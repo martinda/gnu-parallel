@@ -466,7 +466,10 @@ sub queue_job {
     my $processes = shift;
     my $command = shift;
 
-    push @Global::command, $command;
+    if($command =~ /\S/) {
+	# Only run commands - not empty lines
+	push @Global::command, $command;
+    }
     if($Global::running_jobs <= $processes) {
 	$Global::debug and print "queing $command\n";	
 	start_another_job();

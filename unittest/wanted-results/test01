@@ -21,8 +21,8 @@ ls b
 1-col.txt.diff
 2-col.txt
 2-col.txt.diff
-      5       5      30
-      7       7      45
+      4       4      26
+      6       6      41
 a
 b
 ls 1-col.txt.diff|wc;echo 1-col.txt.diff
@@ -135,8 +135,8 @@ ls b|wc;echo b
 1 more_than_5000-5998
 1 more_than_5000-5999
 1 more_than_5000-6000
-5 b
-7 a
+4 b
+6 a
 1 1-col.txt
 1 1-col.txt.diff
 1 2-col.txt
@@ -241,8 +241,8 @@ ls b|wc;echo b
 1 more_than_5000-5998
 1 more_than_5000-5999
 1 more_than_5000-6000
-5 b
-7 a
+4 b
+6 a
 1-col.txt.diff
 1-col.txt.diff
 2-col.txt
