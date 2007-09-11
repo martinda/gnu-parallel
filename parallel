@@ -304,7 +304,7 @@ $command = undef;
 $Global::verbose = 0;
 $Global::grouped = 1;
 $Global::quoting = 0;
-$Global::input_is_filename = (defined @ARGV);
+$Global::input_is_filename = (@ARGV);
 $/="\n";
 
 $Global::debug = (defined $::opt_d);
