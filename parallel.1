@@ -345,8 +345,7 @@ So \fBparallel\fR's newline separation can be emulated with:
 cat | tr '\en' '\e0' | xargs \-0 \-n1 \fIcommand\fR
 .PP
 \&\fBxargs\fR can run a given number of jobs in parallel, but has no
-support for running no_of_cpus jobs or as many as possible in
-parallel.
+support for running no_of_cpus jobs in parallel.
 .PP
 \&\fBxargs\fR has no support for grouping the output, so output may run
 together, so the first half of a line is from one process and the last
