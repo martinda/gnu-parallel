@@ -129,7 +129,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2007-09-10" "perl v5.8.8" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2007-09-14" "perl v5.8.8" "User Contributed Perl Documentation"
 .SH "NAME"
 parallel \- build and execute command lines from standard input in parallel
 .SH "SYNOPSIS"
@@ -173,7 +173,7 @@ printed when the command is finished. \s-1STDERR\s0 first followed by \s-1STDOUT
 \&\fB\-g\fR is the default. Can be reversed with \fB\-u\fR.
 .IP "\fB\-j\fR \fIN\fR" 9
 .IX Item "-j N"
-Run N jobs in parallel.  Default is 10.
+Run N jobs in parallel.  0 means as many as possible. Default is 10.
 .IP "\fB\-j\fR +\fIN\fR" 9
 .IX Item "-j +N"
 Add N to the number of CPUs.  Run this many jobs in parallel. For
@@ -320,14 +320,14 @@ because > needs to be interpreted by the shell.
 \&\fBConclusion\fR: To avoid dealing with the quoting problems it may be
 easier just to write a small script and have \fBparallel\fR call that
 script.
-.SH "WHY NOT xargs/find \-exec"
-.IX Header "WHY NOT xargs/find -exec"
+.SH "DIFFERENCES BETWEEN xargs/find \-exec AND parallel"
+.IX Header "DIFFERENCES BETWEEN xargs/find -exec AND parallel"
 \&\fBxargs\fR and \fBfind \-exec\fR offer some of the same possibilites as
-\&\fBparallel\fR. However, the support for running jobs in parallel is
-limited.
+\&\fBparallel\fR. 
 .PP
 \&\fBfind \-exec\fR only works on files. So processing other input (such as
-hosts or URLs) will require creating these inputs as files.
+hosts or URLs) will require creating these inputs as files. \fBfind
+\&\-exec\fR has no support for running commands in parallel.
 .PP
 \&\fBxargs\fR deals badly with special characters (such as space, ' and ") unless
 \&\fB\-0\fR is specified. Many input generators are not optimized for using
@@ -336,16 +336,24 @@ hosts or URLs) will require creating these inputs as files.
 (\-0 and \e0 instead of \en), \fBlocate\fR (requires using \-0), \fBfind\fR
 (requires using \-print0), \fBgrep\fR (requires user to use \-z or \-Z).
 .PP
-An example would be to list the number of lines in files containing GNU/Linux:
+The input \fIcan\fR be fixed for \fBxargs\fR with: 
 .PP
-find . \-type f \-print0 | xargs \-0 grep \-Zl GNU/Linux | xargs \-0n1 wc \-l
+tr '\en' '\e0'
 .PP
-find . \-type f | parallel grep \-l GNU/Linux | parallel wc \-l
+So \fBparallel\fR's newline separation can be emulated with:
 .PP
-In the \fBxargs\fR version the user will have to remember \fB\-Z\fR for \fBgrep\fR.
+cat | tr '\en' '\e0' | xargs \-0 \-n1 \fIcommand\fR
 .PP
-\&\fBparallel\fR offers the option \fB\-0\fR for \fB\s-1NUL\s0\fR separated strings in the
-rare event that the input strings contain \en (newline).
+\&\fBxargs\fR can run a given number of jobs in parallel, but has no
+support for running no_of_cpus jobs or as many as possible in
+parallel.
+.PP
+\&\fBxargs\fR has no support for grouping the output, so output may run
+together, so the first half of a line is from one process and the last
+half of the line is from another process.
+.PP
+If no command is given to \fBxargs\fR it defaults to /bin/echo. So the
+\&\fBcat | sh\fR functionality is missing.
 .SH "BUGS"
 .IX Header "BUGS"
 Filenames beginning with '\-' can cause some commands to give

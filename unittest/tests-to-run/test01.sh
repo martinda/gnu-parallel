@@ -13,8 +13,9 @@ ls | parallel echo ls | sort
 ls | parallel -j 1 echo ls | sort
 find -type f | parallel diff {} a/foo ">"{}.diff | sort
 ls | parallel -vg "ls {}|wc;echo {}" | sort
-perl -e 'print map {"more_than_5000-$_\n" } (1..6000)' | parallel -j 100 touch | sort
-perl -e 'print map {"more_than_5000-$_\n" } (1..5900)' | parallel -j 100 rm | sort
+# Check that we can have more input than max procs (-j 0)
+perl -e 'print map {"more_than_5000-$_\n" } (4000..9999)' | parallel -vj 0 touch | sort | tail
+perl -e 'print map {"more_than_5000-$_\n" } (4000..9900)' | parallel -j 0 rm | sort
 ls | parallel -j500 'sleep 1; ls {} | perl -ne "END{print $..\" {}\n\"}"' | sort
 ls | parallel -gj500 'sleep 1; ls {} | perl -ne "END{print $..\" {}\n\"}"' | sort
 ls | parallel -g  "perl -ne '/^\\S+\\s+\\S+$/ and print \$ARGV,\"\\n\"'" | sort

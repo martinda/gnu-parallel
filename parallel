@@ -54,7 +54,7 @@ B<-g> is the default. Can be reversed with B<-u>.
 
 =item B<-j> I<N>
 
-Run N jobs in parallel.  Default is 10.
+Run N jobs in parallel.  0 means as many as possible. Default is 10.
 
 =item B<-j> +I<N>
 
@@ -213,14 +213,14 @@ easier just to write a small script and have B<parallel> call that
 script.
 
 
-=head1 WHY NOT xargs/find -exec
+=head1 DIFFERENCES BETWEEN xargs/find -exec AND parallel
 
 B<xargs> and B<find -exec> offer some of the same possibilites as
-B<parallel>. However, the support for running jobs in parallel is
-limited.
+B<parallel>. 
 
 B<find -exec> only works on files. So processing other input (such as
-hosts or URLs) will require creating these inputs as files.
+hosts or URLs) will require creating these inputs as files. B<find
+-exec> has no support for running commands in parallel.
 
 B<xargs> deals badly with special characters (such as space, ' and ") unless
 B<-0> is specified. Many input generators are not optimized for using
@@ -229,16 +229,24 @@ B<head>, B<tail>, B<awk>, B<ls>, B<echo>, B<sed>, B<tar -v>, B<perl>
 (-0 and \0 instead of \n), B<locate> (requires using -0), B<find>
 (requires using -print0), B<grep> (requires user to use -z or -Z).
 
-An example would be to list the number of lines in files containing GNU/Linux:
+The input I<can> be fixed for B<xargs> with: 
 
-find . -type f -print0 | xargs -0 grep -Zl GNU/Linux | xargs -0n1 wc -l
+tr '\n' '\0'
 
-find . -type f | parallel grep -l GNU/Linux | parallel wc -l
+So B<parallel>'s newline separation can be emulated with:
 
-In the B<xargs> version the user will have to remember B<-Z> for B<grep>.
+cat | tr '\n' '\0' | xargs -0 -n1 I<command>
 
-B<parallel> offers the option B<-0> for B<NUL> separated strings in the
-rare event that the input strings contain \n (newline).
+B<xargs> can run a given number of jobs in parallel, but has no
+support for running no_of_cpus jobs or as many as possible in
+parallel.
+
+B<xargs> has no support for grouping the output, so output may run
+together, so the first half of a line is from one process and the last
+half of the line is from another process.
+
+If no command is given to B<xargs> it defaults to /bin/echo. So the
+B<cat | sh> functionality is missing.
 
 
 =head1 BUGS
@@ -295,7 +303,7 @@ use File::Temp qw/ tempfile tempdir /;
 use Getopt::Std;
 
 my ($processes,$command);
-getopts("0cdefgj:qsuv") || die $::Usage;
+getopts("0cdefgj:qsuv") || die_usage();
 
 # Defaults:
 $Global::debug = 0;
@@ -398,15 +406,37 @@ sub compute_number_of_processes {
 	    $processes = no_of_cpus() * $j / 100;
 	} elsif ($opt_j =~ /^(\d+)$/) {
 	    $processes = $1;
+	    if($processes == 0) {
+		# -j 0 = infinity (or at least close)
+		$processes = 2**31;
+	    }
 	} else {
-	    die $::Usage;
+	    die_usage();
 	}
 	if($processes < 1) {
 	    $processes = 1;
 	}
     }
-    $Global::debug and print "Computed processes: ".(int $processes)."\n";
+    my $free_handles = compute_no_of_free_filehandles();
+    if($processes > $free_handles / 2) {
+	# Every simultaneous process uses 2 filehandles when grouping
+	# perl uses 7 for something?
+	$processes = int (($free_handles -7) / 2);
+	print STDERR ("Warning: Only enough filehandles to run ",
+		      $processes, " jobs in parallel\n");
+    }
+
+    debug("Computed processes: ".(int $processes)."\n");
     return int $processes;
+}
+
+sub compute_no_of_free_filehandles {
+    my $i=1;
+    my %fh;
+    while(open($fh{$i},"</dev/null")) { $i++ }
+    for (keys %fh) { close $fh{$_} }
+    debug("Number of free handles: ".."\n");    
+    return $i;
 }
 
 sub no_of_cpus {
@@ -470,17 +500,17 @@ sub queue_job {
 	# Only run commands - not empty lines
 	push @Global::command, $command;
     }
-    if($Global::running_jobs <= $processes) {
-	$Global::debug and print "queing $command\n";	
+    if($Global::running_jobs < $processes) {
+	debug("queing $command\n");
 	start_another_job();
-	$Global::debug and print "queed $command\n";	
+	debug("queued $command\n");	
     }
 }
 
 sub drain_job_queue {
     while(1) {
 	if($Global::running_jobs == 0) { last }
-	$Global::debug and print "jobs running: $Global::running_jobs\n";
+	debug("jobs running: $Global::running_jobs\n");
 	sleep 1;
     }
 }
@@ -497,7 +527,7 @@ sub run_jobs {
     
     while(1) {
 	if($Global::running_jobs == 0) { last }
-	$Global::debug and print "jobs running: $Global::running_jobs\n";
+	debug("jobs running: $Global::running_jobs\n");
 	sleep 1;
     }
 }
@@ -533,13 +563,15 @@ sub start_job {
 	open STDOUT, '>&', $out{$outname} or die "Can't redirect STDOUT: $!";
 	open STDERR, '>&', $err{$errname} or die "Can't dup STDOUT: $!";
     }
-    $Global::debug and print "starting: $command\n";
+
     if($Global::verbose and not $Global::grouped) {
 	print STDOUT $command,"\n";
     }
     $Global::running_jobs++;
-    $pid = open3(gensym, ">&STDOUT", ">&STDERR", $command);
-
+    debug("starting: $command\n");
+    $pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) || 
+	die("open3 failed. Report a bug\n");
+    debug("started: $command\n");
     open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$oldout: $!";
     open STDERR, ">&", $Global::original_stderr or die "Can't dup \$oldout: $!";
 
@@ -562,7 +594,7 @@ sub print_job {
     my $err = $fhs->{err};
     my $command = $fhs->{command};
 
-    $Global::debug and print ">>job\n";
+    debug(">>job\n");
     if($Global::verbose and $Global::grouped) {
 	print STDOUT $command,"\n";
 	# If STDOUT and STDERR is merged, we want the command to be printed first
@@ -577,7 +609,7 @@ sub print_job {
 	while( <$err> ) { print STDERR }
 	while( <$out> ) { print STDOUT }
     }
-    $Global::debug and print "<<job\n";
+    debug("<<job\n");
     close $out;
     close $err;
 }
@@ -612,7 +644,7 @@ sub Reaper {
     # Start another job
     DoNotReap();
     my $stiff;
-    $Global::debug and print "Reaper called\n";
+    debug("Reaper called\n");
     while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
 	print_job($Global::running{$stiff});
 	delete $Global::running{$stiff};
@@ -623,8 +655,31 @@ sub Reaper {
 }
 
 #
+# Usage
+#
+
+sub die_usage {
+    usage();
+    exit(1);
+}
+
+sub usage {
+    print "Usage:\n";
+    print "parallel [options] [command [arguments]] < list_of_arguments\n";
+}
+
+#
 # Debugging
 #
+
+sub debug {
+    $Global::debug or return;
+    if($Global::original_stdout) {
+	print $Global::original_stdout @_;
+    } else {
+	print @_;
+    }
+}
 
 sub my_dump {
     my @dump_this = (@_);
