@@ -1,0 +1,200 @@
+1
+10
+100
+11
+12
+13
+14
+15
+16
+17
+18
+19
+2
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+3
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+4
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+5
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+6
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+7
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+8
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+9
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 1
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 10
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 100
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 11
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 12
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 13
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 14
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 15
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 16
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 17
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 18
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 19
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 2
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 20
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 21
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 22
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 23
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 24
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 25
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 26
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 27
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 28
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 29
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 3
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 30
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 31
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 32
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 33
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 34
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 35
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 36
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 37
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 38
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 39
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 4
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 40
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 41
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 42
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 43
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 44
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 45
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 46
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 47
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 48
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 49
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 5
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 50
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 51
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 52
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 53
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 54
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 55
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 56
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 57
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 58
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 59
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 6
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 60
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 61
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 62
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 63
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 64
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 65
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 66
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 67
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 68
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 69
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 7
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 70
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 71
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 72
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 73
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 74
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 75
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 76
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 77
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 78
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 79
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 8
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 80
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 81
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 82
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 83
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 84
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 85
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 86
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 87
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 88
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 89
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 9
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 90
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 91
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 92
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 93
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 94
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 95
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 96
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 97
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 98
+perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\){\$a=\"a\"x100}\;print\ shift,\"\\n\" 10000 99
