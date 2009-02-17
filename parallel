@@ -93,6 +93,10 @@ output from different commands to be mixed. Can be reversed with B<-g>.
 
 Verbose.  Print the job to be run. Can be reversed with B<-s>.
 
+=item B<-x>
+
+xargs.  Insert as many arguments as the command line length permits.
+
 =back
 
 =head1 EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation
@@ -185,6 +189,10 @@ files in each directory:
 
 B<ls | parallel 'echo -n {}" "; ls {}|wc -l'>
 
+To put the output in a file called <name>.dir:
+
+B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >>B< {}.dir'>
+
 =head1 QUOTING
 
 For more advanced use quoting may be an issue. The following will
@@ -207,6 +215,12 @@ characters. For example this B<will not work>:
 B<ls | parallel -q "diff {} foo >>B<{}.diff"> 
 
 because > needs to be interpreted by the shell.
+
+If you get errors like:
+
+B<sh: -c: line 0: syntax error near unexpected token>
+
+then you might try using B<-q>.
 
 B<Conclusion>: To avoid dealing with the quoting problems it may be
 easier just to write a small script and have B<parallel> call that
@@ -240,18 +254,23 @@ cat | tr '\n' '\0' | xargs -0 -n1 I<command>
 B<xargs> can run a given number of jobs in parallel, but has no
 support for running no_of_cpus jobs in parallel.
 
-B<xargs> has no support for grouping the output, so output may run
-together, so the first half of a line is from one process and the last
-half of the line is from another process.
+B<xargs> has no support for grouping the output, therefore output may
+run together, e.g. the first half of a line is from one process and
+the last half of the line is from another process.
 
 If no command is given to B<xargs> it defaults to /bin/echo. So the
 B<cat | sh> functionality is missing.
 
+Quoting in B<xargs> works like B<-q> in B<parallel>. Doing B<ls |
+parallel "wc {} >> B<{}.wc"> using B<xargs> seems to be impossible.
 
 =head1 BUGS
 
 Filenames beginning with '-' can cause some commands to give
 unexpected results, as it will often be interpreted as an option.
+
+If you have a lot of filehandles, then computing the max no 
+takes a long time.
 
 
 =head1 REPORTING BUGS
@@ -261,7 +280,8 @@ Report bugs to <bug-parallel@tange.dk>.
 
 =head1 AUTHOR
 
-Copyright (C) 2007 Ole Tange, http://ole.tange.dk
+Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
+Copyright (C) 2008-2009 Ole Tange, http://ole.tange.dk
 
 
 =head1 LICENSE
@@ -294,6 +314,7 @@ B<find>(1), B<xargs>(1)
 
 =cut
 
+
 use IPC::Open3;
 use Symbol qw(gensym);
 use IO::File;
@@ -316,6 +337,7 @@ $/="\n";
 
 $Global::debug = (defined $::opt_d);
 if(defined $::opt_j) { $processes = compute_number_of_processes($::opt_j); }
+if(defined $::opt_x) { $Global::xargs = 1; }
 if(defined $::opt_v) { $Global::verbose = 1; }
 if(defined $::opt_s) { $Global::verbose = 0; }
 if(defined $::opt_g) { $Global::grouped = 1; }
@@ -326,17 +348,20 @@ if(defined $::opt_0) { $/ = "\0"; }
 if(defined $::opt_q) { $Global::quoting = 1; }
 if(@ARGV) { 
     if($Global::quoting) {
-        $command = join(" ", shell_quote(@ARGV)); 
+        $Global::command = join(" ", shell_quote(@ARGV)); 
     } else {
-        $command = join(" ", @ARGV); 
+        $Global::command = join(" ", @ARGV); 
     }
 }
 
 init_run_jobs();
-while($args = <STDIN>) {
-    my $cmd_line = generate_command_line($command, $args);
-    queue_job($processes, $cmd_line);
+DoNotReap();
+while($Global::running_jobs < $processes 
+      and 
+      start_another_job()) {
+    # skip
 }
+ReapIfNeeded();
 drain_job_queue();
 
 #
@@ -345,12 +370,15 @@ drain_job_queue();
 
 sub generate_command_line {
     my $command = shift;
-    my $line = shift;
-    chomp($line);
-    my ($job_line,$arg);
+    my @args = @_;
+    chomp(@args);
     if($Global::input_is_filename) {
-	($line) = (shell_quote($line));
+	for my $arg (@args) {
+	    ($arg) = (shell_quote($arg));
+	}
     }
+    my $line = join(" ",@args);
+    my ($job_line,$arg);
     if($command) {
 	$job_line = $command;
 	$arg = $line;
@@ -385,8 +413,12 @@ sub shell_quote {
 }
 
 #
-# Number of processes
+# Number of processes, filehandles, max length of command line
 #
+
+sub max_length_of_command_line {
+    
+}
 
 sub compute_number_of_processes {
     my $opt_j = shift;
@@ -416,13 +448,16 @@ sub compute_number_of_processes {
 	    $processes = 1;
 	}
     }
-    my $free_handles = compute_no_of_free_filehandles();
-    if($processes > $free_handles / 2) {
-	# Every simultaneous process uses 2 filehandles when grouping
-	# perl uses 7 for something?
-	$processes = int (($free_handles -7) / 2);
+    # Every simultaneous process uses 2 filehandles when grouping
+    # perl uses 7 for something?
+    # parallel uses 1 for memory_usage
+    my $file_handles_needed = $processes*2+7+1;
+    my $free_handles = compute_no_of_free_filehandles($file_handles_needed);
+    if($file_handles_needed > $free_handles) {
+	$processes = int (($free_handles -7 -1) / 2);
 	print STDERR ("Warning: Only enough filehandles to run ",
-		      $processes, " jobs in parallel\n");
+		      $processes, " jobs in parallel. ",
+		      "Raising ulimit -n may help\n");
     }
 
     debug("Computed processes: ".(int $processes)."\n");
@@ -430,11 +465,12 @@ sub compute_number_of_processes {
 }
 
 sub compute_no_of_free_filehandles {
+    my $needed = shift;
     my $i=1;
     my %fh;
-    while(open($fh{$i},"</dev/null")) { $i++ }
+    while(open($fh{$i},"</dev/null")) { $i++; $i > $needed and last }
     for (keys %fh) { close $fh{$_} }
-    debug("Number of free handles: ".."\n");    
+    debug("Number of free handles: ".$i."\n");    
     return $i;
 }
 
@@ -491,42 +527,21 @@ sub init_run_jobs {
     $Global::running_jobs=0;
 }
 
-sub queue_job {
-    my $processes = shift;
-    my $command = shift;
-
-    if($command =~ /\S/) {
-	# Only run commands - not empty lines
-	push @Global::command, $command;
-    }
-    if($Global::running_jobs < $processes) {
-	debug("queing $command\n");
-	start_another_job();
-	debug("queued $command\n");	
-    }
+sub next_command_line {
+    my $cmd_line;
+    do {
+	if(eof STDIN) {
+	    return undef;
+	}
+	my $args = <STDIN>;
+	$cmd_line = generate_command_line($Global::command, $args);
+    } while ($cmd_line =~ /^\s*$/); # Skip empty lines
+    return $cmd_line;
 }
 
 sub drain_job_queue {
-    while(1) {
-	if($Global::running_jobs == 0) { last }
-	debug("jobs running: $Global::running_jobs\n");
-	sleep 1;
-    }
-}
-
-sub run_jobs {
-    # Run the jobs in @Global::command with $processes simultaneously
-    my $processes = shift;
-
-    for my $i (1..$processes) {
-	# Start $processes jobs.
-	# When a job dies, the handler will take care of starting another
-	start_another_job();
-    }
-    
-    while(1) {
-	if($Global::running_jobs == 0) { last }
-	debug("jobs running: $Global::running_jobs\n");
+    while($Global::running_jobs > 0) {
+	debug("jobs running: $Global::running_jobs Memory usage:".my_memory_usage()."\n");
 	sleep 1;
     }
 }
@@ -535,12 +550,13 @@ sub start_another_job {
     # Grab a job from @Global::command, start it 
     # and remember the pid, the STDOUT and the STDERR handles
     # If no more jobs: do nothing
-    my $command = shift @Global::command;
+    my $command = next_command_line();
     if(defined $command) {
-	DoNotReap();
 	my %jobinfo = start_job($command);
 	$Global::running{$jobinfo{"pid"}} = \%jobinfo;
-	ReapIfNeeded();
+	return 1;
+    } else {
+	return 0;
     }
 }
 
@@ -567,9 +583,9 @@ sub start_job {
 	print STDOUT $command,"\n";
     }
     $Global::running_jobs++;
-    debug("starting: $command\n");
+    debug("$Global::running_jobs processes. Starting: $command\n");
     $pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) || 
-	die("open3 failed. Report a bug\n");
+	die("open3 failed. Report a bug to <parallel\@tange.dk>\n");
     debug("started: $command\n");
     open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$oldout: $!";
     open STDERR, ">&", $Global::original_stderr or die "Can't dup \$oldout: $!";
@@ -593,7 +609,7 @@ sub print_job {
     my $err = $fhs->{err};
     my $command = $fhs->{command};
 
-    debug(">>job\n");
+    debug(">>joboutput $command\n");
     if($Global::verbose and $Global::grouped) {
 	print STDOUT $command,"\n";
 	# If STDOUT and STDERR is merged, we want the command to be printed first
@@ -605,10 +621,10 @@ sub print_job {
 	while( <$err> ) { print STDERR "ERR: $_" }
 	while( <$out> ) { print STDOUT "OUT: $_" }
     } else {
-	while( <$err> ) { print STDERR }
-	while( <$out> ) { print STDOUT }
+	print STDERR <$err>;
+	print STDOUT <$out>;
     }
-    debug("<<job\n");
+    debug("<<joboutput $command\n");
     close $out;
     close $err;
 }
@@ -642,8 +658,9 @@ sub Reaper {
     # Print the output.
     # Start another job
     DoNotReap();
+    $Global::reaperlevel++;
     my $stiff;
-    debug("Reaper called\n");
+    debug("Reaper called $Global::reaperlevel\n");
     while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
 	print_job($Global::running{$stiff});
 	delete $Global::running{$stiff};
@@ -651,6 +668,8 @@ sub Reaper {
 	start_another_job();
     }
     ReapIfNeeded();
+    debug("Reaper exit $Global::reaperlevel\n");
+    $Global::reaperlevel--;
 }
 
 #
@@ -680,6 +699,33 @@ sub debug {
     }
 }
 
+sub my_memory_usage {
+    use strict;
+    use FileHandle;
+
+    my $pid = $$;
+    my $fh = FileHandle->new("</proc/$pid/stat");
+
+    my $data = <$fh>;
+    chomp $data;
+    $fh->close;
+
+    my @procinfo = split(/\s+/,$data);
+
+    return $procinfo[22];
+}
+
+sub my_size {
+    my @size_this = (@_);
+    eval "use Devel::Size qw(size total_size)";
+    if ($@) {
+	return -1;
+    } else {
+	return total_size(@_);
+    }
+}
+
+
 sub my_dump {
     my @dump_this = (@_);
     eval "use Data::Dump qw(dump);";
@@ -703,7 +749,7 @@ sub my_dump {
 # Keep perl -w happy
 $main::opt_u = $main::opt_c = $main::opt_f = $main::opt_q =
 $main::opt_0 = $main::opt_s = $main::opt_v = $main::opt_g =
-$main::opt_j = $main::opt_d=1;
-
+$main::opt_j = $main::opt_d = $main::opt_x =1;
+$Global::xargs = 1;
 
 
