@@ -323,7 +323,7 @@ use File::Temp qw/ tempfile tempdir /;
 use Getopt::Std;
 
 my ($processes,$command);
-getopts("0cdefgj:qsuv") || die_usage();
+getopts("0cdefgj:qsuvx") || die_usage();
 
 # Defaults:
 $Global::debug = 0;
@@ -337,7 +337,10 @@ $/="\n";
 
 $Global::debug = (defined $::opt_d);
 if(defined $::opt_j) { $processes = compute_number_of_processes($::opt_j); }
-if(defined $::opt_x) { $Global::xargs = 1; }
+if(defined $::opt_x) { 
+    $Global::xargs = 1; 
+    $Global::command_line_max_len = max_length_of_command_line(); 
+}
 if(defined $::opt_v) { $Global::verbose = 1; }
 if(defined $::opt_s) { $Global::verbose = 0; }
 if(defined $::opt_g) { $Global::grouped = 1; }
@@ -356,11 +359,13 @@ if(@ARGV) {
 
 init_run_jobs();
 DoNotReap();
+
 while($Global::running_jobs < $processes 
       and 
       start_another_job()) {
     # skip
 }
+
 ReapIfNeeded();
 drain_job_queue();
 
@@ -370,28 +375,39 @@ drain_job_queue();
 
 sub generate_command_line {
     my $command = shift;
-    my @args = @_;
-    chomp(@args);
-    if($Global::input_is_filename) {
-	for my $arg (@args) {
-	    ($arg) = (shell_quote($arg));
+    my ($job_line,$last_good);
+    my ($next_arg,@quoted_args,$arg_length);
+    while ($next_arg = get_next_arg()) {
+	push (@quoted_args, $next_arg);
+	if(not $Global::xargs) {
+	    last;
+	} else {
+	    # Emulate xargs if there is a command and -x is set
+	    $arg_length += length $next_arg + 1;
+	    debug("arglen $arg_length\n");
+	    $job_line_length = length($command) + 1 + $arg_length;
+	    debug("linelen $job_line_length\n");
+	    if($job_line_length >= $Global::command_line_max_len) {
+		unget_arg(pop @quoted_args);
+		if($quoted_args[0]) {
+		    last;
+		} else {
+		    die ("Command line too long at $next_arg");
+		}
+	    }
 	}
     }
-    my $line = join(" ",@args);
-    my ($job_line,$arg);
-    if($command) {
+    if(@quoted_args) {
+	my $arg=join(" ",@quoted_args);
 	$job_line = $command;
-	$arg = $line;
-	if($job_line =~ s/{}/$arg/g) {
+	if(defined $job_line and $job_line =~ s/{}/$arg/g) {
 	    # substituted {} with args
 	} else {
 	    # append args
 	    $job_line .= " $arg";
 	}
-    } else {
-	$job_line = $line;
+	debug("Return jobline: $job_line\n");
     }
-    
     return $job_line;
 }
 
@@ -417,7 +433,38 @@ sub shell_quote {
 #
 
 sub max_length_of_command_line {
-    
+    # Find the max_length of a command line
+    # First find an upper bound
+    my $len = 2;
+    do {
+	$len += $len+1;
+    } while (acceptable_command_line_length($len));
+    # Then search for the actual max length between 0 and upper bound
+    return binary_find_max_length(0,$len);
+}
+
+sub binary_find_max_length {
+    # Given a lower and upper bound find the max_length of a command line
+    my ($lower, $upper) = (@_);
+    if($lower == $upper or $lower == $upper-1) { return $lower; }
+    my $middle = int (($upper-$lower)/2 + $lower);
+    $debug && print "$lower,$upper,$middle\n";
+    if (acceptable_command_line_length($middle)) {
+	return binary_find_max_length($middle,$upper);
+    } else {
+	return binary_find_max_length($lower,$middle);
+    }
+}
+
+sub acceptable_command_line_length {
+    # Test if this length can run
+    # This is done using external perl script to avoid warning
+    # (Can this be done prettier?)
+    my $len = shift;
+    my $testscript = q{'system ("true "."x"x$ARGV[0]); exit $?;'};
+    $debug && print "perl -e $testscript $len\n";
+    system "perl -e $testscript $len";
+    return not $?;
 }
 
 sub compute_number_of_processes {
@@ -448,6 +495,9 @@ sub compute_number_of_processes {
 	    $processes = 1;
 	}
     }
+    # Have we asked for more processes than arguments?
+    $processes = min_of_args_and_processes($processes);
+
     # Every simultaneous process uses 2 filehandles when grouping
     # perl uses 7 for something?
     # parallel uses 1 for memory_usage
@@ -462,6 +512,46 @@ sub compute_number_of_processes {
 
     debug("Computed processes: ".(int $processes)."\n");
     return int $processes;
+}
+
+sub min_of_args_and_processes {
+    my $processes = shift;
+    my $min_of_args_and_processes=0;
+    my @args=();
+    my $next_arg;
+    my $max_system_proc_reached=0;
+    my $time = time;
+    do {
+	$min_of_args_and_processes++;
+	$next_arg = get_next_arg();
+	if(defined $next_arg) { 
+	    push(@args, $next_arg);
+	}
+	$min_of_args_and_processes % 10	or $time=time;
+#	if($child = fork()) {
+#	    push (@children,$child);
+#	} elsif(defined $child) {
+#	    sleep 1000000;
+#	} else {
+#	    $max_system_proc_reached = 1;
+#	}
+#	debug("Time to fork ten procs ", time-$time, " process ", $min_of_args_and_processes);
+#	if(time-$time > 1) {
+#	    # It took more than 1 second to fork ten processes. We should stop forking.
+#	    # Let us give the system a little slack
+#	    $min_of_args_and_processes = int ($min_of_args_and_processes * 0.9)+1;
+#	    $max_system_proc_reached = 1;
+#	}
+    } while($min_of_args_and_processes <= $processes 
+	    and defined $next_arg
+	    and not $max_system_proc_reached);
+#    kill 9, @children;
+    unget_arg(@args);
+    return $min_of_args_and_processes;
+}
+
+sub NullReaper {
+    while (waitpid(-1, &WNOHANG) > 0) { }
 }
 
 sub compute_no_of_free_filehandles {
@@ -530,13 +620,31 @@ sub init_run_jobs {
 sub next_command_line {
     my $cmd_line;
     do {
+	$cmd_line = generate_command_line($Global::command);
+    } while (defined $cmd_line and $cmd_line =~ /^\s*$/); # Skip empty lines
+    return $cmd_line;
+}
+
+sub get_next_arg {
+    my $arg;
+    if(@Global::unget_arg) {
+	$arg = shift @Global::unget_arg;
+    } else {
 	if(eof STDIN) {
 	    return undef;
 	}
-	my $args = <STDIN>;
-	$cmd_line = generate_command_line($Global::command, $args);
-    } while ($cmd_line =~ /^\s*$/); # Skip empty lines
-    return $cmd_line;
+	$arg = <STDIN>;
+	chomp $arg;
+	if($Global::input_is_filename) {
+	    ($arg) = shell_quote($arg);
+	}
+    }
+    debug("Next arg: ".$arg."\n");    
+    return $arg;
+}
+
+sub unget_arg {
+    push @Global::unget_arg, @_;
 }
 
 sub drain_job_queue {
@@ -605,6 +713,9 @@ sub print_job {
     # Only relevant for grouping
     $Global::grouped or return;
     my $fhs = shift;
+    if(not defined $fhs) {
+	return;
+    }
     my $out = $fhs->{out};
     my $err = $fhs->{err};
     my $command = $fhs->{command};
