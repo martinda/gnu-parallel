@@ -269,9 +269,6 @@ parallel "wc {} >> B<{}.wc"> using B<xargs> seems to be impossible.
 Filenames beginning with '-' can cause some commands to give
 unexpected results, as it will often be interpreted as an option.
 
-If you have a lot of filehandles, then computing the max no 
-takes a long time.
-
 
 =head1 REPORTING BUGS
 
@@ -281,12 +278,13 @@ Report bugs to <bug-parallel@tange.dk>.
 =head1 AUTHOR
 
 Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
+
 Copyright (C) 2008-2009 Ole Tange, http://ole.tange.dk
 
 
 =head1 LICENSE
 
-Copyright (C) 2007 Free Software Foundation, Inc.
+Copyright (C) 2007-2009 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -336,7 +334,6 @@ $Global::input_is_filename = (@ARGV);
 $/="\n";
 
 $Global::debug = (defined $::opt_d);
-if(defined $::opt_j) { $processes = compute_number_of_processes($::opt_j); }
 if(defined $::opt_x) { 
     $Global::xargs = 1; 
     $Global::command_line_max_len = max_length_of_command_line(); 
@@ -356,6 +353,9 @@ if(@ARGV) {
         $Global::command = join(" ", @ARGV); 
     }
 }
+# Needs to be done after setting $Global::command and $Global::command_line_max_len
+# as '-x' influences the number of commands that needs to be run
+if(defined $::opt_j) { $processes = compute_number_of_processes($::opt_j); }
 
 init_run_jobs();
 DoNotReap();
@@ -432,13 +432,15 @@ sub shell_quote {
 # Number of processes, filehandles, max length of command line
 #
 
+# Maximal command line length (for -x)
+
 sub max_length_of_command_line {
     # Find the max_length of a command line
     # First find an upper bound
     my $len = 2;
     do {
 	$len += $len+1;
-    } while (acceptable_command_line_length($len));
+    } while (is_acceptable_command_line_length($len));
     # Then search for the actual max length between 0 and upper bound
     return binary_find_max_length(0,$len);
 }
@@ -449,14 +451,14 @@ sub binary_find_max_length {
     if($lower == $upper or $lower == $upper-1) { return $lower; }
     my $middle = int (($upper-$lower)/2 + $lower);
     $debug && print "$lower,$upper,$middle\n";
-    if (acceptable_command_line_length($middle)) {
+    if (is_acceptable_command_line_length($middle)) {
 	return binary_find_max_length($middle,$upper);
     } else {
 	return binary_find_max_length($lower,$middle);
     }
 }
 
-sub acceptable_command_line_length {
+sub is_acceptable_command_line_length {
     # Test if a command line of this length can run
     # This is done using external perl script to avoid warning
     # (Can this be done prettier?)
@@ -466,6 +468,8 @@ sub acceptable_command_line_length {
     system "perl -e $testscript $len";
     return not $?;
 }
+
+# Number of parallel processes to run
 
 sub compute_number_of_processes {
     # Number of processes wanted and limited by system ressources
@@ -479,12 +483,10 @@ sub processes_available_by_system_limit {
     # If the wanted number of processes is bigger than the system limits:
     # Limit them to the system limits
     # Limits are: File handles, number of input lines, processes, 
-    # and taking > 1 second to spawn 10 extra procs 
+    # and taking > 1 second to spawn 10 extra processes 
     my $wanted_processes = shift;
     my $system_limit=0;
-#GONE    my @args=();
     my @command_lines=();
-#GONE    my $next_arg;
     my $next_command_line;
     my $more_filehandles;
     my $max_system_proc_reached=0;
@@ -508,13 +510,6 @@ sub processes_available_by_system_limit {
 	if(defined $next_command_line) { 
 	    push(@command_lines, $next_command_line);
 	}
-
-#GONNE	# If there are no more arguments, then we have a process per argument
-#GONNE	# so no need to go further
-#GONNE	$next_arg = get_next_arg();
-#GONNE	if(defined $next_arg) { 
-#GONNE	    push(@args, $next_arg);
-#GONNE	}
 
 	# Every simultaneous process uses 2 filehandles when grouping
 	$more_filehandles = open($fh{$system_limit*2},"</dev/null") 
@@ -546,19 +541,16 @@ sub processes_available_by_system_limit {
 	    and $more_filehandles
 	    and not $max_system_proc_reached
 	    and not $spawning_too_slow);
-    if($system_limit <= $wanted_processes
-	and not $more_filehandles) {
+    if($system_limit <= $wanted_processes and not $more_filehandles) {
 	print STDERR ("Warning: Only enough filehandles to run ",
 		      $system_limit, " jobs in parallel. ",
 		      "Raising ulimit -n may help\n");
     }
-    if($system_limit <= $wanted_processes
-	and $max_system_proc_reached) {
+    if($system_limit <= $wanted_processes and $max_system_proc_reached) {
 	print STDERR ("Warning: Only enough available processes to run ",
 		      $system_limit, " jobs in parallel.\n");
     }
-    if($system_limit <= $wanted_processes
-	and $spawning_too_slow) {
+    if($system_limit <= $wanted_processes and $spawning_too_slow) {
 	print STDERR ("Warning: Starting 10 extra processes takes > 1 sec.\n",
 		      "Limiting to ", $system_limit, " jobs in parallel.\n");
     }
@@ -570,8 +562,6 @@ sub processes_available_by_system_limit {
 	waitpid($pid,0);
     }
     wait();
-#    # Cleanup: Unget the args
-#    unget_arg(@args);
     # Cleanup: Unget the command_lines
     unget_command_line(@command_lines);
     return $system_limit;
@@ -606,114 +596,6 @@ sub user_requested_processes {
 	}
     }
     return $processes;
-}
-
-
-sub GONE_compute_number_of_processes {
-    my $opt_j = shift;
-    my $processes = 0; 
-    if(defined $opt_j) {
-	if($opt_j =~ /^\+(\d+)$/) {
-	    # E.g. -j +2
-	    my $j = $1;
-	    $processes = $j + no_of_cpus();
-	} elsif ($opt_j =~ /^-(\d+)$/) {
-	    # E.g. -j -2
-	    my $j = $1;
-	    $processes = no_of_cpus() - $j;
-	} elsif ($opt_j =~ /^(\d+)\%$/) {
-	    my $j = $1;
-	    $processes = no_of_cpus() * $j / 100;
-	} elsif ($opt_j =~ /^(\d+)$/) {
-	    $processes = $1;
-	    if($processes == 0) {
-		# -j 0 = infinity (or at least close)
-		$processes = 2**31;
-	    }
-	} else {
-	    die_usage();
-	}
-	if($processes < 1) {
-	    $processes = 1;
-	}
-    }
-    # Have we asked for more processes than arguments?
-    $processes = min_of_args_and_processes($processes);
-
-    # Every simultaneous process uses 2 filehandles when grouping
-    # perl uses 7 for something?
-    # parallel uses 1 for memory_usage
-    my $file_handles_needed = $processes*2+7+1;
-    my $free_handles = compute_no_of_free_filehandles($file_handles_needed);
-    if($file_handles_needed > $free_handles) {
-	$processes = int (($free_handles -7 -1) / 2);
-	print STDERR ("Warning: Only enough filehandles to run ",
-		      $processes, " jobs in parallel. ",
-		      "Raising ulimit -n may help\n");
-    }
-
-    debug("Computed processes: ".(int $processes)."\n");
-    return int $processes;
-}
-
-sub GONE_min_of_args_and_processes {
-    my $processes = shift;
-    my $min_of_args_and_processes=0;
-    my @args=();
-    my $next_arg;
-    my $max_system_proc_reached=0;
-    my $time = time;
-    DoNotReap();
-    do {
-	$min_of_args_and_processes++;
-	$next_arg = get_next_arg();
-	if(defined $next_arg) { 
-	    push(@args, $next_arg);
-	}
-	$min_of_args_and_processes % 10	or $time=time;
-	if($child = fork()) {
-	    push (@children,$child);
-	} elsif(defined $child) {
-	    # The child needs to take one process. 
-	    # It will be killed later
-	    sleep 100000;
-	    exit;
-	} else {
-	    $max_system_proc_reached = 1;
-	}
-	debug("Time to fork ten procs ", time-$time, " process ", $min_of_args_and_processes);
-	if(time-$time > 1) {
-	    # It took more than 1 second to fork ten processes. We should stop forking.
-	    # Let us give the system a little slack
-	    debug("\nLimiting processes to: $min_of_args_and_processes-10%=".
-		  (int ($min_of_args_and_processes * 0.9)+1)."\n");
-	    $min_of_args_and_processes = int ($min_of_args_and_processes * 0.9)+1;
-	    $max_system_proc_reached = 1;
-	}
-    } while($min_of_args_and_processes <= $processes 
-	    and defined $next_arg
-	    and not $max_system_proc_reached);
-    for $pid (@children) {
-	kill 15, $pid;
-	waitpid($pid,0);
-    }
-    wait();
-    unget_arg(@args);
-    return $min_of_args_and_processes;
-}
-
-sub NullReaper {
-    while (waitpid(-1, &WNOHANG) > 0) { }
-}
-
-sub GONE_compute_no_of_free_filehandles {
-    my $needed = shift;
-    my $i=1;
-    my %fh;
-    while(open($fh{$i},"</dev/null")) { $i++; $i > $needed and last }
-    for (keys %fh) { close $fh{$_} }
-    debug("Number of free handles: ".$i."\n");    
-    return $i;
 }
 
 sub no_of_cpus {
@@ -784,7 +666,6 @@ sub next_command_line {
 sub unget_command_line {
     push @Global::unget_next_command_line, @_;
 }
-
 
 sub get_next_arg {
     my $arg;
