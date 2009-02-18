@@ -521,6 +521,7 @@ sub min_of_args_and_processes {
     my $next_arg;
     my $max_system_proc_reached=0;
     my $time = time;
+    DoNotReap();
     do {
 	$min_of_args_and_processes++;
 	$next_arg = get_next_arg();
@@ -528,24 +529,33 @@ sub min_of_args_and_processes {
 	    push(@args, $next_arg);
 	}
 	$min_of_args_and_processes % 10	or $time=time;
-#	if($child = fork()) {
-#	    push (@children,$child);
-#	} elsif(defined $child) {
-#	    sleep 1000000;
-#	} else {
-#	    $max_system_proc_reached = 1;
-#	}
-#	debug("Time to fork ten procs ", time-$time, " process ", $min_of_args_and_processes);
-#	if(time-$time > 1) {
-#	    # It took more than 1 second to fork ten processes. We should stop forking.
-#	    # Let us give the system a little slack
-#	    $min_of_args_and_processes = int ($min_of_args_and_processes * 0.9)+1;
-#	    $max_system_proc_reached = 1;
-#	}
+	if($child = fork()) {
+	    push (@children,$child);
+	} elsif(defined $child) {
+	    # The child needs to take one process. 
+	    # It will be killed later
+	    sleep 100000;
+	    exit;
+	} else {
+	    $max_system_proc_reached = 1;
+	}
+	debug("Time to fork ten procs ", time-$time, " process ", $min_of_args_and_processes);
+	if(time-$time > 1) {
+	    # It took more than 1 second to fork ten processes. We should stop forking.
+	    # Let us give the system a little slack
+	    debug("\nLimiting processes to: $min_of_args_and_processes-10%=".
+		  (int ($min_of_args_and_processes * 0.9)+1)."\n");
+	    $min_of_args_and_processes = int ($min_of_args_and_processes * 0.9)+1;
+	    $max_system_proc_reached = 1;
+	}
     } while($min_of_args_and_processes <= $processes 
 	    and defined $next_arg
 	    and not $max_system_proc_reached);
-#    kill 9, @children;
+    for $pid (@children) {
+	kill 15, $pid;
+	waitpid($pid,0);
+    }
+    wait();
     unget_arg(@args);
     return $min_of_args_and_processes;
 }
