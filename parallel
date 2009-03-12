@@ -6,7 +6,7 @@ parallel - build and execute command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [options] [command [arguments]] < list_of_arguments
+B<parallel> [-0cfgqsuvx] [-j num] [command [arguments]] < list_of_arguments
 
 =head1 DESCRIPTION
 
@@ -319,6 +319,7 @@ use IO::File;
 use POSIX ":sys_wait_h";
 use File::Temp qw/ tempfile tempdir /;
 use Getopt::Std;
+use strict;
 
 my ($processes,$command);
 getopts("0cdefgj:qsuvx") || die_usage();
@@ -385,7 +386,7 @@ sub generate_command_line {
 	    # Emulate xargs if there is a command and -x is set
 	    $arg_length += length $next_arg + 1;
 	    debug("arglen $arg_length\n");
-	    $job_line_length = length($command) + 1 + $arg_length;
+	    my $job_line_length = length($command) + 1 + $arg_length;
 	    debug("linelen $job_line_length\n");
 	    if($job_line_length >= $Global::command_line_max_len) {
 		unget_arg(pop @quoted_args);
@@ -450,7 +451,7 @@ sub binary_find_max_length {
     my ($lower, $upper) = (@_);
     if($lower == $upper or $lower == $upper-1) { return $lower; }
     my $middle = int (($upper-$lower)/2 + $lower);
-    $debug && print "$lower,$upper,$middle\n";
+    debug("$lower,$upper,$middle\n");
     if (is_acceptable_command_line_length($middle)) {
 	return binary_find_max_length($middle,$upper);
     } else {
@@ -464,7 +465,7 @@ sub is_acceptable_command_line_length {
     # (Can this be done prettier?)
     my $len = shift;
     my $testscript = q{'system ("true "."x"x$ARGV[0]); exit $?;'};
-    $debug && print "perl -e $testscript $len\n";
+    debug("perl -e $testscript $len\n");
     system "perl -e $testscript $len";
     return not $?;
 }
@@ -493,6 +494,7 @@ sub processes_available_by_system_limit {
     my $spawning_too_slow=0;
     my $time = time;
     my %fh;
+    my @children;
     DoNotReap();
 
     # Reserve filehandles
@@ -517,6 +519,7 @@ sub processes_available_by_system_limit {
 
 	# System process limit
 	$system_limit % 10 or $time=time;
+	my $child;
 	if($child = fork()) {
 	    push (@children,$child);
 	} elsif(defined $child) {
@@ -557,7 +560,7 @@ sub processes_available_by_system_limit {
     # Cleanup: Close the files
     for (keys %fh) { close $fh{$_} }
     # Cleanup: Kill the children
-    for $pid (@children) {
+    for my $pid (@children) {
 	kill 15, $pid;
 	waitpid($pid,0);
     }
@@ -836,7 +839,7 @@ sub die_usage {
 
 sub usage {
     print "Usage:\n";
-    print "parallel [options] [command [arguments]] < list_of_arguments\n";
+    print "parallel [-0cfgqsuvx] [command [arguments]] < list_of_arguments\n";
 }
 
 #
@@ -904,5 +907,3 @@ $main::opt_u = $main::opt_c = $main::opt_f = $main::opt_q =
 $main::opt_0 = $main::opt_s = $main::opt_v = $main::opt_g =
 $main::opt_j = $main::opt_d = $main::opt_x =1;
 $Global::xargs = 1;
-
-
