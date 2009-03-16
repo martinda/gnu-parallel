@@ -1,4 +1,10 @@
 33bf8b2986551515cdaff5e860618098  -
 960bedf6398273937e314fb49c7b3ffa  -
-8f7a50abe8d1024e90a2bc9c99ee0b05  -
-      3   80000  468894
+b35d8e49be8d94899b719c40d3f1f4bb  -
+      3   60000  348894
+1foo bar2foo bar3 Afoo barBfoo barC
+1foo2foo3 1bar2bar3 AfooBfooC AbarBbarC
+1c0c49286e5b5b18437e51b438ea5475  -
+      6  119994  697800
+1c0c49286e5b5b18437e51b438ea5475  -
+Chars per line: 116300

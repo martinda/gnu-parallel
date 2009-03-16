@@ -28,7 +28,7 @@ command also invokes B<-f>.
 If B<command> is given, B<parallel> will behave similar to B<xargs>. If
 B<command> is not given B<parallel> will behave similar to B<cat | sh>.
 
-=item I<-0>
+=item B<-0>
 
 Use NUL as delimiter.  Normally input lines will end in \n
 (newline). If they end in \0 (NUL), then use this option. It is useful
@@ -56,13 +56,13 @@ B<-g> is the default. Can be reversed with B<-u>.
 
 Run N jobs in parallel.  0 means as many as possible. Default is 10.
 
-=item B<-j> +I<N>
+=item B<-j> I<+N>
 
 Add N to the number of CPUs.  Run this many jobs in parallel. For
 compute intensive jobs I<-j +0> is useful as it will run
 number-of-cpus jobs in parallel.
 
-=item B<-j> -I<N>
+=item B<-j> I<-N>
 
 Subtract N from the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
@@ -95,7 +95,14 @@ Verbose.  Print the job to be run. Can be reversed with B<-s>.
 
 =item B<-x>
 
-xargs.  Insert as many arguments as the command line length permits.
+xargs. Insert as many arguments as the command line length permits. If
+{} is not used the arguments will be appended to the line.  If {} is
+used multiple times each {} will be replaced with all the arguments.
+
+=item B<-X>
+
+xargs with context replace. This works like B<-x> except if {} is part
+of a word (like I<pic{}.jpg>) then the whole word will be repeated.
 
 =back
 
@@ -264,6 +271,7 @@ B<cat | sh> functionality is missing.
 Quoting in B<xargs> works like B<-q> in B<parallel>. Doing B<ls |
 parallel "wc {} >> B<{}.wc"> using B<xargs> seems to be impossible.
 
+
 =head1 BUGS
 
 Filenames beginning with '-' can cause some commands to give
@@ -322,7 +330,7 @@ use Getopt::Std;
 use strict;
 
 my ($processes,$command);
-getopts("0cdefgj:qsuvx") || die_usage();
+getopts("0cdefgj:qsuvxX") || die_usage();
 
 # Defaults:
 $Global::debug = 0;
@@ -337,6 +345,10 @@ $/="\n";
 $Global::debug = (defined $::opt_d);
 if(defined $::opt_x) { 
     $Global::xargs = 1; 
+    $Global::command_line_max_len = max_length_of_command_line(); 
+}
+if(defined $::opt_X) { 
+    $Global::Xargs = 1; 
     $Global::command_line_max_len = max_length_of_command_line(); 
 }
 if(defined $::opt_v) { $Global::verbose = 1; }
@@ -378,16 +390,40 @@ sub generate_command_line {
     my $command = shift;
     my ($job_line,$last_good);
     my ($next_arg,@quoted_args,$arg_length);
+    my ($number_of_substitution) = 1;
+    my ($length_of_context) = 0;
+    my ($length_of_command_no_args);
+    if($Global::xargs or $Global::Xargs) {
+	# Count number of {}'s on the command line
+	$number_of_substitution = ($command =~ s/{}/{}/g);
+	$number_of_substitution ||= 1;
+    }
+    if($Global::xargs) {
+	my $c = $command;
+	# remove all {}s
+	$c =~ s/{}//g;
+	$length_of_command_no_args = length($c);
+    }
+    if($Global::Xargs) {
+	my $c = $command;
+	while($c =~ s/(\S*{}\S*)//) {
+	    # Length of context minus the {}
+	    $length_of_context += length($1) - 2;
+	}
+	$length_of_command_no_args = length($c);
+    }
+
     while ($next_arg = get_next_arg()) {
 	push (@quoted_args, $next_arg);
-	if(not $Global::xargs) {
+	if(not $Global::xargs and not $Global::Xargs) {
 	    last;
 	} else {
-	    # Emulate xargs if there is a command and -x is set
-	    $arg_length += length $next_arg + 1;
-	    debug("arglen $arg_length\n");
-	    my $job_line_length = length($command) + 1 + $arg_length;
-	    debug("linelen $job_line_length\n");
+	    # Emulate xargs if there is a command and -x or -X is set
+	    $arg_length += $number_of_substitution * (1 + length ($next_arg)) 
+		+ $length_of_context;
+	    # debug("arglen $arg_length = $number_of_substitution * (1 + length ($next_arg)) + $length_of_context\n");
+	    my $job_line_length = $length_of_command_no_args + 1 + $arg_length;
+	    # debug("linelen $job_line_length = $length_of_command_no_args + 1 + $arg_length\n");
 	    if($job_line_length >= $Global::command_line_max_len) {
 		unget_arg(pop @quoted_args);
 		if($quoted_args[0]) {
@@ -399,12 +435,31 @@ sub generate_command_line {
 	}
     }
     if(@quoted_args) {
-	my $arg=join(" ",@quoted_args);
 	$job_line = $command;
-	if(defined $job_line and $job_line =~ s/{}/$arg/g) {
-	    # substituted {} with args
+	if(defined $job_line and $job_line =~/{}/) {
+	    # substitute {} with args
+	    if($Global::Xargs) {
+		# Context sensitive replace
+		while($job_line =~/{}/) {
+		    $job_line =~ /(\S*{}\S*)/ or die ("This should never happen"); 
+		    my $wordarg = $1;
+		    my @all_word_arg;
+		    for my $arg (@quoted_args) {
+			my $substituted = $wordarg;
+			$substituted=~s/{}/$arg/g;
+			push @all_word_arg, $substituted;
+		    }
+		    my $all_word_arg = join(" ",@all_word_arg);
+		    $job_line =~ s/$wordarg/$all_word_arg/;
+		}
+	    } else {
+		# Normal replace
+		my $arg=join(" ",@quoted_args);
+		$job_line =~ s/{}/$arg/g;
+	    }
 	} else {
 	    # append args
+	    my $arg=join(" ",@quoted_args);
 	    $job_line .= " $arg";
 	}
 	debug("Return jobline: $job_line\n");
@@ -905,5 +960,5 @@ sub my_dump {
 # Keep perl -w happy
 $main::opt_u = $main::opt_c = $main::opt_f = $main::opt_q =
 $main::opt_0 = $main::opt_s = $main::opt_v = $main::opt_g =
-$main::opt_j = $main::opt_d = $main::opt_x =1;
+$main::opt_j = $main::opt_d = $main::opt_x = $main::opt_X =1;
 $Global::xargs = 1;

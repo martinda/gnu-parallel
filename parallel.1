@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2009-03-12" "perl v5.10.0" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2009-03-16" "perl v5.10.0" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -150,7 +150,7 @@ command also invokes \fB\-f\fR.
 .Sp
 If \fBcommand\fR is given, \fBparallel\fR will behave similar to \fBxargs\fR. If
 \&\fBcommand\fR is not given \fBparallel\fR will behave similar to \fBcat | sh\fR.
-.IP "\fI\-0\fR" 9
+.IP "\fB\-0\fR" 9
 .IX Item "-0"
 Use \s-1NUL\s0 as delimiter.  Normally input lines will end in \en
 (newline). If they end in \e0 (\s-1NUL\s0), then use this option. It is useful
@@ -173,12 +173,12 @@ printed when the command is finished. \s-1STDERR\s0 first followed by \s-1STDOUT
 .IP "\fB\-j\fR \fIN\fR" 9
 .IX Item "-j N"
 Run N jobs in parallel.  0 means as many as possible. Default is 10.
-.IP "\fB\-j\fR +\fIN\fR" 9
+.IP "\fB\-j\fR \fI+N\fR" 9
 .IX Item "-j +N"
 Add N to the number of CPUs.  Run this many jobs in parallel. For
 compute intensive jobs \fI\-j +0\fR is useful as it will run
 number-of-cpus jobs in parallel.
-.IP "\fB\-j\fR \-\fIN\fR" 9
+.IP "\fB\-j\fR \fI\-N\fR" 9
 .IX Item "-j -N"
 Subtract N from the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
@@ -205,7 +205,13 @@ output from different commands to be mixed. Can be reversed with \fB\-g\fR.
 Verbose.  Print the job to be run. Can be reversed with \fB\-s\fR.
 .IP "\fB\-x\fR" 9
 .IX Item "-x"
-xargs.  Insert as many arguments as the command line length permits.
+xargs. Insert as many arguments as the command line length permits. If
+{} is not used the arguments will be appended to the line.  If {} is
+used multiple times each {} will be replaced with all the arguments.
+.IP "\fB\-X\fR" 9
+.IX Item "-X"
+xargs with context replace. This works like \fB\-x\fR except if {} is part
+of a word (like \fIpic{}.jpg\fR) then the whole word will be repeated.
 .SH "EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation"
 .IX Header "EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation"
 \&\fBparallel\fR can work similar to \fBcat | sh\fR.
