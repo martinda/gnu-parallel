@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2009-03-16" "perl v5.10.0" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2009-04-04" "perl v5.10.0" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -133,7 +133,7 @@
 parallel \- build and execute command lines from standard input in parallel
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBparallel\fR [\-0cfgqsuvx] [\-j num] [command [arguments]] < list_of_arguments
+\&\fBparallel\fR [\-0cfgqsuvxX] [\-j num] [command [arguments]] < list_of_arguments
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 For each line of input \fBparallel\fR will execute \fBcommand\fR with the
@@ -306,6 +306,26 @@ files in each directory:
 To put the output in a file called <name>.dir:
 .PP
 \&\fBls | parallel '(echo \-n {}\*(L" \*(R"; ls {}|wc \-l) \fR>\fB {}.dir'\fR
+.SH "EXAMPLE 6: Context replace"
+.IX Header "EXAMPLE 6: Context replace"
+To remove the files \fIpict1000.jpg\fR .. \fIpict9999.jpg\fR you could do:
+.PP
+\&\fBseq 1000 9999 | parallel rm pict{}.jpg\fR
+.PP
+You could also do:
+.PP
+\&\fBseq 1000 9999 | perl \-pe 's/(.*)/pict$1.jpg/' | parallel \-x rm\fR
+.PP
+The first will run \fBrm\fR 8999 times, while the last will only run
+\&\fBrm\fR as many times needed to keep the command line length short
+enough.
+.PP
+You could also run:
+.PP
+\&\fBseq 1000 9999 | parallel \-X rm pict{}.jpg\fR
+.PP
+This will also only run \fBrm\fR as many times needed to keep the command
+line length short enough.
 .SH "QUOTING"
 .IX Header "QUOTING"
 For more advanced use quoting may be an issue. The following will

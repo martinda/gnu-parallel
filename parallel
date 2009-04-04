@@ -6,7 +6,7 @@ parallel - build and execute command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [-0cfgqsuvx] [-j num] [command [arguments]] < list_of_arguments
+B<parallel> [-0cfgqsuvxX] [-j num] [command [arguments]] < list_of_arguments
 
 =head1 DESCRIPTION
 
@@ -176,6 +176,7 @@ is a better solution:
   find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg
   find . -name '*_thumb.jpg' | ren 's:/([^/]+)_thumb.jpg$:/thumb_$1:'
 
+
 =head1 EXAMPLE 4: Substitution and redirection
 
 This will compare all files in the dir to the file foo and save the
@@ -199,6 +200,29 @@ B<ls | parallel 'echo -n {}" "; ls {}|wc -l'>
 To put the output in a file called <name>.dir:
 
 B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >>B< {}.dir'>
+
+
+=head1 EXAMPLE 6: Context replace
+
+To remove the files I<pict1000.jpg> .. I<pict9999.jpg> you could do:
+
+B<seq 1000 9999 | parallel rm pict{}.jpg>
+
+You could also do:
+
+B<seq 1000 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -x rm>
+
+The first will run B<rm> 8999 times, while the last will only run
+B<rm> as many times needed to keep the command line length short
+enough.
+
+You could also run:
+
+B<seq 1000 9999 | parallel -X rm pict{}.jpg>
+
+This will also only run B<rm> as many times needed to keep the command
+line length short enough.
+
 
 =head1 QUOTING
 
@@ -531,7 +555,9 @@ sub compute_number_of_processes {
     # Number of processes wanted and limited by system ressources
     my $opt_j = shift;
     my $wanted_processes = user_requested_processes($opt_j);
+    debug("Wanted procs: $wanted_processes\n");
     my $system_limit = processes_available_by_system_limit($wanted_processes);
+    debug("Limited to procs: $system_limit\n");
     return $system_limit;
 }
 
@@ -594,21 +620,21 @@ sub processes_available_by_system_limit {
 	    $system_limit = int ($system_limit * 0.9)+1;
 	    $spawning_too_slow = 1;
 	}
-    } while($system_limit <= $wanted_processes 
+    } while($system_limit < $wanted_processes 
 	    and defined $next_command_line
 	    and $more_filehandles
 	    and not $max_system_proc_reached
 	    and not $spawning_too_slow);
-    if($system_limit <= $wanted_processes and not $more_filehandles) {
+    if($system_limit < $wanted_processes and not $more_filehandles) {
 	print STDERR ("Warning: Only enough filehandles to run ",
 		      $system_limit, " jobs in parallel. ",
 		      "Raising ulimit -n may help\n");
     }
-    if($system_limit <= $wanted_processes and $max_system_proc_reached) {
+    if($system_limit < $wanted_processes and $max_system_proc_reached) {
 	print STDERR ("Warning: Only enough available processes to run ",
 		      $system_limit, " jobs in parallel.\n");
     }
-    if($system_limit <= $wanted_processes and $spawning_too_slow) {
+    if($system_limit < $wanted_processes and $spawning_too_slow) {
 	print STDERR ("Warning: Starting 10 extra processes takes > 1 sec.\n",
 		      "Limiting to ", $system_limit, " jobs in parallel.\n");
     }
@@ -894,7 +920,7 @@ sub die_usage {
 
 sub usage {
     print "Usage:\n";
-    print "parallel [-0cfgqsuvx] [command [arguments]] < list_of_arguments\n";
+    print "parallel [-0cfgqsuvxX] [-j num] [command [arguments]] < list_of_arguments\n";
 }
 
 #
