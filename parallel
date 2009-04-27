@@ -437,7 +437,7 @@ sub generate_command_line {
 	$length_of_command_no_args = length($c);
     }
 
-    while ($next_arg = get_next_arg()) {
+    while (defined($next_arg = get_next_arg())) {
 	push (@quoted_args, $next_arg);
 	if(not $Global::xargs and not $Global::Xargs) {
 	    last;
