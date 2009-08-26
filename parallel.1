@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2009-04-27" "perl v5.10.0" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2009-08-26" "perl v5.10.0" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -347,7 +347,9 @@ characters. For example this \fBwill not work\fR:
 .PP
 \&\fBls | parallel \-q "diff {} foo \fR>\fB{}.diff"\fR
 .PP
-because > needs to be interpreted by the shell.
+\&\fBls | parallel \-q \*(L"ls {} | wc \-l\*(R"\fR
+.PP
+because > and | need to be interpreted by the shell.
 .PP
 If you get errors like:
 .PP
@@ -392,12 +394,17 @@ the last half of the line is from another process.
 If no command is given to \fBxargs\fR it defaults to /bin/echo. So the
 \&\fBcat | sh\fR functionality is missing.
 .PP
-Quoting in \fBxargs\fR works like \fB\-q\fR in \fBparallel\fR. Doing \fBls |
-parallel "wc {} \fR> \fB{}.wc"\fR using \fBxargs\fR seems to be impossible.
+Quoting in \fBxargs\fR works like \fB\-q\fR in \fBparallel\fR. This means
+composed commands and redirection is impossible: \fBls | parallel "wc
+{} \fR> \fB{}.wc"\fR or \fBls | parallel \*(L"echo {}; ls {}|wc\*(R"\fR cannot be done using
+\&\fBxargs\fR.
 .SH "BUGS"
 .IX Header "BUGS"
 Filenames beginning with '\-' can cause some commands to give
 unexpected results, as it will often be interpreted as an option.
+.PP
+Some Bash specific constructs like '<(cmd)' do not work.  They can be
+fixed by prepending '/bin/bash \-c'. How much slower will that be?
 .SH "REPORTING BUGS"
 .IX Header "REPORTING BUGS"
 Report bugs to <bug\-parallel@tange.dk>.

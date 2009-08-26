@@ -2,11 +2,16 @@ parallel.1: parallel
 	pod2man parallel > parallel.1
 
 install: parallel parallel.1
-	cp parallel /usr/local/bin/parallel
-	cp parallel.1 /usr/local/man/man1/parallel.1
+	install -D -m 755 parallel $(DESTDIR)/usr/bin/parallel
+	install -D -m 644 parallel.1 $(DESTDIR)/usr/share/man/man1/parallel.1
 
 unittest: parallel unittest/tests-to-run/* unittest/wanted-results/*
+	echo | mop || (echo mop is required for unittest; /bin/false)
+	seq 1 2 | mop || (echo seq is required for unittest; /bin/false)
 	(cd unittest; sh Start.sh)
+
+clean:
+	rm -f parallel.1
 
 dist:
 	rm -rf ./unittest/input-files/random_dirs_*_newline || /bin/true

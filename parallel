@@ -245,7 +245,9 @@ characters. For example this B<will not work>:
 
 B<ls | parallel -q "diff {} foo >>B<{}.diff"> 
 
-because > needs to be interpreted by the shell.
+B<ls | parallel -q "ls {} | wc -l">
+
+because > and | need to be interpreted by the shell.
 
 If you get errors like:
 
@@ -292,8 +294,10 @@ the last half of the line is from another process.
 If no command is given to B<xargs> it defaults to /bin/echo. So the
 B<cat | sh> functionality is missing.
 
-Quoting in B<xargs> works like B<-q> in B<parallel>. Doing B<ls |
-parallel "wc {} >> B<{}.wc"> using B<xargs> seems to be impossible.
+Quoting in B<xargs> works like B<-q> in B<parallel>. This means
+composed commands and redirection is impossible: B<ls | parallel "wc
+{} >> B<{}.wc"> or B<ls | parallel "echo {}; ls {}|wc"> cannot be done using
+B<xargs>.
 
 
 =head1 BUGS
@@ -301,6 +305,8 @@ parallel "wc {} >> B<{}.wc"> using B<xargs> seems to be impossible.
 Filenames beginning with '-' can cause some commands to give
 unexpected results, as it will often be interpreted as an option.
 
+Some Bash specific constructs like '<(cmd)' do not work.  They can be
+fixed by prepending '/bin/bash -c'. How much slower will that be?
 
 =head1 REPORTING BUGS
 
@@ -474,7 +480,8 @@ sub generate_command_line {
 			push @all_word_arg, $substituted;
 		    }
 		    my $all_word_arg = join(" ",@all_word_arg);
-		    $job_line =~ s/$wordarg/$all_word_arg/;
+		    my ($quoted_wordarg) = shell_quote($wordarg);
+		    $job_line =~ s/$quoted_wordarg/$all_word_arg/;
 		}
 	    } else {
 		# Normal replace
@@ -855,11 +862,17 @@ sub print_job {
     }
     seek $_, 0, 0 for $out, $err;
     if($Global::debug) {
-	while( <$err> ) { print STDERR "ERR: $_" }
-	while( <$out> ) { print STDOUT "OUT: $_" }
-    } else {
-	print STDERR <$err>;
-	print STDOUT <$out>;
+	print STDERR "ERR:\n";
+    }
+    my $buf;
+    while(sysread($err,$buf,1000_000)) {
+	print STDERR $buf;
+    }
+    if($Global::debug) {
+	print STDOUT "OUT:\n";
+    }
+    while(sysread($out,$buf,1000_000)) {
+	print STDOUT $buf;
     }
     debug("<<joboutput $command\n");
     close $out;

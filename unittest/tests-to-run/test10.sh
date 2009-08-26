@@ -15,3 +15,7 @@ echo -n "Chars per line: "
 CHAR=$(cat ~/.mop/:parallel | wc -c)
 LINES=$(cat ~/.mop/:parallel | wc -l)
 echo "$CHAR/$LINES" | bc
+
+# Bug before 2009-08-26 causing regexp compile error or infinite loop
+echo a | parallel -qX echo  "'"{}"' "
+echo a | parallel -qX echo  "'{}'"
