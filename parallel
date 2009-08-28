@@ -199,26 +199,26 @@ B<ls | parallel 'echo -n {}" "; ls {}|wc -l'>
 
 To put the output in a file called <name>.dir:
 
-B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >>B< {}.dir'>
+B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >> B<{}.dir'>
 
 
 =head1 EXAMPLE 6: Context replace
 
-To remove the files I<pict1000.jpg> .. I<pict9999.jpg> you could do:
+To remove the files I<pict0000.jpg> .. I<pict9999.jpg> you could do:
 
-B<seq 1000 9999 | parallel rm pict{}.jpg>
+B<seq -f %04g 0 9999 | parallel rm pict{}.jpg>
 
 You could also do:
 
-B<seq 1000 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -x rm>
+B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -x rm>
 
-The first will run B<rm> 8999 times, while the last will only run
+The first will run B<rm> 10000 times, while the last will only run
 B<rm> as many times needed to keep the command line length short
-enough.
+enough (typically 1-2 times).
 
 You could also run:
 
-B<seq 1000 9999 | parallel -X rm pict{}.jpg>
+B<seq -f %04g 0 9999 | parallel -X rm pict{}.jpg>
 
 This will also only run B<rm> as many times needed to keep the command
 line length short enough.

@@ -17,7 +17,7 @@ dist:
 	rm -rf ./unittest/input-files/random_dirs_*_newline || /bin/true
 	rm -rf ./unittest/tmp || /bin/true
 	rm parallel-????????.tar.bz2 || /bin/true
-	( cd ..; tar -cvj --exclude .git --exclude '#*#' --exclude '*~' --exclude CVS -f /tmp/parallel.tar.bz2 parallel )
+	( cd ..; tar -cvj --exclude .git --exclude '#*#' --exclude '*~' --exclude CVS -f /tmp/parallel.tar.bz2 parallel-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9] )
 	mv /tmp/parallel.tar.bz2 parallel-$$(date +"%Y%m%d").tar.bz2
 	rsync -Havessh parallel-$$(date +"%Y%m%d").tar.bz2 download.savannah.nongnu.org:/releases/parallel/
 
