@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2009-08-26" "perl v5.10.0" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2009-09-02" "perl v5.10.0" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -133,7 +133,7 @@
 parallel \- build and execute command lines from standard input in parallel
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBparallel\fR [\-0cfgqsuvxX] [\-j num] [command [arguments]] < list_of_arguments
+\&\fBparallel\fR [\-0cfgkqsuvxX] [\-j num] [command [arguments]] < list_of_arguments
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 For each line of input \fBparallel\fR will execute \fBcommand\fR with the
@@ -186,6 +186,10 @@ If the evaluated number is less than 1 then 1 will be used.
 .IX Item "-j N%"
 Multiply N% with the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
+.IP "\fB\-k\fR" 9
+.IX Item "-k"
+Keep sequence of output same as the order of input. If jobs 1 2 3 4
+end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 .IP "\fB\-q\fR" 9
 .IX Item "-q"
 Quote \fBcommand\fR.  This will quote the command line so special
@@ -305,27 +309,46 @@ files in each directory:
 .PP
 To put the output in a file called <name>.dir:
 .PP
-\&\fBls | parallel '(echo \-n {}\*(L" \*(R"; ls {}|wc \-l) \fR>\fB {}.dir'\fR
+\&\fBls | parallel '(echo \-n {}\*(L" \*(R"; ls {}|wc \-l) \fR> \fB{}.dir'\fR
 .SH "EXAMPLE 6: Context replace"
 .IX Header "EXAMPLE 6: Context replace"
-To remove the files \fIpict1000.jpg\fR .. \fIpict9999.jpg\fR you could do:
+To remove the files \fIpict0000.jpg\fR .. \fIpict9999.jpg\fR you could do:
 .PP
-\&\fBseq 1000 9999 | parallel rm pict{}.jpg\fR
+\&\fBseq \-f \f(CB%04g\fB 0 9999 | parallel rm pict{}.jpg\fR
 .PP
 You could also do:
 .PP
-\&\fBseq 1000 9999 | perl \-pe 's/(.*)/pict$1.jpg/' | parallel \-x rm\fR
+\&\fBseq \-f \f(CB%04g\fB 0 9999 | perl \-pe 's/(.*)/pict$1.jpg/' | parallel \-x rm\fR
 .PP
-The first will run \fBrm\fR 8999 times, while the last will only run
+The first will run \fBrm\fR 10000 times, while the last will only run
 \&\fBrm\fR as many times needed to keep the command line length short
-enough.
+enough (typically 1\-2 times).
 .PP
 You could also run:
 .PP
-\&\fBseq 1000 9999 | parallel \-X rm pict{}.jpg\fR
+\&\fBseq \-f \f(CB%04g\fB 0 9999 | parallel \-X rm pict{}.jpg\fR
 .PP
 This will also only run \fBrm\fR as many times needed to keep the command
 line length short enough.
+.SH "EXAMPLE 7: Keep order of output same as order of input"
+.IX Header "EXAMPLE 7: Keep order of output same as order of input"
+Normally the output of a job will be printed as soon as it
+completes. Sometimes you want the order of the output to remain the
+same as the order of the input. \fB\-k\fR will make sure the order of
+output will be in the same order as input even if later jobs end
+before earlier jobs.
+.PP
+If you have a directory with subdirectories that contain different
+amount of files running:
+.PP
+\&\fBls | sort | parallel \-v \*(L"ls {} | wc\*(R"\fR
+.PP
+will give the output of each dir, but it will be sorted accoring to
+which job completed first.
+.PP
+To keep the order the same as input run:
+.PP
+\&\fBls | sort | parallel \-kv \*(L"ls {} | wc\*(R"\fR
 .SH "QUOTING"
 .IX Header "QUOTING"
 For more advanced use quoting may be an issue. The following will
@@ -357,6 +380,15 @@ If you get errors like:
 .PP
 then you might try using \fB\-q\fR.
 .PP
+If you are using \fBbash\fR process substitution like \fB<(cat foo)\fR then
+you may try \fB\-q\fR and prepending \fBcommand\fR with \fBbash \-c\fR:
+.PP
+\&\fBls | parallel \-q bash \-c 'wc \-c <(echo {})'\fR
+.PP
+Or for substituting output:
+.PP
+\&\fBls | parallel \-q bash \-c 'tar c {} | tee \fR>\fB(gzip \fR>\fB{}.tar.gz) | bzip2 \fR>\fB{}.tar.bz2'\fR
+.PP
 \&\fBConclusion\fR: To avoid dealing with the quoting problems it may be
 easier just to write a small script and have \fBparallel\fR call that
 script.
@@ -369,20 +401,17 @@ script.
 hosts or URLs) will require creating these inputs as files. \fBfind
 \&\-exec\fR has no support for running commands in parallel.
 .PP
-\&\fBxargs\fR deals badly with special characters (such as space, ' and ") unless
-\&\fB\-0\fR is specified. Many input generators are not optimized for using
-\&\fB\s-1NUL\s0\fR as separator but are optimized for \fBnewline\fR as separator. E.g
-\&\fBhead\fR, \fBtail\fR, \fBawk\fR, \fBls\fR, \fBecho\fR, \fBsed\fR, \fBtar \-v\fR, \fBperl\fR
-(\-0 and \e0 instead of \en), \fBlocate\fR (requires using \-0), \fBfind\fR
-(requires using \-print0), \fBgrep\fR (requires user to use \-z or \-Z).
-.PP
-The input \fIcan\fR be fixed for \fBxargs\fR with:
-.PP
-tr '\en' '\e0'
+\&\fBxargs\fR deals badly with special characters (such as space, ' and ")
+unless \fB\-0\fR or \fB\-d \*(L"\en\*(R"\fR is specified. Many input generators are not
+optimized for using \fB\s-1NUL\s0\fR as separator but are optimized for
+\&\fBnewline\fR as separator. E.g \fBhead\fR, \fBtail\fR, \fBawk\fR, \fBls\fR, \fBecho\fR,
+\&\fBsed\fR, \fBtar \-v\fR, \fBperl\fR (\-0 and \e0 instead of \en), \fBlocate\fR
+(requires using \-0), \fBfind\fR (requires using \-print0), \fBgrep\fR
+(requires user to use \-z or \-Z).
 .PP
 So \fBparallel\fR's newline separation can be emulated with:
 .PP
-cat | tr '\en' '\e0' | xargs \-0 \-n1 \fIcommand\fR
+\&\fBcat | xargs \-d \*(L"\en\*(R" \-n1 \f(BIcommand\fB\fR
 .PP
 \&\fBxargs\fR can run a given number of jobs in parallel, but has no
 support for running no_of_cpus jobs in parallel.
@@ -391,23 +420,42 @@ support for running no_of_cpus jobs in parallel.
 run together, e.g. the first half of a line is from one process and
 the last half of the line is from another process.
 .PP
-If no command is given to \fBxargs\fR it defaults to /bin/echo. So the
-\&\fBcat | sh\fR functionality is missing.
+\&\fBxargs\fR has no support for keeping the order of the output, therefore
+output of the second job cannot be postponed till the first job is done.
+.PP
+\&\fBxargs\fR has no support for context replace, so you will have to create the 
+arguments.
+.PP
+If you use a replace string in \fBxargs\fR (\fB\-I\fR) you can not force
+\&\fBxargs\fR to use more than one argument.
 .PP
 Quoting in \fBxargs\fR works like \fB\-q\fR in \fBparallel\fR. This means
-composed commands and redirection is impossible: \fBls | parallel "wc
-{} \fR> \fB{}.wc"\fR or \fBls | parallel \*(L"echo {}; ls {}|wc\*(R"\fR cannot be done using
-\&\fBxargs\fR.
+composed commands and redirection requires using \fBbash \-c\fR.
+.PP
+\&\fBls | parallel "wc {} \fR> \fB{}.wc"\fR
+.PP
+becomes
+.PP
+\&\fBls | xargs \-d \*(L"\en\*(R" \-P10 \-I {} bash \-c "wc {} \fR>\fB {}.wc"\fR
+.PP
+and
+.PP
+\&\fBls | parallel \*(L"echo {}; ls {}|wc\*(R"\fR
+.PP
+becomes
+.PP
+\&\fBls | xargs \-d \*(L"\en\*(R" \-P10 \-I {} bash \-c \*(L"echo {}; ls {}|wc\*(R"\fR
 .SH "BUGS"
 .IX Header "BUGS"
 Filenames beginning with '\-' can cause some commands to give
 unexpected results, as it will often be interpreted as an option.
-.PP
-Some Bash specific constructs like '<(cmd)' do not work.  They can be
-fixed by prepending '/bin/bash \-c'. How much slower will that be?
 .SH "REPORTING BUGS"
 .IX Header "REPORTING BUGS"
 Report bugs to <bug\-parallel@tange.dk>.
+.SH "IDEAS"
+.IX Header "IDEAS"
+xargs dropin-replacement.
+Implement the missing \-\-features
 .SH "AUTHOR"
 .IX Header "AUTHOR"
 Copyright (C) 2007\-10\-18 Ole Tange, http://ole.tange.dk
