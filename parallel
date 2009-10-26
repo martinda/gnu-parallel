@@ -241,7 +241,7 @@ amount of files running:
 
 B<ls | sort | parallel -v "ls {} | wc">
 
-will give the output of each dir, but it will be sorted accoring to
+will give the output of each dir, but it will be sorted according to
 which job completed first.
 
 To keep the order the same as input run:
@@ -294,6 +294,18 @@ easier just to write a small script and have B<parallel> call that
 script.
 
 
+=head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
+
+If you regret starting a lot of jobs you can simply break B<parallel>,
+but if you want to make sure you do not have halfcompleted jobs you
+should send the signal B<-USR2> to B<parallel>:
+
+B<killall -USR2 parallel>
+
+This will tell B<parallel> to not start any new jobs, but wait until
+the currently running jobs are finished.
+
+
 =head1 DIFFERENCES BETWEEN xargs/find -exec AND parallel
 
 B<xargs> and B<find -exec> offer some of the same possibilites as
@@ -323,7 +335,8 @@ run together, e.g. the first half of a line is from one process and
 the last half of the line is from another process.
 
 B<xargs> has no support for keeping the order of the output, therefore
-output of the second job cannot be postponed till the first job is done.
+if running jobs in parallel using B<xargs> the output of the second
+job cannot be postponed till the first job is done.
 
 B<xargs> has no support for context replace, so you will have to create the 
 arguments.
@@ -348,6 +361,19 @@ becomes
 
 B<ls | xargs -d "\n" -P10 -I {} bash -c "echo {}; ls {}|wc">
 
+
+=head1 DIFFERENCES BETWEEN mdm/middleman AND parallel
+
+middleman(mdm) is also a tool for running jobs in parallel.
+
+Here are the shellscripts of http://mdm.berlios.de/usage.html ported
+to parallel use:
+
+B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
+
+B<cat files | parallel -j+0 cmd>
+
+
 =head1 BUGS
 
 Filenames beginning with '-' can cause some commands to give
@@ -361,6 +387,29 @@ Report bugs to <bug-parallel@tange.dk>.
 
 xargs dropin-replacement.
 Implement the missing --features
+
+monitor to see which jobs are currently running
+http://code.google.com/p/ppss/
+
+accept signal USR1 to complete current running jobs but do not start
+new jobs.
+
+distibute jobs to computers with different speeds/no_of_cpu using ssh
+ask the computers how many cpus they have and spawn appropriately
+accoring to -j setting
+
+Parallelize so this can be done:
+mdm.screen find dir -execdir mdm-run cmd {} \;
+Maybe:
+find dir -execdir parallel --communication-file /tmp/comfile cmd {} \;
+
+=head2 Comfile
+
+This will put a lock on /tmp/comfile. The number of locks is the number of running commands.
+If the number is smaller than -j then it will start a process in the background ( cmd & ),
+otherwise wait.
+
+parallel --wait /tmp/comfile will wait until no more locks on the file
 
 =head1 AUTHOR
 
@@ -423,14 +472,8 @@ $Global::input_is_filename = (@ARGV);
 $/="\n";
 
 $Global::debug = (defined $::opt_d);
-if(defined $::opt_x) { 
-    $Global::xargs = 1; 
-    $Global::command_line_max_len = max_length_of_command_line(); 
-}
-if(defined $::opt_X) { 
-    $Global::Xargs = 1; 
-    $Global::command_line_max_len = max_length_of_command_line(); 
-}
+if(defined $::opt_x) { $Global::xargs = 1; }
+if(defined $::opt_X) { $Global::Xargs = 1; }
 if(defined $::opt_v) { $Global::verbose = 1; }
 if(defined $::opt_s) { $Global::verbose = 0; }
 if(defined $::opt_k) { $Global::keeporder = 1; }
@@ -501,7 +544,7 @@ sub generate_command_line {
 	    # debug("arglen $arg_length = $number_of_substitution * (1 + length ($next_arg)) + $length_of_context\n");
 	    my $job_line_length = $length_of_command_no_args + 1 + $arg_length;
 	    # debug("linelen $job_line_length = $length_of_command_no_args + 1 + $arg_length\n");
-	    if($job_line_length >= $Global::command_line_max_len) {
+	    if($job_line_length >= max_length_of_command_line()) {
 		unget_arg(pop @quoted_args);
 		if($quoted_args[0]) {
 		    last;
@@ -571,12 +614,15 @@ sub shell_quote {
 sub max_length_of_command_line {
     # Find the max_length of a command line
     # First find an upper bound
-    my $len = 2;
-    do {
-	$len += $len+1;
-    } while (is_acceptable_command_line_length($len));
-    # Then search for the actual max length between 0 and upper bound
-    return binary_find_max_length(0,$len);
+    if(not $Global::command_line_max_len) {
+	my $len = 2;
+	do {
+	    $len += $len+1;
+	} while (is_acceptable_command_line_length($len));
+	# Then search for the actual max length between 0 and upper bound
+	$Global::command_line_max_len = binary_find_max_length(0,$len);
+    }
+    return $Global::command_line_max_len;
 }
 
 sub binary_find_max_length {
@@ -755,15 +801,16 @@ sub user_requested_processes {
 }
 
 sub no_of_cpus {
-    my $no_of_cpus = 
-	(no_of_cpus_gnu_linux() ||
-	no_of_cpus_solaris());
-    if($no_of_cpus) {
-	return $no_of_cpus;
-    } else {
-	warn("Cannot figure out no of cpus. Using 1");
-	return 1;
+    if(not $Global::no_of_cpus) {
+	my $no_of_cpus = (no_of_cpus_gnu_linux() || no_of_cpus_solaris());
+	if($no_of_cpus) {
+	    $Global::no_of_cpus = $no_of_cpus;
+	} else {
+	    warn("Cannot figure out no of cpus. Using 1");
+	    $Global::no_of_cpus = 1;
+	}
     }
+    return $Global::no_of_cpus;
 }
 
 sub no_of_cpus_gnu_linux {
@@ -805,6 +852,7 @@ sub init_run_jobs {
     open $Global::original_stdout, ">&STDOUT" or die "Can't dup STDOUT: $!";
     open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
     $Global::running_jobs=0;
+    $SIG{USR1} = \&StartNoNewJobs;
 }
 
 sub next_command_line {
@@ -854,10 +902,12 @@ sub drain_job_queue {
 
 sub start_more_jobs {
     my $jobs_started = 0;
-    while($Global::running_jobs < $Global::processes_to_run
-	  and 
-	  start_another_job()) {
-	$jobs_started++;
+    if(not $Global::StartNoNewJobs) {
+	while($Global::running_jobs < $Global::processes_to_run
+	      and
+	      start_another_job()) {
+	    $jobs_started++;
+	}
     }
     return $jobs_started;
 }
@@ -966,6 +1016,10 @@ sub print_job {
 #
 # Signal handling stuff
 #
+
+sub StartNoNewJobs {
+    $Global::StartNoNewJobs++;
+}
 
 sub CountSigChild {
     $Global::SigChildCaught++;
