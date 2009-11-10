@@ -6,7 +6,7 @@ parallel - build and execute command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [-0cfgkqsuvxX] [-j num] [command [arguments]] < list_of_arguments
+B<parallel> [-0cfgkqsuvxX] [-I str] [-j num] [command [arguments]] < list_of_arguments
 
 =head1 DESCRIPTION
 
@@ -51,6 +51,10 @@ B<command> is set. Can be reversed with B<-c>.
 Group output.  Output from each jobs is grouped together and is only
 printed when the command is finished. STDERR first followed by STDOUT.
 B<-g> is the default. Can be reversed with B<-u>.
+
+=item B<-I> I<string>
+
+Use the replacement string I<string> instead of {}.
 
 =item B<-j> I<N>
 
@@ -458,7 +462,7 @@ use Getopt::Std;
 use strict;
 
 my ($processes,$command);
-getopts("0cdfgj:kqsuvxX") || die_usage();
+getopts("0cdfgI:j:kqsuvxX") || die_usage();
 
 # Defaults:
 $Global::debug = 0;
@@ -468,6 +472,7 @@ $Global::verbose = 0;
 $Global::grouped = 1;
 $Global::keeporder = 0;
 $Global::quoting = 0;
+$Global::replacestring = '{}';
 $Global::input_is_filename = (@ARGV);
 $/="\n";
 
@@ -483,6 +488,8 @@ if(defined $::opt_c) { $Global::input_is_filename = 0; }
 if(defined $::opt_f) { $Global::input_is_filename = 1; }
 if(defined $::opt_0) { $/ = "\0"; }
 if(defined $::opt_q) { $Global::quoting = 1; }
+if(defined $::opt_I) { $Global::replacestring = $::opt_I; }
+
 if(@ARGV) { 
     if($Global::quoting) {
         $Global::command = join(" ", shell_quote(@ARGV)); 
@@ -515,18 +522,18 @@ sub generate_command_line {
     my ($length_of_command_no_args);
     if($Global::xargs or $Global::Xargs) {
 	# Count number of {}'s on the command line
-	$number_of_substitution = ($command =~ s/{}/{}/g);
+	$number_of_substitution = ($command =~ s/$Global::replacestring/$Global::replacestring/go);
 	$number_of_substitution ||= 1;
     }
     if($Global::xargs) {
 	my $c = $command;
 	# remove all {}s
-	$c =~ s/{}//g;
+	$c =~ s/$Global::replacestring//go;
 	$length_of_command_no_args = length($c);
     }
     if($Global::Xargs) {
 	my $c = $command;
-	while($c =~ s/(\S*{}\S*)//) {
+	while($c =~ s/(\S*$Global::replacestring\S*)//o) {
 	    # Length of context minus the {}
 	    $length_of_context += length($1) - 2;
 	}
@@ -556,17 +563,17 @@ sub generate_command_line {
     }
     if(@quoted_args) {
 	$job_line = $command;
-	if(defined $job_line and $job_line =~/{}/) {
+	if(defined $job_line and $job_line =~/$Global::replacestring/o) {
 	    # substitute {} with args
 	    if($Global::Xargs) {
-		# Context sensitive replace
-		while($job_line =~/{}/) {
-		    $job_line =~ /(\S*{}\S*)/ or die ("This should never happen"); 
+		# Context sensitive replace (foo{}bar with fooargsbar)
+		while($job_line =~/$Global::replacestring/o) {
+		    $job_line =~ /(\S*$Global::replacestring\S*)/ or die ("This should never happen"); 
 		    my $wordarg = $1;
 		    my @all_word_arg;
 		    for my $arg (@quoted_args) {
 			my $substituted = $wordarg;
-			$substituted=~s/{}/$arg/g;
+			$substituted=~s/$Global::replacestring/$arg/go;
 			push @all_word_arg, $substituted;
 		    }
 		    my $all_word_arg = join(" ",@all_word_arg);
@@ -574,9 +581,9 @@ sub generate_command_line {
 		    $job_line =~ s/$quoted_wordarg/$all_word_arg/;
 		}
 	    } else {
-		# Normal replace
+		# Normal replace {} with args
 		my $arg=join(" ",@quoted_args);
-		$job_line =~ s/{}/$arg/g;
+		$job_line =~ s/$Global::replacestring/$arg/go;
 	    }
 	} else {
 	    # append args

@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2009-10-26" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2009-11-10" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -133,7 +133,7 @@
 parallel \- build and execute command lines from standard input in parallel
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBparallel\fR [\-0cfgkqsuvxX] [\-j num] [command [arguments]] < list_of_arguments
+\&\fBparallel\fR [\-0cfgkqsuvxX] [\-I str] [\-j num] [command [arguments]] < list_of_arguments
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 For each line of input \fBparallel\fR will execute \fBcommand\fR with the
@@ -170,6 +170,9 @@ quoted so it is not evaluated by the shell. This is the default if
 Group output.  Output from each jobs is grouped together and is only
 printed when the command is finished. \s-1STDERR\s0 first followed by \s-1STDOUT\s0.
 \&\fB\-g\fR is the default. Can be reversed with \fB\-u\fR.
+.IP "\fB\-I\fR \fIstring\fR" 9
+.IX Item "-I string"
+Use the replacement string \fIstring\fR instead of {}.
 .IP "\fB\-j\fR \fIN\fR" 9
 .IX Item "-j N"
 Run N jobs in parallel.  0 means as many as possible. Default is 10.
@@ -477,6 +480,8 @@ Report bugs to <bug\-parallel@tange.dk>.
 .IX Header "IDEAS"
 xargs dropin-replacement.
 Implement the missing \-\-features
+.PP
+\&\-I <string> replacement string
 .PP
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/
