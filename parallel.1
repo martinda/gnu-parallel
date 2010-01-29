@@ -124,13 +124,13 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2009-11-10" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2010-01-29" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
 .nh
 .SH "NAME"
-parallel \- build and execute command lines from standard input in parallel
+parallel \- build and execute shell command lines from standard input in parallel
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
 \&\fBparallel\fR [\-0cfgkqsuvxX] [\-I str] [\-j num] [command [arguments]] < list_of_arguments
@@ -333,25 +333,41 @@ You could also run:
 .PP
 This will also only run \fBrm\fR as many times needed to keep the command
 line length short enough.
-.SH "EXAMPLE 7: Keep order of output same as order of input"
-.IX Header "EXAMPLE 7: Keep order of output same as order of input"
+.SH "EXAMPLE 7: Group output lines"
+.IX Header "EXAMPLE 7: Group output lines"
+When runnning jobs that output data, you often do not want the output
+of multiple jobs to run together. \fBparallel\fR defaults to grouping the
+output of each job, so the output is printed when the job finishes. If
+you want the output to be printed while the job is running you can use
+\&\fB\-u\fR.
+.PP
+Compare the output of:
+.PP
+\&\fB(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel traceroute\fR
+.PP
+to the output of:
+.PP
+\&\fB(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel \-u traceroute\fR
+.SH "EXAMPLE 8: Keep order of output same as order of input"
+.IX Header "EXAMPLE 8: Keep order of output same as order of input"
 Normally the output of a job will be printed as soon as it
 completes. Sometimes you want the order of the output to remain the
 same as the order of the input. \fB\-k\fR will make sure the order of
 output will be in the same order as input even if later jobs end
 before earlier jobs.
 .PP
-If you have a directory with subdirectories that contain different
-amount of files running:
+\&\fB(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel traceroute\fR
 .PP
-\&\fBls | sort | parallel \-v \*(L"ls {} | wc\*(R"\fR
-.PP
-will give the output of each dir, but it will be sorted according to
-which job completed first.
+will give traceroute of foss.org.my, www.debian.org and
+www.freenetproject.org, but it will be sorted according to which job
+completed first.
 .PP
 To keep the order the same as input run:
 .PP
-\&\fBls | sort | parallel \-kv \*(L"ls {} | wc\*(R"\fR
+\&\fB(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel \-k traceroute\fR
+.PP
+This will make sure the traceroute to foss.org.my will be printed
+first.
 .SH "QUOTING"
 .IX Header "QUOTING"
 For more advanced use quoting may be an issue. The following will
@@ -395,6 +411,13 @@ Or for substituting output:
 \&\fBConclusion\fR: To avoid dealing with the quoting problems it may be
 easier just to write a small script and have \fBparallel\fR call that
 script.
+.SH "LIST RUNNING JOBS"
+.IX Header "LIST RUNNING JOBS"
+To list the jobs currently running you can run:
+.PP
+\&\fBkillall \-USR1 parallel\fR
+.PP
+\&\fBparallel\fR will then print the currently running jobs on \s-1STDERR\s0.
 .SH "COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS"
 .IX Header "COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS"
 If you regret starting a lot of jobs you can simply break \fBparallel\fR,
@@ -414,8 +437,14 @@ the currently running jobs are finished.
 hosts or URLs) will require creating these inputs as files. \fBfind
 \&\-exec\fR has no support for running commands in parallel.
 .PP
-\&\fBxargs\fR deals badly with special characters (such as space, ' and ")
-unless \fB\-0\fR or \fB\-d \*(L"\en\*(R"\fR is specified. Many input generators are not
+\&\fBxargs\fR deals badly with special characters (such as space, ' and
+"). To see the problem try this:
+.PP
+touch important_file
+touch 'not important_file'
+ls not* | xargs rm
+.PP
+You can specify \fB\-0\fR or \fB\-d \*(L"\en\*(R"\fR, but many input generators are not
 optimized for using \fB\s-1NUL\s0\fR as separator but are optimized for
 \&\fBnewline\fR as separator. E.g \fBhead\fR, \fBtail\fR, \fBawk\fR, \fBls\fR, \fBecho\fR,
 \&\fBsed\fR, \fBtar \-v\fR, \fBperl\fR (\-0 and \e0 instead of \en), \fBlocate\fR
@@ -481,17 +510,25 @@ Report bugs to <bug\-parallel@tange.dk>.
 xargs dropin-replacement.
 Implement the missing \-\-features
 .PP
-\&\-I <string> replacement string
-.PP
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/
 .PP
-accept signal \s-1USR1\s0 to complete current running jobs but do not start
-new jobs.
+Accept signal \s-1INT\s0 to complete current running jobs but do not start
+new jobs. Print out the number of jobs waiting to complete on
+\&\s-1STDERR\s0. Accept sig \s-1INT\s0 again to kill now. This seems to be hard, as
+all foreground processes get the \s-1INT\s0 from the shell.
 .PP
-distibute jobs to computers with different speeds/no_of_cpu using ssh
+Distibute jobs to computers with different speeds/no_of_cpu using ssh
 ask the computers how many cpus they have and spawn appropriately
-accoring to \-j setting
+according to \-j setting. 
+http://www.semicomplete.com/blog/geekery/distributed\-xargs.html?source=rss20
+.SS "\-S"
+.IX Subsection "-S"
+\&\-S sshlogin[,sshlogin]
+.PP
+sshlogin is [user@]host or filename with list of sshlogin
+.PP
+What about copying data to/from remote host?
 .PP
 Parallelize so this can be done:
 mdm.screen find dir \-execdir mdm-run cmd {} \e;

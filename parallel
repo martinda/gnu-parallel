@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-parallel - build and execute command lines from standard input in parallel
+parallel - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
@@ -232,7 +232,24 @@ B<seq -f %04g 0 9999 | parallel -X rm pict{}.jpg>
 This will also only run B<rm> as many times needed to keep the command
 line length short enough.
 
-=head1 EXAMPLE 7: Keep order of output same as order of input
+=head1 EXAMPLE 7: Group output lines
+
+When runnning jobs that output data, you often do not want the output
+of multiple jobs to run together. B<parallel> defaults to grouping the
+output of each job, so the output is printed when the job finishes. If
+you want the output to be printed while the job is running you can use
+B<-u>.
+
+Compare the output of:
+
+B<(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel traceroute>
+
+to the output of:
+
+B<(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel -u traceroute>
+
+
+=head1 EXAMPLE 8: Keep order of output same as order of input
 
 Normally the output of a job will be printed as soon as it
 completes. Sometimes you want the order of the output to remain the
@@ -240,17 +257,18 @@ same as the order of the input. B<-k> will make sure the order of
 output will be in the same order as input even if later jobs end
 before earlier jobs.
 
-If you have a directory with subdirectories that contain different
-amount of files running:
+B<(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel traceroute>
 
-B<ls | sort | parallel -v "ls {} | wc">
-
-will give the output of each dir, but it will be sorted according to
-which job completed first.
+will give traceroute of foss.org.my, www.debian.org and
+www.freenetproject.org, but it will be sorted according to which job
+completed first.
 
 To keep the order the same as input run:
 
-B<ls | sort | parallel -kv "ls {} | wc">
+B<(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel -k traceroute>
+
+This will make sure the traceroute to foss.org.my will be printed
+first.
 
 
 =head1 QUOTING
@@ -298,6 +316,15 @@ easier just to write a small script and have B<parallel> call that
 script.
 
 
+=head1 LIST RUNNING JOBS
+
+To list the jobs currently running you can run:
+
+B<killall -USR1 parallel>
+
+B<parallel> will then print the currently running jobs on STDERR.
+
+
 =head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
 
 If you regret starting a lot of jobs you can simply break B<parallel>,
@@ -319,8 +346,14 @@ B<find -exec> only works on files. So processing other input (such as
 hosts or URLs) will require creating these inputs as files. B<find
 -exec> has no support for running commands in parallel.
 
-B<xargs> deals badly with special characters (such as space, ' and ")
-unless B<-0> or B<-d "\n"> is specified. Many input generators are not
+B<xargs> deals badly with special characters (such as space, ' and
+"). To see the problem try this:
+
+touch important_file
+touch 'not important_file'
+ls not* | xargs rm
+
+You can specify B<-0> or B<-d "\n">, but many input generators are not
 optimized for using B<NUL> as separator but are optimized for
 B<newline> as separator. E.g B<head>, B<tail>, B<awk>, B<ls>, B<echo>,
 B<sed>, B<tar -v>, B<perl> (-0 and \0 instead of \n), B<locate>
@@ -395,12 +428,25 @@ Implement the missing --features
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/
 
-accept signal USR1 to complete current running jobs but do not start
-new jobs.
+Accept signal INT to complete current running jobs but do not start
+new jobs. Print out the number of jobs waiting to complete on
+STDERR. Accept sig INT again to kill now. This seems to be hard, as
+all foreground processes get the INT from the shell.
 
-distibute jobs to computers with different speeds/no_of_cpu using ssh
+Distibute jobs to computers with different speeds/no_of_cpu using ssh
 ask the computers how many cpus they have and spawn appropriately
-accoring to -j setting
+according to -j setting. 
+http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
+
+=head2 -S
+
+-S sshlogin[,sshlogin]
+
+sshlogin is [user@]host or filename with list of sshlogin
+
+What about copying data to/from remote host?
+
+
 
 Parallelize so this can be done:
 mdm.screen find dir -execdir mdm-run cmd {} \;
@@ -719,8 +765,8 @@ sub processes_available_by_system_limit {
 	    $max_system_proc_reached = 1;
 	}
 	debug("Time to fork ten procs ", time-$time, " process ", $system_limit);
-	if(time-$time > 1) {
-	    # It took more than 1 second to fork ten processes. We should stop forking.
+	if(time-$time > 2) {
+	    # It took more than 2 second to fork ten processes. We should stop forking.
 	    # Let us give the system a little slack
 	    debug("\nLimiting processes to: $system_limit-10%=".
 		  (int ($system_limit * 0.9)+1)."\n");
@@ -742,7 +788,7 @@ sub processes_available_by_system_limit {
 		      $system_limit, " jobs in parallel.\n");
     }
     if($system_limit < $wanted_processes and $spawning_too_slow) {
-	print STDERR ("Warning: Starting 10 extra processes takes > 1 sec.\n",
+	print STDERR ("Warning: Starting 10 extra processes takes > 2 sec.\n",
 		      "Limiting to ", $system_limit, " jobs in parallel.\n");
     }
     # Cleanup: Close the files
@@ -859,7 +905,8 @@ sub init_run_jobs {
     open $Global::original_stdout, ">&STDOUT" or die "Can't dup STDOUT: $!";
     open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
     $Global::running_jobs=0;
-    $SIG{USR1} = \&StartNoNewJobs;
+    $SIG{USR1} = \&ListRunningJobs;
+    $SIG{USR2} = \&StartNoNewJobs;
 }
 
 sub next_command_line {
@@ -1023,6 +1070,12 @@ sub print_job {
 #
 # Signal handling stuff
 #
+
+sub ListRunningJobs {
+    for my $v (values %Global::running) {
+	print STDERR "parallel: ",$v->{'command'},"\n";
+    }
+}
 
 sub StartNoNewJobs {
     $Global::StartNoNewJobs++;
