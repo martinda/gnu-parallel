@@ -88,7 +88,7 @@ characters are not interpreted by the shell. See the section
 QUOTING. Most people will never need this.  Quoting is disabled by
 default.
 
-=item B<-s>
+=item B<--silent>
 
 Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with B<-v>.
@@ -100,17 +100,17 @@ output from different commands to be mixed. Can be reversed with B<-g>.
 
 =item B<-v>
 
-Verbose.  Print the job to be run. Can be reversed with B<-s>.
+Verbose.  Print the job to be run on standard output. Can be reversed with B<-s>.
 
-=item B<-x>
+=item B<-m>
 
-xargs. Insert as many arguments as the command line length permits. If
+Multiple. Insert as many arguments as the command line length permits. If
 {} is not used the arguments will be appended to the line.  If {} is
 used multiple times each {} will be replaced with all the arguments.
 
 =item B<-X>
 
-xargs with context replace. This works like B<-x> except if {} is part
+xargs with context replace. This works like B<-m> except if {} is part
 of a word (like I<pic{}.jpg>) then the whole word will be repeated.
 
 =back
@@ -522,11 +522,11 @@ my ($processes,$command);
 
 # getopts("0cdfgI:j:kqsuvxX") || die_usage();
 Getopt::Long::Configure ("bundling","require_order");
-GetOptions("debug|d" => \$::opt_d,
-           "xargs|x" => \$::opt_x,
+GetOptions("debug|D" => \$::opt_D,
+           "xargs|m" => \$::opt_m,
            "X" => \$::opt_X,
-	   "verbose|v" => \$::opt_v,
-	   "silent|s" => \$::opt_s,
+	   "v" => \$::opt_v,
+	   "silent" => \$::opt_silent,
 	   "keeporder|k" => \$::opt_k,
 	   "group|g" => \$::opt_g,
 	   "ungroup|u" => \$::opt_u,
@@ -534,8 +534,27 @@ GetOptions("debug|d" => \$::opt_d,
 	   "file|f" => \$::opt_f,
 	   "null|0" => \$::opt_0,
 	   "quote|q" => \$::opt_q,
-	   "replace|I=s" => \$::opt_I,
-	   "jobs|j=s" => \$::opt_j) || die_usage();
+	   "I=s" => \$::opt_I,
+	   "jobs|j=s" => \$::opt_j,
+	   # xargs-compatability - implemented
+	   # xargs-compatability - unimplemented
+	   "arg-fil|a=s" => \$::opt_a,
+	   "delimiter|d=s" => \$::opt_d,
+	   "E=s" => \$::opt_E,
+	   "eof|e:s" => \$::opt_e,
+	   "help|h" => \$::opt_help,
+	   "replace|i:s" => \$::opt_i,
+	   "L=i" => \$::opt_L,
+	   "max-lines|l:i" => \$::opt_l,
+	   "max-args|n=i" => \$::opt_n,
+	   "interactive|p" => \$::opt_p,
+	   "no-run-if-empty|r" => \$::opt_r,
+	   "max-chars|s=i" => \$::opt_s,
+	   "version" => \$::opt_version,
+	   "verbose|t" => \$::opt_t,
+	   "show-limits" => \$::opt_show_limits,
+	   "exit|x" => \$::opt_x,
+	   "max-procs|P=s" => \$::opt_P) || die_usage();
 
 # Defaults:
 $Global::debug = 0;
@@ -549,11 +568,11 @@ $Global::replacestring = '{}';
 $Global::input_is_filename = (@ARGV);
 $/="\n";
 
-$Global::debug = (defined $::opt_d);
-if(defined $::opt_x) { $Global::xargs = 1; }
+$Global::debug = (defined $::opt_D);
+if(defined $::opt_m) { $Global::xargs = 1; }
 if(defined $::opt_X) { $Global::Xargs = 1; }
 if(defined $::opt_v) { $Global::verbose = 1; }
-if(defined $::opt_s) { $Global::verbose = 0; }
+if(defined $::opt_silent) { $Global::verbose = 0; }
 if(defined $::opt_k) { $Global::keeporder = 1; }
 if(defined $::opt_g) { $Global::grouped = 1; }
 if(defined $::opt_u) { $Global::grouped = 0; }
@@ -1244,6 +1263,10 @@ sub my_dump {
 # Keep perl -w happy
 $main::opt_u = $main::opt_c = $main::opt_f = $main::opt_q =
 $main::opt_0 = $main::opt_s = $main::opt_v = $main::opt_g =
-$main::opt_j = $main::opt_d = $main::opt_x = $main::opt_X =
-$main::opt_k =
+$main::opt_j = $main::opt_D = $main::opt_m = $main::opt_X =
+$main::opt_x =
+$main::opt_k = $main::opt_d = $main::opt_P = $main::opt_i =
+$main::opt_p = $main::opt_a = $main::opt_version = $main::opt_L =
+$main::opt_l = $main::opt_show_limits = $main::opt_n = $main::opt_e =
+$main::opt_t = $main::opt_E = $main::opt_r = $main::opt_help =
 $Global::xargs = $Global::keeporder = 0;

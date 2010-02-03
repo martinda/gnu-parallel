@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2010-01-29" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2010-02-03" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -199,8 +199,8 @@ Quote \fBcommand\fR.  This will quote the command line so special
 characters are not interpreted by the shell. See the section
 \&\s-1QUOTING\s0. Most people will never need this.  Quoting is disabled by
 default.
-.IP "\fB\-s\fR" 9
-.IX Item "-s"
+.IP "\fB\-\-silent\fR" 9
+.IX Item "--silent"
 Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with \fB\-v\fR.
 .IP "\fB\-u\fR" 9
@@ -209,15 +209,15 @@ Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with \fB\-g\fR.
 .IP "\fB\-v\fR" 9
 .IX Item "-v"
-Verbose.  Print the job to be run. Can be reversed with \fB\-s\fR.
-.IP "\fB\-x\fR" 9
-.IX Item "-x"
-xargs. Insert as many arguments as the command line length permits. If
+Verbose.  Print the job to be run on standard output. Can be reversed with \fB\-s\fR.
+.IP "\fB\-m\fR" 9
+.IX Item "-m"
+Multiple. Insert as many arguments as the command line length permits. If
 {} is not used the arguments will be appended to the line.  If {} is
 used multiple times each {} will be replaced with all the arguments.
 .IP "\fB\-X\fR" 9
 .IX Item "-X"
-xargs with context replace. This works like \fB\-x\fR except if {} is part
+xargs with context replace. This works like \fB\-m\fR except if {} is part
 of a word (like \fIpic{}.jpg\fR) then the whole word will be repeated.
 .SH "EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation"
 .IX Header "EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation"
@@ -413,7 +413,7 @@ easier just to write a small script and have \fBparallel\fR call that
 script.
 .SH "LIST RUNNING JOBS"
 .IX Header "LIST RUNNING JOBS"
-To list the jobs currently running you can run:
+If you want a list of the jobs currently running you can run:
 .PP
 \&\fBkillall \-USR1 parallel\fR
 .PP
@@ -422,9 +422,9 @@ To list the jobs currently running you can run:
 .IX Header "COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS"
 If you regret starting a lot of jobs you can simply break \fBparallel\fR,
 but if you want to make sure you do not have halfcompleted jobs you
-should send the signal \fB\-USR2\fR to \fBparallel\fR:
+should send the signal \fB\s-1SIGTERM\s0\fR to \fBparallel\fR:
 .PP
-\&\fBkillall \-USR2 parallel\fR
+\&\fBkillall \-TERM parallel\fR
 .PP
 This will tell \fBparallel\fR to not start any new jobs, but wait until
 the currently running jobs are finished.
@@ -443,6 +443,8 @@ hosts or URLs) will require creating these inputs as files. \fBfind
 touch important_file
 touch 'not important_file'
 ls not* | xargs rm
+mkdir \-p '12" records'
+ls | xargs rmdir
 .PP
 You can specify \fB\-0\fR or \fB\-d \*(L"\en\*(R"\fR, but many input generators are not
 optimized for using \fB\s-1NUL\s0\fR as separator but are optimized for
@@ -513,22 +515,32 @@ Implement the missing \-\-features
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/
 .PP
-Accept signal \s-1INT\s0 to complete current running jobs but do not start
-new jobs. Print out the number of jobs waiting to complete on
-\&\s-1STDERR\s0. Accept sig \s-1INT\s0 again to kill now. This seems to be hard, as
-all foreground processes get the \s-1INT\s0 from the shell.
+Accept signal \s-1INT\s0 instead of \s-1TERM\s0 to complete current running jobs but
+do not start new jobs. Print out the number of jobs waiting to
+complete on \s-1STDERR\s0. Accept sig \s-1INT\s0 again to kill now. This seems to be
+hard, as all foreground processes get the \s-1INT\s0 from the shell.
+.PP
+If there are nomore jobs (\s-1STDIN\s0 is closed) then make sure to
+distribute the arguments evenly if running \-X.
 .PP
 Distibute jobs to computers with different speeds/no_of_cpu using ssh
 ask the computers how many cpus they have and spawn appropriately
-according to \-j setting. 
+according to \-j setting. Reuse ssh connection (\-M and \-S)
 http://www.semicomplete.com/blog/geekery/distributed\-xargs.html?source=rss20
+http://code.google.com/p/ppss/wiki/Manual2
 .SS "\-S"
 .IX Subsection "-S"
 \&\-S sshlogin[,sshlogin]
 .PP
 sshlogin is [user@]host or filename with list of sshlogin
 .PP
-What about copying data to/from remote host?
+What about copying data to remote host? Have an option that says the
+argument is a file that should be copied.
+.PP
+What about copying data from remote host? Have an option that says
+the argument is a file that should be copied.
+.PP
+Where will '>' be run? Local or remote?
 .PP
 Parallelize so this can be done:
 mdm.screen find dir \-execdir mdm-run cmd {} \e;
@@ -553,7 +565,7 @@ Copyright (C) 2007\-2009 Free Software Foundation, Inc.
 This program is free software; you can redistribute it and/or modify
 it under the terms of the \s-1GNU\s0 General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+at your option any later version.
 .PP
 This program is distributed in the hope that it will be useful,
 but \s-1WITHOUT\s0 \s-1ANY\s0 \s-1WARRANTY\s0; without even the implied warranty of
@@ -568,4 +580,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Symbol, IO::File, \s-1POSIX\s0, and File::Temp.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fBfind\fR(1), \fBxargs\fR(1)
+\&\fBfind\fR(1), \fBxargs\fR(1), '
