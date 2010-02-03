@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2010-02-03" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2010-02-04" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -221,7 +221,8 @@ Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with \fB\-g\fR.
 .IP "\fB\-v\fR" 9
 .IX Item "-v"
-Verbose.  Print the job to be run on \s-1STDOUT\s0. Can be reversed with \fB\-s\fR.
+Verbose.  Print the job to be run on \s-1STDOUT\s0. Can be reversed with
+\&\fB\-\-silent\fR.
 .IP "\fB\-\-xargs\fR =item \fB\-m\fR" 9
 .IX Item "--xargs =item -m"
 Multiple. Insert as many arguments as the command line length permits. If
@@ -571,10 +572,10 @@ parallel \-\-wait /tmp/comfile will wait until no more locks on the file
 .IX Header "AUTHOR"
 Copyright (C) 2007\-10\-18 Ole Tange, http://ole.tange.dk
 .PP
-Copyright (C) 2008\-2009 Ole Tange, http://ole.tange.dk
+Copyright (C) 2008\-2010 Ole Tange, http://ole.tange.dk
 .SH "LICENSE"
 .IX Header "LICENSE"
-Copyright (C) 2007\-2009 Free Software Foundation, Inc.
+Copyright (C) 2007\-2010 Free Software Foundation, Inc.
 .PP
 This program is free software; you can redistribute it and/or modify
 it under the terms of the \s-1GNU\s0 General Public License as published by
@@ -590,7 +591,7 @@ You should have received a copy of the \s-1GNU\s0 General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 .SH "DEPENDENCIES"
 .IX Header "DEPENDENCIES"
-\&\fBparallel\fR uses Perl, and the Perl modules Getopt::Std, IPC::Open3,
+\&\fBparallel\fR uses Perl, and the Perl modules Getopt::Long, IPC::Open3,
 Symbol, IO::File, \s-1POSIX\s0, and File::Temp.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"

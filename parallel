@@ -133,7 +133,8 @@ output from different commands to be mixed. Can be reversed with B<-g>.
 
 =item B<-v>
 
-Verbose.  Print the job to be run on STDOUT. Can be reversed with B<-s>.
+Verbose.  Print the job to be run on STDOUT. Can be reversed with
+B<--silent>.
 
 =item B<--xargs>
 =item B<-m>
@@ -512,12 +513,12 @@ parallel --wait /tmp/comfile will wait until no more locks on the file
 
 Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
 
-Copyright (C) 2008-2009 Ole Tange, http://ole.tange.dk
+Copyright (C) 2008-2010 Ole Tange, http://ole.tange.dk
 
 
 =head1 LICENSE
 
-Copyright (C) 2007-2009 Free Software Foundation, Inc.
+Copyright (C) 2007-2010 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -535,7 +536,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 =head1 DEPENDENCIES
 
-B<parallel> uses Perl, and the Perl modules Getopt::Std, IPC::Open3,
+B<parallel> uses Perl, and the Perl modules Getopt::Long, IPC::Open3,
 Symbol, IO::File, POSIX, and File::Temp.
 
 
@@ -571,36 +572,35 @@ GetOptions("debug|D" => \$::opt_D,
 	   "quote|q" => \$::opt_q,
 	   "I=s" => \$::opt_I,
 	   "jobs|j=s" => \$::opt_P,
-	   # xargs-compatability - implemented - unittest missing
+	   # xargs-compatibility - implemented, man, unittest
 	   "max-procs|P=s" => \$::opt_P,
+	   "delimiter|d=s" => \$::opt_d,
+	   # xargs-compatibility - implemented, unittest - man missing
 	   "max-chars|s=i" => \$::opt_s,
 	   "arg-file|a=s" => \$::opt_a,
-	   "delimiter|d=s" => \$::opt_d,
 	   "no-run-if-empty|r" => \$::opt_r,
-	   ## echo "  " | parallel -r echo
-	   ## echo "  " | parallel echo
 	   "replace|i:s" => \$::opt_i,
 	   "E=s" => \$::opt_E,
 	   "eof|e:s" => \$::opt_E,
 	   "max-args|n=i" => \$::opt_n,
-	   ## (echo a b;echo c;echo d) | parallel -k -n1 -X echo
-	   ## (echo a b;echo c;echo d) | parallel -k -n2 -X echo
+	   "verbose|t" => \$::opt_t,
+	   "help|h" => \$::opt_h,
+	   "version" => \$::opt_version,
+	   ## xargs-compatibility - implemented - unittest missing - man missing
 	   "interactive|p" => \$::opt_p,
 	   ## How to unittest? tty skal emuleres
-	   "verbose|t" => \$::opt_t,
 
 	   # xargs-compatability - unimplemented
-	   "help|h" => \$::opt_help,
 	   "L=i" => \$::opt_L,
 	   "max-lines|l:i" => \$::opt_l,
-	   # (echo a b;echo c) | xargs -l1 echo
-	   # (echo a b' ';echo c) | xargs -l1 echo
-	   "version" => \$::opt_version,
+	   ## (echo a b;echo c) | xargs -l1 echo
+	   ## (echo a b' ';echo c) | xargs -l1 echo
 	   "show-limits" => \$::opt_show_limits,
 	   "exit|x" => \$::opt_x,
     ) || die_usage();
 
 # Defaults:
+$Global::version = 20100203;
 $Global::debug = 0;
 $Global::processes_to_run = 10;
 $command = undef;
@@ -627,7 +627,7 @@ if(defined $::opt_u) { $Global::grouped = 0; }
 if(defined $::opt_c) { $Global::input_is_filename = 0; }
 if(defined $::opt_f) { $Global::input_is_filename = 1; }
 if(defined $::opt_0) { $/ = "\0"; }
-if(defined $::opt_d) { $/ = $::opt_d; }
+if(defined $::opt_d) { my $e="sprintf \"$::opt_d\""; $/ = eval $e; }
 if(defined $::opt_p) { $Global::interactive = $::opt_p; }
 if(defined $::opt_q) { $Global::quoting = 1; }
 if(defined $::opt_r) { $Global::ignore_empty = 1; }
@@ -636,8 +636,10 @@ if(defined $::opt_I) { $Global::replacestring = $::opt_I; }
 if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
 if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
 if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
+if(defined $::opt_h) { die_usage(); }
+if(defined $::opt_version) { version(); exit(0); }
 
-if(defined $::opt_a) { 
+if(defined $::opt_a) {
     if(not open(ARGFILE,"<".$::opt_a)) {
 	print STDERR "parallel: Cannot open input file `$::opt_a': No such file or directory\n";
 	exit(-1);
@@ -677,18 +679,18 @@ sub generate_command_line {
     my ($length_of_command_no_args);
     if($Global::xargs or $Global::Xargs) {
 	# Count number of {}'s on the command line
-	$number_of_substitution = ($command =~ s/$Global::replacestring/$Global::replacestring/go);
+	$number_of_substitution = ($command =~ s/\Q$Global::replacestring\E/$Global::replacestring/go);
 	$number_of_substitution ||= 1;
     }
     if($Global::xargs) {
 	my $c = $command;
 	# remove all {}s
-	$c =~ s/$Global::replacestring//go;
+	$c =~ s/\Q$Global::replacestring\E//go;
 	$length_of_command_no_args = length($c);
     }
     if($Global::Xargs) {
 	my $c = $command;
-	while($c =~ s/(\S*$Global::replacestring\S*)//o) {
+	while($c =~ s/(\S*\Q$Global::replacestring\E\S*)//o) {
 	    # Length of context minus the {}
 	    $length_of_context += length($1) - 2;
 	}
@@ -713,7 +715,7 @@ sub generate_command_line {
 		if($quoted_args[0]) {
 		    last;
 		} else {
-		    die ("Command line too long at $next_arg");
+		    die ("Command line too long at: $next_arg");
 		}
 	    }
 	    if($Global::max_number_of_args and $number_of_args >= $Global::max_number_of_args) {
@@ -723,17 +725,17 @@ sub generate_command_line {
     }
     if(@quoted_args) {
 	$job_line = $command;
-	if(defined $job_line and $job_line =~/$Global::replacestring/o) {
+	if(defined $job_line and $job_line =~/\Q$Global::replacestring\E/o) {
 	    # substitute {} with args
 	    if($Global::Xargs) {
 		# Context sensitive replace (foo{}bar with fooargsbar)
-		while($job_line =~/$Global::replacestring/o) {
-		    $job_line =~ /(\S*$Global::replacestring\S*)/ or die ("This should never happen"); 
+		while($job_line =~/\Q$Global::replacestring\E/o) {
+		    $job_line =~ /(\S*\Q$Global::replacestring\E\S*)/ or die ("This should never happen"); 
 		    my $wordarg = $1;
 		    my @all_word_arg;
 		    for my $arg (@quoted_args) {
 			my $substituted = $wordarg;
-			$substituted=~s/$Global::replacestring/$arg/go;
+			$substituted=~s/\Q$Global::replacestring\E/$arg/go;
 			push @all_word_arg, $substituted;
 		    }
 		    my $all_word_arg = join(" ",@all_word_arg);
@@ -743,7 +745,7 @@ sub generate_command_line {
 	    } else {
 		# Normal replace {} with args
 		my $arg=join(" ",@quoted_args);
-		$job_line =~ s/$Global::replacestring/$arg/go;
+		$job_line =~ s/\Q$Global::replacestring\E/$arg/go;
 	    }
 	} else {
 	    # append args
@@ -948,11 +950,11 @@ sub user_requested_processes {
     my $opt_P = shift;
     if(defined $opt_P) {
 	if($opt_P =~ /^\+(\d+)$/) {
-	    # E.g. -j +2
+	    # E.g. -P +2
 	    my $j = $1;
 	    $processes = $j + no_of_cpus();
 	} elsif ($opt_P =~ /^-(\d+)$/) {
-	    # E.g. -j -2
+	    # E.g. -P -2
 	    my $j = $1;
 	    $processes = no_of_cpus() - $j;
 	} elsif ($opt_P =~ /^(\d+)\%$/) {
@@ -961,7 +963,7 @@ sub user_requested_processes {
 	} elsif ($opt_P =~ /^(\d+)$/) {
 	    $processes = $1;
 	    if($processes == 0) {
-		# -j 0 = infinity (or at least close)
+		# -P 0 = infinity (or at least close)
 		$processes = 2**31;
 	    }
 	} else {
@@ -1303,6 +1305,19 @@ sub usage {
     print "parallel [-0cdfgkqsuvxX] [-j num] [command [arguments]] < list_of_arguments\n";
 }
 
+sub version {
+    print join("\n",
+	       "parallel $Global::version",
+	       "Copyright (C) 2007-2010 Free Software Foundation, Inc.",
+	       "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
+	       "This is free software: you are free to change and redistribute it.",
+	       "There is NO WARRANTY, to the extent permitted by law.",
+	       "",
+	       "Written by Ole Tange <http://ole.tange.dk>.\n"
+	);
+}
+
+
 #
 # Debugging
 #
@@ -1371,5 +1386,4 @@ $main::opt_X = $main::opt_x = $main::opt_k = $main::opt_d =
 $main::opt_P = $main::opt_i = $main::opt_p = $main::opt_a =
 $main::opt_version = $main::opt_L = $main::opt_l =
 $main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_t =
-$main::opt_E = $main::opt_r = $main::opt_help = $Global::xargs =
-$Global::keeporder = 0;
+$main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
