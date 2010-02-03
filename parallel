@@ -6,7 +6,7 @@ parallel - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [-0cfgkqsuvxX] [-I str] [-j num] [command [arguments]] < list_of_arguments
+B<parallel> [-0cfgkquvmX] [-I str] [-j num] [--silent] [command [arguments]] < list_of_arguments
 
 =head1 DESCRIPTION
 
@@ -28,24 +28,42 @@ command also invokes B<-f>.
 If B<command> is given, B<parallel> will behave similar to B<xargs>. If
 B<command> is not given B<parallel> will behave similar to B<cat | sh>.
 
+=item B<--null>
 =item B<-0>
 
 Use NUL as delimiter.  Normally input lines will end in \n
 (newline). If they end in \0 (NUL), then use this option. It is useful
 for processing filenames that may contain \n (newline).
 
+=item B<--command>
 =item B<-c>
 
 Line is a command.  The input line contains more than one argument or
 the input line needs to be evaluated by the shell. This is the default
 if B<command> is not set. Can be reversed with B<-f>.
 
+=item B<--delimiter> I<delim>
+=item B<-d> I<delim>
+
+Input items are terminated by the specified character.  Quotes and
+backslash are not special; every character in the input is taken
+literally.  Disables the end-of-file string, which is treated like any
+other argument.  This can be used when the input consists of simply
+newline-separated items, although it is almost always better to design
+your program to use --null where this is possible.  The specified
+delimiter may be a single character, a C-style character escape such
+as \n, or an octal or hexadecimal escape code.  Octal and
+hexadecimal escape codes are understood as for the printf command.
+Multibyte characters are not supported.
+
+=item B<--file>
 =item B<-f>
 
 Line is a filename.  The input line contains a filename that will be
 quoted so it is not evaluated by the shell. This is the default if
 B<command> is set. Can be reversed with B<-c>.
 
+=item B<--group>
 =item B<-g>
 
 Group output.  Output from each jobs is grouped together and is only
@@ -56,31 +74,45 @@ B<-g> is the default. Can be reversed with B<-u>.
 
 Use the replacement string I<string> instead of {}.
 
+=item B<--jobs> I<N>
 =item B<-j> I<N>
+=item B<--max-procs> I<N>
+=item B<-P> I<N>
 
-Run N jobs in parallel.  0 means as many as possible. Default is 10.
+Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
 
+=item B<--jobs> I<+N>
 =item B<-j> I<+N>
+=item B<--max-procs> I<+N>
+=item B<-P> I<+N>
 
 Add N to the number of CPUs.  Run this many jobs in parallel. For
 compute intensive jobs I<-j +0> is useful as it will run
 number-of-cpus jobs in parallel.
 
+=item B<--jobs> I<-N>
 =item B<-j> I<-N>
+=item B<--max-procs> I<-N>
+=item B<-P> I<-N>
 
 Subtract N from the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
 
+=item B<--jobs> I<N>%
 =item B<-j> I<N>%
+=item B<--max-procs> I<N>%
+=item B<-P> I<N>%
 
 Multiply N% with the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
 
+=item B<--keeporder>
 =item B<-k>
 
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 
+=item B<--quote>
 =item B<-q>
 
 Quote B<command>.  This will quote the command line so special
@@ -93,6 +125,7 @@ default.
 Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with B<-v>.
 
+=item B<--ungroup>
 =item B<-u>
 
 Ungroup output.  Output is printed as soon as possible. This may cause
@@ -100,8 +133,9 @@ output from different commands to be mixed. Can be reversed with B<-g>.
 
 =item B<-v>
 
-Verbose.  Print the job to be run on standard output. Can be reversed with B<-s>.
+Verbose.  Print the job to be run on STDOUT. Can be reversed with B<-s>.
 
+=item B<--xargs>
 =item B<-m>
 
 Multiple. Insert as many arguments as the command line length permits. If
@@ -424,6 +458,8 @@ Report bugs to <bug-parallel@tange.dk>.
 
 =head1 IDEAS
 
+Test if -0 works on filenames ending in '\n'
+
 xargs dropin-replacement.
 Implement the missing --features
 
@@ -520,7 +556,6 @@ use strict;
 
 my ($processes,$command);
 
-# getopts("0cdfgI:j:kqsuvxX") || die_usage();
 Getopt::Long::Configure ("bundling","require_order");
 GetOptions("debug|D" => \$::opt_D,
            "xargs|m" => \$::opt_m,
@@ -535,26 +570,35 @@ GetOptions("debug|D" => \$::opt_D,
 	   "null|0" => \$::opt_0,
 	   "quote|q" => \$::opt_q,
 	   "I=s" => \$::opt_I,
-	   "jobs|j=s" => \$::opt_j,
-	   # xargs-compatability - implemented
-	   # xargs-compatability - unimplemented
-	   "arg-fil|a=s" => \$::opt_a,
+	   "jobs|j=s" => \$::opt_P,
+	   # xargs-compatability - implemented - unittest missing
+	   "max-procs|P=s" => \$::opt_P,
+	   "max-chars|s=i" => \$::opt_s,
+	   "arg-file|a=s" => \$::opt_a,
 	   "delimiter|d=s" => \$::opt_d,
-	   "E=s" => \$::opt_E,
-	   "eof|e:s" => \$::opt_e,
-	   "help|h" => \$::opt_help,
+	   "no-run-if-empty|r" => \$::opt_r,
+	   ## echo "  " | parallel -r echo
+	   ## echo "  " | parallel echo
 	   "replace|i:s" => \$::opt_i,
+	   "E=s" => \$::opt_E,
+	   "eof|e:s" => \$::opt_E,
+	   "max-args|n=i" => \$::opt_n,
+	   ## (echo a b;echo c;echo d) | parallel -k -n1 -X echo
+	   ## (echo a b;echo c;echo d) | parallel -k -n2 -X echo
+	   "interactive|p" => \$::opt_p,
+	   ## How to unittest? tty skal emuleres
+	   "verbose|t" => \$::opt_t,
+
+	   # xargs-compatability - unimplemented
+	   "help|h" => \$::opt_help,
 	   "L=i" => \$::opt_L,
 	   "max-lines|l:i" => \$::opt_l,
-	   "max-args|n=i" => \$::opt_n,
-	   "interactive|p" => \$::opt_p,
-	   "no-run-if-empty|r" => \$::opt_r,
-	   "max-chars|s=i" => \$::opt_s,
+	   # (echo a b;echo c) | xargs -l1 echo
+	   # (echo a b' ';echo c) | xargs -l1 echo
 	   "version" => \$::opt_version,
-	   "verbose|t" => \$::opt_t,
 	   "show-limits" => \$::opt_show_limits,
 	   "exit|x" => \$::opt_x,
-	   "max-procs|P=s" => \$::opt_P) || die_usage();
+    ) || die_usage();
 
 # Defaults:
 $Global::debug = 0;
@@ -567,6 +611,10 @@ $Global::quoting = 0;
 $Global::replacestring = '{}';
 $Global::input_is_filename = (@ARGV);
 $/="\n";
+$Global::ignore_empty = 0;
+$Global::argfile = *STDIN;
+$Global::interactive = 0;
+$Global::stderr_verbose = 0;
 
 $Global::debug = (defined $::opt_D);
 if(defined $::opt_m) { $Global::xargs = 1; }
@@ -579,8 +627,23 @@ if(defined $::opt_u) { $Global::grouped = 0; }
 if(defined $::opt_c) { $Global::input_is_filename = 0; }
 if(defined $::opt_f) { $Global::input_is_filename = 1; }
 if(defined $::opt_0) { $/ = "\0"; }
+if(defined $::opt_d) { $/ = $::opt_d; }
+if(defined $::opt_p) { $Global::interactive = $::opt_p; }
 if(defined $::opt_q) { $Global::quoting = 1; }
+if(defined $::opt_r) { $Global::ignore_empty = 1; }
+if(defined $::opt_t) { $Global::stderr_verbose = 1; }
 if(defined $::opt_I) { $Global::replacestring = $::opt_I; }
+if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
+if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
+if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
+
+if(defined $::opt_a) { 
+    if(not open(ARGFILE,"<".$::opt_a)) {
+	print STDERR "parallel: Cannot open input file `$::opt_a': No such file or directory\n";
+	exit(-1);
+    }
+    $Global::argfile = *ARGFILE;
+}
 
 if(@ARGV) { 
     if($Global::quoting) {
@@ -590,8 +653,8 @@ if(@ARGV) {
     }
 }
 # Needs to be done after setting $Global::command and $Global::command_line_max_len
-# as '-x' influences the number of commands that needs to be run
-if(defined $::opt_j) { $Global::processes_to_run = compute_number_of_processes($::opt_j); }
+# as '-m' influences the number of commands that needs to be run
+if(defined $::opt_P) { $Global::processes_to_run = compute_number_of_processes($::opt_P); }
 
 $Global::job_end_sequence=1;
 
@@ -632,8 +695,10 @@ sub generate_command_line {
 	$length_of_command_no_args = length($c);
     }
 
+    my $number_of_args = 0;
     while (defined($next_arg = get_next_arg())) {
 	push (@quoted_args, $next_arg);
+	$number_of_args++;
 	if(not $Global::xargs and not $Global::Xargs) {
 	    last;
 	} else {
@@ -650,6 +715,9 @@ sub generate_command_line {
 		} else {
 		    die ("Command line too long at $next_arg");
 		}
+	    }
+	    if($Global::max_number_of_args and $number_of_args >= $Global::max_number_of_args) {
+		last;
 	    }
 	}
     }
@@ -708,18 +776,24 @@ sub shell_quote {
 # Number of processes, filehandles, max length of command line
 #
 
-# Maximal command line length (for -x)
-
+# Maximal command line length (for -m and -X)
 sub max_length_of_command_line {
     # Find the max_length of a command line
     # First find an upper bound
     if(not $Global::command_line_max_len) {
-	my $len = 2;
+	my $len = 10;
 	do {
-	    $len += $len+1;
+	    $len *= 10;
 	} while (is_acceptable_command_line_length($len));
 	# Then search for the actual max length between 0 and upper bound
-	$Global::command_line_max_len = binary_find_max_length(0,$len);
+	$Global::command_line_max_len = binary_find_max_length(int(($len)/10),$len);
+	if($::opt_s) {
+	    if($::opt_s <= $Global::command_line_max_len) {
+		$Global::command_line_max_len = $::opt_s;
+	    } else {
+		print STDERR "parallel: value for -s option should be < $Global::command_line_max_len\n";
+	    }
+	}
     }
     return $Global::command_line_max_len;
 }
@@ -739,12 +813,13 @@ sub binary_find_max_length {
 
 sub is_acceptable_command_line_length {
     # Test if a command line of this length can run
-    # This is done using external perl script to avoid warning
-    # (Can this be done prettier?)
     my $len = shift;
-    my $testscript = q{'system ("true "."x"x$ARGV[0]); exit $?;'};
-    debug("perl -e $testscript $len\n");
-    system "perl -e $testscript $len";
+    $Global::is_acceptable_command_line_length++;
+    debug("$Global::is_acceptable_command_line_length $len\n");
+    local *STDERR;
+    open (STDERR,">/dev/null");
+    system "true "."x"x$len;
+    close STDERR;
     return not $?;
 }
 
@@ -752,8 +827,8 @@ sub is_acceptable_command_line_length {
 
 sub compute_number_of_processes {
     # Number of processes wanted and limited by system ressources
-    my $opt_j = shift;
-    my $wanted_processes = user_requested_processes($opt_j);
+    my $opt_P = shift;
+    my $wanted_processes = user_requested_processes($opt_P);
     debug("Wanted procs: $wanted_processes\n");
     my $system_limit = processes_available_by_system_limit($wanted_processes);
     debug("Limited to procs: $system_limit\n");
@@ -870,20 +945,20 @@ sub enough_file_handles {
 
 sub user_requested_processes {
     # Parse the number of processes that the user asked for
-    my $opt_j = shift;
-    if(defined $opt_j) {
-	if($opt_j =~ /^\+(\d+)$/) {
+    my $opt_P = shift;
+    if(defined $opt_P) {
+	if($opt_P =~ /^\+(\d+)$/) {
 	    # E.g. -j +2
 	    my $j = $1;
 	    $processes = $j + no_of_cpus();
-	} elsif ($opt_j =~ /^-(\d+)$/) {
+	} elsif ($opt_P =~ /^-(\d+)$/) {
 	    # E.g. -j -2
 	    my $j = $1;
 	    $processes = no_of_cpus() - $j;
-	} elsif ($opt_j =~ /^(\d+)\%$/) {
+	} elsif ($opt_P =~ /^(\d+)\%$/) {
 	    my $j = $1;
 	    $processes = no_of_cpus() * $j / 100;
-	} elsif ($opt_j =~ /^(\d+)$/) {
+	} elsif ($opt_P =~ /^(\d+)$/) {
 	    $processes = $1;
 	    if($processes == 0) {
 		# -j 0 = infinity (or at least close)
@@ -977,11 +1052,21 @@ sub get_next_arg {
     if(@Global::unget_arg) {
 	$arg = shift @Global::unget_arg;
     } else {
-	if(eof STDIN) {
+	if(eof $Global::argfile) {
 	    return undef;
 	}
-	$arg = <STDIN>;
+	$arg = <$Global::argfile>;
 	chomp $arg;
+	if($Global::end_of_file_string and $arg eq $Global::end_of_file_string) {
+	    # Ignore the rest of STDIN
+	    while (<$Global::argfile>) {}
+	    return undef;
+	}
+	if($Global::ignore_empty) {
+	    if($arg =~ /^\s*$/) {
+		return get_next_arg();
+	    }
+	}
 	if($Global::input_is_filename) {
 	    ($arg) = shell_quote($arg);
 	}
@@ -1022,7 +1107,9 @@ sub start_another_job {
 	my $command = next_command_line();
 	if(defined $command) {
 	    my %jobinfo = start_job($command);
-	    $Global::running{$jobinfo{"pid"}} = \%jobinfo;
+	    if(%jobinfo) {
+		$Global::running{$jobinfo{"pid"}} = \%jobinfo;
+	    }
 	    return 1;
 	} else {
 	    return 0;
@@ -1051,6 +1138,22 @@ sub start_job {
 	open STDERR, '>&', $err{$errname} or die "Can't dup STDOUT: $!";
     }
 
+    if($Global::interactive or $Global::stderr_verbose) {
+	if($Global::interactive) {
+	    print $Global::original_stderr "$command ?...";
+	    open(TTY,"/dev/tty") || die;
+	    my $answer = <TTY>;
+	    close TTY;
+	    my $run_yes = ($answer =~ /^\s*y/i);
+	    if (not $run_yes) {
+		open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$oldout: $!";
+		open STDERR, ">&", $Global::original_stderr or die "Can't dup \$oldout: $!";
+		return;
+	    }
+	} else {
+	    print $Global::original_stderr "$command\n";
+	}
+    }
     if($Global::verbose and not $Global::grouped) {
 	print STDOUT $command,"\n";
     }
@@ -1261,12 +1364,12 @@ sub my_dump {
 }
 
 # Keep perl -w happy
-$main::opt_u = $main::opt_c = $main::opt_f = $main::opt_q =
-$main::opt_0 = $main::opt_s = $main::opt_v = $main::opt_g =
-$main::opt_j = $main::opt_D = $main::opt_m = $main::opt_X =
-$main::opt_x =
-$main::opt_k = $main::opt_d = $main::opt_P = $main::opt_i =
-$main::opt_p = $main::opt_a = $main::opt_version = $main::opt_L =
-$main::opt_l = $main::opt_show_limits = $main::opt_n = $main::opt_e =
-$main::opt_t = $main::opt_E = $main::opt_r = $main::opt_help =
-$Global::xargs = $Global::keeporder = 0;
+$main::opt_u = $main::opt_e = $main::opt_c = $main::opt_f =
+$main::opt_q = $main::opt_0 = $main::opt_s = $main::opt_v =
+$main::opt_g = $main::opt_P = $main::opt_D = $main::opt_m =
+$main::opt_X = $main::opt_x = $main::opt_k = $main::opt_d =
+$main::opt_P = $main::opt_i = $main::opt_p = $main::opt_a =
+$main::opt_version = $main::opt_L = $main::opt_l =
+$main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_t =
+$main::opt_E = $main::opt_r = $main::opt_help = $Global::xargs =
+$Global::keeporder = 0;

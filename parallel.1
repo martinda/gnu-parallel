@@ -133,7 +133,7 @@
 parallel \- build and execute shell command lines from standard input in parallel
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBparallel\fR [\-0cfgkqsuvxX] [\-I str] [\-j num] [command [arguments]] < list_of_arguments
+\&\fBparallel\fR [\-0cfgkquvmX] [\-I str] [\-j num] [\-\-silent] [command [arguments]] < list_of_arguments
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 For each line of input \fBparallel\fR will execute \fBcommand\fR with the
@@ -150,51 +150,63 @@ command also invokes \fB\-f\fR.
 .Sp
 If \fBcommand\fR is given, \fBparallel\fR will behave similar to \fBxargs\fR. If
 \&\fBcommand\fR is not given \fBparallel\fR will behave similar to \fBcat | sh\fR.
-.IP "\fB\-0\fR" 9
-.IX Item "-0"
+.IP "\fB\-\-null\fR =item \fB\-0\fR" 9
+.IX Item "--null =item -0"
 Use \s-1NUL\s0 as delimiter.  Normally input lines will end in \en
 (newline). If they end in \e0 (\s-1NUL\s0), then use this option. It is useful
 for processing filenames that may contain \en (newline).
-.IP "\fB\-c\fR" 9
-.IX Item "-c"
+.IP "\fB\-\-command\fR =item \fB\-c\fR" 9
+.IX Item "--command =item -c"
 Line is a command.  The input line contains more than one argument or
 the input line needs to be evaluated by the shell. This is the default
 if \fBcommand\fR is not set. Can be reversed with \fB\-f\fR.
-.IP "\fB\-f\fR" 9
-.IX Item "-f"
+.IP "\fB\-\-delimiter\fR \fIdelim\fR =item \fB\-d\fR \fIdelim\fR" 9
+.IX Item "--delimiter delim =item -d delim"
+Input items are terminated by the specified character.  Quotes and
+backslash are not special; every character in the input is taken
+literally.  Disables the end-of-file string, which is treated like any
+other argument.  This can be used when the input consists of simply
+newline-separated items, although it is almost always better to design
+your program to use \-\-null where this is possible.  The specified
+delimiter may be a single character, a C\-style character escape such
+as \en, or an octal or hexadecimal escape code.  Octal and
+hexadecimal escape codes are understood as for the printf command.
+Multibyte characters are not supported.
+.IP "\fB\-\-file\fR =item \fB\-f\fR" 9
+.IX Item "--file =item -f"
 Line is a filename.  The input line contains a filename that will be
 quoted so it is not evaluated by the shell. This is the default if
 \&\fBcommand\fR is set. Can be reversed with \fB\-c\fR.
-.IP "\fB\-g\fR" 9
-.IX Item "-g"
+.IP "\fB\-\-group\fR =item \fB\-g\fR" 9
+.IX Item "--group =item -g"
 Group output.  Output from each jobs is grouped together and is only
 printed when the command is finished. \s-1STDERR\s0 first followed by \s-1STDOUT\s0.
 \&\fB\-g\fR is the default. Can be reversed with \fB\-u\fR.
 .IP "\fB\-I\fR \fIstring\fR" 9
 .IX Item "-I string"
 Use the replacement string \fIstring\fR instead of {}.
-.IP "\fB\-j\fR \fIN\fR" 9
-.IX Item "-j N"
-Run N jobs in parallel.  0 means as many as possible. Default is 10.
-.IP "\fB\-j\fR \fI+N\fR" 9
-.IX Item "-j +N"
+.IP "\fB\-\-jobs\fR \fIN\fR =item \fB\-j\fR \fIN\fR =item \fB\-\-max\-procs\fR \fIN\fR =item \fB\-P\fR \fIN\fR" 9
+.IX Item "--jobs N =item -j N =item --max-procs N =item -P N"
+Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
+.IP "\fB\-\-jobs\fR \fI+N\fR =item \fB\-j\fR \fI+N\fR =item \fB\-\-max\-procs\fR \fI+N\fR =item \fB\-P\fR \fI+N\fR" 9
+.IX Item "--jobs +N =item -j +N =item --max-procs +N =item -P +N"
 Add N to the number of CPUs.  Run this many jobs in parallel. For
 compute intensive jobs \fI\-j +0\fR is useful as it will run
 number-of-cpus jobs in parallel.
-.IP "\fB\-j\fR \fI\-N\fR" 9
-.IX Item "-j -N"
+.IP "\fB\-\-jobs\fR \fI\-N\fR =item \fB\-j\fR \fI\-N\fR =item \fB\-\-max\-procs\fR \fI\-N\fR =item \fB\-P\fR \fI\-N\fR" 9
+.IX Item "--jobs -N =item -j -N =item --max-procs -N =item -P -N"
 Subtract N from the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
-.IP "\fB\-j\fR \fIN\fR%" 9
-.IX Item "-j N%"
+.IP "\fB\-\-jobs\fR \fIN\fR% =item \fB\-j\fR \fIN\fR% =item \fB\-\-max\-procs\fR \fIN\fR% =item \fB\-P\fR \fIN\fR%" 9
+.IX Item "--jobs N% =item -j N% =item --max-procs N% =item -P N%"
 Multiply N% with the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
-.IP "\fB\-k\fR" 9
-.IX Item "-k"
+.IP "\fB\-\-keeporder\fR =item \fB\-k\fR" 9
+.IX Item "--keeporder =item -k"
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
-.IP "\fB\-q\fR" 9
-.IX Item "-q"
+.IP "\fB\-\-quote\fR =item \fB\-q\fR" 9
+.IX Item "--quote =item -q"
 Quote \fBcommand\fR.  This will quote the command line so special
 characters are not interpreted by the shell. See the section
 \&\s-1QUOTING\s0. Most people will never need this.  Quoting is disabled by
@@ -203,15 +215,15 @@ default.
 .IX Item "--silent"
 Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with \fB\-v\fR.
-.IP "\fB\-u\fR" 9
-.IX Item "-u"
+.IP "\fB\-\-ungroup\fR =item \fB\-u\fR" 9
+.IX Item "--ungroup =item -u"
 Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with \fB\-g\fR.
 .IP "\fB\-v\fR" 9
 .IX Item "-v"
-Verbose.  Print the job to be run on standard output. Can be reversed with \fB\-s\fR.
-.IP "\fB\-m\fR" 9
-.IX Item "-m"
+Verbose.  Print the job to be run on \s-1STDOUT\s0. Can be reversed with \fB\-s\fR.
+.IP "\fB\-\-xargs\fR =item \fB\-m\fR" 9
+.IX Item "--xargs =item -m"
 Multiple. Insert as many arguments as the command line length permits. If
 {} is not used the arguments will be appended to the line.  If {} is
 used multiple times each {} will be replaced with all the arguments.
@@ -509,6 +521,8 @@ unexpected results, as it will often be interpreted as an option.
 Report bugs to <bug\-parallel@tange.dk>.
 .SH "IDEAS"
 .IX Header "IDEAS"
+Test if \-0 works on filenames ending in '\en'
+.PP
 xargs dropin-replacement.
 Implement the missing \-\-features
 .PP
