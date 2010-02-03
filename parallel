@@ -318,7 +318,7 @@ script.
 
 =head1 LIST RUNNING JOBS
 
-To list the jobs currently running you can run:
+If you want a list of the jobs currently running you can run:
 
 B<killall -USR1 parallel>
 
@@ -329,9 +329,9 @@ B<parallel> will then print the currently running jobs on STDERR.
 
 If you regret starting a lot of jobs you can simply break B<parallel>,
 but if you want to make sure you do not have halfcompleted jobs you
-should send the signal B<-USR2> to B<parallel>:
+should send the signal B<SIGTERM> to B<parallel>:
 
-B<killall -USR2 parallel>
+B<killall -TERM parallel>
 
 This will tell B<parallel> to not start any new jobs, but wait until
 the currently running jobs are finished.
@@ -352,6 +352,8 @@ B<xargs> deals badly with special characters (such as space, ' and
 touch important_file
 touch 'not important_file'
 ls not* | xargs rm
+mkdir -p '12" records'
+ls | xargs rmdir 
 
 You can specify B<-0> or B<-d "\n">, but many input generators are not
 optimized for using B<NUL> as separator but are optimized for
@@ -428,15 +430,19 @@ Implement the missing --features
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/
 
-Accept signal INT to complete current running jobs but do not start
-new jobs. Print out the number of jobs waiting to complete on
-STDERR. Accept sig INT again to kill now. This seems to be hard, as
-all foreground processes get the INT from the shell.
+Accept signal INT instead of TERM to complete current running jobs but
+do not start new jobs. Print out the number of jobs waiting to
+complete on STDERR. Accept sig INT again to kill now. This seems to be
+hard, as all foreground processes get the INT from the shell.
+
+If there are nomore jobs (STDIN is closed) then make sure to
+distribute the arguments evenly if running -X.
 
 Distibute jobs to computers with different speeds/no_of_cpu using ssh
 ask the computers how many cpus they have and spawn appropriately
-according to -j setting. 
+according to -j setting. Reuse ssh connection (-M and -S)
 http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
+http://code.google.com/p/ppss/wiki/Manual2
 
 =head2 -S
 
@@ -444,8 +450,13 @@ http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
 
 sshlogin is [user@]host or filename with list of sshlogin
 
-What about copying data to/from remote host?
+What about copying data to remote host? Have an option that says the
+argument is a file that should be copied.
 
+What about copying data from remote host? Have an option that says
+the argument is a file that should be copied.
+
+Where will '>' be run? Local or remote?
 
 
 Parallelize so this can be done:
@@ -475,7 +486,7 @@ Copyright (C) 2007-2009 Free Software Foundation, Inc.
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
+at your option any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -494,7 +505,7 @@ Symbol, IO::File, POSIX, and File::Temp.
 
 =head1 SEE ALSO
 
-B<find>(1), B<xargs>(1)
+B<find>(1), B<xargs>(1), '
 
 =cut
 
@@ -504,11 +515,27 @@ use Symbol qw(gensym);
 use IO::File;
 use POSIX ":sys_wait_h";
 use File::Temp qw/ tempfile tempdir /;
-use Getopt::Std;
+use Getopt::Long;
 use strict;
 
 my ($processes,$command);
-getopts("0cdfgI:j:kqsuvxX") || die_usage();
+
+# getopts("0cdfgI:j:kqsuvxX") || die_usage();
+Getopt::Long::Configure ("bundling","require_order");
+GetOptions("debug|d" => \$::opt_d,
+           "xargs|x" => \$::opt_x,
+           "X" => \$::opt_X,
+	   "verbose|v" => \$::opt_v,
+	   "silent|s" => \$::opt_s,
+	   "keeporder|k" => \$::opt_k,
+	   "group|g" => \$::opt_g,
+	   "ungroup|u" => \$::opt_u,
+	   "command|c" => \$::opt_c,
+	   "file|f" => \$::opt_f,
+	   "null|0" => \$::opt_0,
+	   "quote|q" => \$::opt_q,
+	   "replace|I=s" => \$::opt_I,
+	   "jobs|j=s" => \$::opt_j) || die_usage();
 
 # Defaults:
 $Global::debug = 0;
@@ -906,7 +933,8 @@ sub init_run_jobs {
     open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
     $Global::running_jobs=0;
     $SIG{USR1} = \&ListRunningJobs;
-    $SIG{USR2} = \&StartNoNewJobs;
+    $Global::original_sigterm = $SIG{TERM};
+    $SIG{TERM} = \&StartNoNewJobs;
 }
 
 sub next_command_line {
@@ -1078,7 +1106,12 @@ sub ListRunningJobs {
 }
 
 sub StartNoNewJobs {
+    print STDERR ("parallel: SIGTERM received. No new jobs will be started.\n",
+		  "parallel: Waiting for these ", scalar(keys %Global::running), 
+		  " jobs to finish. Send SIGTERM again to stop now.\n");
+    ListRunningJobs();
     $Global::StartNoNewJobs++;
+    $SIG{TERM} = $Global::original_sigterm;
 }
 
 sub CountSigChild {
