@@ -12,8 +12,10 @@ parallel --arg-file /tmp/$$ echo
 (echo a; echo END; echo b) | parallel -k -i -eEND echo repl{}ce
 (echo a; echo END; echo b) | parallel -k --replace -eEND echo repl{}ce
 (echo a; echo END; echo b) | parallel -k -i+ -eEND echo repl+ce
+(echo e; echo END; echo b) | parallel -k -i'*' -eEND echo r'*'plac'*'
 (echo a; echo END; echo b) | parallel -k --replace + -eEND echo repl+ce
 (echo a; echo END; echo b) | parallel -k --replace== -eEND echo repl=ce
+(echo a; echo END; echo b) | parallel -k --replace = -eEND echo repl=ce
 (echo a; echo END; echo b) | parallel -k --replace=^ -eEND echo repl^ce
 (echo a; echo END; echo b) | parallel -k -I^ -eEND echo repl^ce
 

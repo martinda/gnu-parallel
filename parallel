@@ -6,7 +6,7 @@ parallel - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [-0cfgkquvmX] [-I str] [-j num] [--silent] [command [arguments]] < list_of_arguments
+B<parallel> [-0cfgkquvmX] [-I str] [-j num] [--silent] [command [arguments]] [< list_of_arguments]
 
 =head1 DESCRIPTION
 
@@ -28,21 +28,27 @@ command also invokes B<-f>.
 If B<command> is given, B<parallel> will behave similar to B<xargs>. If
 B<command> is not given B<parallel> will behave similar to B<cat | sh>.
 
+
 =item B<--null>
+
 =item B<-0>
 
 Use NUL as delimiter.  Normally input lines will end in \n
 (newline). If they end in \0 (NUL), then use this option. It is useful
 for processing filenames that may contain \n (newline).
 
+
 =item B<--command>
+
 =item B<-c>
 
 Line is a command.  The input line contains more than one argument or
 the input line needs to be evaluated by the shell. This is the default
 if B<command> is not set. Can be reversed with B<-f>.
 
+
 =item B<--delimiter> I<delim>
+
 =item B<-d> I<delim>
 
 Input items are terminated by the specified character.  Quotes and
@@ -56,14 +62,18 @@ as \n, or an octal or hexadecimal escape code.  Octal and
 hexadecimal escape codes are understood as for the printf command.
 Multibyte characters are not supported.
 
+
 =item B<--file>
+
 =item B<-f>
 
 Line is a filename.  The input line contains a filename that will be
 quoted so it is not evaluated by the shell. This is the default if
 B<command> is set. Can be reversed with B<-c>.
 
+
 =item B<--group>
+
 =item B<-g>
 
 Group output.  Output from each jobs is grouped together and is only
@@ -74,45 +84,65 @@ B<-g> is the default. Can be reversed with B<-u>.
 
 Use the replacement string I<string> instead of {}.
 
+
 =item B<--jobs> I<N>
+
 =item B<-j> I<N>
+
 =item B<--max-procs> I<N>
+
 =item B<-P> I<N>
 
 Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
 
+
 =item B<--jobs> I<+N>
+
 =item B<-j> I<+N>
+
 =item B<--max-procs> I<+N>
+
 =item B<-P> I<+N>
 
 Add N to the number of CPUs.  Run this many jobs in parallel. For
 compute intensive jobs I<-j +0> is useful as it will run
 number-of-cpus jobs in parallel.
 
+
 =item B<--jobs> I<-N>
+
 =item B<-j> I<-N>
+
 =item B<--max-procs> I<-N>
+
 =item B<-P> I<-N>
 
 Subtract N from the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
 
+
 =item B<--jobs> I<N>%
+
 =item B<-j> I<N>%
+
 =item B<--max-procs> I<N>%
+
 =item B<-P> I<N>%
 
 Multiply N% with the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
 
+
 =item B<--keeporder>
+
 =item B<-k>
 
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 
+
 =item B<--quote>
+
 =item B<-q>
 
 Quote B<command>.  This will quote the command line so special
@@ -120,28 +150,35 @@ characters are not interpreted by the shell. See the section
 QUOTING. Most people will never need this.  Quoting is disabled by
 default.
 
+
 =item B<--silent>
 
 Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with B<-v>.
 
+
 =item B<--ungroup>
+
 =item B<-u>
 
 Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with B<-g>.
+
 
 =item B<-v>
 
 Verbose.  Print the job to be run on STDOUT. Can be reversed with
 B<--silent>.
 
+
 =item B<--xargs>
+
 =item B<-m>
 
 Multiple. Insert as many arguments as the command line length permits. If
 {} is not used the arguments will be appended to the line.  If {} is
 used multiple times each {} will be replaced with all the arguments.
+
 
 =item B<-X>
 
@@ -254,7 +291,7 @@ B<seq -f %04g 0 9999 | parallel rm pict{}.jpg>
 
 You could also do:
 
-B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -x rm>
+B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -m rm>
 
 The first will run B<rm> 10000 times, while the last will only run
 B<rm> as many times needed to keep the command line length short
@@ -277,11 +314,11 @@ B<-u>.
 
 Compare the output of:
 
-B<(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel traceroute>
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
 
 to the output of:
 
-B<(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel -u traceroute>
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -u traceroute>
 
 
 =head1 EXAMPLE 8: Keep order of output same as order of input
@@ -292,15 +329,15 @@ same as the order of the input. B<-k> will make sure the order of
 output will be in the same order as input even if later jobs end
 before earlier jobs.
 
-B<(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel traceroute>
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
 
-will give traceroute of foss.org.my, www.debian.org and
-www.freenetproject.org, but it will be sorted according to which job
+will give traceroute of foss.org.my, debian.org and
+freenetproject.org, but it will be sorted according to which job
 completed first.
 
 To keep the order the same as input run:
 
-B<(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel -k traceroute>
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -k traceroute>
 
 This will make sure the traceroute to foss.org.my will be printed
 first.
@@ -384,11 +421,11 @@ hosts or URLs) will require creating these inputs as files. B<find
 B<xargs> deals badly with special characters (such as space, ' and
 "). To see the problem try this:
 
-touch important_file
-touch 'not important_file'
-ls not* | xargs rm
-mkdir -p '12" records'
-ls | xargs rmdir 
+  touch important_file
+  touch 'not important_file'
+  ls not* | xargs rm
+  mkdir -p '12" records'
+  ls | xargs rmdir 
 
 You can specify B<-0> or B<-d "\n">, but many input generators are not
 optimized for using B<NUL> as separator but are optimized for
@@ -542,7 +579,7 @@ Symbol, IO::File, POSIX, and File::Temp.
 
 =head1 SEE ALSO
 
-B<find>(1), B<xargs>(1), '
+B<find>(1), B<xargs>(1)
 
 =cut
 

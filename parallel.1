@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2010-02-04" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2010-03-06" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -133,7 +133,7 @@
 parallel \- build and execute shell command lines from standard input in parallel
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBparallel\fR [\-0cfgkquvmX] [\-I str] [\-j num] [\-\-silent] [command [arguments]] < list_of_arguments
+\&\fBparallel\fR [\-0cfgkquvmX] [\-I str] [\-j num] [\-\-silent] [command [arguments]] [< list_of_arguments]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 For each line of input \fBparallel\fR will execute \fBcommand\fR with the
@@ -150,18 +150,30 @@ command also invokes \fB\-f\fR.
 .Sp
 If \fBcommand\fR is given, \fBparallel\fR will behave similar to \fBxargs\fR. If
 \&\fBcommand\fR is not given \fBparallel\fR will behave similar to \fBcat | sh\fR.
-.IP "\fB\-\-null\fR =item \fB\-0\fR" 9
-.IX Item "--null =item -0"
+.IP "\fB\-\-null\fR" 9
+.IX Item "--null"
+.PD 0
+.IP "\fB\-0\fR" 9
+.IX Item "-0"
+.PD
 Use \s-1NUL\s0 as delimiter.  Normally input lines will end in \en
 (newline). If they end in \e0 (\s-1NUL\s0), then use this option. It is useful
 for processing filenames that may contain \en (newline).
-.IP "\fB\-\-command\fR =item \fB\-c\fR" 9
-.IX Item "--command =item -c"
+.IP "\fB\-\-command\fR" 9
+.IX Item "--command"
+.PD 0
+.IP "\fB\-c\fR" 9
+.IX Item "-c"
+.PD
 Line is a command.  The input line contains more than one argument or
 the input line needs to be evaluated by the shell. This is the default
 if \fBcommand\fR is not set. Can be reversed with \fB\-f\fR.
-.IP "\fB\-\-delimiter\fR \fIdelim\fR =item \fB\-d\fR \fIdelim\fR" 9
-.IX Item "--delimiter delim =item -d delim"
+.IP "\fB\-\-delimiter\fR \fIdelim\fR" 9
+.IX Item "--delimiter delim"
+.PD 0
+.IP "\fB\-d\fR \fIdelim\fR" 9
+.IX Item "-d delim"
+.PD
 Input items are terminated by the specified character.  Quotes and
 backslash are not special; every character in the input is taken
 literally.  Disables the end-of-file string, which is treated like any
@@ -172,41 +184,89 @@ delimiter may be a single character, a C\-style character escape such
 as \en, or an octal or hexadecimal escape code.  Octal and
 hexadecimal escape codes are understood as for the printf command.
 Multibyte characters are not supported.
-.IP "\fB\-\-file\fR =item \fB\-f\fR" 9
-.IX Item "--file =item -f"
+.IP "\fB\-\-file\fR" 9
+.IX Item "--file"
+.PD 0
+.IP "\fB\-f\fR" 9
+.IX Item "-f"
+.PD
 Line is a filename.  The input line contains a filename that will be
 quoted so it is not evaluated by the shell. This is the default if
 \&\fBcommand\fR is set. Can be reversed with \fB\-c\fR.
-.IP "\fB\-\-group\fR =item \fB\-g\fR" 9
-.IX Item "--group =item -g"
+.IP "\fB\-\-group\fR" 9
+.IX Item "--group"
+.PD 0
+.IP "\fB\-g\fR" 9
+.IX Item "-g"
+.PD
 Group output.  Output from each jobs is grouped together and is only
 printed when the command is finished. \s-1STDERR\s0 first followed by \s-1STDOUT\s0.
 \&\fB\-g\fR is the default. Can be reversed with \fB\-u\fR.
 .IP "\fB\-I\fR \fIstring\fR" 9
 .IX Item "-I string"
 Use the replacement string \fIstring\fR instead of {}.
-.IP "\fB\-\-jobs\fR \fIN\fR =item \fB\-j\fR \fIN\fR =item \fB\-\-max\-procs\fR \fIN\fR =item \fB\-P\fR \fIN\fR" 9
-.IX Item "--jobs N =item -j N =item --max-procs N =item -P N"
+.IP "\fB\-\-jobs\fR \fIN\fR" 9
+.IX Item "--jobs N"
+.PD 0
+.IP "\fB\-j\fR \fIN\fR" 9
+.IX Item "-j N"
+.IP "\fB\-\-max\-procs\fR \fIN\fR" 9
+.IX Item "--max-procs N"
+.IP "\fB\-P\fR \fIN\fR" 9
+.IX Item "-P N"
+.PD
 Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
-.IP "\fB\-\-jobs\fR \fI+N\fR =item \fB\-j\fR \fI+N\fR =item \fB\-\-max\-procs\fR \fI+N\fR =item \fB\-P\fR \fI+N\fR" 9
-.IX Item "--jobs +N =item -j +N =item --max-procs +N =item -P +N"
+.IP "\fB\-\-jobs\fR \fI+N\fR" 9
+.IX Item "--jobs +N"
+.PD 0
+.IP "\fB\-j\fR \fI+N\fR" 9
+.IX Item "-j +N"
+.IP "\fB\-\-max\-procs\fR \fI+N\fR" 9
+.IX Item "--max-procs +N"
+.IP "\fB\-P\fR \fI+N\fR" 9
+.IX Item "-P +N"
+.PD
 Add N to the number of CPUs.  Run this many jobs in parallel. For
 compute intensive jobs \fI\-j +0\fR is useful as it will run
 number-of-cpus jobs in parallel.
-.IP "\fB\-\-jobs\fR \fI\-N\fR =item \fB\-j\fR \fI\-N\fR =item \fB\-\-max\-procs\fR \fI\-N\fR =item \fB\-P\fR \fI\-N\fR" 9
-.IX Item "--jobs -N =item -j -N =item --max-procs -N =item -P -N"
+.IP "\fB\-\-jobs\fR \fI\-N\fR" 9
+.IX Item "--jobs -N"
+.PD 0
+.IP "\fB\-j\fR \fI\-N\fR" 9
+.IX Item "-j -N"
+.IP "\fB\-\-max\-procs\fR \fI\-N\fR" 9
+.IX Item "--max-procs -N"
+.IP "\fB\-P\fR \fI\-N\fR" 9
+.IX Item "-P -N"
+.PD
 Subtract N from the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
-.IP "\fB\-\-jobs\fR \fIN\fR% =item \fB\-j\fR \fIN\fR% =item \fB\-\-max\-procs\fR \fIN\fR% =item \fB\-P\fR \fIN\fR%" 9
-.IX Item "--jobs N% =item -j N% =item --max-procs N% =item -P N%"
+.IP "\fB\-\-jobs\fR \fIN\fR%" 9
+.IX Item "--jobs N%"
+.PD 0
+.IP "\fB\-j\fR \fIN\fR%" 9
+.IX Item "-j N%"
+.IP "\fB\-\-max\-procs\fR \fIN\fR%" 9
+.IX Item "--max-procs N%"
+.IP "\fB\-P\fR \fIN\fR%" 9
+.IX Item "-P N%"
+.PD
 Multiply N% with the number of CPUs.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.
-.IP "\fB\-\-keeporder\fR =item \fB\-k\fR" 9
-.IX Item "--keeporder =item -k"
+.IP "\fB\-\-keeporder\fR" 9
+.IX Item "--keeporder"
+.PD 0
+.IP "\fB\-k\fR" 9
+.IX Item "-k"
+.PD
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
-.IP "\fB\-\-quote\fR =item \fB\-q\fR" 9
-.IX Item "--quote =item -q"
+.IP "\fB\-\-quote\fR" 9
+.IX Item "--quote"
+.PD 0
+.IP "\fB\-q\fR" 9
+.IX Item "-q"
+.PD
 Quote \fBcommand\fR.  This will quote the command line so special
 characters are not interpreted by the shell. See the section
 \&\s-1QUOTING\s0. Most people will never need this.  Quoting is disabled by
@@ -215,16 +275,24 @@ default.
 .IX Item "--silent"
 Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with \fB\-v\fR.
-.IP "\fB\-\-ungroup\fR =item \fB\-u\fR" 9
-.IX Item "--ungroup =item -u"
+.IP "\fB\-\-ungroup\fR" 9
+.IX Item "--ungroup"
+.PD 0
+.IP "\fB\-u\fR" 9
+.IX Item "-u"
+.PD
 Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with \fB\-g\fR.
 .IP "\fB\-v\fR" 9
 .IX Item "-v"
 Verbose.  Print the job to be run on \s-1STDOUT\s0. Can be reversed with
 \&\fB\-\-silent\fR.
-.IP "\fB\-\-xargs\fR =item \fB\-m\fR" 9
-.IX Item "--xargs =item -m"
+.IP "\fB\-\-xargs\fR" 9
+.IX Item "--xargs"
+.PD 0
+.IP "\fB\-m\fR" 9
+.IX Item "-m"
+.PD
 Multiple. Insert as many arguments as the command line length permits. If
 {} is not used the arguments will be appended to the line.  If {} is
 used multiple times each {} will be replaced with all the arguments.
@@ -334,7 +402,7 @@ To remove the files \fIpict0000.jpg\fR .. \fIpict9999.jpg\fR you could do:
 .PP
 You could also do:
 .PP
-\&\fBseq \-f \f(CB%04g\fB 0 9999 | perl \-pe 's/(.*)/pict$1.jpg/' | parallel \-x rm\fR
+\&\fBseq \-f \f(CB%04g\fB 0 9999 | perl \-pe 's/(.*)/pict$1.jpg/' | parallel \-m rm\fR
 .PP
 The first will run \fBrm\fR 10000 times, while the last will only run
 \&\fBrm\fR as many times needed to keep the command line length short
@@ -356,11 +424,11 @@ you want the output to be printed while the job is running you can use
 .PP
 Compare the output of:
 .PP
-\&\fB(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel traceroute\fR
+\&\fB(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute\fR
 .PP
 to the output of:
 .PP
-\&\fB(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel \-u traceroute\fR
+\&\fB(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel \-u traceroute\fR
 .SH "EXAMPLE 8: Keep order of output same as order of input"
 .IX Header "EXAMPLE 8: Keep order of output same as order of input"
 Normally the output of a job will be printed as soon as it
@@ -369,15 +437,15 @@ same as the order of the input. \fB\-k\fR will make sure the order of
 output will be in the same order as input even if later jobs end
 before earlier jobs.
 .PP
-\&\fB(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel traceroute\fR
+\&\fB(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute\fR
 .PP
-will give traceroute of foss.org.my, www.debian.org and
-www.freenetproject.org, but it will be sorted according to which job
+will give traceroute of foss.org.my, debian.org and
+freenetproject.org, but it will be sorted according to which job
 completed first.
 .PP
 To keep the order the same as input run:
 .PP
-\&\fB(echo foss.org.my; echo www.debian.org; echo www.freenetproject.org) | parallel \-k traceroute\fR
+\&\fB(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel \-k traceroute\fR
 .PP
 This will make sure the traceroute to foss.org.my will be printed
 first.
@@ -453,11 +521,13 @@ hosts or URLs) will require creating these inputs as files. \fBfind
 \&\fBxargs\fR deals badly with special characters (such as space, ' and
 "). To see the problem try this:
 .PP
-touch important_file
-touch 'not important_file'
-ls not* | xargs rm
-mkdir \-p '12" records'
-ls | xargs rmdir
+.Vb 5
+\&  touch important_file
+\&  touch \*(Aqnot important_file\*(Aq
+\&  ls not* | xargs rm
+\&  mkdir \-p \*(Aq12" records\*(Aq
+\&  ls | xargs rmdir
+.Ve
 .PP
 You can specify \fB\-0\fR or \fB\-d \*(L"\en\*(R"\fR, but many input generators are not
 optimized for using \fB\s-1NUL\s0\fR as separator but are optimized for
@@ -595,4 +665,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Symbol, IO::File, \s-1POSIX\s0, and File::Temp.
 .SH "SEE ALSO"
 .IX Header "SEE ALSO"
-\&\fBfind\fR(1), \fBxargs\fR(1), '
+\&\fBfind\fR(1), \fBxargs\fR(1)
