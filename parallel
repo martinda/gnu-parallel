@@ -36,7 +36,7 @@ be used for putting the argument in the command line. It can be
 changed with B<-I>.
 
 
-=item B<{.}> (not implemented)
+=item B<{.}>
 
 Input line without extension. This is a specialized replacement string
 with the extension removed. It will remove from the last B<.> till the
@@ -103,7 +103,9 @@ B<-g> is the default. Can be reversed with B<-u>.
 Use the replacement string I<string> instead of {}.
 
 
-=item B<-U> I<string> (not implemented)
+=item B<-U> I<string>
+
+=item B<--extensionreplace> I<string>
 
 Use the replacement string I<string> instead of {.} for input line without extension.
 
@@ -782,7 +784,7 @@ hard, as all foreground processes get the INT from the shell.
 If there are nomore jobs (STDIN is closed) then make sure to
 distribute the arguments evenly if running -X.
 
-Distibute jobs to computers with different speeds/number-of-cpu-cores using ssh
+Distribute jobs to computers with different speeds/number-of-cpu-cores using ssh
 ask the computers how many cpus they have and spawn appropriately
 according to -j setting. Reuse ssh connection (-M and -S)
 http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
@@ -790,9 +792,7 @@ http://code.google.com/p/ppss/wiki/Manual2
 
 http://www.gnu.org/software/pexec/
 
-
-
-Where will '>' be run? Local or remote? Where ever is easier.
+Where will '>' be run? Local or remote? Remote.
 
 
 Parallelize so this can be done:
@@ -870,6 +870,7 @@ GetOptions("debug|D" => \$::opt_D,
 	   "null|0" => \$::opt_0,
 	   "quote|q" => \$::opt_q,
 	   "I=s" => \$::opt_I,
+	   "extensionreplace|U=s" => \$::opt_U,
 	   "jobs|j=s" => \$::opt_P,
 	   "number-of-cpus" => \$::opt_number_of_cpus,
 	   "number-of-cores" => \$::opt_number_of_cores,
@@ -910,6 +911,7 @@ $Global::grouped = 1;
 $Global::keeporder = 0;
 $Global::quoting = 0;
 $Global::replacestring = '{}';
+$Global::replace_no_ext = '{.}';
 $Global::input_is_filename = (@ARGV);
 $/="\n";
 $Global::ignore_empty = 0;
@@ -934,6 +936,7 @@ if(defined $::opt_q) { $Global::quoting = 1; }
 if(defined $::opt_r) { $Global::ignore_empty = 1; }
 if(defined $::opt_t) { $Global::stderr_verbose = 1; }
 if(defined $::opt_I) { $Global::replacestring = $::opt_I; }
+if(defined $::opt_U) { $Global::replace_no_ext = $::opt_U; }
 if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
 if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
 if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
@@ -976,8 +979,9 @@ drain_job_queue();
 sub generate_command_line {
     my $command = shift;
     my ($job_line,$last_good);
-    my ($next_arg,@quoted_args,$arg_length);
+    my ($next_arg,@quoted_args,@quoted_args_no_ext,$arg_length);
     my ($number_of_substitution) = 1;
+    my ($number_of_substitution_no_ext) = 0;
     my ($length_of_context) = 0;
     my ($length_of_command_no_args);
     if($Global::xargs or $Global::Xargs) {
@@ -985,48 +989,76 @@ sub generate_command_line {
 	$number_of_substitution = ($command =~ s/\Q$Global::replacestring\E/$Global::replacestring/go);
 	$number_of_substitution ||= 1;
     }
-    if($Global::xargs) {
-	my $c = $command;
-	# remove all {}s
-	$c =~ s/\Q$Global::replacestring\E//go;
-	$length_of_command_no_args = length($c);
+    if($Global::xargs or $Global::Xargs) {
+	# Count number of {.}'s on the command line
+	$number_of_substitution_no_ext =
+	($command =~ s/\Q$Global::replace_no_ext\E/$Global::replace_no_ext/go);
+	$number_of_substitution_no_ext ||= 0;
     }
-    if($Global::Xargs) {
+    my $spaces=0;
+    if($Global::xargs or $Global::Xargs) {
 	my $c = $command;
-	while($c =~ s/(\S*\Q$Global::replacestring\E\S*)//o) {
-	    # Length of context minus the {}
-	    $length_of_context += length($1) - 2;
+	# count number of replacements
+	my $no_of_replace = 0;
+	$no_of_replace++ while ($c =~ m/\Q$Global::replacestring\E/g);
+	my $no_of_no_ext = 0;
+	$no_of_no_ext++ while ($c =~ m/\Q$Global::replace_no_ext\E/g);
+
+	if($Global::xargs) {
+	    # remove all {}s
+	    $c =~ s/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E//og;
+	    $length_of_command_no_args = length($c) - $no_of_replace - $no_of_no_ext;
+	    $length_of_context = 0;
+	    $spaces = 1;
 	}
-	$length_of_command_no_args = length($c);
+	if($Global::Xargs) {
+	    $c =~ s/\S*\Q$Global::replacestring\E\S*//go;
+	    $c =~ s/\S*\Q$Global::replace_no_ext\E\S*//go;
+
+	    $length_of_command_no_args = length($c) - 1;
+	    $length_of_context = length($command) - $length_of_command_no_args
+		- $no_of_replace * length($Global::replacestring)
+		- $no_of_no_ext * length($Global::replace_no_ext);
+	}
     }
 
     my $number_of_args = 0;
     # max number of lines (-L) =
     # number_of_read_lines = 0
     while (defined($next_arg = get_next_arg())) {
-	# if defined max_number_of_lines {
+	my $next_arg_no_ext = $next_arg;
+	$next_arg_no_ext =~ s/\.[^\.]*$//; # Remove .ext from argument
+	# if defined max_number_of_lines
 	# number_of_read_lines++
-	# if $next_arg =~ /\w$/ number_of_read_lines-- (Trailing blanks cause an
-	    # input line to be logically continued on the next input line.)
+	# if $next_arg =~ /\w$/ then number_of_read_lines--
+	    # Trailing blanks cause an
+	    # input line to be logically continued on the next input line.
 	# if number_of_read_lines > max_number_of_lines
 	    # last
 	push (@quoted_args, $next_arg);
+	push (@quoted_args_no_ext, $next_arg_no_ext);
 	$number_of_args++;
 	if(not $Global::xargs and not $Global::Xargs) {
 	    last;
 	} else {
 	    # Emulate xargs if there is a command and -x or -X is set
-	    $arg_length += $number_of_substitution * (1 + length ($next_arg)) 
+	    my $next_arg_len = $number_of_substitution * (length ($next_arg) + $spaces) +
+		+ $number_of_substitution_no_ext * (length ($next_arg_no_ext) + $spaces)
 		+ $length_of_context;
+
+	    $arg_length += $next_arg_len;
 	    # debug("arglen $arg_length = $number_of_substitution * (1 + length ($next_arg)) + $length_of_context\n");
-	    my $job_line_length = $length_of_command_no_args + 1 + $arg_length;
+	    my $job_line_length = $length_of_command_no_args + $arg_length;
 	    # debug("linelen $job_line_length = $length_of_command_no_args + 1 + $arg_length\n");
+#	    print STDERR "1234567890123456789012345678901234567890\n";
+	    #print STDERR "LENcalc $number_of_args CON$length_of_context $length_of_command_no_args ".length ($next_arg)." LL$job_line_length NAL$next_arg_len ",$job_line_length-$next_arg_len-1,"\n";
 	    if($job_line_length >= max_length_of_command_line()) {
 		unget_arg(pop @quoted_args);
-		if($quoted_args[0]) {
+		if(defined $quoted_args[0]) {
 		    last;
 		} else {
-		    die ("Command line too long at: $next_arg");
+		    die ("Command line too long ($job_line_length >= "
+			 . max_length_of_command_line() . ") at number $number_of_args: $next_arg");
 		}
 	    }
 	    if($Global::max_number_of_args and $number_of_args >= $Global::max_number_of_args) {
@@ -1036,27 +1068,18 @@ sub generate_command_line {
     }
     if(@quoted_args) {
 	$job_line = $command;
-	if(defined $job_line and $job_line =~/\Q$Global::replacestring\E/o) {
-	    # substitute {} with args
+	if(defined $job_line and
+	   ($job_line =~/\Q$Global::replacestring\E/o or $job_line =~/\Q$Global::replace_no_ext\E/o)) {
+	    # substitute {} and {.} with args
 	    if($Global::Xargs) {
 		# Context sensitive replace (foo{}bar with fooargsbar)
-		while($job_line =~/\Q$Global::replacestring\E/o) {
-		    $job_line =~ /(\S*\Q$Global::replacestring\E\S*)/ or die ("This should never happen"); 
-		    my $wordarg = $1;
-		    my @all_word_arg;
-		    for my $arg (@quoted_args) {
-			my $substituted = $wordarg;
-			$substituted=~s/\Q$Global::replacestring\E/$arg/go;
-			push @all_word_arg, $substituted;
-		    }
-		    my $all_word_arg = join(" ",@all_word_arg);
-		    my ($quoted_wordarg) = shell_quote($wordarg);
-		    $job_line =~ s/$quoted_wordarg/$all_word_arg/;
-		}
+		$job_line = context_replace($job_line, \@quoted_args, \@quoted_args_no_ext);
 	    } else {
-		# Normal replace {} with args
+		# Normal replace {} with args and {.} with args without extension
 		my $arg=join(" ",@quoted_args);
+		my $arg_no_ext=join(" ",@quoted_args_no_ext);
 		$job_line =~ s/\Q$Global::replacestring\E/$arg/go;
+		$job_line =~ s/\Q$Global::replace_no_ext\E/$arg_no_ext/go;
 	    }
 	} else {
 	    # append args
@@ -1083,6 +1106,28 @@ sub shell_quote {
 	$arg =~ s/([\n])/'\n'/g; # filenames with '\n' is quoted using \'
     }
     return (@strings);
+}
+
+# Replace foo{}bar or foo{.}bar
+sub context_replace {
+    my ($job_line,$quoted,$no_ext) = (@_);
+    while($job_line =~/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E/o) {
+	$job_line =~ /(\S*(\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E)\S*)/o
+	    or die ("This should never happen");
+	my $wordarg = $1; # This is the context that needs to be substituted
+	my @all_word_arg;
+	for my $n (0 .. $#$quoted) {
+	    my $arg = $quoted->[$n];
+	    my $arg_no_ext = $no_ext->[$n];
+	    my $substituted = $wordarg;
+	    $substituted=~s/\Q$Global::replacestring\E/$arg/go;
+	    $substituted=~s/\Q$Global::replace_no_ext\E/$arg_no_ext/go;
+	    push @all_word_arg, $substituted;
+	}
+	my $all_word_arg = join(" ",@all_word_arg);
+	$job_line =~ s/\Q$wordarg\E/$all_word_arg/;
+    }
+    return $job_line;
 }
 
 #
@@ -1151,8 +1196,8 @@ sub compute_number_of_processes {
 sub processes_available_by_system_limit {
     # If the wanted number of processes is bigger than the system limits:
     # Limit them to the system limits
-    # Limits are: File handles, number of input lines, processes, 
-    # and taking > 1 second to spawn 10 extra processes 
+    # Limits are: File handles, number of input lines, processes,
+    # and taking > 1 second to spawn 10 extra processes
     my $wanted_processes = shift;
     my $system_limit=0;
     my @command_lines=();
@@ -1484,6 +1529,7 @@ sub start_job {
     }
     $Global::running_jobs++;
     debug("$Global::running_jobs processes. Starting: $command\n");
+    #print STDERR "LEN".length($command)."\n";
     $pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) || 
 	die("open3 failed. Report a bug to <parallel\@tange.dk>\n");
     debug("started: $command\n");

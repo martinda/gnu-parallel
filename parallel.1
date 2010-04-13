@@ -155,8 +155,8 @@ If \fBcommand\fR is given, \fBparallel\fR will behave similar to \fBxargs\fR. If
 Input line. This is the default replacement string and will normally
 be used for putting the argument in the command line. It can be
 changed with \fB\-I\fR.
-.IP "\fB{.}\fR (not implemented)" 9
-.IX Item "{.} (not implemented)"
+.IP "\fB{.}\fR" 9
+.IX Item "{.}"
 Input line without extension. This is a specialized replacement string
 with the extension removed. It will remove from the last \fB.\fR till the
 end of line of each input line and replace {.} with the
@@ -219,8 +219,12 @@ printed when the command is finished. \s-1STDERR\s0 first followed by \s-1STDOUT
 .IP "\fB\-I\fR \fIstring\fR" 9
 .IX Item "-I string"
 Use the replacement string \fIstring\fR instead of {}.
-.IP "\fB\-U\fR \fIstring\fR (not implemented)" 9
-.IX Item "-U string (not implemented)"
+.IP "\fB\-U\fR \fIstring\fR" 9
+.IX Item "-U string"
+.PD 0
+.IP "\fB\-\-extensionreplace\fR \fIstring\fR" 9
+.IX Item "--extensionreplace string"
+.PD
 Use the replacement string \fIstring\fR instead of {.} for input line without extension.
 .IP "\fB\-\-jobs\fR \fIN\fR" 9
 .IX Item "--jobs N"
@@ -390,7 +394,7 @@ This will transfer the file \fI\f(CI$HOME\fI/foo/bar.txt.out\fR from the server
 \&\fBtouch foo/bar.txt.out\fR on \fIserver.example.com\fR.
 .Sp
 .Vb 2
-\&  echo /tmp/foo/bar.txt | parallel \e 
+\&  echo /tmp/foo/bar.txt | parallel \e
 \&    \-\-sshlogin server.example.com \-\-return .out touch {}.out
 .Ve
 .Sp
@@ -896,7 +900,7 @@ hard, as all foreground processes get the \s-1INT\s0 from the shell.
 If there are nomore jobs (\s-1STDIN\s0 is closed) then make sure to
 distribute the arguments evenly if running \-X.
 .PP
-Distibute jobs to computers with different speeds/number\-of\-cpu\-cores using ssh
+Distribute jobs to computers with different speeds/number\-of\-cpu\-cores using ssh
 ask the computers how many cpus they have and spawn appropriately
 according to \-j setting. Reuse ssh connection (\-M and \-S)
 http://www.semicomplete.com/blog/geekery/distributed\-xargs.html?source=rss20
@@ -904,7 +908,7 @@ http://code.google.com/p/ppss/wiki/Manual2
 .PP
 http://www.gnu.org/software/pexec/
 .PP
-Where will '>' be run? Local or remote? Where ever is easier.
+Where will '>' be run? Local or remote? Remote.
 .PP
 Parallelize so this can be done:
 mdm.screen find dir \-execdir mdm-run cmd {} \e;

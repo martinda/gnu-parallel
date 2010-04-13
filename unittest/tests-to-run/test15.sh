@@ -40,15 +40,15 @@ parallel --arg-file /tmp/$$ echo
 (echo line 1;echo line 1;echo line 2) | parallel -k --max-args 2 -X echo
 
 # Test --max-procs and -P: Number of processes
-seq 1 10 | parallel -k --max-procs +0 echo 
-seq 1 10 | parallel -k -P 200% echo 
+seq 1 10 | parallel -k --max-procs +0 echo max proc
+seq 1 10 | parallel -k -P 200% echo 200% proc
 
 # Test --delimiter and -d: Delimiter instead of newline
 # Yes there is supposed to be an extra newline for -d N
 echo line 1Nline 2Nline 3 | parallel -k -d N echo This is
 echo line 1Nline 2Nline 3 | parallel -k --delimiter N echo This is
-printf "line 1\0line 2\0line 3" | parallel -d '\0' echo
-printf "line 1\tline 2\tline 3" | parallel --delimiter '\t' echo
+printf "delimiter NUL line 1\0line 2\0line 3" | parallel -k -d '\0' echo
+printf "delimiter TAB line 1\tline 2\tline 3" | parallel -k --delimiter '\t' echo
 
 # Test --max-chars and -s: Max number of chars in a line
 (echo line 1;echo line 1;echo line 2) | parallel -k --max-chars 25 -X echo
