@@ -21,13 +21,30 @@ Several lines will be run in parallel.
 
 =item I<command>
 
-Command to execute.  If B<command> or the following arguments contain {}
-every instance will be substituted with the input line. Setting a
+Command to execute.  If B<command> or the following arguments contain
+{} every instance will be substituted with the input line. Setting a
 command also invokes B<-f>.
 
 If B<command> is given, B<parallel> will behave similar to B<xargs>. If
 B<command> is not given B<parallel> will behave similar to B<cat | sh>.
 
+
+=item B<{}>
+
+Input line. This is the default replacement string and will normally
+be used for putting the argument in the command line. It can be
+changed with B<-I>.
+
+
+=item B<{.}> (not implemented)
+
+Input line without extension. This is a specialized replacement string
+with the extension removed. It will remove from the last B<.> till the
+end of line of each input line and replace {.} with the
+remaining. E.g. I<foo.jpg> becomes I<foo>. If the input line does
+not contain B<.> it will remain unchanged.
+
+{.} can be used the same places as {}.
 
 =item B<--null>
 
@@ -80,9 +97,15 @@ Group output.  Output from each jobs is grouped together and is only
 printed when the command is finished. STDERR first followed by STDOUT.
 B<-g> is the default. Can be reversed with B<-u>.
 
+
 =item B<-I> I<string>
 
 Use the replacement string I<string> instead of {}.
+
+
+=item B<-U> I<string> (not implemented)
+
+Use the replacement string I<string> instead of {.} for input line without extension.
 
 
 =item B<--jobs> I<N>
@@ -104,9 +127,10 @@ Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
 
 =item B<-P> I<+N>
 
-Add N to the number of CPUs.  Run this many jobs in parallel. For
+Add N to the number of CPU cores.  Run this many jobs in parallel. For
 compute intensive jobs I<-j +0> is useful as it will run
-number-of-cpus jobs in parallel.
+number-of-cpu-cores jobs in parallel. See also
+--use-cpus-instead-of-cores.
 
 
 =item B<--jobs> I<-N>
@@ -117,8 +141,9 @@ number-of-cpus jobs in parallel.
 
 =item B<-P> I<-N>
 
-Subtract N from the number of CPUs.  Run this many jobs in parallel.
-If the evaluated number is less than 1 then 1 will be used.
+Subtract N from the number of CPU cores.  Run this many jobs in parallel.
+If the evaluated number is less than 1 then 1 will be used.  See also
+--use-cpus-instead-of-cores.
 
 
 =item B<--jobs> I<N>%
@@ -129,8 +154,9 @@ If the evaluated number is less than 1 then 1 will be used.
 
 =item B<-P> I<N>%
 
-Multiply N% with the number of CPUs.  Run this many jobs in parallel.
-If the evaluated number is less than 1 then 1 will be used.
+Multiply N% with the number of CPU cores.  Run this many jobs in parallel.
+If the evaluated number is less than 1 then 1 will be used.  See also
+--use-cpus-instead-of-cores.
 
 
 =item B<--keeporder>
@@ -139,6 +165,18 @@ If the evaluated number is less than 1 then 1 will be used.
 
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
+
+
+=item B<--number-of-cpus>
+
+Print the number of CPUs and exit (used by B<parallel> itself to
+determine the number of CPUs on remote machines).
+
+
+=item B<--number-of-cores>
+
+Print the number of cores and exit (used by B<parallel> itself to determine the
+number of cores on remote machines).
 
 
 =item B<--quote>
@@ -151,10 +189,131 @@ QUOTING. Most people will never need this.  Quoting is disabled by
 default.
 
 
+=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin]> (not implemented)
+
+=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin]> (not implemented)
+
+Distribute jobs to remote servers. The jobs will be run on a list of
+remote servers.  B<parallel> will determine the number of CPU cores on
+the remote servers and run the number of jobs as specified by -j.  If
+the number I<ncpu> is given B<parallel> will use this number for
+number of CPUs on the host. Normally I<ncpu> will not be needed.
+
+An I<sshlogin> is the string you would normally pass to SSH to login,
+e.g. I<server.example.com>, I<foo@server.example.com>, or I<"-l foo -p
+2222 server.example.com">. The sshlogin must not require a password.
+
+The sshlogin ':' is special, it means 'no ssh' and will therefore run
+on the local machine.
+
+To specify more sshlogins separate the sshlogins by comma or repeat
+the options multiple times.
+
+For examples: see B<--sshloginfile>.
+
+The remote host must have B<parallel> installed.
+
+
+=item B<--sshloginfile> I<filename> (not implemented)
+
+File with sshlogins. The file consists of sshlogins on separate
+lines. Empty lines and lines starting with '#' are ignored. Example:
+
+  server.example.com
+  username@server2.example.com
+  8/my-8-core-server.example.com
+  2/myusername@my-dualcore.example.net
+  # This server has SSH running on port 2222
+  -p 2222 server.example.net
+  4/-p 2222 quadserver.example.net
+  # Assume 16 cores on the local machine
+  16/:
+
+
 =item B<--silent>
 
 Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with B<-v>.
+
+
+=item B<--transfer> (not implemented)
+
+Transfer files to remote servers. B<--transfer> is used with
+B<--sshlogin> when the arguments are files and should be transfered to
+the remote servers. The files will be transfered using B<rsync> and
+will be put relative to the default login dir. E.g.
+
+  echo foo/bar.txt | parallel \
+    --sshlogin server.example.com --transfer wc
+
+This will transfer the file I<foo/bar.txt> to the server
+I<server.example.com> to the file $HOME/foo/bar.txt before running
+B<wc foo/bar.txt> on I<server.example.com>.
+
+  echo /tmp/foo/bar.txt | parallel \
+    --sshlogin server.example.com --transfer wc
+
+This will transfer the file I<foo/bar.txt> to the server
+I<server.example.com> to the file /tmp/foo/bar.txt before running
+B<wc /tmp/foo/bar.txt> on I<server.example.com>.
+
+B<--transfer> is often used with B<--return> and B<--cleanup>.
+
+B<--transfer> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
+
+
+=item B<--return> I<suffix> (not implemented)
+
+Transfer files from remote servers. B<--return> is used with
+B<--sshlogin> when the arguments are files on the remote servers. When
+processing is done the file with I<suffix> appended will be transfered
+from the remote server using B<rsync> and will be put relative to
+the default login dir. E.g.
+
+  echo foo/bar.txt | parallel \
+    --sshlogin server.example.com --return .out touch {}.out
+
+This will transfer the file I<$HOME/foo/bar.txt.out> from the server
+I<server.example.com> to the file I<foo/bar.txt.out> after running
+B<touch foo/bar.txt.out> on I<server.example.com>.
+
+  echo /tmp/foo/bar.txt | parallel \
+    --sshlogin server.example.com --return .out touch {}.out
+
+This will transfer the file I</tmp/foo/bar.txt.out> from the server
+I<server.example.com> to the file I</tmp/foo/bar.txt.out> after running
+B<touch /tmp/foo/bar.txt.out> on I<server.example.com>.
+
+Multiple files with different suffixes can be transfered by repeating
+the options multiple times:
+
+  echo /tmp/foo/bar.txt | \
+    parallel --sshlogin server.example.com \
+    --return .out --return .out2 touch {}.out {}.out2
+
+B<--return> is often used with B<--transfer> and B<--cleanup>.
+
+B<--return> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
+
+
+=item B<--cleanup> (not implemented)
+
+Remove transfered files. B<--cleanup> will remove the transfered files
+on the remote server after processing is done.
+
+  find log -name '*gz' | parallel \
+    --sshlogin server.example.com --transfer --return .bz2 \
+    --cleanup "zcat {} | bzip -9 >{}.bz2"
+
+With B<--transfer> the file transfered to the remote server will be
+removed on the remote server.  Directories created will not be removed
+- even if they are empty.
+
+With B<--return> the file transfered from the remote server will be
+removed on the remote server.  Directories created will not be removed
+- even if they are empty.
+
+B<--cleanup> is ignored when not used with B<--transfer> or B<--return>.
 
 
 =item B<--ungroup>
@@ -163,6 +322,16 @@ Can be reversed with B<-v>.
 
 Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with B<-g>.
+
+
+=item B<--use-cpus-instead-of-cores> (not implemented)
+
+Count the number of CPUs instead of cores. When computing how many
+jobs to run in parallel relative to the number of cores you can ask
+parallel to instead look at the number of CPUs. This will make sense
+for computers that have hyperthreading as two jobs running on one CPU
+with hyperthreading will run slower than two jobs running on two CPUs.
+Normal users will not need this option.
 
 
 =item B<-v>
@@ -231,9 +400,9 @@ file:
 
 B<convert -geometry 120 foo.jpg thumb_foo.jpg>
 
-If the system has more than 1 CPU it can be run with number-of-cpus
-jobs in parallel (-j +0). This will do that for all jpg files in a
-directory:
+If the system has more than 1 CPU core it can be run with
+number-of-cpu-cores jobs in parallel (-j +0). This will do that for
+all jpg files in a directory:
 
 B<ls *.jpg | parallel -j +0 convert -geometry 120 {} thumb_{}>
 
@@ -257,6 +426,9 @@ is a better solution:
   find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg
   find . -name '*_thumb.jpg' | ren 's:/([^/]+)_thumb.jpg$:/thumb_$1:'
 
+(Not implemented) This will make files like ./foo/bar_thumb.jpg:
+
+B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {.}_thumb.jpg>
 
 =head1 EXAMPLE 4: Substitution and redirection
 
@@ -341,6 +513,104 @@ B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -k tra
 
 This will make sure the traceroute to foss.org.my will be printed
 first.
+
+=head1 EXAMPLE 9: Using remote computers (not implemented)
+
+To run commands on a remote computer SSH needs to be set up and you
+must be able to login without entering a password (B<ssh-agent> may be
+handy).
+
+To run B<echo> on B<server.example.com>:
+
+  seq 1 10 | parallel --sshlogin server.example.com echo
+
+To run commands on more than one remote computer run:
+
+  seq 1 10 | parallel --sshlogin server.example.com,server2.example.net echo
+
+Or:
+
+  seq 1 10 | parallel --sshlogin server.example.com \
+    --sshlogin server2.example.net echo
+
+If the login username is I<foo> on I<server2.example.net> use:
+
+  seq 1 10 | parallel --sshlogin server.example.com \
+    --sshlogin foo@server2.example.net echo
+
+To distribute the commands to a list of machines, make a file
+I<mymachines> with all the machines:
+
+  server.example.com
+  foo@server2.example.com
+  server3.example.com
+
+Then run:
+
+  seq 1 10 | parallel --sshloginfile mymachines echo
+
+To include the local machine add the special sshlogin ':' to the list:
+
+  server.example.com
+  foo@server2.example.com
+  server3.example.com
+  :
+
+If the number of CPU cores on the remote servers is not identified
+correctly the number of CPU cores can be added in front. Here the
+server has 8 CPU cores.
+
+  seq 1 10 | parallel --sshlogin 8/server.example.com echo
+
+
+=head1 EXAMPLE 10: Transferring of files (not implemented)
+
+To recompress gzipped files with bzip2 using a remote server run:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com \
+    --transfer "zcat {} | bzip2 -9 >{}.bz2"
+
+This will list the .gz-files in the I<logs> directory and all
+directories below. Then it will transfer the files to
+I<server.example.com> to the corresponding directory in
+I<$HOME/logs>. On I<server.example.com> the file will be recompressed
+using B<zcat> and B<bzip2> resulting in the corresponding file with
+the suffix I<.bz2>.
+
+If you want the file to be transfered back to the local machine add
+I<--return .bz2>:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com \
+    --transfer --return .bz2 "zcat {} | bzip2 -9 >{}.bz2"
+
+After the recompressing is done the I<.bz2>-file is transfered back to
+the local machine.
+
+If you want to delete the transfered files on the remote machine add
+I<--cleanup>:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com \
+    --transfer --return .bz2 --cleanup "zcat {} | bzip2 -9 >{}.bz2"
+
+If you want run one several servers add the servers to I<--sshlogin>
+either using ',' or separate I<--sshlogin>:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com,server2.example.com \
+    --sshlogin server3.example.com \
+    --transfer --return .bz2 --cleanup "zcat {} | bzip2 -9 >{}.bz2"
+
+You can add the local machine using I<--sshlogin :>. This will disable the
+removing and transferring for the local machine only:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com,server2.example.com \
+    --sshlogin server3.example.com \
+    --sshlogin : \
+    --transfer --return .bz2 --cleanup "zcat {} | bzip2 -9 >{}.bz2"
 
 
 =head1 QUOTING
@@ -439,7 +709,7 @@ So B<parallel>'s newline separation can be emulated with:
 B<cat | xargs -d "\n" -n1 I<command>>
 
 B<xargs> can run a given number of jobs in parallel, but has no
-support for running no_of_cpus jobs in parallel.
+support for running number-of-cpu-cores jobs in parallel.
 
 B<xargs> has no support for grouping the output, therefore output may
 run together, e.g. the first half of a line is from one process and
@@ -512,25 +782,17 @@ hard, as all foreground processes get the INT from the shell.
 If there are nomore jobs (STDIN is closed) then make sure to
 distribute the arguments evenly if running -X.
 
-Distibute jobs to computers with different speeds/no_of_cpu using ssh
+Distibute jobs to computers with different speeds/number-of-cpu-cores using ssh
 ask the computers how many cpus they have and spawn appropriately
 according to -j setting. Reuse ssh connection (-M and -S)
 http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
 http://code.google.com/p/ppss/wiki/Manual2
 
-=head2 -S
+http://www.gnu.org/software/pexec/
 
--S sshlogin[,sshlogin]
 
-sshlogin is [user@]host or filename with list of sshlogin
 
-What about copying data to remote host? Have an option that says the
-argument is a file that should be copied.
-
-What about copying data from remote host? Have an option that says
-the argument is a file that should be copied.
-
-Where will '>' be run? Local or remote?
+Where will '>' be run? Local or remote? Where ever is easier.
 
 
 Parallelize so this can be done:
@@ -609,6 +871,8 @@ GetOptions("debug|D" => \$::opt_D,
 	   "quote|q" => \$::opt_q,
 	   "I=s" => \$::opt_I,
 	   "jobs|j=s" => \$::opt_P,
+	   "number-of-cpus" => \$::opt_number_of_cpus,
+	   "number-of-cores" => \$::opt_number_of_cores,
 	   # xargs-compatibility - implemented, man, unittest
 	   "max-procs|P=s" => \$::opt_P,
 	   "delimiter|d=s" => \$::opt_d,
@@ -674,6 +938,8 @@ if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
 if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
 if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
 if(defined $::opt_h) { die_usage(); }
+if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
+if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; exit(0); }
 if(defined $::opt_version) { version(); exit(0); }
 
 if(defined $::opt_a) {
@@ -735,7 +1001,15 @@ sub generate_command_line {
     }
 
     my $number_of_args = 0;
+    # max number of lines (-L) =
+    # number_of_read_lines = 0
     while (defined($next_arg = get_next_arg())) {
+	# if defined max_number_of_lines {
+	# number_of_read_lines++
+	# if $next_arg =~ /\w$/ number_of_read_lines-- (Trailing blanks cause an
+	    # input line to be logically continued on the next input line.)
+	# if number_of_read_lines > max_number_of_lines
+	    # last
 	push (@quoted_args, $next_arg);
 	$number_of_args++;
 	if(not $Global::xargs and not $Global::Xargs) {
@@ -1013,9 +1287,16 @@ sub user_requested_processes {
     return $processes;
 }
 
+sub no_of_cores {
+    # TODO This should return number of cores and not the number of CPUs
+    return no_of_cpus(@_);
+}
+
 sub no_of_cpus {
     if(not $Global::no_of_cpus) {
-	my $no_of_cpus = (no_of_cpus_gnu_linux() || no_of_cpus_solaris());
+	my $no_of_cpus = (no_of_cpus_darwin()
+			  || no_of_cpus_gnu_linux()
+			  || no_of_cpus_solaris());
 	if($no_of_cpus) {
 	    $Global::no_of_cpus = $no_of_cpus;
 	} else {
@@ -1036,6 +1317,11 @@ sub no_of_cpus_gnu_linux {
 	}
 	close IN;
     }
+    return $no_of_cpus;
+}
+
+sub no_of_cpus_darwin {
+    my $no_of_cpus = `sysctl -n hw.ncpu 2>/dev/null`;
     return $no_of_cpus;
 }
 
@@ -1372,16 +1658,21 @@ sub my_memory_usage {
     use strict;
     use FileHandle;
 
+
     my $pid = $$;
-    my $fh = FileHandle->new("</proc/$pid/stat");
+    if(-e "/proc/$pid/stat") {
+	my $fh = FileHandle->new("</proc/$pid/stat");
 
-    my $data = <$fh>;
-    chomp $data;
-    $fh->close;
+	my $data = <$fh>;
+	chomp $data;
+	$fh->close;
 
-    my @procinfo = split(/\s+/,$data);
+	my @procinfo = split(/\s+/,$data);
 
-    return $procinfo[22];
+	return $procinfo[22];
+    } else {
+	return 0;
+    }
 }
 
 sub my_size {

@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2010-03-06" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2010-04-13" "perl v5.10.1" "User Contributed Perl Documentation"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -144,12 +144,26 @@ or \fBcat | sh\fR.
 Several lines will be run in parallel.
 .IP "\fIcommand\fR" 9
 .IX Item "command"
-Command to execute.  If \fBcommand\fR or the following arguments contain {}
-every instance will be substituted with the input line. Setting a
+Command to execute.  If \fBcommand\fR or the following arguments contain
+{} every instance will be substituted with the input line. Setting a
 command also invokes \fB\-f\fR.
 .Sp
 If \fBcommand\fR is given, \fBparallel\fR will behave similar to \fBxargs\fR. If
 \&\fBcommand\fR is not given \fBparallel\fR will behave similar to \fBcat | sh\fR.
+.IP "\fB{}\fR" 9
+.IX Item "{}"
+Input line. This is the default replacement string and will normally
+be used for putting the argument in the command line. It can be
+changed with \fB\-I\fR.
+.IP "\fB{.}\fR (not implemented)" 9
+.IX Item "{.} (not implemented)"
+Input line without extension. This is a specialized replacement string
+with the extension removed. It will remove from the last \fB.\fR till the
+end of line of each input line and replace {.} with the
+remaining. E.g. \fIfoo.jpg\fR becomes \fIfoo\fR. If the input line does
+not contain \fB.\fR it will remain unchanged.
+.Sp
+{.} can be used the same places as {}.
 .IP "\fB\-\-null\fR" 9
 .IX Item "--null"
 .PD 0
@@ -205,6 +219,9 @@ printed when the command is finished. \s-1STDERR\s0 first followed by \s-1STDOUT
 .IP "\fB\-I\fR \fIstring\fR" 9
 .IX Item "-I string"
 Use the replacement string \fIstring\fR instead of {}.
+.IP "\fB\-U\fR \fIstring\fR (not implemented)" 9
+.IX Item "-U string (not implemented)"
+Use the replacement string \fIstring\fR instead of {.} for input line without extension.
 .IP "\fB\-\-jobs\fR \fIN\fR" 9
 .IX Item "--jobs N"
 .PD 0
@@ -226,9 +243,10 @@ Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
 .IP "\fB\-P\fR \fI+N\fR" 9
 .IX Item "-P +N"
 .PD
-Add N to the number of CPUs.  Run this many jobs in parallel. For
+Add N to the number of \s-1CPU\s0 cores.  Run this many jobs in parallel. For
 compute intensive jobs \fI\-j +0\fR is useful as it will run
-number-of-cpus jobs in parallel.
+number-of-cpu-cores jobs in parallel. See also
+\&\-\-use\-cpus\-instead\-of\-cores.
 .IP "\fB\-\-jobs\fR \fI\-N\fR" 9
 .IX Item "--jobs -N"
 .PD 0
@@ -239,8 +257,9 @@ number-of-cpus jobs in parallel.
 .IP "\fB\-P\fR \fI\-N\fR" 9
 .IX Item "-P -N"
 .PD
-Subtract N from the number of CPUs.  Run this many jobs in parallel.
-If the evaluated number is less than 1 then 1 will be used.
+Subtract N from the number of \s-1CPU\s0 cores.  Run this many jobs in parallel.
+If the evaluated number is less than 1 then 1 will be used.  See also
+\&\-\-use\-cpus\-instead\-of\-cores.
 .IP "\fB\-\-jobs\fR \fIN\fR%" 9
 .IX Item "--jobs N%"
 .PD 0
@@ -251,8 +270,9 @@ If the evaluated number is less than 1 then 1 will be used.
 .IP "\fB\-P\fR \fIN\fR%" 9
 .IX Item "-P N%"
 .PD
-Multiply N% with the number of CPUs.  Run this many jobs in parallel.
-If the evaluated number is less than 1 then 1 will be used.
+Multiply N% with the number of \s-1CPU\s0 cores.  Run this many jobs in parallel.
+If the evaluated number is less than 1 then 1 will be used.  See also
+\&\-\-use\-cpus\-instead\-of\-cores.
 .IP "\fB\-\-keeporder\fR" 9
 .IX Item "--keeporder"
 .PD 0
@@ -261,6 +281,14 @@ If the evaluated number is less than 1 then 1 will be used.
 .PD
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
+.IP "\fB\-\-number\-of\-cpus\fR" 9
+.IX Item "--number-of-cpus"
+Print the number of CPUs and exit (used by \fBparallel\fR itself to
+determine the number of CPUs on remote machines).
+.IP "\fB\-\-number\-of\-cores\fR" 9
+.IX Item "--number-of-cores"
+Print the number of cores and exit (used by \fBparallel\fR itself to determine the
+number of cores on remote machines).
 .IP "\fB\-\-quote\fR" 9
 .IX Item "--quote"
 .PD 0
@@ -271,10 +299,137 @@ Quote \fBcommand\fR.  This will quote the command line so special
 characters are not interpreted by the shell. See the section
 \&\s-1QUOTING\s0. Most people will never need this.  Quoting is disabled by
 default.
+.IP "\fB\-S\fR \fI[ncpu/]sshlogin[,[ncpu/]sshlogin]\fR (not implemented)" 9
+.IX Item "-S [ncpu/]sshlogin[,[ncpu/]sshlogin] (not implemented)"
+.PD 0
+.IP "\fB\-\-sshlogin\fR \fI[ncpu/]sshlogin[,[ncpu/]sshlogin]\fR (not implemented)" 9
+.IX Item "--sshlogin [ncpu/]sshlogin[,[ncpu/]sshlogin] (not implemented)"
+.PD
+Distribute jobs to remote servers. The jobs will be run on a list of
+remote servers.  \fBparallel\fR will determine the number of \s-1CPU\s0 cores on
+the remote servers and run the number of jobs as specified by \-j.  If
+the number \fIncpu\fR is given \fBparallel\fR will use this number for
+number of CPUs on the host. Normally \fIncpu\fR will not be needed.
+.Sp
+An \fIsshlogin\fR is the string you would normally pass to \s-1SSH\s0 to login,
+e.g. \fIserver.example.com\fR, \fIfoo@server.example.com\fR, or \fI\*(L"\-l foo \-p
+2222 server.example.com\*(R"\fR. The sshlogin must not require a password.
+.Sp
+The sshlogin ':' is special, it means 'no ssh' and will therefore run
+on the local machine.
+.Sp
+To specify more sshlogins separate the sshlogins by comma or repeat
+the options multiple times.
+.Sp
+For examples: see \fB\-\-sshloginfile\fR.
+.Sp
+The remote host must have \fBparallel\fR installed.
+.IP "\fB\-\-sshloginfile\fR \fIfilename\fR (not implemented)" 9
+.IX Item "--sshloginfile filename (not implemented)"
+File with sshlogins. The file consists of sshlogins on separate
+lines. Empty lines and lines starting with '#' are ignored. Example:
+.Sp
+.Vb 9
+\&  server.example.com
+\&  username@server2.example.com
+\&  8/my\-8\-core\-server.example.com
+\&  2/myusername@my\-dualcore.example.net
+\&  # This server has SSH running on port 2222
+\&  \-p 2222 server.example.net
+\&  4/\-p 2222 quadserver.example.net
+\&  # Assume 16 cores on the local machine
+\&  16/:
+.Ve
 .IP "\fB\-\-silent\fR" 9
 .IX Item "--silent"
 Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with \fB\-v\fR.
+.IP "\fB\-\-transfer\fR (not implemented)" 9
+.IX Item "--transfer (not implemented)"
+Transfer files to remote servers. \fB\-\-transfer\fR is used with
+\&\fB\-\-sshlogin\fR when the arguments are files and should be transfered to
+the remote servers. The files will be transfered using \fBrsync\fR and
+will be put relative to the default login dir. E.g.
+.Sp
+.Vb 2
+\&  echo foo/bar.txt | parallel \e
+\&    \-\-sshlogin server.example.com \-\-transfer wc
+.Ve
+.Sp
+This will transfer the file \fIfoo/bar.txt\fR to the server
+\&\fIserver.example.com\fR to the file \f(CW$HOME\fR/foo/bar.txt before running
+\&\fBwc foo/bar.txt\fR on \fIserver.example.com\fR.
+.Sp
+.Vb 2
+\&  echo /tmp/foo/bar.txt | parallel \e
+\&    \-\-sshlogin server.example.com \-\-transfer wc
+.Ve
+.Sp
+This will transfer the file \fIfoo/bar.txt\fR to the server
+\&\fIserver.example.com\fR to the file /tmp/foo/bar.txt before running
+\&\fBwc /tmp/foo/bar.txt\fR on \fIserver.example.com\fR.
+.Sp
+\&\fB\-\-transfer\fR is often used with \fB\-\-return\fR and \fB\-\-cleanup\fR.
+.Sp
+\&\fB\-\-transfer\fR is ignored when used with \fB\-\-sshlogin :\fR or when not used with \fB\-\-sshlogin\fR.
+.IP "\fB\-\-return\fR \fIsuffix\fR (not implemented)" 9
+.IX Item "--return suffix (not implemented)"
+Transfer files from remote servers. \fB\-\-return\fR is used with
+\&\fB\-\-sshlogin\fR when the arguments are files on the remote servers. When
+processing is done the file with \fIsuffix\fR appended will be transfered
+from the remote server using \fBrsync\fR and will be put relative to
+the default login dir. E.g.
+.Sp
+.Vb 2
+\&  echo foo/bar.txt | parallel \e
+\&    \-\-sshlogin server.example.com \-\-return .out touch {}.out
+.Ve
+.Sp
+This will transfer the file \fI\f(CI$HOME\fI/foo/bar.txt.out\fR from the server
+\&\fIserver.example.com\fR to the file \fIfoo/bar.txt.out\fR after running
+\&\fBtouch foo/bar.txt.out\fR on \fIserver.example.com\fR.
+.Sp
+.Vb 2
+\&  echo /tmp/foo/bar.txt | parallel \e 
+\&    \-\-sshlogin server.example.com \-\-return .out touch {}.out
+.Ve
+.Sp
+This will transfer the file \fI/tmp/foo/bar.txt.out\fR from the server
+\&\fIserver.example.com\fR to the file \fI/tmp/foo/bar.txt.out\fR after running
+\&\fBtouch /tmp/foo/bar.txt.out\fR on \fIserver.example.com\fR.
+.Sp
+Multiple files with different suffixes can be transfered by repeating
+the options multiple times:
+.Sp
+.Vb 3
+\&  echo /tmp/foo/bar.txt | \e
+\&    parallel \-\-sshlogin server.example.com \e
+\&    \-\-return .out \-\-return .out2 touch {}.out {}.out2
+.Ve
+.Sp
+\&\fB\-\-return\fR is often used with \fB\-\-transfer\fR and \fB\-\-cleanup\fR.
+.Sp
+\&\fB\-\-return\fR is ignored when used with \fB\-\-sshlogin :\fR or when not used with \fB\-\-sshlogin\fR.
+.IP "\fB\-\-cleanup\fR (not implemented)" 9
+.IX Item "--cleanup (not implemented)"
+Remove transfered files. \fB\-\-cleanup\fR will remove the transfered files
+on the remote server after processing is done.
+.Sp
+.Vb 3
+\&  find log \-name \*(Aq*gz\*(Aq | parallel \e
+\&    \-\-sshlogin server.example.com \-\-transfer \-\-return .bz2 \e
+\&    \-\-cleanup "zcat {} | bzip \-9 >{}.bz2"
+.Ve
+.Sp
+With \fB\-\-transfer\fR the file transfered to the remote server will be
+removed on the remote server.  Directories created will not be removed
+\&\- even if they are empty.
+.Sp
+With \fB\-\-return\fR the file transfered from the remote server will be
+removed on the remote server.  Directories created will not be removed
+\&\- even if they are empty.
+.Sp
+\&\fB\-\-cleanup\fR is ignored when not used with \fB\-\-transfer\fR or \fB\-\-return\fR.
 .IP "\fB\-\-ungroup\fR" 9
 .IX Item "--ungroup"
 .PD 0
@@ -283,6 +438,14 @@ Can be reversed with \fB\-v\fR.
 .PD
 Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with \fB\-g\fR.
+.IP "\fB\-\-use\-cpus\-instead\-of\-cores\fR (not implemented)" 9
+.IX Item "--use-cpus-instead-of-cores (not implemented)"
+Count the number of CPUs instead of cores. When computing how many
+jobs to run in parallel relative to the number of cores you can ask
+parallel to instead look at the number of CPUs. This will make sense
+for computers that have hyperthreading as two jobs running on one \s-1CPU\s0
+with hyperthreading will run slower than two jobs running on two CPUs.
+Normal users will not need this option.
 .IP "\fB\-v\fR" 9
 .IX Item "-v"
 Verbose.  Print the job to be run on \s-1STDOUT\s0. Can be reversed with
@@ -344,9 +507,9 @@ file:
 .PP
 \&\fBconvert \-geometry 120 foo.jpg thumb_foo.jpg\fR
 .PP
-If the system has more than 1 \s-1CPU\s0 it can be run with number-of-cpus
-jobs in parallel (\-j +0). This will do that for all jpg files in a
-directory:
+If the system has more than 1 \s-1CPU\s0 core it can be run with
+number-of-cpu-cores jobs in parallel (\-j +0). This will do that for
+all jpg files in a directory:
 .PP
 \&\fBls *.jpg | parallel \-j +0 convert \-geometry 120 {} thumb_{}\fR
 .PP
@@ -373,6 +536,10 @@ is a better solution:
 \&  find . \-name \*(Aq*.jpg\*(Aq | parallel \-j +0 convert \-geometry 120 {} {}_thumb.jpg
 \&  find . \-name \*(Aq*_thumb.jpg\*(Aq | ren \*(Aqs:/([^/]+)_thumb.jpg$:/thumb_$1:\*(Aq
 .Ve
+.PP
+(Not implemented) This will make files like ./foo/bar_thumb.jpg:
+.PP
+\&\fBfind . \-name '*.jpg' | parallel \-j +0 convert \-geometry 120 {} {.}_thumb.jpg\fR
 .SH "EXAMPLE 4: Substitution and redirection"
 .IX Header "EXAMPLE 4: Substitution and redirection"
 This will compare all files in the dir to the file foo and save the
@@ -449,6 +616,127 @@ To keep the order the same as input run:
 .PP
 This will make sure the traceroute to foss.org.my will be printed
 first.
+.SH "EXAMPLE 9: Using remote computers (not implemented)"
+.IX Header "EXAMPLE 9: Using remote computers (not implemented)"
+To run commands on a remote computer \s-1SSH\s0 needs to be set up and you
+must be able to login without entering a password (\fBssh-agent\fR may be
+handy).
+.PP
+To run \fBecho\fR on \fBserver.example.com\fR:
+.PP
+.Vb 1
+\&  seq 1 10 | parallel \-\-sshlogin server.example.com echo
+.Ve
+.PP
+To run commands on more than one remote computer run:
+.PP
+.Vb 1
+\&  seq 1 10 | parallel \-\-sshlogin server.example.com,server2.example.net echo
+.Ve
+.PP
+Or:
+.PP
+.Vb 2
+\&  seq 1 10 | parallel \-\-sshlogin server.example.com \e
+\&    \-\-sshlogin server2.example.net echo
+.Ve
+.PP
+If the login username is \fIfoo\fR on \fIserver2.example.net\fR use:
+.PP
+.Vb 2
+\&  seq 1 10 | parallel \-\-sshlogin server.example.com \e
+\&    \-\-sshlogin foo@server2.example.net echo
+.Ve
+.PP
+To distribute the commands to a list of machines, make a file
+\&\fImymachines\fR with all the machines:
+.PP
+.Vb 3
+\&  server.example.com
+\&  foo@server2.example.com
+\&  server3.example.com
+.Ve
+.PP
+Then run:
+.PP
+.Vb 1
+\&  seq 1 10 | parallel \-\-sshloginfile mymachines echo
+.Ve
+.PP
+To include the local machine add the special sshlogin ':' to the list:
+.PP
+.Vb 4
+\&  server.example.com
+\&  foo@server2.example.com
+\&  server3.example.com
+\&  :
+.Ve
+.PP
+If the number of \s-1CPU\s0 cores on the remote servers is not identified
+correctly the number of \s-1CPU\s0 cores can be added in front. Here the
+server has 8 \s-1CPU\s0 cores.
+.PP
+.Vb 1
+\&  seq 1 10 | parallel \-\-sshlogin 8/server.example.com echo
+.Ve
+.SH "EXAMPLE 10: Transferring of files (not implemented)"
+.IX Header "EXAMPLE 10: Transferring of files (not implemented)"
+To recompress gzipped files with bzip2 using a remote server run:
+.PP
+.Vb 3
+\&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
+\&    parallel \-\-sshlogin server.example.com \e
+\&    \-\-transfer "zcat {} | bzip2 \-9 >{}.bz2"
+.Ve
+.PP
+This will list the .gz\-files in the \fIlogs\fR directory and all
+directories below. Then it will transfer the files to
+\&\fIserver.example.com\fR to the corresponding directory in
+\&\fI\f(CI$HOME\fI/logs\fR. On \fIserver.example.com\fR the file will be recompressed
+using \fBzcat\fR and \fBbzip2\fR resulting in the corresponding file with
+the suffix \fI.bz2\fR.
+.PP
+If you want the file to be transfered back to the local machine add
+\&\fI\-\-return .bz2\fR:
+.PP
+.Vb 3
+\&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
+\&    parallel \-\-sshlogin server.example.com \e
+\&    \-\-transfer \-\-return .bz2 "zcat {} | bzip2 \-9 >{}.bz2"
+.Ve
+.PP
+After the recompressing is done the \fI.bz2\fR\-file is transfered back to
+the local machine.
+.PP
+If you want to delete the transfered files on the remote machine add
+\&\fI\-\-cleanup\fR:
+.PP
+.Vb 3
+\&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
+\&    parallel \-\-sshlogin server.example.com \e
+\&    \-\-transfer \-\-return .bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{}.bz2"
+.Ve
+.PP
+If you want run one several servers add the servers to \fI\-\-sshlogin\fR
+either using ',' or separate \fI\-\-sshlogin\fR:
+.PP
+.Vb 4
+\&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
+\&    parallel \-\-sshlogin server.example.com,server2.example.com \e
+\&    \-\-sshlogin server3.example.com \e
+\&    \-\-transfer \-\-return .bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{}.bz2"
+.Ve
+.PP
+You can add the local machine using \fI\-\-sshlogin :\fR. This will disable the
+removing and transferring for the local machine only:
+.PP
+.Vb 5
+\&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
+\&    parallel \-\-sshlogin server.example.com,server2.example.com \e
+\&    \-\-sshlogin server3.example.com \e
+\&    \-\-sshlogin : \e
+\&    \-\-transfer \-\-return .bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{}.bz2"
+.Ve
 .SH "QUOTING"
 .IX Header "QUOTING"
 For more advanced use quoting may be an issue. The following will
@@ -541,7 +829,7 @@ So \fBparallel\fR's newline separation can be emulated with:
 \&\fBcat | xargs \-d \*(L"\en\*(R" \-n1 \f(BIcommand\fB\fR
 .PP
 \&\fBxargs\fR can run a given number of jobs in parallel, but has no
-support for running no_of_cpus jobs in parallel.
+support for running number-of-cpu-cores jobs in parallel.
 .PP
 \&\fBxargs\fR has no support for grouping the output, therefore output may
 run together, e.g. the first half of a line is from one process and
@@ -608,24 +896,15 @@ hard, as all foreground processes get the \s-1INT\s0 from the shell.
 If there are nomore jobs (\s-1STDIN\s0 is closed) then make sure to
 distribute the arguments evenly if running \-X.
 .PP
-Distibute jobs to computers with different speeds/no_of_cpu using ssh
+Distibute jobs to computers with different speeds/number\-of\-cpu\-cores using ssh
 ask the computers how many cpus they have and spawn appropriately
 according to \-j setting. Reuse ssh connection (\-M and \-S)
 http://www.semicomplete.com/blog/geekery/distributed\-xargs.html?source=rss20
 http://code.google.com/p/ppss/wiki/Manual2
-.SS "\-S"
-.IX Subsection "-S"
-\&\-S sshlogin[,sshlogin]
 .PP
-sshlogin is [user@]host or filename with list of sshlogin
+http://www.gnu.org/software/pexec/
 .PP
-What about copying data to remote host? Have an option that says the
-argument is a file that should be copied.
-.PP
-What about copying data from remote host? Have an option that says
-the argument is a file that should be copied.
-.PP
-Where will '>' be run? Local or remote?
+Where will '>' be run? Local or remote? Where ever is easier.
 .PP
 Parallelize so this can be done:
 mdm.screen find dir \-execdir mdm-run cmd {} \e;
