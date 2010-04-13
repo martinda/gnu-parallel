@@ -1,7 +1,6 @@
 #!/bin/bash
 
-rm -rf tmp 2>/dev/null
-cp -a input-files/testdir tmp
+rsync -Ha --delete input-files/testdir/ tmp/
 cd tmp
 
 echo echo test of cat pipe sh | parallel -j 50 2>&1

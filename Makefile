@@ -12,6 +12,8 @@ unittest: parallel unittest/tests-to-run/* unittest/wanted-results/*
 
 clean:
 	rm -f parallel.1
+	rm -rf unittest/input-files/random_dirs_no_newline
+	rm -rf unittest/input-files/random_dirs_with_newline
 
 dist:
 	rm -rf ./unittest/input-files/random_dirs_*_newline || /bin/true
