@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+
+$line="";
+
+while(<>) {
+    /^\#/ and next;
+    if($verbatim) {
+	if(/^\S/) {
+	    chomp($line);
+	    $line=~s/\s+$/\n/gism;
+	    push(@lines, $line."-verbatim-\n"); 
+	    $verbatim=0;
+	    $line="";
+	}
+    } else {
+	if(/^\s*$/) { 
+	    $line=~s/B<(.*?)>/*$1*/gs;
+	    $line=~s/I<(.*?)>/_$1_/gs;
+	    push(@lines,$line."\n\n"); 
+	    $line="";
+	    next;
+	}
+	if(/^\s+\S/) { 
+	    $line.="+verbatim+\n ";
+	    $verbatim=1; 
+	} else {
+	    s/\*/***/g;
+	    chomp;
+	}
+    }
+    s/=head1 (.*)/= $1 =/g;
+    s/=head2 (.*)/== $1 ==/g;
+    s/=over (.*)//g;
+    s/=back//g;
+    s/=item /* /g;
+    m/=cut/ and last;
+    $line.=$_." ";
+}
+
+print @lines;

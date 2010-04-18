@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL 1"
-.TH PARALLEL 1 "2010-04-13" "perl v5.10.1" "User Contributed Perl Documentation"
+.TH PARALLEL 1 "2010-04-16" "20100419" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -133,7 +133,7 @@
 parallel \- build and execute shell command lines from standard input in parallel
 .SH "SYNOPSIS"
 .IX Header "SYNOPSIS"
-\&\fBparallel\fR [\-0cfgkquvmX] [\-I str] [\-j num] [\-\-silent] [command [arguments]] [< list_of_arguments]
+\&\fBparallel\fR [\-0cdEfghiIkmnpqrtuUvX] [\-I str] [\-j num] [\-\-silent] [command [arguments]] [< list_of_arguments]
 .SH "DESCRIPTION"
 .IX Header "DESCRIPTION"
 For each line of input \fBparallel\fR will execute \fBcommand\fR with the
@@ -376,17 +376,24 @@ This will transfer the file \fIfoo/bar.txt\fR to the server
 \&\fB\-\-transfer\fR is often used with \fB\-\-return\fR and \fB\-\-cleanup\fR.
 .Sp
 \&\fB\-\-transfer\fR is ignored when used with \fB\-\-sshlogin :\fR or when not used with \fB\-\-sshlogin\fR.
-.IP "\fB\-\-return\fR \fIsuffix\fR (not implemented)" 9
-.IX Item "--return suffix (not implemented)"
+.IP "\fB\-\-trc\fR \fIfilename\fR (not implemented)" 9
+.IX Item "--trc filename (not implemented)"
+Transfer, Return, Cleanup. Short hand for:
+.Sp
+.Vb 1
+\&  \-\-transfer \-\-return I<filename> \-\-cleanup
+.Ve
+.IP "\fB\-\-return\fR \fIfilename\fR (not implemented)" 9
+.IX Item "--return filename (not implemented)"
 Transfer files from remote servers. \fB\-\-return\fR is used with
 \&\fB\-\-sshlogin\fR when the arguments are files on the remote servers. When
-processing is done the file with \fIsuffix\fR appended will be transfered
+processing is done the file \fIfilename\fR will be transfered
 from the remote server using \fBrsync\fR and will be put relative to
 the default login dir. E.g.
 .Sp
 .Vb 2
 \&  echo foo/bar.txt | parallel \e
-\&    \-\-sshlogin server.example.com \-\-return .out touch {}.out
+\&    \-\-sshlogin server.example.com \-\-return {}.out touch {}.out
 .Ve
 .Sp
 This will transfer the file \fI\f(CI$HOME\fI/foo/bar.txt.out\fR from the server
@@ -395,20 +402,20 @@ This will transfer the file \fI\f(CI$HOME\fI/foo/bar.txt.out\fR from the server
 .Sp
 .Vb 2
 \&  echo /tmp/foo/bar.txt | parallel \e
-\&    \-\-sshlogin server.example.com \-\-return .out touch {}.out
+\&    \-\-sshlogin server.example.com \-\-return {}.out touch {}.out
 .Ve
 .Sp
 This will transfer the file \fI/tmp/foo/bar.txt.out\fR from the server
 \&\fIserver.example.com\fR to the file \fI/tmp/foo/bar.txt.out\fR after running
 \&\fBtouch /tmp/foo/bar.txt.out\fR on \fIserver.example.com\fR.
 .Sp
-Multiple files with different suffixes can be transfered by repeating
-the options multiple times:
+Multiple files can be transfered by repeating the options multiple
+times:
 .Sp
 .Vb 3
 \&  echo /tmp/foo/bar.txt | \e
 \&    parallel \-\-sshlogin server.example.com \e
-\&    \-\-return .out \-\-return .out2 touch {}.out {}.out2
+\&    \-\-return {}.out \-\-return {}.out2 touch {}.out {}.out2
 .Ve
 .Sp
 \&\fB\-\-return\fR is often used with \fB\-\-transfer\fR and \fB\-\-cleanup\fR.
@@ -421,8 +428,8 @@ on the remote server after processing is done.
 .Sp
 .Vb 3
 \&  find log \-name \*(Aq*gz\*(Aq | parallel \e
-\&    \-\-sshlogin server.example.com \-\-transfer \-\-return .bz2 \e
-\&    \-\-cleanup "zcat {} | bzip \-9 >{}.bz2"
+\&    \-\-sshlogin server.example.com \-\-transfer \-\-return {.}.bz2 \e
+\&    \-\-cleanup "zcat {} | bzip \-9 >{.}.bz2"
 .Ve
 .Sp
 With \fB\-\-transfer\fR the file transfered to the remote server will be
@@ -541,7 +548,7 @@ is a better solution:
 \&  find . \-name \*(Aq*_thumb.jpg\*(Aq | ren \*(Aqs:/([^/]+)_thumb.jpg$:/thumb_$1:\*(Aq
 .Ve
 .PP
-(Not implemented) This will make files like ./foo/bar_thumb.jpg:
+This will make files like ./foo/bar_thumb.jpg:
 .PP
 \&\fBfind . \-name '*.jpg' | parallel \-j +0 convert \-geometry 120 {} {.}_thumb.jpg\fR
 .SH "EXAMPLE 4: Substitution and redirection"
@@ -690,7 +697,7 @@ To recompress gzipped files with bzip2 using a remote server run:
 .Vb 3
 \&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
 \&    parallel \-\-sshlogin server.example.com \e
-\&    \-\-transfer "zcat {} | bzip2 \-9 >{}.bz2"
+\&    \-\-transfer "zcat {} | bzip2 \-9 >{.}.bz2"
 .Ve
 .PP
 This will list the .gz\-files in the \fIlogs\fR directory and all
@@ -698,27 +705,28 @@ directories below. Then it will transfer the files to
 \&\fIserver.example.com\fR to the corresponding directory in
 \&\fI\f(CI$HOME\fI/logs\fR. On \fIserver.example.com\fR the file will be recompressed
 using \fBzcat\fR and \fBbzip2\fR resulting in the corresponding file with
-the suffix \fI.bz2\fR.
+\&\fI.gz\fR replaced with \fI.bz2\fR.
 .PP
 If you want the file to be transfered back to the local machine add
-\&\fI\-\-return .bz2\fR:
+\&\fI\-\-return {.}.bz2\fR:
 .PP
 .Vb 3
 \&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
 \&    parallel \-\-sshlogin server.example.com \e
-\&    \-\-transfer \-\-return .bz2 "zcat {} | bzip2 \-9 >{}.bz2"
+\&    \-\-transfer \-\-return {.}.bz2 "zcat {} | bzip2 \-9 >{.}.bz2"
 .Ve
 .PP
 After the recompressing is done the \fI.bz2\fR\-file is transfered back to
-the local machine.
+the local machine and put next to the original \fI.gz\fR\-file.
 .PP
 If you want to delete the transfered files on the remote machine add
-\&\fI\-\-cleanup\fR:
+\&\fI\-\-cleanup\fR. This will remove both the file transfered to the remote
+machine and the files transfered from the remote machine:
 .PP
 .Vb 3
 \&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
 \&    parallel \-\-sshlogin server.example.com \e
-\&    \-\-transfer \-\-return .bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{}.bz2"
+\&    \-\-transfer \-\-return {.}.bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{.}.bz2"
 .Ve
 .PP
 If you want run one several servers add the servers to \fI\-\-sshlogin\fR
@@ -728,7 +736,7 @@ either using ',' or separate \fI\-\-sshlogin\fR:
 \&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
 \&    parallel \-\-sshlogin server.example.com,server2.example.com \e
 \&    \-\-sshlogin server3.example.com \e
-\&    \-\-transfer \-\-return .bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{}.bz2"
+\&    \-\-transfer \-\-return {.}.bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{.}.bz2"
 .Ve
 .PP
 You can add the local machine using \fI\-\-sshlogin :\fR. This will disable the
@@ -739,7 +747,25 @@ removing and transferring for the local machine only:
 \&    parallel \-\-sshlogin server.example.com,server2.example.com \e
 \&    \-\-sshlogin server3.example.com \e
 \&    \-\-sshlogin : \e
-\&    \-\-transfer \-\-return .bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{}.bz2"
+\&    \-\-transfer \-\-return {.}.bz2 \-\-cleanup "zcat {} | bzip2 \-9 >{.}.bz2"
+.Ve
+.PP
+Often \fI\-\-transfer\fR, \fI\-\-return\fR and \fI\-\-cleanup\fR are used together. They can be
+shortened to \fI\-\-trc\fR:
+.PP
+.Vb 5
+\&  find logs/ \-name \*(Aq*.gz\*(Aq | \e
+\&    parallel \-\-sshlogin server.example.com,server2.example.com \e
+\&    \-\-sshlogin server3.example.com \e
+\&    \-\-sshlogin : \e
+\&    \-\-trc {.}.bz2 "zcat {} | bzip2 \-9 >{.}.bz2"
+.Ve
+.PP
+With the file \fImymachines\fR containing the compute machines it becomes:
+.PP
+.Vb 2
+\&  find logs/ \-name \*(Aq*.gz\*(Aq | parallel \-\-sshloginfile mymachines \e
+\&    \-\-trc {.}.bz2 "zcat {} | bzip2 \-9 >{.}.bz2"
 .Ve
 .SH "QUOTING"
 .IX Header "QUOTING"
@@ -884,6 +910,8 @@ unexpected results, as it will often be interpreted as an option.
 Report bugs to <bug\-parallel@tange.dk>.
 .SH "IDEAS"
 .IX Header "IDEAS"
+One char options not used: F G J K M P Q Y
+.PP
 Test if \-0 works on filenames ending in '\en'
 .PP
 xargs dropin-replacement.
@@ -902,7 +930,20 @@ distribute the arguments evenly if running \-X.
 .PP
 Distribute jobs to computers with different speeds/number\-of\-cpu\-cores using ssh
 ask the computers how many cpus they have and spawn appropriately
-according to \-j setting. Reuse ssh connection (\-M and \-S)
+according to \-j setting.  Reuse ssh connection (\-M and \-S)
+.PP
+SEED=$RANDOM
+ssh \-MS /tmp/ssh\-%r@%h:%p\-$SEED elvis
+rsync \-\-rsh=\*(L"ssh \-S /tmp/ssh\-%r@%h:%p\-$SEED\*(R"  gitup elvis:/tmp/
+ssh \-S /tmp/ssh\-%r@%h:%p\-$SEED elvis hostname
+.PP
+FILE=gpl\-3.0.txt
+BASE=gpl\-3.0
+$ rsync \-z \f(CW$FILE\fR e:$FILE
+$ ssh e \*(L"cat \f(CW$FILE\fR | bzip2 > \f(CW$BASE\fR.bz2\*(R"
+$ rsync \-z e:$BASE.bz2 \f(CW$BASE\fR.bz2
+$ ssh e \*(L"rm \f(CW$FILE\fR \f(CW$BASE\fR\*(R"
+.PP
 http://www.semicomplete.com/blog/geekery/distributed\-xargs.html?source=rss20
 http://code.google.com/p/ppss/wiki/Manual2
 .PP

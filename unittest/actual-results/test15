@@ -91,8 +91,9 @@ line 1 line 1
 line 2
 line 1 line 1
 line 2
-2
-2
+Output from -h and --help
+4
+4
 7
 echo bar
 echo car

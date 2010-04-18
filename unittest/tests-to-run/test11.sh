@@ -1,4 +1,6 @@
 #!/bin/bash
 
+PAR=parallel
+
 # Test the empty line
-echo | parallel echo foo
+echo | $PAR echo foo

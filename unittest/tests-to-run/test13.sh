@@ -1,9 +1,11 @@
 #!/bin/bash
 
+PAR=parallel
+
 # Test -k
 ulimit -n 50
-(echo "sleep 3; echo begin"; seq 1 30 | parallel -kq echo "sleep 1; echo {}"; echo "echo end") \
-| parallel -k -j0
+(echo "sleep 3; echo begin"; seq 1 30 | $PAR -kq echo "sleep 1; echo {}"; echo "echo end") \
+| $PAR -k -j0
 
 # Test SIGTERM
-(sleep 5; killall parallel -TERM) & seq 1 100 | parallel -k sleep 3';' echo
+(sleep 5; killall $PAR -TERM) & seq 1 100 | $PAR -k sleep 3';' echo

@@ -1,0 +1,1806 @@
+#!/usr/bin/perl -w
+
+=head1 NAME
+
+parallel - build and execute shell command lines from standard input in parallel
+
+=head1 SYNOPSIS
+
+B<parallel> [-0cdEfghiIkmnpqrtuUvX] [-I str] [-j num] [--silent] [command [arguments]] [< list_of_arguments]
+
+=head1 DESCRIPTION
+
+For each line of input B<parallel> will execute B<command> with the
+line as arguments. If no B<command> is given the line of input is
+executed.  B<parallel> can often be used as a substitute for B<xargs>
+or B<cat | sh>.
+
+Several lines will be run in parallel.
+
+=over 9
+
+=item I<command>
+
+Command to execute.  If B<command> or the following arguments contain
+{} every instance will be substituted with the input line. Setting a
+command also invokes B<-f>.
+
+If B<command> is given, B<parallel> will behave similar to B<xargs>. If
+B<command> is not given B<parallel> will behave similar to B<cat | sh>.
+
+
+=item B<{}>
+
+Input line. This is the default replacement string and will normally
+be used for putting the argument in the command line. It can be
+changed with B<-I>.
+
+
+=item B<{.}>
+
+Input line without extension. This is a specialized replacement string
+with the extension removed. It will remove from the last B<.> till the
+end of line of each input line and replace {.} with the
+remaining. E.g. I<foo.jpg> becomes I<foo>. If the input line does
+not contain B<.> it will remain unchanged.
+
+{.} can be used the same places as {}.
+
+
+=item B<--null>
+
+=item B<-0>
+
+Use NUL as delimiter.  Normally input lines will end in \n
+(newline). If they end in \0 (NUL), then use this option. It is useful
+for processing filenames that may contain \n (newline).
+
+
+=item B<--command>
+
+=item B<-c>
+
+Line is a command.  The input line contains more than one argument or
+the input line needs to be evaluated by the shell. This is the default
+if B<command> is not set. Can be reversed with B<-f>.
+
+
+=item B<--delimiter> I<delim>
+
+=item B<-d> I<delim>
+
+Input items are terminated by the specified character.  Quotes and
+backslash are not special; every character in the input is taken
+literally.  Disables the end-of-file string, which is treated like any
+other argument.  This can be used when the input consists of simply
+newline-separated items, although it is almost always better to design
+your program to use --null where this is possible.  The specified
+delimiter may be a single character, a C-style character escape such
+as \n, or an octal or hexadecimal escape code.  Octal and
+hexadecimal escape codes are understood as for the printf command.
+Multibyte characters are not supported.
+
+
+=item B<--file>
+
+=item B<-f>
+
+Line is a filename.  The input line contains a filename that will be
+quoted so it is not evaluated by the shell. This is the default if
+B<command> is set. Can be reversed with B<-c>.
+
+
+=item B<--group>
+
+=item B<-g>
+
+Group output.  Output from each jobs is grouped together and is only
+printed when the command is finished. STDERR first followed by STDOUT.
+B<-g> is the default. Can be reversed with B<-u>.
+
+
+=item B<-I> I<string>
+
+Use the replacement string I<string> instead of {}.
+
+
+=item B<-U> I<string>
+
+=item B<--extensionreplace> I<string>
+
+Use the replacement string I<string> instead of {.} for input line without extension.
+
+
+=item B<--jobs> I<N>
+
+=item B<-j> I<N>
+
+=item B<--max-procs> I<N>
+
+=item B<-P> I<N>
+
+Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
+
+
+=item B<--jobs> I<+N>
+
+=item B<-j> I<+N>
+
+=item B<--max-procs> I<+N>
+
+=item B<-P> I<+N>
+
+Add N to the number of CPU cores.  Run this many jobs in parallel. For
+compute intensive jobs I<-j +0> is useful as it will run
+number-of-cpu-cores jobs in parallel. See also
+--use-cpus-instead-of-cores.
+
+
+=item B<--jobs> I<-N>
+
+=item B<-j> I<-N>
+
+=item B<--max-procs> I<-N>
+
+=item B<-P> I<-N>
+
+Subtract N from the number of CPU cores.  Run this many jobs in parallel.
+If the evaluated number is less than 1 then 1 will be used.  See also
+--use-cpus-instead-of-cores.
+
+
+=item B<--jobs> I<N>%
+
+=item B<-j> I<N>%
+
+=item B<--max-procs> I<N>%
+
+=item B<-P> I<N>%
+
+Multiply N% with the number of CPU cores.  Run this many jobs in parallel.
+If the evaluated number is less than 1 then 1 will be used.  See also
+--use-cpus-instead-of-cores.
+
+
+=item B<--keeporder>
+
+=item B<-k>
+
+Keep sequence of output same as the order of input. If jobs 1 2 3 4
+end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
+
+
+=item B<--number-of-cpus>
+
+Print the number of CPUs and exit (used by B<parallel> itself to
+determine the number of CPUs on remote machines).
+
+
+=item B<--number-of-cores>
+
+Print the number of cores and exit (used by B<parallel> itself to determine the
+number of cores on remote machines).
+
+
+=item B<--quote>
+
+=item B<-q>
+
+Quote B<command>.  This will quote the command line so special
+characters are not interpreted by the shell. See the section
+QUOTING. Most people will never need this.  Quoting is disabled by
+default.
+
+
+=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin]> (not implemented)
+
+=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin]> (not implemented)
+
+Distribute jobs to remote servers. The jobs will be run on a list of
+remote servers.  B<parallel> will determine the number of CPU cores on
+the remote servers and run the number of jobs as specified by -j.  If
+the number I<ncpu> is given B<parallel> will use this number for
+number of CPUs on the host. Normally I<ncpu> will not be needed.
+
+An I<sshlogin> is the string you would normally pass to SSH to login,
+e.g. I<server.example.com>, I<foo@server.example.com>, or I<"-l foo -p
+2222 server.example.com">. The sshlogin must not require a password.
+
+The sshlogin ':' is special, it means 'no ssh' and will therefore run
+on the local machine.
+
+To specify more sshlogins separate the sshlogins by comma or repeat
+the options multiple times.
+
+For examples: see B<--sshloginfile>.
+
+The remote host must have B<parallel> installed.
+
+
+=item B<--sshloginfile> I<filename> (not implemented)
+
+File with sshlogins. The file consists of sshlogins on separate
+lines. Empty lines and lines starting with '#' are ignored. Example:
+
+  server.example.com
+  username@server2.example.com
+  8/my-8-core-server.example.com
+  2/myusername@my-dualcore.example.net
+  # This server has SSH running on port 2222
+  -p 2222 server.example.net
+  4/-p 2222 quadserver.example.net
+  # Assume 16 cores on the local machine
+  16/:
+
+
+=item B<--silent>
+
+Silent.  The job to be run will not be printed. This is the default.
+Can be reversed with B<-v>.
+
+
+=item B<--transfer> (not implemented)
+
+Transfer files to remote servers. B<--transfer> is used with
+B<--sshlogin> when the arguments are files and should be transfered to
+the remote servers. The files will be transfered using B<rsync> and
+will be put relative to the default login dir. E.g.
+
+  echo foo/bar.txt | parallel \
+    --sshlogin server.example.com --transfer wc
+
+This will transfer the file I<foo/bar.txt> to the server
+I<server.example.com> to the file $HOME/foo/bar.txt before running
+B<wc foo/bar.txt> on I<server.example.com>.
+
+  echo /tmp/foo/bar.txt | parallel \
+    --sshlogin server.example.com --transfer wc
+
+This will transfer the file I<foo/bar.txt> to the server
+I<server.example.com> to the file /tmp/foo/bar.txt before running
+B<wc /tmp/foo/bar.txt> on I<server.example.com>.
+
+B<--transfer> is often used with B<--return> and B<--cleanup>.
+
+B<--transfer> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
+
+
+=item B<--trc> I<filename> (not implemented)
+
+Transfer, Return, Cleanup. Short hand for:
+
+  --transfer --return I<filename> --cleanup
+
+
+=item B<--return> I<filename> (not implemented)
+
+Transfer files from remote servers. B<--return> is used with
+B<--sshlogin> when the arguments are files on the remote servers. When
+processing is done the file I<filename> will be transfered
+from the remote server using B<rsync> and will be put relative to
+the default login dir. E.g.
+
+  echo foo/bar.txt | parallel \
+    --sshlogin server.example.com --return {}.out touch {}.out
+
+This will transfer the file I<$HOME/foo/bar.txt.out> from the server
+I<server.example.com> to the file I<foo/bar.txt.out> after running
+B<touch foo/bar.txt.out> on I<server.example.com>.
+
+  echo /tmp/foo/bar.txt | parallel \
+    --sshlogin server.example.com --return {}.out touch {}.out
+
+This will transfer the file I</tmp/foo/bar.txt.out> from the server
+I<server.example.com> to the file I</tmp/foo/bar.txt.out> after running
+B<touch /tmp/foo/bar.txt.out> on I<server.example.com>.
+
+Multiple files can be transfered by repeating the options multiple
+times:
+
+  echo /tmp/foo/bar.txt | \
+    parallel --sshlogin server.example.com \
+    --return {}.out --return {}.out2 touch {}.out {}.out2
+
+B<--return> is often used with B<--transfer> and B<--cleanup>.
+
+B<--return> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
+
+
+=item B<--cleanup> (not implemented)
+
+Remove transfered files. B<--cleanup> will remove the transfered files
+on the remote server after processing is done.
+
+  find log -name '*gz' | parallel \
+    --sshlogin server.example.com --transfer --return {.}.bz2 \
+    --cleanup "zcat {} | bzip -9 >{.}.bz2"
+
+With B<--transfer> the file transfered to the remote server will be
+removed on the remote server.  Directories created will not be removed
+- even if they are empty.
+
+With B<--return> the file transfered from the remote server will be
+removed on the remote server.  Directories created will not be removed
+- even if they are empty.
+
+B<--cleanup> is ignored when not used with B<--transfer> or B<--return>.
+
+
+=item B<--ungroup>
+
+=item B<-u>
+
+Ungroup output.  Output is printed as soon as possible. This may cause
+output from different commands to be mixed. Can be reversed with B<-g>.
+
+
+=item B<--use-cpus-instead-of-cores> (not implemented)
+
+Count the number of CPUs instead of cores. When computing how many
+jobs to run in parallel relative to the number of cores you can ask
+parallel to instead look at the number of CPUs. This will make sense
+for computers that have hyperthreading as two jobs running on one CPU
+with hyperthreading will run slower than two jobs running on two CPUs.
+Normal users will not need this option.
+
+
+=item B<-v>
+
+Verbose.  Print the job to be run on STDOUT. Can be reversed with
+B<--silent>.
+
+
+=item B<--xargs>
+
+=item B<-m>
+
+Multiple. Insert as many arguments as the command line length permits. If
+{} is not used the arguments will be appended to the line.  If {} is
+used multiple times each {} will be replaced with all the arguments.
+
+
+=item B<-X>
+
+xargs with context replace. This works like B<-m> except if {} is part
+of a word (like I<pic{}.jpg>) then the whole word will be repeated.
+
+=back
+
+=head1 EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation
+
+B<parallel> can work similar to B<cat | sh>. 
+
+A ressource inexpensive job is a job that takes very little CPU, disk
+I/O and network I/O. Ping is an example of a ressource inexpensive
+job. wget is too - if the webpages are small.
+
+The content of the file jobs_to_run:
+
+  ping -c 1 10.0.0.1
+  wget http://status-server/status.cgi?ip=10.0.0.1
+  ping -c 1 10.0.0.2
+  wget http://status-server/status.cgi?ip=10.0.0.2
+  ...
+  ping -c 1 10.0.0.255
+  wget http://status-server/status.cgi?ip=10.0.0.255
+
+To run 100 processes simultaneously do:
+
+B<parallel -j 100 < jobs_to_run>
+
+As there is not a B<command> the option B<-c> is default because the
+jobs needs to be evaluated by the shell.
+
+=head1 EXAMPLE 2: Working as xargs -n1. Argument appending
+
+B<parallel> can work similar to B<xargs -n1>. 
+
+To output all html files run:
+
+B<find . -name '*.html' | parallel cat>
+
+As there is a B<command> the option B<-f> is default because the
+filenames needs to be protected from the shell in case a filename
+contains special characters.
+
+=head1 EXAMPLE 3: Compute intensive jobs and substitution
+
+If ImageMagick is installed this will generate a thumbnail of a jpg
+file:
+
+B<convert -geometry 120 foo.jpg thumb_foo.jpg>
+
+If the system has more than 1 CPU core it can be run with
+number-of-cpu-cores jobs in parallel (-j +0). This will do that for
+all jpg files in a directory:
+
+B<ls *.jpg | parallel -j +0 convert -geometry 120 {} thumb_{}>
+
+To do it recursively use B<find>:
+
+B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg>
+
+Notice how the argument has to start with {} as {} will include path
+(e.g. running B<convert -geometry 120 ./foo/bar.jpg
+thumb_./foo/bar.jpg> would clearly be wrong). It will result in files
+like ./foo/bar.jpg_thumb.jpg. If that is not wanted this can fix it:
+
+  find . -name '*.jpg' | \
+  perl -pe 'chomp; $a=$_; s:/([^/]+)$:/thumb_$1:; $_="convert -geometry 120 $a $_\n"' | \
+  parallel -c -j +0
+
+Unfortunately this will not work if the filenames contain special
+characters (such as space or quotes). If you have B<ren> installed this
+is a better solution:
+
+  find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg
+  find . -name '*_thumb.jpg' | ren 's:/([^/]+)_thumb.jpg$:/thumb_$1:'
+
+This will make files like ./foo/bar_thumb.jpg:
+
+B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {.}_thumb.jpg>
+
+=head1 EXAMPLE 4: Substitution and redirection
+
+This will compare all files in the dir to the file foo and save the
+diffs in corresponding .diff files:
+
+B<ls | parallel diff {} foo ">>B<"{}.diff>
+
+Quoting of > is necessary to postpone the redirection. Another
+solution is to quote the whole command:
+
+B<ls | parallel "diff {} foo >>B<{}.diff">
+
+
+=head1 EXAMPLE 5: Composed commands
+
+A job can consist of several commands. This will print the number of
+files in each directory:
+
+B<ls | parallel 'echo -n {}" "; ls {}|wc -l'>
+
+To put the output in a file called <name>.dir:
+
+B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >> B<{}.dir'>
+
+
+=head1 EXAMPLE 6: Context replace
+
+To remove the files I<pict0000.jpg> .. I<pict9999.jpg> you could do:
+
+B<seq -f %04g 0 9999 | parallel rm pict{}.jpg>
+
+You could also do:
+
+B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -m rm>
+
+The first will run B<rm> 10000 times, while the last will only run
+B<rm> as many times needed to keep the command line length short
+enough (typically 1-2 times).
+
+You could also run:
+
+B<seq -f %04g 0 9999 | parallel -X rm pict{}.jpg>
+
+This will also only run B<rm> as many times needed to keep the command
+line length short enough.
+
+=head1 EXAMPLE 7: Group output lines
+
+When runnning jobs that output data, you often do not want the output
+of multiple jobs to run together. B<parallel> defaults to grouping the
+output of each job, so the output is printed when the job finishes. If
+you want the output to be printed while the job is running you can use
+B<-u>.
+
+Compare the output of:
+
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
+
+to the output of:
+
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -u traceroute>
+
+
+=head1 EXAMPLE 8: Keep order of output same as order of input
+
+Normally the output of a job will be printed as soon as it
+completes. Sometimes you want the order of the output to remain the
+same as the order of the input. B<-k> will make sure the order of
+output will be in the same order as input even if later jobs end
+before earlier jobs.
+
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
+
+will give traceroute of foss.org.my, debian.org and
+freenetproject.org, but it will be sorted according to which job
+completed first.
+
+To keep the order the same as input run:
+
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -k traceroute>
+
+This will make sure the traceroute to foss.org.my will be printed
+first.
+
+=head1 EXAMPLE 9: Using remote computers (not implemented)
+
+To run commands on a remote computer SSH needs to be set up and you
+must be able to login without entering a password (B<ssh-agent> may be
+handy).
+
+To run B<echo> on B<server.example.com>:
+
+  seq 1 10 | parallel --sshlogin server.example.com echo
+
+To run commands on more than one remote computer run:
+
+  seq 1 10 | parallel --sshlogin server.example.com,server2.example.net echo
+
+Or:
+
+  seq 1 10 | parallel --sshlogin server.example.com \
+    --sshlogin server2.example.net echo
+
+If the login username is I<foo> on I<server2.example.net> use:
+
+  seq 1 10 | parallel --sshlogin server.example.com \
+    --sshlogin foo@server2.example.net echo
+
+To distribute the commands to a list of machines, make a file
+I<mymachines> with all the machines:
+
+  server.example.com
+  foo@server2.example.com
+  server3.example.com
+
+Then run:
+
+  seq 1 10 | parallel --sshloginfile mymachines echo
+
+To include the local machine add the special sshlogin ':' to the list:
+
+  server.example.com
+  foo@server2.example.com
+  server3.example.com
+  :
+
+If the number of CPU cores on the remote servers is not identified
+correctly the number of CPU cores can be added in front. Here the
+server has 8 CPU cores.
+
+  seq 1 10 | parallel --sshlogin 8/server.example.com echo
+
+
+=head1 EXAMPLE 10: Transferring of files (not implemented)
+
+To recompress gzipped files with bzip2 using a remote server run:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com \
+    --transfer "zcat {} | bzip2 -9 >{.}.bz2"
+
+This will list the .gz-files in the I<logs> directory and all
+directories below. Then it will transfer the files to
+I<server.example.com> to the corresponding directory in
+I<$HOME/logs>. On I<server.example.com> the file will be recompressed
+using B<zcat> and B<bzip2> resulting in the corresponding file with
+I<.gz> replaced with I<.bz2>.
+
+If you want the file to be transfered back to the local machine add
+I<--return {.}.bz2>:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com \
+    --transfer --return {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
+
+After the recompressing is done the I<.bz2>-file is transfered back to
+the local machine and put next to the original I<.gz>-file.
+
+If you want to delete the transfered files on the remote machine add
+I<--cleanup>. This will remove both the file transfered to the remote
+machine and the files transfered from the remote machine:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com \
+    --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
+
+If you want run one several servers add the servers to I<--sshlogin>
+either using ',' or separate I<--sshlogin>:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com,server2.example.com \
+    --sshlogin server3.example.com \
+    --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
+
+You can add the local machine using I<--sshlogin :>. This will disable the
+removing and transferring for the local machine only:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com,server2.example.com \
+    --sshlogin server3.example.com \
+    --sshlogin : \
+    --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
+
+Often I<--transfer>, I<--return> and I<--cleanup> are used together. They can be
+shortened to I<--trc>:
+
+  find logs/ -name '*.gz' | \
+    parallel --sshlogin server.example.com,server2.example.com \
+    --sshlogin server3.example.com \
+    --sshlogin : \
+    --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
+
+With the file I<mymachines> containing the compute machines it becomes:
+
+  find logs/ -name '*.gz' | parallel --sshloginfile mymachines \
+    --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
+
+=head1 QUOTING
+
+For more advanced use quoting may be an issue. The following will
+print the filename for each line that has exactly 2 columns:
+
+B<perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file>
+
+This can be done by B<parallel> using:
+
+B<ls | parallel "perl -ne '/^\\S+\\s+\\S+$/ and print \$ARGV,\"\\n\"'">
+
+Notice how \'s, "'s, and $'s needs to be quoted. B<parallel> can do
+the quoting by using option B<-q>:
+
+B<ls | parallel -q  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"'>
+
+However, this means you cannot make the shell interpret special
+characters. For example this B<will not work>:
+
+B<ls | parallel -q "diff {} foo >>B<{}.diff"> 
+
+B<ls | parallel -q "ls {} | wc -l">
+
+because > and | need to be interpreted by the shell.
+
+If you get errors like:
+
+B<sh: -c: line 0: syntax error near unexpected token>
+
+then you might try using B<-q>.
+
+If you are using B<bash> process substitution like B<<(cat foo)> then
+you may try B<-q> and prepending B<command> with B<bash -c>:
+
+B<ls | parallel -q bash -c 'wc -c <(echo {})'>
+
+Or for substituting output:
+
+B<ls | parallel -q bash -c 'tar c {} | tee >>B<(gzip >>B<{}.tar.gz) | bzip2 >>B<{}.tar.bz2'>
+
+B<Conclusion>: To avoid dealing with the quoting problems it may be
+easier just to write a small script and have B<parallel> call that
+script.
+
+
+=head1 LIST RUNNING JOBS
+
+If you want a list of the jobs currently running you can run:
+
+B<killall -USR1 parallel>
+
+B<parallel> will then print the currently running jobs on STDERR.
+
+
+=head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
+
+If you regret starting a lot of jobs you can simply break B<parallel>,
+but if you want to make sure you do not have halfcompleted jobs you
+should send the signal B<SIGTERM> to B<parallel>:
+
+B<killall -TERM parallel>
+
+This will tell B<parallel> to not start any new jobs, but wait until
+the currently running jobs are finished.
+
+
+=head1 DIFFERENCES BETWEEN xargs/find -exec AND parallel
+
+B<xargs> and B<find -exec> offer some of the same possibilites as
+B<parallel>. 
+
+B<find -exec> only works on files. So processing other input (such as
+hosts or URLs) will require creating these inputs as files. B<find
+-exec> has no support for running commands in parallel.
+
+B<xargs> deals badly with special characters (such as space, ' and
+"). To see the problem try this:
+
+  touch important_file
+  touch 'not important_file'
+  ls not* | xargs rm
+  mkdir -p '12" records'
+  ls | xargs rmdir 
+
+You can specify B<-0> or B<-d "\n">, but many input generators are not
+optimized for using B<NUL> as separator but are optimized for
+B<newline> as separator. E.g B<head>, B<tail>, B<awk>, B<ls>, B<echo>,
+B<sed>, B<tar -v>, B<perl> (-0 and \0 instead of \n), B<locate>
+(requires using -0), B<find> (requires using -print0), B<grep>
+(requires user to use -z or -Z).
+
+So B<parallel>'s newline separation can be emulated with:
+
+B<cat | xargs -d "\n" -n1 I<command>>
+
+B<xargs> can run a given number of jobs in parallel, but has no
+support for running number-of-cpu-cores jobs in parallel.
+
+B<xargs> has no support for grouping the output, therefore output may
+run together, e.g. the first half of a line is from one process and
+the last half of the line is from another process.
+
+B<xargs> has no support for keeping the order of the output, therefore
+if running jobs in parallel using B<xargs> the output of the second
+job cannot be postponed till the first job is done.
+
+B<xargs> has no support for context replace, so you will have to create the 
+arguments.
+
+If you use a replace string in B<xargs> (B<-I>) you can not force
+B<xargs> to use more than one argument.
+
+Quoting in B<xargs> works like B<-q> in B<parallel>. This means
+composed commands and redirection requires using B<bash -c>.
+
+B<ls | parallel "wc {} >> B<{}.wc"> 
+
+becomes 
+
+B<ls | xargs -d "\n" -P10 -I {} bash -c "wc {} >>B< {}.wc">
+
+and 
+
+B<ls | parallel "echo {}; ls {}|wc"> 
+
+becomes 
+
+B<ls | xargs -d "\n" -P10 -I {} bash -c "echo {}; ls {}|wc">
+
+
+=head1 DIFFERENCES BETWEEN mdm/middleman AND parallel
+
+middleman(mdm) is also a tool for running jobs in parallel.
+
+Here are the shellscripts of http://mdm.berlios.de/usage.html ported
+to parallel use:
+
+B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
+
+B<cat files | parallel -j+0 cmd>
+
+
+=head1 BUGS
+
+Filenames beginning with '-' can cause some commands to give
+unexpected results, as it will often be interpreted as an option.
+
+=head1 REPORTING BUGS
+
+Report bugs to <bug-parallel@tange.dk>.
+
+=head1 IDEAS
+
+One char options not used: F G J K M P Q Y
+
+Test if -0 works on filenames ending in '\n'
+
+xargs dropin-replacement.
+Implement the missing --features
+
+monitor to see which jobs are currently running
+http://code.google.com/p/ppss/
+
+Accept signal INT instead of TERM to complete current running jobs but
+do not start new jobs. Print out the number of jobs waiting to
+complete on STDERR. Accept sig INT again to kill now. This seems to be
+hard, as all foreground processes get the INT from the shell.
+
+If there are nomore jobs (STDIN is closed) then make sure to
+distribute the arguments evenly if running -X.
+
+
+Distribute jobs to computers with different speeds/number-of-cpu-cores using ssh
+ask the computers how many cpus they have and spawn appropriately
+according to -j setting.  Reuse ssh connection (-M and -S)
+
+SEED=$RANDOM
+ssh -MS /tmp/ssh-%r@%h:%p-$SEED elvis
+rsync --rsh="ssh -S /tmp/ssh-%r@%h:%p-$SEED"  gitup elvis:/tmp/
+ssh -S /tmp/ssh-%r@%h:%p-$SEED elvis hostname
+
+FILE=gpl-3.0.txt
+BASE=gpl-3.0
+$ rsync -z $FILE e:$FILE
+$ ssh e "cat $FILE | bzip2 > $BASE.bz2"
+$ rsync -z e:$BASE.bz2 $BASE.bz2
+$ ssh e "rm $FILE $BASE"
+
+http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
+http://code.google.com/p/ppss/wiki/Manual2
+
+http://www.gnu.org/software/pexec/
+
+Where will '>' be run? Local or remote? Remote.
+
+
+Parallelize so this can be done:
+mdm.screen find dir -execdir mdm-run cmd {} \;
+Maybe:
+find dir -execdir parallel --communication-file /tmp/comfile cmd {} \;
+
+=head2 Comfile
+
+This will put a lock on /tmp/comfile. The number of locks is the number of running commands.
+If the number is smaller than -j then it will start a process in the background ( cmd & ),
+otherwise wait.
+
+parallel --wait /tmp/comfile will wait until no more locks on the file
+
+=head1 AUTHOR
+
+Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
+
+Copyright (C) 2008-2010 Ole Tange, http://ole.tange.dk
+
+
+=head1 LICENSE
+
+Copyright (C) 2007-2010 Free Software Foundation, Inc.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+at your option any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+=head1 DEPENDENCIES
+
+B<parallel> uses Perl, and the Perl modules Getopt::Long, IPC::Open3,
+Symbol, IO::File, POSIX, and File::Temp.
+
+
+=head1 SEE ALSO
+
+B<find>(1), B<xargs>(1)
+
+=cut
+
+
+use IPC::Open3;
+use Symbol qw(gensym);
+use IO::File;
+use POSIX ":sys_wait_h";
+use File::Temp qw/ tempfile tempdir /;
+use Getopt::Long;
+use strict;
+
+my ($processes,$command);
+
+Getopt::Long::Configure ("bundling","require_order");
+GetOptions("debug|D" => \$::opt_D,
+           "xargs|m" => \$::opt_m,
+           "X" => \$::opt_X,
+	   "v" => \$::opt_v,
+	   "silent" => \$::opt_silent,
+	   "keeporder|k" => \$::opt_k,
+	   "group|g" => \$::opt_g,
+	   "ungroup|u" => \$::opt_u,
+	   "command|c" => \$::opt_c,
+	   "file|f" => \$::opt_f,
+	   "null|0" => \$::opt_0,
+	   "quote|q" => \$::opt_q,
+	   "I=s" => \$::opt_I,
+	   "extensionreplace|U=s" => \$::opt_U,
+	   "jobs|j=s" => \$::opt_P,
+	   "number-of-cpus" => \$::opt_number_of_cpus,
+	   "number-of-cores" => \$::opt_number_of_cores,
+	   # xargs-compatibility - implemented, man, unittest
+	   "max-procs|P=s" => \$::opt_P,
+	   "delimiter|d=s" => \$::opt_d,
+	   # xargs-compatibility - implemented, unittest - man missing
+	   "max-chars|s=i" => \$::opt_s,
+	   "arg-file|a=s" => \$::opt_a,
+	   "no-run-if-empty|r" => \$::opt_r,
+	   "replace|i:s" => \$::opt_i,
+	   "E=s" => \$::opt_E,
+	   "eof|e:s" => \$::opt_E,
+	   "max-args|n=i" => \$::opt_n,
+	   "verbose|t" => \$::opt_t,
+	   "help|h" => \$::opt_h,
+	   "version" => \$::opt_version,
+	   ## xargs-compatibility - implemented - unittest missing - man missing
+	   "interactive|p" => \$::opt_p,
+	   ## How to unittest? tty skal emuleres
+
+	   # xargs-compatability - unimplemented
+	   "L=i" => \$::opt_L,
+	   "max-lines|l:i" => \$::opt_l,
+	   ## (echo a b;echo c) | xargs -l1 echo
+	   ## (echo a b' ';echo c) | xargs -l1 echo
+	   "show-limits" => \$::opt_show_limits,
+	   "exit|x" => \$::opt_x,
+    ) || die_usage();
+
+# Defaults:
+$Global::version = 20100416;
+$Global::progname = "parallel";
+$Global::debug = 0;
+$Global::processes_to_run = 10;
+$command = undef;
+$Global::verbose = 0;
+$Global::grouped = 1;
+$Global::keeporder = 0;
+$Global::quoting = 0;
+$Global::replacestring = '{}';
+$Global::replace_no_ext = '{.}';
+$Global::input_is_filename = (@ARGV);
+$/="\n";
+$Global::ignore_empty = 0;
+$Global::argfile = *STDIN;
+$Global::interactive = 0;
+$Global::stderr_verbose = 0;
+
+$Global::debug = (defined $::opt_D);
+if(defined $::opt_m) { $Global::xargs = 1; }
+if(defined $::opt_X) { $Global::Xargs = 1; }
+if(defined $::opt_v) { $Global::verbose = 1; }
+if(defined $::opt_silent) { $Global::verbose = 0; }
+if(defined $::opt_k) { $Global::keeporder = 1; }
+if(defined $::opt_g) { $Global::grouped = 1; }
+if(defined $::opt_u) { $Global::grouped = 0; }
+if(defined $::opt_c) { $Global::input_is_filename = 0; }
+if(defined $::opt_f) { $Global::input_is_filename = 1; }
+if(defined $::opt_0) { $/ = "\0"; }
+if(defined $::opt_d) { my $e="sprintf \"$::opt_d\""; $/ = eval $e; }
+if(defined $::opt_p) { $Global::interactive = $::opt_p; }
+if(defined $::opt_q) { $Global::quoting = 1; }
+if(defined $::opt_r) { $Global::ignore_empty = 1; }
+if(defined $::opt_t) { $Global::stderr_verbose = 1; }
+if(defined $::opt_I) { $Global::replacestring = $::opt_I; }
+if(defined $::opt_U) { $Global::replace_no_ext = $::opt_U; }
+if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
+if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
+if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
+if(defined $::opt_h) { die_usage(); }
+if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
+if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; exit(0); }
+if(defined $::opt_version) { version(); exit(0); }
+
+if(defined $::opt_a) {
+    if(not open(ARGFILE,"<".$::opt_a)) {
+	print STDERR "$Global::progname: Cannot open input file `$::opt_a': No such file or directory\n";
+	exit(-1);
+    }
+    $Global::argfile = *ARGFILE;
+}
+
+if(@ARGV) { 
+    if($Global::quoting) {
+        $Global::command = join(" ", shell_quote(@ARGV)); 
+    } else {
+        $Global::command = join(" ", @ARGV); 
+    }
+}
+# Needs to be done after setting $Global::command and $Global::command_line_max_len
+# as '-m' influences the number of commands that needs to be run
+if(defined $::opt_P) { $Global::processes_to_run = compute_number_of_processes($::opt_P); }
+
+$Global::job_end_sequence=1;
+
+init_run_jobs();
+DoNotReap();
+start_more_jobs();
+ReapIfNeeded();
+drain_job_queue();
+
+#
+# Generating the command line
+#
+
+sub generate_command_line {
+    my $command = shift;
+    my ($job_line,$last_good);
+    my ($next_arg,@quoted_args,@quoted_args_no_ext,$arg_length);
+    my ($number_of_substitution) = 1;
+    my ($number_of_substitution_no_ext) = 0;
+    my ($length_of_context) = 0;
+    my ($length_of_command_no_args);
+    if($Global::xargs or $Global::Xargs) {
+	# Count number of {}'s on the command line
+	$number_of_substitution = ($command =~ s/\Q$Global::replacestring\E/$Global::replacestring/go);
+	$number_of_substitution ||= 1;
+    }
+    if($Global::xargs or $Global::Xargs) {
+	# Count number of {.}'s on the command line
+	$number_of_substitution_no_ext =
+	($command =~ s/\Q$Global::replace_no_ext\E/$Global::replace_no_ext/go);
+	$number_of_substitution_no_ext ||= 0;
+    }
+    my $spaces=0;
+    if($Global::xargs or $Global::Xargs) {
+	my $c = $command;
+	# count number of replacements
+	my $no_of_replace = 0;
+	$no_of_replace++ while ($c =~ m/\Q$Global::replacestring\E/g);
+	my $no_of_no_ext = 0;
+	$no_of_no_ext++ while ($c =~ m/\Q$Global::replace_no_ext\E/g);
+
+	if($Global::xargs) {
+	    # remove all {}s
+	    $c =~ s/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E//og;
+	    $length_of_command_no_args = length($c) - $no_of_replace - $no_of_no_ext;
+	    $length_of_context = 0;
+	    $spaces = 1;
+	}
+	if($Global::Xargs) {
+	    $c =~ s/\S*\Q$Global::replacestring\E\S*//go;
+	    $c =~ s/\S*\Q$Global::replace_no_ext\E\S*//go;
+
+	    $length_of_command_no_args = length($c) - 1;
+	    $length_of_context = length($command) - $length_of_command_no_args
+		- $no_of_replace * length($Global::replacestring)
+		- $no_of_no_ext * length($Global::replace_no_ext);
+	}
+    }
+
+    my $number_of_args = 0;
+    # max number of lines (-L) =
+    # number_of_read_lines = 0
+    while (defined($next_arg = get_next_arg())) {
+	my $next_arg_no_ext = $next_arg;
+	$next_arg_no_ext =~ s/\.[^\.]*$//; # Remove .ext from argument
+	# if defined max_number_of_lines
+	# number_of_read_lines++
+	# if $next_arg =~ /\w$/ then number_of_read_lines--
+	    # Trailing blanks cause an
+	    # input line to be logically continued on the next input line.
+	# if number_of_read_lines > max_number_of_lines
+	    # last
+	push (@quoted_args, $next_arg);
+	push (@quoted_args_no_ext, $next_arg_no_ext);
+	$number_of_args++;
+	if(not $Global::xargs and not $Global::Xargs) {
+	    last;
+	} else {
+	    # Emulate xargs if there is a command and -x or -X is set
+	    my $next_arg_len = $number_of_substitution * (length ($next_arg) + $spaces) +
+		+ $number_of_substitution_no_ext * (length ($next_arg_no_ext) + $spaces)
+		+ $length_of_context;
+
+	    $arg_length += $next_arg_len;
+	    # debug("arglen $arg_length = $number_of_substitution * (1 + length ($next_arg)) + $length_of_context\n");
+	    my $job_line_length = $length_of_command_no_args + $arg_length;
+	    # debug("linelen $job_line_length = $length_of_command_no_args + 1 + $arg_length\n");
+#	    print STDERR "1234567890123456789012345678901234567890\n";
+	    #print STDERR "LENcalc $number_of_args CON$length_of_context $length_of_command_no_args ".length ($next_arg)." LL$job_line_length NAL$next_arg_len ",$job_line_length-$next_arg_len-1,"\n";
+	    if($job_line_length >= max_length_of_command_line()) {
+		unget_arg(pop @quoted_args);
+		if(defined $quoted_args[0]) {
+		    last;
+		} else {
+		    die ("Command line too long ($job_line_length >= "
+			 . max_length_of_command_line() . ") at number $number_of_args: $next_arg");
+		}
+	    }
+	    if($Global::max_number_of_args and $number_of_args >= $Global::max_number_of_args) {
+		last;
+	    }
+	}
+    }
+    if(@quoted_args) {
+	$job_line = $command;
+	if(defined $job_line and
+	   ($job_line =~/\Q$Global::replacestring\E/o or $job_line =~/\Q$Global::replace_no_ext\E/o)) {
+	    # substitute {} and {.} with args
+	    if($Global::Xargs) {
+		# Context sensitive replace (foo{}bar with fooargsbar)
+		$job_line = context_replace($job_line, \@quoted_args, \@quoted_args_no_ext);
+	    } else {
+		# Normal replace {} with args and {.} with args without extension
+		my $arg=join(" ",@quoted_args);
+		my $arg_no_ext=join(" ",@quoted_args_no_ext);
+		$job_line =~ s/\Q$Global::replacestring\E/$arg/go;
+		$job_line =~ s/\Q$Global::replace_no_ext\E/$arg_no_ext/go;
+	    }
+	} else {
+	    # append args
+	    my $arg=join(" ",@quoted_args);
+	    $job_line .= " $arg";
+	}
+	debug("Return jobline: $job_line\n");
+    }
+    return $job_line;
+}
+
+sub shell_quote {
+    # Quote the string so shell will not expand any special chars
+    my (@strings) = (@_);
+    my $arg; 
+    for $arg (@strings) {
+	# what is the right thing to do about '-' at start of line?
+	# maybe substitute with './'
+	# so it is not regarded as -option.
+	$arg =~ s/\\/\\\\/g;
+	
+	$arg =~ s/([\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
+	$arg =~ s/([\002-\011\013-\032])/\\$1/g;
+	$arg =~ s/([\n])/'\n'/g; # filenames with '\n' is quoted using \'
+    }
+    return (@strings);
+}
+
+# Replace foo{}bar or foo{.}bar
+sub context_replace {
+    my ($job_line,$quoted,$no_ext) = (@_);
+    while($job_line =~/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E/o) {
+	$job_line =~ /(\S*(\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E)\S*)/o
+	    or die ("This should never happen");
+	my $wordarg = $1; # This is the context that needs to be substituted
+	my @all_word_arg;
+	for my $n (0 .. $#$quoted) {
+	    my $arg = $quoted->[$n];
+	    my $arg_no_ext = $no_ext->[$n];
+	    my $substituted = $wordarg;
+	    $substituted=~s/\Q$Global::replacestring\E/$arg/go;
+	    $substituted=~s/\Q$Global::replace_no_ext\E/$arg_no_ext/go;
+	    push @all_word_arg, $substituted;
+	}
+	my $all_word_arg = join(" ",@all_word_arg);
+	$job_line =~ s/\Q$wordarg\E/$all_word_arg/;
+    }
+    return $job_line;
+}
+
+#
+# Number of processes, filehandles, max length of command line
+#
+
+# Maximal command line length (for -m and -X)
+sub max_length_of_command_line {
+    # Find the max_length of a command line
+    # First find an upper bound
+    if(not $Global::command_line_max_len) {
+	my $len = 10;
+	do {
+	    $len *= 10;
+	} while (is_acceptable_command_line_length($len));
+	# Then search for the actual max length between 0 and upper bound
+	$Global::command_line_max_len = binary_find_max_length(int(($len)/10),$len);
+	if($::opt_s) {
+	    if($::opt_s <= $Global::command_line_max_len) {
+		$Global::command_line_max_len = $::opt_s;
+	    } else {
+		print STDERR "$Global::progname: ",
+		"value for -s option should be < $Global::command_line_max_len\n";
+	    }
+	}
+    }
+    return $Global::command_line_max_len;
+}
+
+sub binary_find_max_length {
+    # Given a lower and upper bound find the max_length of a command line
+    my ($lower, $upper) = (@_);
+    if($lower == $upper or $lower == $upper-1) { return $lower; }
+    my $middle = int (($upper-$lower)/2 + $lower);
+    debug("$lower,$upper,$middle\n");
+    if (is_acceptable_command_line_length($middle)) {
+	return binary_find_max_length($middle,$upper);
+    } else {
+	return binary_find_max_length($lower,$middle);
+    }
+}
+
+sub is_acceptable_command_line_length {
+    # Test if a command line of this length can run
+    my $len = shift;
+    $Global::is_acceptable_command_line_length++;
+    debug("$Global::is_acceptable_command_line_length $len\n");
+    local *STDERR;
+    open (STDERR,">/dev/null");
+    system "true "."x"x$len;
+    close STDERR;
+    return not $?;
+}
+
+# Number of parallel processes to run
+
+sub compute_number_of_processes {
+    # Number of processes wanted and limited by system ressources
+    my $opt_P = shift;
+    my $wanted_processes = user_requested_processes($opt_P);
+    debug("Wanted procs: $wanted_processes\n");
+    my $system_limit = processes_available_by_system_limit($wanted_processes);
+    debug("Limited to procs: $system_limit\n");
+    return $system_limit;
+}
+
+sub processes_available_by_system_limit {
+    # If the wanted number of processes is bigger than the system limits:
+    # Limit them to the system limits
+    # Limits are: File handles, number of input lines, processes,
+    # and taking > 1 second to spawn 10 extra processes
+    my $wanted_processes = shift;
+    my $system_limit=0;
+    my @command_lines=();
+    my $next_command_line;
+    my $more_filehandles;
+    my $max_system_proc_reached=0;
+    my $spawning_too_slow=0;
+    my $time = time;
+    my %fh;
+    my @children;
+    DoNotReap();
+
+    # Reserve filehandles
+    # perl uses 7 filehandles for something?
+    # parallel uses 1 for memory_usage
+    for my $i (1..8) {
+	open($fh{"init-$i"},"</dev/null");
+    }
+    do {
+	$system_limit++;
+
+	# If there are no more command lines, then we have a process
+	# per command line, so no need to go further
+	$next_command_line = next_command_line();
+	if(defined $next_command_line) { 
+	    push(@command_lines, $next_command_line);
+	}
+
+	# Every simultaneous process uses 2 filehandles when grouping
+	$more_filehandles = open($fh{$system_limit*2},"</dev/null") 
+	    && open($fh{$system_limit*2+1},"</dev/null");
+
+	# System process limit
+	$system_limit % 10 or $time=time;
+	my $child;
+	if($child = fork()) {
+	    push (@children,$child);
+	} elsif(defined $child) {
+	    # The child takes one process slot
+	    # It will be killed later
+	    sleep 100000;
+	    exit;
+	} else {
+	    $max_system_proc_reached = 1;
+	}
+	debug("Time to fork ten procs ", time-$time, " process ", $system_limit);
+	if(time-$time > 2) {
+	    # It took more than 2 second to fork ten processes. We should stop forking.
+	    # Let us give the system a little slack
+	    debug("\nLimiting processes to: $system_limit-10%=".
+		  (int ($system_limit * 0.9)+1)."\n");
+	    $system_limit = int ($system_limit * 0.9)+1;
+	    $spawning_too_slow = 1;
+	}
+    } while($system_limit < $wanted_processes 
+	    and defined $next_command_line
+	    and $more_filehandles
+	    and not $max_system_proc_reached
+	    and not $spawning_too_slow);
+    if($system_limit < $wanted_processes and not $more_filehandles) {
+	print STDERR ("Warning: Only enough filehandles to run ",
+		      $system_limit, " jobs in parallel. ",
+		      "Raising ulimit -n may help\n");
+    }
+    if($system_limit < $wanted_processes and $max_system_proc_reached) {
+	print STDERR ("Warning: Only enough available processes to run ",
+		      $system_limit, " jobs in parallel.\n");
+    }
+    if($system_limit < $wanted_processes and $spawning_too_slow) {
+	print STDERR ("Warning: Starting 10 extra processes takes > 2 sec.\n",
+		      "Limiting to ", $system_limit, " jobs in parallel.\n");
+    }
+    # Cleanup: Close the files
+    for (values %fh) { close $_ }
+    # Cleanup: Kill the children
+    for my $pid (@children) {
+	kill 15, $pid;
+	waitpid($pid,0);
+    }
+    wait();
+    # Cleanup: Unget the command_lines
+    unget_command_line(@command_lines);
+    return $system_limit;
+}
+
+sub enough_file_handles {
+    # check that we have enough filehandles available for starting
+    # another job
+    if($Global::grouped) {
+	my %fh;
+	my $enough_filehandles = 1;
+	# We need a filehandle for STDOUT and STDERR
+	# open3 uses 2 extra filehandles temporarily
+	for my $i (1..4) {
+	    $enough_filehandles &&= open($fh{$i},"</dev/null");
+	}
+	for (values %fh) { close $_; }
+	return $enough_filehandles;
+    } else {
+	return 1;
+    }
+}
+
+sub user_requested_processes {
+    # Parse the number of processes that the user asked for
+    my $opt_P = shift;
+    if(defined $opt_P) {
+	if($opt_P =~ /^\+(\d+)$/) {
+	    # E.g. -P +2
+	    my $j = $1;
+	    $processes = $j + no_of_cpus();
+	} elsif ($opt_P =~ /^-(\d+)$/) {
+	    # E.g. -P -2
+	    my $j = $1;
+	    $processes = no_of_cpus() - $j;
+	} elsif ($opt_P =~ /^(\d+)\%$/) {
+	    my $j = $1;
+	    $processes = no_of_cpus() * $j / 100;
+	} elsif ($opt_P =~ /^(\d+)$/) {
+	    $processes = $1;
+	    if($processes == 0) {
+		# -P 0 = infinity (or at least close)
+		$processes = 2**31;
+	    }
+	} else {
+	    die_usage();
+	}
+	if($processes < 1) {
+	    $processes = 1;
+	}
+    }
+    return $processes;
+}
+
+sub no_of_cores {
+    # TODO This should return number of cores and not the number of CPUs
+    return no_of_cpus(@_);
+}
+
+sub no_of_cpus {
+    if(not $Global::no_of_cpus) {
+	my $no_of_cpus = (no_of_cpus_darwin()
+			  || no_of_cpus_gnu_linux()
+			  || no_of_cpus_solaris());
+	if($no_of_cpus) {
+	    $Global::no_of_cpus = $no_of_cpus;
+	} else {
+	    warn("Cannot figure out no of cpus. Using 1");
+	    $Global::no_of_cpus = 1;
+	}
+    }
+    return $Global::no_of_cpus;
+}
+
+sub no_of_cpus_gnu_linux {
+    my $no_of_cpus;
+    if(-e "/proc/cpuinfo") {
+	$no_of_cpus = 0;
+	open(IN,"cat /proc/cpuinfo|") || return undef;
+	while(<IN>) {
+	    /^processor.*[:]/ and $no_of_cpus++;
+	}
+	close IN;
+    }
+    return $no_of_cpus;
+}
+
+sub no_of_cpus_darwin {
+    my $no_of_cpus = `sysctl -n hw.ncpu 2>/dev/null`;
+    return $no_of_cpus;
+}
+
+sub no_of_cpus_solaris {
+    if(-x "/usr/sbin/psrinfo") {
+	my @psrinfo = `/usr/sbin/psrinfo`;
+	if($#psrinfo >= 0) {
+	    return $#psrinfo +1;
+	}
+    }
+    if(-x "/usr/sbin/prtconf") {
+	my @prtconf = `/usr/sbin/prtconf | grep cpu..instance`;
+	if($#prtconf >= 0) {
+	    return $#prtconf +1;
+	}
+    }
+    return undef;
+}
+
+
+#
+# Running and printing the jobs
+#
+
+sub init_run_jobs {
+    # Remember the original STDOUT and STDERR
+    open $Global::original_stdout, ">&STDOUT" or die "Can't dup STDOUT: $!";
+    open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
+    $Global::running_jobs=0;
+    $SIG{USR1} = \&ListRunningJobs;
+    $Global::original_sigterm = $SIG{TERM};
+    $SIG{TERM} = \&StartNoNewJobs;
+}
+
+sub next_command_line {
+    my $cmd_line;
+    if(@Global::unget_next_command_line) {
+	$cmd_line = shift @Global::unget_next_command_line;
+    } else {
+	do {
+	    $cmd_line = generate_command_line($Global::command);
+	} while (defined $cmd_line and $cmd_line =~ /^\s*$/); # Skip empty lines
+    }
+    return $cmd_line;
+}
+
+sub unget_command_line {
+    push @Global::unget_next_command_line, @_;
+}
+
+sub get_next_arg {
+    my $arg;
+    if(@Global::unget_arg) {
+	$arg = shift @Global::unget_arg;
+    } else {
+	if(eof $Global::argfile) {
+	    return undef;
+	}
+	$arg = <$Global::argfile>;
+	chomp $arg;
+	if($Global::end_of_file_string and $arg eq $Global::end_of_file_string) {
+	    # Ignore the rest of STDIN
+	    while (<$Global::argfile>) {}
+	    return undef;
+	}
+	if($Global::ignore_empty) {
+	    if($arg =~ /^\s*$/) {
+		return get_next_arg();
+	    }
+	}
+	if($Global::input_is_filename) {
+	    ($arg) = shell_quote($arg);
+	}
+    }
+    debug("Next arg: ".$arg."\n");    
+    return $arg;
+}
+
+sub unget_arg {
+    push @Global::unget_arg, @_;
+}
+
+sub drain_job_queue {
+    while($Global::running_jobs > 0) {
+	debug("jobs running: $Global::running_jobs Memory usage:".my_memory_usage()."\n");
+	sleep 1;
+    }
+}
+
+sub start_more_jobs {
+    my $jobs_started = 0;
+    if(not $Global::StartNoNewJobs) {
+	while($Global::running_jobs < $Global::processes_to_run
+	      and
+	      start_another_job()) {
+	    $jobs_started++;
+	}
+    }
+    return $jobs_started;
+}
+
+sub start_another_job {
+    # Grab a job from @Global::command, start it 
+    # and remember the pid, the STDOUT and the STDERR handles
+    # If no more jobs: do nothing
+    # Do we have enough file handles to start another job?
+    if(enough_file_handles()) {
+	my $command = next_command_line();
+	if(defined $command) {
+	    my %jobinfo = start_job($command);
+	    if(%jobinfo) {
+		$Global::running{$jobinfo{"pid"}} = \%jobinfo;
+	    }
+	    return 1;
+	} else {
+	    return 0;
+	}
+    } else {
+	return 0;
+    }
+}
+
+sub start_job {
+    # Setup STDOUT and STDERR for a job and start it.
+    my $command = shift;
+    my ($pid,$out,$err,%out,%err,$outname,$errname,$name);
+    if($Global::grouped) {
+	# To group we create temporary files for STDOUT and STDERR
+	# Filehandles are global, so to not overwrite the filehandles use a hash with new keys
+	# To avoid the cleanup unlink the files immediately (but keep them open)
+	$outname = ++$Global::TmpFilename;
+	($out{$outname},$name) = tempfile(SUFFIX => ".par");
+	unlink $name;
+	$errname = ++$Global::TmpFilename;
+	($err{$errname},$name) = tempfile(SUFFIX => ".par");
+	unlink $name;
+
+	open STDOUT, '>&', $out{$outname} or die "Can't redirect STDOUT: $!";
+	open STDERR, '>&', $err{$errname} or die "Can't dup STDOUT: $!";
+    }
+
+    if($Global::interactive or $Global::stderr_verbose) {
+	if($Global::interactive) {
+	    print $Global::original_stderr "$command ?...";
+	    open(TTY,"/dev/tty") || die;
+	    my $answer = <TTY>;
+	    close TTY;
+	    my $run_yes = ($answer =~ /^\s*y/i);
+	    if (not $run_yes) {
+		open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$oldout: $!";
+		open STDERR, ">&", $Global::original_stderr or die "Can't dup \$oldout: $!";
+		return;
+	    }
+	} else {
+	    print $Global::original_stderr "$command\n";
+	}
+    }
+    if($Global::verbose and not $Global::grouped) {
+	print STDOUT $command,"\n";
+    }
+    $Global::running_jobs++;
+    debug("$Global::running_jobs processes. Starting: $command\n");
+    #print STDERR "LEN".length($command)."\n";
+    $pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) || 
+	die("open3 failed. Report a bug to <par\@tange.dk>\n");
+    debug("started: $command\n");
+    open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$oldout: $!";
+    open STDERR, ">&", $Global::original_stderr or die "Can't dup \$oldout: $!";
+
+    $Global::job_start_sequence++;
+    if($Global::grouped) {
+	return ("seq" => $Global::job_start_sequence,
+		"pid" => $pid,
+		"out" => $out{$outname},
+		"err" => $err{$errname},
+		"command" => $command);
+    } else {
+	return ("seq" => $Global::job_start_sequence,
+		"pid" => $pid, 
+		"command" => $command);
+    }
+}
+
+sub print_job {
+    # Print the output of the jobs
+    # Only relevant for grouping
+    $Global::grouped or return;
+    my $fhs = shift;
+    if(not defined $fhs) {
+	return;
+    }
+    my $out = $fhs->{out};
+    my $err = $fhs->{err};
+    my $command = $fhs->{command};
+
+    debug(">>joboutput $command\n");
+    if($Global::verbose and $Global::grouped) {
+	print STDOUT $command,"\n";
+	# If STDOUT and STDERR is merged, we want the command to be printed first
+	# so flush to avoid STDOUT being buffered
+	flush STDOUT;
+    }
+    seek $_, 0, 0 for $out, $err;
+    if($Global::debug) {
+	print STDERR "ERR:\n";
+    }
+    my $buf;
+    while(sysread($err,$buf,1000_000)) {
+	print STDERR $buf;
+    }
+    if($Global::debug) {
+	print STDOUT "OUT:\n";
+    }
+    while(sysread($out,$buf,1000_000)) {
+	print STDOUT $buf;
+    }
+    debug("<<joboutput $command\n");
+    close $out;
+    close $err;
+}
+
+#
+# Signal handling stuff
+#
+
+sub ListRunningJobs {
+    for my $v (values %Global::running) {
+	print STDERR "$Global::progname: ",$v->{'command'},"\n";
+    }
+}
+
+sub StartNoNewJobs {
+    print STDERR ("$Global::progname: SIGTERM received. No new jobs will be started.\n",
+		  "$Global::progname: Waiting for these ", scalar(keys %Global::running), 
+		  " jobs to finish. Send SIGTERM again to stop now.\n");
+    ListRunningJobs();
+    $Global::StartNoNewJobs++;
+    $SIG{TERM} = $Global::original_sigterm;
+}
+
+sub CountSigChild {
+    $Global::SigChildCaught++;
+}
+
+sub DoNotReap {
+    # This will postpone SIGCHILD for sections that cannot be distracted by a dying child
+    # (Racecondition)
+    $SIG{CHLD} = \&CountSigChild;
+}
+
+sub ReapIfNeeded {
+    # Do the postponed SIGCHILDs if any and re-install normal reaper for SIGCHILD
+    # (Racecondition)
+    if($Global::SigChildCaught) {
+	$Global::SigChildCaught = 0;
+	Reaper();
+    }
+    $SIG{CHLD} = \&Reaper;    
+}
+
+sub Reaper {
+    # A job finished.
+    # Print the output.
+    # Start another job
+    DoNotReap();
+    $Global::reaperlevel++;
+    my $stiff;
+    debug("Reaper called $Global::reaperlevel\n");
+    while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
+	if($Global::keeporder) {
+	    $Global::print_later{$Global::running{$stiff}{"seq"}} = $Global::running{$stiff};
+	    debug("died: $Global::running{$stiff}{'seq'}");
+	    while($Global::print_later{$Global::job_end_sequence}) {
+		debug("Found job end $Global::job_end_sequence");
+		print_job($Global::print_later{$Global::job_end_sequence});
+		delete $Global::print_later{$Global::job_end_sequence};
+		$Global::job_end_sequence++;
+	    }
+	    delete $Global::running{$stiff};
+	    $Global::running_jobs--;
+	    start_more_jobs();
+	} else {
+	    print_job($Global::running{$stiff});
+	    delete $Global::running{$stiff};
+	    $Global::running_jobs--;
+	    start_more_jobs();
+	}
+    }
+    ReapIfNeeded();
+    debug("Reaper exit $Global::reaperlevel\n");
+    $Global::reaperlevel--;
+}
+
+#
+# Usage
+#
+
+sub die_usage {
+    usage();
+    exit(1);
+}
+
+sub usage {
+    print "Usage:\n";
+    print "$Global::progname [options] [command [arguments]] < list_of_arguments\n";
+    print "\n";
+    print "See 'man $Global::progname' for the options\n";
+}
+
+sub version {
+    print join("\n",
+	       "$Global::progname $Global::version",
+#	       "Copyright (C) 2007,2008,2009,2010 Ole Tange and Free Software Foundation, Inc.",
+	       "Copyright (C) 2007,2008,2009,2010 Ole Tange.",
+	       "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
+	       "This is free software: you are free to change and redistribute it.",
+	       "$Global::progname comes with no warranty.",
+	       "",
+	       "Web site: http://${Global::progname}.nongnu.org\n"
+	);
+}
+
+
+#
+# Debugging
+#
+
+sub debug {
+    $Global::debug or return;
+    if($Global::original_stdout) {
+	print $Global::original_stdout @_;
+    } else {
+	print @_;
+    }
+}
+
+sub my_memory_usage {
+    use strict;
+    use FileHandle;
+
+
+    my $pid = $$;
+    if(-e "/proc/$pid/stat") {
+	my $fh = FileHandle->new("</proc/$pid/stat");
+
+	my $data = <$fh>;
+	chomp $data;
+	$fh->close;
+
+	my @procinfo = split(/\s+/,$data);
+
+	return $procinfo[22];
+    } else {
+	return 0;
+    }
+}
+
+sub my_size {
+    my @size_this = (@_);
+    eval "use Devel::Size qw(size total_size)";
+    if ($@) {
+	return -1;
+    } else {
+	return total_size(@_);
+    }
+}
+
+
+sub my_dump {
+    my @dump_this = (@_);
+    eval "use Data::Dump qw(dump);";
+    if ($@) {
+        # Data::Dump not installed
+        eval "use Data::Dumper;";
+        if ($@) {
+            my $err =  "Neither Data::Dump nor Data::Dumper is installed\n".
+                "Not dumping output\n";
+            print STDERR $err;
+            return $err;
+        } else {
+            return Dumper(@dump_this);
+        }
+    } else {
+        eval "use Data::Dump qw(dump);";
+        return (Data::Dump::dump(@dump_this));
+    }
+}
+
+# Keep perl -w happy
+$main::opt_u = $main::opt_e = $main::opt_c = $main::opt_f =
+$main::opt_q = $main::opt_0 = $main::opt_s = $main::opt_v =
+$main::opt_g = $main::opt_P = $main::opt_D = $main::opt_m =
+$main::opt_X = $main::opt_x = $main::opt_k = $main::opt_d =
+$main::opt_P = $main::opt_i = $main::opt_p = $main::opt_a =
+$main::opt_version = $main::opt_L = $main::opt_l =
+$main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_t =
+$main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
