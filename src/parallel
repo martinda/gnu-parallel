@@ -6,7 +6,7 @@ par$ - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<par$> [-0cdEfghiIkmnpqrtuUvX] [-I str] [-j num] [--silent] [command [arguments]] [< list_of_arguments]
+B<par$> [-0cdEfghiIkmnpqrtuUvVX] [-I str] [-j num] [--silent] [command [arguments]] [< list_of_arguments]
 
 =head1 DESCRIPTION
 
@@ -784,79 +784,10 @@ B<cat files | par$ -j+0 cmd>
 Filenames beginning with '-' can cause some commands to give
 unexpected results, as it will often be interpreted as an option.
 
+
 =head1 REPORTING BUGS
 
 Report bugs to <bug-par$@tange.dk>.
-
-=head1 IDEAS
-
-One char options not used: F G J K M P Q Y
-
-Test if -0 works on filenames ending in '\n'
-
-xargs dropin-replacement.
-Implement the missing --features
-
-monitor to see which jobs are currently running
-http://code.google.com/p/ppss/
-
-Accept signal INT instead of TERM to complete current running jobs but
-do not start new jobs. Print out the number of jobs waiting to
-complete on STDERR. Accept sig INT again to kill now. This seems to be
-hard, as all foreground processes get the INT from the shell.
-
-If there are nomore jobs (STDIN is closed) then make sure to
-distribute the arguments evenly if running -X.
-
-
-Distribute jobs to computers with different speeds/number-of-cpu-cores using ssh
-ask the computers how many cpus they have and spawn appropriately
-according to -j setting.  Reuse ssh connection (-M and -S)
-
-SEED=$RANDOM
-ssh -MS /tmp/ssh-%r@%h:%p-$SEED elvis
-rsync --rsh="ssh -S /tmp/ssh-%r@%h:%p-$SEED"  gitup elvis:/tmp/
-ssh -S /tmp/ssh-%r@%h:%p-$SEED elvis hostname
-
-FILE=gpl-3.0.txt
-BASE=gpl-3.0
-$ rsync -z $FILE e:$FILE
-$ ssh e "cat $FILE | bzip2 > $BASE.bz2"
-$ rsync -z e:$BASE.bz2 $BASE.bz2
-$ ssh e "rm $FILE $BASE"
-
-http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
-http://code.google.com/p/ppss/wiki/Manual2
-
-http://www.gnu.org/software/pexec/
-
-Where will '>' be run? Local or remote? Remote.
-
-
-Parallelize so this can be done:
-mdm.screen find dir -execdir mdm-run cmd {} \;
-Maybe:
-find dir -execdir par$ --communication-file /tmp/comfile cmd {} \;
-
-=head2 Comfile
-
-This will put a lock on /tmp/comfile. The number of locks is the number of running commands.
-If the number is smaller than -j then it will start a process in the background ( cmd & ),
-otherwise wait.
-
-par$ --wait /tmp/comfile will wait until no more locks on the file
-
-=head2 mutex
-
-mutex -n -l lockid -m max_locks [command]
-mutex -u lockid
-
--l lockfile will lock using the lockid
--n nonblocking
--m maximal number of locks (default 1)
--u unlock
-
-If command given works like: mutex -l lockfile -n number_of_locks ; command; mutex -u lockfile
 
 
 =head1 AUTHOR
@@ -936,9 +867,9 @@ GetOptions("debug|D" => \$::opt_D,
 	   "E=s" => \$::opt_E,
 	   "eof|e:s" => \$::opt_E,
 	   "max-args|n=i" => \$::opt_n,
-	   "verbose|t" => \$::opt_t,
-	   "help|h" => \$::opt_h,
-	   "version" => \$::opt_version,
+	   "verbose|t" => \$::opt_verbose,
+	   "help|h" => \$::opt_help,
+	   "version|V" => \$::opt_version,
 	   ## xargs-compatibility - implemented - unittest missing - man missing
 	   "interactive|p" => \$::opt_p,
 	   ## How to unittest? tty skal emuleres
@@ -953,7 +884,7 @@ GetOptions("debug|D" => \$::opt_D,
     ) || die_usage();
 
 # Defaults:
-$Global::version = 20100416;
+$Global::version = 20100419;
 $Global::progname = 'par$';
 $Global::debug = 0;
 $Global::processes_to_run = 10;
@@ -986,13 +917,13 @@ if(defined $::opt_d) { my $e="sprintf \"$::opt_d\""; $/ = eval $e; }
 if(defined $::opt_p) { $Global::interactive = $::opt_p; }
 if(defined $::opt_q) { $Global::quoting = 1; }
 if(defined $::opt_r) { $Global::ignore_empty = 1; }
-if(defined $::opt_t) { $Global::stderr_verbose = 1; }
+if(defined $::opt_verbose) { $Global::stderr_verbose = 1; }
 if(defined $::opt_I) { $Global::replacestring = $::opt_I; }
 if(defined $::opt_U) { $Global::replace_no_ext = $::opt_U; }
 if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
 if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
 if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
-if(defined $::opt_h) { die_usage(); }
+if(defined $::opt_help) { die_usage(); }
 if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
 if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; exit(0); }
 if(defined $::opt_version) { version(); exit(0); }
@@ -1099,11 +1030,7 @@ sub generate_command_line {
 		+ $length_of_context;
 
 	    $arg_length += $next_arg_len;
-	    # debug("arglen $arg_length = $number_of_substitution * (1 + length ($next_arg)) + $length_of_context\n");
 	    my $job_line_length = $length_of_command_no_args + $arg_length;
-	    # debug("linelen $job_line_length = $length_of_command_no_args + 1 + $arg_length\n");
-#	    print STDERR "1234567890123456789012345678901234567890\n";
-	    #print STDERR "LENcalc $number_of_args CON$length_of_context $length_of_command_no_args ".length ($next_arg)." LL$job_line_length NAL$next_arg_len ",$job_line_length-$next_arg_len-1,"\n";
 	    if($job_line_length >= max_length_of_command_line()) {
 		unget_arg(pop @quoted_args);
 		if(defined $quoted_args[0]) {
@@ -1512,6 +1439,16 @@ sub drain_job_queue {
 sub start_more_jobs {
     my $jobs_started = 0;
     if(not $Global::StartNoNewJobs) {
+	# do {
+	#   $started_jobs_this_round = 0;
+	#   for slave in sshlogins {
+	#     if running_jobs{slave} < processed_to_run{$slave} {
+	#       my $started += start_another_job($slave)
+	#       $started_jobs_this_round += started
+	#       $jobs_started{$slave}++
+	#     }
+	#   }
+	# } while ($started_jobs_this_round >0)
 	while($Global::running_jobs < $Global::processes_to_run
 	      and
 	      start_another_job()) {
@@ -1698,15 +1635,13 @@ sub Reaper {
 		delete $Global::print_later{$Global::job_end_sequence};
 		$Global::job_end_sequence++;
 	    }
-	    delete $Global::running{$stiff};
-	    $Global::running_jobs--;
-	    start_more_jobs();
 	} else {
 	    print_job($Global::running{$stiff});
-	    delete $Global::running{$stiff};
-	    $Global::running_jobs--;
-	    start_more_jobs();
 	}
+	# $Global::running_jobs{$Global::running{$stiff}{'slave'}}--;
+	$Global::running_jobs--;
+	delete $Global::running{$stiff};
+	start_more_jobs();
     }
     ReapIfNeeded();
     debug("Reaper exit $Global::reaperlevel\n");
@@ -1815,5 +1750,5 @@ $main::opt_g = $main::opt_P = $main::opt_D = $main::opt_m =
 $main::opt_X = $main::opt_x = $main::opt_k = $main::opt_d =
 $main::opt_P = $main::opt_i = $main::opt_p = $main::opt_a =
 $main::opt_version = $main::opt_L = $main::opt_l =
-$main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_t =
+$main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_verbose =
 $main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
