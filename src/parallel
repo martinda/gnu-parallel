@@ -2,17 +2,17 @@
 
 =head1 NAME
 
-par$ - build and execute shell command lines from standard input in parallel
+parallel - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<par$> [-0cdEfghiIkmnpqrtuUvVX] [-I str] [-j num] [--silent] [command [arguments]] [< list_of_arguments]
+B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [-I str] [-j num] [--silent] [command [arguments]] [< list_of_arguments]
 
 =head1 DESCRIPTION
 
-For each line of input B<par$> will execute B<command> with the
+For each line of input B<parallel> will execute B<command> with the
 line as arguments. If no B<command> is given the line of input is
-executed.  B<par$> can often be used as a substitute for B<xargs>
+executed.  B<parallel> can often be used as a substitute for B<xargs>
 or B<cat | sh>.
 
 Several lines will be run in parallel.
@@ -25,8 +25,8 @@ Command to execute.  If B<command> or the following arguments contain
 {} every instance will be substituted with the input line. Setting a
 command also invokes B<-f>.
 
-If B<command> is given, B<par$> will behave similar to B<xargs>. If
-B<command> is not given B<par$> will behave similar to B<cat | sh>.
+If B<command> is given, B<parallel> will behave similar to B<xargs>. If
+B<command> is not given B<parallel> will behave similar to B<cat | sh>.
 
 
 =item B<{}>
@@ -172,13 +172,13 @@ end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 
 =item B<--number-of-cpus>
 
-Print the number of CPUs and exit (used by B<par$> itself to
+Print the number of CPUs and exit (used by B<parallel> itself to
 determine the number of CPUs on remote machines).
 
 
 =item B<--number-of-cores>
 
-Print the number of cores and exit (used by B<par$> itself to determine the
+Print the number of cores and exit (used by B<parallel> itself to determine the
 number of cores on remote machines).
 
 
@@ -197,9 +197,9 @@ default.
 =item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin]> (not implemented)
 
 Distribute jobs to remote servers. The jobs will be run on a list of
-remote servers.  B<par$> will determine the number of CPU cores on
+remote servers.  B<parallel> will determine the number of CPU cores on
 the remote servers and run the number of jobs as specified by -j.  If
-the number I<ncpu> is given B<par$> will use this number for
+the number I<ncpu> is given B<parallel> will use this number for
 number of CPUs on the host. Normally I<ncpu> will not be needed.
 
 An I<sshlogin> is the string you would normally pass to SSH to login,
@@ -214,7 +214,7 @@ the options multiple times.
 
 For examples: see B<--sshloginfile>.
 
-The remote host must have B<par$> installed.
+The remote host must have B<parallel> installed.
 
 
 =item B<--sshloginfile> I<filename> (not implemented)
@@ -246,14 +246,14 @@ B<--sshlogin> when the arguments are files and should be transfered to
 the remote servers. The files will be transfered using B<rsync> and
 will be put relative to the default login dir. E.g.
 
-  echo foo/bar.txt | par$ \
+  echo foo/bar.txt | parallel \
     --sshlogin server.example.com --transfer wc
 
 This will transfer the file I<foo/bar.txt> to the server
 I<server.example.com> to the file $HOME/foo/bar.txt before running
 B<wc foo/bar.txt> on I<server.example.com>.
 
-  echo /tmp/foo/bar.txt | par$ \
+  echo /tmp/foo/bar.txt | parallel \
     --sshlogin server.example.com --transfer wc
 
 This will transfer the file I<foo/bar.txt> to the server
@@ -280,14 +280,14 @@ processing is done the file I<filename> will be transfered
 from the remote server using B<rsync> and will be put relative to
 the default login dir. E.g.
 
-  echo foo/bar.txt | par$ \
+  echo foo/bar.txt | parallel \
     --sshlogin server.example.com --return {}.out touch {}.out
 
 This will transfer the file I<$HOME/foo/bar.txt.out> from the server
 I<server.example.com> to the file I<foo/bar.txt.out> after running
 B<touch foo/bar.txt.out> on I<server.example.com>.
 
-  echo /tmp/foo/bar.txt | par$ \
+  echo /tmp/foo/bar.txt | parallel \
     --sshlogin server.example.com --return {}.out touch {}.out
 
 This will transfer the file I</tmp/foo/bar.txt.out> from the server
@@ -298,7 +298,7 @@ Multiple files can be transfered by repeating the options multiple
 times:
 
   echo /tmp/foo/bar.txt | \
-    par$ --sshlogin server.example.com \
+    parallel --sshlogin server.example.com \
     --return {}.out --return {}.out2 touch {}.out {}.out2
 
 B<--return> is often used with B<--transfer> and B<--cleanup>.
@@ -311,7 +311,7 @@ B<--return> is ignored when used with B<--sshlogin :> or when not used with B<--
 Remove transfered files. B<--cleanup> will remove the transfered files
 on the remote server after processing is done.
 
-  find log -name '*gz' | par$ \
+  find log -name '*gz' | parallel \
     --sshlogin server.example.com --transfer --return {.}.bz2 \
     --cleanup "zcat {} | bzip -9 >{.}.bz2"
 
@@ -338,7 +338,7 @@ output from different commands to be mixed. Can be reversed with B<-g>.
 
 Count the number of CPUs instead of cores. When computing how many
 jobs to run in parallel relative to the number of cores you can ask
-B<par$> to instead look at the number of CPUs. This will make sense
+B<parallel> to instead look at the number of CPUs. This will make sense
 for computers that have hyperthreading as two jobs running on one CPU
 with hyperthreading will run slower than two jobs running on two CPUs.
 Normal users will not need this option.
@@ -368,7 +368,7 @@ of a word (like I<pic{}.jpg>) then the whole word will be repeated.
 
 =head1 EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation
 
-B<par$> can work similar to B<cat | sh>. 
+B<parallel> can work similar to B<cat | sh>. 
 
 A ressource inexpensive job is a job that takes very little CPU, disk
 I/O and network I/O. Ping is an example of a ressource inexpensive
@@ -386,18 +386,18 @@ The content of the file jobs_to_run:
 
 To run 100 processes simultaneously do:
 
-B<par$ -j 100 < jobs_to_run>
+B<parallel -j 100 < jobs_to_run>
 
 As there is not a B<command> the option B<-c> is default because the
 jobs needs to be evaluated by the shell.
 
 =head1 EXAMPLE 2: Working as xargs -n1. Argument appending
 
-B<par$> can work similar to B<xargs -n1>. 
+B<parallel> can work similar to B<xargs -n1>. 
 
 To output all html files run:
 
-B<find . -name '*.html' | par$ cat>
+B<find . -name '*.html' | parallel cat>
 
 As there is a B<command> the option B<-f> is default because the
 filenames needs to be protected from the shell in case a filename
@@ -414,11 +414,11 @@ If the system has more than 1 CPU core it can be run with
 number-of-cpu-cores jobs in parallel (-j +0). This will do that for
 all jpg files in a directory:
 
-B<ls *.jpg | par$ -j +0 convert -geometry 120 {} thumb_{}>
+B<ls *.jpg | parallel -j +0 convert -geometry 120 {} thumb_{}>
 
 To do it recursively use B<find>:
 
-B<find . -name '*.jpg' | par$ -j +0 convert -geometry 120 {} {}_thumb.jpg>
+B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg>
 
 Notice how the argument has to start with {} as {} will include path
 (e.g. running B<convert -geometry 120 ./foo/bar.jpg
@@ -427,30 +427,30 @@ like ./foo/bar.jpg_thumb.jpg. If that is not wanted this can fix it:
 
   find . -name '*.jpg' | \
   perl -pe 'chomp; $a=$_; s:/([^/]+)$:/thumb_$1:; $_="convert -geometry 120 $a $_\n"' | \
-  par$ -c -j +0
+  parallel -c -j +0
 
 Unfortunately this will not work if the filenames contain special
 characters (such as space or quotes). If you have B<ren> installed this
 is a better solution:
 
-  find . -name '*.jpg' | par$ -j +0 convert -geometry 120 {} {}_thumb.jpg
+  find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg
   find . -name '*_thumb.jpg' | ren 's:/([^/]+)_thumb.jpg$:/thumb_$1:'
 
 This will make files like ./foo/bar_thumb.jpg:
 
-B<find . -name '*.jpg' | par$ -j +0 convert -geometry 120 {} {.}_thumb.jpg>
+B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {.}_thumb.jpg>
 
 =head1 EXAMPLE 4: Substitution and redirection
 
 This will compare all files in the dir to the file foo and save the
 diffs in corresponding .diff files:
 
-B<ls | par$ diff {} foo ">>B<"{}.diff>
+B<ls | parallel diff {} foo ">>B<"{}.diff>
 
 Quoting of > is necessary to postpone the redirection. Another
 solution is to quote the whole command:
 
-B<ls | par$ "diff {} foo >>B<{}.diff">
+B<ls | parallel "diff {} foo >>B<{}.diff">
 
 
 =head1 EXAMPLE 5: Composed commands
@@ -458,22 +458,22 @@ B<ls | par$ "diff {} foo >>B<{}.diff">
 A job can consist of several commands. This will print the number of
 files in each directory:
 
-B<ls | par$ 'echo -n {}" "; ls {}|wc -l'>
+B<ls | parallel 'echo -n {}" "; ls {}|wc -l'>
 
 To put the output in a file called <name>.dir:
 
-B<ls | par$ '(echo -n {}" "; ls {}|wc -l) >> B<{}.dir'>
+B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >> B<{}.dir'>
 
 
 =head1 EXAMPLE 6: Context replace
 
 To remove the files I<pict0000.jpg> .. I<pict9999.jpg> you could do:
 
-B<seq -f %04g 0 9999 | par$ rm pict{}.jpg>
+B<seq -f %04g 0 9999 | parallel rm pict{}.jpg>
 
 You could also do:
 
-B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | par$ -m rm>
+B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -m rm>
 
 The first will run B<rm> 10000 times, while the last will only run
 B<rm> as many times needed to keep the command line length short
@@ -481,7 +481,7 @@ enough (typically 1-2 times).
 
 You could also run:
 
-B<seq -f %04g 0 9999 | par$ -X rm pict{}.jpg>
+B<seq -f %04g 0 9999 | parallel -X rm pict{}.jpg>
 
 This will also only run B<rm> as many times needed to keep the command
 line length short enough.
@@ -489,18 +489,18 @@ line length short enough.
 =head1 EXAMPLE 7: Group output lines
 
 When runnning jobs that output data, you often do not want the output
-of multiple jobs to run together. B<par$> defaults to grouping the
+of multiple jobs to run together. B<parallel> defaults to grouping the
 output of each job, so the output is printed when the job finishes. If
 you want the output to be printed while the job is running you can use
 B<-u>.
 
 Compare the output of:
 
-B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | par$ traceroute>
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
 
 to the output of:
 
-B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | par$ -u traceroute>
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -u traceroute>
 
 
 =head1 EXAMPLE 8: Keep order of output same as order of input
@@ -511,7 +511,7 @@ same as the order of the input. B<-k> will make sure the order of
 output will be in the same order as input even if later jobs end
 before earlier jobs.
 
-B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | par$ traceroute>
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
 
 will give traceroute of foss.org.my, debian.org and
 freenetproject.org, but it will be sorted according to which job
@@ -519,7 +519,7 @@ completed first.
 
 To keep the order the same as input run:
 
-B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | par$ -k traceroute>
+B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -k traceroute>
 
 This will make sure the traceroute to foss.org.my will be printed
 first.
@@ -532,20 +532,20 @@ handy).
 
 To run B<echo> on B<server.example.com>:
 
-  seq 1 10 | par$ --sshlogin server.example.com echo
+  seq 1 10 | parallel --sshlogin server.example.com echo
 
 To run commands on more than one remote computer run:
 
-  seq 1 10 | par$ --sshlogin server.example.com,server2.example.net echo
+  seq 1 10 | parallel --sshlogin server.example.com,server2.example.net echo
 
 Or:
 
-  seq 1 10 | par$ --sshlogin server.example.com \
+  seq 1 10 | parallel --sshlogin server.example.com \
     --sshlogin server2.example.net echo
 
 If the login username is I<foo> on I<server2.example.net> use:
 
-  seq 1 10 | par$ --sshlogin server.example.com \
+  seq 1 10 | parallel --sshlogin server.example.com \
     --sshlogin foo@server2.example.net echo
 
 To distribute the commands to a list of machines, make a file
@@ -557,7 +557,7 @@ I<mymachines> with all the machines:
 
 Then run:
 
-  seq 1 10 | par$ --sshloginfile mymachines echo
+  seq 1 10 | parallel --sshloginfile mymachines echo
 
 To include the local machine add the special sshlogin ':' to the list:
 
@@ -570,7 +570,7 @@ If the number of CPU cores on the remote servers is not identified
 correctly the number of CPU cores can be added in front. Here the
 server has 8 CPU cores.
 
-  seq 1 10 | par$ --sshlogin 8/server.example.com echo
+  seq 1 10 | parallel --sshlogin 8/server.example.com echo
 
 
 =head1 EXAMPLE 10: Transferring of files (not implemented)
@@ -578,7 +578,7 @@ server has 8 CPU cores.
 To recompress gzipped files with bzip2 using a remote server run:
 
   find logs/ -name '*.gz' | \
-    par$ --sshlogin server.example.com \
+    parallel --sshlogin server.example.com \
     --transfer "zcat {} | bzip2 -9 >{.}.bz2"
 
 This will list the .gz-files in the I<logs> directory and all
@@ -592,7 +592,7 @@ If you want the file to be transfered back to the local machine add
 I<--return {.}.bz2>:
 
   find logs/ -name '*.gz' | \
-    par$ --sshlogin server.example.com \
+    parallel --sshlogin server.example.com \
     --transfer --return {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
 After the recompressing is done the I<.bz2>-file is transfered back to
@@ -603,14 +603,14 @@ I<--cleanup>. This will remove both the file transfered to the remote
 machine and the files transfered from the remote machine:
 
   find logs/ -name '*.gz' | \
-    par$ --sshlogin server.example.com \
+    parallel --sshlogin server.example.com \
     --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
 
 If you want run one several servers add the servers to I<--sshlogin>
 either using ',' or separate I<--sshlogin>:
 
   find logs/ -name '*.gz' | \
-    par$ --sshlogin server.example.com,server2.example.com \
+    parallel --sshlogin server.example.com,server2.example.com \
     --sshlogin server3.example.com \
     --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
 
@@ -618,7 +618,7 @@ You can add the local machine using I<--sshlogin :>. This will disable the
 removing and transferring for the local machine only:
 
   find logs/ -name '*.gz' | \
-    par$ --sshlogin server.example.com,server2.example.com \
+    parallel --sshlogin server.example.com,server2.example.com \
     --sshlogin server3.example.com \
     --sshlogin : \
     --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
@@ -627,14 +627,14 @@ Often I<--transfer>, I<--return> and I<--cleanup> are used together. They can be
 shortened to I<--trc>:
 
   find logs/ -name '*.gz' | \
-    par$ --sshlogin server.example.com,server2.example.com \
+    parallel --sshlogin server.example.com,server2.example.com \
     --sshlogin server3.example.com \
     --sshlogin : \
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
 With the file I<mymachines> containing the compute machines it becomes:
 
-  find logs/ -name '*.gz' | par$ --sshloginfile mymachines \
+  find logs/ -name '*.gz' | parallel --sshloginfile mymachines \
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
 =head1 QUOTING
@@ -644,21 +644,21 @@ print the filename for each line that has exactly 2 columns:
 
 B<perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file>
 
-This can be done by B<par$> using:
+This can be done by B<parallel> using:
 
-B<ls | par$ "perl -ne '/^\\S+\\s+\\S+$/ and print \$ARGV,\"\\n\"'">
+B<ls | parallel "perl -ne '/^\\S+\\s+\\S+$/ and print \$ARGV,\"\\n\"'">
 
-Notice how \'s, "'s, and $'s needs to be quoted. B<par$> can do
+Notice how \'s, "'s, and $'s needs to be quoted. B<parallel> can do
 the quoting by using option B<-q>:
 
-B<ls | par$ -q  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"'>
+B<ls | parallel -q  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"'>
 
 However, this means you cannot make the shell interpret special
 characters. For example this B<will not work>:
 
-B<ls | par$ -q "diff {} foo >>B<{}.diff"> 
+B<ls | parallel -q "diff {} foo >>B<{}.diff"> 
 
-B<ls | par$ -q "ls {} | wc -l">
+B<ls | parallel -q "ls {} | wc -l">
 
 because > and | need to be interpreted by the shell.
 
@@ -671,14 +671,14 @@ then you might try using B<-q>.
 If you are using B<bash> process substitution like B<<(cat foo)> then
 you may try B<-q> and prepending B<command> with B<bash -c>:
 
-B<ls | par$ -q bash -c 'wc -c <(echo {})'>
+B<ls | parallel -q bash -c 'wc -c <(echo {})'>
 
 Or for substituting output:
 
-B<ls | par$ -q bash -c 'tar c {} | tee >>B<(gzip >>B<{}.tar.gz) | bzip2 >>B<{}.tar.bz2'>
+B<ls | parallel -q bash -c 'tar c {} | tee >>B<(gzip >>B<{}.tar.gz) | bzip2 >>B<{}.tar.bz2'>
 
 B<Conclusion>: To avoid dealing with the quoting problems it may be
-easier just to write a small script and have B<par$> call that
+easier just to write a small script and have B<parallel> call that
 script.
 
 
@@ -686,31 +686,31 @@ script.
 
 If you want a list of the jobs currently running you can run:
 
-B<killall -USR1 par$>
+B<killall -USR1 parallel>
 
-B<par$> will then print the currently running jobs on STDERR.
+B<parallel> will then print the currently running jobs on STDERR.
 
 
 =head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
 
-If you regret starting a lot of jobs you can simply break B<par$>,
+If you regret starting a lot of jobs you can simply break B<parallel>,
 but if you want to make sure you do not have halfcompleted jobs you
-should send the signal B<SIGTERM> to B<par$>:
+should send the signal B<SIGTERM> to B<parallel>:
 
-B<killall -TERM par$>
+B<killall -TERM parallel>
 
-This will tell B<par$> to not start any new jobs, but wait until
+This will tell B<parallel> to not start any new jobs, but wait until
 the currently running jobs are finished.
 
 
-=head1 DIFFERENCES BETWEEN xargs/find -exec AND par$
+=head1 DIFFERENCES BETWEEN xargs/find -exec AND parallel
 
 B<xargs> and B<find -exec> offer some of the same possibilites as
-B<par$>. 
+B<parallel>. 
 
 B<find -exec> only works on files. So processing other input (such as
 hosts or URLs) will require creating these inputs as files. B<find
--exec> has no support for running commands in par$.
+-exec> has no support for running commands in parallel.
 
 B<xargs> deals badly with special characters (such as space, ' and
 "). To see the problem try this:
@@ -728,7 +728,7 @@ B<sed>, B<tar -v>, B<perl> (-0 and \0 instead of \n), B<locate>
 (requires using -0), B<find> (requires using -print0), B<grep>
 (requires user to use -z or -Z).
 
-So B<par$>'s newline separation can be emulated with:
+So B<parallel>'s newline separation can be emulated with:
 
 B<cat | xargs -d "\n" -n1 I<command>>
 
@@ -749,10 +749,10 @@ arguments.
 If you use a replace string in B<xargs> (B<-I>) you can not force
 B<xargs> to use more than one argument.
 
-Quoting in B<xargs> works like B<-q> in B<par$>. This means
+Quoting in B<xargs> works like B<-q> in B<parallel>. This means
 composed commands and redirection requires using B<bash -c>.
 
-B<ls | par$ "wc {} >> B<{}.wc"> 
+B<ls | parallel "wc {} >> B<{}.wc"> 
 
 becomes 
 
@@ -760,23 +760,23 @@ B<ls | xargs -d "\n" -P10 -I {} bash -c "wc {} >>B< {}.wc">
 
 and 
 
-B<ls | par$ "echo {}; ls {}|wc"> 
+B<ls | parallel "echo {}; ls {}|wc"> 
 
 becomes 
 
 B<ls | xargs -d "\n" -P10 -I {} bash -c "echo {}; ls {}|wc">
 
 
-=head1 DIFFERENCES BETWEEN mdm/middleman AND par$
+=head1 DIFFERENCES BETWEEN mdm/middleman AND parallel
 
 middleman(mdm) is also a tool for running jobs in parallel.
 
 Here are the shellscripts of http://mdm.berlios.de/usage.html ported
-to par$ use:
+to parallel use:
 
-B<seq 1 19 | par$ -j+0 buffon -o - | sort -n >>B< result>
+B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
 
-B<cat files | par$ -j+0 cmd>
+B<cat files | parallel -j+0 cmd>
 
 
 =head1 BUGS
@@ -787,19 +787,22 @@ unexpected results, as it will often be interpreted as an option.
 
 =head1 REPORTING BUGS
 
-Report bugs to <bug-par$@tange.dk>.
+Report bugs to <bug-parallel@tange.dk>.
 
 
 =head1 AUTHOR
 
 Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
 
-Copyright (C) 2008-2010 Ole Tange, http://ole.tange.dk
+Copyright (C) 2008,2009,2010 Ole Tange, http://ole.tange.dk
+
+Copyright (C) 2010 Ole Tange, http://ole.tange.dk and Free Software
+Foundation, Inc.
 
 
 =head1 LICENSE
 
-Copyright (C) 2007-2010 Free Software Foundation, Inc.
+Copyright (C) 2007,2008,2009,2010 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -817,7 +820,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 =head1 DEPENDENCIES
 
-B<par$> uses Perl, and the Perl modules Getopt::Long, IPC::Open3,
+B<parallel> uses Perl, and the Perl modules Getopt::Long, IPC::Open3,
 Symbol, IO::File, POSIX, and File::Temp.
 
 
@@ -885,7 +888,7 @@ GetOptions("debug|D" => \$::opt_D,
 
 # Defaults:
 $Global::version = 20100419;
-$Global::progname = 'par$';
+$Global::progname = 'parallel';
 $Global::debug = 0;
 $Global::processes_to_run = 10;
 $command = undef;
