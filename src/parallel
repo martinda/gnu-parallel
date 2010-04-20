@@ -6,7 +6,8 @@ parallel - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [-I str] [-j num] [--silent] [command [arguments]] [< list_of_arguments]
+B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [-I str] [-j num] [--silent]
+[command [arguments]] [< list_of_arguments]
 
 =head1 DESCRIPTION
 
@@ -973,7 +974,7 @@ GetOptions("debug|D" => \$::opt_D,
     ) || die_usage();
 
 # Defaults:
-$Global::version = 20100419;
+$Global::version = 20100420;
 $Global::progname = 'parallel';
 $Global::debug = 0;
 $Global::processes_to_run = 10;

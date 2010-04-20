@@ -3,6 +3,6 @@ man_MANS = parallel.1
 
 parallel.1: parallel Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 parallel > parallel.1
+		--section=1 $(srcdir)/parallel > $(srcdir)/parallel.1
 
-CLEANFILES = parallel.1
+DISTCLEANFILES = parallel.1
