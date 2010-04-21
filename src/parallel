@@ -11,9 +11,9 @@ B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [-I str] [-j num] [--silent]
 
 =head1 DESCRIPTION
 
-For each line of input B<parallel> will execute B<command> with the
+For each line of input GNU B<parallel> will execute B<command> with the
 line as arguments. If no B<command> is given the line of input is
-executed.  B<parallel> can often be used as a substitute for B<xargs>
+executed.  GNU B<parallel> can often be used as a substitute for B<xargs>
 or B<cat | sh>.
 
 Several lines will be run in parallel.
@@ -26,8 +26,8 @@ Command to execute.  If B<command> or the following arguments contain
 {} every instance will be substituted with the input line. Setting a
 command also invokes B<-f>.
 
-If B<command> is given, B<parallel> will behave similar to B<xargs>. If
-B<command> is not given B<parallel> will behave similar to B<cat | sh>.
+If B<command> is given, GNU B<parallel> will behave similar to B<xargs>. If
+B<command> is not given GNU B<parallel> will behave similar to B<cat | sh>.
 
 
 =item B<{}>
@@ -150,7 +150,7 @@ B<-g> is the default. Can be reversed with B<-u>.
 
 =item B<-h>
 
-Print a summary of the options to B<parallel> and exit.
+Print a summary of the options to GNU B<parallel> and exit.
 
 
 =item B<-I> I<string>
@@ -232,19 +232,19 @@ end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 Use at most I<max-args> arguments per command line.  Fewer than
 I<max-args> arguments will be used if the size (see the B<-s> option)
 is exceeded, unless the B<-x> option is given, in which case
-B<parallel> will exit.
+GNU B<parallel> will exit.
 
 Only used with B<-m> and B<-X>.
 
 =item B<--number-of-cpus>
 
-Print the number of CPUs and exit (used by B<parallel> itself to
+Print the number of CPUs and exit (used by GNU B<parallel> itself to
 determine the number of CPUs on remote machines).
 
 
 =item B<--number-of-cores>
 
-Print the number of cores and exit (used by B<parallel> itself to determine the
+Print the number of cores and exit (used by GNU B<parallel> itself to determine the
 number of cores on remote machines).
 
 
@@ -323,18 +323,18 @@ of your environment.  The default value is the maximum.
 
 Display the limits on the command-line length which are imposed by the
 operating system and the -s option.  Pipe the input from /dev/null
-(and perhaps specify --no-run-if-empty) if you don't want B<parallel>
+(and perhaps specify --no-run-if-empty) if you don't want GNU B<parallel>
 to do anything.
 
 
-=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin]> (not implemented)
+=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (not implemented)
 
-=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin]> (not implemented)
+=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (not implemented)
 
 Distribute jobs to remote servers. The jobs will be run on a list of
-remote servers.  B<parallel> will determine the number of CPU cores on
+remote servers.  GNU B<parallel> will determine the number of CPU cores on
 the remote servers and run the number of jobs as specified by -j.  If
-the number I<ncpu> is given B<parallel> will use this number for
+the number I<ncpu> is given GNU B<parallel> will use this number for
 number of CPUs on the host. Normally I<ncpu> will not be needed.
 
 An I<sshlogin> is the string you would normally pass to SSH to login,
@@ -349,7 +349,7 @@ the options multiple times.
 
 For examples: see B<--sshloginfile>.
 
-The remote host must have B<parallel> installed.
+The remote host must have GNU B<parallel> installed.
 
 
 =item B<--sshloginfile> I<filename> (not implemented)
@@ -436,7 +436,7 @@ Use the replacement string I<string> instead of {.} for input line without exten
 
 Count the number of CPUs instead of cores. When computing how many
 jobs to run in parallel relative to the number of cores you can ask
-B<parallel> to instead look at the number of CPUs. This will make sense
+GNU B<parallel> to instead look at the number of CPUs. This will make sense
 for computers that have hyperthreading as two jobs running on one CPU
 with hyperthreading will run slower than two jobs running on two CPUs.
 Normal users will not need this option.
@@ -452,7 +452,7 @@ B<--silent>. See also B<-t>.
 
 =item B<-V>
 
-Print the version B<parallel> and exit.
+Print the version GNU B<parallel> and exit.
 
 
 =item B<--xargs>
@@ -473,7 +473,7 @@ of a word (like I<pic{}.jpg>) then the whole word will be repeated.
 
 =head1 EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation
 
-B<parallel> can work similar to B<cat | sh>. 
+GNU B<parallel> can work similar to B<cat | sh>. 
 
 A ressource inexpensive job is a job that takes very little CPU, disk
 I/O and network I/O. Ping is an example of a ressource inexpensive
@@ -498,7 +498,7 @@ jobs needs to be evaluated by the shell.
 
 =head1 EXAMPLE 2: Working as xargs -n1. Argument appending
 
-B<parallel> can work similar to B<xargs -n1>. 
+GNU B<parallel> can work similar to B<xargs -n1>. 
 
 To output all html files run:
 
@@ -594,7 +594,7 @@ line length short enough.
 =head1 EXAMPLE 7: Group output lines
 
 When runnning jobs that output data, you often do not want the output
-of multiple jobs to run together. B<parallel> defaults to grouping the
+of multiple jobs to run together. GNU B<parallel> defaults to grouping the
 output of each job, so the output is printed when the job finishes. If
 you want the output to be printed while the job is running you can use
 B<-u>.
@@ -749,11 +749,11 @@ print the filename for each line that has exactly 2 columns:
 
 B<perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file>
 
-This can be done by B<parallel> using:
+This can be done by GNU B<parallel> using:
 
 B<ls | parallel "perl -ne '/^\\S+\\s+\\S+$/ and print \$ARGV,\"\\n\"'">
 
-Notice how \'s, "'s, and $'s needs to be quoted. B<parallel> can do
+Notice how \'s, "'s, and $'s needs to be quoted. GNU B<parallel> can do
 the quoting by using option B<-q>:
 
 B<ls | parallel -q  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"'>
@@ -783,7 +783,7 @@ Or for substituting output:
 B<ls | parallel -q bash -c 'tar c {} | tee >>B<(gzip >>B<{}.tar.gz) | bzip2 >>B<{}.tar.bz2'>
 
 B<Conclusion>: To avoid dealing with the quoting problems it may be
-easier just to write a small script and have B<parallel> call that
+easier just to write a small script and have GNU B<parallel> call that
 script.
 
 
@@ -793,25 +793,25 @@ If you want a list of the jobs currently running you can run:
 
 B<killall -USR1 parallel>
 
-B<parallel> will then print the currently running jobs on STDERR.
+GNU B<parallel> will then print the currently running jobs on STDERR.
 
 
 =head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
 
-If you regret starting a lot of jobs you can simply break B<parallel>,
+If you regret starting a lot of jobs you can simply break GNU B<parallel>,
 but if you want to make sure you do not have halfcompleted jobs you
-should send the signal B<SIGTERM> to B<parallel>:
+should send the signal B<SIGTERM> to GNU B<parallel>:
 
 B<killall -TERM parallel>
 
-This will tell B<parallel> to not start any new jobs, but wait until
+This will tell GNU B<parallel> to not start any new jobs, but wait until
 the currently running jobs are finished.
 
 
 =head1 DIFFERENCES BETWEEN xargs/find -exec AND parallel
 
 B<xargs> and B<find -exec> offer some of the same possibilites as
-B<parallel>. 
+GNU B<parallel>. 
 
 B<find -exec> only works on files. So processing other input (such as
 hosts or URLs) will require creating these inputs as files. B<find
@@ -833,7 +833,7 @@ B<sed>, B<tar -v>, B<perl> (-0 and \0 instead of \n), B<locate>
 (requires using -0), B<find> (requires using -print0), B<grep>
 (requires user to use -z or -Z).
 
-So B<parallel>'s newline separation can be emulated with:
+So GNU B<parallel>'s newline separation can be emulated with:
 
 B<cat | xargs -d "\n" -n1 I<command>>
 
@@ -854,7 +854,7 @@ arguments.
 If you use a replace string in B<xargs> (B<-I>) you can not force
 B<xargs> to use more than one argument.
 
-Quoting in B<xargs> works like B<-q> in B<parallel>. This means
+Quoting in B<xargs> works like B<-q> in GNU B<parallel>. This means
 composed commands and redirection requires using B<bash -c>.
 
 B<ls | parallel "wc {} >> B<{}.wc"> 
@@ -892,7 +892,7 @@ unexpected results, as it will often be interpreted as an option.
 
 =head1 REPORTING BUGS
 
-Report bugs to <bug-parallel@tange.dk>.
+Report bugs to <bug-parallel@gnu.org>.
 
 
 =head1 AUTHOR
@@ -1015,7 +1015,7 @@ A copy of the full license is included in the file as cc-by-sa.txt.
 
 =head1 DEPENDENCIES
 
-B<parallel> uses Perl, and the Perl modules Getopt::Long, IPC::Open3,
+GNU B<parallel> uses Perl, and the Perl modules Getopt::Long, IPC::Open3,
 Symbol, IO::File, POSIX, and File::Temp.
 
 
@@ -1036,6 +1036,25 @@ use strict;
 
 my ($processes,$command);
 
+# Defaults:
+$Global::version = 20100422;
+$Global::progname = 'parallel';
+$Global::debug = 0;
+$Global::processes_to_run = 10;
+$command = undef;
+$Global::verbose = 0;
+$Global::grouped = 1;
+$Global::keeporder = 0;
+$Global::quoting = 0;
+$Global::replacestring = '{}';
+$Global::replace_no_ext = '{.}';
+$Global::input_is_filename = (@ARGV);
+$/="\n";
+$Global::ignore_empty = 0;
+$Global::argfile = *STDIN;
+$Global::interactive = 0;
+$Global::stderr_verbose = 0;
+
 Getopt::Long::Configure ("bundling","require_order");
 GetOptions("debug|D" => \$::opt_D,
            "xargs|m" => \$::opt_m,
@@ -1054,6 +1073,8 @@ GetOptions("debug|D" => \$::opt_D,
 	   "jobs|j=s" => \$::opt_P,
 	   "number-of-cpus" => \$::opt_number_of_cpus,
 	   "number-of-cores" => \$::opt_number_of_cores,
+	   "sshlogin|S=s" => \@Global::sshlogin,
+	   "sshloginfile=s" => \$::opt_sshloginfile,
 	   # xargs-compatibility - implemented, man, unittest
 	   "max-procs|P=s" => \$::opt_P,
 	   "delimiter|d=s" => \$::opt_d,
@@ -1081,26 +1102,6 @@ GetOptions("debug|D" => \$::opt_D,
 	   ## (echo a b' ';echo c) | xargs -l1 echo
 	   "exit|x" => \$::opt_x,
     ) || die_usage();
-
-# Defaults:
-$Global::version = 20100420;
-$Global::progname = 'parallel';
-$Global::debug = 0;
-$Global::processes_to_run = 10;
-$command = undef;
-$Global::verbose = 0;
-$Global::grouped = 1;
-$Global::keeporder = 0;
-$Global::quoting = 0;
-$Global::replacestring = '{}';
-$Global::replace_no_ext = '{.}';
-$Global::input_is_filename = (@ARGV);
-$/="\n";
-$Global::ignore_empty = 0;
-$Global::argfile = *STDIN;
-$Global::interactive = 0;
-$Global::stderr_verbose = 0;
-
 $Global::debug = (defined $::opt_D);
 if(defined $::opt_m) { $Global::xargs = 1; }
 if(defined $::opt_X) { $Global::Xargs = 1; }
@@ -1127,6 +1128,7 @@ if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
 if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; exit(0); }
 if(defined $::opt_version) { version(); exit(0); }
 if(defined $::opt_show_limits) { show_limits(); }
+if(defined $::opt_sshloginfile) { read_sshloginfile($::opt_sshloginfile); }
 
 if(defined $::opt_a) {
     if(not open(ARGFILE,"<".$::opt_a)) {
@@ -1149,6 +1151,7 @@ if(defined $::opt_P) { $Global::processes_to_run = compute_number_of_processes($
 
 $Global::job_end_sequence=1;
 
+parse_sshlogin();
 init_run_jobs();
 DoNotReap();
 start_more_jobs();
@@ -1731,12 +1734,12 @@ sub start_job {
     if($::opt_a and $Global::job_start_sequence == 1) {
 	# Give STDIN to the first job if using -a
 	$pid = open3("<&STDIN", ">&STDOUT", ">&STDERR", $command) || 
-	    die("open3 failed. Report a bug to <par\@tange.dk>\n");
+	    die("open3 failed. Report a bug to <bug-parallel\@gnu.org>\n");
 	# Re-open to avoid complaining
 	open STDIN, "<&", $Global::original_stdin or die "Can't dup \$Global::original_stdin: $!";
     } else {
 	$pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) || 
-	    die("open3 failed. Report a bug to <par\@tange.dk>\n");
+	    die("open3 failed. Report a bug to <bug-parallel\@gnu.org>\n");
     }
     debug("started: $command\n");
     open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$Global::original_stdout: $!";
@@ -1792,6 +1795,43 @@ sub print_job {
     close $out;
     close $err;
 }
+
+#
+# Remote ssh stuff
+#
+
+sub read_sshloginfile {
+    my $file = shift;
+    open(IN, $file) || die "Cannot open $file";
+    while(<IN>) {
+	chomp;
+	push @Global::sshlogin, $_;
+    }
+    close IN;
+}
+
+sub parse_sshlogin {
+    my ($ncpu,@login);
+    for my $ssh (@Global::sshlogin) {
+	# Split up -S sshlogin,sshlogin
+	push (@login, (split /,/, $ssh));
+    }
+    for my $ssh (@login) {
+	if($ssh =~ s:^(\d+)/::) {
+	    $ncpu = $1;
+	} else {
+	    if($ssh eq ":") {
+		$ncpu = no_of_cpus();
+	    } else {
+		$ncpu = qx(ssh $ssh parallel --number-of-cpus);
+		chomp($ncpu);
+	    }
+	}
+	# Save the $ssh and $ncpu in a data structure
+	$Global::sshlogin{$ssh} = $ncpu;
+    }
+}
+
 
 #
 # Signal handling stuff
@@ -1882,8 +1922,7 @@ sub usage {
 sub version {
     print join("\n",
 	       "$Global::progname $Global::version",
-#	       "Copyright (C) 2007,2008,2009,2010 Ole Tange and Free Software Foundation, Inc.",
-	       "Copyright (C) 2007,2008,2009,2010 Ole Tange.",
+	       "Copyright (C) 2007,2008,2009,2010 Ole Tange and Free Software Foundation, Inc.",
 	       "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
 	       "This is free software: you are free to change and redistribute it.",
 	       "$Global::progname comes with no warranty.",
