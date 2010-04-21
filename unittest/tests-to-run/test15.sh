@@ -9,6 +9,17 @@ seq 1 10 >/tmp/$$
 $PAR -a /tmp/$$ echo
 $PAR --arg-file /tmp/$$ echo
 
+cd input-files/test15
+
+# echo 3 | xargs -P 2 -n 1 -a files cat -
+echo 3 | parallel -k -P 2 -n 1 -a files cat -
+# echo 3 | xargs -I {} -P 2 -n 1 -a files cat {} -
+# Should give:
+# 3
+# 1
+# 2
+echo 3 | parallel -k -I {} -P 2 -n 1 -a files cat {} -
+
 # Test -i and --replace: Replace with argument
 (echo a; echo END; echo b) | $PAR -k -i -eEND echo repl{}ce
 (echo a; echo END; echo b) | $PAR -k --replace -eEND echo repl{}ce
@@ -70,3 +81,7 @@ $PAR --version | wc -l
 # Test --verbose and -t
 (echo b; echo c; echo f) | $PAR -k -t echo {}ar 2>&1 >/dev/null
 (echo b; echo c; echo f) | $PAR -k --verbose echo {}ar 2>&1 >/dev/null
+
+# Test --show-limits
+(echo b; echo c; echo f) | $PAR -k --show-limits echo {}ar
+(echo b; echo c; echo f) | $PAR -k --show-limits -s 100 echo {}ar

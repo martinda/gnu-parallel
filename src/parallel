@@ -57,6 +57,35 @@ Use NUL as delimiter.  Normally input lines will end in \n
 for processing filenames that may contain \n (newline).
 
 
+=item B<--arg-file>=I<file>
+
+=item B<-a> I<file>
+
+Read items from file instead of standard input.  If you use this
+option, stdin is given to the first process run.  Otherwise, stdin is
+redirected from /dev/null.
+
+
+=item B<--cleanup> (not implemented)
+
+Remove transfered files. B<--cleanup> will remove the transfered files
+on the remote server after processing is done.
+
+  find log -name '*gz' | parallel \
+    --sshlogin server.example.com --transfer --return {.}.bz2 \
+    --cleanup "zcat {} | bzip -9 >{.}.bz2"
+
+With B<--transfer> the file transfered to the remote server will be
+removed on the remote server.  Directories created will not be removed
+- even if they are empty.
+
+With B<--return> the file transfered from the remote server will be
+removed on the remote server.  Directories created will not be removed
+- even if they are empty.
+
+B<--cleanup> is ignored when not used with B<--transfer> or B<--return>.
+
+
 =item B<--command>
 
 =item B<-c>
@@ -81,6 +110,24 @@ as \n, or an octal or hexadecimal escape code.  Octal and
 hexadecimal escape codes are understood as for the printf command.
 Multibyte characters are not supported.
 
+=item B<-E> I<eof-str>
+
+Set the end of file string to eof-str.  If the end of file string
+occurs as a line of input, the rest of the input is ignored.  If
+neither B<-E> nor B<-e> is used, no end of file string is used.
+
+
+=item B<--eof>[=I<eof-str>]
+
+=item B<-e>[I<eof-str>]
+
+This option is a synonym for the B<-E> option.  Use B<-E> instead,
+because it is POSIX compliant for B<xargs> while this option is not.
+If I<eof-str> is omitted, there is no end of file string.  If neither
+B<-E> nor B<-e> is used, no end of file string is used.
+
+
+
 
 =item B<--file>
 
@@ -99,17 +146,25 @@ Group output.  Output from each jobs is grouped together and is only
 printed when the command is finished. STDERR first followed by STDOUT.
 B<-g> is the default. Can be reversed with B<-u>.
 
+=item B<--help>
+
+=item B<-h>
+
+Print a summary of the options to B<parallel> and exit.
+
 
 =item B<-I> I<string>
 
 Use the replacement string I<string> instead of {}.
 
 
-=item B<-U> I<string>
+=item B<--replace>[=I<replace-str>]
 
-=item B<--extensionreplace> I<string>
+=item B<-i>[I<replace-str>]
 
-Use the replacement string I<string> instead of {.} for input line without extension.
+This option is a synonym for B<-I>I<replace-str> if I<replace-str> is
+specified, and for B<-I>{} otherwise.  This option is deprecated;
+use B<-I> instead.
 
 
 =item B<--jobs> I<N>
@@ -170,6 +225,16 @@ If the evaluated number is less than 1 then 1 will be used.  See also
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 
+=item B<--max-args>=I<max-args>
+
+=item B<-n> I<max-args>
+
+Use at most I<max-args> arguments per command line.  Fewer than
+I<max-args> arguments will be used if the size (see the B<-s> option)
+is exceeded, unless the B<-x> option is given, in which case
+B<parallel> will exit.
+
+Only used with B<-m> and B<-X>.
 
 =item B<--number-of-cpus>
 
@@ -191,6 +256,75 @@ Quote B<command>.  This will quote the command line so special
 characters are not interpreted by the shell. See the section
 QUOTING. Most people will never need this.  Quoting is disabled by
 default.
+
+
+=item B<--interactive>
+
+=item B<-p>
+
+Prompt the user about whether to run each command line and read a line
+from the terminal.  Only run the command line if the response starts
+with 'y' or 'Y'.  Implies B<-t>.
+
+
+=item B<--no-run-if-empty>
+
+=item B<-r>
+
+If the standard input does not contain any nonblanks, do not run the
+command.
+
+=item B<--return> I<filename> (not implemented)
+
+Transfer files from remote servers. B<--return> is used with
+B<--sshlogin> when the arguments are files on the remote servers. When
+processing is done the file I<filename> will be transfered
+from the remote server using B<rsync> and will be put relative to
+the default login dir. E.g.
+
+  echo foo/bar.txt | parallel \
+    --sshlogin server.example.com --return {}.out touch {}.out
+
+This will transfer the file I<$HOME/foo/bar.txt.out> from the server
+I<server.example.com> to the file I<foo/bar.txt.out> after running
+B<touch foo/bar.txt.out> on I<server.example.com>.
+
+  echo /tmp/foo/bar.txt | parallel \
+    --sshlogin server.example.com --return {}.out touch {}.out
+
+This will transfer the file I</tmp/foo/bar.txt.out> from the server
+I<server.example.com> to the file I</tmp/foo/bar.txt.out> after running
+B<touch /tmp/foo/bar.txt.out> on I<server.example.com>.
+
+Multiple files can be transfered by repeating the options multiple
+times:
+
+  echo /tmp/foo/bar.txt | \
+    parallel --sshlogin server.example.com \
+    --return {}.out --return {}.out2 touch {}.out {}.out2
+
+B<--return> is often used with B<--transfer> and B<--cleanup>.
+
+B<--return> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
+
+
+=item B<--max-chars>=I<max-chars>
+
+=item B<-s> I<max-chars>
+
+Use at most max-chars characters per command line, including the
+command and initial-arguments and the terminating nulls at the ends of
+the argument strings.  The largest allowed value is system-dependent,
+and is calculated as the argument length limit for exec, less the size
+of your environment.  The default value is the maximum.
+
+
+=item B<--show-limits>
+
+Display the limits on the command-line length which are imposed by the
+operating system and the -s option.  Pipe the input from /dev/null
+(and perhaps specify --no-run-if-empty) if you don't want B<parallel>
+to do anything.
 
 
 =item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin]> (not implemented)
@@ -240,6 +374,16 @@ Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with B<-v>.
 
 
+=item B<--verbose>
+
+=item B<-t>
+
+Print the command line on the standard error output before executing
+it.
+
+See also B<-v>.
+
+
 =item B<--transfer> (not implemented)
 
 Transfer files to remote servers. B<--transfer> is used with
@@ -273,66 +417,19 @@ Transfer, Return, Cleanup. Short hand for:
   --transfer --return I<filename> --cleanup
 
 
-=item B<--return> I<filename> (not implemented)
-
-Transfer files from remote servers. B<--return> is used with
-B<--sshlogin> when the arguments are files on the remote servers. When
-processing is done the file I<filename> will be transfered
-from the remote server using B<rsync> and will be put relative to
-the default login dir. E.g.
-
-  echo foo/bar.txt | parallel \
-    --sshlogin server.example.com --return {}.out touch {}.out
-
-This will transfer the file I<$HOME/foo/bar.txt.out> from the server
-I<server.example.com> to the file I<foo/bar.txt.out> after running
-B<touch foo/bar.txt.out> on I<server.example.com>.
-
-  echo /tmp/foo/bar.txt | parallel \
-    --sshlogin server.example.com --return {}.out touch {}.out
-
-This will transfer the file I</tmp/foo/bar.txt.out> from the server
-I<server.example.com> to the file I</tmp/foo/bar.txt.out> after running
-B<touch /tmp/foo/bar.txt.out> on I<server.example.com>.
-
-Multiple files can be transfered by repeating the options multiple
-times:
-
-  echo /tmp/foo/bar.txt | \
-    parallel --sshlogin server.example.com \
-    --return {}.out --return {}.out2 touch {}.out {}.out2
-
-B<--return> is often used with B<--transfer> and B<--cleanup>.
-
-B<--return> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
-
-
-=item B<--cleanup> (not implemented)
-
-Remove transfered files. B<--cleanup> will remove the transfered files
-on the remote server after processing is done.
-
-  find log -name '*gz' | parallel \
-    --sshlogin server.example.com --transfer --return {.}.bz2 \
-    --cleanup "zcat {} | bzip -9 >{.}.bz2"
-
-With B<--transfer> the file transfered to the remote server will be
-removed on the remote server.  Directories created will not be removed
-- even if they are empty.
-
-With B<--return> the file transfered from the remote server will be
-removed on the remote server.  Directories created will not be removed
-- even if they are empty.
-
-B<--cleanup> is ignored when not used with B<--transfer> or B<--return>.
-
-
 =item B<--ungroup>
 
 =item B<-u>
 
 Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with B<-g>.
+
+
+=item B<-U> I<string>
+
+=item B<--extensionreplace> I<string>
+
+Use the replacement string I<string> instead of {.} for input line without extension.
 
 
 =item B<--use-cpus-instead-of-cores> (not implemented)
@@ -348,7 +445,14 @@ Normal users will not need this option.
 =item B<-v>
 
 Verbose.  Print the job to be run on STDOUT. Can be reversed with
-B<--silent>.
+B<--silent>. See also B<-t>.
+
+
+=item B<--version>
+
+=item B<-V>
+
+Print the version B<parallel> and exit.
 
 
 =item B<--xargs>
@@ -800,6 +904,10 @@ Copyright (C) 2008,2009,2010 Ole Tange, http://ole.tange.dk
 Copyright (C) 2010 Ole Tange, http://ole.tange.dk and Free Software
 Foundation, Inc.
 
+Parts of the manual concerning B<xargs> compatability is inspired by
+the manual of B<xargs> from GNU findutils 4.4.2.
+
+
 
 =head1 LICENSE
 
@@ -949,7 +1057,6 @@ GetOptions("debug|D" => \$::opt_D,
 	   # xargs-compatibility - implemented, man, unittest
 	   "max-procs|P=s" => \$::opt_P,
 	   "delimiter|d=s" => \$::opt_d,
-	   # xargs-compatibility - implemented, unittest - man missing
 	   "max-chars|s=i" => \$::opt_s,
 	   "arg-file|a=s" => \$::opt_a,
 	   "no-run-if-empty|r" => \$::opt_r,
@@ -957,19 +1064,21 @@ GetOptions("debug|D" => \$::opt_D,
 	   "E=s" => \$::opt_E,
 	   "eof|e:s" => \$::opt_E,
 	   "max-args|n=i" => \$::opt_n,
-	   "verbose|t" => \$::opt_verbose,
 	   "help|h" => \$::opt_help,
+	   "verbose|t" => \$::opt_verbose,
 	   "version|V" => \$::opt_version,
-	   ## xargs-compatibility - implemented - unittest missing - man missing
+	   "show-limits" => \$::opt_show_limits,
+	   ## xargs-compatibility - implemented, man - unittest missing
 	   "interactive|p" => \$::opt_p,
 	   ## How to unittest? tty skal emuleres
 
+	   # xargs-compatibility - implemented, unittest - man missing
+	   #none
 	   # xargs-compatability - unimplemented
 	   "L=i" => \$::opt_L,
 	   "max-lines|l:i" => \$::opt_l,
 	   ## (echo a b;echo c) | xargs -l1 echo
 	   ## (echo a b' ';echo c) | xargs -l1 echo
-	   "show-limits" => \$::opt_show_limits,
 	   "exit|x" => \$::opt_x,
     ) || die_usage();
 
@@ -1017,6 +1126,7 @@ if(defined $::opt_help) { die_usage(); }
 if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
 if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; exit(0); }
 if(defined $::opt_version) { version(); exit(0); }
+if(defined $::opt_show_limits) { show_limits(); }
 
 if(defined $::opt_a) {
     if(not open(ARGFILE,"<".$::opt_a)) {
@@ -1208,12 +1318,7 @@ sub max_length_of_command_line {
     # Find the max_length of a command line
     # First find an upper bound
     if(not $Global::command_line_max_len) {
-	my $len = 10;
-	do {
-	    $len *= 10;
-	} while (is_acceptable_command_line_length($len));
-	# Then search for the actual max length between 0 and upper bound
-	$Global::command_line_max_len = binary_find_max_length(int(($len)/10),$len);
+	$Global::command_line_max_len = real_max_length();
 	if($::opt_s) {
 	    if($::opt_s <= $Global::command_line_max_len) {
 		$Global::command_line_max_len = $::opt_s;
@@ -1225,6 +1330,16 @@ sub max_length_of_command_line {
     }
     return $Global::command_line_max_len;
 }
+
+sub real_max_length {
+    my $len = 10;
+    do {
+	$len *= 10;
+    } while (is_acceptable_command_line_length($len));
+    # Then search for the actual max length between 0 and upper bound
+    return binary_find_max_length(int(($len)/10),$len);
+}
+
 
 sub binary_find_max_length {
     # Given a lower and upper bound find the max_length of a command line
@@ -1465,6 +1580,7 @@ sub init_run_jobs {
     # Remember the original STDOUT and STDERR
     open $Global::original_stdout, ">&STDOUT" or die "Can't dup STDOUT: $!";
     open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
+    open $Global::original_stdin, "<&STDIN" or die "Can't dup STDIN: $!";
     $Global::running_jobs=0;
     $SIG{USR1} = \&ListRunningJobs;
     $Global::original_sigterm = $SIG{TERM};
@@ -1610,13 +1726,22 @@ sub start_job {
     $Global::running_jobs++;
     debug("$Global::running_jobs processes. Starting: $command\n");
     #print STDERR "LEN".length($command)."\n";
-    $pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) || 
-	die("open3 failed. Report a bug to <par\@tange.dk>\n");
-    debug("started: $command\n");
-    open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$oldout: $!";
-    open STDERR, ">&", $Global::original_stderr or die "Can't dup \$oldout: $!";
-
     $Global::job_start_sequence++;
+
+    if($::opt_a and $Global::job_start_sequence == 1) {
+	# Give STDIN to the first job if using -a
+	$pid = open3("<&STDIN", ">&STDOUT", ">&STDERR", $command) || 
+	    die("open3 failed. Report a bug to <par\@tange.dk>\n");
+	# Re-open to avoid complaining
+	open STDIN, "<&", $Global::original_stdin or die "Can't dup \$Global::original_stdin: $!";
+    } else {
+	$pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) || 
+	    die("open3 failed. Report a bug to <par\@tange.dk>\n");
+    }
+    debug("started: $command\n");
+    open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$Global::original_stdout: $!";
+    open STDERR, ">&", $Global::original_stderr or die "Can't dup \$Global::original_stderr: $!";
+
     if($Global::grouped) {
 	return ("seq" => $Global::job_start_sequence,
 		"pid" => $pid,
@@ -1765,6 +1890,15 @@ sub version {
 	       "",
 	       "Web site: http://${Global::progname}.nongnu.org\n"
 	);
+}
+
+sub show_limits {
+    print("Maximal size of command: ",real_max_length(),"\n",
+	  "Maximal used size of command: ",max_length_of_command_line(),"\n",
+	  "\n",
+	  "Execution of  will continue now, and it will try to read its input\n",
+	  "and run commands; if this is not what you wanted to happen, please\n",
+	  "press CTRL-D or CTRL-C\n");
 }
 
 
