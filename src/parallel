@@ -54,16 +54,16 @@ not contain B<.> it will remain unchanged.
 
 Use NUL as delimiter.  Normally input lines will end in \n
 (newline). If they end in \0 (NUL), then use this option. It is useful
-for processing filenames that may contain \n (newline).
+for processing arguments that may contain \n (newline).
 
 
-=item B<--arg-file>=I<file>
+=item B<--arg-file>=I<input-file>
 
-=item B<-a> I<file>
+=item B<-a> I<input-file>
 
-Read items from file instead of standard input.  If you use this
-option, stdin is given to the first process run.  Otherwise, stdin is
-redirected from /dev/null.
+Read items from the file I<input-file> instead of standard input.  If
+you use this option, stdin is given to the first process run.
+Otherwise, stdin is redirected from /dev/null.
 
 
 =item B<--cleanup> (not implemented)
@@ -271,8 +271,7 @@ with 'y' or 'Y'.  Implies B<-t>.
 
 =item B<-r>
 
-If the standard input does not contain any nonblanks, do not run the
-command.
+If the standard input only contains whitespace, do not run the command.
 
 =item B<--return> I<filename> (not implemented)
 
@@ -283,25 +282,25 @@ from the remote server using B<rsync> and will be put relative to
 the default login dir. E.g.
 
   echo foo/bar.txt | parallel \
-    --sshlogin server.example.com --return {}.out touch {}.out
+    --sshlogin server.example.com --return {.}.out touch {.}.out
 
-This will transfer the file I<$HOME/foo/bar.txt.out> from the server
-I<server.example.com> to the file I<foo/bar.txt.out> after running
-B<touch foo/bar.txt.out> on I<server.example.com>.
+This will transfer the file I<$HOME/foo/bar.out> from the server
+I<server.example.com> to the file I<foo/bar.out> after running
+B<touch foo/bar.out> on I<server.example.com>.
 
   echo /tmp/foo/bar.txt | parallel \
-    --sshlogin server.example.com --return {}.out touch {}.out
+    --sshlogin server.example.com --return {.}.out touch {.}.out
 
-This will transfer the file I</tmp/foo/bar.txt.out> from the server
-I<server.example.com> to the file I</tmp/foo/bar.txt.out> after running
-B<touch /tmp/foo/bar.txt.out> on I<server.example.com>.
+This will transfer the file I</tmp/foo/bar.out> from the server
+I<server.example.com> to the file I</tmp/foo/bar.out> after running
+B<touch /tmp/foo/bar.out> on I<server.example.com>.
 
 Multiple files can be transfered by repeating the options multiple
 times:
 
   echo /tmp/foo/bar.txt | \
     parallel --sshlogin server.example.com \
-    --return {}.out --return {}.out2 touch {}.out {}.out2
+    --return {.}.out --return {.}.out2 touch {.}.out {.}.out2
 
 B<--return> is often used with B<--transfer> and B<--cleanup>.
 
@@ -312,7 +311,7 @@ B<--return> is ignored when used with B<--sshlogin :> or when not used with B<--
 
 =item B<-s> I<max-chars>
 
-Use at most max-chars characters per command line, including the
+Use at most I<max-chars> characters per command line, including the
 command and initial-arguments and the terminating nulls at the ends of
 the argument strings.  The largest allowed value is system-dependent,
 and is calculated as the argument length limit for exec, less the size
@@ -395,14 +394,14 @@ will be put relative to the default login dir. E.g.
     --sshlogin server.example.com --transfer wc
 
 This will transfer the file I<foo/bar.txt> to the server
-I<server.example.com> to the file $HOME/foo/bar.txt before running
+I<server.example.com> to the file I<$HOME/foo/bar.txt> before running
 B<wc foo/bar.txt> on I<server.example.com>.
 
   echo /tmp/foo/bar.txt | parallel \
     --sshlogin server.example.com --transfer wc
 
 This will transfer the file I<foo/bar.txt> to the server
-I<server.example.com> to the file /tmp/foo/bar.txt before running
+I<server.example.com> to the file I</tmp/foo/bar.txt> before running
 B<wc /tmp/foo/bar.txt> on I<server.example.com>.
 
 B<--transfer> is often used with B<--return> and B<--cleanup>.
@@ -414,7 +413,7 @@ B<--transfer> is ignored when used with B<--sshlogin :> or when not used with B<
 
 Transfer, Return, Cleanup. Short hand for:
 
-  --transfer --return I<filename> --cleanup
+  --transfer --return filename --cleanup
 
 
 =item B<--ungroup>
@@ -425,9 +424,9 @@ Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with B<-g>.
 
 
-=item B<-U> I<string>
-
 =item B<--extensionreplace> I<string>
+
+=item B<-U> I<string>
 
 Use the replacement string I<string> instead of {.} for input line without extension.
 
@@ -528,18 +527,7 @@ B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg>
 Notice how the argument has to start with {} as {} will include path
 (e.g. running B<convert -geometry 120 ./foo/bar.jpg
 thumb_./foo/bar.jpg> would clearly be wrong). It will result in files
-like ./foo/bar.jpg_thumb.jpg. If that is not wanted this can fix it:
-
-  find . -name '*.jpg' | \
-  perl -pe 'chomp; $a=$_; s:/([^/]+)$:/thumb_$1:; $_="convert -geometry 120 $a $_\n"' | \
-  parallel -c -j +0
-
-Unfortunately this will not work if the filenames contain special
-characters (such as space or quotes). If you have B<ren> installed this
-is a better solution:
-
-  find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg
-  find . -name '*_thumb.jpg' | ren 's:/([^/]+)_thumb.jpg$:/thumb_$1:'
+like ./foo/bar.jpg_thumb.jpg.
 
 This will make files like ./foo/bar_thumb.jpg:
 
@@ -904,7 +892,7 @@ Copyright (C) 2008,2009,2010 Ole Tange, http://ole.tange.dk
 Copyright (C) 2010 Ole Tange, http://ole.tange.dk and Free Software
 Foundation, Inc.
 
-Parts of the manual concerning B<xargs> compatability is inspired by
+Parts of the manual concerning B<xargs> compatibility is inspired by
 the manual of B<xargs> from GNU findutils 4.4.2.
 
 
@@ -1048,7 +1036,6 @@ $Global::keeporder = 0;
 $Global::quoting = 0;
 $Global::replacestring = '{}';
 $Global::replace_no_ext = '{.}';
-$Global::input_is_filename = (@ARGV);
 $/="\n";
 $Global::ignore_empty = 0;
 $Global::argfile = *STDIN;
@@ -1103,6 +1090,7 @@ GetOptions("debug|D" => \$::opt_D,
 	   "exit|x" => \$::opt_x,
     ) || die_usage();
 $Global::debug = (defined $::opt_D);
+$Global::input_is_filename = (@ARGV);
 if(defined $::opt_m) { $Global::xargs = 1; }
 if(defined $::opt_X) { $Global::Xargs = 1; }
 if(defined $::opt_v) { $Global::verbose = 1; }
@@ -1927,7 +1915,7 @@ sub version {
 	       "This is free software: you are free to change and redistribute it.",
 	       "$Global::progname comes with no warranty.",
 	       "",
-	       "Web site: http://${Global::progname}.nongnu.org\n"
+	       "Web site: http://www.gnu.org/software/${Global::progname}\n"
 	);
 }
 

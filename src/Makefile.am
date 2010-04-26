@@ -6,3 +6,4 @@ parallel.1: parallel Makefile
 		--section=1 $(srcdir)/parallel > $(srcdir)/parallel.1
 
 DISTCLEANFILES = parallel.1
+EXTRA_DIST = parallel parallel.1

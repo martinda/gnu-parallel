@@ -1,0 +1,52 @@
+= Notes on how to release new version =
+
+== Update version ==
+
+=== configure.ac ===
+configure.ac: AC_INIT([parallel], [20100422], [bug-parallel@gnu.org])
+
+YYYYMMDD=`yyyymmdd`
+perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" configure.ac
+
+=== src/parallel ===
+
+src/parallel: $Global::version = 20100422;
+
+YYYYMMDD=`yyyymmdd`
+perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/parallel
+
+=== directive file for ftp ===
+
+YYYYMMDD=`yyyymmdd`
+perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive.asc
+
+== Autoconf/automake ==
+
+rm -fr autom4te.cache aclocal.m4 config.h config.h.in config.log Makefile.in missing install-sh
+rm -rf src/Makefile.in
+autoreconf --install -W gnu
+./configure
+make
+
+== Unittest ==
+
+cd unittest; make unittest
+
+== Package ==
+
+./configure
+make dist
+make bzip2-dist
+
+== Upload ==
+
+YYYYMMDD=`yyyymmdd`
+cp doc/parallel-directive.asc parallel-$YYYYMMDD.tar.bz2.directive
+perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive
+gpg --clearsign parallel-*.tar.*directive
+
+YYYYMMDD=`yyyymmdd`
+gpg -b parallel-$YYYYMMDD.tar.bz2
+
+YYYYMMDD=`yyyymmdd`
+echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/

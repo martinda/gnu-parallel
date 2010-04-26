@@ -146,6 +146,7 @@ top_srcdir = @top_srcdir@
 bin_SCRIPTS = parallel
 man_MANS = parallel.1
 DISTCLEANFILES = parallel.1
+EXTRA_DIST = parallel parallel.1
 all: all-am
 
 .SUFFIXES:
