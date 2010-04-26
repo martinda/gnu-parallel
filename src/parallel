@@ -11,6 +11,21 @@ B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [-I str] [-j num] [--silent]
 
 =head1 DESCRIPTION
 
+GNU B<parallel> is a shell tool for executing jobs in parallel. A job is
+typically a single command or a small script that has to be run for
+each of the lines in the input. The typical input is a list of files,
+a list of hosts, a list of users, or a list of tables.
+
+If you use B<xargs> today you will find GNU B<parallel> very easy to
+use. If you write loops in shell, you will find GNU B<parallel> may be
+able to replace most of the loops and make them run faster by running
+jobs in parallel. If you use B<ppss> or B<pexec> you will find GNU
+B<parallel> will often make the command easier to read.
+
+GNU B<parallel> makes sure output from the commands is the same output as
+you would get had you run the commands sequentially. This makes it
+possible to use output from GNU B<parallel> as input for other programs.
+
 For each line of input GNU B<parallel> will execute B<command> with the
 line as arguments. If no B<command> is given the line of input is
 executed.  GNU B<parallel> can often be used as a substitute for B<xargs>
@@ -668,7 +683,7 @@ server has 8 CPU cores.
 
 =head1 EXAMPLE 10: Transferring of files (not implemented)
 
-To recompress gzipped files with bzip2 using a remote server run:
+To recompress gzipped files with B<bzip2> using a remote server run:
 
   find logs/ -name '*.gz' | \
     parallel --sshlogin server.example.com \
@@ -700,7 +715,7 @@ machine and the files transfered from the remote machine:
     --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
 
 If you want run one several servers add the servers to I<--sshlogin>
-either using ',' or separate I<--sshlogin>:
+either using ',' or multiple I<--sshlogin>:
 
   find logs/ -name '*.gz' | \
     parallel --sshlogin server.example.com,server2.example.com \
