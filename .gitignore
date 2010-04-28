@@ -1,1 +1,7 @@
 *~
+Makefile
+config.h
+config.log
+config.status
+parallel-*.bz2*
+stamp-h1

@@ -15,6 +15,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 pkgdatadir = $(datadir)/@PACKAGE@
 pkgincludedir = $(includedir)/@PACKAGE@
@@ -63,13 +64,15 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)" \
+	"$(DESTDIR)$(docdir)"
 SCRIPTS = $(bin_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
 man1dir = $(mandir)/man1
 NROFF = nroff
 MANS = $(man_MANS)
+DATA = $(doc_DATA)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 AMTAR = @AMTAR@
@@ -145,8 +148,9 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 bin_SCRIPTS = parallel
 man_MANS = parallel.1
-DISTCLEANFILES = parallel.1
-EXTRA_DIST = parallel parallel.1
+doc_DATA = parallel.html
+DISTCLEANFILES = parallel.1 parallel.html
+EXTRA_DIST = parallel parallel.1 parallel.html
 all: all-am
 
 .SUFFIXES:
@@ -252,6 +256,26 @@ uninstall-man1:
 	test -z "$$files" || { \
 	  echo " ( cd '$(DESTDIR)$(man1dir)' && rm -f" $$files ")"; \
 	  cd "$(DESTDIR)$(man1dir)" && rm -f $$files; }
+install-docDATA: $(doc_DATA)
+	@$(NORMAL_INSTALL)
+	test -z "$(docdir)" || $(MKDIR_P) "$(DESTDIR)$(docdir)"
+	@list='$(doc_DATA)'; test -n "$(docdir)" || list=; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(docdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(docdir)" || exit $$?; \
+	done
+
+uninstall-docDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(doc_DATA)'; test -n "$(docdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	test -n "$$files" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(docdir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(docdir)" && rm -f $$files
 tags: TAGS
 TAGS:
 
@@ -304,9 +328,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(SCRIPTS) $(MANS)
+all-am: Makefile $(SCRIPTS) $(MANS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(docdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -355,7 +379,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-man
+install-data-am: install-docDATA install-man
 
 install-dvi: install-dvi-am
 
@@ -399,7 +423,7 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binSCRIPTS uninstall-man
+uninstall-am: uninstall-binSCRIPTS uninstall-docDATA uninstall-man
 
 uninstall-man: uninstall-man1
 
@@ -408,19 +432,24 @@ uninstall-man: uninstall-man1
 .PHONY: all all-am check check-am clean clean-generic distclean \
 	distclean-generic distdir dvi dvi-am html html-am info info-am \
 	install install-am install-binSCRIPTS install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-man1 install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
-	pdf-am ps ps-am uninstall uninstall-am uninstall-binSCRIPTS \
-	uninstall-man uninstall-man1
+	install-data-am install-docDATA install-dvi install-dvi-am \
+	install-exec install-exec-am install-html install-html-am \
+	install-info install-info-am install-man install-man1 \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic pdf pdf-am ps ps-am uninstall uninstall-am \
+	uninstall-binSCRIPTS uninstall-docDATA uninstall-man \
+	uninstall-man1
 
 
 parallel.1: parallel Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
 		--section=1 $(srcdir)/parallel > $(srcdir)/parallel.1
+
+parallel.html: parallel Makefile
+	pod2html $(srcdir)/parallel > $(srcdir)/parallel.html
+	rm $(srcdir)/pod2htm*
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -6,7 +6,7 @@ parallel - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [-I str] [-j num] [--silent]
+B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [B<-I> str] [B<-j> num] [--silent]
 [command [arguments]] [< list_of_arguments]
 
 =head1 DESCRIPTION
@@ -202,7 +202,7 @@ Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
 =item B<-P> I<+N>
 
 Add N to the number of CPU cores.  Run this many jobs in parallel. For
-compute intensive jobs I<-j +0> is useful as it will run
+compute intensive jobs B<-j> +0 is useful as it will run
 number-of-cpu-cores jobs in parallel. See also
 --use-cpus-instead-of-cores.
 
@@ -336,7 +336,7 @@ of your environment.  The default value is the maximum.
 =item B<--show-limits>
 
 Display the limits on the command-line length which are imposed by the
-operating system and the -s option.  Pipe the input from /dev/null
+operating system and the B<-s> option.  Pipe the input from /dev/null
 (and perhaps specify --no-run-if-empty) if you don't want GNU B<parallel>
 to do anything.
 
@@ -347,7 +347,7 @@ to do anything.
 
 Distribute jobs to remote servers. The jobs will be run on a list of
 remote servers.  GNU B<parallel> will determine the number of CPU cores on
-the remote servers and run the number of jobs as specified by -j.  If
+the remote servers and run the number of jobs as specified by B<-j>.  If
 the number I<ncpu> is given GNU B<parallel> will use this number for
 number of CPUs on the host. Normally I<ncpu> will not be needed.
 
@@ -530,7 +530,7 @@ file:
 B<convert -geometry 120 foo.jpg thumb_foo.jpg>
 
 If the system has more than 1 CPU core it can be run with
-number-of-cpu-cores jobs in parallel (-j +0). This will do that for
+number-of-cpu-cores jobs in parallel (B<-j> +0). This will do that for
 all jpg files in a directory:
 
 B<ls *.jpg | parallel -j +0 convert -geometry 120 {} thumb_{}>
@@ -832,9 +832,9 @@ B<xargs> deals badly with special characters (such as space, ' and
 You can specify B<-0> or B<-d "\n">, but many input generators are not
 optimized for using B<NUL> as separator but are optimized for
 B<newline> as separator. E.g B<head>, B<tail>, B<awk>, B<ls>, B<echo>,
-B<sed>, B<tar -v>, B<perl> (-0 and \0 instead of \n), B<locate>
-(requires using -0), B<find> (requires using -print0), B<grep>
-(requires user to use -z or -Z).
+B<sed>, B<tar -v>, B<perl> (B<-0> and \0 instead of \n), B<locate>
+(requires using B<-0>), B<find> (requires using B<-print0>), B<grep>
+(requires user to use B<-z> or B<-Z>).
 
 So GNU B<parallel>'s newline separation can be emulated with:
 
@@ -989,7 +989,7 @@ applicable law, that status is in no way affected by the license.
 
 In no way are any of the following rights affected by the license:
 
-=over 9
+=over 2
 
 =item *
 
@@ -1006,6 +1006,10 @@ Rights other persons may have either in the work itself or in
 how the work is used, such as publicity or privacy rights.
 
 =back
+
+=back
+
+=over 9
 
 =item B<Notice>
 
@@ -1040,7 +1044,7 @@ use strict;
 my ($processes,$command);
 
 # Defaults:
-$Global::version = 20100422;
+$Global::version = 20100428;
 $Global::progname = 'parallel';
 $Global::debug = 0;
 $Global::processes_to_run = 10;
