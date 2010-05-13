@@ -11,16 +11,17 @@ B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [B<-I> str] [B<-j> num] [--silent]
 
 =head1 DESCRIPTION
 
-GNU B<parallel> is a shell tool for executing jobs in parallel. A job is
-typically a single command or a small script that has to be run for
+GNU B<parallel> is a shell tool for executing jobs in parallel. A job
+is typically a single command or a small script that has to be run for
 each of the lines in the input. The typical input is a list of files,
-a list of hosts, a list of users, or a list of tables.
+a list of hosts, a list of users, a list of URLs, or a list of tables.
 
 If you use B<xargs> today you will find GNU B<parallel> very easy to
-use. If you write loops in shell, you will find GNU B<parallel> may be
-able to replace most of the loops and make them run faster by running
-jobs in parallel. If you use B<ppss> or B<pexec> you will find GNU
-B<parallel> will often make the command easier to read.
+use as GNU B<parallel> is written to have the same options as
+B<xargs>. If you write loops in shell, you will find GNU B<parallel>
+may be able to replace most of the loops and make them run faster by
+running several jobs in parallel. If you use B<ppss> or B<pexec> you will find
+GNU B<parallel> will often make the command easier to read.
 
 GNU B<parallel> makes sure output from the commands is the same output as
 you would get had you run the commands sequentially. This makes it
@@ -168,9 +169,9 @@ B<-g> is the default. Can be reversed with B<-u>.
 Print a summary of the options to GNU B<parallel> and exit.
 
 
-=item B<-I> I<string>
+=item B<-I> I<replace-str>
 
-Use the replacement string I<string> instead of {}.
+Use the replacement string I<replace-str> instead of {}.
 
 
 =item B<--replace>[=I<replace-str>]
@@ -439,11 +440,11 @@ Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. Can be reversed with B<-g>.
 
 
-=item B<--extensionreplace> I<string>
+=item B<--extensionreplace> I<replace-str>
 
-=item B<-U> I<string>
+=item B<-U> I<replace-str>
 
-Use the replacement string I<string> instead of {.} for input line without extension.
+Use the replacement string I<replace-str> instead of {.} for input line without extension.
 
 
 =item B<--use-cpus-instead-of-cores> (not implemented)
@@ -453,7 +454,7 @@ jobs to run in parallel relative to the number of cores you can ask
 GNU B<parallel> to instead look at the number of CPUs. This will make sense
 for computers that have hyperthreading as two jobs running on one CPU
 with hyperthreading will run slower than two jobs running on two CPUs.
-Normal users will not need this option.
+Most users will not need this option.
 
 
 =item B<-v>
@@ -473,56 +474,70 @@ Print the version GNU B<parallel> and exit.
 
 =item B<-m>
 
-Multiple. Insert as many arguments as the command line length permits. If
-{} is not used the arguments will be appended to the line.  If {} is
-used multiple times each {} will be replaced with all the arguments.
+Multiple. Insert as many arguments as the command line length
+permits. If {} is not used the arguments will be appended to the line.
+If {} is used multiple times each {} will be replaced with all the
+arguments.
 
 
 =item B<-X>
 
 xargs with context replace. This works like B<-m> except if {} is part
-of a word (like I<pic{}.jpg>) then the whole word will be repeated.
+of a word (like I<pic{}.jpg>) then the whole word will be
+repeated. Normally B<-X> will do the right thing, whereas B<-m> can
+give surprising results if {} is used as part of a word.
 
 =back
 
-=head1 EXAMPLE 1: Working as cat | sh. Ressource inexpensive jobs and evaluation
+=head1 EXAMPLE: Working as xargs -n1. Argument appending
 
-GNU B<parallel> can work similar to B<cat | sh>. 
+GNU B<parallel> can work similar to B<xargs -n1>.
 
-A ressource inexpensive job is a job that takes very little CPU, disk
-I/O and network I/O. Ping is an example of a ressource inexpensive
-job. wget is too - if the webpages are small.
+To compress all html files using B<gzip> run:
 
-The content of the file jobs_to_run:
+B<find . -name '*.html' | parallel gzip>
 
-  ping -c 1 10.0.0.1
-  wget http://status-server/status.cgi?ip=10.0.0.1
-  ping -c 1 10.0.0.2
-  wget http://status-server/status.cgi?ip=10.0.0.2
-  ...
-  ping -c 1 10.0.0.255
-  wget http://status-server/status.cgi?ip=10.0.0.255
 
-To run 100 processes simultaneously do:
+=head1 EXAMPLE: Inserting multiple arguments
 
-B<parallel -j 100 < jobs_to_run>
+When moving a lot of files like this: B<mv * destdir> you will
+sometimes get the error:
 
-As there is not a B<command> the option B<-c> is default because the
-jobs needs to be evaluated by the shell.
+B<bash: /bin/mv: Argument list too long>
 
-=head1 EXAMPLE 2: Working as xargs -n1. Argument appending
+because there are too many files. You can instead do:
 
-GNU B<parallel> can work similar to B<xargs -n1>. 
+B<ls | parallel mv {} destdir>
 
-To output all html files run:
+This will run B<mv> for each file. It can be done faster if B<mv> gets
+as many arguments that will fit on the line:
 
-B<find . -name '*.html' | parallel cat>
+B<ls | parallel -m mv {} destdir>
 
-As there is a B<command> the option B<-f> is default because the
-filenames needs to be protected from the shell in case a filename
-contains special characters.
 
-=head1 EXAMPLE 3: Compute intensive jobs and substitution
+=head1 EXAMPLE: Context replace
+
+To remove the files I<pict0000.jpg> .. I<pict9999.jpg> you could do:
+
+B<seq -f %04g 0 9999 | parallel rm pict{}.jpg>
+
+You could also do:
+
+B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -m rm>
+
+The first will run B<rm> 10000 times, while the last will only run
+B<rm> as many times needed to keep the command line length short
+enough to avoid B<Argument list too long> (it typically runs 1-2 times).
+
+You could also run:
+
+B<seq -f %04g 0 9999 | parallel -X rm pict{}.jpg>
+
+This will also only run B<rm> as many times needed to keep the command
+line length short enough.
+
+
+=head1 EXAMPLE: Compute intensive jobs and substitution
 
 If ImageMagick is installed this will generate a thumbnail of a jpg
 file:
@@ -541,27 +556,31 @@ B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg>
 
 Notice how the argument has to start with {} as {} will include path
 (e.g. running B<convert -geometry 120 ./foo/bar.jpg
-thumb_./foo/bar.jpg> would clearly be wrong). It will result in files
-like ./foo/bar.jpg_thumb.jpg.
+thumb_./foo/bar.jpg> would clearly be wrong). The command will
+generate files like ./foo/bar.jpg_thumb.jpg.
 
-This will make files like ./foo/bar_thumb.jpg:
+Use B<{.}> to avoid the extra .jpg in the file name. This command will
+make files like ./foo/bar_thumb.jpg:
 
 B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {.}_thumb.jpg>
 
-=head1 EXAMPLE 4: Substitution and redirection
 
-This will compare all files in the dir to the file foo and save the
-diffs in corresponding .diff files:
+=head1 EXAMPLE: Substitution and redirection
 
-B<ls | parallel diff {} foo ">>B<"{}.diff>
+This will generate an uncompressed version of .gz-files next to the .gz-file:
+
+B<ls *.gz | parallel zcat {} ">>B<"{.}>
 
 Quoting of > is necessary to postpone the redirection. Another
 solution is to quote the whole command:
 
-B<ls | parallel "diff {} foo >>B<{}.diff">
+B<ls *.gz | parallel "zcat {} >>B<{.}">
 
+Other special shell charaters (such as * ; $ > < | >> <<) also needs
+to be put in quotes, as they may otherwise be interpreted by the shell
+and not given to GNU B<parallel>.
 
-=head1 EXAMPLE 5: Composed commands
+=head1 EXAMPLE: Composed commands
 
 A job can consist of several commands. This will print the number of
 files in each directory:
@@ -573,28 +592,61 @@ To put the output in a file called <name>.dir:
 B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >> B<{}.dir'>
 
 
-=head1 EXAMPLE 6: Context replace
+=head1 EXAMPLE: Removing file extension when processing files
 
-To remove the files I<pict0000.jpg> .. I<pict9999.jpg> you could do:
+When processing files removing the file extension using {.} is often
+useful.
 
-B<seq -f %04g 0 9999 | parallel rm pict{}.jpg>
+Create a directory for each zip-file and unzip it in that dir:
 
-You could also do:
+B<ls *zip | parallel 'mkdir {.}; cd {.}; unzip ../{}'>
 
-B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -m rm>
+Recompress all .gz files in current directory using B<bzip2> running 1
+job per CPU in parallel:
 
-The first will run B<rm> 10000 times, while the last will only run
-B<rm> as many times needed to keep the command line length short
-enough (typically 1-2 times).
+B<ls *.gz | parallel -j+0 "zcat {} | bzip2 >>B<{.}.bz2 && rm {}">
 
-You could also run:
 
-B<seq -f %04g 0 9999 | parallel -X rm pict{}.jpg>
+=head1 EXAMPLE: Rewriting a for-loop and a while-loop
 
-This will also only run B<rm> as many times needed to keep the command
-line length short enough.
+for-loops like this:
 
-=head1 EXAMPLE 7: Group output lines
+B<  (for x in `cat list` ; do
+    do_something $x
+  done) | process_output>
+
+and while-loops like this:
+
+B<  cat list | (while read x ; do
+    do_something $x
+  done) | process_output>
+
+can be written like this:
+
+B<cat list | parallel do_something | process_output>
+
+If the processing requires more steps the for-loop like this:
+
+B< (for x in `cat list` ; do
+   no_extension=${x%.png};
+   do_something $x scale $no_extension.jpg
+   do_step2 <$x $no_extension
+ done) | process_output>
+
+and while-loops like this:
+
+B<  cat list | (while read x ; do
+   no_extension=${x%.png};
+   do_something $x scale $no_extension.jpg
+   do_step2 <$x $no_extension
+ done) | process_output>
+
+can be written like this:
+
+B<cat list | parallel "do_something {} scale {.}.jpg ; do_step2 <{} {.}" | process_output>
+
+
+=head1 EXAMPLE: Group output lines
 
 When runnning jobs that output data, you often do not want the output
 of multiple jobs to run together. GNU B<parallel> defaults to grouping the
@@ -611,13 +663,22 @@ to the output of:
 B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -u traceroute>
 
 
-=head1 EXAMPLE 8: Keep order of output same as order of input
+=head1 EXAMPLE: Keep order of output same as order of input
 
 Normally the output of a job will be printed as soon as it
 completes. Sometimes you want the order of the output to remain the
-same as the order of the input. B<-k> will make sure the order of
+same as the order of the input. This is often important, if the output
+is used for input for another system. B<-k> will make sure the order of
 output will be in the same order as input even if later jobs end
 before earlier jobs.
+
+Append a string to every line in a text file:
+
+B<cat textfile | parallel -k echo {} append_string>
+
+If you remove B<-k> some of the lines may come out in the wrong order.
+
+Another example is B<traceroute>:
 
 B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
 
@@ -632,7 +693,7 @@ B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -k tra
 This will make sure the traceroute to foss.org.my will be printed
 first.
 
-=head1 EXAMPLE 9: Using remote computers (not implemented)
+=head1 EXAMPLE: Using remote computers (not implemented)
 
 To run commands on a remote computer SSH needs to be set up and you
 must be able to login without entering a password (B<ssh-agent> may be
@@ -681,7 +742,7 @@ server has 8 CPU cores.
   seq 1 10 | parallel --sshlogin 8/server.example.com echo
 
 
-=head1 EXAMPLE 10: Transferring of files (not implemented)
+=head1 EXAMPLE: Transferring of files (not implemented)
 
 To recompress gzipped files with B<bzip2> using a remote server run:
 
@@ -745,6 +806,33 @@ With the file I<mymachines> containing the compute machines it becomes:
   find logs/ -name '*.gz' | parallel --sshloginfile mymachines \
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
+
+=head1 EXAMPLE: Working as cat | sh. Ressource inexpensive jobs and evaluation
+
+GNU B<parallel> can work similar to B<cat | sh>.
+
+A ressource inexpensive job is a job that takes very little CPU, disk
+I/O and network I/O. Ping is an example of a ressource inexpensive
+job. wget is too - if the webpages are small.
+
+The content of the file jobs_to_run:
+
+  ping -c 1 10.0.0.1
+  wget http://status-server/status.cgi?ip=10.0.0.1
+  ping -c 1 10.0.0.2
+  wget http://status-server/status.cgi?ip=10.0.0.2
+  ...
+  ping -c 1 10.0.0.255
+  wget http://status-server/status.cgi?ip=10.0.0.255
+
+To run 100 processes simultaneously do:
+
+B<parallel -j 100 < jobs_to_run>
+
+As there is not a B<command> the option B<-c> is default because the
+jobs needs to be evaluated by the shell.
+
+
 =head1 QUOTING
 
 For more advanced use quoting may be an issue. The following will
@@ -764,9 +852,9 @@ B<ls | parallel -q  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"'>
 However, this means you cannot make the shell interpret special
 characters. For example this B<will not work>:
 
-B<ls | parallel -q "diff {} foo >>B<{}.diff"> 
+B<ls *.gz | parallel -q "zcat {} >>B<{.}">
 
-B<ls | parallel -q "ls {} | wc -l">
+B<ls *.gz | parallel -q "zcat {} | bzip2 >>B<{.}.bz2">
 
 because > and | need to be interpreted by the shell.
 
@@ -808,7 +896,7 @@ should send the signal B<SIGTERM> to GNU B<parallel>:
 B<killall -TERM parallel>
 
 This will tell GNU B<parallel> to not start any new jobs, but wait until
-the currently running jobs are finished.
+the currently running jobs are finished before exiting.
 
 
 =head1 DIFFERENCES BETWEEN xargs/find -exec AND parallel
