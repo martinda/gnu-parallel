@@ -1270,46 +1270,10 @@ sub generate_command_line {
     my $command = shift;
     my ($job_line,$last_good);
     my ($next_arg,@quoted_args,@quoted_args_no_ext,$arg_length);
-    my ($number_of_substitution) = 1;
-    my ($number_of_substitution_no_ext) = 0;
-    my ($length_of_context) = 0;
-    my ($length_of_command_no_args);
+    my ($number_of_substitution,$number_of_substitution_no_ext,$length_of_context,$length_of_command_no_args,$spaces);
     if($Global::xargs or $Global::Xargs) {
-	# Count number of {}'s on the command line
-	$number_of_substitution = ($command =~ s/\Q$Global::replacestring\E/$Global::replacestring/go);
-	$number_of_substitution ||= 1;
-    }
-    if($Global::xargs or $Global::Xargs) {
-	# Count number of {.}'s on the command line
-	$number_of_substitution_no_ext =
-	($command =~ s/\Q$Global::replace_no_ext\E/$Global::replace_no_ext/go);
-	$number_of_substitution_no_ext ||= 0;
-    }
-    my $spaces=0;
-    if($Global::xargs or $Global::Xargs) {
-	my $c = $command;
-	# count number of replacements
-	my $no_of_replace = 0;
-	$no_of_replace++ while ($c =~ m/\Q$Global::replacestring\E/g);
-	my $no_of_no_ext = 0;
-	$no_of_no_ext++ while ($c =~ m/\Q$Global::replace_no_ext\E/g);
-
-	if($Global::xargs) {
-	    # remove all {}s
-	    $c =~ s/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E//og;
-	    $length_of_command_no_args = length($c) - $no_of_replace - $no_of_no_ext;
-	    $length_of_context = 0;
-	    $spaces = 1;
-	}
-	if($Global::Xargs) {
-	    $c =~ s/\S*\Q$Global::replacestring\E\S*//go;
-	    $c =~ s/\S*\Q$Global::replace_no_ext\E\S*//go;
-
-	    $length_of_command_no_args = length($c) - 1;
-	    $length_of_context = length($command) - $length_of_command_no_args
-		- $no_of_replace * length($Global::replacestring)
-		- $no_of_no_ext * length($Global::replace_no_ext);
-	}
+	($number_of_substitution, $number_of_substitution_no_ext,$spaces,
+	 $length_of_command_no_args,$length_of_context) = xargs_computations($command);
     }
 
     my $number_of_args = 0;
@@ -1329,6 +1293,7 @@ sub generate_command_line {
 	push (@quoted_args_no_ext, $next_arg_no_ext);
 	$number_of_args++;
 	if(not $Global::xargs and not $Global::Xargs) {
+	    # No xargs-mode: Just one argument per line
 	    last;
 	} else {
 	    # Emulate xargs if there is a command and -x or -X is set
@@ -1376,6 +1341,46 @@ sub generate_command_line {
     }
     return $job_line;
 }
+
+
+sub xargs_computations {
+    my $command = shift;
+    if(not @Calculated::xargs_computations) {
+	my ($length_of_command_no_args, $length_of_context, $spaces);
+
+	# Count number of {}'s on the command line
+	my $no_of_replace = ($command =~ s/\Q$Global::replacestring\E/$Global::replacestring/go);
+	my $number_of_substitution = $no_of_replace || 1;
+	# Count number of {.}'s on the command line
+	my $no_of_no_ext = ($command =~ s/\Q$Global::replace_no_ext\E/$Global::replace_no_ext/go);
+	my $number_of_substitution_no_ext = $no_of_no_ext || 0;
+	# Count 
+	my $c = $command;
+	if($Global::xargs) {
+	    # remove all {}s
+	    $c =~ s/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E//og;
+	    $length_of_command_no_args = length($c) - $no_of_replace - $no_of_no_ext;
+	    $length_of_context = 0;
+	    $spaces = 1;
+	}
+	if($Global::Xargs) {
+	    $c =~ s/\S*\Q$Global::replacestring\E\S*//go;
+	    $c =~ s/\S*\Q$Global::replace_no_ext\E\S*//go;
+	    
+	    $length_of_command_no_args = length($c) - 1;
+	    $length_of_context = length($command) - $length_of_command_no_args
+		- $no_of_replace * length($Global::replacestring)
+		- $no_of_no_ext * length($Global::replace_no_ext);
+	    $spaces = 0;
+	}
+	
+	@Calculated::xargs_computations = 
+	    ($number_of_substitution, $number_of_substitution_no_ext,
+	     $spaces,$length_of_command_no_args,$length_of_context);
+    }
+    return (@Calculated::xargs_computations);
+}
+
 
 sub shell_quote {
     # Quote the string so shell will not expand any special chars
