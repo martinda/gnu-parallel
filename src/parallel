@@ -241,6 +241,7 @@ If the evaluated number is less than 1 then 1 will be used.  See also
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 
+
 =item B<--max-args>=I<max-args>
 
 =item B<-n> I<max-args>
@@ -251,6 +252,14 @@ is exceeded, unless the B<-x> option is given, in which case
 GNU B<parallel> will exit.
 
 Only used with B<-m> and B<-X>.
+
+
+=item B<--max-line-length-allowed>
+
+Print the maximal number characters allowed on the command line and
+exit (used by GNU B<parallel> itself to determine the line length
+on remote machines).
+
 
 =item B<--number-of-cpus>
 
@@ -1129,129 +1138,129 @@ use File::Temp qw/ tempfile tempdir /;
 use Getopt::Long;
 use strict;
 
-my ($processes,$command);
-
-# Defaults:
-$Global::version = 20100428;
-$Global::progname = 'parallel';
-$Global::debug = 0;
-$Global::processes_to_run = 10;
-$command = undef;
-$Global::verbose = 0;
-$Global::grouped = 1;
-$Global::keeporder = 0;
-$Global::quoting = 0;
-$Global::replacestring = '{}';
-$Global::replace_no_ext = '{.}';
-$/="\n";
-$Global::ignore_empty = 0;
-$Global::argfile = *STDIN;
-$Global::interactive = 0;
-$Global::stderr_verbose = 0;
-
-Getopt::Long::Configure ("bundling","require_order");
-GetOptions("debug|D" => \$::opt_D,
-           "xargs|m" => \$::opt_m,
-           "X" => \$::opt_X,
-	   "v" => \$::opt_v,
-	   "silent" => \$::opt_silent,
-	   "keeporder|k" => \$::opt_k,
-	   "group|g" => \$::opt_g,
-	   "ungroup|u" => \$::opt_u,
-	   "command|c" => \$::opt_c,
-	   "file|f" => \$::opt_f,
-	   "null|0" => \$::opt_0,
-	   "quote|q" => \$::opt_q,
-	   "I=s" => \$::opt_I,
-	   "extensionreplace|U=s" => \$::opt_U,
-	   "jobs|j=s" => \$::opt_P,
-	   "number-of-cpus" => \$::opt_number_of_cpus,
-	   "number-of-cores" => \$::opt_number_of_cores,
-	   "sshlogin|S=s" => \@Global::sshlogin,
-	   "sshloginfile=s" => \$::opt_sshloginfile,
-	   # xargs-compatibility - implemented, man, unittest
-	   "max-procs|P=s" => \$::opt_P,
-	   "delimiter|d=s" => \$::opt_d,
-	   "max-chars|s=i" => \$::opt_s,
-	   "arg-file|a=s" => \$::opt_a,
-	   "no-run-if-empty|r" => \$::opt_r,
-	   "replace|i:s" => \$::opt_i,
-	   "E=s" => \$::opt_E,
-	   "eof|e:s" => \$::opt_E,
-	   "max-args|n=i" => \$::opt_n,
-	   "help|h" => \$::opt_help,
-	   "verbose|t" => \$::opt_verbose,
-	   "version|V" => \$::opt_version,
-	   "show-limits" => \$::opt_show_limits,
-	   ## xargs-compatibility - implemented, man - unittest missing
-	   "interactive|p" => \$::opt_p,
-	   ## How to unittest? tty skal emuleres
-
-	   # xargs-compatibility - implemented, unittest - man missing
-	   #none
-	   # xargs-compatability - unimplemented
-	   "L=i" => \$::opt_L,
-	   "max-lines|l:i" => \$::opt_l,
-	   ## (echo a b;echo c) | xargs -l1 echo
-	   ## (echo a b' ';echo c) | xargs -l1 echo
-	   "exit|x" => \$::opt_x,
-    ) || die_usage();
-$Global::debug = (defined $::opt_D);
-$Global::input_is_filename = (@ARGV);
-if(defined $::opt_m) { $Global::xargs = 1; }
-if(defined $::opt_X) { $Global::Xargs = 1; }
-if(defined $::opt_v) { $Global::verbose = 1; }
-if(defined $::opt_silent) { $Global::verbose = 0; }
-if(defined $::opt_k) { $Global::keeporder = 1; }
-if(defined $::opt_g) { $Global::grouped = 1; }
-if(defined $::opt_u) { $Global::grouped = 0; }
-if(defined $::opt_c) { $Global::input_is_filename = 0; }
-if(defined $::opt_f) { $Global::input_is_filename = 1; }
-if(defined $::opt_0) { $/ = "\0"; }
-if(defined $::opt_d) { my $e="sprintf \"$::opt_d\""; $/ = eval $e; }
-if(defined $::opt_p) { $Global::interactive = $::opt_p; }
-if(defined $::opt_q) { $Global::quoting = 1; }
-if(defined $::opt_r) { $Global::ignore_empty = 1; }
-if(defined $::opt_verbose) { $Global::stderr_verbose = 1; }
-if(defined $::opt_I) { $Global::replacestring = $::opt_I; }
-if(defined $::opt_U) { $Global::replace_no_ext = $::opt_U; }
-if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
-if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
-if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
-if(defined $::opt_help) { die_usage(); }
-if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
-if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; exit(0); }
-if(defined $::opt_version) { version(); exit(0); }
-if(defined $::opt_show_limits) { show_limits(); }
-if(defined $::opt_sshloginfile) { read_sshloginfile($::opt_sshloginfile); }
-
-if(defined $::opt_a) {
-    if(not open(ARGFILE,"<".$::opt_a)) {
-	print STDERR "$Global::progname: Cannot open input file `$::opt_a': No such file or directory\n";
-	exit(-1);
-    }
-    $Global::argfile = *ARGFILE;
-}
-
-if(@ARGV) { 
-    if($Global::quoting) {
-        $Global::command = join(" ", shell_quote(@ARGV)); 
-    } else {
-        $Global::command = join(" ", @ARGV); 
-    }
-}
-# Needs to be done after setting $Global::command and $Global::command_line_max_len
-# as '-m' influences the number of commands that needs to be run
-if(defined $::opt_P) { $Global::processes_to_run = compute_number_of_processes($::opt_P); }
-
-$Global::job_end_sequence=1;
-
+parse_options();
 parse_sshlogin();
 init_run_jobs();
 DoNotReap();
 start_more_jobs();
 ReapIfNeeded();
 drain_job_queue();
+
+sub parse_options {
+    # Defaults:
+    $Global::version = 20100428;
+    $Global::progname = 'parallel';
+    $Global::debug = 0;
+    $Global::processes_to_run = 10;
+    $Global::verbose = 0;
+    $Global::grouped = 1;
+    $Global::keeporder = 0;
+    $Global::quoting = 0;
+    $Global::replacestring = '{}';
+    $Global::replace_no_ext = '{.}';
+    $/="\n";
+    $Global::ignore_empty = 0;
+    $Global::argfile = *STDIN;
+    $Global::interactive = 0;
+    $Global::stderr_verbose = 0;
+    
+    Getopt::Long::Configure ("bundling","require_order");
+    GetOptions("debug|D" => \$::opt_D,
+	       "xargs|m" => \$::opt_m,
+	       "X" => \$::opt_X,
+	       "v" => \$::opt_v,
+	       "silent" => \$::opt_silent,
+	       "keeporder|k" => \$::opt_k,
+	       "group|g" => \$::opt_g,
+	       "ungroup|u" => \$::opt_u,
+	       "command|c" => \$::opt_c,
+	       "file|f" => \$::opt_f,
+	       "null|0" => \$::opt_0,
+	       "quote|q" => \$::opt_q,
+	       "I=s" => \$::opt_I,
+	       "extensionreplace|U=s" => \$::opt_U,
+	       "jobs|j=s" => \$::opt_P,
+	       "max-line-length-allowed" => \$::opt_max_line_length_allowed,
+	       "number-of-cpus" => \$::opt_number_of_cpus,
+	       "number-of-cores" => \$::opt_number_of_cores,
+	       "sshlogin|S=s" => \@Global::sshlogin,
+	       "sshloginfile=s" => \$::opt_sshloginfile,
+	       # xargs-compatibility - implemented, man, unittest
+	       "max-procs|P=s" => \$::opt_P,
+	       "delimiter|d=s" => \$::opt_d,
+	       "max-chars|s=i" => \$::opt_s,
+	       "arg-file|a=s" => \$::opt_a,
+	       "no-run-if-empty|r" => \$::opt_r,
+	       "replace|i:s" => \$::opt_i,
+	       "E=s" => \$::opt_E,
+	       "eof|e:s" => \$::opt_E,
+	       "max-args|n=i" => \$::opt_n,
+	       "help|h" => \$::opt_help,
+	       "verbose|t" => \$::opt_verbose,
+	       "version|V" => \$::opt_version,
+	       "show-limits" => \$::opt_show_limits,
+	       ## xargs-compatibility - implemented, man - unittest missing
+	       "interactive|p" => \$::opt_p,
+	       ## How to unittest? tty skal emuleres
+	       
+	       # xargs-compatibility - unimplemented
+	       "L=i" => \$::opt_L,
+	       "max-lines|l:i" => \$::opt_l,
+	       ## (echo a b;echo c) | xargs -l1 echo
+	       ## (echo a b' ';echo c) | xargs -l1 echo
+	       "exit|x" => \$::opt_x,
+	) || die_usage();
+    $Global::debug = (defined $::opt_D);
+    $Global::input_is_filename = (@ARGV);
+    if(defined $::opt_m) { $Global::xargs = 1; }
+    if(defined $::opt_X) { $Global::Xargs = 1; }
+    if(defined $::opt_v) { $Global::verbose = 1; }
+    if(defined $::opt_silent) { $Global::verbose = 0; }
+    if(defined $::opt_k) { $Global::keeporder = 1; }
+    if(defined $::opt_g) { $Global::grouped = 1; }
+    if(defined $::opt_u) { $Global::grouped = 0; }
+    if(defined $::opt_c) { $Global::input_is_filename = 0; }
+    if(defined $::opt_f) { $Global::input_is_filename = 1; }
+    if(defined $::opt_0) { $/ = "\0"; }
+    if(defined $::opt_d) { my $e="sprintf \"$::opt_d\""; $/ = eval $e; }
+    if(defined $::opt_p) { $Global::interactive = $::opt_p; }
+    if(defined $::opt_q) { $Global::quoting = 1; }
+    if(defined $::opt_r) { $Global::ignore_empty = 1; }
+    if(defined $::opt_verbose) { $Global::stderr_verbose = 1; }
+    if(defined $::opt_I) { $Global::replacestring = $::opt_I; }
+    if(defined $::opt_U) { $Global::replace_no_ext = $::opt_U; }
+    if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
+    if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
+    if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
+    if(defined $::opt_help) { die_usage(); }
+    if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
+    if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; exit(0); }
+    if(defined $::opt_max_line_length_allowed) { print real_max_length(),"\n"; exit(0); }
+    if(defined $::opt_version) { version(); exit(0); }
+    if(defined $::opt_show_limits) { show_limits(); }
+    if(defined $::opt_sshloginfile) { read_sshloginfile($::opt_sshloginfile); }
+
+    if(defined $::opt_a) {
+	if(not open(ARGFILE,"<".$::opt_a)) {
+	    print STDERR "$Global::progname: Cannot open input file `$::opt_a': No such file or directory\n";
+	    exit(-1);
+	}
+	$Global::argfile = *ARGFILE;
+    }
+
+    if(@ARGV) { 
+	if($Global::quoting) {
+	    $Global::command = join(" ", shell_quote(@ARGV)); 
+	} else {
+	    $Global::command = join(" ", @ARGV); 
+	}
+    }
+    # Needs to be done after setting $Global::command and $Global::command_line_max_len
+    # as '-m' influences the number of commands that needs to be run
+    if(defined $::opt_P) { $Global::processes_to_run = compute_number_of_processes($::opt_P); }
+
+    $Global::job_end_sequence=1;
+}
 
 #
 # Generating the command line
@@ -1373,9 +1382,6 @@ sub shell_quote {
     my (@strings) = (@_);
     my $arg; 
     for $arg (@strings) {
-	# what is the right thing to do about '-' at start of line?
-	# maybe substitute with './'
-	# so it is not regarded as -option.
 	$arg =~ s/\\/\\\\/g;
 	
 	$arg =~ s/([\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
@@ -1587,6 +1593,7 @@ sub enough_file_handles {
 sub user_requested_processes {
     # Parse the number of processes that the user asked for
     my $opt_P = shift;
+    my $processes;
     if(defined $opt_P) {
 	if($opt_P =~ /^\+(\d+)$/) {
 	    # E.g. -P +2
@@ -1622,8 +1629,8 @@ sub no_of_cores {
 
 sub no_of_cpus {
     if(not $Global::no_of_cpus) {
-	my $no_of_cpus = (no_of_cpus_darwin()
-			  || no_of_cpus_gnu_linux()
+	my $no_of_cpus = (no_of_cpus_gnu_linux()
+			  || no_of_cpus_darwin()
 			  || no_of_cpus_solaris());
 	if($no_of_cpus) {
 	    $Global::no_of_cpus = $no_of_cpus;
@@ -1746,7 +1753,7 @@ sub start_more_jobs {
 	# do {
 	#   $started_jobs_this_round = 0;
 	#   for slave in sshlogins {
-	#     if running_jobs{slave} < processed_to_run{$slave} {
+	#     if running_jobs{slave} < processes_to_run{$slave} {
 	#       my $started += start_another_job($slave)
 	#       $started_jobs_this_round += started
 	#       $jobs_started{$slave}++
@@ -2110,3 +2117,27 @@ $main::opt_P = $main::opt_i = $main::opt_p = $main::opt_a =
 $main::opt_version = $main::opt_L = $main::opt_l =
 $main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_verbose =
 $main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
+
+# Per host variables:
+# Can depend on OS
+#$Global::command_line_max_len = 
+# Can depend on processes_available_by_system_limit
+#$Global::processes_to_run =
+# 
+# $sshlogin, $ncpus
+#    $Global::running_jobs = 0;
+#    $Global::running{$pid}{'seq'} = printsequence
+#    $Global::running{$pid}{sshlogin} = server to run on
+#    $Global::host{sshlogin}{'no_of_running'} = number of currently running jobs
+#    $Global::host{sshlogin}{'ncpus'} = number of cpus
+#    $Global::host{sshlogin}{'maxlength'} = $Global::command_line_max_len
+#    $Global::host{sshlogin}{'max_no_of_running'} = number of currently running jobs
+# $Global::running_jobs = sum $Global::host{sshlogin}{'no_of_running'}
+# Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
+# argumenter, der er? Lav system limits lokalt og lad det være max
+
+# Compress ide: identificer blokke af samme type (ascii binary picture
+# sound). Flyt dem rundt, så de står ved siden af hinanden. Kompremer
+# blokkene samlet med den mest egnede algoritme.
+
+# Moved parse options to parse_options
