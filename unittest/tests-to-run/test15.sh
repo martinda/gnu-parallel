@@ -6,8 +6,8 @@ PAR=parallel
 
 # Test -a and --arg-file: Read input from file instead of stdin
 seq 1 10 >/tmp/$$
-$PAR -a /tmp/$$ echo
-$PAR --arg-file /tmp/$$ echo
+$PAR -k -a /tmp/$$ echo
+$PAR -k --arg-file /tmp/$$ echo
 
 cd input-files/test15
 
