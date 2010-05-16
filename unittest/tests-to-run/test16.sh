@@ -34,6 +34,9 @@ seq 1 60000 | perl -pe 's/$/.gif\n/' | $PAR -kX echo a{}b{.}c{.} | wc -l
 seq 1 60000 | perl -pe 's/$/.gif\n/' | $PAR -kX echo a{}b{.}c | wc -l
 seq 1 60000 | perl -pe 's/$/.gif\n/' | $PAR -kX echo a{}b | wc -l
 seq 1 60000 | $PAR -I :: -X echo a::b::c:: | wc -l
+seq 1 60000 | $PAR -I '<>' -X echo 'a<>b<>c<>' | wc -l
+seq 1 60000 | $PAR -I '<' -X echo 'a<b<c<' | wc -l
+seq 1 60000 | $PAR -I '>' -X echo 'a>b>c>' | wc -l
 echo a | $PAR -qX echo  "'"{.}"' "
 echo a | $PAR -qX echo  "'{.}'"
 (echo "sleep 3; echo begin"; seq 1 30 | $PAR -kq echo "sleep 1; echo {.}"; echo "echo end") \

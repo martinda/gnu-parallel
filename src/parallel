@@ -351,9 +351,9 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
-=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (not implemented)
+=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
 
-=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (not implemented)
+=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
 
 Distribute jobs to remote servers. The jobs will be run on a list of
 remote servers.  GNU B<parallel> will determine the number of CPU cores on
@@ -376,7 +376,7 @@ For examples: see B<--sshloginfile>.
 The remote host must have GNU B<parallel> installed.
 
 
-=item B<--sshloginfile> I<filename> (not implemented)
+=item B<--sshloginfile> I<filename> (beta testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1403,7 +1403,8 @@ sub shell_quote {
 	$arg =~ s/([\002-\011\013-\032])/\\$1/g;
 	$arg =~ s/([\n])/'\n'/g; # filenames with '\n' is quoted using \'
     }
-    return (@strings);
+    #return wantarray ? @strings : "@strings";  
+    return @strings;
 }
 
 # Replace foo{}bar or foo{.}bar
@@ -1708,6 +1709,16 @@ sub init_run_jobs {
     $SIG{TERM} = \&StartNoNewJobs;
 }
 
+sub next_command_line_with_sshlogin {
+    my $sshlogin = shift;
+    my $next_command_line = next_command_line();
+    if($next_command_line and $sshlogin ne ":") {
+	return "ssh $sshlogin ".join("",shell_quote($next_command_line));
+    } else {
+	return $next_command_line;
+    }
+}
+
 sub next_command_line {
     my $cmd_line;
     if(@Global::unget_next_command_line) {
@@ -1791,7 +1802,7 @@ sub start_another_job {
     # Do we have enough file handles to start another job?
     my $sshlogin = shift;
     if(enough_file_handles()) {
-	my $command = next_command_line();
+	my $command = next_command_line_with_sshlogin($sshlogin);
 	if(defined $command) {
 	    debug("Command to run on '$sshlogin': $command\n");
 	    my %jobinfo = start_job($command,$sshlogin);
