@@ -1147,7 +1147,7 @@ drain_job_queue();
 
 sub parse_options {
     # Defaults:
-    $Global::version = 20100428;
+    $Global::version = 20100516;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -1644,6 +1644,7 @@ sub no_of_cores {
 
 sub no_of_cpus {
     if(not $Global::no_of_cpus) {
+	local $/="\n"; # If delimiter is set, then $/ will be wrong
 	my $no_of_cpus = (no_of_cpus_gnu_linux()
 			  || no_of_cpus_darwin()
 			  || no_of_cpus_solaris());
@@ -1766,12 +1767,17 @@ sub start_more_jobs {
     my $jobs_started = 0;
     if(not $Global::StartNoNewJobs) {
 	for my $sshlogin (keys %Global::host) {
+	    debug("Running jobs on $sshlogin: $Global::host{$sshlogin}{'no_of_running'}\n");
 	    while ($Global::host{$sshlogin}{'no_of_running'} < 
 		$Global::host{$sshlogin}{'max_no_of_running'}) {
-		start_another_job($sshlogin);
+		if(start_another_job($sshlogin) == 0) {
+		    # No more jobs to start
+		    last;
+		}
 		$Global::host{$sshlogin}{'no_of_running'}++;
 		$jobs_started++;
 	    }
+	    debug("Running jobs on $sshlogin: $Global::host{$sshlogin}{'no_of_running'}\n");
 	}
     }
     return $jobs_started;
@@ -1780,21 +1786,29 @@ sub start_more_jobs {
 sub start_another_job {
     # Grab a job from @Global::command, start it 
     # and remember the pid, the STDOUT and the STDERR handles
-    # If no more jobs: do nothing
+    # Return 1.
+    # If no more jobs: do nothing and return 0
     # Do we have enough file handles to start another job?
     my $sshlogin = shift;
     if(enough_file_handles()) {
 	my $command = next_command_line();
 	if(defined $command) {
+	    debug("Command to run on '$sshlogin': $command\n");
 	    my %jobinfo = start_job($command,$sshlogin);
 	    if(%jobinfo) {
 		$Global::running{$jobinfo{"pid"}} = \%jobinfo;
+		return 1;
+	    } else {
+		# If interactive says: Dont run the job, then skip it and run the next
+		return start_another_job($sshlogin);
 	    }
-	    return 1;
 	} else {
+	    # No more commands to run
 	    return 0;
 	}
     } else {
+	# No more file handles
+	warn("Not enough file handles to start another job");
 	return 0;
     }
 }
@@ -1939,12 +1953,10 @@ sub parse_sshlogin {
 	    if($ssh eq ":") {
 		$ncpu = no_of_cpus();
 	    } else {
-		$ncpu = qx(ssh $ssh parallel --number-of-cpus);
+		$ncpu = qx(echo|ssh $ssh parallel --number-of-cpus);
 		chomp($ncpu);
 	    }
 	}
-	# Save the $ssh and $ncpu in a data structure
-	$Global::sshlogin{$ssh} = $ncpu;
 	$Global::host{$ssh}{'no_of_running'} = 0;
 	$Global::host{$ssh}{'ncpus'} = $ncpu;
 	$Global::host{$ssh}{'maxlength'} = max_length_of_command_line();
