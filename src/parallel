@@ -1755,20 +1755,13 @@ sub drain_job_queue {
 sub start_more_jobs {
     my $jobs_started = 0;
     if(not $Global::StartNoNewJobs) {
-	# do {
-	#   $started_jobs_this_round = 0;
-	#   for slave in sshlogins {
-	#     if running_jobs{slave} < processes_to_run{$slave} {
-	#       my $started += start_another_job($slave)
-	#       $started_jobs_this_round += started
-	#       $jobs_started{$slave}++
-	#     }
-	#   }
-	# } while ($started_jobs_this_round >0)
-	while($Global::running_jobs < $Global::processes_to_run
-	      and
-	      start_another_job()) {
-	    $jobs_started++;
+	for my $sshlogin (keys %Global::host) {
+	    while ($Global::host{$sshlogin}{'no_of_running'} < 
+		$Global::host{$sshlogin}{'max_no_of_running'}) {
+		start_another_job($sshlogin);
+		$Global::host{$sshlogin}{'no_of_running'}++;
+		$jobs_started++;
+	    }
 	}
     }
     return $jobs_started;
@@ -1779,10 +1772,11 @@ sub start_another_job {
     # and remember the pid, the STDOUT and the STDERR handles
     # If no more jobs: do nothing
     # Do we have enough file handles to start another job?
+    my $sshlogin = shift;
     if(enough_file_handles()) {
 	my $command = next_command_line();
 	if(defined $command) {
-	    my %jobinfo = start_job($command);
+	    my %jobinfo = start_job($command,$sshlogin);
 	    if(%jobinfo) {
 		$Global::running{$jobinfo{"pid"}} = \%jobinfo;
 	    }
@@ -1798,6 +1792,7 @@ sub start_another_job {
 sub start_job {
     # Setup STDOUT and STDERR for a job and start it.
     my $command = shift;
+    my $sshlogin = shift;
     my ($pid,$out,$err,%out,%err,$outname,$errname,$name);
     if($Global::grouped) {
 	# To group we create temporary files for STDOUT and STDERR
@@ -1857,10 +1852,12 @@ sub start_job {
 		"pid" => $pid,
 		"out" => $out{$outname},
 		"err" => $err{$errname},
+		"sshlogin" => $sshlogin,
 		"command" => $command);
     } else {
 	return ("seq" => $Global::job_start_sequence,
 		"pid" => $pid, 
+		"sshlogin" => $sshlogin,
 		"command" => $command);
     }
 }
@@ -1918,6 +1915,13 @@ sub read_sshloginfile {
 }
 
 sub parse_sshlogin {
+    $Global::host{':'}{'no_of_running'} = 0;
+    $Global::host{':'}{'ncpus'} = 2;
+    $Global::host{':'}{'maxlength'} = max_length_of_command_line();
+    $Global::host{':'}{'max_no_of_running'} = 2;
+}
+
+sub _parse_sshlogin {
     my ($ncpu,@login);
     for my $ssh (@Global::sshlogin) {
 	# Split up -S sshlogin,sshlogin
@@ -1998,9 +2002,10 @@ sub Reaper {
 		$Global::job_end_sequence++;
 	    }
 	} else {
-	    print_job($Global::running{$stiff});
+	    print_job ($Global::running{$stiff});
 	}
-	# $Global::running_jobs{$Global::running{$stiff}{'slave'}}--;
+	my $sshlogin = $Global::running{$stiff}{'sshlogin'};
+	$Global::host{$sshlogin}{'no_of_running'}--;
 	$Global::running_jobs--;
 	delete $Global::running{$stiff};
 	start_more_jobs();
