@@ -1139,7 +1139,6 @@ use Getopt::Long;
 use strict;
 
 parse_options();
-parse_sshlogin();
 init_run_jobs();
 DoNotReap();
 start_more_jobs();
@@ -1151,7 +1150,6 @@ sub parse_options {
     $Global::version = 20100428;
     $Global::progname = 'parallel';
     $Global::debug = 0;
-    $Global::processes_to_run = 10;
     $Global::verbose = 0;
     $Global::grouped = 1;
     $Global::keeporder = 0;
@@ -1255,9 +1253,21 @@ sub parse_options {
 	    $Global::command = join(" ", @ARGV); 
 	}
     }
+
+    parse_sshlogin();
+
     # Needs to be done after setting $Global::command and $Global::command_line_max_len
     # as '-m' influences the number of commands that needs to be run
-    if(defined $::opt_P) { $Global::processes_to_run = compute_number_of_processes($::opt_P); }
+    if(defined $::opt_P) { 
+	for my $sshlogin (keys %Global::host) {
+	    $Global::host{$sshlogin}{'max_no_of_running'} =
+		compute_number_of_processes($::opt_P);
+	}
+    } else {
+	for my $sshlogin (keys %Global::host) {
+	    $Global::host{$sshlogin}{'max_no_of_running'} = 10;
+	}
+    }
 
     $Global::job_end_sequence=1;
 }
@@ -1455,7 +1465,7 @@ sub binary_find_max_length {
     my ($lower, $upper) = (@_);
     if($lower == $upper or $lower == $upper-1) { return $lower; }
     my $middle = int (($upper-$lower)/2 + $lower);
-    debug("$lower,$upper,$middle\n");
+    debug("Maxlen: $lower,$upper,$middle\n");
     if (is_acceptable_command_line_length($middle)) {
 	return binary_find_max_length($middle,$upper);
     } else {
@@ -1914,15 +1924,10 @@ sub read_sshloginfile {
     close IN;
 }
 
-sub parse_sshlogin {
-    $Global::host{':'}{'no_of_running'} = 0;
-    $Global::host{':'}{'ncpus'} = 2;
-    $Global::host{':'}{'maxlength'} = max_length_of_command_line();
-    $Global::host{':'}{'max_no_of_running'} = 2;
-}
 
-sub _parse_sshlogin {
+sub parse_sshlogin {
     my ($ncpu,@login);
+    if(not @Global::sshlogin) { @Global::sshlogin = (":"); }
     for my $ssh (@Global::sshlogin) {
 	# Split up -S sshlogin,sshlogin
 	push (@login, (split /,/, $ssh));
@@ -1940,7 +1945,11 @@ sub _parse_sshlogin {
 	}
 	# Save the $ssh and $ncpu in a data structure
 	$Global::sshlogin{$ssh} = $ncpu;
+	$Global::host{$ssh}{'no_of_running'} = 0;
+	$Global::host{$ssh}{'ncpus'} = $ncpu;
+	$Global::host{$ssh}{'maxlength'} = max_length_of_command_line();
     }
+    debug("sshlogin: ", my_dump(%Global::host));
 }
 
 
