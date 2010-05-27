@@ -1,3 +1,4 @@
+### Test -k
 begin
 1
 2
@@ -30,6 +31,7 @@ begin
 29
 30
 end
+### Test SIGTERM
 1
 2
 3
@@ -48,5 +50,3 @@ end
 16
 17
 18
-19
-20

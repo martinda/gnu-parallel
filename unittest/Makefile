@@ -1,6 +1,7 @@
 unittest: ../src/parallel tests-to-run/* wanted-results/*
 	echo | mop || (echo mop is required for unittest; /bin/false)
 	seq 1 2 | mop || (echo seq is required for unittest; /bin/false)
+	stdout echo || (echo stdout is required for unittest; /bin/false)
 	sh Start.sh
 
 clean:

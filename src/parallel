@@ -191,7 +191,7 @@ use B<-I> instead.
 
 =item B<-P> I<N>
 
-Run up to N jobs in parallel.  0 means as many as possible. Default is 10.
+Run up to N jobs in parallel.  0 means as many as possible. Default is 9.
 
 
 =item B<--jobs> I<+N>
@@ -356,14 +356,17 @@ to do anything.
 =item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
 
 Distribute jobs to remote servers. The jobs will be run on a list of
-remote servers.  GNU B<parallel> will determine the number of CPU cores on
-the remote servers and run the number of jobs as specified by B<-j>.  If
-the number I<ncpu> is given GNU B<parallel> will use this number for
-number of CPUs on the host. Normally I<ncpu> will not be needed.
+remote servers.  GNU B<parallel> will determine the number of CPU
+cores on the remote servers and run the number of jobs as specified by
+B<-j>.  If the number I<ncpu> is given GNU B<parallel> will use this
+number for number of CPUs on the host. Normally I<ncpu> will not be
+needed.
 
-An I<sshlogin> is the string you would normally pass to SSH to login,
-e.g. I<server.example.com>, I<foo@server.example.com>, or I<"-l foo -p
-2222 server.example.com">. The sshlogin must not require a password.
+An I<sshlogin> is of the form:
+
+  [sshcommand [options]][username@]hostname
+
+The sshlogin must not require a password.
 
 The sshlogin ':' is special, it means 'no ssh' and will therefore run
 on the local machine.
@@ -386,8 +389,12 @@ lines. Empty lines and lines starting with '#' are ignored. Example:
   8/my-8-core-server.example.com
   2/myusername@my-dualcore.example.net
   # This server has SSH running on port 2222
-  -p 2222 server.example.net
-  4/-p 2222 quadserver.example.net
+  ssh -p 2222 server.example.net
+  4/ssh -p 2222 quadserver.example.net
+  # Use a different ssh program
+  myssh -p 2222 -l compute hexacpu.example.net
+  /usr/local/bin/myssh -p 2222 -l compute hexacpu.example.net
+  6//usr/local/bin/myssh -p 2222 -l compute hexacpu.example.net
   # Assume 16 cores on the local machine
   16/:
 
@@ -961,7 +968,7 @@ B<ls | parallel "wc {} >> B<{}.wc">
 
 becomes
 
-B<ls | xargs -d "\n" -P10 -I {} bash -c "wc {} >>B< {}.wc">
+B<ls | xargs -d "\n" -P9 -I {} bash -c "wc {} >>B< {}.wc">
 
 and
 
@@ -969,7 +976,7 @@ B<ls | parallel "echo {}; ls {}|wc">
 
 becomes
 
-B<ls | xargs -d "\n" -P10 -I {} bash -c "echo {}; ls {}|wc">
+B<ls | xargs -d "\n" -P9 -I {} bash -c "echo {}; ls {}|wc">
 
 
 =head1 DIFFERENCES BETWEEN mdm/middleman AND parallel
@@ -1161,6 +1168,7 @@ sub parse_options {
     $Global::argfile = *STDIN;
     $Global::interactive = 0;
     $Global::stderr_verbose = 0;
+    $Global::default_simultaneous_sshlogins = 9;
 
     Getopt::Long::Configure ("bundling","require_order");
     GetOptions("debug|D" => \$::opt_D,
@@ -1275,10 +1283,9 @@ sub parse_options {
 	}
     } else {
 	for my $sshlogin (keys %Global::host) {
-	    $Global::host{$sshlogin}{'max_no_of_running'} = 10;
+	    $Global::host{$sshlogin}{'max_no_of_running'} = $Global::default_simultaneous_sshlogins;
 	}
     }
-
     $Global::job_end_sequence=1;
 }
 
@@ -1288,7 +1295,7 @@ sub parse_options {
 
 sub no_extension {
     my $no_ext = shift;
-    $no_ext =~ s/\.[^\.]*$//; # Remove .ext from argument
+    $no_ext =~ s:\.[^/\.]*$::; # Remove .ext from argument
     return $no_ext;
 }
 
@@ -1517,6 +1524,7 @@ sub processes_available_by_system_limit {
     # Limit them to the system limits
     # Limits are: File handles, number of input lines, processes,
     # and taking > 1 second to spawn 10 extra processes
+
     my $wanted_processes = shift;
     my $sshlogin = shift;
     my $system_limit=0;
@@ -1600,7 +1608,43 @@ sub processes_available_by_system_limit {
     wait();
     # Cleanup: Unget the command_lines (and args_refs)
     unget_command_line(@command_lines);
+    if($sshlogin ne ":" and $system_limit > $Global::default_simultaneous_sshlogins) {
+	$system_limit = simultaneous_sshlogin_limit($sshlogin,$system_limit);
+    }
     return $system_limit;
+}
+
+sub simultaneous_sshlogin {
+    my $sshlogin = shift;
+    my $wanted_processes = shift;
+    my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
+    my $cmd = "$sshcmd $serverlogin echo simultaneouslogin 2>&1 &"x$wanted_processes;
+    open (SIMUL, "($cmd)|grep simultaneouslogin | wc -l|") or die;
+    my $ssh_limit = <SIMUL>;
+    close SIMUL;
+    chomp $ssh_limit;
+    return $ssh_limit;
+}
+
+sub simultaneous_sshlogin_limit {
+    # Test by logging in wanted number of times simultaneously
+    # (ssh e echo simultaneouslogin &ssh e echo simultaneouslogin &...)|grep simul|wc -l
+    # Return min($wanted_processes,$working_simultaneous_ssh_logins-1)
+    my $sshlogin = shift;
+    my $wanted_processes = shift;
+    my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
+    # Try twice because it guesses wrong sometimes
+    # Choose the minimal
+    my $ssh_limit = min(simultaneous_sshlogin($sshlogin,$wanted_processes),
+			simultaneous_sshlogin($sshlogin,$wanted_processes));
+    if($ssh_limit < $wanted_processes) {
+	print STDERR ("Warning: ssh to $serverlogin only allows for $ssh_limit simultaneous logins.\n",
+		      "You may raise this by changing /etc/ssh/sshd_config:MaxStartup on $serverlogin\n",
+		      "Using only ",$ssh_limit-1," connections to avoid race conditions\n");
+    }
+    # Race condition can cause problem if using all sshs.
+    if($ssh_limit > 1) { $ssh_limit -= 1; }
+    return $ssh_limit;
 }
 
 sub enough_file_handles {
@@ -1662,13 +1706,19 @@ sub no_of_cores {
 sub no_of_cpus_sshlogin {
     # Number of CPUs at this sshlogin
     my $sshlogin = shift;
+    my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     if(not $Global::host{$sshlogin}{'ncpus'}) {
-	if($sshlogin eq ":") {
+	if($serverlogin eq ":") {
 	    $Global::host{$sshlogin}{'ncpus'} = no_of_cpus();
 	} else {
-	    my $ncpu = qx(echo|ssh $sshlogin parallel --number-of-cpus);
+	    my $ncpu = qx(echo|$sshcmd $serverlogin parallel --number-of-cpus);
 	    chomp($ncpu);
-	    $Global::host{$sshlogin}{'ncpus'} = $ncpu;
+	    if($ncpu =~ /^[0-9]+$/) {
+		$Global::host{$sshlogin}{'ncpus'} = $ncpu;
+	    } else {
+		print STDERR ("Warning: Could not figure out number of cpus on $serverlogin. Using 1");
+		$Global::host{$sshlogin}{'ncpus'} = 1;
+	    }
 	}
     }
     return $Global::host{$sshlogin}{'ncpus'};
@@ -1724,10 +1774,32 @@ sub no_of_cpus_solaris {
     return undef;
 }
 
+#
+# General useful library functions
+#
+
+sub min {
+    my $min = shift;
+    my @args = @_;
+    for my $a (@args) {
+	$min = ($min < $a) ? $min : $a;
+    }
+    return $min;
+}
+
 
 #
 # Running and printing the jobs
 #
+
+# Variable structure:
+#    $Global::running{$pid}{'seq'} = printsequence
+#    $Global::running{$pid}{sshlogin} = server to run on
+#    $Global::host{$sshlogin}{'no_of_running'} = number of currently running jobs
+#    $Global::host{$sshlogin}{'ncpus'} = number of cpus
+#    $Global::host{$sshlogin}{'maxlength'} = max line length (currently buggy for remote)
+#    $Global::host{$sshlogin}{'max_no_of_running'} = number of currently running jobs
+#    $Global::running_jobs = total number of running jobs
 
 sub init_run_jobs {
     # Remember the original STDOUT and STDERR
@@ -1749,24 +1821,37 @@ sub login_and_host {
 sub next_command_line_with_sshlogin {
     my $sshlogin = shift;
     my ($next_command_line, $args_ref) = next_command_line();
+    my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     my ($pre,$post)=("","");
-    if($next_command_line and $sshlogin ne ":") {
-	my $remote = login_and_host($sshlogin);
+    if($next_command_line and $serverlogin ne ":") {
 	for my $file (@$args_ref) {
-	    $file =~ s:^([^/]):./$1:; # If relative path: prepend ./ (to avoid problems with ':')
+	    $file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
+	    my $noext = no_extension($file); # Remove .ext before prepending ./
+	    my $relpath = ($file !~ m:^/:); # Is the path relative?
+	    # If relative path: prepend ./ (to avoid problems with ':')
+	    $noext = ($relpath ? "./".$noext : $noext);
+	    my $rsync_opt = "-rlDzR -e".shell_quote($sshcmd);
+	    # Use different subdirs depending on abs or rel path
+	    my $rsync_destdir = ($relpath ? "./" : "/");
 	    if($::opt_transfer) {
-		$pre = "rsync -az $file $remote:".shell_quote($file)." ;";
+		# --transfer
+		# Abs path: rsync -rlDzR /home/tange/dir/subdir/file.gz server:/
+		# Rel path: rsync -rlDzR ./subdir/file.gz server:./
+		$pre = "rsync $rsync_opt $file $serverlogin:$rsync_destdir ;";
 	    }
 	    for my $ret_file (@Global::ret_files) {
 		my $remove = $::opt_cleanup ? "--remove-source-files" : "";
-		my $replaced = context_replace($ret_file,[$file],[no_extension($file)]);
-		$post .= "rsync -az $remove $remote:".shell_quote($replaced)." $replaced ;";
+		my $replaced = context_replace($ret_file,[$file],[$noext]);
+		# --return
+		# Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
+		# Rel path: rsync -rlDzR server:./subsir/file.gz ./
+		$post .= "rsync $rsync_opt $remove $serverlogin:".shell_quote($replaced)." $rsync_destdir ;";
 	    }
 	    if($::opt_cleanup) {
-		$post .= "ssh $sshlogin rm ".shell_quote($file).";";
+		$post .= "$sshcmd $serverlogin rm -f ".shell_quote($file).";";
 	    }
 	}
-	return "$pre ssh $sshlogin ".shell_quote($next_command_line)."; $post";
+	return "$pre$sshcmd $serverlogin ".shell_quote($next_command_line)."; $post";
     } else {
 	return $next_command_line;
     }
@@ -1989,7 +2074,7 @@ sub print_job {
 }
 
 #
-# Remote ssh stuff
+# Remote ssh
 #
 
 sub read_sshloginfile {
@@ -2011,9 +2096,11 @@ sub parse_sshlogin {
 	push (@login, (split /,/, $sshlogin));
     }
     for my $sshlogin (@login) {
-	if($sshlogin =~ s:^(\d+)/::) {
-	    # Override default autodetected ncpus
-	    $Global::host{$sshlogin}{'ncpus'} = $1;
+	if($sshlogin =~ s:^(\d*)/::) {
+	    # Override default autodetected ncpus unless zero or missing
+	    if($1) {
+		$Global::host{$sshlogin}{'ncpus'} = $1;
+	    }
 	}
 	$Global::host{$sshlogin}{'no_of_running'} = 0;
 	$Global::host{$sshlogin}{'maxlength'} = max_length_of_command_line();
@@ -2021,9 +2108,25 @@ sub parse_sshlogin {
     debug("sshlogin: ", my_dump(%Global::host));
 }
 
+sub sshcommand_of_sshlogin {
+    # 'server' -> ('ssh','server')
+    # 'user@server' -> ('ssh','user@server')
+    # 'myssh user@server' -> ('myssh','user@server')
+    # 'myssh -l user server' -> ('myssh -l user','server')
+    # '/usr/local/bin/myssh -l user server' -> ('/usr/local/bin/myssh -l user','server')
+    my $sshlogin = shift;
+    my ($sshcmd, $serverlogin);
+    if($sshlogin =~ /(.+) (\S+)$/) {
+	$sshcmd = $1; $serverlogin = $2;
+    } else {
+	$sshcmd = "ssh"; $serverlogin = $sshlogin;
+    }
+    return ($sshcmd, $serverlogin);
+}
+
 
 #
-# Signal handling stuff
+# Signal handling
 #
 
 sub ListRunningJobs {
@@ -2206,32 +2309,25 @@ $main::opt_version = $main::opt_L = $main::opt_l =
 $main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_verbose =
 $main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
 
-# Per host variables:
-# Can depend on OS
-#$Global::command_line_max_len =
-# Can depend on processes_available_by_system_limit
-#$Global::processes_to_run =
-#
-# $sshlogin, $ncpus
-#    $Global::running_jobs = 0;
-#    $Global::running{$pid}{'seq'} = printsequence
-#    $Global::running{$pid}{sshlogin} = server to run on
-#    $Global::host{sshlogin}{'no_of_running'} = number of currently running jobs
-#    $Global::host{sshlogin}{'ncpus'} = number of cpus
-#    $Global::host{sshlogin}{'maxlength'} = $Global::command_line_max_len
-#    $Global::host{sshlogin}{'max_no_of_running'} = number of currently running jobs
-# $Global::running_jobs = sum $Global::host{sshlogin}{'no_of_running'}
 # Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
 # argumenter, der er? Lav system limits lokalt og lad det være max
-
-# Compress ide: identificer blokke af samme type (ascii binary picture
-# sound). Flyt dem rundt, så de står ved siden af hinanden. Kompremer
-# blokkene samlet med den mest egnede algoritme.
-
-# Moved parse options to parse_options
 
 # TODO max_line_length on remote
 # TODO compute how many can be transferred within max_line_length
 # TODO Unittest with filename that is long and requires a lot of quoting. Will there be to many
-# TODO Unittest --trc without -S should warn
-# TODO Unittest --transfer file called ' : & ) *.jpg'
+# TODO Unittest --trc/--transfer/--return without -S should warn
+# TODO --max-number-of-jobs print the system limited number of jobs
+# TODO Unittest with dir containing . and file with noextension and {.}
+
+#=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
+# Skilletegn:
+# No: "#!&()?\<>|;*'~ shellspecial
+# No: @.- part of user@i.p.n.r i.p.n.r host-name
+# No: , separates different sshlogins
+# No: space Will make it hard to do: 8/server1,server2
+# Maybe: / 8//usr/bin/myssh,//usr/bin/ssh
+# %/=:_^
+
+# Check transfer of newline file to sshlogin with own ssh and more than 9 simultaneously
+# TODO Unittest seq 1 11 | parallel --trc -j10000% -S "myssh -l tange nlv.pi.dk" echo
+
