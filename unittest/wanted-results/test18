@@ -1,3 +1,15 @@
+### Check warning if --transfer but file not found
+Warning: /tmp/noexistant/file is not readable and will not be transferred
+/tmp/noexistant/file
+### Check warning if --transfer but not --sshlogin
+Warning: --transfer ignored as there are no remote --sshlogin
+
+### Check warning if --return but not --sshlogin
+Warning: --return ignored as there are no remote --sshlogin
+
+### Check warning if --cleanup but not --sshlogin
+Warning: --cleanup ignored as there are no remote --sshlogin
+
 ### Test --sshlogin -S --sshloginfile
 1
 2

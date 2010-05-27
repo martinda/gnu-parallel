@@ -495,6 +495,8 @@ permits. If {} is not used the arguments will be appended to the line.
 If {} is used multiple times each {} will be replaced with all the
 arguments.
 
+Support for B<-m> with B<--sshlogin> is limited and may fail.
+
 
 =item B<-X>
 
@@ -502,6 +504,8 @@ xargs with context replace. This works like B<-m> except if {} is part
 of a word (like I<pic{}.jpg>) then the whole word will be
 repeated. Normally B<-X> will do the right thing, whereas B<-m> can
 give surprising results if {} is used as part of a word.
+
+Support for B<-X> with B<--sshlogin> is limited and may fail.
 
 =back
 
@@ -1427,6 +1431,21 @@ sub shell_quote {
     return wantarray ? @strings : "@strings";
 }
 
+
+sub shell_unquote {
+    # Unquote strings from shell_quote
+    my (@strings) = (@_);
+    my $arg;
+    for $arg (@strings) {
+	$arg =~ s/'\n'/\n/g; # filenames with '\n' is quoted using \'
+	$arg =~ s/\\([\002-\011\013-\032])/$1/g;
+	$arg =~ s/\\([\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/$1/g;
+	$arg =~ s/\\\\/\\/g;
+    }
+    return wantarray ? @strings : "@strings";
+}
+
+
 # Replace foo{}bar or foo{.}bar
 sub context_replace {
     my ($job_line,$quoted,$no_ext) = (@_);
@@ -1837,7 +1856,11 @@ sub next_command_line_with_sshlogin {
 		# --transfer
 		# Abs path: rsync -rlDzR /home/tange/dir/subdir/file.gz server:/
 		# Rel path: rsync -rlDzR ./subdir/file.gz server:./
-		$pre = "rsync $rsync_opt $file $serverlogin:$rsync_destdir ;";
+		if(-r shell_unquote($file)) {
+		    $pre = "rsync $rsync_opt $file $serverlogin:$rsync_destdir ;";
+		} else {
+		    print STDERR "Warning: $file is not readable and will not be transferred\n";
+		}
 	    }
 	    for my $ret_file (@Global::ret_files) {
 		my $remove = $::opt_cleanup ? "--remove-source-files" : "";
@@ -2106,6 +2129,22 @@ sub parse_sshlogin {
 	$Global::host{$sshlogin}{'maxlength'} = max_length_of_command_line();
     }
     debug("sshlogin: ", my_dump(%Global::host));
+    if($::opt_transfer or @::opt_return or $::opt_cleanup) {
+	my @remote_hosts = grep !/^:$/, keys %Global::host;
+	debug("Remote hosts: ",@remote_hosts);
+	if(not @remote_hosts) {
+	    # There are no remote hosts
+	    if(defined @::opt_trc) {
+		print STDERR "Warning: --trc ignored as there are no remote --sshlogin\n";
+	    } elsif (defined $::opt_transfer) {
+		print STDERR "Warning: --transfer ignored as there are no remote --sshlogin\n";
+	    } elsif (defined @::opt_return) {
+		print STDERR "Warning: --return ignored as there are no remote --sshlogin\n";
+	    } elsif (defined $::opt_cleanup) {
+		print STDERR "Warning: --cleanup ignored as there are no remote --sshlogin\n";
+	    }
+	}
+    }
 }
 
 sub sshcommand_of_sshlogin {
@@ -2315,9 +2354,7 @@ $main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
 # TODO max_line_length on remote
 # TODO compute how many can be transferred within max_line_length
 # TODO Unittest with filename that is long and requires a lot of quoting. Will there be to many
-# TODO Unittest --trc/--transfer/--return without -S should warn
 # TODO --max-number-of-jobs print the system limited number of jobs
-# TODO Unittest with dir containing . and file with noextension and {.}
 
 #=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
 # Skilletegn:
@@ -2329,5 +2366,4 @@ $main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
 # %/=:_^
 
 # Check transfer of newline file to sshlogin with own ssh and more than 9 simultaneously
-# TODO Unittest seq 1 11 | parallel --trc -j10000% -S "myssh -l tange nlv.pi.dk" echo
-
+# TODO Unittest myssh: parallel --trc -j10000% -S "myssh -l tange nlv.pi.dk" echo

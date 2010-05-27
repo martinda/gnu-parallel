@@ -1,6 +1,9 @@
 ### Test weird regexp chars
 a1b1^c1[.}c a2b2^c2[.}c a3b3^c3[.}c a4b4^c4[.}c a5b5^c5[.}c a6b6^c6[.}c
 ### Test {.} and {}
+### Test {.} with files that have no . but dir does
+/tmp/test-of-{.}-parallel/subdir/file
+/tmp/test-of-{.}-parallel/subdir/file{.}
 ls 1-col.diff|wc;echo 1-col.diff
       1       1      11
 1-col.diff

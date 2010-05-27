@@ -13,6 +13,14 @@ cd tmp
 echo '### Test {.} and {}'
 find . -name '*.jpg' | $PAR -j +0 convert -geometry 120 {} {.}_thumb.jpg
 
+echo '### Test {.} with files that have no . but dir does'
+mkdir -p /tmp/test-of-{.}-parallel/subdir
+touch /tmp/test-of-{.}-parallel/subdir/file
+touch /tmp/test-of-{.}-parallel/subdir/file{.}.funkyextension}}
+find /tmp/test-of-{.}-parallel -type f | $PAR echo {.}
+rm -rf /tmp/test-of-{.}-parallel/subdir
+
+
 find -type f | $PAR -k diff {} a/foo ">"{.}.diff
 ls | $PAR -kvg "ls {}|wc;echo {}"
 ls | $PAR -kj500 'sleep 1; ls {} | perl -ne "END{print $..\" {}\n\"}"'
