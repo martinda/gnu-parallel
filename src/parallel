@@ -6,8 +6,7 @@ parallel - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [-0cdEfghiIkmnpqrtuUvVX] [B<-I> str] [B<-j> num] [--silent]
-[command [arguments]] [< list_of_arguments]
+B<parallel> [options] [I<command> [arguments]] [< list_of_arguments]
 
 =head1 DESCRIPTION
 
@@ -27,23 +26,21 @@ GNU B<parallel> makes sure output from the commands is the same output as
 you would get had you run the commands sequentially. This makes it
 possible to use output from GNU B<parallel> as input for other programs.
 
-For each line of input GNU B<parallel> will execute B<command> with the
-line as arguments. If no B<command> is given the line of input is
-executed.  GNU B<parallel> can often be used as a substitute for B<xargs>
-or B<cat | sh>.
-
-Several lines will be run in parallel.
+For each line of input GNU B<parallel> will execute I<command> with
+the line as arguments. If no I<command> is given, the line of input is
+executed. Several lines will be run in parallel. GNU B<parallel> can
+often be used as a substitute for B<xargs> or B<cat | sh>.
 
 =over 9
 
 =item I<command>
 
-Command to execute.  If B<command> or the following arguments contain
+Command to execute.  If I<command> or the following arguments contain
 {} every instance will be substituted with the input line. Setting a
 command also invokes B<-f>.
 
-If B<command> is given, GNU B<parallel> will behave similar to B<xargs>. If
-B<command> is not given GNU B<parallel> will behave similar to B<cat | sh>.
+If I<command> is given, GNU B<parallel> will behave similar to B<xargs>. If
+I<command> is not given GNU B<parallel> will behave similar to B<cat | sh>.
 
 
 =item B<{}>
@@ -56,12 +53,15 @@ changed with B<-I>.
 =item B<{.}>
 
 Input line without extension. This is a specialized replacement string
-with the extension removed. It will remove from the last B<.> till the
-end of line of each input line and replace {.} with the
-remaining. E.g. I<foo.jpg> becomes I<foo>. If the input line does
-not contain B<.> it will remain unchanged.
+with the extension removed. If the input line contains B<.> after the
+last B</> the last B<.> till the end of the string will be removed and
+B<{.}> will be replaced with the remaining. E.g. I<foo.jpg> becomes
+I<foo>, I<subdir/foo.jpg> becomes I<subdir/foo>, I<sub.dir/foo.jpg>
+becomes I<sub.dir/foo>, I<sub.dir/bar> remains I<sub.dir/bar>. If the
+input line does not contain B<.> it will remain unchanged.
 
-{.} can be used the same places as {}.
+B<{.}> can be used the same places as B<{}>. The replacement string
+B<{.}> can be changed with B<-U>.
 
 
 =item B<--null>
@@ -84,18 +84,18 @@ Otherwise, stdin is redirected from /dev/null.
 
 =item B<--cleanup>
 
-Remove transfered files. B<--cleanup> will remove the transfered files
+Remove transferred files. B<--cleanup> will remove the transferred files
 on the remote server after processing is done.
 
   find log -name '*gz' | parallel \
     --sshlogin server.example.com --transfer --return {.}.bz2 \
     --cleanup "zcat {} | bzip -9 >{.}.bz2"
 
-With B<--transfer> the file transfered to the remote server will be
+With B<--transfer> the file transferred to the remote server will be
 removed on the remote server.  Directories created will not be removed
 - even if they are empty.
 
-With B<--return> the file transfered from the remote server will be
+With B<--return> the file transferred from the remote server will be
 removed on the remote server.  Directories created will not be removed
 - even if they are empty.
 
@@ -108,7 +108,7 @@ B<--cleanup> is ignored when not used with B<--transfer> or B<--return>.
 
 Line is a command.  The input line contains more than one argument or
 the input line needs to be evaluated by the shell. This is the default
-if B<command> is not set. Can be reversed with B<-f>.
+if I<command> is not set. Can be reversed with B<-f>.
 
 
 =item B<--delimiter> I<delim>
@@ -151,7 +151,7 @@ B<-E> nor B<-e> is used, no end of file string is used.
 
 Line is a filename.  The input line contains a filename that will be
 quoted so it is not evaluated by the shell. This is the default if
-B<command> is set. Can be reversed with B<-c>.
+I<command> is set. Can be reversed with B<-c>.
 
 
 =item B<--group>
@@ -205,7 +205,7 @@ Run up to N jobs in parallel.  0 means as many as possible. Default is 9.
 Add N to the number of CPU cores.  Run this many jobs in parallel. For
 compute intensive jobs B<-j> +0 is useful as it will run
 number-of-cpu-cores jobs in parallel. See also
---use-cpus-instead-of-cores.
+B<--use-cpus-instead-of-cores>.
 
 
 =item B<--jobs> I<-N>
@@ -218,7 +218,7 @@ number-of-cpu-cores jobs in parallel. See also
 
 Subtract N from the number of CPU cores.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.  See also
---use-cpus-instead-of-cores.
+B<--use-cpus-instead-of-cores>.
 
 
 =item B<--jobs> I<N>%
@@ -231,7 +231,7 @@ If the evaluated number is less than 1 then 1 will be used.  See also
 
 Multiply N% with the number of CPU cores.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.  See also
---use-cpus-instead-of-cores.
+B<--use-cpus-instead-of-cores>.
 
 
 =item B<--keeporder>
@@ -267,7 +267,7 @@ Print the number of physical CPUs and exit (used by GNU B<parallel>
 itself to determine the number of physical CPUs on remote machines).
 
 
-=item B<--number-of-cores> (not implemented)
+=item B<--number-of-cores>
 
 Print the number of cores and exit (used by GNU B<parallel> itself to determine the
 number of cores on remote machines).
@@ -286,7 +286,7 @@ with 'y' or 'Y'.  Implies B<-t>.
 
 =item B<-q>
 
-Quote B<command>.  This will quote the command line so special
+Quote I<command>.  This will quote the command line so special
 characters are not interpreted by the shell. See the section
 QUOTING. Most people will never need this.  Quoting is disabled by
 default.
@@ -302,7 +302,7 @@ If the standard input only contains whitespace, do not run the command.
 
 Transfer files from remote servers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote servers. When
-processing is done the file I<filename> will be transfered
+processing is done the file I<filename> will be transferred
 from the remote server using B<rsync> and will be put relative to
 the default login dir. E.g.
 
@@ -320,7 +320,7 @@ This will transfer the file I</tmp/foo/bar.out> from the server
 I<server.example.com> to the file I</tmp/foo/bar.out> after running
 B<touch /tmp/foo/bar.out> on I<server.example.com>.
 
-Multiple files can be transfered by repeating the options multiple
+Multiple files can be transferred by repeating the options multiple
 times:
 
   echo /tmp/foo/bar.txt | \
@@ -378,6 +378,8 @@ For examples: see B<--sshloginfile>.
 
 The remote host must have GNU B<parallel> installed.
 
+B<--sshlogin> is known to cause problems with B<-m> and B<-X>.
+
 
 =item B<--sshloginfile> I<filename> (beta testing)
 
@@ -393,7 +395,9 @@ lines. Empty lines and lines starting with '#' are ignored. Example:
   4/ssh -p 2222 quadserver.example.net
   # Use a different ssh program
   myssh -p 2222 -l compute hexacpu.example.net
-  /usr/local/bin/myssh -p 2222 -l compute hexacpu.example.net
+  # Use a different ssh program with default number of cores
+  //usr/local/bin/myssh -p 2222 -l compute hexacpu.example.net
+  # Use a different ssh program with 6 cores
   6//usr/local/bin/myssh -p 2222 -l compute hexacpu.example.net
   # Assume 16 cores on the local machine
   16/:
@@ -418,8 +422,8 @@ See also B<-v>.
 =item B<--transfer>
 
 Transfer files to remote servers. B<--transfer> is used with
-B<--sshlogin> when the arguments are files and should be transfered to
-the remote servers. The files will be transfered using B<rsync> and
+B<--sshlogin> when the arguments are files and should be transferred to
+the remote servers. The files will be transferred using B<rsync> and
 will be put relative to the default login dir. E.g.
 
   echo foo/bar.txt | parallel \
@@ -445,7 +449,7 @@ B<--transfer> is ignored when used with B<--sshlogin :> or when not used with B<
 
 Transfer, Return, Cleanup. Short hand for:
 
-  --transfer --return filename --cleanup
+B<--transfer> B<--return> I<filename> B<--cleanup>
 
 
 =item B<--ungroup>
@@ -494,19 +498,19 @@ Print the version GNU B<parallel> and exit.
 =item B<-m>
 
 Multiple. Insert as many arguments as the command line length
-permits. If {} is not used the arguments will be appended to the line.
-If {} is used multiple times each {} will be replaced with all the
-arguments.
+permits. If B<{}> is not used the arguments will be appended to the
+line.  If B<{}> is used multiple times each B<{}> will be replaced
+with all the arguments.
 
 Support for B<-m> with B<--sshlogin> is limited and may fail.
 
 
 =item B<-X>
 
-xargs with context replace. This works like B<-m> except if {} is part
+xargs with context replace. This works like B<-m> except if B<{}> is part
 of a word (like I<pic{}.jpg>) then the whole word will be
 repeated. Normally B<-X> will do the right thing, whereas B<-m> can
-give surprising results if {} is used as part of a word.
+give surprising results if B<{}> is used as part of a word.
 
 Support for B<-X> with B<--sshlogin> is limited and may fail.
 
@@ -577,7 +581,7 @@ To do it recursively use B<find>:
 
 B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg>
 
-Notice how the argument has to start with {} as {} will include path
+Notice how the argument has to start with B<{}> as B<{}> will include path
 (e.g. running B<convert -geometry 120 ./foo/bar.jpg
 thumb_./foo/bar.jpg> would clearly be wrong). The command will
 generate files like ./foo/bar.jpg_thumb.jpg.
@@ -617,15 +621,15 @@ B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >> B<{}.dir'>
 
 =head1 EXAMPLE: Removing file extension when processing files
 
-When processing files removing the file extension using {.} is often
-useful.
+When processing files removing the file extension using B<{.}> is
+often useful.
 
 Create a directory for each zip-file and unzip it in that dir:
 
 B<ls *zip | parallel 'mkdir {.}; cd {.}; unzip ../{}'>
 
 Recompress all .gz files in current directory using B<bzip2> running 1
-job per CPU in parallel:
+job per CPU core in parallel:
 
 B<ls *.gz | parallel -j+0 "zcat {} | bzip2 >>B<{.}.bz2 && rm {}">
 
@@ -691,7 +695,7 @@ B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -u tra
 Normally the output of a job will be printed as soon as it
 completes. Sometimes you want the order of the output to remain the
 same as the order of the input. This is often important, if the output
-is used for input for another system. B<-k> will make sure the order of
+is used as input for another system. B<-k> will make sure the order of
 output will be in the same order as input even if later jobs end
 before earlier jobs.
 
@@ -780,25 +784,25 @@ I<$HOME/logs>. On I<server.example.com> the file will be recompressed
 using B<zcat> and B<bzip2> resulting in the corresponding file with
 I<.gz> replaced with I<.bz2>.
 
-If you want the file to be transfered back to the local machine add
+If you want the file to be transferred back to the local machine add
 I<--return {.}.bz2>:
 
   find logs/ -name '*.gz' | \
     parallel --sshlogin server.example.com \
     --transfer --return {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
-After the recompressing is done the I<.bz2>-file is transfered back to
+After the recompressing is done the I<.bz2>-file is transferred back to
 the local machine and put next to the original I<.gz>-file.
 
-If you want to delete the transfered files on the remote machine add
-I<--cleanup>. This will remove both the file transfered to the remote
-machine and the files transfered from the remote machine:
+If you want to delete the transferred files on the remote machine add
+I<--cleanup>. This will remove both the file transferred to the remote
+machine and the files transferred from the remote machine:
 
   find logs/ -name '*.gz' | \
     parallel --sshlogin server.example.com \
     --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
 
-If you want run one several servers add the servers to I<--sshlogin>
+If you want run on several servers add the servers to I<--sshlogin>
 either using ',' or multiple I<--sshlogin>:
 
   find logs/ -name '*.gz' | \
@@ -852,7 +856,7 @@ To run 100 processes simultaneously do:
 
 B<parallel -j 100 < jobs_to_run>
 
-As there is not a B<command> the option B<-c> is default because the
+As there is not a I<command> the option B<-c> is default because the
 jobs needs to be evaluated by the shell.
 
 
@@ -888,7 +892,7 @@ B<sh: -c: line 0: syntax error near unexpected token>
 then you might try using B<-q>.
 
 If you are using B<bash> process substitution like B<<(cat foo)> then
-you may try B<-q> and prepending B<command> with B<bash -c>:
+you may try B<-q> and prepending I<command> with B<bash -c>:
 
 B<ls | parallel -q bash -c 'wc -c <(echo {})'>
 
@@ -961,6 +965,8 @@ the last half of the line is from another process.
 B<xargs> has no support for keeping the order of the output, therefore
 if running jobs in parallel using B<xargs> the output of the second
 job cannot be postponed till the first job is done.
+
+B<xargs> has no support for running jobs on remote machines.
 
 B<xargs> has no support for context replace, so you will have to create the
 arguments.
