@@ -8,6 +8,8 @@ SERVER2=parallel-server2
 echo '### Test --transfer --return --cleanup'
 
 rm -rf /tmp/parallel.file*
+stdout ssh $SERVER1 rm -rf 'tmp/parallel.file*'  '/tmp/parallel.file*' 
+stdout ssh parallel@$SERVER2 rm -rf 'tmp/parallel.file*' '/tmp/parallel.file*' 
 (seq 1 3;echo '>fire';seq 5 10; echo ' : & ) \n*.jpg'; echo '/./sub dir'; seq 13 20) >/tmp/test17
 # Create some weirdly files in /tmp
 mkdir -p /tmp/parallel.file
@@ -21,7 +23,7 @@ stdout ssh parallel@$SERVER2 'rm -rf tmp/parallel.file*'
 cat /tmp/test17abs | $PAR -k --transfer --sshlogin $SERVER1,parallel@$SERVER2 cat {}";"rm {}
 # One of these should give the empty dir /tmp/parallel.file
 echo good if no file
-stdout ssh $SERVER1 ls '/tmp/parallel.file*' 
+stdout ssh $SERVER1 ls '/tmp/parallel.file*'
 # The other: No such file or directory
 stdout ssh parallel@$SERVER2 ls '/tmp/parallel.file*'
 
@@ -35,10 +37,6 @@ echo good if no file
 stdout ssh $SERVER1 ls 'tmp/parallel.file*' 
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls 'tmp/parallel.file*'
-
-echo '### --transfer - file with newline'
-## TODO
-
 
 echo '### --transfer --cleanup - abspath'
 cat /tmp/test17abs | $PAR -k --transfer --cleanup --sshlogin $SERVER1,parallel@$SERVER2 cat {}
@@ -56,9 +54,6 @@ stdout ssh $SERVER1 ls 'tmp/parallel.file*' || echo OK
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls 'tmp/parallel.file*' || echo OK
 
-echo '### --transfer --cleanup - file with newline'
-# TODO
-
 echo '### --return - abspath'
 rm -rf /tmp/parallel.file*out
 cat /tmp/test17abs | $PAR -k --return {.}.out --sshlogin $SERVER1,parallel@$SERVER2 echo {} ">"{.}.out
@@ -68,9 +63,6 @@ echo '### --return - relpath'
 rm -rf /tmp/parallel.file*out
 cat /tmp/test17rel | $PAR -k --return {.}.out --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp ';'echo {} ">"{.}.out
 ls tmp/parallel.file*out tmp/parallel.file/*out
-
-echo '### --return - file with newline'
-# TODO
 
 echo '### --return - multiple files'
 rm -rf tmp/parallel.file*out tmp/parallel.file/*out tmp/parallel.file*done tmp/parallel.file/*done
@@ -97,10 +89,6 @@ echo good if no file
 stdout ssh $SERVER1 ls 'tmp/parallel.file*' || echo OK
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls 'tmp/parallel.file*' || echo OK
-
-echo '### --return --cleanup - file with newline'
-#
-# TODO
 
 echo '### --return --cleanup - multiple returns'
 rm -rf tmp/parallel.file*out tmp/parallel.file/*out tmp/parallel.file*done tmp/parallel.file/*done
@@ -133,9 +121,6 @@ stdout ssh $SERVER1 ls 'tmp/parallel.file*' || echo OK
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls 'tmp/parallel.file*' || echo OK
 
-echo '### --transfer --return --cleanup - file with newline'
-# TODO
-
 echo '### --transfer --return --cleanup - multiple files'
 rm -rf tmp/parallel.file*out tmp/parallel.file/*out tmp/parallel.file*done tmp/parallel.file/*done
 cat /tmp/test17rel | $PAR -k --transfer --return {.}.out --return {}.done --cleanup \
@@ -164,9 +149,6 @@ echo good if no file
 stdout ssh $SERVER1 ls 'tmp/parallel.file*' || echo OK
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls 'tmp/parallel.file*' || echo OK
-
-echo '### --trc - file with newline'
-# TODO
 
 echo '### --trc - multiple files'
 rm -rf /tmp/parallel.file*out /tmp/parallel.file/*out /tmp/parallel.file*done /tmp/parallel.file/*done

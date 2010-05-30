@@ -1,0 +1,8 @@
+### Test --number-of-cpus
+1
+### Test --number-of-cores
+2
+### Test --use-cpus-instead-of-cores
+Cores should complete first on machines with less than 4 physical CPUs
+cores done
+CPUs done

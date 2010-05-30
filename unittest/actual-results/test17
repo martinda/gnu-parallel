@@ -45,7 +45,6 @@ file19
 file20
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
-### --transfer - file with newline
 ### --transfer --cleanup - abspath
 file1
 file2
@@ -93,7 +92,6 @@ file20
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
-### --transfer --cleanup - file with newline
 ### --return - abspath
 /tmp/parallel.file10.out
 /tmp/parallel.file13.out
@@ -136,7 +134,6 @@ tmp/parallel.file9.out
 tmp/parallel.file>fire.out
 tmp/parallel.file : & ) \n*.jpg.out
 tmp/parallel.file/sub dir.out
-### --return - file with newline
 ### --return - multiple files
 tmp/parallel.file10.file.done
 tmp/parallel.file10.out
@@ -266,7 +263,6 @@ tmp/parallel.file/sub dir.out
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
-### --return --cleanup - file with newline
 ### --return --cleanup - multiple returns
 /tmp/parallel.file10.file.done
 /tmp/parallel.file10.out
@@ -399,7 +395,6 @@ OK
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
-### --transfer --return --cleanup - file with newline
 ### --transfer --return --cleanup - multiple files
 /tmp/parallel.file10.file.done
 /tmp/parallel.file10.out
@@ -531,7 +526,6 @@ tmp/parallel.file/sub dir.out
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
-### --trc - file with newline
 ### --trc - multiple files
 /tmp/parallel.file10.file.done
 /tmp/parallel.file10.out

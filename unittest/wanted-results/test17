@@ -45,7 +45,6 @@ file19
 file20
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
-### --transfer - file with newline
 ### --transfer --cleanup - abspath
 file1
 file2
@@ -91,9 +90,8 @@ file18
 file19
 file20
 good if no file
-ls: cannot access /tmp/parallel.file*: No such file or directory
+ls: cannot access tmp/parallel.file*: No such file or directory
 OK
-### --transfer --cleanup - file with newline
 ### --return - abspath
 /tmp/parallel.file10.out
 /tmp/parallel.file13.out
@@ -116,68 +114,67 @@ OK
 /tmp/parallel.file : & ) \n*.jpg.out
 /tmp/parallel.file/sub dir.out
 ### --return - relpath
-/tmp/parallel.file10.out
-/tmp/parallel.file13.out
-/tmp/parallel.file14.out
-/tmp/parallel.file15.out
-/tmp/parallel.file16.out
-/tmp/parallel.file17.out
-/tmp/parallel.file18.out
-/tmp/parallel.file19.out
-/tmp/parallel.file1.out
-/tmp/parallel.file20.out
-/tmp/parallel.file2.out
-/tmp/parallel.file3.out
-/tmp/parallel.file5.out
-/tmp/parallel.file6.out
-/tmp/parallel.file7.out
-/tmp/parallel.file8.out
-/tmp/parallel.file9.out
-/tmp/parallel.file>fire.out
-/tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.out
-### --return - file with newline
+tmp/parallel.file10.out
+tmp/parallel.file13.out
+tmp/parallel.file14.out
+tmp/parallel.file15.out
+tmp/parallel.file16.out
+tmp/parallel.file17.out
+tmp/parallel.file18.out
+tmp/parallel.file19.out
+tmp/parallel.file1.out
+tmp/parallel.file20.out
+tmp/parallel.file2.out
+tmp/parallel.file3.out
+tmp/parallel.file5.out
+tmp/parallel.file6.out
+tmp/parallel.file7.out
+tmp/parallel.file8.out
+tmp/parallel.file9.out
+tmp/parallel.file>fire.out
+tmp/parallel.file : & ) \n*.jpg.out
+tmp/parallel.file/sub dir.out
 ### --return - multiple files
-/tmp/parallel.file10.file.done
-/tmp/parallel.file10.out
-/tmp/parallel.file13.file.done
-/tmp/parallel.file13.out
-/tmp/parallel.file14.file.done
-/tmp/parallel.file14.out
-/tmp/parallel.file15.file.done
-/tmp/parallel.file15.out
-/tmp/parallel.file16.file.done
-/tmp/parallel.file16.out
-/tmp/parallel.file17.file.done
-/tmp/parallel.file17.out
-/tmp/parallel.file18.file.done
-/tmp/parallel.file18.out
-/tmp/parallel.file19.file.done
-/tmp/parallel.file19.out
-/tmp/parallel.file1.file.done
-/tmp/parallel.file1.out
-/tmp/parallel.file20.file.done
-/tmp/parallel.file20.out
-/tmp/parallel.file2.file.done
-/tmp/parallel.file2.out
-/tmp/parallel.file3.file.done
-/tmp/parallel.file3.out
-/tmp/parallel.file5.file.done
-/tmp/parallel.file5.out
-/tmp/parallel.file6.file.done
-/tmp/parallel.file6.out
-/tmp/parallel.file7.file.done
-/tmp/parallel.file7.out
-/tmp/parallel.file8.file.done
-/tmp/parallel.file8.out
-/tmp/parallel.file9.file.done
-/tmp/parallel.file9.out
-/tmp/parallel.file>fire.file.done
-/tmp/parallel.file>fire.out
-/tmp/parallel.file : & ) \n*.jpg.file.done
-/tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
+tmp/parallel.file10.file.done
+tmp/parallel.file10.out
+tmp/parallel.file13.file.done
+tmp/parallel.file13.out
+tmp/parallel.file14.file.done
+tmp/parallel.file14.out
+tmp/parallel.file15.file.done
+tmp/parallel.file15.out
+tmp/parallel.file16.file.done
+tmp/parallel.file16.out
+tmp/parallel.file17.file.done
+tmp/parallel.file17.out
+tmp/parallel.file18.file.done
+tmp/parallel.file18.out
+tmp/parallel.file19.file.done
+tmp/parallel.file19.out
+tmp/parallel.file1.file.done
+tmp/parallel.file1.out
+tmp/parallel.file20.file.done
+tmp/parallel.file20.out
+tmp/parallel.file2.file.done
+tmp/parallel.file2.out
+tmp/parallel.file3.file.done
+tmp/parallel.file3.out
+tmp/parallel.file5.file.done
+tmp/parallel.file5.out
+tmp/parallel.file6.file.done
+tmp/parallel.file6.out
+tmp/parallel.file7.file.done
+tmp/parallel.file7.out
+tmp/parallel.file8.file.done
+tmp/parallel.file8.out
+tmp/parallel.file9.file.done
+tmp/parallel.file9.out
+tmp/parallel.file>fire.file.done
+tmp/parallel.file>fire.out
+tmp/parallel.file : & ) \n*.jpg.file.done
+tmp/parallel.file : & ) \n*.jpg.out
+tmp/parallel.file/sub dir.file.done
+tmp/parallel.file/sub dir.out
 ### --return --cleanup - abspath
 /tmp/parallel.file10.file.done
 /tmp/parallel.file10.out
@@ -223,50 +220,49 @@ good if no file
 ls: cannot access /tmp/parallel.file*: No such file or directory
 OK
 ### --return --cleanup - relpath
-/tmp/parallel.file10.file.done
-/tmp/parallel.file10.out
-/tmp/parallel.file13.file.done
-/tmp/parallel.file13.out
-/tmp/parallel.file14.file.done
-/tmp/parallel.file14.out
-/tmp/parallel.file15.file.done
-/tmp/parallel.file15.out
-/tmp/parallel.file16.file.done
-/tmp/parallel.file16.out
-/tmp/parallel.file17.file.done
-/tmp/parallel.file17.out
-/tmp/parallel.file18.file.done
-/tmp/parallel.file18.out
-/tmp/parallel.file19.file.done
-/tmp/parallel.file19.out
-/tmp/parallel.file1.file.done
-/tmp/parallel.file1.out
-/tmp/parallel.file20.file.done
-/tmp/parallel.file20.out
-/tmp/parallel.file2.file.done
-/tmp/parallel.file2.out
-/tmp/parallel.file3.file.done
-/tmp/parallel.file3.out
-/tmp/parallel.file5.file.done
-/tmp/parallel.file5.out
-/tmp/parallel.file6.file.done
-/tmp/parallel.file6.out
-/tmp/parallel.file7.file.done
-/tmp/parallel.file7.out
-/tmp/parallel.file8.file.done
-/tmp/parallel.file8.out
-/tmp/parallel.file9.file.done
-/tmp/parallel.file9.out
-/tmp/parallel.file>fire.file.done
-/tmp/parallel.file>fire.out
-/tmp/parallel.file : & ) \n*.jpg.file.done
-/tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
+tmp/parallel.file10.file.done
+tmp/parallel.file10.out
+tmp/parallel.file13.file.done
+tmp/parallel.file13.out
+tmp/parallel.file14.file.done
+tmp/parallel.file14.out
+tmp/parallel.file15.file.done
+tmp/parallel.file15.out
+tmp/parallel.file16.file.done
+tmp/parallel.file16.out
+tmp/parallel.file17.file.done
+tmp/parallel.file17.out
+tmp/parallel.file18.file.done
+tmp/parallel.file18.out
+tmp/parallel.file19.file.done
+tmp/parallel.file19.out
+tmp/parallel.file1.file.done
+tmp/parallel.file1.out
+tmp/parallel.file20.file.done
+tmp/parallel.file20.out
+tmp/parallel.file2.file.done
+tmp/parallel.file2.out
+tmp/parallel.file3.file.done
+tmp/parallel.file3.out
+tmp/parallel.file5.file.done
+tmp/parallel.file5.out
+tmp/parallel.file6.file.done
+tmp/parallel.file6.out
+tmp/parallel.file7.file.done
+tmp/parallel.file7.out
+tmp/parallel.file8.file.done
+tmp/parallel.file8.out
+tmp/parallel.file9.file.done
+tmp/parallel.file9.out
+tmp/parallel.file>fire.file.done
+tmp/parallel.file>fire.out
+tmp/parallel.file : & ) \n*.jpg.file.done
+tmp/parallel.file : & ) \n*.jpg.out
+tmp/parallel.file/sub dir.file.done
+tmp/parallel.file/sub dir.out
 good if no file
-ls: cannot access /tmp/parallel.file*: No such file or directory
+ls: cannot access tmp/parallel.file*: No such file or directory
 OK
-### --return --cleanup - file with newline
 ### --return --cleanup - multiple returns
 /tmp/parallel.file10.file.done
 /tmp/parallel.file10.out
@@ -309,7 +305,7 @@ OK
 /tmp/parallel.file/sub dir.file.done
 /tmp/parallel.file/sub dir.out
 good if no file
-ls: cannot access /tmp/parallel.file*: No such file or directory
+ls: cannot access tmp/parallel.file*: No such file or directory
 OK
 ### --transfer --return --cleanup - abspath
 /tmp/parallel.file10.file.done
@@ -397,9 +393,8 @@ OK
 /tmp/parallel.file/sub dir.file.done
 /tmp/parallel.file/sub dir.out
 good if no file
-ls: cannot access /tmp/parallel.file*: No such file or directory
+ls: cannot access tmp/parallel.file*: No such file or directory
 OK
-### --transfer --return --cleanup - file with newline
 ### --transfer --return --cleanup - multiple files
 /tmp/parallel.file10.file.done
 /tmp/parallel.file10.out
@@ -441,7 +436,7 @@ OK
 /tmp/parallel.file : & ) \n*.jpg.out
 /tmp/parallel.file/sub dir.file.done
 /tmp/parallel.file/sub dir.out
-ls: cannot access /tmp/parallel.file*: No such file or directory
+ls: cannot access tmp/parallel.file*: No such file or directory
 OK
 ### --trc - abspath
 /tmp/parallel.file10.file.done
@@ -488,50 +483,49 @@ good if no file
 ls: cannot access /tmp/parallel.file*: No such file or directory
 OK
 ### --trc - relpath
-/tmp/parallel.file10.file.done
-/tmp/parallel.file10.out
-/tmp/parallel.file13.file.done
-/tmp/parallel.file13.out
-/tmp/parallel.file14.file.done
-/tmp/parallel.file14.out
-/tmp/parallel.file15.file.done
-/tmp/parallel.file15.out
-/tmp/parallel.file16.file.done
-/tmp/parallel.file16.out
-/tmp/parallel.file17.file.done
-/tmp/parallel.file17.out
-/tmp/parallel.file18.file.done
-/tmp/parallel.file18.out
-/tmp/parallel.file19.file.done
-/tmp/parallel.file19.out
-/tmp/parallel.file1.file.done
-/tmp/parallel.file1.out
-/tmp/parallel.file20.file.done
-/tmp/parallel.file20.out
-/tmp/parallel.file2.file.done
-/tmp/parallel.file2.out
-/tmp/parallel.file3.file.done
-/tmp/parallel.file3.out
-/tmp/parallel.file5.file.done
-/tmp/parallel.file5.out
-/tmp/parallel.file6.file.done
-/tmp/parallel.file6.out
-/tmp/parallel.file7.file.done
-/tmp/parallel.file7.out
-/tmp/parallel.file8.file.done
-/tmp/parallel.file8.out
-/tmp/parallel.file9.file.done
-/tmp/parallel.file9.out
-/tmp/parallel.file>fire.file.done
-/tmp/parallel.file>fire.out
-/tmp/parallel.file : & ) \n*.jpg.file.done
-/tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
+tmp/parallel.file10.file.done
+tmp/parallel.file10.out
+tmp/parallel.file13.file.done
+tmp/parallel.file13.out
+tmp/parallel.file14.file.done
+tmp/parallel.file14.out
+tmp/parallel.file15.file.done
+tmp/parallel.file15.out
+tmp/parallel.file16.file.done
+tmp/parallel.file16.out
+tmp/parallel.file17.file.done
+tmp/parallel.file17.out
+tmp/parallel.file18.file.done
+tmp/parallel.file18.out
+tmp/parallel.file19.file.done
+tmp/parallel.file19.out
+tmp/parallel.file1.file.done
+tmp/parallel.file1.out
+tmp/parallel.file20.file.done
+tmp/parallel.file20.out
+tmp/parallel.file2.file.done
+tmp/parallel.file2.out
+tmp/parallel.file3.file.done
+tmp/parallel.file3.out
+tmp/parallel.file5.file.done
+tmp/parallel.file5.out
+tmp/parallel.file6.file.done
+tmp/parallel.file6.out
+tmp/parallel.file7.file.done
+tmp/parallel.file7.out
+tmp/parallel.file8.file.done
+tmp/parallel.file8.out
+tmp/parallel.file9.file.done
+tmp/parallel.file9.out
+tmp/parallel.file>fire.file.done
+tmp/parallel.file>fire.out
+tmp/parallel.file : & ) \n*.jpg.file.done
+tmp/parallel.file : & ) \n*.jpg.out
+tmp/parallel.file/sub dir.file.done
+tmp/parallel.file/sub dir.out
 good if no file
-ls: cannot access /tmp/parallel.file*: No such file or directory
+ls: cannot access tmp/parallel.file*: No such file or directory
 OK
-### --trc - file with newline
 ### --trc - multiple files
 /tmp/parallel.file10.file.done
 /tmp/parallel.file10.out
