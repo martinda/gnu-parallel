@@ -926,14 +926,18 @@ This will tell GNU B<parallel> to not start any new jobs, but wait until
 the currently running jobs are finished before exiting.
 
 
-=head1 DIFFERENCES BETWEEN xargs/find -exec AND parallel
+=head1 DIFFERENCES BETWEEN find -exec AND parallel
 
-B<xargs> and B<find -exec> offer some of the same possibilites as
-GNU B<parallel>.
+B<find -exec> offer some of the same possibilites as GNU B<parallel>.
 
 B<find -exec> only works on files. So processing other input (such as
 hosts or URLs) will require creating these inputs as files. B<find
 -exec> has no support for running commands in parallel.
+
+
+=head1 DIFFERENCES BETWEEN xargs AND parallel
+
+B<xargs> offer some of the same possibilites as GNU B<parallel>.
 
 B<xargs> deals badly with special characters (such as space, ' and
 "). To see the problem try this:
@@ -990,6 +994,130 @@ B<ls | parallel "echo {}; ls {}|wc">
 becomes
 
 B<ls | xargs -d "\n" -P9 -I {} bash -c "echo {}; ls {}|wc">
+
+
+=head1 DIFFERENCES BETWEEN ppss AND parallel
+
+B<ppss> is also a tool for running jobs in parallel.
+
+The output of B<ppss> is status information and thus not useful for
+using as input for another command. The output from the jobs are put
+into files.
+
+The argument replace string ($ITEM) cannot be changed and must be
+quoted - thus arguments containing special characters (space '"&!*)
+may cause problems. More than one argument is not supported. File
+names containing newlines are not processed correctly. When reading
+input from a file null cannot be used terminator. B<ppss> needs to
+read the whole input file before starting any jobs.
+
+Output and status information is stored in ppss_dir and thus requires
+cleanup when completed. If the dir is not removed before running
+B<ppss> again it may cause nothing to happen as B<ppss> thinks the
+task is already done. GNU B<parallel> will normally not need cleaning
+up if running locally and will only need cleaning up if stopped
+abnormally and running remote (B<--cleanup> may not complete if
+stopped abnormally).
+
+=head2 EXAMPLES FROM ppss MANUAL
+
+Here are the examples from B<ppss>'s manual page with the equivalent
+using parallel:
+
+./ppss.sh standalone -d /path/to/files -c 'gzip '
+
+find /path/to/files -type f | parallel -j+0 gzip
+
+./ppss.sh standalone -d /path/to/files -c 'cp "$ITEM" /destination/dir '
+
+find /path/to/files -type f | parallel -j+0 cp {} /destination/dir
+
+./ppss.sh standalone -f list-of-urls.txt -c 'wget -q '
+
+parallel -a list-of-urls.txt wget -q
+
+./ppss.sh standalone -f list-of-urls.txt -c 'wget -q "$ITEM"'
+
+parallel -a list-of-urls.txt wget -q {}
+
+./ppss config -C config.cfg -c 'encode.sh ' -d /source/dir -m 192.168.1.100 -u ppss -k ppss-key.key -S ./encode.sh -n nodes.txt -o /some/output/dir --upload --download
+
+./ppss deploy -C config.cfg
+
+./ppss start -C config
+
+# parallel does not use configs. If you want a different username put it in nodes.txt: user@hostname
+
+find source/dir -type f | parallel --sshloginfile nodes.txt --trc {.}.mp3 lame -a {} -o {.}.mp3 --preset standard --quiet
+
+./ppss stop -C config.cfg
+
+killall -TERM parallel
+
+./ppss pause -C config.cfg
+
+Press: CTRL-Z or killall -SIGTSTP parallel
+
+./ppss continue -C config.cfg
+
+Enter: fg or killall -SIGCONT parallel
+
+./ppss.sh status -C config.cfg
+
+killall -SIGUSR1 parallel # Not quite equivalent: Only shows the currently running jobs
+
+
+=head1 DIFFERENCES BETWEEN pexec AND parallel
+
+B<pexec> is also a tool for running jobs in parallel.
+
+Here are the examples from B<pexec>'s info page with the equivalent
+using parallel:
+
+pexec -o sqrt-%s.dat -p "$(seq 10)" -e NUM -n 4 -c -- \
+  'echo "scale=10000;sqrt($NUM)" | bc'
+
+seq 10 | parallel -j4 'echo "scale=10000;sqrt({})" | bc > sqrt-{}.dat'
+
+pexec -p "$(ls myfiles*.ext)" -i %s -o %s.sort -- sort
+
+ls myfiles*.ext | parallel sort {} ">{}.sort"
+
+pexec -f image.list -n auto -e B -u star.log -c -- \
+  'fistar $B.fits -f 100 -F id,x,y,flux -o $B.star'
+
+parallel -a image.list -j+0 \
+  'fistar {}.fits -f 100 -F id,x,y,flux -o {}.star' 2>star.log
+
+pexec -r *.png -e IMG -c -o - -- \
+  'convert $IMG ${IMG%.png}.jpeg ; "echo $IMG: done"'
+
+ls *.png | parallel 'convert {} {.}.jpeg; echo {}: done'
+
+pexec -r *.png -i %s -o %s.jpg -c 'pngtopnm | pnmtojpeg'
+
+ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {}.jpg'
+
+for p in *.png ; do echo ${p%.png} ; done | \
+  pexec -f - -i %s.png -o %s.jpg -c 'pngtopnm | pnmtojpeg'
+
+ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {.}.jpg'
+
+LIST=$(for p in *.png ; do echo ${p%.png} ; done)
+  pexec -r $LIST -i %s.png -o %s.jpg -c 'pngtopnm | pnmtojpeg'
+
+ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {.}.jpg'
+
+pexec -n 8 -r *.jpg -y unix -e IMG -c \
+  'pexec -j -m blockread -d $IMG | \
+  jpegtopnm | pnmscale 0.5 | pnmtojpeg | \
+  pexec -j -m blockwrite -s th_$IMG'
+
+GNU B<parallel> does not support mutexes directly but uses B<mutex> to
+do that.
+
+ls *jpg | parallel -j8 'mutex -m blockread cat {} | jpegtopnm |' \
+  'pnmscale 0.5 | pnmtojpeg | mutex -m blockwrite cat > th_{}'
 
 
 =head1 DIFFERENCES BETWEEN mdm/middleman AND parallel
@@ -1145,7 +1273,7 @@ Symbol, IO::File, POSIX, and File::Temp.
 
 =head1 SEE ALSO
 
-B<find>(1), B<xargs>(1)
+B<find>(1), B<xargs>(1), B<pexec>(1), B<ppss>(1)
 
 =cut
 
