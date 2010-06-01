@@ -1,11 +1,8 @@
 =head1 IDEAS
 
-One char options not used: F G J K M P Q Y
+One char options not used: F G J K P Q Y
 
 Test if -0 works on filenames ending in '\n'
-
-xargs dropin-replacement.
-Implement the missing --features
 
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/
@@ -19,31 +16,15 @@ If there are nomore jobs (STDIN is closed) then make sure to
 distribute the arguments evenly if running -X.
 
 
-Distribute jobs to computers with different speeds/number-of-cpu-cores using ssh
-ask the computers how many cpus they have and spawn appropriately
-according to -j setting.  Reuse ssh connection (-M and -S)
-
-Start by porting everything to use sshlogin :.
+Reuse ssh connection (-M and -S) if not using own ssh command.
 
 SEED=$RANDOM
-ssh -MS /tmp/ssh-%r@%h:%p-$SEED elvis
+ssh -MST /tmp/ssh-%r@%h:%p-$SEED elvis
 rsync --rsh="ssh -S /tmp/ssh-%r@%h:%p-$SEED"  gitup elvis:/tmp/
 ssh -S /tmp/ssh-%r@%h:%p-$SEED elvis hostname
 
-FILE=gpl-3.0.txt
-BASE=gpl-3.0
-$ rsync -z $FILE e:$FILE
-$ ssh e "cat $FILE | bzip2 > $BASE.bz2"
-$ rsync -z e:$BASE.bz2 $BASE.bz2
-$ ssh e "rm $FILE $BASE"
 
 http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
-http://code.google.com/p/ppss/wiki/Manual2
-
-http://www.gnu.org/software/pexec/
-
-Where will '>' be run? Local or remote? Remote.
-
 
 Parallelize so this can be done:
 mdm.screen find dir -execdir mdm-run cmd {} \;

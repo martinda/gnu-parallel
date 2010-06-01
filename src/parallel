@@ -242,6 +242,14 @@ Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 
 
+=item B<--controlmaster> (experimental)
+
+=item B<-M> (experimental)
+
+Use ssh's ControlMaster to make ssh connections faster. Useful if jobs
+run remote and are very fast to run.
+
+
 =item B<--max-args>=I<max-args>
 
 =item B<-n> I<max-args>
@@ -1286,9 +1294,9 @@ use File::Temp qw/ tempfile tempdir /;
 use Getopt::Long;
 use strict;
 
+DoNotReap();
 parse_options();
 init_run_jobs();
-DoNotReap();
 start_more_jobs();
 ReapIfNeeded();
 drain_job_queue();
@@ -1333,6 +1341,7 @@ sub parse_options {
 	       "use-cpus-instead-of-cores" => \$::opt_use_cpus_instead_of_cores,
 	       "sshlogin|S=s" => \@::opt_sshlogin,
 	       "sshloginfile=s" => \$::opt_sshloginfile,
+	       "controlmaster|M" => \$::opt_controlmaster,
 	       "return=s" => \@::opt_return,
 	       "trc=s" => \@::opt_trc,
 	       "transfer" => \$::opt_transfer,
@@ -2032,6 +2041,8 @@ sub min {
 #    $Global::host{$sshlogin}{'ncpus'} = number of cpus
 #    $Global::host{$sshlogin}{'maxlength'} = max line length (currently buggy for remote)
 #    $Global::host{$sshlogin}{'max_no_of_running'} = number of currently running jobs
+#    $Global::host{$sshlogin}{'sshcmd'} = command to use as ssh
+#    $Global::host{$sshlogin}{'serverlogin'} = username@hostname
 #    $Global::running_jobs = total number of running jobs
 
 sub init_run_jobs {
@@ -2362,7 +2373,7 @@ sub parse_sshlogin {
 }
 
 sub sshcommand_of_sshlogin {
-    # 'server' -> ('ssh','server')
+    # 'server' -> ('ssh -S /tmp/parallel-ssh-RANDOM/host-','server')
     # 'user@server' -> ('ssh','user@server')
     # 'myssh user@server' -> ('myssh','user@server')
     # 'myssh -l user server' -> ('myssh -l user','server')
@@ -2370,11 +2381,39 @@ sub sshcommand_of_sshlogin {
     my $sshlogin = shift;
     my ($sshcmd, $serverlogin);
     if($sshlogin =~ /(.+) (\S+)$/) {
+	# Own ssh command
 	$sshcmd = $1; $serverlogin = $2;
     } else {
-	$sshcmd = "ssh"; $serverlogin = $sshlogin;
+	# Normal ssh
+	if($::opt_controlmaster) {
+	    # Use control_path to make ssh faster
+	    my $control_path = control_path_dir()."/ssh-%r@%h:%p";
+	    $sshcmd = "ssh -S ".$control_path;
+	    $serverlogin = $sshlogin;
+	    #my $master = "ssh -MTS ".control_path_dir()."/ssh-%r@%h:%p ".$serverlogin;
+	    my $master = "ssh -MTS ".control_path_dir()."/ssh-%r@%h:%p ".$serverlogin." sleep 1";
+	    if(not $Global::control_path{$control_path}++) {
+		my $pid = fork();
+		if($pid) {
+		    $Global::sshmaster{$pid}++;
+		} else {
+		    debug($master,"\n");
+		    `$master`;
+		    exit;
+		}
+	    }
+	} else {
+	    $sshcmd = "ssh"; $serverlogin = $sshlogin;
+	}
     }
     return ($sshcmd, $serverlogin);
+}
+
+sub control_path_dir {
+    if(not $Global::control_path_dir) {
+	$Global::control_path_dir = tempdir("/tmp/parallel-ssh-XXXX", CLEANUP => 1 );
+    }
+    return $Global::control_path_dir;
 }
 
 
@@ -2426,6 +2465,10 @@ sub Reaper {
     my $stiff;
     debug("Reaper called $Global::reaperlevel\n");
     while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
+	if($Global::sshmaster{$stiff}) {
+	    # This is one of the ssh -M: ignore
+	    next;
+	}
 	if($Global::keeporder) {
 	    $Global::print_later{$Global::running{$stiff}{"seq"}} = $Global::running{$stiff};
 	    debug("died: $Global::running{$stiff}{'seq'}");
@@ -2560,7 +2603,8 @@ $main::opt_X = $main::opt_x = $main::opt_k = $main::opt_d =
 $main::opt_P = $main::opt_i = $main::opt_p = $main::opt_a =
 $main::opt_version = $main::opt_L = $main::opt_l =
 $main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_verbose =
-$main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
+$main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder =
+$Global::control_path = 0;
 
 # Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
 # argumenter, der er? Lav system limits lokalt og lad det være max
@@ -2569,6 +2613,9 @@ $main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder = 0;
 # TODO compute how many can be transferred within max_line_length
 # TODO Unittest with filename that is long and requires a lot of quoting. Will there be to many
 # TODO --max-number-of-jobs print the system limited number of jobs
+
+# TODO Debian package
+# TODO environment variable and .parallelrc
 
 #=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
 # Skilletegn:
