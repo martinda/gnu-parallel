@@ -10,10 +10,11 @@ B<parallel> [options] [I<command> [arguments]] [< list_of_arguments]
 
 =head1 DESCRIPTION
 
-GNU B<parallel> is a shell tool for executing jobs in parallel. A job
-is typically a single command or a small script that has to be run for
-each of the lines in the input. The typical input is a list of files,
-a list of hosts, a list of users, a list of URLs, or a list of tables.
+GNU B<parallel> is a shell tool for executing jobs in parallel using
+one or more machines. A job is typically a single command or a small
+script that has to be run for each of the lines in the input. The
+typical input is a list of files, a list of hosts, a list of users, a
+list of URLs, or a list of tables.
 
 If you use B<xargs> today you will find GNU B<parallel> very easy to
 use as GNU B<parallel> is written to have the same options as
@@ -1140,6 +1141,40 @@ B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
 B<cat files | parallel -j+0 cmd>
 
 
+=head1 ENVIRONMENT VARIABLES
+
+The environment variable $PARALLEL will be used as default options for
+GNU B<parallel>. However, because some options take arguments the
+options need to be split into groups in which only the last option
+takes an argument. Each group of options should be put on a line of its
+own.
+
+=head1 INIT FILE (RC FILE)
+
+The file ~/.parallelrc will be read if it exists. It should be
+formatted like the environment variable $PARALLEL. Lines starting with
+'#' will be ignored.
+
+
+=head2 EXAMPLE
+
+cat list | parallel -j1 -k -v ls
+
+can be written as:
+
+cat list | PARALLEL="-kvj1" parallel ls
+
+cat list | parallel -j1 -k -v -S"myssh user@server" ls
+
+can be written as:
+
+cat list | PARALLEL="-kvj1
+-Smyssh user@server" parallel echo
+
+Notice the newline in the middel is needed because both B<-S> and
+B<-j> take an argument and thus both need to be at the end of a group.
+
+
 =head1 BUGS
 
 Filenames beginning with '-' can cause some commands to give
@@ -1320,6 +1355,19 @@ sub parse_options {
     $Global::default_simultaneous_sshlogins = 9;
 
     Getopt::Long::Configure ("bundling","require_order");
+    # Add options from .parallelrc
+    my $parallelrc = $ENV{'HOME'}."/.parallelrc";
+    if(-r $parallelrc) {
+	open (IN, "<", $parallelrc) || die;
+	while(<IN>) {
+	    /^\s*\#/ and next;
+	    chomp;
+	    unshift @ARGV, $_;
+	}
+	close IN;
+    }
+    # Add options from shell variable $PARALLEL
+    $ENV{'PARALLEL'} and unshift @ARGV, split/\n/, $ENV{'PARALLEL'};
     GetOptions("debug|D" => \$::opt_D,
 	       "xargs|m" => \$::opt_m,
 	       "X" => \$::opt_X,
@@ -1518,9 +1566,14 @@ sub generate_command_line {
 	} else {
 	    # append args
 	    my $arg=join(" ",@quoted_args);
-	    $job_line .= " $arg";
+	    if($job_line) {
+		$job_line .= " ".$arg;
+	    } else {
+		# Parallel behaving like '|sh'
+		$job_line = $arg;
+	    }
 	}
-	debug("Return jobline: $job_line\n");
+	debug("Return jobline: !$job_line!\n");
     }
     return ($job_line,\@quoted_args);
 }
@@ -2146,7 +2199,7 @@ sub get_next_arg {
 	    $arg = shell_quote($arg);
 	}
     }
-    debug("Next arg: ".$arg."\n");
+    debug("Next arg: !".$arg."!\n");
     return $arg;
 }
 
@@ -2615,7 +2668,7 @@ $Global::control_path = 0;
 # TODO --max-number-of-jobs print the system limited number of jobs
 
 # TODO Debian package
-# TODO environment variable and .parallelrc
+# TODO transfer a script to be run
 
 #=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
 # Skilletegn:

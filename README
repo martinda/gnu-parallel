@@ -5,10 +5,11 @@ Please send problems and feedback to bug-parallel@gnu.org.
 
 = Presentation of GNU Parallel =
 
-GNU Parallel is a shell tool for executing jobs in parallel. A job is
-typically a single command or a small script that has to be run for
-each of the lines in the input. The typical input is a list of files,
-a list of hosts, a list of users, or a list of tables.
+GNU Parallel is a shell tool for executing jobs in parallel using one
+or more machines. A job is typically a single command or a small
+script that has to be run for each of the lines in the input. The
+typical input is a list of files, a list of hosts, a list of users, or
+a list of tables.
 
 If you use xargs today you will find GNU Parallel very easy to use. If
 you write loops in shell, you will find GNU Parallel may be able to
