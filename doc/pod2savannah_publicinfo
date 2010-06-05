@@ -15,7 +15,8 @@ while(<>) {
     } else {
 	if(/^\s*$/) { 
 	    $line=~s/B<(.*?)>/*$1*/gs;
-	    $line=~s/I<(.*?)>/_$1_/gs;
+	    # =_text_ -> = _text_
+	    $line=~s/I<(.*?)>/ _$1_ /gs;
 	    push(@lines,$line."\n\n"); 
 	    $line="";
 	    next;

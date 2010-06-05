@@ -1,8 +1,11 @@
 =head1 IDEAS
 
-One char options not used: F G J K P Q Y
+Kan vi lave flere ssh'er, hvis vi venter lidt?
+En ssh med 20% loss og 900 ms delay, så kan login nås på 15 sek.
 
 Test if -0 works on filenames ending in '\n'
+
+Transfer scriptfile before first job. Remove it when last job done.
 
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/
@@ -15,21 +18,12 @@ hard, as all foreground processes get the INT from the shell.
 If there are nomore jobs (STDIN is closed) then make sure to
 distribute the arguments evenly if running -X.
 
-
-Reuse ssh connection (-M and -S) if not using own ssh command.
-
-SEED=$RANDOM
-ssh -MST /tmp/ssh-%r@%h:%p-$SEED elvis
-rsync --rsh="ssh -S /tmp/ssh-%r@%h:%p-$SEED"  gitup elvis:/tmp/
-ssh -S /tmp/ssh-%r@%h:%p-$SEED elvis hostname
-
-
-http://www.semicomplete.com/blog/geekery/distributed-xargs.html?source=rss20
-
 Parallelize so this can be done:
 mdm.screen find dir -execdir mdm-run cmd {} \;
 Maybe:
 find dir -execdir par$ --communication-file /tmp/comfile cmd {} \;
+
+find dir -execdir mutex -j4 -b cmd {} \;
 
 =head2 Comfile
 
@@ -41,12 +35,30 @@ par$ --wait /tmp/comfile will wait until no more locks on the file
 
 =head2 mutex
 
-mutex -n -l lockid -m max_locks [command]
+mutex -b -n -l lockid -m max_locks [command]
 mutex -u lockid
 
+-b run command in background 
 -l lockfile will lock using the lockid
 -n nonblocking
 -m maximal number of locks (default 1)
 -u unlock
 
 If command given works like: mutex -l lockfile -n number_of_locks ; command; mutex -u lockfile
+If -b given works like: mutex -l lockfile -n number_of_locks ; (command; mutex -u lockfile)&
+
+Kan vi finde på lockid som giver mening?
+
+=head1 options
+
+One char options not used: F G J K P Q Y
+
+Skilletegn i sshlogin:
+#=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
+# Skilletegn:
+# No: "#!&()?\<>|;*'~ shellspecial
+# No: @.- part of user@i.p.n.r i.p.n.r host-name
+# No: , separates different sshlogins
+# No: space Will make it hard to do: 8/server1,server2
+# Maybe: / 8//usr/bin/myssh,//usr/bin/ssh
+# %/=:_^
