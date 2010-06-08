@@ -51,6 +51,14 @@ echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org
 doc/pod2savannah_publicinfo src/parallel | klipper-stdin
 https://savannah.gnu.org/project/admin/editgroupinfo.php?group=parallel
 
+== Update website ==
+
+http://www.gnu.org/software/parallel/
+http://www.gnu.org/software/parallel/man.html
+
+pod2html src/parallel > ../parallel-web/parallel/man.html
+cvs ci
+
 == Update Freshmeat ==
 
 http://freshmeat.net/projects/parallel/releases/new

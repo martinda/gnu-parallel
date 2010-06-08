@@ -10,11 +10,11 @@ B<parallel> [options] [I<command> [arguments]] [< list_of_arguments]
 
 =head1 DESCRIPTION
 
-GNU B<parallel> is a shell tool for executing jobs in parallel using
-one or more machines. A job is typically a single command or a small
-script that has to be run for each of the lines in the input. The
-typical input is a list of files, a list of hosts, a list of users, a
-list of URLs, or a list of tables.
+GNU B<parallel> is a shell tool for executing jobs in parallel locally
+or using remote computers. A job is typically a single command or a
+small script that has to be run for each of the lines in the
+input. The typical input is a list of files, a list of hosts, a list
+of users, a list of URLs, or a list of tables.
 
 If you use B<xargs> today you will find GNU B<parallel> very easy to
 use as GNU B<parallel> is written to have the same options as
@@ -31,6 +31,12 @@ For each line of input GNU B<parallel> will execute I<command> with
 the line as arguments. If no I<command> is given, the line of input is
 executed. Several lines will be run in parallel. GNU B<parallel> can
 often be used as a substitute for B<xargs> or B<cat | sh>.
+
+Before looking at the options you may want to check out the examples
+after the list of options. That will give you an idea of what GNU
+B<parallel> is capable of.
+
+=head1 OPTIONS
 
 =over 9
 
@@ -248,7 +254,8 @@ end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 =item B<-M> (experimental)
 
 Use ssh's ControlMaster to make ssh connections faster. Useful if jobs
-run remote and are very fast to run.
+run remote and are very fast to run. This is disabled for sshlogins
+that specify their own ssh command.
 
 
 =item B<--max-args>=I<max-args>
@@ -267,19 +274,19 @@ Only used with B<-m> and B<-X>.
 
 Print the maximal number characters allowed on the command line and
 exit (used by GNU B<parallel> itself to determine the line length
-on remote machines).
+on remote computers).
 
 
 =item B<--number-of-cpus>
 
 Print the number of physical CPUs and exit (used by GNU B<parallel>
-itself to determine the number of physical CPUs on remote machines).
+itself to determine the number of physical CPUs on remote computers).
 
 
 =item B<--number-of-cores>
 
-Print the number of cores and exit (used by GNU B<parallel> itself to determine the
-number of cores on remote machines).
+Print the number of CPU cores and exit (used by GNU B<parallel> itself
+to determine the number of CPU cores on remote computers).
 
 
 =item B<--interactive>
@@ -368,8 +375,8 @@ Distribute jobs to remote servers. The jobs will be run on a list of
 remote servers.  GNU B<parallel> will determine the number of CPU
 cores on the remote servers and run the number of jobs as specified by
 B<-j>.  If the number I<ncpu> is given GNU B<parallel> will use this
-number for number of CPUs on the host. Normally I<ncpu> will not be
-needed.
+number for number of CPU cores on the host. Normally I<ncpu> will not
+be needed.
 
 An I<sshlogin> is of the form:
 
@@ -378,7 +385,7 @@ An I<sshlogin> is of the form:
 The sshlogin must not require a password.
 
 The sshlogin ':' is special, it means 'no ssh' and will therefore run
-on the local machine.
+on the local computer.
 
 To specify more sshlogins separate the sshlogins by comma or repeat
 the options multiple times.
@@ -398,18 +405,20 @@ lines. Empty lines and lines starting with '#' are ignored. Example:
   server.example.com
   username@server2.example.com
   8/my-8-core-server.example.com
-  2/myusername@my-dualcore.example.net
+  2/my_other_username@my-dualcore.example.net
   # This server has SSH running on port 2222
   ssh -p 2222 server.example.net
   4/ssh -p 2222 quadserver.example.net
   # Use a different ssh program
-  myssh -p 2222 -l compute hexacpu.example.net
+  myssh -p 2222 -l myusername hexacpu.example.net
   # Use a different ssh program with default number of cores
-  //usr/local/bin/myssh -p 2222 -l compute hexacpu.example.net
+  //usr/local/bin/myssh -p 2222 -l myusername hexacpu.example.net
   # Use a different ssh program with 6 cores
-  6//usr/local/bin/myssh -p 2222 -l compute hexacpu.example.net
-  # Assume 16 cores on the local machine
+  6//usr/local/bin/myssh -p 2222 -l myusername hexacpu.example.net
+  # Assume 16 cores on the local computer
   16/:
+
+When using a different ssh program the last argument must be the hostname.
 
 
 =item B<--silent>
@@ -479,9 +488,9 @@ Use the replacement string I<replace-str> instead of {.} for input line without 
 
 =item B<--use-cpus-instead-of-cores>
 
-Count the number of physical CPUs instead of cores. When computing how
-many jobs to run in parallel relative to the number of cores you can
-ask GNU B<parallel> to instead look at the number of physical
+Count the number of physical CPUs instead of CPU cores. When computing
+how many jobs to run in parallel relative to the number of CPU cores
+you can ask GNU B<parallel> to instead look at the number of physical
 CPUs. This will make sense for computers that have hyperthreading as
 two jobs running on one CPU with hyperthreading will run slower than
 two jobs running on two physical CPUs. Some multi-core CPUs can run
@@ -643,6 +652,16 @@ job per CPU core in parallel:
 B<ls *.gz | parallel -j+0 "zcat {} | bzip2 >>B<{.}.bz2 && rm {}">
 
 
+=head1 EXAMPLE: Removing two file extensions when processing files and
+calling GNU Parallel from itself
+
+If you have directory with tar.gz files and want these extracted in
+the corresponding dir (e.g foo.tar.gz will be extracted in the dir
+foo) you can do:
+
+B<ls *.tar.gz| parallel -U /// 'echo ///|parallel "mkdir -p {.} ; tar -C {.} -xf {.}.tar.gz"'>
+
+
 =head1 EXAMPLE: Rewriting a for-loop and a while-loop
 
 for-loops like this:
@@ -753,8 +772,8 @@ If the login username is I<foo> on I<server2.example.net> use:
   seq 1 10 | parallel --sshlogin server.example.com \
     --sshlogin foo@server2.example.net echo
 
-To distribute the commands to a list of machines, make a file
-I<mymachines> with all the machines:
+To distribute the commands to a list of computers, make a file
+I<mycomputers> with all the computers:
 
   server.example.com
   foo@server2.example.com
@@ -762,14 +781,18 @@ I<mymachines> with all the machines:
 
 Then run:
 
-  seq 1 10 | parallel --sshloginfile mymachines echo
+  seq 1 10 | parallel --sshloginfile mycomputers echo
 
-To include the local machine add the special sshlogin ':' to the list:
+To include the local computer add the special sshlogin ':' to the list:
 
   server.example.com
   foo@server2.example.com
   server3.example.com
   :
+
+GNU B<parallel> will try to determine the number of CPU cores on each
+of the remote computers, so B<-j+0> will run one job per CPU core -
+even if the remote computers do not have the same number of CPU cores.
 
 If the number of CPU cores on the remote servers is not identified
 correctly the number of CPU cores can be added in front. Here the
@@ -793,19 +816,19 @@ I<$HOME/logs>. On I<server.example.com> the file will be recompressed
 using B<zcat> and B<bzip2> resulting in the corresponding file with
 I<.gz> replaced with I<.bz2>.
 
-If you want the file to be transferred back to the local machine add
-I<--return {.}.bz2>:
+If you want the resulting bz2-file to be transferred back to the local
+computer add I<--return {.}.bz2>:
 
   find logs/ -name '*.gz' | \
     parallel --sshlogin server.example.com \
     --transfer --return {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
 After the recompressing is done the I<.bz2>-file is transferred back to
-the local machine and put next to the original I<.gz>-file.
+the local computer and put next to the original I<.gz>-file.
 
-If you want to delete the transferred files on the remote machine add
+If you want to delete the transferred files on the remote computer add
 I<--cleanup>. This will remove both the file transferred to the remote
-machine and the files transferred from the remote machine:
+computer and the files transferred from the remote computer:
 
   find logs/ -name '*.gz' | \
     parallel --sshlogin server.example.com \
@@ -819,8 +842,8 @@ either using ',' or multiple I<--sshlogin>:
     --sshlogin server3.example.com \
     --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
 
-You can add the local machine using I<--sshlogin :>. This will disable the
-removing and transferring for the local machine only:
+You can add the local computer using I<--sshlogin :>. This will disable the
+removing and transferring for the local computer only:
 
   find logs/ -name '*.gz' | \
     parallel --sshlogin server.example.com,server2.example.com \
@@ -837,9 +860,9 @@ shortened to I<--trc>:
     --sshlogin : \
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
-With the file I<mymachines> containing the compute machines it becomes:
+With the file I<mycomputers> containing the list of computers it becomes:
 
-  find logs/ -name '*.gz' | parallel --sshloginfile mymachines \
+  find logs/ -name '*.gz' | parallel --sshloginfile mycomputers \
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
 
@@ -935,16 +958,14 @@ This will tell GNU B<parallel> to not start any new jobs, but wait until
 the currently running jobs are finished before exiting.
 
 
-=head1 DIFFERENCES BETWEEN find -exec AND parallel
+=head1 DIFFERENCES BETWEEN GNU Parallel AND ALTERNATIVES
 
-B<find -exec> offer some of the same possibilites as GNU B<parallel>.
-
-B<find -exec> only works on files. So processing other input (such as
-hosts or URLs) will require creating these inputs as files. B<find
--exec> has no support for running commands in parallel.
+There are a lot programs with some of the functionality of GNU
+B<parallel>. GNU B<parallel> strives to include the best of the
+functionality without sacrifying ease of use.
 
 
-=head1 DIFFERENCES BETWEEN xargs AND parallel
+=head2 DIFFERENCES BETWEEN xargs AND GNU Parallel
 
 B<xargs> offer some of the same possibilites as GNU B<parallel>.
 
@@ -979,7 +1000,7 @@ B<xargs> has no support for keeping the order of the output, therefore
 if running jobs in parallel using B<xargs> the output of the second
 job cannot be postponed till the first job is done.
 
-B<xargs> has no support for running jobs on remote machines.
+B<xargs> has no support for running jobs on remote computers.
 
 B<xargs> has no support for context replace, so you will have to create the
 arguments.
@@ -988,7 +1009,7 @@ If you use a replace string in B<xargs> (B<-I>) you can not force
 B<xargs> to use more than one argument.
 
 Quoting in B<xargs> works like B<-q> in GNU B<parallel>. This means
-composed commands and redirection requires using B<bash -c>.
+composed commands and redirection require using B<bash -c>.
 
 B<ls | parallel "wc {} >> B<{}.wc">
 
@@ -1005,7 +1026,26 @@ becomes
 B<ls | xargs -d "\n" -P9 -I {} bash -c "echo {}; ls {}|wc">
 
 
-=head1 DIFFERENCES BETWEEN ppss AND parallel
+=head2 DIFFERENCES BETWEEN find -exec AND GNU Parallel
+
+B<find -exec> offer some of the same possibilites as GNU B<parallel>.
+
+B<find -exec> only works on files. So processing other input (such as
+hosts or URLs) will require creating these inputs as files. B<find
+-exec> has no support for running commands in parallel.
+
+
+=head2 DIFFERENCES BETWEEN make -j AND GNU Parallel
+
+B<make -j> can run jobs in parallel, but requires a crafted Makefile
+to do this. That results in extra quoting to get filename containing
+newline to work correctly.
+
+(Very early versions of GNU Parallel was coincidently implemented
+using B<make -j>).
+
+
+=head2 DIFFERENCES BETWEEN ppss AND GNU Parallel
 
 B<ppss> is also a tool for running jobs in parallel.
 
@@ -1013,8 +1053,8 @@ The output of B<ppss> is status information and thus not useful for
 using as input for another command. The output from the jobs are put
 into files.
 
-The argument replace string ($ITEM) cannot be changed and must be
-quoted - thus arguments containing special characters (space '"&!*)
+The argument replace string ($ITEM) cannot be changed. Arguments must
+be quoted - thus arguments containing special characters (space '"&!*)
 may cause problems. More than one argument is not supported. File
 names containing newlines are not processed correctly. When reading
 input from a file null cannot be used terminator. B<ppss> needs to
@@ -1028,10 +1068,10 @@ up if running locally and will only need cleaning up if stopped
 abnormally and running remote (B<--cleanup> may not complete if
 stopped abnormally).
 
-=head2 EXAMPLES FROM ppss MANUAL
+=head3 EXAMPLES FROM ppss MANUAL
 
 Here are the examples from B<ppss>'s manual page with the equivalent
-using parallel:
+using GNU B<parallel>:
 
 ./ppss.sh standalone -d /path/to/files -c 'gzip '
 
@@ -1076,7 +1116,7 @@ Enter: fg or killall -SIGCONT parallel
 killall -SIGUSR1 parallel # Not quite equivalent: Only shows the currently running jobs
 
 
-=head1 DIFFERENCES BETWEEN pexec AND parallel
+=head2 DIFFERENCES BETWEEN pexec AND GNU Parallel
 
 B<pexec> is also a tool for running jobs in parallel.
 
@@ -1129,19 +1169,85 @@ ls *jpg | parallel -j8 'mutex -m blockread cat {} | jpegtopnm |' \
   'pnmscale 0.5 | pnmtojpeg | mutex -m blockwrite cat > th_{}'
 
 
-=head1 DIFFERENCES BETWEEN dxargs AND parallel
+=head2 DIFFERENCES BETWEEN xjobs AND GNU Parallel
+
+B<xjobs> is also a tool for running jobs in parallel. It only supports
+running jobs on your local computer.
+
+B<xjobs> deals badly with special characters just like B<xargs>. See
+the section B<DIFFERENCES BETWEEN xargs AND GNU Parallel>.
+
+Here are the examples from B<xjobs>'s man page with the equivalent
+using GNU B<parallel>:
+
+ls -1 *.zip | xjobs unzip
+
+ls *.zip | parallel unzip
+
+ls -1 *.zip | xjobs -n unzip
+
+ls *.zip | parallel unzip >/dev/null
+
+find . -name '*.bak' | xjobs gzip
+
+find . -name '*.bak' | parallel gzip
+
+ls -1 *.jar | sed 's/\(.*\)/\1 > \1.idx/' | xjobs jar tf
+
+ls *.jar | parallel jar tf {} '>' {}.idx
+
+xjobs -s script
+
+cat script | parallel
+
+mkfifo /var/run/my_named_pipe;
+xjobs -s /var/run/my_named_pipe &
+echo unzip 1.zip >> /var/run/my_named_pipe;
+echo tar cf /backup/myhome.tar /home/me >> /var/run/my_named_pipe
+
+mkfifo /var/run/my_named_pipe;
+cat /var/run/my_named_pipe | parallel &
+echo unzip 1.zip >> /var/run/my_named_pipe;
+echo tar cf /backup/myhome.tar /home/me >> /var/run/my_named_pipe
+
+
+=head2 DIFFERENCES BETWEEN prll AND GNU parallel
+
+B<prll> is also a tool for running jobs in parallel. It does not
+support running jobs on remote computers.
+
+B<prll> encourages using BASH aliases and BASH functions instead of
+scripts. GNU B<parallel> will never support running aliases and
+functions (see why http://www.perlmonks.org/index.pl?node_id=484296)
+but scripts or composed commands work just fine.
+
+B<prll> generates a lot of status information on STDERR which makes it
+harder to use the STDERR output of the job directly as input for
+another program.
+
+Here is the example from B<prll>'s man page with the equivalent
+using GNU B<parallel>:
+
+prll -s 'mogrify -flip $1' *.jpg
+
+ls *.jpg | parallel mogrify -flip
+
+
+=head2 DIFFERENCES BETWEEN dxargs AND GNU Parallel
+
+B<dxargs> is also a tool for running jobs in parallel.
 
 B<dxargs> does not deal well with more simultaneous jobs than SSHD's
 MaxStartup. B<dxargs> is only built for remote run jobs, but does not
 support transferring of files.
 
 
-=head1 DIFFERENCES BETWEEN mdm/middleman AND parallel
+=head2 DIFFERENCES BETWEEN mdm/middleman AND GNU Parallel
 
 middleman(mdm) is also a tool for running jobs in parallel.
 
 Here are the shellscripts of http://mdm.berlios.de/usage.html ported
-to parallel use:
+to GNU B<parallel>:
 
 B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
 
@@ -1150,30 +1256,47 @@ B<cat files | parallel -j+0 cmd>
 
 =head1 ENVIRONMENT VARIABLES
 
+=over 9
+
+=item $PARALLEL_PID - unimplemented
+
+The environment variable $PARALLEL_PID is set by GNU B<parallel> and
+is visible to the jobs started from GNU B<parallel>. This makes it
+possible for the jobs to communicate directly to GNU <parallel>.
+
+B<Example:> If each of the jobs tests a solution and one of jobs finds
+the solution the job can tell GNU B<parallel> not to start more jobs
+by: B<kill -TERM $PARALLEL_PID>. This only works on the local
+computer.
+
+=item $PARALLEL
+
 The environment variable $PARALLEL will be used as default options for
 GNU B<parallel>. However, because some options take arguments the
 options need to be split into groups in which only the last option
 takes an argument. Each group of options should be put on a line of its
 own.
 
-=head2 EXAMPLE
+B<Example:>
 
-cat list | parallel -j1 -k -v ls
-
-can be written as:
-
-cat list | PARALLEL="-kvj1" parallel ls
-
-cat list | parallel -j1 -k -v -S"myssh user@server" ls
+B<cat list | parallel -j1 -k -v ls>
 
 can be written as:
 
-cat list | PARALLEL="-kvj1
--Smyssh user@server" parallel echo
+B<cat list | PARALLEL="-kvj1" parallel ls>
 
-Notice the newline in the middel is needed because both B<-S> and
+B<cat list | parallel -j1 -k -v -S"myssh user@server" ls>
+
+can be written as:
+
+B<cat list | PARALLEL="-kvj1>
+
+B<-Smyssh user@server" parallel echo>
+
+Notice the newline in the middle is needed because both B<-S> and
 B<-j> take an argument and thus both need to be at the end of a group.
 
+=back
 
 =head1 INIT FILE (RC FILE)
 
@@ -1324,7 +1447,8 @@ Symbol, IO::File, POSIX, and File::Temp.
 
 =head1 SEE ALSO
 
-B<find>(1), B<xargs>(1), B<pexec>(1), B<ppss>(1)
+B<find>(1), B<xargs>(1), B<make>(1), B<pexec>(1), B<ppss>(1),
+B<xjobs>(1), B<prll>(1), B<dxargs>(1), B<mdm>(1)
 
 =cut
 
@@ -1480,6 +1604,10 @@ sub parse_options {
     }
 
     parse_sshlogin();
+
+    if(remote_hosts() and ($Global::xargs or $Global::Xargs)) {
+	print STDERR ("Warning: using -X or -m with --sshlogin may fail\n");
+    }
 
     # Needs to be done after setting $Global::command and $Global::command_line_max_len
     # as '-m' influences the number of commands that needs to be run
@@ -2416,9 +2544,7 @@ sub parse_sshlogin {
     }
     debug("sshlogin: ", my_dump(%Global::host));
     if($::opt_transfer or @::opt_return or $::opt_cleanup) {
-	my @remote_hosts = grep !/^:$/, keys %Global::host;
-	debug("Remote hosts: ",@remote_hosts);
-	if(not @remote_hosts) {
+	if(not remote_hosts()) {
 	    # There are no remote hosts
 	    if(defined @::opt_trc) {
 		print STDERR "Warning: --trc ignored as there are no remote --sshlogin\n";
@@ -2431,6 +2557,11 @@ sub parse_sshlogin {
 	    }
 	}
     }
+}
+
+sub remote_hosts {
+    # Return sshlogins that are not ':'
+    return grep !/^:$/, keys %Global::host;
 }
 
 sub sshcommand_of_sshlogin {
@@ -2677,3 +2808,8 @@ $Global::control_path = 0;
 
 # TODO Debian package
 # TODO transfer a script to be run
+# TODO check that error code is passed out. echo | parallel /bin/false should give error code
+# TODO halt on first error. (/bin/false; E=$?; /bin/true; echo $E; exit $E); echo $?
+# TODO halt on first error --soft (let running complete) --hard (killall running)
+# TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
+
