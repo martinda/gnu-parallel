@@ -19,9 +19,9 @@ echo $?
 (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true") | parallel --halt-on-error 2
 echo $?
 
-(echo "sleep 1;true"; echo "sleep 1;false";echo "sleep 1;true";echo "sleep 1; non_exist") | parallel -H0
+(echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true";echo "sleep 4; non_exist") | parallel -H0
 echo $?
-(echo "sleep 1;true"; echo "sleep 1;false";echo "sleep 1;true";echo "sleep 1; non_exist") | parallel -H1
+(echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true";echo "sleep 4; non_exist") | parallel -H1
 echo $?
 (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true";echo "sleep 4; non_exist") | parallel -H2
 echo $?

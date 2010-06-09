@@ -2336,36 +2336,18 @@ sub next_command_line_with_sshlogin {
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     my ($pre,$post)=("","");
     if($next_command_line and $serverlogin ne ":") {
-	my $rsync_opt = "-rlDzR -e".shell_quote($sshcmd);
 	for my $file (@$args_ref) {
-	    $file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
-	    my $noext = no_extension($file); # Remove .ext before prepending ./
-	    my $relpath = ($file !~ m:^/:); # Is the path relative?
-	    # If relative path: prepend ./ (to avoid problems with ':')
-	    $noext = ($relpath ? "./".$noext : $noext);
-	    # Use different subdirs depending on abs or rel path
-	    my $rsync_destdir = ($relpath ? "./" : "/");
 	    if($::opt_transfer) {
 		# --transfer
-		# Abs path: rsync -rlDzR /home/tange/dir/subdir/file.gz server:/
-		# Rel path: rsync -rlDzR ./subdir/file.gz server:./
-		if(-r shell_unquote($file)) {
-		    $pre .= "rsync $rsync_opt $file $serverlogin:$rsync_destdir ;";
-		} else {
-		    print STDERR "Warning: $file is not readable and will not be transferred\n";
-		}
+		$pre .= sshtransfer($sshlogin,$file).";";
 	    }
-	    for my $ret_file (@Global::ret_files) {
-		my $remove = $::opt_cleanup ? "--remove-source-files" : "";
-		my $replaced = context_replace($ret_file,[$file],[$noext]);
-		# --return
-		# Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
-		# Rel path: rsync -rlDzR server:./subsir/file.gz ./
-		$post .= "rsync $rsync_opt $remove $serverlogin:"
-		    .shell_quote($replaced)." $rsync_destdir ;";
+	    if(@Global::ret_files) {
+		# --return or --trc
+		$post .= sshreturn($sshlogin,$file).";";
 	    }
 	    if($::opt_cleanup) {
-		$post .= "$sshcmd $serverlogin rm -f ".shell_quote($file).";";
+		# --cleanup
+		$post .= sshcleanup($sshlogin,$file).";";
 	    }
 	}
 	if($post) {
@@ -2692,6 +2674,61 @@ sub control_path_dir {
     return $Global::control_path_dir;
 }
 
+sub sshtransfer {
+    # Return the sshcommand needed to transfer the file
+    return sshtransferreturn(@_,1,0);
+}
+
+sub sshreturn {
+    # Return the sshcommand needed to returning the file
+    my $removesource = $::opt_cleanup;
+    return sshtransferreturn(@_,0,$removesource);
+}
+
+sub sshcleanup {
+    # Return the sshcommand needed to remove the file
+    my ($sshlogin,$file) = (@_);
+    my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
+    return "$sshcmd $serverlogin rm -f ".shell_quote($file);
+}
+
+sub sshtransferreturn {
+    my ($sshlogin,$file,$transfer,$removesource) = (@_);
+    my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
+    my $rsync_opt = "-rlDzRE -e".shell_quote($sshcmd);
+    $file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
+    $file =~ s:^\./::g; # Remove ./ if any
+    my $relpath = ($file !~ m:^/:); # Is the path relative?
+    # Use different subdirs depending on abs or rel path
+    my $rsync_destdir = ($relpath ? "./" : "/");
+    if($transfer) {
+	# Abs path: rsync -rlDzR /home/tange/dir/subdir/file.gz server:/
+	# Rel path: rsync -rlDzR ./subdir/file.gz server:./
+	if(-r shell_unquote($file)) {
+	    return "rsync $rsync_opt $file $serverlogin:$rsync_destdir";
+	} else {
+	    print STDERR "Warning: $file is not readable and will not be transferred\n";
+	    return "true"; # dummy command to run
+	}
+    } else {
+	my $noext = no_extension($file); # Remove .ext before prepending ./
+	# If relative path: prepend ./ (to avoid problems with ':')
+	$noext = ($relpath ? "./".$noext : $noext);
+	$file = ($relpath ? "./".$file : $file);
+	my @cmd = ();
+	for my $ret_file (@Global::ret_files) {
+	    my $remove = $removesource ? "--remove-source-files" : "";
+	    my $replaced = context_replace($ret_file,[$file],[$noext]);
+	    # --return
+	    # Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
+	    # Rel path: rsync -rlDzR server:./subsir/file.gz ./
+	    push(@cmd, "rsync $rsync_opt $remove $serverlogin:"
+		.shell_quote($replaced)." ".$rsync_destdir);
+	}
+	return join(";",@cmd);
+    }
+}
+
 sub setup_basefile {
     # Transfer basefiles to each $sshlogin
     # This needs to be done before first jobs on $sshlogin is run
@@ -2951,8 +2988,8 @@ $Global::control_path = 0;
 # TODO --max-number-of-jobs print the system limited number of jobs
 
 # TODO Debian package
-# TODO transfer a script to be run
-
+# TODO transfer a script to be run - are permissions kept?
+# TODO try transfer + return of file beginning with :
 
 # TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
 # TAGS: parallel | parallel processing | multicore | multiprocessor | Clustering/Distributed Networks

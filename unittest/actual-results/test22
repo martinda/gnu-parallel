@@ -12,10 +12,10 @@ sleep 2;false
 sh: non_exist: command not found
 2
 parallel: Starting no more jobs. Waiting for 3 jobs to finish. This job failed:
-sleep 1;false
+sleep 2;false
 sh: non_exist: command not found
 parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
-sleep 1; non_exist
+sleep 4; non_exist
 127
 parallel: This job failed:
 sleep 2;false
