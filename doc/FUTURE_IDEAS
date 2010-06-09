@@ -10,28 +10,24 @@ Transfer scriptfile before first job. Remove it when last job done.
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/
 
-Accept signal INT instead of TERM to complete current running jobs but
-do not start new jobs. Print out the number of jobs waiting to
-complete on STDERR. Accept sig INT again to kill now. This seems to be
-hard, as all foreground processes get the INT from the shell.
-
 If there are nomore jobs (STDIN is closed) then make sure to
 distribute the arguments evenly if running -X.
 
-Parallelize so this can be done:
-mdm.screen find dir -execdir mdm-run cmd {} \;
-Maybe:
-find dir -execdir par$ --communication-file /tmp/comfile cmd {} \;
+=head1 options
 
-find dir -execdir mutex -j4 -b cmd {} \;
+One char options not used: F G J K P Q Y
 
-=head2 Comfile
+Skilletegn i sshlogin:
+#=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
+# Skilletegn:
+# No: "#!&()?\<>|;*'~ shellspecial
+# No: @.- part of user@i.p.n.r i.p.n.r host-name
+# No: , separates different sshlogins
+# No: space Will make it hard to do: 8/server1,server2
+# Maybe: / 8//usr/bin/myssh,//usr/bin/ssh
+# %/=:_^
 
-This will put a lock on /tmp/comfile. The number of locks is the number of running commands.
-If the number is smaller than -j then it will start a process in the background ( cmd & ),
-otherwise wait.
 
-par$ --wait /tmp/comfile will wait until no more locks on the file
 
 =head2 mutex
 
@@ -49,16 +45,27 @@ If -b given works like: mutex -l lockfile -n number_of_locks ; (command; mutex -
 
 Kan vi finde på lockid som giver mening?
 
-=head1 options
+Parallelize so this can be done:
+mdm.screen find dir -execdir mdm-run cmd {} \;
+Maybe:
+find dir -execdir par$ --communication-file /tmp/comfile cmd {} \;
 
-One char options not used: F G J K P Q Y
+find dir -execdir mutex -j4 -b cmd {} \;
 
-Skilletegn i sshlogin:
-#=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
-# Skilletegn:
-# No: "#!&()?\<>|;*'~ shellspecial
-# No: @.- part of user@i.p.n.r i.p.n.r host-name
-# No: , separates different sshlogins
-# No: space Will make it hard to do: 8/server1,server2
-# Maybe: / 8//usr/bin/myssh,//usr/bin/ssh
-# %/=:_^
+=head2 Comfile
+
+This will put a lock on /tmp/comfile. The number of locks is the number of running commands.
+If the number is smaller than -j then it will start a process in the background ( cmd & ),
+otherwise wait.
+
+par$ --wait /tmp/comfile will wait until no more locks on the file
+
+
+
+=head1 Unlikely
+
+Accept signal INT instead of TERM to complete current running jobs but
+do not start new jobs. Print out the number of jobs waiting to
+complete on STDERR. Accept sig INT again to kill now. This seems to be
+hard, as all foreground processes get the INT from the shell.
+

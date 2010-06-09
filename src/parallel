@@ -175,6 +175,29 @@ B<-g> is the default. Can be reversed with B<-u>.
 
 Print a summary of the options to GNU B<parallel> and exit.
 
+=item B<--halt-on-error> <0|1|2>
+
+=item B<-H> <0|1|2>
+
+=over 3
+
+=item 0
+
+Do not halt if a job fails. This is the default.
+
+=item 1
+
+Do not start new jobs if a job fails, but complete the running jobs
+including cleanup. The exit status will be the exit status from the
+last failing job.
+
+=item 2
+
+Kill off all jobs immediately and exit without cleanup. The exit
+status will be the exit status from the failing job.
+
+=back
+
 
 =item B<-I> I<replace-str>
 
@@ -958,6 +981,84 @@ This will tell GNU B<parallel> to not start any new jobs, but wait until
 the currently running jobs are finished before exiting.
 
 
+=head1 ENVIRONMENT VARIABLES
+
+=over 9
+
+=item $PARALLEL_PID - unimplemented
+
+The environment variable $PARALLEL_PID is set by GNU B<parallel> and
+is visible to the jobs started from GNU B<parallel>. This makes it
+possible for the jobs to communicate directly to GNU <parallel>.
+
+B<Example:> If each of the jobs tests a solution and one of jobs finds
+the solution the job can tell GNU B<parallel> not to start more jobs
+by: B<kill -TERM $PARALLEL_PID>. This only works on the local
+computer.
+
+=item $PARALLEL
+
+The environment variable $PARALLEL will be used as default options for
+GNU B<parallel>. However, because some options take arguments the
+options need to be split into groups in which only the last option
+takes an argument. Each group of options should be put on a line of its
+own.
+
+B<Example:>
+
+B<cat list | parallel -j1 -k -v ls>
+
+can be written as:
+
+B<cat list | PARALLEL="-kvj1" parallel ls>
+
+B<cat list | parallel -j1 -k -v -S"myssh user@server" ls>
+
+can be written as:
+
+B<cat list | PARALLEL="-kvj1>
+
+B<-Smyssh user@server" parallel echo>
+
+Notice the newline in the middle is needed because both B<-S> and
+B<-j> take an argument and thus both need to be at the end of a group.
+
+=back
+
+=head1 INIT FILE (RC FILE)
+
+The file ~/.parallelrc will be read if it exists. It should be
+formatted like the environment variable $PARALLEL. Lines starting with
+'#' will be ignored.
+
+
+=head1 EXIT STATUS
+
+If B<--halt-on-error> 0 or not specified:
+
+=over 6
+
+=item 0
+
+All jobs ran without error.
+
+=item 1-253
+
+Some of the jobs failed. The exit status gives the number of failed jobs
+
+=item 254
+
+More than 253 jobs failed.
+
+=item 255
+
+Other error.
+
+=back
+
+If B<--halt-on-error> 1 or 2: Exit status of the failing job.
+
+
 =head1 DIFFERENCES BETWEEN GNU Parallel AND ALTERNATIVES
 
 There are a lot programs with some of the functionality of GNU
@@ -1254,58 +1355,6 @@ B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
 B<cat files | parallel -j+0 cmd>
 
 
-=head1 ENVIRONMENT VARIABLES
-
-=over 9
-
-=item $PARALLEL_PID - unimplemented
-
-The environment variable $PARALLEL_PID is set by GNU B<parallel> and
-is visible to the jobs started from GNU B<parallel>. This makes it
-possible for the jobs to communicate directly to GNU <parallel>.
-
-B<Example:> If each of the jobs tests a solution and one of jobs finds
-the solution the job can tell GNU B<parallel> not to start more jobs
-by: B<kill -TERM $PARALLEL_PID>. This only works on the local
-computer.
-
-=item $PARALLEL
-
-The environment variable $PARALLEL will be used as default options for
-GNU B<parallel>. However, because some options take arguments the
-options need to be split into groups in which only the last option
-takes an argument. Each group of options should be put on a line of its
-own.
-
-B<Example:>
-
-B<cat list | parallel -j1 -k -v ls>
-
-can be written as:
-
-B<cat list | PARALLEL="-kvj1" parallel ls>
-
-B<cat list | parallel -j1 -k -v -S"myssh user@server" ls>
-
-can be written as:
-
-B<cat list | PARALLEL="-kvj1>
-
-B<-Smyssh user@server" parallel echo>
-
-Notice the newline in the middle is needed because both B<-S> and
-B<-j> take an argument and thus both need to be at the end of a group.
-
-=back
-
-=head1 INIT FILE (RC FILE)
-
-The file ~/.parallelrc will be read if it exists. It should be
-formatted like the environment variable $PARALLEL. Lines starting with
-'#' will be ignored.
-
-
-
 =head1 BUGS
 
 Filenames beginning with '-' can cause some commands to give
@@ -1467,6 +1516,11 @@ init_run_jobs();
 start_more_jobs();
 ReapIfNeeded();
 drain_job_queue();
+if($::opt_halt_on_error) {
+    exit $Global::halt_on_error_exitstatus;
+} else {
+    exit(min($Global::exitstatus,254));
+}
 
 sub parse_options {
     # Defaults:
@@ -1485,6 +1539,8 @@ sub parse_options {
     $Global::interactive = 0;
     $Global::stderr_verbose = 0;
     $Global::default_simultaneous_sshlogins = 9;
+    $Global::exitstatus = 0;
+    $Global::halt_on_error_exitstatus = 0;
 
     Getopt::Long::Configure ("bundling","require_order");
     # Add options from .parallelrc
@@ -1526,6 +1582,7 @@ sub parse_options {
 	       "trc=s" => \@::opt_trc,
 	       "transfer" => \$::opt_transfer,
 	       "cleanup" => \$::opt_cleanup,
+	       "halt-on-error|H=s" => \$::opt_halt_on_error,
 	       # xargs-compatibility - implemented, man, unittest
 	       "max-procs|P=s" => \$::opt_P,
 	       "delimiter|d=s" => \$::opt_d,
@@ -1590,7 +1647,7 @@ sub parse_options {
     if(defined $::opt_a) {
 	if(not open(ARGFILE,"<",$::opt_a)) {
 	    print STDERR "$Global::progname: Cannot open input file `$::opt_a': No such file or directory\n";
-	    exit(-1);
+	    exit(255);
 	}
 	$Global::argfile = *ARGFILE;
     }
@@ -1922,7 +1979,7 @@ sub processes_available_by_system_limit {
 	    # The child takes one process slot
 	    # It will be killed later
 	    sleep 100000;
-	    exit;
+	    exit(0);
 	} else {
 	    $max_system_proc_reached = 1;
 	}
@@ -2226,6 +2283,7 @@ sub min {
 # Variable structure:
 #    $Global::running{$pid}{'seq'} = printsequence
 #    $Global::running{$pid}{sshlogin} = server to run on
+#    $Global::running{$pid}{'exitstatus'} = exit status
 #    $Global::host{$sshlogin}{'no_of_running'} = number of currently running jobs
 #    $Global::host{$sshlogin}{'ncpus'} = number of cpus
 #    $Global::host{$sshlogin}{'maxlength'} = max line length (currently buggy for remote)
@@ -2288,7 +2346,11 @@ sub next_command_line_with_sshlogin {
 		$post .= "$sshcmd $serverlogin rm -f ".shell_quote($file).";";
 	    }
 	}
-	return "$pre$sshcmd $serverlogin ".shell_quote($next_command_line)."; $post";
+	if($post) {
+	    # We need to save the exit status of the job
+	    $post = '_EXIT_status=$?; '.$post.' exit $_EXIT_status;';
+	}
+	return "$pre$sshcmd $serverlogin ".shell_quote($next_command_line).";".$post;
     } else {
 	return $next_command_line;
     }
@@ -2591,7 +2653,7 @@ sub sshcommand_of_sshlogin {
 		} else {
 		    debug($master,"\n");
 		    `$master`;
-		    exit;
+		    exit(0);
 		}
 	    }
 	} else {
@@ -2661,9 +2723,13 @@ sub Reaper {
 	    # This is one of the ssh -M: ignore
 	    next;
 	}
-	if($Global::keeporder) {
+	$Global::running{$stiff}{'exitstatus'} = $? >> 8;
+	debug("died ($Global::running{$stiff}{'exitstatus'}): $Global::running{$stiff}{'seq'}");
+	# Force printing now if the job failed and we are going to exit
+	my $print_now = ($Global::running{$stiff}{'exitstatus'} and
+	    $::opt_halt_on_error and $::opt_halt_on_error == 2);
+	if($Global::keeporder and not $print_now) {
 	    $Global::print_later{$Global::running{$stiff}{"seq"}} = $Global::running{$stiff};
-	    debug("died: $Global::running{$stiff}{'seq'}");
 	    while($Global::print_later{$Global::job_end_sequence}) {
 		debug("Found job end $Global::job_end_sequence");
 		print_job($Global::print_later{$Global::job_end_sequence});
@@ -2672,6 +2738,26 @@ sub Reaper {
 	    }
 	} else {
 	    print_job ($Global::running{$stiff});
+	}
+	if($Global::running{$stiff}{'exitstatus'}) {
+	    # The jobs had a exit status <> 0, so error
+	    $Global::exitstatus++;
+	    if($::opt_halt_on_error) {
+		if($::opt_halt_on_error == 1) {
+		    # If halt on error == 1 we should gracefully exit
+		    print STDERR ("$Global::progname: Starting no more jobs. ",
+				  "Waiting for ", scalar(keys %Global::running),
+				  " jobs to finish. This job failed:\n",
+				  $Global::running{$stiff}{"command"},"\n");
+		    $Global::StartNoNewJobs++;
+		    $Global::halt_on_error_exitstatus = $Global::running{$stiff}{'exitstatus'};
+		} elsif($::opt_halt_on_error == 2) {
+		    # If halt on error == 2 we should exit immediately
+		    print STDERR ("$Global::progname: This job failed:\n",
+				  $Global::running{$stiff}{"command"},"\n");
+		    exit ($Global::running{$stiff}{'exitstatus'});
+		}
+	    }
 	}
 	my $sshlogin = $Global::running{$stiff}{'sshlogin'};
 	$Global::host{$sshlogin}{'no_of_running'}--;
@@ -2690,7 +2776,7 @@ sub Reaper {
 
 sub die_usage {
     usage();
-    exit(1);
+    exit(255);
 }
 
 sub usage {
@@ -2808,8 +2894,13 @@ $Global::control_path = 0;
 
 # TODO Debian package
 # TODO transfer a script to be run
-# TODO check that error code is passed out. echo | parallel /bin/false should give error code
-# TODO halt on first error. (/bin/false; E=$?; /bin/true; echo $E; exit $E); echo $?
-# TODO halt on first error --soft (let running complete) --hard (killall running)
-# TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
 
+# -F basefile this file will be transferred to each sshlogin before a
+# jobs is started. It will be removed if --cleanup is active. The file
+# may be a script to run or some common base data needed for the jobs.
+# Multiple -F can be specified to transfer more basefiles.
+
+# TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
+# TAGS: parallel | parallel processing | multicore | multiprocessor | Clustering/Distributed Networks
+# job control | multiple jobs | parallelization | text processing | cluster | filters
+# Clustering Tools | Command Line Tools | Utilities | System Administration
