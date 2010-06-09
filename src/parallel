@@ -80,13 +80,24 @@ Use NUL as delimiter.  Normally input lines will end in \n
 for processing arguments that may contain \n (newline).
 
 
-=item B<--arg-file>=I<input-file>
+=item B<--arg-file> I<input-file>
 
 =item B<-a> I<input-file>
 
 Read items from the file I<input-file> instead of standard input.  If
 you use this option, stdin is given to the first process run.
 Otherwise, stdin is redirected from /dev/null.
+
+
+=item B<--basefile> I<file>
+
+=item B<-B> I<file>
+
+I<file> will be transferred to each sshlogin before a jobs is
+started. It will be removed if B<--cleanup> is active. The file may be
+a script to run or some common base data needed for the jobs.
+Multiple B<-B> can be specified to transfer more basefiles. The
+I<file> will be transferred the same way as B<--transfer>.
 
 
 =item B<--cleanup>
@@ -150,8 +161,6 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-
-
 =item B<--file>
 
 =item B<-f>
@@ -174,6 +183,7 @@ B<-g> is the default. Can be reversed with B<-u>.
 =item B<-h>
 
 Print a summary of the options to GNU B<parallel> and exit.
+
 
 =item B<--halt-on-error> <0|1|2>
 
@@ -1516,6 +1526,7 @@ init_run_jobs();
 start_more_jobs();
 ReapIfNeeded();
 drain_job_queue();
+cleanup();
 if($::opt_halt_on_error) {
     exit $Global::halt_on_error_exitstatus;
 } else {
@@ -1582,6 +1593,7 @@ sub parse_options {
 	       "trc=s" => \@::opt_trc,
 	       "transfer" => \$::opt_transfer,
 	       "cleanup" => \$::opt_cleanup,
+	       "basefile|B=s" => \@::opt_basefile,
 	       "halt-on-error|H=s" => \$::opt_halt_on_error,
 	       # xargs-compatibility - implemented, man, unittest
 	       "max-procs|P=s" => \$::opt_P,
@@ -1679,6 +1691,12 @@ sub parse_options {
 	}
     }
     $Global::job_end_sequence=1;
+}
+
+sub cleanup {
+    if(@::opt_basefile) {
+	cleanup_basefile();
+    }
 }
 
 #
@@ -2301,6 +2319,9 @@ sub init_run_jobs {
     $SIG{USR1} = \&ListRunningJobs;
     $Global::original_sigterm = $SIG{TERM};
     $SIG{TERM} = \&StartNoNewJobs;
+    if(@::opt_basefile) {
+	setup_basefile();
+    }
 }
 
 sub login_and_host {
@@ -2315,13 +2336,13 @@ sub next_command_line_with_sshlogin {
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     my ($pre,$post)=("","");
     if($next_command_line and $serverlogin ne ":") {
+	my $rsync_opt = "-rlDzR -e".shell_quote($sshcmd);
 	for my $file (@$args_ref) {
 	    $file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
 	    my $noext = no_extension($file); # Remove .ext before prepending ./
 	    my $relpath = ($file !~ m:^/:); # Is the path relative?
 	    # If relative path: prepend ./ (to avoid problems with ':')
 	    $noext = ($relpath ? "./".$noext : $noext);
-	    my $rsync_opt = "-rlDzR -e".shell_quote($sshcmd);
 	    # Use different subdirs depending on abs or rel path
 	    my $rsync_destdir = ($relpath ? "./" : "/");
 	    if($::opt_transfer) {
@@ -2329,7 +2350,7 @@ sub next_command_line_with_sshlogin {
 		# Abs path: rsync -rlDzR /home/tange/dir/subdir/file.gz server:/
 		# Rel path: rsync -rlDzR ./subdir/file.gz server:./
 		if(-r shell_unquote($file)) {
-		    $pre = "rsync $rsync_opt $file $serverlogin:$rsync_destdir ;";
+		    $pre .= "rsync $rsync_opt $file $serverlogin:$rsync_destdir ;";
 		} else {
 		    print STDERR "Warning: $file is not readable and will not be transferred\n";
 		}
@@ -2340,7 +2361,8 @@ sub next_command_line_with_sshlogin {
 		# --return
 		# Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
 		# Rel path: rsync -rlDzR server:./subsir/file.gz ./
-		$post .= "rsync $rsync_opt $remove $serverlogin:".shell_quote($replaced)." $rsync_destdir ;";
+		$post .= "rsync $rsync_opt $remove $serverlogin:"
+		    .shell_quote($replaced)." $rsync_destdir ;";
 	    }
 	    if($::opt_cleanup) {
 		$post .= "$sshcmd $serverlogin rm -f ".shell_quote($file).";";
@@ -2350,7 +2372,8 @@ sub next_command_line_with_sshlogin {
 	    # We need to save the exit status of the job
 	    $post = '_EXIT_status=$?; '.$post.' exit $_EXIT_status;';
 	}
-	return "$pre$sshcmd $serverlogin ".shell_quote($next_command_line).";".$post;
+	return ($pre . "$sshcmd $serverlogin "
+		.shell_quote($next_command_line).";".$post);
     } else {
 	return $next_command_line;
     }
@@ -2586,7 +2609,6 @@ sub read_sshloginfile {
     close IN;
 }
 
-
 sub parse_sshlogin {
     my (@login);
     if(not @Global::sshlogin) { @Global::sshlogin = (":"); }
@@ -2604,7 +2626,7 @@ sub parse_sshlogin {
 	$Global::host{$sshlogin}{'no_of_running'} = 0;
 	$Global::host{$sshlogin}{'maxlength'} = max_length_of_command_line();
     }
-    debug("sshlogin: ", my_dump(%Global::host));
+    debug("sshlogin: ", my_dump(%Global::host),"\n");
     if($::opt_transfer or @::opt_return or $::opt_cleanup) {
 	if(not remote_hosts()) {
 	    # There are no remote hosts
@@ -2670,6 +2692,42 @@ sub control_path_dir {
     return $Global::control_path_dir;
 }
 
+sub setup_basefile {
+    # Transfer basefiles to each $sshlogin
+    # This needs to be done before first jobs on $sshlogin is run
+    # Can we do this in parallel?
+    my $cmd = "";
+    for my $sshlogin (keys %Global::host) {
+	my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
+	my $rsync_opt = "-rlDzR -e".shell_quote($sshcmd);
+	for my $file (@::opt_basefile) {
+	    my $f = $file;
+	    my $relpath = ($f !~ m:^/:); # Is the path relative?
+	    # Use different subdirs depending on abs or rel path
+	    my $rsync_destdir = ($relpath ? "./" : "/");
+	    $f =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
+	    $f = shell_quote($f);
+	    $cmd .= "rsync $rsync_opt $f $serverlogin:$rsync_destdir &";
+	}
+    }
+    $cmd .= "wait;";
+    debug("basesetup: $cmd\n");
+    print `$cmd`;
+}
+
+sub cleanup_basefile {
+    # Remove the basefiles transferred
+    my $cmd="";
+    for my $sshlogin (keys %Global::host) {
+	my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
+	for my $file (@::opt_basefile) {
+	    $cmd .= "$sshcmd $serverlogin rm -f ".shell_quote(shell_quote($file))."&";
+	}
+    }
+    $cmd .= "wait;";
+    debug("basecleanup: $cmd\n");
+    print `$cmd`;
+}
 
 #
 # Signal handling
@@ -2895,10 +2953,6 @@ $Global::control_path = 0;
 # TODO Debian package
 # TODO transfer a script to be run
 
-# -F basefile this file will be transferred to each sshlogin before a
-# jobs is started. It will be removed if --cleanup is active. The file
-# may be a script to run or some common base data needed for the jobs.
-# Multiple -F can be specified to transfer more basefiles.
 
 # TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
 # TAGS: parallel | parallel processing | multicore | multiprocessor | Clustering/Distributed Networks

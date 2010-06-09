@@ -1,3 +1,12 @@
+Ved første ssh til hosten:
+if not -B kopieret:
+  kopier
+  tilføj til cleanup
+
+Ved afslutning:
+  if cleanup:
+    for each cleanup: cleanup
+
 =head1 IDEAS
 
 Kan vi lave flere ssh'er, hvis vi venter lidt?
