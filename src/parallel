@@ -2735,6 +2735,7 @@ sub setup_basefile {
     # Can we do this in parallel?
     my $cmd = "";
     for my $sshlogin (keys %Global::host) {
+	if($sshlogin eq ":") { next }
 	my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
 	my $rsync_opt = "-rlDzR -e".shell_quote($sshcmd);
 	for my $file (@::opt_basefile) {
@@ -2756,6 +2757,7 @@ sub cleanup_basefile {
     # Remove the basefiles transferred
     my $cmd="";
     for my $sshlogin (keys %Global::host) {
+	if($sshlogin eq ":") { next }
 	my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
 	for my $file (@::opt_basefile) {
 	    $cmd .= "$sshcmd $serverlogin rm -f ".shell_quote(shell_quote($file))."&";
@@ -2988,7 +2990,6 @@ $Global::control_path = 0;
 # TODO --max-number-of-jobs print the system limited number of jobs
 
 # TODO Debian package
-# TODO transfer a script to be run - are permissions kept?
 # TODO try transfer + return of file beginning with :
 
 # TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
