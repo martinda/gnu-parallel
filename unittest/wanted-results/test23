@@ -1,0 +1,36 @@
+### Test --basefile + --cleanup + permissions
+scriptrun 1
+scriptrun 2
+scriptrun 3
+scriptrun 4
+scriptrun 5
+good if no file
+ls: cannot access script: No such file or directory
+OK
+### Test --basefile + --sshlogin :
+1
+10
+11
+12
+13
+2
+3
+4
+5
+6
+7
+8
+9
+1
+10
+11
+12
+13
+2
+3
+4
+5
+6
+7
+8
+9

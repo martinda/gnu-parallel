@@ -89,9 +89,9 @@ you use this option, stdin is given to the first process run.
 Otherwise, stdin is redirected from /dev/null.
 
 
-=item B<--basefile> I<file>
+=item B<--basefile> I<file> (beta testing)
 
-=item B<-B> I<file>
+=item B<-B> I<file> (beta testing)
 
 I<file> will be transferred to each sshlogin before a jobs is
 started. It will be removed if B<--cleanup> is active. The file may be
@@ -185,15 +185,16 @@ B<-g> is the default. Can be reversed with B<-u>.
 Print a summary of the options to GNU B<parallel> and exit.
 
 
-=item B<--halt-on-error> <0|1|2>
+=item B<--halt-on-error> <0|1|2> (beta testing)
 
-=item B<-H> <0|1|2>
+=item B<-H> <0|1|2> (beta testing)
 
 =over 3
 
 =item 0
 
-Do not halt if a job fails. This is the default.
+Do not halt if a job fails. Exit status will be the number of jobs
+failed. This is the default.
 
 =item 1
 
@@ -280,6 +281,23 @@ B<--use-cpus-instead-of-cores>.
 
 Keep sequence of output same as the order of input. If jobs 1 2 3 4
 end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
+
+
+=item B<-L> I<max-lines>
+
+Use at most I<max-lines> nonblank input lines per command line.
+Trailing blanks cause an input line to be logically continued on the
+next input line.  Implies B<-x>.
+
+
+=item B<--max-lines>[=I<max-lines>]
+
+=item B<-l>[I<max-lines>]
+
+Synonym for the B<-L> option.  Unlike B<-L>, the I<max-lines> argument
+is optional.  If I<max-lines> is not specified, it defaults to one.
+The B<-l> option is deprecated since the POSIX standard specifies
+B<-L> instead.
 
 
 =item B<--controlmaster> (experimental)
@@ -565,6 +583,14 @@ give surprising results if B<{}> is used as part of a word.
 
 Support for B<-X> with B<--sshlogin> is limited and may fail.
 
+
+=item B<--exit>
+
+=item B<-x>
+
+Exit if the size (see the B<-s> option) is exceeded.
+
+
 =back
 
 =head1 EXAMPLE: Working as xargs -n1. Argument appending
@@ -780,6 +806,17 @@ B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -k tra
 
 This will make sure the traceroute to foss.org.my will be printed
 first.
+
+
+=head1 EXAMPLE: Parallel grep
+
+B<grep -r> greps recursively through directories. On multicore CPUs
+GNU B<parallel> can often speed this up.
+
+find . -type f | parallel -k -j150% -n 1000 -m grep -H -n STRING {}
+
+This will run 1.5 job per core, and give 1000 arguments to B<grep>.
+
 
 =head1 EXAMPLE: Using remote computers
 
@@ -1105,7 +1142,9 @@ support for running number-of-cpu-cores jobs in parallel.
 
 B<xargs> has no support for grouping the output, therefore output may
 run together, e.g. the first half of a line is from one process and
-the last half of the line is from another process.
+the last half of the line is from another process. The example
+B<Parallel grep> cannot be done reliably with B<xargs> because of
+this.
 
 B<xargs> has no support for keeping the order of the output, therefore
 if running jobs in parallel using B<xargs> the output of the second
@@ -1152,6 +1191,12 @@ B<make -j> can run jobs in parallel, but requires a crafted Makefile
 to do this. That results in extra quoting to get filename containing
 newline to work correctly.
 
+B<make -j> has no support for grouping the output, therefore output
+may run together, e.g. the first half of a line is from one process
+and the last half of the line is from another process. The example
+B<Parallel grep> cannot be done reliably with B<make -j> because of
+this.
+
 (Very early versions of GNU Parallel was coincidently implemented
 using B<make -j>).
 
@@ -1177,7 +1222,8 @@ B<ppss> again it may cause nothing to happen as B<ppss> thinks the
 task is already done. GNU B<parallel> will normally not need cleaning
 up if running locally and will only need cleaning up if stopped
 abnormally and running remote (B<--cleanup> may not complete if
-stopped abnormally).
+stopped abnormally). The example B<Parallel grep> would require extra
+postprocessing if written using B<ppss>.
 
 =head3 EXAMPLES FROM ppss MANUAL
 
@@ -1606,18 +1652,15 @@ sub parse_options {
 	       "eof|e:s" => \$::opt_E,
 	       "max-args|n=i" => \$::opt_n,
 	       "help|h" => \$::opt_help,
+	       "L=i" => \$::opt_L,
+	       "max-lines|l:i" => \$::opt_l,
 	       "verbose|t" => \$::opt_verbose,
 	       "version|V" => \$::opt_version,
 	       "show-limits" => \$::opt_show_limits,
+	       "exit|x" => \$::opt_x,
 	       ## xargs-compatibility - implemented, man - unittest missing
 	       "interactive|p" => \$::opt_p,
-	       ## How to unittest? tty skal emuleres
-	       # xargs-compatibility - unimplemented
-	       "L=i" => \$::opt_L,
-	       "max-lines|l:i" => \$::opt_l,
-	       ## (echo a b;echo c) | xargs -l1 echo
-	       ## (echo a b' ';echo c) | xargs -l1 echo
-	       "exit|x" => \$::opt_x,
+	       ## How to unittest? tty must be emulated
 	) || die_usage();
     $Global::debug = (defined $::opt_D);
     $Global::input_is_filename = (@ARGV);
@@ -1640,6 +1683,10 @@ sub parse_options {
     if(defined $::opt_U) { $Global::replace_no_ext = $::opt_U; }
     if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
     if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
+    if(defined $::opt_L and $::opt_L or defined $::opt_l) {
+	$Global::max_lines = $::opt_l || $::opt_L || 1;
+	$Global::max_number_of_args = $Global::max_lines;
+    }
     if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
@@ -1658,7 +1705,9 @@ sub parse_options {
 
     if(defined $::opt_a) {
 	if(not open(ARGFILE,"<",$::opt_a)) {
-	    print STDERR "$Global::progname: Cannot open input file `$::opt_a': No such file or directory\n";
+	    print STDERR "$Global::progname: ".
+		"Cannot open input file `$::opt_a': ".
+		"No such file or directory\n";
 	    exit(255);
 	}
 	$Global::argfile = *ARGFILE;
@@ -1687,7 +1736,8 @@ sub parse_options {
 	}
     } else {
 	for my $sshlogin (keys %Global::host) {
-	    $Global::host{$sshlogin}{'max_no_of_running'} = $Global::default_simultaneous_sshlogins;
+	    $Global::host{$sshlogin}{'max_no_of_running'} =
+		$Global::default_simultaneous_sshlogins;
 	}
     }
     $Global::job_end_sequence=1;
@@ -1713,60 +1763,64 @@ sub generate_command_line {
     my $command = shift;
     my ($job_line,$last_good);
     my ($next_arg,@quoted_args,@quoted_args_no_ext,$arg_length);
-    my ($number_of_substitution,$number_of_substitution_no_ext,$length_of_context,$length_of_command_no_args,$spaces);
-    if($Global::xargs or $Global::Xargs) {
-	($number_of_substitution, $number_of_substitution_no_ext,$spaces,
-	 $length_of_command_no_args,$length_of_context) = xargs_computations($command);
-    }
-
+    my ($number_of_substitution,
+	$number_of_substitution_no_ext,$spaces,
+	$length_of_command_no_args,$length_of_context) =
+	    xargs_computations($command);
     my $number_of_args = 0;
-    # max number of lines (-L) =
-    # number_of_read_lines = 0
     while (defined($next_arg = get_next_arg())) {
 	my $next_arg_no_ext = no_extension($next_arg);
-	# if defined max_number_of_lines
-	# number_of_read_lines++
-	# if $next_arg =~ /\w$/ then number_of_read_lines--
-	    # Trailing blanks cause an
-	    # input line to be logically continued on the next input line.
-	# if number_of_read_lines > max_number_of_lines
-	    # last
 	push (@quoted_args, $next_arg);
 	push (@quoted_args_no_ext, $next_arg_no_ext);
 	$number_of_args++;
+
+	# Emulate xargs if there is a command and -x or -X is set
+	my $next_arg_len =
+	    $number_of_substitution * (length ($next_arg) + $spaces)
+	    + $number_of_substitution_no_ext * (length ($next_arg_no_ext) + $spaces)
+	    + $length_of_context;
+	$arg_length += $next_arg_len;
+	my $job_line_length = $length_of_command_no_args + $arg_length;
+	if($job_line_length >= max_length_of_command_line()) {
+	    unget_arg(pop @quoted_args);
+	    if($::opt_x and $length_of_command_no_args + $next_arg_len
+	       >= max_length_of_command_line()) {
+		# To be compatible with xargs -x
+		print STDERR ("Command line too long ($job_line_length >= "
+			      . max_length_of_command_line() .
+			      ") at number $number_of_args: ".
+			      (substr($next_arg,0,50))."...\n");
+		exit(255);
+	    }
+	    if(defined $quoted_args[0]) {
+		last;
+	    } else {
+		print STDERR ("Command line too long ($job_line_length >= "
+			      . max_length_of_command_line() .
+			      ") at number $number_of_args: ".
+			      (substr($next_arg,0,50))."...\n");
+		exit(255);
+	    }
+	}
+	if($Global::max_number_of_args and
+	   $number_of_args >= $Global::max_number_of_args) {
+	    last;
+	}
 	if(not $Global::xargs and not $Global::Xargs) {
 	    # No xargs-mode: Just one argument per line
 	    last;
-	} else {
-	    # Emulate xargs if there is a command and -x or -X is set
-	    my $next_arg_len = $number_of_substitution * (length ($next_arg) + $spaces) +
-		+ $number_of_substitution_no_ext * (length ($next_arg_no_ext) + $spaces)
-		+ $length_of_context;
-
-	    $arg_length += $next_arg_len;
-	    my $job_line_length = $length_of_command_no_args + $arg_length;
-	    if($job_line_length >= max_length_of_command_line()) {
-		unget_arg(pop @quoted_args);
-		if(defined $quoted_args[0]) {
-		    last;
-		} else {
-		    die ("Command line too long ($job_line_length >= "
-			 . max_length_of_command_line() . ") at number $number_of_args: $next_arg");
-		}
-	    }
-	    if($Global::max_number_of_args and $number_of_args >= $Global::max_number_of_args) {
-		last;
-	    }
 	}
     }
     if(@quoted_args) {
 	$job_line = $command;
 	if(defined $job_line and
-	   ($job_line =~/\Q$Global::replacestring\E/o or $job_line =~/\Q$Global::replace_no_ext\E/o)) {
+	   ($job_line =~/\Q$Global::replacestring\E/o or
+	    $job_line =~/\Q$Global::replace_no_ext\E/o)) {
 	    # substitute {} and {.} with args
 	    if($Global::Xargs) {
 		# Context sensitive replace (foo{}bar with fooargsbar)
-		$job_line = context_replace($job_line, \@quoted_args, \@quoted_args_no_ext);
+		$job_line =
+		    context_replace($job_line, \@quoted_args, \@quoted_args_no_ext);
 	    } else {
 		# Normal replace {} with args and {.} with args without extension
 		my $arg=join(" ",@quoted_args);
@@ -1793,33 +1847,37 @@ sub generate_command_line {
 sub xargs_computations {
     my $command = shift;
     if(not @Calculated::xargs_computations) {
-	my ($length_of_command_no_args, $length_of_context, $spaces);
-
-	# Count number of {}'s on the command line
-	my $no_of_replace = ($command =~ s/\Q$Global::replacestring\E/$Global::replacestring/go);
-	my $number_of_substitution = $no_of_replace || 1;
-	# Count number of {.}'s on the command line
-	my $no_of_no_ext = ($command =~ s/\Q$Global::replace_no_ext\E/$Global::replace_no_ext/go);
-	my $number_of_substitution_no_ext = $no_of_no_ext || 0;
-	# Count
-	my $c = $command;
-	if($Global::xargs) {
-	    # remove all {}s
-	    $c =~ s/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E//og;
-	    $length_of_command_no_args = length($c) - $no_of_replace - $no_of_no_ext;
-	    $length_of_context = 0;
-	    $spaces = 1;
+	my ($number_of_substitution, $number_of_substitution_no_ext,
+	     $spaces,$length_of_command_no_args,$length_of_context)
+	    = (1,0,0,0,0);
+	if($command) {
+	    # Count number of {}'s on the command line
+	    my $no_of_replace =
+		($command =~ s/\Q$Global::replacestring\E/$Global::replacestring/go);
+	    $number_of_substitution = $no_of_replace || 1;
+	    # Count number of {.}'s on the command line
+	    my $no_of_no_ext =
+		($command =~ s/\Q$Global::replace_no_ext\E/$Global::replace_no_ext/go);
+	    $number_of_substitution_no_ext = $no_of_no_ext || 0;
+	    # Count
+	    my $c = $command;
+	    if($Global::Xargs) {
+		$c =~ s/\S*\Q$Global::replacestring\E\S*//go;
+		$c =~ s/\S*\Q$Global::replace_no_ext\E\S*//go;
+		$length_of_command_no_args = length($c) - 1;
+		$length_of_context = length($command) - $length_of_command_no_args
+		    - $no_of_replace * length($Global::replacestring)
+		    - $no_of_no_ext * length($Global::replace_no_ext);
+		$spaces = 0;
+	    } else {
+		# remove all {}s
+		$c =~ s/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E//og;
+		$length_of_command_no_args = length($c) -
+		    $no_of_replace - $no_of_no_ext;
+		$length_of_context = 0;
+		$spaces = 1;
+	    }
 	}
-	if($Global::Xargs) {
-	    $c =~ s/\S*\Q$Global::replacestring\E\S*//go;
-	    $c =~ s/\S*\Q$Global::replace_no_ext\E\S*//go;
-	    $length_of_command_no_args = length($c) - 1;
-	    $length_of_context = length($command) - $length_of_command_no_args
-		- $no_of_replace * length($Global::replacestring)
-		- $no_of_no_ext * length($Global::replace_no_ext);
-	    $spaces = 0;
-	}
-	
 	@Calculated::xargs_computations =
 	    ($number_of_substitution, $number_of_substitution_no_ext,
 	     $spaces,$length_of_command_no_args,$length_of_context);
@@ -1944,7 +2002,8 @@ sub compute_number_of_processes {
     my $sshlogin = shift;
     my $wanted_processes = user_requested_processes($opt_P,$sshlogin);
     debug("Wanted procs: $wanted_processes\n");
-    my $system_limit = processes_available_by_system_limit($wanted_processes,$sshlogin);
+    my $system_limit =
+	processes_available_by_system_limit($wanted_processes,$sshlogin);
     debug("Limited to procs: $system_limit\n");
     return $system_limit;
 }
@@ -2038,8 +2097,10 @@ sub processes_available_by_system_limit {
     wait();
     # Cleanup: Unget the command_lines (and args_refs)
     unget_command_line(@command_lines);
-    if($sshlogin ne ":" and $system_limit > $Global::default_simultaneous_sshlogins) {
-	$system_limit = simultaneous_sshlogin_limit($sshlogin,$system_limit);
+    if($sshlogin ne ":" and
+       $system_limit > $Global::default_simultaneous_sshlogins) {
+	$system_limit =
+	    simultaneous_sshlogin_limit($sshlogin,$system_limit);
     }
     return $system_limit;
 }
@@ -2067,12 +2128,17 @@ sub simultaneous_sshlogin_limit {
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     # Try twice because it guesses wrong sometimes
     # Choose the minimal
-    my $ssh_limit = min(simultaneous_sshlogin($sshlogin,$wanted_processes),
-			simultaneous_sshlogin($sshlogin,$wanted_processes));
+    my $ssh_limit =
+	min(simultaneous_sshlogin($sshlogin,$wanted_processes),
+	    simultaneous_sshlogin($sshlogin,$wanted_processes));
     if($ssh_limit < $wanted_processes) {
-	print STDERR ("Warning: ssh to $serverlogin only allows for $ssh_limit simultaneous logins.\n",
-		      "You may raise this by changing /etc/ssh/sshd_config:MaxStartup on $serverlogin\n",
-		      "Using only ",$ssh_limit-1," connections to avoid race conditions\n");
+	print STDERR
+	    ("Warning: ssh to $serverlogin only allows ",
+	     "for $ssh_limit simultaneous logins.\n",
+	     "You may raise this by changing ",
+	     "/etc/ssh/sshd_config:MaxStartup on $serverlogin\n",
+	     "Using only ",$ssh_limit-1," connections ",
+	     "to avoid race conditions\n");
     }
     # Race condition can cause problem if using all sshs.
     if($ssh_limit > 1) { $ssh_limit -= 1; }
@@ -2106,14 +2172,17 @@ sub user_requested_processes {
 	if($opt_P =~ /^\+(\d+)$/) {
 	    # E.g. -P +2
 	    my $j = $1;
-	    $processes = $j + no_of_processing_units_sshlogin($sshlogin);
+	    $processes =
+		$j + no_of_processing_units_sshlogin($sshlogin);
 	} elsif ($opt_P =~ /^-(\d+)$/) {
 	    # E.g. -P -2
 	    my $j = $1;
-	    $processes = no_of_processing_units_sshlogin($sshlogin) - $j;
+	    $processes =
+		no_of_processing_units_sshlogin($sshlogin) - $j;
 	} elsif ($opt_P =~ /^(\d+)\%$/) {
 	    my $j = $1;
-	    $processes = no_of_processing_units_sshlogin($sshlogin) * $j / 100;
+	    $processes =
+		no_of_processing_units_sshlogin($sshlogin) * $j / 100;
 	} elsif ($opt_P =~ /^(\d+)$/) {
 	    $processes = $1;
 	    if($processes == 0) {
@@ -2153,7 +2222,8 @@ sub no_of_processing_units_sshlogin {
 	    if($ncpu =~ /^[0-9]+$/) {
 		$Global::host{$sshlogin}{'ncpus'} = $ncpu;
 	    } else {
-		print STDERR ("Warning: Could not figure out number of cpus on $serverlogin. Using 1");
+		print STDERR ("Warning: Could not figure out ",
+			      "number of cpus on $serverlogin. Using 1");
 		$Global::host{$sshlogin}{'ncpus'} = 1;
 	    }
 	}
@@ -2164,8 +2234,7 @@ sub no_of_processing_units_sshlogin {
 sub no_of_cpus {
     if(not $Global::no_of_cpus) {
 	local $/="\n"; # If delimiter is set, then $/ will be wrong
-	my $no_of_cpus = (0
-			  || no_of_cpus_freebsd()
+	my $no_of_cpus = (no_of_cpus_freebsd()
 			  || no_of_cpus_darwin()
 			  || no_of_cpus_solaris()
 			  || no_of_cpus_gnu_linux()
@@ -2183,8 +2252,7 @@ sub no_of_cpus {
 sub no_of_cores {
     if(not $Global::no_of_cores) {
 	local $/="\n"; # If delimiter is set, then $/ will be wrong
-	my $no_of_cores = (0
-			   || no_of_cores_freebsd()
+	my $no_of_cores = (no_of_cores_freebsd()
 			   || no_of_cores_darwin()
 			   || no_of_cores_solaris()
 			   || no_of_cores_gnu_linux()
@@ -2303,7 +2371,7 @@ sub min {
 #    $Global::running{$pid}{sshlogin} = server to run on
 #    $Global::running{$pid}{'exitstatus'} = exit status
 #    $Global::host{$sshlogin}{'no_of_running'} = number of currently running jobs
-#    $Global::host{$sshlogin}{'ncpus'} = number of cpus
+#    $Global::host{$sshlogin}{'ncpus'} = number of CPUs (or CPU cores)
 #    $Global::host{$sshlogin}{'maxlength'} = max line length (currently buggy for remote)
 #    $Global::host{$sshlogin}{'max_no_of_running'} = number of currently running jobs
 #    $Global::host{$sshlogin}{'sshcmd'} = command to use as ssh
@@ -2388,7 +2456,8 @@ sub get_next_arg {
 	}
 	$arg = <$Global::argfile>;
 	chomp $arg;
-	if($Global::end_of_file_string and $arg eq $Global::end_of_file_string) {
+	if($Global::end_of_file_string and
+	   $arg eq $Global::end_of_file_string) {
 	    # Ignore the rest of STDIN
 	    while (<$Global::argfile>) {}
 	    return undef;
@@ -2396,6 +2465,12 @@ sub get_next_arg {
 	if($Global::ignore_empty) {
 	    if($arg =~ /^\s*$/) {
 		return get_next_arg();
+	    }
+	}
+	if($Global::max_lines) {
+	    if($arg =~ /\s$/) {
+		# Trailing space => continued on next line
+		$arg .= get_next_arg();
 	    }
 	}
 	if($Global::input_is_filename) {
@@ -2494,8 +2569,10 @@ sub start_job {
 	    close TTY;
 	    my $run_yes = ($answer =~ /^\s*y/i);
 	    if (not $run_yes) {
-		open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$oldout: $!";
-		open STDERR, ">&", $Global::original_stderr or die "Can't dup \$oldout: $!";
+		open STDOUT, ">&", $Global::original_stdout
+		    or die "Can't dup \$oldout: $!";
+		open STDERR, ">&", $Global::original_stderr
+		    or die "Can't dup \$oldout: $!";
 		return;
 	    }
 	} else {
@@ -2515,14 +2592,17 @@ sub start_job {
 	$pid = open3("<&STDIN", ">&STDOUT", ">&STDERR", $command) ||
 	    die("open3 failed. Report a bug to <bug-parallel\@gnu.org>\n");
 	# Re-open to avoid complaining
-	open STDIN, "<&", $Global::original_stdin or die "Can't dup \$Global::original_stdin: $!";
+	open STDIN, "<&", $Global::original_stdin
+	    or die "Can't dup \$Global::original_stdin: $!";
     } else {
 	$pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) ||
 	    die("open3 failed. Report a bug to <bug-parallel\@gnu.org>\n");
     }
     debug("started: $command\n");
-    open STDOUT, ">&", $Global::original_stdout or die "Can't dup \$Global::original_stdout: $!";
-    open STDERR, ">&", $Global::original_stderr or die "Can't dup \$Global::original_stderr: $!";
+    open STDOUT, ">&", $Global::original_stdout
+	or die "Can't dup \$Global::original_stdout: $!";
+    open STDERR, ">&", $Global::original_stderr
+	or die "Can't dup \$Global::original_stderr: $!";
 
     if($Global::grouped) {
 	return ("seq" => $Global::job_start_sequence,
@@ -2702,8 +2782,8 @@ sub sshtransferreturn {
     # Use different subdirs depending on abs or rel path
     my $rsync_destdir = ($relpath ? "./" : "/");
     if($transfer) {
-	# Abs path: rsync -rlDzR /home/tange/dir/subdir/file.gz server:/
-	# Rel path: rsync -rlDzR ./subdir/file.gz server:./
+	# Abs path: rsync -rlDzRE /home/tange/dir/subdir/file.gz server:/
+	# Rel path: rsync -rlDzRE ./subdir/file.gz server:./
 	if(-r shell_unquote($file)) {
 	    return "rsync $rsync_opt $file $serverlogin:$rsync_destdir";
 	} else {
@@ -2720,8 +2800,8 @@ sub sshtransferreturn {
 	    my $remove = $removesource ? "--remove-source-files" : "";
 	    my $replaced = context_replace($ret_file,[$file],[$noext]);
 	    # --return
-	    # Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
-	    # Rel path: rsync -rlDzR server:./subsir/file.gz ./
+	    # Abs path: rsync -rlDzRE server:/home/tange/dir/subdir/file.gz /
+	    # Rel path: rsync -rlDzRE server:./subsir/file.gz ./
 	    push(@cmd, "rsync $rsync_opt $remove $serverlogin:"
 		.shell_quote($replaced)." ".$rsync_destdir);
 	}
@@ -2779,9 +2859,10 @@ sub ListRunningJobs {
 }
 
 sub StartNoNewJobs {
-    print STDERR ("$Global::progname: SIGTERM received. No new jobs will be started.\n",
-		  "$Global::progname: Waiting for these ", scalar(keys %Global::running),
-		  " jobs to finish. Send SIGTERM again to stop now.\n");
+    print STDERR
+	("$Global::progname: SIGTERM received. No new jobs will be started.\n",
+	 "$Global::progname: Waiting for these ", scalar(keys %Global::running),
+	 " jobs to finish. Send SIGTERM again to stop now.\n");
     ListRunningJobs();
     $Global::StartNoNewJobs++;
     $SIG{TERM} = $Global::original_sigterm;
@@ -2826,7 +2907,8 @@ sub Reaper {
 	my $print_now = ($Global::running{$stiff}{'exitstatus'} and
 	    $::opt_halt_on_error and $::opt_halt_on_error == 2);
 	if($Global::keeporder and not $print_now) {
-	    $Global::print_later{$Global::running{$stiff}{"seq"}} = $Global::running{$stiff};
+	    $Global::print_later{$Global::running{$stiff}{"seq"}} =
+		$Global::running{$stiff};
 	    while($Global::print_later{$Global::job_end_sequence}) {
 		debug("Found job end $Global::job_end_sequence");
 		print_job($Global::print_later{$Global::job_end_sequence});

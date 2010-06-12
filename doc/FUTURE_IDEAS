@@ -1,11 +1,97 @@
-Ved første ssh til hosten:
-if not -B kopieret:
-  kopier
-  tilføj til cleanup
+=head1 YouTube video
 
-Ved afslutning:
-  if cleanup:
-    for each cleanup: cleanup
+GNU Parallel is a tool with lots of uses in shell. Every time you use
+xargs or a for-loop GNU Parallel can probably do that faster, safer
+and more readable.
+
+If you have access to more computers through ssh, GNU Parallel makes
+it easy to distribute jobs to these.
+
+terminal2: ssh parallel@vh2.pi.dk
+ssh parallel@vh2.pi.dk
+
+
+PS1="\e[7mGNU Parallel:\[\033[01;34m\]\w\[\033[00m\]\e[27m$ "
+gunzip logs/*gz
+rm logs/*bz2
+rm -rf zip/*[^p]
+
+# GET GNU PARALLEL
+wget ftp://ftp.gnu.org/gnu/parallel/parallel-20100601.tar.bz2
+tar xvjf parallel-20100601.tar.bz2
+cd parallel-20100601
+./configure && make   ##
+su
+make install
+exit
+cd
+
+# YOUR FIRST PARALLEL JOBS
+cd logs
+du
+/usr/bin/time gzip *
+/usr/bin/time gunzip *
+ls | time parallel gzip
+ls | time parallel gunzip
+
+# RECOMPRESS gz TO bz2
+ls | time parallel gzip
+ls *.gz | time parallel 'zcat {} | bzip2 > {.}.bz2'
+## vis top local
+# RECOMPRESS gz TO bz2 USING local(:) AND REMOTE server1
+ls *.gz | time parallel -S server1,: --trc {.}.bz2 \
+'zcat {} | bzip2 > {.}.bz2'
+## vis top local
+## vis top remote
+
+# MAKING SMALL SCRIPTS
+cd ../zip
+ls -l
+ls *.zip | parallel 'mkdir {.} && cd {.} && unzip ../{}' ###
+ls -l
+
+# GROUP OUTPUT
+traceroute debian.org
+traceroute debian.org & traceroute freenetproject.org  ###
+(echo debian.org; echo freenetproject.org) \
+| parallel traceroute
+
+# KEEP ORDER
+(echo debian.org; echo freenetproject.org) \
+| parallel -k traceroute
+
+# RUN MANY JOBS. USE OUTPUT
+# Find the number of hosts responding to ping
+seq 1 255 | parallel -j255 ping -c 1 178.63.11.{} 2>&1 \
+| grep '64 bytes' | wc -l
+seq 1 255 | parallel -j0 ping -c 1 178.63.11.{} 2>&1 \
+| grep '64 bytes' | wc -l
+
+# MULTIPLE ARGUMENTS
+# make dir: (1-20000).dir
+cd ../dirs
+rm -rf *; sync
+seq 1 20000 | time parallel mkdir {}.dir
+rm -rf *; sync
+seq 1 20000 | time parallel -X mkdir {}.dir
+
+# CALLING GNU PARALLEL FROM GNU PARALLEL
+# make dir: top-(1-100)/sub-(1-300)
+rm -rf *; sync
+seq 1 100 | time parallel -I /// \
+'mkdir top-///;cd top-///; seq 1 300 | parallel -X mkdir sub-{}'
+find | wc -l
+
+# Thanks for watching
+# Find GNU Parallel at http://www.gnu.org/software/parallel/
+
+# GIVE ME THE FIRST RESULT
+(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -H2 traceroute {}";false"
+
+find . -type f | parallel -k -j150% -n 1000 -m grep -H -n STRING {}
+
+(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute
+
 
 =head1 IDEAS
 
@@ -13,8 +99,6 @@ Kan vi lave flere ssh'er, hvis vi venter lidt?
 En ssh med 20% loss og 900 ms delay, så kan login nås på 15 sek.
 
 Test if -0 works on filenames ending in '\n'
-
-Transfer scriptfile before first job. Remove it when last job done.
 
 monitor to see which jobs are currently running
 http://code.google.com/p/ppss/

@@ -18,12 +18,12 @@ ls b
       1       1      10
       1       1      15
       1       1      15
+      4       4      26
+      6       6      41
 1-col.txt
 1-col.txt.diff
 2-col.txt
 2-col.txt.diff
-      4       4      26
-      6       6      41
 a
 b
 ls 1-col.txt.diff|wc;echo 1-col.txt.diff
@@ -32,6 +32,7 @@ ls 2-col.txt.diff|wc;echo 2-col.txt.diff
 ls 2-col.txt|wc;echo 2-col.txt
 ls a|wc;echo a
 ls b|wc;echo b
+### Check that we can have more input than max procs (-j 0)
 touch more_than_5000-9990
 touch more_than_5000-9991
 touch more_than_5000-9992

@@ -75,7 +75,7 @@ OK
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
 Input for ssh
-parallel-server1 rsync --server -lDrRze.iLsf . ./
+parallel-server1 rsync --server -lDErRze.iLsf . ./
 parallel-server1 cat tmp/parallel.file.'
 'newline2 > tmp/parallel.file.'
 'newline2.out;cat tmp/parallel.file.'
@@ -87,7 +87,7 @@ parallel-server1 rsync --server --sender -lDrRze.iLsf --remove-source-files . ./
 'newline2.out2
 parallel-server1 rm -f tmp/parallel.file.'
 'newline2
--l parallel parallel-server2 rsync --server -lDrRze.iLsf . ./
+-l parallel parallel-server2 rsync --server -lDErRze.iLsf . ./
 parallel@parallel-server2 cat tmp/parallel.file.'
 'newline1 > tmp/parallel.file.'
 'newline1.out;cat tmp/parallel.file.'

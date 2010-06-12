@@ -48,6 +48,8 @@ echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org
 
 == Update Savannah ==
 
+https://savannah.gnu.org/news/submit.php?group=parallel
+
 doc/pod2savannah_publicinfo src/parallel | klipper-stdin
 https://savannah.gnu.org/project/admin/editgroupinfo.php?group=parallel
 
