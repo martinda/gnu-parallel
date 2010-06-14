@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export LANG=C
 SHFILE=/tmp/unittest-parallel.sh
 
 ls -t tests-to-run/test*.sh \

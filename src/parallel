@@ -309,6 +309,21 @@ run remote and are very fast to run. This is disabled for sshlogins
 that specify their own ssh command.
 
 
+=item B<--progress>
+
+Show progress of computations. List the computers involved in the task
+with number of CPU cores detected and the max number of jobs to
+run. After that show progress for each computer: number of running
+jobs, number of completed jobs, and percentage of all jobs done by
+this computer. The percentage will only be available after all jobs
+have been scheduled as GNU B<parallel> only read the next job when
+ready to schedule it - this is to avoid wasting time and memory by
+reading everything at startup.
+
+By sending GNU B<parallel> SIGUSR2 you can toggle turning on/off
+B<--progress> on a running GNU B<parallel> process.
+
+
 =item B<--max-args>=I<max-args>
 
 =item B<-n> I<max-args>
@@ -1225,6 +1240,9 @@ abnormally and running remote (B<--cleanup> may not complete if
 stopped abnormally). The example B<Parallel grep> would require extra
 postprocessing if written using B<ppss>.
 
+For remote systems PPSS requires 3 steps: config, deploy, and
+start. GNU B<parallel> only requires one step.
+
 =head3 EXAMPLES FROM ppss MANUAL
 
 Here are the examples from B<ppss>'s manual page with the equivalent
@@ -1641,6 +1659,7 @@ sub parse_options {
 	       "cleanup" => \$::opt_cleanup,
 	       "basefile|B=s" => \@::opt_basefile,
 	       "halt-on-error|H=s" => \$::opt_halt_on_error,
+	       "progress" => \$::opt_progress,
 	       # xargs-compatibility - implemented, man, unittest
 	       "max-procs|P=s" => \$::opt_P,
 	       "delimiter|d=s" => \$::opt_d,
@@ -2112,6 +2131,7 @@ sub simultaneous_sshlogin {
     my $wanted_processes = shift;
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     my $cmd = "$sshcmd $serverlogin echo simultaneouslogin 2>&1 &"x$wanted_processes;
+    debug("Trying $wanted_processes logins at $serverlogin");
     open (SIMUL, "($cmd)|grep simultaneouslogin | wc -l|") or die;
     my $ssh_limit = <SIMUL>;
     close SIMUL;
@@ -2371,20 +2391,27 @@ sub min {
 #    $Global::running{$pid}{sshlogin} = server to run on
 #    $Global::running{$pid}{'exitstatus'} = exit status
 #    $Global::host{$sshlogin}{'no_of_running'} = number of currently running jobs
+#    $Global::host{$sshlogin}{'completed'} = number of completed jobs
 #    $Global::host{$sshlogin}{'ncpus'} = number of CPUs (or CPU cores)
 #    $Global::host{$sshlogin}{'maxlength'} = max line length (currently buggy for remote)
-#    $Global::host{$sshlogin}{'max_no_of_running'} = number of currently running jobs
+#    $Global::host{$sshlogin}{'max_no_of_running'} = max parallel running jobs
 #    $Global::host{$sshlogin}{'sshcmd'} = command to use as ssh
 #    $Global::host{$sshlogin}{'serverlogin'} = username@hostname
-#    $Global::running_jobs = total number of running jobs
+#    $Global::total_running = total number of running jobs
+#    $Global::total_started = total jobs started
+#    $Global::total_jobs = total jobs to be started at all
+#    $Global::total_completed = total jobs completed
 
 sub init_run_jobs {
     # Remember the original STDOUT and STDERR
     open $Global::original_stdout, ">&STDOUT" or die "Can't dup STDOUT: $!";
     open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
     open $Global::original_stdin, "<&STDIN" or die "Can't dup STDIN: $!";
-    $Global::running_jobs=0;
+    $Global::total_running = 0;
+    $Global::total_started = 0;
+    $Global::total_completed = 0;
     $SIG{USR1} = \&ListRunningJobs;
+    $SIG{USR2} = \&toggle_progress;
     $Global::original_sigterm = $SIG{TERM};
     $SIG{TERM} = \&StartNoNewJobs;
     if(@::opt_basefile) {
@@ -2486,10 +2513,127 @@ sub unget_arg {
 }
 
 sub drain_job_queue {
-    while($Global::running_jobs > 0) {
-	debug("jobs running: $Global::running_jobs Memory usage:".my_memory_usage()."\n");
-	sleep 1;
+    if($::opt_progress) {
+	print init_progress();
     }
+    my $last_header="";
+    while($Global::total_running > 0) {
+	debug("jobs running: $Global::total_running Memory usage:".my_memory_usage()."\n");
+	sleep 1;
+	if($::opt_progress) {
+	    my %progress = progress();
+	    if($last_header ne $progress{'header'}) {
+		print "\n",$progress{'header'},"\n";
+		$last_header = $progress{'header'};
+	    }
+	    print "\r",$progress{'status'};
+	}
+    }
+    if($::opt_progress) {
+	print "\n";
+    }
+}
+
+sub toggle_progress {
+    # Turn on/off progress view
+    $::opt_progress = not $::opt_progress;
+    if($::opt_progress) {
+	print init_progress();
+    }
+}
+
+sub init_progress {
+    $|=1;
+    my %progress = progress();
+    return ("\nComputers / CPU cores / Max jobs to run\n",
+	    $progress{'workerlist'},"\n");
+}
+
+sub progress {
+    my $termcols = columns();
+    my ($status, $header)=("x"x($termcols+1),"");
+    my @workers = sort keys %Global::host;
+    my %sshlogin = map { $_ eq ":" ? ($_=>"local") : ($_=>$_) } @workers;
+    my $workerno = 1;
+    my %workerno = map { ($_=>$workerno++) } @workers;
+    my $workerlist = join("\n", map {
+	$workerno{$_}.":".$sshlogin{$_} ." / ".
+	    ($Global::host{$_}{'ncpus'} || "-") ." / ".
+	    $Global::host{$_}{'max_no_of_running'}
+			  } @workers);
+    if(eof $Global::argfile) {
+	# sshlogin1:XX/XX/XX% sshlogin2:XX/XX/XX% sshlogin3:XX/XX/XX%
+	$header = "Computer:jobs running/jobs completed/%completed of all jobs";
+	$status = join(" ",map
+		       { sprintf("%s:%d/%d/%d%%",
+				 $sshlogin{$_}, $Global::host{$_}{'no_of_running'},
+				 ($Global::host{$_}{'completed'}||0),
+				 ($Global::host{$_}{'completed'}||0)*100
+				 / $Global::total_started) }
+		       @workers);
+	if(length $status > $termcols) {
+	    # 1:XX/XX/XX% 2:XX/XX/XX% 3:XX/XX/XX% 4:XX/XX/XX% 5:XX/XX/XX% 6:XX/XX/XX%
+	    $header = "Computer:jobs running/jobs completed/%completed of all jobs";
+	    $status = join(" ",map
+			   { sprintf("%s:%d/%d/%d%%",
+				     $workerno{$_}, $Global::host{$_}{'no_of_running'},
+				     ($Global::host{$_}{'completed'}||0),
+				     ($Global::host{$_}{'completed'}||0)*100
+				     / $Global::total_started) }
+			   @workers);
+	}
+
+    }
+    if(length $status > $termcols) {
+	# sshlogin1:XX/XX sshlogin2:XX/XX sshlogin3:XX/XX sshlogin4:XX/XX
+	$header = "Computer:jobs running/jobs completed";
+	$status = join(" ",map
+		       { sprintf("%s:%d/%d",
+				 $sshlogin{$_}, $Global::host{$_}{'no_of_running'},
+				 ($Global::host{$_}{'completed'}||0)) }
+		       @workers);
+    }
+    if(length $status > $termcols) {
+	# 1:XX/XX 2:XX/XX 3:XX/XX 4:XX/XX 5:XX/XX 6:XX/XX
+	$header = "Computer:jobs running/jobs completed";
+	$status = join(" ",map
+		       { sprintf("%s:%d/%d",
+				 $workerno{$_}, $Global::host{$_}{'no_of_running'},
+				 ($Global::host{$_}{'completed'}||0)) }
+		       @workers);
+    }
+    if(length $status > $termcols) {
+	# sshlogin1:XX sshlogin2:XX sshlogin3:XX sshlogin4:XX sshlogin5:XX
+	$header = "Computer:jobs completed";
+	$status = join(" ",map
+		       { sprintf("%s:%d/%d",
+				 $sshlogin{$_},
+				 ($Global::host{$_}{'completed'}||0)) }
+		       @workers);
+    }
+    if(length $status > $termcols) {
+	# 1:XX 2:XX 3:XX 4:XX 5:XX 6:XX
+	$header = "Computer:jobs completed";
+	$status = join(" ",map
+		       { sprintf("%s:%d/%d",
+				 $workerno{$_},
+				 ($Global::host{$_}{'completed'}||0)) }
+		       @workers);
+    }
+    return ("workerlist" => $workerlist, "header" => $header, "status" => $status);
+}
+
+sub columns {
+    # Get the number of columns of the display
+    if(not $Global::columns) {
+	$Global::columns = $ENV{'COLUMNS'};
+	if(not $Global::columns) {
+	    my $resize = qx{ resize };
+	    $resize =~ /COLUMNS=(\d+);/ and do { $Global::columns = $1; };
+	}
+	$Global::columns ||= 80;
+    }
+    return $Global::columns;
 }
 
 sub start_more_jobs {
@@ -2582,8 +2726,9 @@ sub start_job {
     if($Global::verbose and not $Global::grouped) {
 	print STDOUT $command,"\n";
     }
-    $Global::running_jobs++;
-    debug("$Global::running_jobs processes. Starting: $command\n");
+    $Global::total_running++;
+    $Global::total_started++;
+    debug("$Global::total_running processes. Starting: $command\n");
     #print STDERR "LEN".length($command)."\n";
     $Global::job_start_sequence++;
 
@@ -2689,7 +2834,7 @@ sub parse_sshlogin {
 	$Global::host{$sshlogin}{'maxlength'} = max_length_of_command_line();
     }
     debug("sshlogin: ", my_dump(%Global::host),"\n");
-    if($::opt_transfer or @::opt_return or $::opt_cleanup) {
+    if($::opt_transfer or @::opt_return or $::opt_cleanup or @::opt_basefile) {
 	if(not remote_hosts()) {
 	    # There are no remote hosts
 	    if(defined @::opt_trc) {
@@ -2700,6 +2845,8 @@ sub parse_sshlogin {
 		print STDERR "Warning: --return ignored as there are no remote --sshlogin\n";
 	    } elsif (defined $::opt_cleanup) {
 		print STDERR "Warning: --cleanup ignored as there are no remote --sshlogin\n";
+	    } elsif (defined @::opt_basefile) {
+		print STDERR "Warning: --basefile ignored as there are no remote --sshlogin\n";
 	    }
 	}
     }
@@ -2784,6 +2931,9 @@ sub sshtransferreturn {
     if($transfer) {
 	# Abs path: rsync -rlDzRE /home/tange/dir/subdir/file.gz server:/
 	# Rel path: rsync -rlDzRE ./subdir/file.gz server:./
+	if($relpath) {
+	    $file = "./".$file;
+	}
 	if(-r shell_unquote($file)) {
 	    return "rsync $rsync_opt $file $serverlogin:$rsync_destdir";
 	} else {
@@ -2792,13 +2942,12 @@ sub sshtransferreturn {
 	}
     } else {
 	my $noext = no_extension($file); # Remove .ext before prepending ./
-	# If relative path: prepend ./ (to avoid problems with ':')
-	$noext = ($relpath ? "./".$noext : $noext);
-	$file = ($relpath ? "./".$file : $file);
 	my @cmd = ();
 	for my $ret_file (@Global::ret_files) {
 	    my $remove = $removesource ? "--remove-source-files" : "";
-	    my $replaced = context_replace($ret_file,[$file],[$noext]);
+	    # If relative path: prepend ./ (to avoid problems with ':')
+	    my $replaced = ($relpath ? "./" : "") .
+		context_replace($ret_file,[$file],[$noext]);
 	    # --return
 	    # Abs path: rsync -rlDzRE server:/home/tange/dir/subdir/file.gz /
 	    # Rel path: rsync -rlDzRE server:./subsir/file.gz ./
@@ -2940,7 +3089,9 @@ sub Reaper {
 	}
 	my $sshlogin = $Global::running{$stiff}{'sshlogin'};
 	$Global::host{$sshlogin}{'no_of_running'}--;
-	$Global::running_jobs--;
+	$Global::host{$sshlogin}{'completed'}++;
+	$Global::total_running--;
+	$Global::total_completed++;
 	delete $Global::running{$stiff};
 	start_more_jobs();
     }
@@ -3072,9 +3223,9 @@ $Global::control_path = 0;
 # TODO --max-number-of-jobs print the system limited number of jobs
 
 # TODO Debian package
-# TODO try transfer + return of file beginning with :
 
 # TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
 # TAGS: parallel | parallel processing | multicore | multiprocessor | Clustering/Distributed Networks
 # job control | multiple jobs | parallelization | text processing | cluster | filters
 # Clustering Tools | Command Line Tools | Utilities | System Administration
+# Bash parallel

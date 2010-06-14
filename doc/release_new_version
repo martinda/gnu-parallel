@@ -67,6 +67,8 @@ http://freshmeat.net/projects/parallel/releases/new
 
 == Send announce ==
 
+Newsgroups: comp.unix.shell,comp.unix.admin
+
 <<<<<
 to:parallel@gnu.org, bug-parallel@gnu.org, info-gnu@gnu.org, bug-directory@gnu.org
 
@@ -98,7 +100,9 @@ GNU Parallel makes sure output from the commands is the same output as
 you would get had you run the commands sequentially. This makes it
 possible to use output from GNU Parallel as input for other programs.
 
-
 You can find more about GNU Parallel at:
 http://www.gnu.org/software/parallel/
+
+Watch the intro video on http://www.youtube.com/watch?v=LlXDtd_pRaY
+
 >>>>>

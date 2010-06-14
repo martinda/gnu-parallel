@@ -8,6 +8,15 @@ SERVER2=parallel-server2
 echo '### Check warning if --transfer but file not found'
 echo /tmp/noexistant/file | stdout $PAR -k -S $SERVER1 --transfer echo
 
+echo '### Transfer for file starting with :'
+cd /tmp
+(echo ':'; echo file:name; echo file:name.foo; echo file: name.foo; echo file : name.foo;) \
+  > /tmp/test18
+cat /tmp/test18 | parallel echo content-{} ">" {}
+cat /tmp/test18 | parallel -j1 --trc {}.{.} -S $SERVER1,parallel@$SERVER2,: \
+  '(echo remote-{}.{.};cat {}) > {}.{.}'
+cat /tmp/test18 | parallel -j1 -k 'cat {}.{.}'
+
 echo '### Check warning if --transfer but not --sshlogin'
 echo | stdout $PAR -k --transfer echo
 
@@ -28,7 +37,7 @@ echo "#2/ssh -l tange nothing" >>/tmp/parallel-sshlogin
 seq 1 10 | $PAR -k --sshloginfile /tmp/parallel-sshlogin echo
 
 echo '### Check forced number of CPUs being respected'
-stdout cat /tmp/test17 | parallel -k -j+0  -S 1/:,9/$SERVER1  "hostname; echo {} >/dev/null"
+stdout seq 1 20 | parallel -k -j+0  -S 1/:,9/$SERVER1  "hostname; echo {} >/dev/null"
 
 echo '### Check more than 9 simultaneous sshlogins'
 seq 1 11 | $PAR -k -j0 -S "/ssh $SERVER1" echo

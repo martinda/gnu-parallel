@@ -1,3 +1,26 @@
+--progress
+Fixed bug if transfered file contains :
+
+
+* 100% options complete with xargs. All options for xargs can now
+  be used in GNU Parallel - even the more exotic.
+
+* --basefile for transfering basedata. When running jobs on remote
+  computers --basefile will transfer files before the first jobs is
+  run. It can be used to transfer data that remains the same for each
+  job such as scripts or lookup tables.
+
+* --progress shows progress. To see how many jobs is running on each
+  server use --progress. It can be turned on even after GNU Parallel
+  is started.
+
+* --halt-on-error stops if an error occurs. GNU Parallel will default
+  to run all jobs - even if some of them fail. With --halt-on-error
+  GNU Parallel can ignore errors, wait for the currently running jobs
+  to finish, or stop immediately when an error occurs.
+
+* New video showing the new options.
+
 =head1 YouTube video
 
 GNU Parallel is a tool with lots of uses in shell. Every time you use
@@ -100,10 +123,7 @@ En ssh med 20% loss og 900 ms delay, så kan login nås på 15 sek.
 
 Test if -0 works on filenames ending in '\n'
 
-monitor to see which jobs are currently running
-http://code.google.com/p/ppss/
-
-If there are nomore jobs (STDIN is closed) then make sure to
+If there are nomore jobs (STDIN is eof) then make sure to
 distribute the arguments evenly if running -X.
 
 =head1 options

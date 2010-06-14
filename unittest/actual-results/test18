@@ -1,6 +1,17 @@
 ### Check warning if --transfer but file not found
 Warning: /tmp/noexistant/file is not readable and will not be transferred
 /tmp/noexistant/file
+### Transfer for file starting with :
+remote-:.:
+content-:
+remote-file:name.file:name
+content-file:name
+remote-file:name.foo.file:name
+content-file:name.foo
+remote-file: name.foo.file: name
+content-file: name.foo
+remote-file : name.foo.file : name
+content-file : name.foo
 ### Check warning if --transfer but not --sshlogin
 Warning: --transfer ignored as there are no remote --sshlogin
 

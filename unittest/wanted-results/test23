@@ -1,11 +1,21 @@
+### Test --basefile with no --sshlogin
+Warning: --basefile ignored as there are no remote --sshlogin
+
 ### Test --basefile + --cleanup + permissions
-scriptrun 1
-scriptrun 2
-scriptrun 3
-scriptrun 4
-scriptrun 5
+script1 run 1
+script2 run 1
+script1 run 2
+script2 run 2
+script1 run 3
+script2 run 3
+script1 run 4
+script2 run 4
+script1 run 5
+script2 run 5
 good if no file
-ls: cannot access script: No such file or directory
+ls: cannot access script1: No such file or directory
+OK
+ls: cannot access script2: No such file or directory
 OK
 ### Test --basefile + --sshlogin :
 1
