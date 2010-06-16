@@ -2,7 +2,7 @@
 
 PAR=parallel
 
-SERVER1=parallel-server1
+SERVER1=parallel-server3
 SERVER2=parallel-server2
 
 echo '### Check warning if --transfer but file not found'

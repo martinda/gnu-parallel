@@ -60,8 +60,8 @@ rm -- 中国\ \(Zhōngguó\)/abc-中国\ \(Zhōngguó\)-中国\ \(Zhōngguó\)
 ### Test -m
 1foo bar joe.gif2foo bar joe3 Afoo bar joeBfoo bar joeC
 1foo2foo3 1bar2bar3 1joe.gif2joe3 AfooBfooC AbarBbarC AjoeBjoeC
-a1.gif  2.gif  3.gif  4.gif  5.gif  6.gif b1  2  3  4  5  6 c1  2  3  4  5  6
-a1.gifb1c1 a 2.gifb 2c 2 a 3.gifb 3c 3 a 4.gifb 4c 4 a 5.gifb 5c 5 a 6.gifb 6c 6 abc
+a1.gif 2.gif 3.gif 4.gif 5.gif 6.gifb1 2 3 4 5 6c1 2 3 4 5 6
+a1.gifb1c1 a2.gifb2c2 a3.gifb3c3 a4.gifb4c4 a5.gifb5c5 a6.gifb6c6
 ### Test -m with 60000 args
 98c94dcab1efedab3f820935d230bc77  -
      12  180011 1286837

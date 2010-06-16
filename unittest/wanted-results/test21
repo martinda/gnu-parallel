@@ -2,10 +2,10 @@
 1
 ssh -l parallel parallel-server2 echo\ 1;
 1
-ssh parallel-server1 echo\ 2;
+ssh parallel-server3 echo\ 2;
 2
 ### Test ~/.parallelrc
 ssh -l parallel parallel-server2 echo\ 1;
 1
-ssh parallel-server1 echo\ 2;
+ssh parallel-server3 echo\ 2;
 2

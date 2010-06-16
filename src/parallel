@@ -30,11 +30,14 @@ possible to use output from GNU B<parallel> as input for other programs.
 For each line of input GNU B<parallel> will execute I<command> with
 the line as arguments. If no I<command> is given, the line of input is
 executed. Several lines will be run in parallel. GNU B<parallel> can
-often be used as a substitute for B<xargs> or B<cat | sh>.
+often be used as a substitute for B<xargs> or B<cat | bash>.
 
 Before looking at the options you may want to check out the examples
 after the list of options. That will give you an idea of what GNU
 B<parallel> is capable of.
+
+You can also watch the intro video for a quick introduction:
+http://www.youtube.com/watch?v=LlXDtd_pRaY
 
 =head1 OPTIONS
 
@@ -411,7 +414,8 @@ times:
 
 B<--return> is often used with B<--transfer> and B<--cleanup>.
 
-B<--return> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
+B<--return> is ignored when used with B<--sshlogin :> or when not used
+with B<--sshlogin>.
 
 
 =item B<--max-chars>=I<max-chars>
@@ -1599,7 +1603,7 @@ if($::opt_halt_on_error) {
 
 sub parse_options {
     # Defaults:
-    $Global::version = 20100601;
+    $Global::version = 20100616;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -2520,6 +2524,7 @@ sub drain_job_queue {
     while($Global::total_running > 0) {
 	debug("jobs running: $Global::total_running Memory usage:".my_memory_usage()."\n");
 	sleep 1;
+	Reaper(); # Some systems fail to catch the SIGCHLD
 	if($::opt_progress) {
 	    my %progress = progress();
 	    if($last_header ne $progress{'header'}) {
@@ -2628,7 +2633,7 @@ sub columns {
     if(not $Global::columns) {
 	$Global::columns = $ENV{'COLUMNS'};
 	if(not $Global::columns) {
-	    my $resize = qx{ resize };
+	    my $resize = qx{ resize 2>/dev/null };
 	    $resize =~ /COLUMNS=(\d+);/ and do { $Global::columns = $1; };
 	}
 	$Global::columns ||= 80;

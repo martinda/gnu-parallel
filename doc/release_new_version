@@ -37,7 +37,7 @@ make dist-bzip2
 
 YYYYMMDD=`yyyymmdd`
 cp doc/parallel.directive parallel-$YYYYMMDD.tar.bz2.directive
-perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive
+perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive
 gpg --clearsign parallel-$YYYYMMDD.tar.bz2.directive
 
 YYYYMMDD=`yyyymmdd`

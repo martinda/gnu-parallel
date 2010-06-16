@@ -2,7 +2,7 @@
 
 PAR=parallel
 
-SERVER1=parallel-server1
+SERVER1=parallel-server3
 SERVER2=parallel-server2
 
 # Make sure sort order is the same
@@ -13,12 +13,12 @@ echo '### Test --transfer --return --cleanup'
 rm -rf /tmp/parallel.file*
 stdout ssh $SERVER1 rm -rf 'tmp/parallel.file*'  '/tmp/parallel.file*' 
 stdout ssh parallel@$SERVER2 rm -rf 'tmp/parallel.file*' '/tmp/parallel.file*' 
-(seq 1 3;echo '>fire';seq 5 10; echo ' : & ) \n*.jpg'; echo '/./sub dir'; seq 13 20) >/tmp/test17
+(seq 1 3;echo '>fire';seq 5 10; /bin/echo ' : & ) \n*.jpg'; echo '/./sub dir'; seq 13 20) >/tmp/test17
 echo '# Create some weirdly files in /tmp'
 mkdir -p /tmp/parallel.file
-cat /tmp/test17 | $PAR -k echo file{} '>'/tmp/parallel.file{}.file
-cat /tmp/test17 | $PAR -k echo /tmp/parallel.file{}.file >/tmp/test17abs
-cat /tmp/test17 | $PAR -k echo tmp/parallel.file{}.file >/tmp/test17rel
+cat /tmp/test17 | $PAR -k /bin/echo file{} '>'/tmp/parallel.file{}.file
+cat /tmp/test17 | $PAR -k /bin/echo /tmp/parallel.file{}.file >/tmp/test17abs
+cat /tmp/test17 | $PAR -k /bin/echo tmp/parallel.file{}.file >/tmp/test17rel
 
 echo '### --transfer - abspath'
 stdout ssh $SERVER1 'rm -rf tmp/parallel.file*' 

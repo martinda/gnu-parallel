@@ -18,14 +18,12 @@ Warning: --transfer ignored as there are no remote --sshlogin
 ### Check warning if --return but not --sshlogin
 Warning: --return ignored as there are no remote --sshlogin
 
-### Check warning if --cleanup but not --sshlogin
-Warning: --cleanup ignored as there are no remote --sshlogin
-
-### Test --sshlogin -S --sshloginfile
-1
-2
-3
-### Test --sshloginfile with extra content
+### Check warning if --cleanup but not --sshlog10
+### Check forced number of CPUs being respected
+alpha
+### Check more than 9 simultaneous sshlogins
+### Check more than 9(relative) simultaneous sshlogins
+### Check -S syntax
 1
 2
 3
@@ -36,17 +34,18 @@ Warning: --cleanup ignored as there are no remote --sshlogin
 8
 9
 10
-### Check forced number of CPUs being respected
+11
+PUs being respected
+nlv.pi.dk
+nlv.pi.dk
+nlv.pi.dk
+nlv.pi.dk
+nlv.pi.dk
+nlv.pi.dk
+nlv.pi.dk
+nlv.pi.dk
+nlv.pi.dk
 alpha
-nlv.pi.dk
-nlv.pi.dk
-nlv.pi.dk
-nlv.pi.dk
-nlv.pi.dk
-nlv.pi.dk
-nlv.pi.dk
-nlv.pi.dk
-nlv.pi.dk
 alpha
 alpha
 alpha

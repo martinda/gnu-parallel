@@ -17,7 +17,7 @@ echo '### Test {.} with files that have no . but dir does'
 mkdir -p /tmp/test-of-{.}-parallel/subdir
 touch /tmp/test-of-{.}-parallel/subdir/file
 touch /tmp/test-of-{.}-parallel/subdir/file{.}.funkyextension}}
-find /tmp/test-of-{.}-parallel -type f | $PAR echo {.}
+find /tmp/test-of-{.}-parallel -type f | $PAR echo {.} | sort
 rm -rf /tmp/test-of-{.}-parallel/subdir
 
 
@@ -34,8 +34,8 @@ ls | $PAR -kv rm -- {.}/abc-{.}-{} 2>&1
 echo '### Test -m'
 (echo foo;echo bar;echo joe.gif) | $PAR -km echo 1{}2{.}3 A{.}B{.}C
 (echo foo;echo bar;echo joe.gif) | $PAR -kX echo 1{}2{.}3 A{.}B{.}C
-seq 1 6 | $PAR -kX echo -e '{}.gif\\n' | $PAR -km echo a{}b{.}c{.}
-seq 1 6 | $PAR -kX echo -e '{}.gif\\n' | $PAR -kX echo a{}b{.}c{.}
+seq 1 6 | $PAR -k printf '{}.gif\\n' | $PAR -km echo a{}b{.}c{.}
+seq 1 6 | $PAR -k printf '{}.gif\\n' | $PAR -kX echo a{}b{.}c{.}
 echo '### Test -m with 60000 args'
 seq 1 60000 | perl -pe 's/$/.gif\n/' | $PAR -km echo a{}b{.}c{.} | mop -d 4 "|md5sum" "| wc"
 echo '### Test -X with 60000 args'

@@ -1,6 +1,6 @@
---progress
-Fixed bug if transfered file contains :
-
+Some systems does not receive the SIGCHLD (maybe when running under
+dash?).
+Unittest failed if /bin/sh was dash.
 
 * 100% options complete with xargs. All options for xargs can now
   be used in GNU Parallel - even the more exotic.
@@ -21,6 +21,8 @@ Fixed bug if transfered file contains :
 
 * New video showing the new options.
 
+
+
 =head1 YouTube video
 
 GNU Parallel is a tool with lots of uses in shell. Every time you use
@@ -32,17 +34,28 @@ it easy to distribute jobs to these.
 
 terminal2: ssh parallel@vh2.pi.dk
 ssh parallel@vh2.pi.dk
+ and  
 
-
-PS1="\e[7mGNU Parallel:\[\033[01;34m\]\w\[\033[00m\]\e[27m$ "
+PS1="\[\e[7m\]GNU Parallel:\[\033[01;34m\]\w\[\033[00m\e[27m\]$ "
 gunzip logs/*gz
-rm logs/*bz2
+rm -f logs/*bz2*
 rm -rf zip/*[^p]
+rm -rf dirs/*
+rm -rf parallel-*bz2
+
+xvidcap
+ffmpeg -i 20100615_002.mp4 -ab 320k -ar 44100 speak.mp3
+# Merge video using youtube
+#ffmpeg -i speak.mp3 -i xvidcap.mpeg -target mpeg -hq -minrate 8000000 \
+#-title "GNU Parallel" -author "Ole Tange" -copyright "(CC-By-SA) 2010" -comment "Intro video of GNU Parallel 20100615" videoaudio.mpg
+
+# GNU PARALLEL - BASIC USAGE
+# A GNU tool for parallelizing shell commands
 
 # GET GNU PARALLEL
-wget ftp://ftp.gnu.org/gnu/parallel/parallel-20100601.tar.bz2
-tar xvjf parallel-20100601.tar.bz2
-cd parallel-20100601
+wget ftp://ftp.gnu.org/gnu/parallel/parallel-20100615.tar.bz2
+tar xjf parallel-20100615.tar.bz2
+cd parallel-20100615
 ./configure && make   ##
 su
 make install
@@ -52,20 +65,39 @@ cd
 # YOUR FIRST PARALLEL JOBS
 cd logs
 du
-/usr/bin/time gzip *
+/usr/bin/time gzip -1 *
+## 24 sek - 22 sek
 /usr/bin/time gunzip *
-ls | time parallel gzip
+## 24 sek - 18
+ls | time parallel gzip -1
+## 17 sek - 10
 ls | time parallel gunzip
+## 25 sek - 19
 
 # RECOMPRESS gz TO bz2
-ls | time parallel gzip
-ls *.gz | time parallel 'zcat {} | bzip2 > {.}.bz2'
+ls | time parallel gzip -1
+ls *.gz | time parallel -j+0 --progress 'zcat {} | bzip2 -1 > {.}.bz2'
+## Explain command line
 ## vis top local
-# RECOMPRESS gz TO bz2 USING local(:) AND REMOTE server1
-ls *.gz | time parallel -S server1,: --trc {.}.bz2 \
-'zcat {} | bzip2 > {.}.bz2'
+## Man that is boring
+## 2m41s - 2m
+
+# RECOMPRESS gz TO bz2 USING local(:) AND REMOTE server1-3
+ls *.gz |time parallel -j+0 --progress -Sserver1,server2,server3,: \
+--transfer --return {.}.bz2 --cleanup 'zcat {} | bzip2 -1 > {.}.bz2'
+## Explain command line
+## Explain server config
 ## vis top local
-## vis top remote
+## vis top remote1-3
+## 49 sek
+
+# RECOMPRESS gz TO bz2 USING A SCRIPT ON local AND REMOTE server1-3
+# (imagine the script is way more complex)
+cp ../recompress /tmp
+cat /tmp/recompress
+ls *.gz |time parallel -j+0 --progress -Sserver1,server2,server3,: \
+--trc {.}.bz2 --basefile /tmp/recompress '/tmp/recompress {} {.}.bz2'
+
 
 # MAKING SMALL SCRIPTS
 cd ../zip
@@ -76,37 +108,54 @@ ls -l
 # GROUP OUTPUT
 traceroute debian.org
 traceroute debian.org & traceroute freenetproject.org  ###
-(echo debian.org; echo freenetproject.org) \
-| parallel traceroute
+(echo debian.org; echo freenetproject.org) | parallel traceroute ###
 
 # KEEP ORDER
-(echo debian.org; echo freenetproject.org) \
-| parallel -k traceroute
+(echo debian.org; echo freenetproject.org) | parallel -k traceroute ###
 
 # RUN MANY JOBS. USE OUTPUT
 # Find the number of hosts responding to ping
+ping -c 1 178.63.11.1
+ping -c 1 178.63.11.1 | grep '64 bytes'
 seq 1 255 | parallel -j255 ping -c 1 178.63.11.{} 2>&1 \
 | grep '64 bytes' | wc -l
 seq 1 255 | parallel -j0 ping -c 1 178.63.11.{} 2>&1 \
 | grep '64 bytes' | wc -l
 
 # MULTIPLE ARGUMENTS
-# make dir: (1-20000).dir
+# make dir: test-(1-20000).dir
 cd ../dirs
 rm -rf *; sync
-seq 1 20000 | time parallel mkdir {}.dir
+seq 1 10 | parallel echo mkdir test-{}.dir
+seq 1 5000 | time parallel mkdir test-{}.dir
+## 15 sek
+
 rm -rf *; sync
-seq 1 20000 | time parallel -X mkdir {}.dir
+seq 1 10 | parallel -X echo mkdir test-{}.dir
+seq 1 5000 | time parallel -X mkdir test-{}.dir
 
 # CALLING GNU PARALLEL FROM GNU PARALLEL
-# make dir: top-(1-100)/sub-(1-300)
+# make dir: top-(1-100)/sub-(1-100)
 rm -rf *; sync
-seq 1 100 | time parallel -I /// \
-'mkdir top-///;cd top-///; seq 1 300 | parallel -X mkdir sub-{}'
+seq 1 100 | time parallel -I @@ \
+'mkdir top-@@; seq 1 100 | parallel -X mkdir top-@@/sub-{}'
 find | wc -l
 
-# Thanks for watching
+cd
+# Thank you for watching
+#
+# If you like GNU Parallel:
+# * Post this video on your blog/Twitter/Facebook/Linkedin
+# * Join the mailing list http://lists.gnu.org/mailman/listinfo/parallel
+# * Request or write a review for your favourite magazine
+# * Request or build a package for your favourite distribution
+# * Invite me for your next conference (Contact http://ole.tange.dk)
+#
+# If GNU Parallel saves you money:
+# * Donate to FSF https://my.fsf.org/donate/
+#
 # Find GNU Parallel at http://www.gnu.org/software/parallel/
+
 
 # GIVE ME THE FIRST RESULT
 (echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -H2 traceroute {}";false"

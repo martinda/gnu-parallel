@@ -2,6 +2,11 @@ unittest: ../src/parallel tests-to-run/* wanted-results/*
 	echo | mop || (echo mop is required for unittest; /bin/false)
 	seq 1 2 | mop || (echo seq is required for unittest; /bin/false)
 	stdout echo || (echo stdout is required for unittest; /bin/false)
+	convert | mop || (echo convert is required for unittest; /bin/false)
+	ren 2>&1 | mop || (echo ren is required for unittest; /bin/false)
+	echo | buffer | mop || (echo buffer is required for unittest; /bin/false)
+	echo 1+2 | bc | mop || (echo bc is required for unittest; /bin/false)
+	stdout gawk | mop || (echo gawk is required for parallel; /bin/false)
 	sh Start.sh
 
 clean:
