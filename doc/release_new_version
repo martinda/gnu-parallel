@@ -79,7 +79,7 @@ download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* GNU Parallel now has support for running jobs on remote machines
+* GNU Parallel now has progress indicator
 
 = About GNU Parallel =
 

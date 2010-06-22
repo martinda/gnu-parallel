@@ -37,7 +37,7 @@ after the list of options. That will give you an idea of what GNU
 B<parallel> is capable of.
 
 You can also watch the intro video for a quick introduction:
-http://www.youtube.com/watch?v=LlXDtd_pRaY
+http://www.youtube.com/watch?v=OpaiGYxkSuQ
 
 =head1 OPTIONS
 
@@ -162,6 +162,14 @@ This option is a synonym for the B<-E> option.  Use B<-E> instead,
 because it is POSIX compliant for B<xargs> while this option is not.
 If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
+
+
+=item B<--eta> (beta testing)
+
+Show the estimated number of seconds before finishing. This forces GNU
+B<parallel> to read all jobs before starting to find the number of
+jobs. GNU B<parallel> normally only reads the next job to run.
+Implies B<--progress>.
 
 
 =item B<--file>
@@ -1603,7 +1611,7 @@ if($::opt_halt_on_error) {
 
 sub parse_options {
     # Defaults:
-    $Global::version = 20100616;
+    $Global::version = 20100620;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -1620,6 +1628,8 @@ sub parse_options {
     $Global::default_simultaneous_sshlogins = 9;
     $Global::exitstatus = 0;
     $Global::halt_on_error_exitstatus = 0;
+    $Global::total_jobs = 0;
+    $Global::eta = 0;
 
     Getopt::Long::Configure ("bundling","require_order");
     # Add options from .parallelrc
@@ -1664,6 +1674,7 @@ sub parse_options {
 	       "basefile|B=s" => \@::opt_basefile,
 	       "halt-on-error|H=s" => \$::opt_halt_on_error,
 	       "progress" => \$::opt_progress,
+	       "eta" => \$::opt_eta,
 	       # xargs-compatibility - implemented, man, unittest
 	       "max-procs|P=s" => \$::opt_P,
 	       "delimiter|d=s" => \$::opt_d,
@@ -1677,13 +1688,11 @@ sub parse_options {
 	       "help|h" => \$::opt_help,
 	       "L=i" => \$::opt_L,
 	       "max-lines|l:i" => \$::opt_l,
+	       "interactive|p" => \$::opt_p,
 	       "verbose|t" => \$::opt_verbose,
 	       "version|V" => \$::opt_version,
 	       "show-limits" => \$::opt_show_limits,
 	       "exit|x" => \$::opt_x,
-	       ## xargs-compatibility - implemented, man - unittest missing
-	       "interactive|p" => \$::opt_p,
-	       ## How to unittest? tty must be emulated
 	) || die_usage();
     $Global::debug = (defined $::opt_D);
     $Global::input_is_filename = (@ARGV);
@@ -1734,6 +1743,16 @@ sub parse_options {
 	    exit(255);
 	}
 	$Global::argfile = *ARGFILE;
+    }
+    if(defined $::opt_eta) {
+	# must be done after opt_a
+	$::opt_progress = $::opt_eta;
+	my @args = ();
+	while(not eof $Global::argfile) {
+	    # This will read all arguments and compute $Global::total_jobs
+	    push @args, get_next_arg();
+	}
+	unget_arg(@args);
     }
 
     if(@ARGV) {
@@ -2507,6 +2526,7 @@ sub get_next_arg {
 	if($Global::input_is_filename) {
 	    $arg = shell_quote($arg);
 	}
+	$Global::total_jobs++;
     }
     debug("Next arg: !".$arg."!\n");
     return $arg;
@@ -2518,7 +2538,9 @@ sub unget_arg {
 
 sub drain_job_queue {
     if($::opt_progress) {
+	DoNotReap();
 	print init_progress();
+	ReapIfNeeded();
     }
     my $last_header="";
     while($Global::total_running > 0) {
@@ -2527,11 +2549,13 @@ sub drain_job_queue {
 	Reaper(); # Some systems fail to catch the SIGCHLD
 	if($::opt_progress) {
 	    my %progress = progress();
+	    DoNotReap();
 	    if($last_header ne $progress{'header'}) {
 		print "\n",$progress{'header'},"\n";
 		$last_header = $progress{'header'};
 	    }
 	    print "\r",$progress{'status'};
+	    ReapIfNeeded();
 	}
     }
     if($::opt_progress) {
@@ -2566,33 +2590,92 @@ sub progress {
 	    ($Global::host{$_}{'ncpus'} || "-") ." / ".
 	    $Global::host{$_}{'max_no_of_running'}
 			  } @workers);
-    if(eof $Global::argfile) {
-	# sshlogin1:XX/XX/XX% sshlogin2:XX/XX/XX% sshlogin3:XX/XX/XX%
-	$header = "Computer:jobs running/jobs completed/%completed of all jobs";
-	$status = join(" ",map
-		       { sprintf("%s:%d/%d/%d%%",
-				 $sshlogin{$_}, $Global::host{$_}{'no_of_running'},
-				 ($Global::host{$_}{'completed'}||0),
-				 ($Global::host{$_}{'completed'}||0)*100
-				 / $Global::total_started) }
-		       @workers);
-	if(length $status > $termcols) {
-	    # 1:XX/XX/XX% 2:XX/XX/XX% 3:XX/XX/XX% 4:XX/XX/XX% 5:XX/XX/XX% 6:XX/XX/XX%
-	    $header = "Computer:jobs running/jobs completed/%completed of all jobs";
-	    $status = join(" ",map
-			   { sprintf("%s:%d/%d/%d%%",
-				     $workerno{$_}, $Global::host{$_}{'no_of_running'},
-				     ($Global::host{$_}{'completed'}||0),
-				     ($Global::host{$_}{'completed'}||0)*100
-				     / $Global::total_started) }
-			   @workers);
+    my $eta = "";
+    if($::opt_eta) {
+	my $completed = 0;
+	for(@workers) { $completed += ($Global::host{$_}{'completed'}||0) }
+	if($completed) {
+	    $Global::first_completed ||= time;
+	    my $avgtime = (time-$Global::first_completed)/$completed;
+	    my $this_eta = ($Global::total_jobs - $completed) * $avgtime;
+	    $Global::eta ||= $this_eta;
+	    # Smooth the eta so it does not jump wildly
+	    $Global::eta = 0.9 * $Global::eta + 0.1 * $this_eta;
+	    $eta = sprintf("ETA: %ds ", $Global::eta);
 	}
-
+    }
+    
+    if(length $status > $termcols) {
+	# sshlogin1:XX/XX/XX%/XX.Xs sshlogin2:XX/XX/XX%/XX.Xs sshlogin3:XX/XX/XX%/XX.Xs
+	$header = "Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete";
+	$status = $eta .
+	    join(" ",map
+		 {
+		     my $completed = ($Global::host{$_}{'completed'}||0);
+		     my $running = $Global::host{$_}{'no_of_running'};
+		     my $time = $completed ? (time-$^T)/($completed) : "0";
+		     sprintf("%s:%d/%d/%d%%/%.1fs ",
+			     $sshlogin{$_}, $running, $completed,
+			     ($running+$completed)*100
+			     / $Global::total_started, $time);
+		 } @workers);
+    }
+    if(length $status > $termcols) {
+	# 1:XX/XX/XX%/XX.Xs 2:XX/XX/XX%/XX.Xs 3:XX/XX/XX%/XX.Xs 4:XX/XX/XX%/XX.Xs
+	$header = "Computer:jobs running/jobs completed/%of started jobs";
+	$status = $eta .
+	    join(" ",map
+		 {
+		     my $completed = ($Global::host{$_}{'completed'}||0);
+		     my $running = $Global::host{$_}{'no_of_running'};
+		     my $time = $completed ? (time-$^T)/($completed) : "0";
+		     sprintf("%s:%d/%d/%d%%/%.1fs ",
+			     $workerno{$_}, $running, $completed,
+			     ($running+$completed)*100
+			     / $Global::total_started, $time);
+		 } @workers);
+    }
+    if(length $status > $termcols) {
+	# sshlogin1:XX/XX/XX% sshlogin2:XX/XX/XX% sshlogin3:XX/XX/XX%
+	$header = "Computer:jobs running/jobs completed/%of started jobs";
+	$status = $eta .
+	    join(" ",map
+		 { sprintf("%s:%d/%d/%d%%",
+			   $sshlogin{$_}, $Global::host{$_}{'no_of_running'},
+			   ($Global::host{$_}{'completed'}||0),
+			   ($Global::host{$_}{'no_of_running'}+
+			    ($Global::host{$_}{'completed'}||0))*100
+			   / $Global::total_started) }
+		 @workers);
+    }
+    if(length $status > $termcols) {
+	# 1:XX/XX/XX% 2:XX/XX/XX% 3:XX/XX/XX% 4:XX/XX/XX% 5:XX/XX/XX% 6:XX/XX/XX%
+	$header = "Computer:jobs running/jobs completed/%of started jobs";
+	$status = $eta .
+	    join(" ",map
+		 { sprintf("%s:%d/%d/%d%%",
+			   $workerno{$_}, $Global::host{$_}{'no_of_running'},
+			   ($Global::host{$_}{'completed'}||0),
+			   ($Global::host{$_}{'no_of_running'}+
+			    ($Global::host{$_}{'completed'}||0))*100
+			   / $Global::total_started) }
+		 @workers);
+    }
+    if(length $status > $termcols) {
+	# sshlogin1:XX/XX/XX% sshlogin2:XX/XX/XX% sshlogin3:XX/XX sshlogin4:XX/XX
+	$header = "Computer:jobs running/jobs completed";
+	$status = $eta .
+	    join(" ",map
+		       { sprintf("%s:%d/%d",
+				 $sshlogin{$_}, $Global::host{$_}{'no_of_running'},
+				 ($Global::host{$_}{'completed'}||0)) }
+		       @workers);
     }
     if(length $status > $termcols) {
 	# sshlogin1:XX/XX sshlogin2:XX/XX sshlogin3:XX/XX sshlogin4:XX/XX
 	$header = "Computer:jobs running/jobs completed";
-	$status = join(" ",map
+	$status = $eta .
+	    join(" ",map
 		       { sprintf("%s:%d/%d",
 				 $sshlogin{$_}, $Global::host{$_}{'no_of_running'},
 				 ($Global::host{$_}{'completed'}||0)) }
@@ -2601,7 +2684,8 @@ sub progress {
     if(length $status > $termcols) {
 	# 1:XX/XX 2:XX/XX 3:XX/XX 4:XX/XX 5:XX/XX 6:XX/XX
 	$header = "Computer:jobs running/jobs completed";
-	$status = join(" ",map
+	$status = $eta .
+	    join(" ",map
 		       { sprintf("%s:%d/%d",
 				 $workerno{$_}, $Global::host{$_}{'no_of_running'},
 				 ($Global::host{$_}{'completed'}||0)) }
@@ -2610,7 +2694,8 @@ sub progress {
     if(length $status > $termcols) {
 	# sshlogin1:XX sshlogin2:XX sshlogin3:XX sshlogin4:XX sshlogin5:XX
 	$header = "Computer:jobs completed";
-	$status = join(" ",map
+	$status = $eta .
+	    join(" ",map
 		       { sprintf("%s:%d/%d",
 				 $sshlogin{$_},
 				 ($Global::host{$_}{'completed'}||0)) }
@@ -2619,7 +2704,8 @@ sub progress {
     if(length $status > $termcols) {
 	# 1:XX 2:XX 3:XX 4:XX 5:XX 6:XX
 	$header = "Computer:jobs completed";
-	$status = join(" ",map
+	$status = $eta .
+	    join(" ",map
 		       { sprintf("%s:%d/%d",
 				 $workerno{$_},
 				 ($Global::host{$_}{'completed'}||0)) }
@@ -3219,18 +3305,3 @@ $main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_verbose =
 $main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder =
 $Global::control_path = 0;
 
-# Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
-# argumenter, der er? Lav system limits lokalt og lad det være max
-
-# TODO max_line_length on remote
-# TODO compute how many can be transferred within max_line_length
-# TODO Unittest with filename that is long and requires a lot of quoting. Will there be to many
-# TODO --max-number-of-jobs print the system limited number of jobs
-
-# TODO Debian package
-
-# TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
-# TAGS: parallel | parallel processing | multicore | multiprocessor | Clustering/Distributed Networks
-# job control | multiple jobs | parallelization | text processing | cluster | filters
-# Clustering Tools | Command Line Tools | Utilities | System Administration
-# Bash parallel

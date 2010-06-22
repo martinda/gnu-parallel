@@ -4,6 +4,36 @@
 
 PAR=parallel
 
+echo '### Test -p --interactive'
+cat >/tmp/parallel-script-for-expect <<_EOF
+#!/bin/bash
+
+seq 1 3 | parallel -k -p  echo opt-p
+seq 1 3 | parallel -k --interactive  echo opt--interactive
+_EOF
+chmod 755 /tmp/parallel-script-for-expect
+
+expect -b - <<_EOF
+spawn /tmp/parallel-script-for-expect
+expect "echo opt-p 1"
+send "y\n"
+expect "echo opt-p 2"
+send "n\n"
+expect "echo opt-p 3"
+send "y\n"
+expect "opt-p 1"
+expect "opt-p 3"
+expect "echo opt--interactive 1"
+send "y\n"
+expect "echo opt--interactive 2"
+send "n\n"
+expect "echo opt--interactive 3"
+send "y\n"
+expect "opt--interactive 1"
+expect "opt--interactive 3"
+_EOF
+
+
 echo '### Test -L -l and --max-lines'
 (echo a_b;echo c) | parallel -km -L2  echo
 (echo a_b;echo c) | xargs -L2  echo
