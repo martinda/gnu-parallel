@@ -3141,6 +3141,8 @@ sub Reaper {
 	    # This is one of the ssh -M: ignore
 	    next;
 	}
+	# Ignore processes that we did not start
+	$Global::running{$stiff} or next;
 	$Global::running{$stiff}{'exitstatus'} = $? >> 8;
 	debug("died ($Global::running{$stiff}{'exitstatus'}): $Global::running{$stiff}{'seq'}");
 	# Force printing now if the job failed and we are going to exit
