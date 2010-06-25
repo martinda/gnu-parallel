@@ -37,7 +37,8 @@ after the list of options. That will give you an idea of what GNU
 B<parallel> is capable of.
 
 You can also watch the intro video for a quick introduction:
-http://www.youtube.com/watch?v=OpaiGYxkSuQ
+http://www.youtube.com/watch?v=OpaiGYxkSuQ or at
+http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
 
 =head1 OPTIONS
 
@@ -300,6 +301,8 @@ Use at most I<max-lines> nonblank input lines per command line.
 Trailing blanks cause an input line to be logically continued on the
 next input line.  Implies B<-x>.
 
+Implies B<-X> unless B<-m> is set.
+
 
 =item B<--max-lines>[=I<max-lines>]
 
@@ -309,6 +312,8 @@ Synonym for the B<-L> option.  Unlike B<-L>, the I<max-lines> argument
 is optional.  If I<max-lines> is not specified, it defaults to one.
 The B<-l> option is deprecated since the POSIX standard specifies
 B<-L> instead.
+
+Implies B<-X> unless B<-m> is set.
 
 
 =item B<--controlmaster> (experimental)
@@ -344,7 +349,7 @@ I<max-args> arguments will be used if the size (see the B<-s> option)
 is exceeded, unless the B<-x> option is given, in which case
 GNU B<parallel> will exit.
 
-Only used with B<-m> and B<-X>.
+Implies B<-X> unless B<-m> is set.
 
 
 =item B<--max-line-length-allowed>
@@ -435,6 +440,8 @@ command and initial-arguments and the terminating nulls at the ends of
 the argument strings.  The largest allowed value is system-dependent,
 and is calculated as the argument length limit for exec, less the size
 of your environment.  The default value is the maximum.
+
+Implies B<-X> unless B<-m> is set.
 
 
 =item B<--show-limits>
@@ -1735,6 +1742,14 @@ sub parse_options {
 	$::opt_cleanup = 1;
     }
 
+    if(($::opt_l || $::opt_L || $::opt_n || $::opt_s) and not
+       ($::opt_m or $::opt_X)) {
+	# These --max-line, -l, -L, --max-args, -n, --max-chars, -s
+	# do not make sense without -X or -m 
+	# so default to -X
+	$Global::Xargs = 1;
+    }
+
     if(defined $::opt_a) {
 	if(not open(ARGFILE,"<",$::opt_a)) {
 	    print STDERR "$Global::progname: ".
@@ -1880,7 +1895,7 @@ sub generate_command_line {
 		$job_line = $arg;
 	    }
 	}
-	debug("Return jobline: !$job_line!\n");
+	debug("Return jobline(".length($job_line)."): !$job_line!\n");
     }
     return ($job_line,\@quoted_args);
 }
