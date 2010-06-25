@@ -1,5 +1,3 @@
-# BUG: bash -c 'parallel -a <(seq 1 3) -p  echo'
-
 # Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
 # argumenter, der er? Lav system limits lokalt og lad det være max
 
@@ -15,29 +13,6 @@
 # job control | multiple jobs | parallelization | text processing | cluster | filters
 # Clustering Tools | Command Line Tools | Utilities | System Administration
 # Bash parallel
-
-* 100% options complete with xargs. All options for xargs can now
-  be used in GNU Parallel - even the more exotic.
-
-* --basefile for transfering basedata. When running jobs on remote
-  computers --basefile will transfer files before the first jobs is
-  run. It can be used to transfer data that remains the same for each
-  job such as scripts or lookup tables.
-
-* --progress shows progress. To see how many jobs is running on each
-  server use --progress. It can be turned on even after GNU Parallel
-  is started.
-
-* --eta shows estimated time left in seconds.
-
-* --halt-on-error stops if an error occurs. GNU Parallel will default
-  to run all jobs - even if some of them fail. With --halt-on-error
-  GNU Parallel can ignore errors, wait for the currently running jobs
-  to finish, or stop immediately when an error occurs.
-
-* New video showing the new options.
-
-
 
 =head1 YouTube video
 

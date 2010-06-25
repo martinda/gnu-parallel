@@ -1908,6 +1908,10 @@ sub xargs_computations {
 	     $spaces,$length_of_command_no_args,$length_of_context)
 	    = (1,0,0,0,0);
 	if($command) {
+	    if($command !~ /\s\S*\Q$Global::replacestring\E\S*|\s\S*\Q$Global::replace_no_ext\E\S*/o) {
+		# No replacement strings: add {}
+		$command .= " ".$Global::replacestring;
+	    }
 	    # Count number of {}'s on the command line
 	    my $no_of_replace =
 		($command =~ s/\Q$Global::replacestring\E/$Global::replacestring/go);
@@ -1919,13 +1923,15 @@ sub xargs_computations {
 	    # Count
 	    my $c = $command;
 	    if($Global::Xargs) {
-		$c =~ s/\S*\Q$Global::replacestring\E\S*//go;
-		$c =~ s/\S*\Q$Global::replace_no_ext\E\S*//go;
-		$length_of_command_no_args = length($c) - 1;
+		$c =~ s/\s\S*\Q$Global::replacestring\E\S*|\s\S*\Q$Global::replace_no_ext\E\S*//go;
+		$length_of_command_no_args = length($c);
 		$length_of_context = length($command) - $length_of_command_no_args
 		    - $no_of_replace * length($Global::replacestring)
 		    - $no_of_no_ext * length($Global::replace_no_ext);
 		$spaces = 0;
+		debug("length_of_command_no_args $length_of_command_no_args\n");
+		debug("length_of_context $length_of_context\n");
+		debug("no_of_replace $no_of_replace no_of_no_ext $no_of_no_ext\n");
 	    } else {
 		# remove all {}s
 		$c =~ s/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E//og;
@@ -3321,4 +3327,3 @@ $main::opt_version = $main::opt_L = $main::opt_l =
 $main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_verbose =
 $main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder =
 $Global::control_path = 0;
-
