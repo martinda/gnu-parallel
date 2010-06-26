@@ -1617,6 +1617,7 @@ if($::opt_halt_on_error) {
 }
 
 sub parse_options {
+    # Returns: N/A
     # Defaults:
     $Global::version = 20100620;
     $Global::progname = 'parallel';
@@ -1801,6 +1802,7 @@ sub parse_options {
 }
 
 sub cleanup {
+    # Returns: N/A
     if(@::opt_basefile) {
 	cleanup_basefile();
     }
@@ -1811,12 +1813,17 @@ sub cleanup {
 #
 
 sub no_extension {
+    # Returns:
+    #   argument with .extension removed if any
     my $no_ext = shift;
     $no_ext =~ s:\.[^/\.]*$::; # Remove .ext from argument
     return $no_ext;
 }
 
 sub generate_command_line {
+    # Returns:
+    #   the full job line to run
+    #   list of quoted arguments on that line
     my $command = shift;
     my ($job_line,$last_good);
     my ($next_arg,@quoted_args,@quoted_args_no_ext,$arg_length);
@@ -1902,6 +1909,13 @@ sub generate_command_line {
 
 
 sub xargs_computations {
+    # Returns:
+    #   $number_of_substitution = number of {}'s
+    #   $number_of_substitution_no_ext = number of {.}'s
+    #   $spaces = is a single space needed at the start?
+    #   $length_of_command_no_args = length of command line with args removed
+    #   $length_of_context = context needed for each additional arg
+
     my $command = shift;
     if(not @Calculated::xargs_computations) {
 	my ($number_of_substitution, $number_of_substitution_no_ext,
@@ -1951,6 +1965,8 @@ sub xargs_computations {
 
 sub shell_quote {
     # Quote the string so shell will not expand any special chars
+    # Returns:
+    #   string quoted with \ as needed by the shell
     my (@strings) = (@_);
     my $arg;
     for $arg (@strings) {
@@ -1966,6 +1982,8 @@ sub shell_quote {
 
 sub shell_unquote {
     # Unquote strings from shell_quote
+    # Returns:
+    #   string with shell quoting removed
     my (@strings) = (@_);
     my $arg;
     for $arg (@strings) {
@@ -1978,8 +1996,10 @@ sub shell_unquote {
 }
 
 
-# Replace foo{}bar or foo{.}bar
 sub context_replace {
+    # Replace foo{}bar or foo{.}bar
+    # Returns:
+    #   jobline with {} and {.} expanded to args
     my ($job_line,$quoted,$no_ext) = (@_);
     while($job_line =~/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E/o) {
 	$job_line =~ /(\S*(\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E)\S*)/o
@@ -2007,6 +2027,8 @@ sub context_replace {
 # Maximal command line length (for -m and -X)
 sub max_length_of_command_line {
     # Find the max_length of a command line
+    # Returns:
+    #   number of chars on the longest command line allowed
     # First find an upper bound
     if(not $Global::command_line_max_len) {
 	$Global::command_line_max_len = real_max_length();
@@ -2023,6 +2045,8 @@ sub max_length_of_command_line {
 }
 
 sub real_max_length {
+    # Returns:
+    #   number of chars on the longest command line allowed
     my $len = 10;
     do {
 	$len *= 10;
@@ -2031,9 +2055,10 @@ sub real_max_length {
     return binary_find_max_length(int(($len)/10),$len);
 }
 
-
 sub binary_find_max_length {
     # Given a lower and upper bound find the max_length of a command line
+    # Returns:
+    #   number of chars on the longest command line allowed
     my ($lower, $upper) = (@_);
     if($lower == $upper or $lower == $upper-1) { return $lower; }
     my $middle = int (($upper-$lower)/2 + $lower);
@@ -2047,6 +2072,9 @@ sub binary_find_max_length {
 
 sub is_acceptable_command_line_length {
     # Test if a command line of this length can run
+    # Returns:
+    #   0 if the command line length is too long
+    #   1 otherwise
     my $len = shift;
     $Global::is_acceptable_command_line_length++;
     debug("$Global::is_acceptable_command_line_length $len\n");
@@ -2061,6 +2089,8 @@ sub is_acceptable_command_line_length {
 
 sub compute_number_of_processes {
     # Number of processes wanted and limited by system ressources
+    # Returns:
+    #   Number of processes
     my $opt_P = shift;
     my $sshlogin = shift;
     my $wanted_processes = user_requested_processes($opt_P,$sshlogin);
@@ -2076,6 +2106,8 @@ sub processes_available_by_system_limit {
     # Limit them to the system limits
     # Limits are: File handles, number of input lines, processes,
     # and taking > 1 second to spawn 10 extra processes
+    # Returns:
+    #   Number of processes
 
     my $wanted_processes = shift;
     my $sshlogin = shift;
@@ -2171,6 +2203,9 @@ sub processes_available_by_system_limit {
 sub simultaneous_sshlogin {
     # Using $sshlogin try to see if we can do $wanted_processes
     # simultaneous logins
+    # (ssh host echo simultaneouslogin & ssh host echo simultaneouslogin & ...)|grep simul|wc -l
+    # Returns:
+    #   Number of succesful logins
     my $sshlogin = shift;
     my $wanted_processes = shift;
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
@@ -2185,8 +2220,8 @@ sub simultaneous_sshlogin {
 
 sub simultaneous_sshlogin_limit {
     # Test by logging in wanted number of times simultaneously
-    # (ssh e echo simultaneouslogin &ssh e echo simultaneouslogin &...)|grep simul|wc -l
-    # Return min($wanted_processes,$working_simultaneous_ssh_logins-1)
+    # Returns:
+    #   min($wanted_processes,$working_simultaneous_ssh_logins-1)
     my $sshlogin = shift;
     my $wanted_processes = shift;
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
@@ -2212,6 +2247,10 @@ sub simultaneous_sshlogin_limit {
 sub enough_file_handles {
     # check that we have enough filehandles available for starting
     # another job
+    # Returns:
+    #   1 if ungrouped (thus not needing extra filehandles)
+    #   0 if too few filehandles
+    #   1 if enough filehandles
     if($Global::grouped) {
 	my %fh;
 	my $enough_filehandles = 1;
@@ -2228,7 +2267,9 @@ sub enough_file_handles {
 }
 
 sub user_requested_processes {
-    # Parse the number of processes that the user asked for
+    # Parse the number of processes that the user asked for using -j
+    # Returns:
+    #   the number of processes to run on this sshlogin
     my $opt_P = shift;
     my $sshlogin = shift;
     my $processes;
@@ -2265,6 +2306,8 @@ sub user_requested_processes {
 
 sub no_of_processing_units_sshlogin {
     # Number of processing units (CPUs or cores) at this sshlogin
+    # Returns:
+    #   number of CPUs or cores at the sshlogin
     my $sshlogin = shift;
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     if(not $Global::host{$sshlogin}{'ncpus'}) {
@@ -2296,6 +2339,8 @@ sub no_of_processing_units_sshlogin {
 }
 
 sub no_of_cpus {
+    # Returns:
+    #   Number of physical CPUs
     if(not $Global::no_of_cpus) {
 	local $/="\n"; # If delimiter is set, then $/ will be wrong
 	my $no_of_cpus = (no_of_cpus_freebsd()
@@ -2314,6 +2359,8 @@ sub no_of_cpus {
 }
 
 sub no_of_cores {
+    # Returns:
+    #   Number of CPU cores
     if(not $Global::no_of_cores) {
 	local $/="\n"; # If delimiter is set, then $/ will be wrong
 	my $no_of_cores = (no_of_cores_freebsd()
@@ -2332,6 +2379,8 @@ sub no_of_cores {
 }
 
 sub no_of_cpus_gnu_linux {
+    # Returns:
+    #   Number of physical CPUs on GNU/Linux
     my $no_of_cpus;
     if(-e "/proc/cpuinfo") {
 	$no_of_cpus = 0;
@@ -2348,6 +2397,8 @@ sub no_of_cpus_gnu_linux {
 }
 
 sub no_of_cores_gnu_linux {
+    # Returns:
+    #   Number of CPU cores on GNU/Linux
     my $no_of_cores;
     if(-e "/proc/cpuinfo") {
 	$no_of_cores = 0;
@@ -2361,26 +2412,36 @@ sub no_of_cores_gnu_linux {
 }
 
 sub no_of_cpus_darwin {
+    # Returns:
+    #   Number of physical CPUs on Mac Darwin
     my $no_of_cpus = `sysctl -a hw 2>/dev/null | grep -w physicalcpu | awk '{ print \$2 }'`;
     return $no_of_cpus;
 }
 
 sub no_of_cores_darwin {
+    # Returns:
+    #   Number of CPU cores on Mac Darwin
     my $no_of_cores = `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`;
     return $no_of_cores;
 }
 
 sub no_of_cpus_freebsd {
+    # Returns:
+    #   Number of physical CPUs on FreeBSD
     my $no_of_cpus = `sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`;
     return $no_of_cpus;
 }
 
 sub no_of_cores_freebsd {
+    # Returns:
+    #   Number of CPU cores on FreeBSD
     my $no_of_cores = `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`;
     return $no_of_cores;
 }
 
 sub no_of_cpus_solaris {
+    # Returns:
+    #   Number of physical CPUs on Solaris
     if(-x "/usr/sbin/psrinfo") {
 	my @psrinfo = `/usr/sbin/psrinfo`;
 	if($#psrinfo >= 0) {
@@ -2397,6 +2458,8 @@ sub no_of_cpus_solaris {
 }
 
 sub no_of_cores_solaris {
+    # Returns:
+    #   Number of CPU cores on Solaris
     if(-x "/usr/sbin/psrinfo") {
 	my @psrinfo = `/usr/sbin/psrinfo`;
 	if($#psrinfo >= 0) {
@@ -2417,6 +2480,8 @@ sub no_of_cores_solaris {
 #
 
 sub min {
+    # Returns:
+    #   Minimum value of array
     my $min = shift;
     my @args = @_;
     for my $a (@args) {
@@ -2448,6 +2513,7 @@ sub min {
 
 sub init_run_jobs {
     # Remember the original STDOUT and STDERR
+    # Returns: N/A
     open $Global::original_stdout, ">&STDOUT" or die "Can't dup STDOUT: $!";
     open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
     open $Global::original_stdin, "<&STDIN" or die "Can't dup STDIN: $!";
@@ -2464,12 +2530,16 @@ sub init_run_jobs {
 }
 
 sub login_and_host {
+    # Returns:
+    #   login@hostname
     my $sshlogin = shift;
     $sshlogin =~ /(\S+$)/ or die;
     return $1;
 }
 
 sub next_command_line_with_sshlogin {
+    # Returns:
+    #   next command to run with ssh command wrapping if remote
     my $sshlogin = shift;
     my ($next_command_line, $args_ref) = next_command_line();
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
@@ -2501,6 +2571,9 @@ sub next_command_line_with_sshlogin {
 }
 
 sub next_command_line {
+    # Returns:
+    #   next command line
+    #   list of arguments for the line
     my ($cmd_line,$args_ref);
     if(@Global::unget_next_command_line) {
 	$cmd_line = shift @Global::unget_next_command_line;
@@ -2514,10 +2587,13 @@ sub next_command_line {
 }
 
 sub unget_command_line {
+    # Returns: N/A
     push @Global::unget_next_command_line, @_;
 }
 
 sub get_next_arg {
+    # Returns:
+    #   next argument from input
     my $arg;
     if(@Global::unget_arg) {
 	$arg = shift @Global::unget_arg;
@@ -2554,10 +2630,12 @@ sub get_next_arg {
 }
 
 sub unget_arg {
+    # Returns: N/A
     push @Global::unget_arg, @_;
 }
 
 sub drain_job_queue {
+    # Returns: N/A
     if($::opt_progress) {
 	DoNotReap();
 	print init_progress();
@@ -2586,6 +2664,7 @@ sub drain_job_queue {
 
 sub toggle_progress {
     # Turn on/off progress view
+    # Returns: N/A
     $::opt_progress = not $::opt_progress;
     if($::opt_progress) {
 	print init_progress();
@@ -2593,6 +2672,8 @@ sub toggle_progress {
 }
 
 sub init_progress {
+    # Returns:
+    #   list of computers for progress output
     $|=1;
     my %progress = progress();
     return ("\nComputers / CPU cores / Max jobs to run\n",
@@ -2600,6 +2681,10 @@ sub init_progress {
 }
 
 sub progress {
+    # Returns:
+    #   list of workers
+    #   header that will fit on the screen
+    #   status message that will fit on the screen
     my $termcols = columns();
     my ($status, $header)=("x"x($termcols+1),"");
     my @workers = sort keys %Global::host;
@@ -2737,6 +2822,8 @@ sub progress {
 
 sub columns {
     # Get the number of columns of the display
+    # Returns:
+    #   number of columns of the screen
     if(not $Global::columns) {
 	$Global::columns = $ENV{'COLUMNS'};
 	if(not $Global::columns) {
@@ -2749,6 +2836,8 @@ sub columns {
 }
 
 sub start_more_jobs {
+    # Returns:
+    #   number of jobs started
     my $jobs_started = 0;
     if(not $Global::StartNoNewJobs) {
 	for my $sshlogin (keys %Global::host) {
@@ -2769,12 +2858,13 @@ sub start_more_jobs {
 }
 
 sub start_another_job {
-    # Grab a job from @Global::command, start it
+    # Grab a job from @Global::command, start it at sshlogin
     # and remember the pid, the STDOUT and the STDERR handles
-    # Return 1.
-    # If no more jobs: do nothing and return 0
-    # Do we have enough file handles to start another job?
+    # Returns:
+    #   1 if another jobs was started
+    #   0 otherwise
     my $sshlogin = shift;
+    # Do we have enough file handles to start another job?
     if(enough_file_handles()) {
 	my $command = next_command_line_with_sshlogin($sshlogin);
 	if(defined $command) {
@@ -2799,6 +2889,13 @@ sub start_another_job {
 
 sub start_job {
     # Setup STDOUT and STDERR for a job and start it.
+    # Returns:
+    #   "seq" => sequence number of job
+    #   "pid" => process id
+    #   "out" => STDOUT filehandle (if grouped)
+    #   "err" => STDERR filehandle (if grouped)
+    #   "sshlogin" => sshlogin
+    #   "command" => command being run
     my $command = shift;
     my $sshlogin = shift;
     my ($pid,$out,$err,%out,%err,$outname,$errname,$name);
@@ -2878,6 +2975,7 @@ sub start_job {
 
 sub print_job {
     # Print the output of the jobs
+    # Returns: N/A
     # Only relevant for grouping
     $Global::grouped or return;
     my $fhs = shift;
@@ -2919,6 +3017,7 @@ sub print_job {
 #
 
 sub read_sshloginfile {
+    # Returns: N/A
     my $file = shift;
     open(IN, $file) || die "Cannot open $file";
     while(<IN>) {
@@ -2929,6 +3028,7 @@ sub read_sshloginfile {
 }
 
 sub parse_sshlogin {
+    # Returns: N/A
     my (@login);
     if(not @Global::sshlogin) { @Global::sshlogin = (":"); }
     for my $sshlogin (@Global::sshlogin) {
@@ -2966,6 +3066,8 @@ sub parse_sshlogin {
 
 sub remote_hosts {
     # Return sshlogins that are not ':'
+    # Returns:
+    #   list of sshlogins with ':' removed
     return grep !/^:$/, keys %Global::host;
 }
 
@@ -2975,6 +3077,9 @@ sub sshcommand_of_sshlogin {
     # 'myssh user@server' -> ('myssh','user@server')
     # 'myssh -l user server' -> ('myssh -l user','server')
     # '/usr/local/bin/myssh -l user server' -> ('/usr/local/bin/myssh -l user','server')
+    # Returns:
+    #   sshcommand - defaults to 'ssh'
+    #   login@host
     my $sshlogin = shift;
     my ($sshcmd, $serverlogin);
     if($sshlogin =~ /(.+) (\S+)$/) {
@@ -3007,6 +3112,8 @@ sub sshcommand_of_sshlogin {
 }
 
 sub control_path_dir {
+    # Returns:
+    #   path to directory
     if(not $Global::control_path_dir) {
 	$Global::control_path_dir = tempdir("/tmp/parallel-ssh-XXXX", CLEANUP => 1 );
     }
@@ -3015,23 +3122,31 @@ sub control_path_dir {
 
 sub sshtransfer {
     # Return the sshcommand needed to transfer the file
+    # Returns:
+    #   ssh command needed to transfer file to sshlogin
     return sshtransferreturn(@_,1,0);
 }
 
 sub sshreturn {
     # Return the sshcommand needed to returning the file
+    # Returns:
+    #   ssh command needed to transfer file from sshlogin
     my $removesource = $::opt_cleanup;
     return sshtransferreturn(@_,0,$removesource);
 }
 
 sub sshcleanup {
     # Return the sshcommand needed to remove the file
+    # Returns:
+    #   ssh command needed to remove file from sshlogin
     my ($sshlogin,$file) = (@_);
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     return "$sshcmd $serverlogin rm -f ".shell_quote($file);
 }
 
 sub sshtransferreturn {
+    # Returns:
+    #   ssh comands needed to transfer file to/from sshlogin
     my ($sshlogin,$file,$transfer,$removesource) = (@_);
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     my $rsync_opt = "-rlDzRE -e".shell_quote($sshcmd);
@@ -3073,7 +3188,7 @@ sub sshtransferreturn {
 sub setup_basefile {
     # Transfer basefiles to each $sshlogin
     # This needs to be done before first jobs on $sshlogin is run
-    # Can we do this in parallel?
+    # Returns: N/A
     my $cmd = "";
     for my $sshlogin (keys %Global::host) {
 	if($sshlogin eq ":") { next }
@@ -3096,6 +3211,7 @@ sub setup_basefile {
 
 sub cleanup_basefile {
     # Remove the basefiles transferred
+    # Returns: N/A
     my $cmd="";
     for my $sshlogin (keys %Global::host) {
 	if($sshlogin eq ":") { next }
@@ -3114,12 +3230,14 @@ sub cleanup_basefile {
 #
 
 sub ListRunningJobs {
+    # Returns: N/A
     for my $v (values %Global::running) {
 	print STDERR "$Global::progname: ",$v->{'command'},"\n";
     }
 }
 
 sub StartNoNewJobs {
+    # Returns: N/A
     print STDERR
 	("$Global::progname: SIGTERM received. No new jobs will be started.\n",
 	 "$Global::progname: Waiting for these ", scalar(keys %Global::running),
@@ -3130,18 +3248,21 @@ sub StartNoNewJobs {
 }
 
 sub CountSigChild {
+    # Returns: N/A
     $Global::SigChildCaught++;
 }
 
 sub DoNotReap {
     # This will postpone SIGCHILD for sections that cannot be distracted by a dying child
     # (Racecondition)
+    # Returns: N/A
     $SIG{CHLD} = \&CountSigChild;
 }
 
 sub ReapIfNeeded {
     # Do the postponed SIGCHILDs if any and re-install normal reaper for SIGCHILD
     # (Racecondition)
+    # Returns: N/A
     if($Global::SigChildCaught) {
 	$Global::SigChildCaught = 0;
 	Reaper();
@@ -3153,6 +3274,7 @@ sub Reaper {
     # A job finished.
     # Print the output.
     # Start another job
+    # Returns: N/A
     DoNotReap();
     $Global::reaperlevel++;
     my $stiff;
@@ -3219,11 +3341,13 @@ sub Reaper {
 #
 
 sub die_usage {
+    # Returns: N/A
     usage();
     exit(255);
 }
 
 sub usage {
+    # Returns: N/A
     print "Usage:\n";
     print "$Global::progname [options] [command [arguments]] < list_of_arguments\n";
     print "\n";
@@ -3231,6 +3355,7 @@ sub usage {
 }
 
 sub version {
+    # Returns: N/A
     print join("\n",
 	       "$Global::progname $Global::version",
 	       "Copyright (C) 2007,2008,2009,2010 Ole Tange and Free Software Foundation, Inc.",
@@ -3243,6 +3368,7 @@ sub version {
 }
 
 sub show_limits {
+    # Returns: N/A
     print("Maximal size of command: ",real_max_length(),"\n",
 	  "Maximal used size of command: ",max_length_of_command_line(),"\n",
 	  "\n",
@@ -3257,6 +3383,7 @@ sub show_limits {
 #
 
 sub debug {
+    # Returns: N/A
     $Global::debug or return;
     if($Global::original_stdout) {
 	print $Global::original_stdout @_;
@@ -3266,6 +3393,9 @@ sub debug {
 }
 
 sub my_memory_usage {
+    # Returns:
+    #   memory usage if found
+    #   0 otherwise
     use strict;
     use FileHandle;
 
@@ -3287,6 +3417,9 @@ sub my_memory_usage {
 }
 
 sub my_size {
+    # Returns:
+    #   size of object if Devel::Size is installed
+    #   -1 otherwise
     my @size_this = (@_);
     eval "use Devel::Size qw(size total_size)";
     if ($@) {
@@ -3298,6 +3431,9 @@ sub my_size {
 
 
 sub my_dump {
+    # Returns:
+    #   ascii expression of object if Data::Dump(er) is installed
+    #   error code otherwise
     my @dump_this = (@_);
     eval "use Data::Dump qw(dump);";
     if ($@) {
