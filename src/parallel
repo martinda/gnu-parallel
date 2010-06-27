@@ -1603,11 +1603,11 @@ use File::Temp qw/ tempfile tempdir /;
 use Getopt::Long;
 use strict;
 
-DoNotReap();
+do_not_reap();
 parse_options();
 init_run_jobs();
 start_more_jobs();
-ReapIfNeeded();
+reap_if_needed();
 drain_job_queue();
 cleanup();
 if($::opt_halt_on_error) {
@@ -2120,7 +2120,7 @@ sub processes_available_by_system_limit {
     my $time = time;
     my %fh;
     my @children;
-    DoNotReap();
+    do_not_reap();
 
     # Reserve filehandles
     # perl uses 7 filehandles for something?
@@ -2520,10 +2520,10 @@ sub init_run_jobs {
     $Global::total_running = 0;
     $Global::total_started = 0;
     $Global::total_completed = 0;
-    $SIG{USR1} = \&ListRunningJobs;
+    $SIG{USR1} = \&list_running_jobs;
     $SIG{USR2} = \&toggle_progress;
     $Global::original_sigterm = $SIG{TERM};
-    $SIG{TERM} = \&StartNoNewJobs;
+    $SIG{TERM} = \&start_no_new_jobs;
     if(@::opt_basefile) {
 	setup_basefile();
     }
@@ -2637,24 +2637,24 @@ sub unget_arg {
 sub drain_job_queue {
     # Returns: N/A
     if($::opt_progress) {
-	DoNotReap();
+	do_not_reap();
 	print init_progress();
-	ReapIfNeeded();
+	reap_if_needed();
     }
     my $last_header="";
     while($Global::total_running > 0) {
 	debug("jobs running: $Global::total_running Memory usage:".my_memory_usage()."\n");
 	sleep 1;
-	Reaper(); # Some systems fail to catch the SIGCHLD
+	reaper(); # Some systems fail to catch the SIGCHLD
 	if($::opt_progress) {
 	    my %progress = progress();
-	    DoNotReap();
+	    do_not_reap();
 	    if($last_header ne $progress{'header'}) {
 		print "\n",$progress{'header'},"\n";
 		$last_header = $progress{'header'};
 	    }
 	    print "\r",$progress{'status'};
-	    ReapIfNeeded();
+	    reap_if_needed();
 	}
     }
     if($::opt_progress) {
@@ -2839,7 +2839,7 @@ sub start_more_jobs {
     # Returns:
     #   number of jobs started
     my $jobs_started = 0;
-    if(not $Global::StartNoNewJobs) {
+    if(not $Global::start_no_new_jobs) {
 	for my $sshlogin (keys %Global::host) {
 	    debug("Running jobs on $sshlogin: $Global::host{$sshlogin}{'no_of_running'}\n");
 	    while ($Global::host{$sshlogin}{'no_of_running'} <
@@ -3229,53 +3229,53 @@ sub cleanup_basefile {
 # Signal handling
 #
 
-sub ListRunningJobs {
+sub list_running_jobs {
     # Returns: N/A
     for my $v (values %Global::running) {
 	print STDERR "$Global::progname: ",$v->{'command'},"\n";
     }
 }
 
-sub StartNoNewJobs {
+sub start_no_new_jobs {
     # Returns: N/A
     print STDERR
 	("$Global::progname: SIGTERM received. No new jobs will be started.\n",
 	 "$Global::progname: Waiting for these ", scalar(keys %Global::running),
 	 " jobs to finish. Send SIGTERM again to stop now.\n");
-    ListRunningJobs();
-    $Global::StartNoNewJobs++;
+    list_running_jobs();
+    $Global::start_no_new_jobs++;
     $SIG{TERM} = $Global::original_sigterm;
 }
 
-sub CountSigChild {
+sub count_sig_child {
     # Returns: N/A
-    $Global::SigChildCaught++;
+    $Global::sig_child_caught++;
 }
 
-sub DoNotReap {
+sub do_not_reap {
     # This will postpone SIGCHILD for sections that cannot be distracted by a dying child
     # (Racecondition)
     # Returns: N/A
-    $SIG{CHLD} = \&CountSigChild;
+    $SIG{CHLD} = \&count_sig_child;
 }
 
-sub ReapIfNeeded {
+sub reap_if_needed {
     # Do the postponed SIGCHILDs if any and re-install normal reaper for SIGCHILD
     # (Racecondition)
     # Returns: N/A
-    if($Global::SigChildCaught) {
-	$Global::SigChildCaught = 0;
-	Reaper();
+    if($Global::sig_child_caught) {
+	$Global::sig_child_caught = 0;
+	reaper();
     }
-    $SIG{CHLD} = \&Reaper;
+    $SIG{CHLD} = \&reaper;
 }
 
-sub Reaper {
+sub reaper {
     # A job finished.
     # Print the output.
     # Start another job
     # Returns: N/A
-    DoNotReap();
+    do_not_reap();
     $Global::reaperlevel++;
     my $stiff;
     debug("Reaper called $Global::reaperlevel\n");
@@ -3313,7 +3313,7 @@ sub Reaper {
 				  "Waiting for ", scalar(keys %Global::running),
 				  " jobs to finish. This job failed:\n",
 				  $Global::running{$stiff}{"command"},"\n");
-		    $Global::StartNoNewJobs++;
+		    $Global::start_no_new_jobs++;
 		    $Global::halt_on_error_exitstatus = $Global::running{$stiff}{'exitstatus'};
 		} elsif($::opt_halt_on_error == 2) {
 		    # If halt on error == 2 we should exit immediately
@@ -3331,7 +3331,7 @@ sub Reaper {
 	delete $Global::running{$stiff};
 	start_more_jobs();
     }
-    ReapIfNeeded();
+    reap_if_needed();
     debug("Reaper exit $Global::reaperlevel\n");
     $Global::reaperlevel--;
 }
