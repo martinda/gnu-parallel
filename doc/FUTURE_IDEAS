@@ -1,3 +1,5 @@
+Unittest: -0 on filenames ending in \n
+
 # Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
 # argumenter, der er? Lav system limits lokalt og lad det være max
 
@@ -13,6 +15,24 @@
 # job control | multiple jobs | parallelization | text processing | cluster | filters
 # Clustering Tools | Command Line Tools | Utilities | System Administration
 # Bash parallel
+
+=head1 YouTube video2
+
+Converting of WAV files to MP3 using GNU Parallel
+
+# Run one jobs per CPU core
+# For 'foo.wav' call the output file 'foo.mp3'
+
+find music-files -type f | parallel -j+0 lame {} -o {.}.mp3
+
+# Run one jobs per CPU core
+# Run on local computer + 2 remote computers
+# Give us progress information
+# For 'foo.wav' call the output file 'foo.mp3'
+
+find music-files -type f | parallel -j+0 -S :,computer1.examle.com,computer2.example.com \
+--eta --trc {.}.mp3 lame {} -o {.}.mp3
+
 
 =head1 YouTube video
 

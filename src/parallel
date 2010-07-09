@@ -1677,7 +1677,7 @@ if($::opt_halt_on_error) {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100705;
+    $Global::version = 20100706;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -1846,7 +1846,7 @@ sub parse_options {
 	# must be done after opt_a
 	$::opt_progress = $::opt_eta;
 	my @args = ();
-	while(not eof $Global::argfile) {
+	while(more_arguments()) {
 	    # This will read all arguments and compute $Global::total_jobs
 	    push @args, get_next_arg();
 	}
@@ -1908,6 +1908,46 @@ sub generate_command_line {
     #   list of quoted arguments on that line
     my $command = shift;
     my ($job_line,$last_good);
+    my ($quoted_args,$quoted_args_no_ext) =
+	get_multiple_args($command,max_length_of_command_line(),0);
+
+    if(@$quoted_args) {
+	$job_line = $command;
+	if(defined $job_line and
+	   ($job_line =~/\Q$Global::replacestring\E/o or
+	    $job_line =~/\Q$Global::replace_no_ext\E/o)) {
+	    # substitute {} and {.} with args
+	    if($Global::Xargs) {
+		# Context sensitive replace (foo{}bar with fooargsbar)
+		$job_line =
+		    context_replace($job_line, $quoted_args, $quoted_args_no_ext);
+	    } else {
+		# Normal replace {} with args and {.} with args without extension
+		my $arg=join(" ",@$quoted_args);
+		my $arg_no_ext=join(" ",@$quoted_args_no_ext);
+		$job_line =~ s/\Q$Global::replacestring\E/$arg/go;
+		$job_line =~ s/\Q$Global::replace_no_ext\E/$arg_no_ext/go;
+	    }
+	} else {
+	    # append args
+	    my $arg=join(" ",@$quoted_args);
+	    if($job_line) {
+		$job_line .= " ".$arg;
+	    } else {
+		# Parallel behaving like '|sh'
+		$job_line = $arg;
+	    }
+	}
+	debug("Return jobline(".length($job_line)."): !$job_line!\n");
+    }
+    return ($job_line,$quoted_args);
+}
+
+sub get_multiple_args {
+    # Returns:
+    #   \@quoted_args - empty if no more args
+    #   \@quoted_args_no_ext
+    my ($command,$max_length_of_command_line,$test_only_mode) = (@_);
     my ($next_arg,@quoted_args,@quoted_args_no_ext,$arg_length);
     my ($number_of_substitution,
 	$number_of_substitution_no_ext,$spaces,
@@ -1927,13 +1967,17 @@ sub generate_command_line {
 	    + $length_of_context;
 	$arg_length += $next_arg_len;
 	my $job_line_length = $length_of_command_no_args + $arg_length;
-	if($job_line_length >= max_length_of_command_line()) {
+	if($job_line_length >= $max_length_of_command_line) {
 	    unget_arg(pop @quoted_args);
+	    pop @quoted_args_no_ext;
+	    if($test_only_mode) {
+		last;
+	    }
 	    if($::opt_x and $length_of_command_no_args + $next_arg_len
-	       >= max_length_of_command_line()) {
+	       >= $max_length_of_command_line) {
 		# To be compatible with xargs -x
 		print STDERR ("Command line too long ($job_line_length >= "
-			      . max_length_of_command_line() .
+			      . $max_length_of_command_line .
 			      ") at number $number_of_args: ".
 			      (substr($next_arg,0,50))."...\n");
 		exit(255);
@@ -1942,7 +1986,7 @@ sub generate_command_line {
 		last;
 	    } else {
 		print STDERR ("Command line too long ($job_line_length >= "
-			      . max_length_of_command_line() .
+			      . $max_length_of_command_line .
 			      ") at number $number_of_args: ".
 			      (substr($next_arg,0,50))."...\n");
 		exit(255);
@@ -1957,36 +2001,7 @@ sub generate_command_line {
 	    last;
 	}
     }
-    if(@quoted_args) {
-	$job_line = $command;
-	if(defined $job_line and
-	   ($job_line =~/\Q$Global::replacestring\E/o or
-	    $job_line =~/\Q$Global::replace_no_ext\E/o)) {
-	    # substitute {} and {.} with args
-	    if($Global::Xargs) {
-		# Context sensitive replace (foo{}bar with fooargsbar)
-		$job_line =
-		    context_replace($job_line, \@quoted_args, \@quoted_args_no_ext);
-	    } else {
-		# Normal replace {} with args and {.} with args without extension
-		my $arg=join(" ",@quoted_args);
-		my $arg_no_ext=join(" ",@quoted_args_no_ext);
-		$job_line =~ s/\Q$Global::replacestring\E/$arg/go;
-		$job_line =~ s/\Q$Global::replace_no_ext\E/$arg_no_ext/go;
-	    }
-	} else {
-	    # append args
-	    my $arg=join(" ",@quoted_args);
-	    if($job_line) {
-		$job_line .= " ".$arg;
-	    } else {
-		# Parallel behaving like '|sh'
-		$job_line = $arg;
-	    }
-	}
-	debug("Return jobline(".length($job_line)."): !$job_line!\n");
-    }
-    return ($job_line,\@quoted_args);
+    return (\@quoted_args,\@quoted_args_no_ext);
 }
 
 
@@ -2113,7 +2128,7 @@ sub max_length_of_command_line {
     #   number of chars on the longest command line allowed
     # First find an upper bound
     if(not $Global::command_line_max_len) {
-	$Global::command_line_max_len = real_max_length();
+	$Global::command_line_max_len = limited_max_length();
 	if($::opt_s) {
 	    if($::opt_s <= $Global::command_line_max_len) {
 		$Global::command_line_max_len = $::opt_s;
@@ -2126,15 +2141,60 @@ sub max_length_of_command_line {
     return $Global::command_line_max_len;
 }
 
-sub real_max_length {
+sub limited_max_length {
     # Returns:
-    #   number of chars on the longest command line allowed
-    my $len = 10;
+    #   min(opt_s, number of chars on the longest command line allowed)
+    if($::opt_s) {
+	if(is_acceptable_command_line_length($::opt_s)) {
+	    debug("-s is OK: $::opt_s\n");
+	    return $::opt_s;
+	}
+	# -s is too long: Find the correct
+	return binary_find_max_length(0,$::opt_s);
+    }
+
+#TODO
+    # Running is_acceptable_command_line_length is expensive
+    # Try to run as few times as possible.
+    # If all arguments fit on the line now, don't try a longer length
+    my ($quoted_args,$quoted_args_no_ext);
+    my $more = more_arguments();
+    my $len = 8;
+    my $is_acceptable;
     do {
-	$len *= 10;
+	$len *= 16;
+	$is_acceptable = is_acceptable_command_line_length($len);
+	($quoted_args,$quoted_args_no_ext) =
+	    get_multiple_args($Global::command,$len,1);
+	$more = more_arguments();
+	debug("Test len: $len\n");
+	# Reset the getting of args
+	my $next = get_next_arg();
+	if($next) {
+	    push @$quoted_args, $next;
+	}
+	if (@$quoted_args) {
+	    unget_arg(@$quoted_args);
+	}
+    } while ($more and $is_acceptable);
+
+    if(not $is_acceptable) {
+	# There are more arguments than will fit on one line
+	# Then search for the actual max length between 0 and upper bound
+	return binary_find_max_length(int(($len)/16),$len);
+    } else {
+	# The arguments will fit on one line of length $len
+	return $len;
+    }
+}
+
+sub real_max_length {
+    my $len = 8;
+    do {
+	$len *= 16;
     } while (is_acceptable_command_line_length($len));
     # Then search for the actual max length between 0 and upper bound
-    return binary_find_max_length(int(($len)/10),$len);
+    return binary_find_max_length(int(($len)/16),$len);
 }
 
 sub binary_find_max_length {
@@ -2164,6 +2224,7 @@ sub is_acceptable_command_line_length {
     open (STDERR,">/dev/null");
     system "true "."x"x$len;
     close STDERR;
+    debug("$len $?\n");
     return not $?;
 }
 
@@ -2673,14 +2734,21 @@ sub unget_command_line {
     push @Global::unget_next_command_line, @_;
 }
 
+sub more_arguments {
+    # Returns:
+    #   whether there are more arguments to be processed or not
+    return (@Global::unget_arg or not eof $Global::argfile);
+}
+
 sub get_next_arg {
     # Returns:
     #   next argument from input
+    #   undef if end of file
     my $arg;
     if(@Global::unget_arg) {
 	$arg = shift @Global::unget_arg;
     } else {
-	if(eof $Global::argfile) {
+	if(not more_arguments()) {
 	    return undef;
 	}
 	$arg = <$Global::argfile>;
