@@ -1,0 +1,32 @@
+### Test basic --arg-sep
+a
+b
+### Run commands using --arg-sep
+echo a
+a
+echo b
+b
+### Change --arg-sep
+echo a
+a
+echo b
+b
+echo a
+a
+echo b
+b
+### Test stdin goes to first command only
+cat -
+via first cat
+cat -
+cat
+via cat
+echo b
+b
+cat
+via cat
+echo b
+b
+echo a
+a
+cat
