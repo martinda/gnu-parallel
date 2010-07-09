@@ -1677,7 +1677,7 @@ if($::opt_halt_on_error) {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100706;
+    $Global::version = 20100707;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
