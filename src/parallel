@@ -671,6 +671,20 @@ To compress all html files using B<gzip> run:
 B<find . -name '*.html' | parallel gzip>
 
 
+=head1 EXAMPLE: Reading arguments from command line
+
+GNU B<parallel> can take the arguments from command line instead of
+stdin (standard input). To compress all html files in the current dir
+using B<gzip> run:
+
+B<parallel gzip ::: *.html>
+
+To convert *.wav to *.mp3 using LAME running one process per CPU core
+run:
+
+B<parallel -j+0 lame {} -o {.}.mp3 ::: *.wav>
+
+
 =head1 EXAMPLE: Inserting multiple arguments
 
 When moving a lot of files like this: B<mv * destdir> you will
@@ -1677,7 +1691,7 @@ if($::opt_halt_on_error) {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100707;
+    $Global::version = 20100708;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -1695,7 +1709,6 @@ sub parse_options {
     $Global::exitstatus = 0;
     $Global::halt_on_error_exitstatus = 0;
     $Global::total_jobs = 0;
-    $Global::eta = 0;
     $Global::arg_sep = ":::";
 
     Getopt::Long::Configure ("bundling","require_order");
@@ -1821,8 +1834,9 @@ sub parse_options {
 	my @new_argv = ();
 	while(@ARGV) {
 	    my $arg = shift @ARGV;
-	    if($arg =~ /^$Global::arg_sep$/o) {
+	    if($arg eq $Global::arg_sep) {
 		unget_arg(@ARGV);
+		$Global::total_jobs += @ARGV;
 		@ARGV=();
 	    } else {
 		push @new_argv, $arg;
@@ -1880,7 +1894,6 @@ sub parse_options {
 		$Global::default_simultaneous_sshlogins;
 	}
     }
-    $Global::job_end_sequence=1;
 }
 
 sub cleanup {
@@ -2126,75 +2139,51 @@ sub max_length_of_command_line {
     # Find the max_length of a command line
     # Returns:
     #   number of chars on the longest command line allowed
-    # First find an upper bound
-    if(not $Global::command_line_max_len) {
-	$Global::command_line_max_len = limited_max_length();
+    if(not $Private::command_line_max_len) {
+	$Private::command_line_max_len = limited_max_length();
 	if($::opt_s) {
-	    if($::opt_s <= $Global::command_line_max_len) {
-		$Global::command_line_max_len = $::opt_s;
+	    if($::opt_s <= $Private::command_line_max_len) {
+		$Private::command_line_max_len = $::opt_s;
 	    } else {
 		print STDERR "$Global::progname: ",
-		"value for -s option should be < $Global::command_line_max_len\n";
+		"value for -s option should be < $Private::command_line_max_len\n";
 	    }
 	}
     }
-    return $Global::command_line_max_len;
+    return $Private::command_line_max_len;
+}
+
+sub max_length_limited_by_opt_s {
+    # Returns:
+    #   min(opt_s, number of chars on the longest command line allowed)
+    if(is_acceptable_command_line_length($::opt_s)) {
+	debug("-s is OK: $::opt_s\n");
+	return $::opt_s;
+    }
+    # -s is too long: Find the correct
+    return binary_find_max_length(0,$::opt_s);
 }
 
 sub limited_max_length {
     # Returns:
     #   min(opt_s, number of chars on the longest command line allowed)
-    if($::opt_s) {
-	if(is_acceptable_command_line_length($::opt_s)) {
-	    debug("-s is OK: $::opt_s\n");
-	    return $::opt_s;
-	}
-	# -s is too long: Find the correct
-	return binary_find_max_length(0,$::opt_s);
-    }
+    if($::opt_s) { return max_length_limited_by_opt_s() }
 
-#TODO
-    # Running is_acceptable_command_line_length is expensive
-    # Try to run as few times as possible.
-    # If all arguments fit on the line now, don't try a longer length
-    my ($quoted_args,$quoted_args_no_ext);
-    my $more = more_arguments();
-    my $len = 8;
-    my $is_acceptable;
-    do {
-	$len *= 16;
-	$is_acceptable = is_acceptable_command_line_length($len);
-	($quoted_args,$quoted_args_no_ext) =
-	    get_multiple_args($Global::command,$len,1);
-	$more = more_arguments();
-	debug("Test len: $len\n");
-	# Reset the getting of args
-	my $next = get_next_arg();
-	if($next) {
-	    push @$quoted_args, $next;
-	}
-	if (@$quoted_args) {
-	    unget_arg(@$quoted_args);
-	}
-    } while ($more and $is_acceptable);
-
-    if(not $is_acceptable) {
-	# There are more arguments than will fit on one line
-	# Then search for the actual max length between 0 and upper bound
-	return binary_find_max_length(int(($len)/16),$len);
-    } else {
-	# The arguments will fit on one line of length $len
-	return $len;
-    }
+    return real_max_length();
 }
 
 sub real_max_length {
+    # Returns:
+    #   The maximal command line length
+    # Use an upper bound of 8 MB if the shell allows for for infinite long lengths
+    my $upper = 8_000_000;
     my $len = 8;
     do {
+	if($len > $upper) { return $len };
 	$len *= 16;
     } while (is_acceptable_command_line_length($len));
     # Then search for the actual max length between 0 and upper bound
-    return binary_find_max_length(int(($len)/16),$len);
+    return binary_find_max_length(int($len/16),$len);
 }
 
 sub binary_find_max_length {
@@ -2218,8 +2207,9 @@ sub is_acceptable_command_line_length {
     #   0 if the command line length is too long
     #   1 otherwise
     my $len = shift;
-    $Global::is_acceptable_command_line_length++;
-    debug("$Global::is_acceptable_command_line_length $len\n");
+
+    $Private::is_acceptable_command_line_length++;
+    debug("$Private::is_acceptable_command_line_length $len\n");
     local *STDERR;
     open (STDERR,">/dev/null");
     system "true "."x"x$len;
@@ -2484,7 +2474,7 @@ sub no_of_processing_units_sshlogin {
 sub no_of_cpus {
     # Returns:
     #   Number of physical CPUs
-    if(not $Global::no_of_cpus) {
+    if(not $Private::no_of_cpus) {
 	local $/="\n"; # If delimiter is set, then $/ will be wrong
 	my $no_of_cpus = (no_of_cpus_freebsd()
 			  || no_of_cpus_darwin()
@@ -2492,19 +2482,19 @@ sub no_of_cpus {
 			  || no_of_cpus_gnu_linux()
 	    );
 	if($no_of_cpus) {
-	    $Global::no_of_cpus = $no_of_cpus;
+	    $Private::no_of_cpus = $no_of_cpus;
 	} else {
 	    warn("Cannot figure out number of cpus. Using 1");
-	    $Global::no_of_cpus = 1;
+	    $Private::no_of_cpus = 1;
 	}
     }
-    return $Global::no_of_cpus;
+    return $Private::no_of_cpus;
 }
 
 sub no_of_cores {
     # Returns:
     #   Number of CPU cores
-    if(not $Global::no_of_cores) {
+    if(not $Private::no_of_cores) {
 	local $/="\n"; # If delimiter is set, then $/ will be wrong
 	my $no_of_cores = (no_of_cores_freebsd()
 			   || no_of_cores_darwin()
@@ -2512,13 +2502,13 @@ sub no_of_cores {
 			   || no_of_cores_gnu_linux()
 	    );
 	if($no_of_cores) {
-	    $Global::no_of_cores = $no_of_cores;
+	    $Private::no_of_cores = $no_of_cores;
 	} else {
 	    warn("Cannot figure out number of CPU cores. Using 1");
-	    $Global::no_of_cores = 1;
+	    $Private::no_of_cores = 1;
 	}
     }
-    return $Global::no_of_cores;
+    return $Private::no_of_cores;
 }
 
 sub no_of_cpus_gnu_linux {
@@ -2631,6 +2621,17 @@ sub min {
 	$min = ($min < $a) ? $min : $a;
     }
     return $min;
+}
+
+sub max {
+    # Returns:
+    #   Maximum value of array
+    my $max = shift;
+    my @args = @_;
+    for my $a (@args) {
+	$max = ($max > $a) ? $max : $a;
+    }
+    return $max;
 }
 
 
@@ -2851,13 +2852,13 @@ sub progress {
 	my $completed = 0;
 	for(@workers) { $completed += ($Global::host{$_}{'completed'}||0) }
 	if($completed) {
-	    $Global::first_completed ||= time;
-	    my $avgtime = (time-$Global::first_completed)/$completed;
+	    $Private::first_completed ||= time;
+	    my $avgtime = (time-$Private::first_completed)/$completed;
 	    my $this_eta = ($Global::total_jobs - $completed) * $avgtime;
-	    $Global::eta ||= $this_eta;
+	    $Private::eta ||= $this_eta;
 	    # Smooth the eta so it does not jump wildly
-	    $Global::eta = 0.9 * $Global::eta + 0.1 * $this_eta;
-	    $eta = sprintf("ETA: %ds ", $Global::eta);
+	    $Private::eta = 0.9 * $Private::eta + 0.1 * $this_eta;
+	    $eta = sprintf("ETA: %ds ", $Private::eta);
 	}
     }
     
@@ -2974,15 +2975,15 @@ sub columns {
     # Get the number of columns of the display
     # Returns:
     #   number of columns of the screen
-    if(not $Global::columns) {
-	$Global::columns = $ENV{'COLUMNS'};
-	if(not $Global::columns) {
+    if(not $Private::columns) {
+	$Private::columns = $ENV{'COLUMNS'};
+	if(not $Private::columns) {
 	    my $resize = qx{ resize 2>/dev/null };
-	    $resize =~ /COLUMNS=(\d+);/ and do { $Global::columns = $1; };
+	    $resize =~ /COLUMNS=(\d+);/ and do { $Private::columns = $1; };
 	}
-	$Global::columns ||= 80;
+	$Private::columns ||= 80;
     }
-    return $Global::columns;
+    return $Private::columns;
 }
 
 sub start_more_jobs {
@@ -3051,12 +3052,11 @@ sub start_job {
     my ($pid,$out,$err,%out,%err,$outname,$errname,$name);
     if($Global::grouped) {
 	# To group we create temporary files for STDOUT and STDERR
-	# Filehandles are global, so to not overwrite the filehandles use a hash with new keys
 	# To avoid the cleanup unlink the files immediately (but keep them open)
-	$outname = ++$Global::TmpFilename;
+	$outname = ++$Private::TmpFilename;
 	($out{$outname},$name) = tempfile(SUFFIX => ".par");
 	unlink $name;
-	$errname = ++$Global::TmpFilename;
+	$errname = ++$Private::TmpFilename;
 	($err{$errname},$name) = tempfile(SUFFIX => ".par");
 	unlink $name;
 
@@ -3089,9 +3089,9 @@ sub start_job {
     $Global::total_started++;
     debug("$Global::total_running processes. Starting: $command\n");
     #print STDERR "LEN".length($command)."\n";
-    $Global::job_start_sequence++;
+    $Private::job_start_sequence++;
 
-    if($::opt_a and $Global::job_start_sequence == 1) {
+    if($::opt_a and $Private::job_start_sequence == 1) {
 	# Give STDIN to the first job if using -a
 	$pid = open3("<&STDIN", ">&STDOUT", ">&STDERR", $command) ||
 	    die("open3 failed. Report a bug to <bug-parallel\@gnu.org>\n");
@@ -3109,14 +3109,14 @@ sub start_job {
 	or die "Can't dup \$Global::original_stderr: $!";
 
     if($Global::grouped) {
-	return ("seq" => $Global::job_start_sequence,
+	return ("seq" => $Private::job_start_sequence,
 		"pid" => $pid,
 		"out" => $out{$outname},
 		"err" => $err{$errname},
 		"sshlogin" => $sshlogin,
 		"command" => $command);
     } else {
-	return ("seq" => $Global::job_start_sequence,
+	return ("seq" => $Private::job_start_sequence,
 		"pid" => $pid,
 		"sshlogin" => $sshlogin,
 		"command" => $command);
@@ -3244,7 +3244,9 @@ sub sshcommand_of_sshlogin {
 	    $serverlogin = $sshlogin;
 	    #my $master = "ssh -MTS ".control_path_dir()."/ssh-%r@%h:%p ".$serverlogin;
 	    my $master = "ssh -MTS ".control_path_dir()."/ssh-%r@%h:%p ".$serverlogin." sleep 1";
-	    if(not $Global::control_path{$control_path}++) {
+	    if(not $Private::control_path{$control_path}++) {
+		# Master is not running for this control_path
+		# Start it
 		my $pid = fork();
 		if($pid) {
 		    $Global::sshmaster{$pid}++;
@@ -3264,10 +3266,10 @@ sub sshcommand_of_sshlogin {
 sub control_path_dir {
     # Returns:
     #   path to directory
-    if(not $Global::control_path_dir) {
-	$Global::control_path_dir = tempdir("/tmp/parallel-ssh-XXXX", CLEANUP => 1 );
+    if(not $Private::control_path_dir) {
+	$Private::control_path_dir = tempdir("/tmp/parallel-ssh-XXXX", CLEANUP => 1 );
     }
-    return $Global::control_path_dir;
+    return $Private::control_path_dir;
 }
 
 sub sshtransfer {
@@ -3426,9 +3428,9 @@ sub reaper {
     # Start another job
     # Returns: N/A
     do_not_reap();
-    $Global::reaperlevel++;
+    $Private::reaperlevel++;
     my $stiff;
-    debug("Reaper called $Global::reaperlevel\n");
+    debug("Reaper called $Private::reaperlevel\n");
     while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
 	if($Global::sshmaster{$stiff}) {
 	    # This is one of the ssh -M: ignore
@@ -3444,11 +3446,12 @@ sub reaper {
 	if($Global::keeporder and not $print_now) {
 	    $Global::print_later{$Global::running{$stiff}{"seq"}} =
 		$Global::running{$stiff};
-	    while($Global::print_later{$Global::job_end_sequence}) {
-		debug("Found job end $Global::job_end_sequence");
-		print_job($Global::print_later{$Global::job_end_sequence});
-		delete $Global::print_later{$Global::job_end_sequence};
-		$Global::job_end_sequence++;
+	    $Private::job_end_sequence ||= 1;
+	    while($Global::print_later{$Private::job_end_sequence}) {
+		debug("Found job end $Private::job_end_sequence");
+		print_job($Global::print_later{$Private::job_end_sequence});
+		delete $Global::print_later{$Private::job_end_sequence};
+		$Private::job_end_sequence++;
 	    }
 	} else {
 	    print_job ($Global::running{$stiff});
@@ -3482,8 +3485,8 @@ sub reaper {
 	start_more_jobs();
     }
     reap_if_needed();
-    debug("Reaper exit $Global::reaperlevel\n");
-    $Global::reaperlevel--;
+    debug("Reaper exit $Private::reaperlevel\n");
+    $Private::reaperlevel--;
 }
 
 #
@@ -3604,12 +3607,4 @@ sub my_dump {
 }
 
 # Keep perl -w happy
-$main::opt_u = $main::opt_e = $main::opt_c = $main::opt_f =
-$main::opt_q = $main::opt_0 = $main::opt_s = $main::opt_v =
-$main::opt_g = $main::opt_P = $main::opt_D = $main::opt_m =
-$main::opt_X = $main::opt_x = $main::opt_k = $main::opt_d =
-$main::opt_P = $main::opt_i = $main::opt_p = $main::opt_a =
-$main::opt_version = $main::opt_L = $main::opt_l =
-$main::opt_show_limits = $main::opt_n = $main::opt_e = $main::opt_verbose =
-$main::opt_E = $main::opt_r = $Global::xargs = $Global::keeporder =
-$Global::control_path = 0;
+$Private::control_path = 0;

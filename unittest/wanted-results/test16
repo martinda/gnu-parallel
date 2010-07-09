@@ -63,8 +63,8 @@ rm -- 中国\ \(Zhōngguó\)/abc-中国\ \(Zhōngguó\)-中国\ \(Zhōngguó\)
 a1.gif 2.gif 3.gif 4.gif 5.gif 6.gifb1 2 3 4 5 6c1 2 3 4 5 6
 a1.gifb1c1 a2.gifb2c2 a3.gifb3c3 a4.gifb4c4 a5.gifb5c5 a6.gifb6c6
 ### Test -m with 60000 args
-98c94dcab1efedab3f820935d230bc77  -
-     12  180011 1286837
+cded9cd15e00550b08e57afc0172caa8  -
+     12  180000 1286718
 ### Test -X with 60000 args
 12de4813eda45d364a51bef697eee299  -
      13  120000 1586682
@@ -79,15 +79,15 @@ a1.gifb1c1 abc a2.gifb2c2 abc a3.gifb3c3 abc a4.gifb4c4 abc a5.gifb5c5 abc
 a6.gifb6c6 abc a7.gifb7c7 abc a8.gifb8c8 abc a9.gifb9c9 abc a10.gifb10c10
 abc a11.gifb11c11 abc a12.gifb12c12 abc a13.gifb13c13 abc a14.gifb14c14
 abc a15.gifb15c15 abc
-a1.gif 2.gif 3.gif 4.gif 5.gif b1 2 3 4 5 6c1 2 3 4 5 6
-a6.gif 7.gif 8.gif 9.gif 10.gif b6 7 8 9 10 11c6 7 8 9 10 11
-a11.gif 12.gif 13.gif 14.gif b11 12 13 14 15c11 12 13 14 15
+a1.gif 2.gif 3.gif 4.gif 5.gif b1 2 3 4 5 c1 2 3 4 5
+a6.gif 7.gif 8.gif 9.gif 10.gif b6 7 8 9 10 c6 7 8 9 10
+a11.gif 12.gif 13.gif 14.gif b11 12 13 14 c11 12 13 14
 a15.gif b15 c15
 a1.gifb1c1 a2.gifb2c2 a3.gifb3c3 a4.gifb4c4 a5.gifb5c5 a6.gifb6c6
 a7.gifb7c7 a8.gifb8c8 a9.gifb9c9 a10.gifb10c10 a11.gifb11c11 a12.gifb12c12
 a13.gifb13c13 a14.gifb14c14 a15.gifb15c15
-a1.gif 2.gif 3.gif 4.gif 5.gif 6.gif 7.gifb1 2 3 4 5 6 7 8c1 2 3 4 5 6 7 8
-a8.gif 9.gif 10.gif 11.gif 12.gif 13.gifb8 9 10 11 12 13 14c8 9 10 11 12 13 14
+a1.gif 2.gif 3.gif 4.gif 5.gif 6.gif 7.gifb1 2 3 4 5 6 7c1 2 3 4 5 6 7
+a8.gif 9.gif 10.gif 11.gif 12.gif 13.gifb8 9 10 11 12 13c8 9 10 11 12 13
 a14.gif 15.gifb14 15c14 15
 ### Test -I with shell meta chars
 9

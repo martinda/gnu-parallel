@@ -30,3 +30,13 @@ b
 echo a
 a
 cat
+### Bug made 4 5 go before 1 2 3
+1
+2
+3
+4
+5
+### Bug made 3 go before 1 2
+1
+2
+3
