@@ -1204,7 +1204,7 @@ optimized for using B<NUL> as separator but are optimized for
 B<newline> as separator. E.g B<head>, B<tail>, B<awk>, B<ls>, B<echo>,
 B<sed>, B<tar -v>, B<perl> (B<-0> and \0 instead of \n), B<locate>
 (requires using B<-0>), B<find> (requires using B<-print0>), B<grep>
-(requires user to use B<-z> or B<-Z>).
+(requires user to use B<-z> or B<-Z>), B<sort> (requires using B<-z>).
 
 So GNU B<parallel>'s newline separation can be emulated with:
 
