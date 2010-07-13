@@ -6,7 +6,9 @@ parallel - build and execute shell command lines from standard input in parallel
 
 =head1 SYNOPSIS
 
-B<parallel> [options] [I<command> [arguments]] [< list_of_arguments]
+B<parallel> [options] [I<command> [arguments]] < list_of_arguments
+
+B<parallel> [options] [I<command> [arguments]] B<:::> arguments
 
 =head1 DESCRIPTION
 
@@ -20,12 +22,13 @@ If you use B<xargs> today you will find GNU B<parallel> very easy to
 use as GNU B<parallel> is written to have the same options as
 B<xargs>. If you write loops in shell, you will find GNU B<parallel>
 may be able to replace most of the loops and make them run faster by
-running several jobs in parallel. If you use B<ppss> or B<pexec> you will find
-GNU B<parallel> will often make the command easier to read.
+running several jobs in parallel. If you use B<ppss> or B<pexec> you
+will find GNU B<parallel> will often make the command easier to read.
 
-GNU B<parallel> makes sure output from the commands is the same output as
-you would get had you run the commands sequentially. This makes it
-possible to use output from GNU B<parallel> as input for other programs.
+GNU B<parallel> makes sure output from the commands is the same output
+as you would get had you run the commands sequentially. This makes it
+possible to use output from GNU B<parallel> as input for other
+programs.
 
 For each line of input GNU B<parallel> will execute I<command> with
 the line as arguments. If no I<command> is given, the line of input is
@@ -77,9 +80,9 @@ B<{.}> can be changed with B<-U>.
 
 =item B<:::> (beta testing)
 
-Use arguments on the command line as input instead of stdin (standard
-input). Unlike other options for GNU B<parallel> B<:::> is placed
-after the command and before the arguments.
+Use arguments from the command line as input instead of from stdin
+(standard input). Unlike other options for GNU B<parallel> B<:::> is
+placed after the I<command> and before the arguments.
 
 The following are equivalent:
 
@@ -96,6 +99,14 @@ argument separator to something else. See also B<--arg-sep>.
 stdin (standard input) will be passed to the first process run.
 
 If B<--arg-file> is set arguments from that file will be appended.
+
+
+=item B<::::> (unimplemented)
+
+Use arguments from the command line as files for input. One line will
+be read from each of the files. The arguments can be access in the
+command as {1} .. {n}, so {1} will be a line from the first file, and
+{6} will refer to the corresponding line from the 6th file.
 
 
 =item B<--null>
@@ -334,7 +345,7 @@ end in the sequence 3 1 4 2 the output will still be 1 2 3 4.
 
 Use at most I<max-lines> nonblank input lines per command line.
 Trailing blanks cause an input line to be logically continued on the
-next input line.  Implies B<-x>.
+next input line.
 
 Implies B<-X> unless B<-m> is set.
 
@@ -383,6 +394,21 @@ Use at most I<max-args> arguments per command line.  Fewer than
 I<max-args> arguments will be used if the size (see the B<-s> option)
 is exceeded, unless the B<-x> option is given, in which case
 GNU B<parallel> will exit.
+
+Implies B<-X> unless B<-m> is set.
+
+
+=item B<--max-replace-args>=I<max-args> (unimplemented)
+
+=item B<-N> I<max-args> (unimplemented)
+
+Use at most I<max-args> arguments per command line. Like B<-n> but
+also makes replacement strings {1} .. {I<max-args>} that represents
+argument 1 .. I<max-args>. If too few args the {number} will be empty.
+
+This will set the owner of the homedir to the user:
+
+B<tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}>
 
 Implies B<-X> unless B<-m> is set.
 
@@ -778,6 +804,10 @@ To put the output in a file called <name>.dir:
 
 B<ls | parallel '(echo -n {}" "; ls {}|wc -l) >> B<{}.dir'>
 
+Even small shell scripts can be run by GNU B<parallel>:
+
+B<find . | parallel 'a={}; name=${a##*/}; upper=$(echo "$name" | tr "[:lower:]" "[:upper:]"); echo "$name - $upper"'>
+
 
 =head1 EXAMPLE: Removing file extension when processing files
 
@@ -1021,6 +1051,14 @@ With the file I<mycomputers> containing the list of computers it becomes:
 
   find logs/ -name '*.gz' | parallel --sshloginfile mycomputers \
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
+
+
+=head1 EXAMPLE: Distributing work to local and remote computers
+
+Convert *.mp3 to *.ogg running one process per CPU core on local computer and server2:
+
+  parallel --trc {.}.ogg -j+0 -S server2,: \
+  'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg' ::: *.mp3
 
 
 =head1 EXAMPLE: Working as cat | sh. Ressource inexpensive jobs and evaluation
@@ -2765,7 +2803,7 @@ sub get_next_arg {
 		return get_next_arg();
 	    }
 	}
-	if($Global::max_lines) {
+	if($Global::max_lines and more_arguments()) {
 	    if($arg =~ /\s$/) {
 		# Trailing space => continued on next line
 		$arg .= get_next_arg();
@@ -3502,7 +3540,8 @@ sub die_usage {
 sub usage {
     # Returns: N/A
     print "Usage:\n";
-    print "$Global::progname [options] [command [arguments]] < list_of_arguments\n";
+    print "$Global::progname [options] [command [arguments]] < list_of_arguments)\n";
+    print "$Global::progname [options] [command [arguments]] ::: arguments\n";
     print "\n";
     print "See 'man $Global::progname' for the options\n";
 }
