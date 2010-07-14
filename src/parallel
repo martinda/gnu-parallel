@@ -82,7 +82,7 @@ B<{.}> can be changed with B<-U>.
 
 =item B<{>I<n>B<}>
 
-Argument from argument file I<n> or the I<n>'th argument. See B<::::>
+Argument from argument file I<n> or the I<n>'th argument. See B<-a>
 and B<-N>.
 
 B<{>I<n>B<}> can be used the same places as B<{}>.
@@ -113,11 +113,9 @@ If B<--arg-file> is set arguments from that file will be appended.
 
 =item B<::::> I<argfiles> (beta test)
 
-Use arguments from the command line as arguments files for input. One
-line will be read from each of the files. The arguments can be
-accessed in the command as B<{1}> .. B<{>I<n>B<}>, so B<{1}> will be a
-line from the first file, and B<{6}> will refer to the line with the
-same line number from the 6th file.
+Alternative version of B<-a> I<argfile1> B<-a> I<argfile2> ...
+
+See B<-a>.
 
 
 =item B<--null>
@@ -136,6 +134,12 @@ for processing arguments that may contain \n (newline).
 Read items from the file I<input-file> instead of stdin (standard input).  If
 you use this option, stdin is given to the first process run.
 Otherwise, stdin is redirected from /dev/null.
+
+If multiple B<-a> are given, one line will be read from each of the
+files. The arguments can be accessed in the command as B<{1}>
+.. B<{>I<n>B<}>, so B<{1}> will be a line from the first file, and
+B<{6}> will refer to the line with the same line number from the 6th
+file.
 
 
 =item B<--arg-sep> I<sep-str> (beta testing)
@@ -1947,6 +1951,7 @@ sub parse_options {
 		}
 		$Global::total_jobs += @ARGV;
 		@ARGV=();
+		last;
 	    } else {
 		push @new_argv, $arg;
 	    }
@@ -1956,10 +1961,7 @@ sub parse_options {
     }
 
     if(grep /^::::$/o, @ARGV) {
-	# max-replace-args
-	if(not @::opt_a) { push @::opt_a, "/dev/null"; }
-
-	# read all the files and merge them
+	# convert :::: to multiple -a
 	my @new_argv = ();
 	my @argument_files;
 	while(@ARGV) {
@@ -1973,36 +1975,7 @@ sub parse_options {
 	}
 	# Output: @ARGV = command option
 	@ARGV=@new_argv;
-	$Global::input_is_filename ||= (@ARGV);
-
-	$::opt_N = $#argument_files+1;
-	$Global::max_number_of_args = $#argument_files+1;
-
-	# read the files
-	my @content;
-	my $max_lineno = 0;
-	my $in_fh = gensym;
-	for (my $fileno = 0; $fileno <= $#argument_files; $fileno++) {
-	    if(not open ($in_fh, $argument_files[$fileno])) {
-		print STDERR ("$Global::progname: Cannot open $argument_files[$fileno]\n");
-		    exit (255);
-	    }
-	    for (my $lineno=0; $content[$fileno][$lineno] = get_next_arg_from_fh($in_fh); $lineno++) {
-		$max_lineno = max($max_lineno,$lineno);
-	    }
-	    close $in_fh;
-	}
-	for (my $lineno=0; $lineno <= $max_lineno; $lineno++) {
-	    for (my $fileno = 0; $fileno <= $#argument_files; $fileno++) {
-		my $arg = $content[$fileno][$lineno];
-		if(defined $arg) {
-		    unget_arg($arg);
-		} else {
-		    unget_arg("");
-		}
-	    }
-	}
-	$Global::total_jobs += $max_lineno;
+	push @::opt_a, @argument_files;
     }
 
     # must be done after ::: and :::: because they mess with @ARGV
@@ -2012,21 +1985,10 @@ sub parse_options {
 	# must be done after opt_arg_sep
 	if($#::opt_a == 0) {
 	    # One -a => xargs compatibility
-	    if(not open(ARGFILE,"<",$::opt_a[0])) {
-		print STDERR "$Global::progname: ".
-		    "Cannot open input file `$::opt_a[0]': ".
-		    "No such file or directory\n";
-		exit(255);
-	    }
-	    $Global::argfile = *ARGFILE;
+	    $Global::argfile = open_or_exit($::opt_a[0]);
 	} else {
-	    if(not open(ARGFILE,"<","/dev/null")) {
-		print STDERR "$Global::progname: ".
-		    "Cannot open input file `/dev/null': ".
-		    "No such file or directory\n";
-		exit(255);
-	    }
-	    $Global::argfile = *ARGFILE;
+	    # Multiple -a => xapply style
+	    $Global::argfile = open_or_exit("/dev/null");
 	    $::opt_N = $#::opt_a+1;
 	    $Global::max_number_of_args = $#::opt_a+1;
 	    # read the files
@@ -2034,10 +1996,7 @@ sub parse_options {
 	    my $max_lineno = 0;
 	    my $in_fh = gensym;
 	    for (my $fileno = 0; $fileno <= $#::opt_a; $fileno++) {
-		if(not open ($in_fh, $::opt_a[$fileno])) {
-		    print STDERR ("$Global::progname: Cannot open $::opt_a[$fileno]\n");
-		    exit (255);
-		}
+		$in_fh = open_or_exit($::opt_a[$fileno]);
 		for (my $lineno=0; 
 		     $content[$fileno][$lineno] = get_next_arg_from_fh($in_fh);
 		     $lineno++) {
@@ -2067,7 +2026,6 @@ sub parse_options {
 	# Needs to be done after :::: and @opt_a, as they can set $::opt_N
 	$Global::Xargs = 1;
     }
-
 
     if(defined $::opt_eta) {
 	# must be done after opt_a
@@ -2107,6 +2065,18 @@ sub parse_options {
 		$Global::default_simultaneous_sshlogins;
 	}
     }
+}
+
+sub open_or_exit {
+    my $file = shift;
+    my $fh = gensym;
+    if(not open($fh,"<",$file)) {
+	print STDERR "$Global::progname: ".
+	    "Cannot open input file `$file': ".
+	    "No such file or directory\n";
+	exit(255);
+    }
+    return $fh;
 }
 
 sub cleanup {

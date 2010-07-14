@@ -32,3 +32,13 @@ echo '### Quoting if there is no command and 2 arg files'
 parallel -kv :::: <(echo 'echo a') <(echo 'echo b')
 echo '### Quoting if there is no command and 2 arg files of uneven length'
 parallel -kv :::: <(echo 'echo a';echo echo a1) <(echo 'echo b')
+
+echo '### Test multiple -a'
+parallel -kv -a <(echo a) -a <(echo b) echo {2} {1}
+parallel -kv echo {2} {1} :::: <(echo a) <(echo b)
+echo '### Multiple -a: An unused file'
+parallel -kv -a <(echo a) -a <(echo b) -a <(echo c) echo {2} {1}
+parallel -kv echo {2} {1} :::: <(echo a) <(echo b) <(echo c)
+echo '### Multiple -a: nonexistent'
+stdout parallel -kv echo {2} {1} :::: nonexist nonexist2
+stdout parallel -kv -a nonexist -a nonexist2 echo {2} {1}

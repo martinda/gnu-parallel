@@ -10,7 +10,7 @@
 3 4 5
 6 7
 ### Test :::: on nonexistent
-parallel: Cannot open nonexistent
+parallel: Cannot open input file `nonexistent': No such file or directory
 ### Test :::: two files
 1 5
 2 6
@@ -81,3 +81,16 @@ echo a echo b
 a echo b
 echo a1 
 a1
+### Test multiple -a
+echo b a
+b a
+echo b a
+b a
+### Multiple -a: An unused file
+echo b a
+b a
+echo b a
+b a
+### Multiple -a: nonexistent
+parallel: Cannot open input file `nonexist': No such file or directory
+parallel: Cannot open input file `nonexist': No such file or directory
