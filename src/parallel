@@ -1801,7 +1801,7 @@ if($::opt_halt_on_error) {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100708;
+    $Global::version = 20100709;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -1870,7 +1870,7 @@ sub parse_options {
 	       "max-procs|P=s" => \$::opt_P,
 	       "delimiter|d=s" => \$::opt_d,
 	       "max-chars|s=i" => \$::opt_s,
-	       "arg-file|a=s" => \$::opt_a,
+	       "arg-file|a=s" => \@::opt_a,
 	       "no-run-if-empty|r" => \$::opt_r,
 	       "replace|i:s" => \$::opt_i,
 	       "E=s" => \$::opt_E,
@@ -1932,7 +1932,7 @@ sub parse_options {
 	# Arguments on the command line.
 	# Ignore STDIN by reading from /dev/null
 	# or another file if user has given --arg-file
-	$::opt_a ||= "/dev/null";
+	if(not @::opt_a) { push @::opt_a, "/dev/null"; }
 
 	# Input: @ARGV = command option ::: arg arg arg
 	my @new_argv = ();
@@ -1957,7 +1957,7 @@ sub parse_options {
 
     if(grep /^::::$/o, @ARGV) {
 	# max-replace-args
-	$::opt_a ||= "/dev/null";
+	if(not @::opt_a) { push @::opt_a, "/dev/null"; }
 
 	# read all the files and merge them
 	my @new_argv = ();
@@ -2008,25 +2008,67 @@ sub parse_options {
     # must be done after ::: and :::: because they mess with @ARGV
     $Global::input_is_filename ||= (@ARGV);
 
+    if(@::opt_a) {
+	# must be done after opt_arg_sep
+	if($#::opt_a == 0) {
+	    # One -a => xargs compatibility
+	    if(not open(ARGFILE,"<",$::opt_a[0])) {
+		print STDERR "$Global::progname: ".
+		    "Cannot open input file `$::opt_a[0]': ".
+		    "No such file or directory\n";
+		exit(255);
+	    }
+	    $Global::argfile = *ARGFILE;
+	} else {
+	    if(not open(ARGFILE,"<","/dev/null")) {
+		print STDERR "$Global::progname: ".
+		    "Cannot open input file `/dev/null': ".
+		    "No such file or directory\n";
+		exit(255);
+	    }
+	    $Global::argfile = *ARGFILE;
+	    $::opt_N = $#::opt_a+1;
+	    $Global::max_number_of_args = $#::opt_a+1;
+	    # read the files
+	    my @content;
+	    my $max_lineno = 0;
+	    my $in_fh = gensym;
+	    for (my $fileno = 0; $fileno <= $#::opt_a; $fileno++) {
+		if(not open ($in_fh, $::opt_a[$fileno])) {
+		    print STDERR ("$Global::progname: Cannot open $::opt_a[$fileno]\n");
+		    exit (255);
+		}
+		for (my $lineno=0; 
+		     $content[$fileno][$lineno] = get_next_arg_from_fh($in_fh);
+		     $lineno++) {
+		    $max_lineno = max($max_lineno,$lineno);
+		}
+		close $in_fh;
+	    }
+	    for (my $lineno=0; $lineno <= $max_lineno; $lineno++) {
+		for (my $fileno = 0; $fileno <= $#::opt_a; $fileno++) {
+		    my $arg = $content[$fileno][$lineno];
+		    if(defined $arg) {
+			unget_arg($arg);
+		    } else {
+			unget_arg("");
+		    }
+		}
+	    }
+	    $Global::total_jobs += $max_lineno;
+	}
+    }
+
     if(($::opt_l || $::opt_L || $::opt_n || $::opt_N || $::opt_s) and not
        ($::opt_m or $::opt_X)) {
 	# These --max-line, -l, -L, --max-args, -n, --max-chars, -s
 	# do not make sense without -X or -m
 	# so default to -X
-	# Needs to be done after ::::, as that can set $::opt_N
+	# Needs to be done after :::: and @opt_a, as they can set $::opt_N
 	$Global::Xargs = 1;
     }
 
-    if(defined $::opt_a) {
-	# must be done after opt_arg_sep
-	if(not open(ARGFILE,"<",$::opt_a)) {
-	    print STDERR "$Global::progname: ".
-		"Cannot open input file `$::opt_a': ".
-		"No such file or directory\n";
-	    exit(255);
-	}
-	$Global::argfile = *ARGFILE;
-    }
+
     if(defined $::opt_eta) {
 	# must be done after opt_a
 	$::opt_progress = $::opt_eta;
@@ -3291,7 +3333,7 @@ sub start_job {
     #print STDERR "LEN".length($command)."\n";
     $Private::job_start_sequence++;
 
-    if($::opt_a and $Private::job_start_sequence == 1) {
+    if(@::opt_a and $Private::job_start_sequence == 1) {
 	# Give STDIN to the first job if using -a
 	$pid = open3("<&STDIN", ">&STDOUT", ">&STDERR", $command) ||
 	    die("open3 failed. Report a bug to <bug-parallel\@gnu.org>\n");
