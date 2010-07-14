@@ -40,3 +40,22 @@ cat
 1
 2
 3
+### Bug did not quote
+echo \>
+>
+echo \>
+>
+echo \> 2
+> 2
+> 2
+### Must not quote
+echo | wc -l
+1
+echo | wc -l
+1
+echo a b c | wc -w
+3
+echo a b c | wc -w
+3
+echo a b | wc -w
+2

@@ -1,41 +1,8 @@
-FIXED BUG: time parallel -j+0 --eta -Sserver1,server2,server3,: \
---transfer --return {.}.bz2 --cleanup 'zcat {} | bzip2 -9 > {.}.bz2' ::: *gz
-Time is negative
+FIXED BUG: Dependent quoting of arguments after :::
+FIXED BUG: parallel echo {1} {2} :::: <(echo '>') <(echo b)
+Implemented ::::.
 
-FIXED BUG: echo "foo,bar,baz" | parallel -d, -L 1 echo
-Gave warning.
-
-xapply compatability
-
-xapply -p/dev/null -f 'diff %1 %2' manifest1 checklist1
-BUG: parallel diff {1} {2} :::: manifest1 checklist1
-
-tr ':' '\012' < /etc/passwd | xapply -7 -nf 'chown %1 %6' - - - - - - -
-BUG: tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}
-
-xapply '(cd %1 && make all)' */
-parallel 'cd {} && make all' ::: *
-
-xapply -f 'diff %1 ../version5/%1' manifest | more
-parallel diff {} ../version5/{} < manifest | more
-
-xapply 'indent' *.c
-parallel indent ::: *.c
-
-find ~ksb/bin -type f ! -perm -111 -print | xapply -f -v 'chmod a+x' -
-find ~ksb/bin -type f ! -perm -111 -print | parallel -v chmod a+x
-
-find ... | xapply -f -5 -i /dev/tty 'vi' - - - - -
-sh <(find ... |parallel -n5 echo vi)
-
-xapply -fn "" /etc/passwd
-parallel -k echo /etc/passwd
-
-xapply '[ -d %1/RCS ] || echo %1' */
-parallel '[ -d {}/RCS ] || echo {}' ::: *
-
-xapply -f '[ -f %1 ] && echo %1' List | ...
-parallel '[ -f {} ] && echo {}' < List
+multiple -a == ::::
 
 # Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
 # argumenter, der er? Lav system limits lokalt og lad det være max

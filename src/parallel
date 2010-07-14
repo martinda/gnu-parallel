@@ -10,6 +10,8 @@ B<parallel> [options] [I<command> [arguments]] < list_of_arguments
 
 B<parallel> [options] [I<command> [arguments]] B<:::> arguments
 
+B<parallel> [options] [I<command> [arguments]] B<::::> argfile(s)
+
 =head1 DESCRIPTION
 
 GNU B<parallel> is a shell tool for executing jobs in parallel locally
@@ -78,7 +80,15 @@ B<{.}> can be used the same places as B<{}>. The replacement string
 B<{.}> can be changed with B<-U>.
 
 
-=item B<:::> (beta testing)
+=item B<{>I<n>B<}>
+
+Argument from argument file I<n> or the I<n>'th argument. See B<::::>
+and B<-N>.
+
+B<{>I<n>B<}> can be used the same places as B<{}>.
+
+
+=item B<:::> I<arguments> (beta testing)
 
 Use arguments from the command line as input instead of from stdin
 (standard input). Unlike other options for GNU B<parallel> B<:::> is
@@ -101,12 +111,13 @@ stdin (standard input) will be passed to the first process run.
 If B<--arg-file> is set arguments from that file will be appended.
 
 
-=item B<::::> (unimplemented)
+=item B<::::> I<argfiles> (beta test)
 
-Use arguments from the command line as files for input. One line will
-be read from each of the files. The arguments can be access in the
-command as {1} .. {n}, so {1} will be a line from the first file, and
-{6} will refer to the corresponding line from the 6th file.
+Use arguments from the command line as arguments files for input. One
+line will be read from each of the files. The arguments can be
+accessed in the command as B<{1}> .. B<{>I<n>B<}>, so B<{1}> will be a
+line from the first file, and B<{6}> will refer to the line with the
+same line number from the 6th file.
 
 
 =item B<--null>
@@ -398,13 +409,14 @@ GNU B<parallel> will exit.
 Implies B<-X> unless B<-m> is set.
 
 
-=item B<--max-replace-args>=I<max-args> (unimplemented)
+=item B<--max-replace-args>=I<max-args> (beta test)
 
-=item B<-N> I<max-args> (unimplemented)
+=item B<-N> I<max-args> (beta test)
 
 Use at most I<max-args> arguments per command line. Like B<-n> but
-also makes replacement strings {1} .. {I<max-args>} that represents
-argument 1 .. I<max-args>. If too few args the {number} will be empty.
+also makes replacement strings B<{1}> .. B<{>I<max-args>B<}> that
+represents argument 1 .. I<max-args>. If too few args the {I<n>} will
+be empty.
 
 This will set the owner of the homedir to the user:
 
@@ -1406,7 +1418,7 @@ killall -SIGUSR1 parallel # Not quite equivalent: Only shows the currently runni
 B<pexec> is also a tool for running jobs in parallel.
 
 Here are the examples from B<pexec>'s info page with the equivalent
-using parallel:
+using GNU B<parallel>:
 
 pexec -o sqrt-%s.dat -p "$(seq 10)" -e NUM -n 4 -c -- \
   'echo "scale=10000;sqrt($NUM)" | bc'
@@ -1539,6 +1551,58 @@ B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
 B<cat files | parallel -j+0 cmd>
 
 
+=head2 DIFFERENCES BETWEEN xapply AND GNU Parallel
+
+B<xapply> can run jobs in parallel on the local computer.
+
+Here are the examples from B<xapply>'s man page with the equivalent
+using GNU B<parallel>:
+
+xapply '(cd %1 && make all)' */
+
+parallel 'cd {} && make all' ::: */
+
+xapply -f 'diff %1 ../version5/%1' manifest | more
+
+parallel diff {} ../version5/{} < manifest | more
+
+xapply -p/dev/null -f 'diff %1 %2' manifest1 checklist1
+
+parallel diff {1} {2} :::: manifest1 checklist1
+
+xapply 'indent' *.c
+
+parallel indent ::: *.c
+
+find ~ksb/bin -type f ! -perm -111 -print | xapply -f -v 'chmod a+x' -
+
+find ~ksb/bin -type f ! -perm -111 -print | parallel -v chmod a+x
+
+find */ -... | fmt 960 1024 | xapply -f -i /dev/tty 'vi' -
+
+sh <(find */ -... | parallel -s 1024 echo vi)
+
+find ... | xapply -f -5 -i /dev/tty 'vi' - - - - -
+
+sh <(find ... |parallel -n5 echo vi)
+
+xapply -fn "" /etc/passwd
+
+parallel -k echo < /etc/passwd
+
+tr ':' '\012' < /etc/passwd | xapply -7 -nf 'chown %1 %6' - - - - - - -
+
+tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}
+
+xapply '[ -d %1/RCS ] || echo %1' */
+
+parallel '[ -d {}/RCS ] || echo {}' ::: */
+
+xapply -f '[ -f %1 ] && echo %1' List | ...
+
+parallel '[ -f {} ] && echo {}' < List | ...
+
+
 =head2 DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel
 
 ClusterSSH solves a different problem than GNU B<parallel>.
@@ -1549,7 +1613,7 @@ several machines that are almost identical.
 
 GNU B<parallel> runs the same (or different) commands with different
 arguments in parallel possibly using remote machines to help
-computing. If more than one machine is listed in -S GNU B<parallel> may
+computing. If more than one machine is listed in B<-S> GNU B<parallel> may
 only use one of these (e.g. if there are 8 jobs to be run and one
 machine has 8 cores).
 
@@ -1562,6 +1626,14 @@ B<cat hostlist | parallel ssh {} do_stuff>
 
 Filenames beginning with '-' can cause some commands to give
 unexpected results, as it will often be interpreted as an option.
+
+Because the way newline is quoted this will not work:
+
+echo 1,2,3 | parallel -vkd, "echo 'a{}'"
+
+However, this will work:
+
+echo 1,2,3 | parallel -vkd, echo a{}
 
 
 =head1 REPORTING BUGS
@@ -1804,6 +1876,7 @@ sub parse_options {
 	       "E=s" => \$::opt_E,
 	       "eof|e:s" => \$::opt_E,
 	       "max-args|n=i" => \$::opt_n,
+	       "max-replace-args|N=i" => \$::opt_N,
 	       "help|h" => \$::opt_help,
 	       "L=i" => \$::opt_L,
 	       "max-lines|l:i" => \$::opt_l,
@@ -1814,7 +1887,6 @@ sub parse_options {
 	       "exit|x" => \$::opt_x,
 	) || die_usage();
     $Global::debug = (defined $::opt_D);
-    $Global::input_is_filename = (@ARGV);
     if(defined $::opt_m) { $Global::xargs = 1; }
     if(defined $::opt_X) { $Global::Xargs = 1; }
     if(defined $::opt_v) { $Global::verbose = 1; }
@@ -1839,6 +1911,7 @@ sub parse_options {
 	$Global::max_number_of_args = $Global::max_lines;
     }
     if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
+    if(defined $::opt_N and $::opt_N) { $Global::max_number_of_args = $::opt_N; }
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_arg_sep) { $Global::arg_sep = $::opt_arg_sep; }
     if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
@@ -1855,13 +1928,6 @@ sub parse_options {
 	$::opt_cleanup = 1;
     }
 
-    if(($::opt_l || $::opt_L || $::opt_n || $::opt_s) and not
-       ($::opt_m or $::opt_X)) {
-	# These --max-line, -l, -L, --max-args, -n, --max-chars, -s
-	# do not make sense without -X or -m 
-	# so default to -X
-	$Global::Xargs = 1;
-    }
     if(grep /^$Global::arg_sep$/o, @ARGV) {
 	# Arguments on the command line.
 	# Ignore STDIN by reading from /dev/null
@@ -1873,7 +1939,12 @@ sub parse_options {
 	while(@ARGV) {
 	    my $arg = shift @ARGV;
 	    if($arg eq $Global::arg_sep) {
-		unget_arg(@ARGV);
+		$Global::input_is_filename = (@new_argv);
+		if($Global::input_is_filename) {
+		    unget_arg(shell_quote(@ARGV));
+		} else {
+		    unget_arg(@ARGV);
+		}
 		$Global::total_jobs += @ARGV;
 		@ARGV=();
 	    } else {
@@ -1882,6 +1953,68 @@ sub parse_options {
 	}
 	# Output: @ARGV = command option
 	@ARGV=@new_argv;
+    }
+
+    if(grep /^::::$/o, @ARGV) {
+	# max-replace-args
+	$::opt_a ||= "/dev/null";
+
+	# read all the files and merge them
+	my @new_argv = ();
+	my @argument_files;
+	while(@ARGV) {
+	    my $arg = shift @ARGV;
+	    if($arg eq "::::") {
+		@argument_files = @ARGV;
+		@ARGV=();
+	    } else {
+		push @new_argv, $arg;
+	    }
+	}
+	# Output: @ARGV = command option
+	@ARGV=@new_argv;
+	$Global::input_is_filename ||= (@ARGV);
+
+	$::opt_N = $#argument_files+1;
+	$Global::max_number_of_args = $#argument_files+1;
+
+	# read the files
+	my @content;
+	my $max_lineno = 0;
+	my $in_fh = gensym;
+	for (my $fileno = 0; $fileno <= $#argument_files; $fileno++) {
+	    if(not open ($in_fh, $argument_files[$fileno])) {
+		print STDERR ("$Global::progname: Cannot open $argument_files[$fileno]\n");
+		    exit (255);
+	    }
+	    for (my $lineno=0; $content[$fileno][$lineno] = get_next_arg_from_fh($in_fh); $lineno++) {
+		$max_lineno = max($max_lineno,$lineno);
+	    }
+	    close $in_fh;
+	}
+	for (my $lineno=0; $lineno <= $max_lineno; $lineno++) {
+	    for (my $fileno = 0; $fileno <= $#argument_files; $fileno++) {
+		my $arg = $content[$fileno][$lineno];
+		if(defined $arg) {
+		    unget_arg($arg);
+		} else {
+		    unget_arg("");
+		}
+	    }
+	}
+	$Global::total_jobs += $max_lineno;
+    }
+
+    # must be done after ::: and :::: because they mess with @ARGV
+    $Global::input_is_filename ||= (@ARGV);
+
+    if(($::opt_l || $::opt_L || $::opt_n || $::opt_N || $::opt_s) and not
+       ($::opt_m or $::opt_X)) {
+	# These --max-line, -l, -L, --max-args, -n, --max-chars, -s
+	# do not make sense without -X or -m
+	# so default to -X
+	# Needs to be done after ::::, as that can set $::opt_N
+	$Global::Xargs = 1;
     }
 
     if(defined $::opt_a) {
@@ -1961,6 +2094,7 @@ sub generate_command_line {
     my ($job_line,$last_good);
     my ($quoted_args,$quoted_args_no_ext) =
 	get_multiple_args($command,max_length_of_command_line(),0);
+    my $is_substituted = 0;
 
     if(@$quoted_args) {
 	$job_line = $command;
@@ -1979,7 +2113,23 @@ sub generate_command_line {
 		$job_line =~ s/\Q$Global::replacestring\E/$arg/go;
 		$job_line =~ s/\Q$Global::replace_no_ext\E/$arg_no_ext/go;
 	    }
-	} else {
+	    $is_substituted = 1;
+	}
+	if(defined $job_line and $::opt_N and $job_line =~/\{\d+\}/o) {
+	    # substitute {#} with args
+	    my $argno=1;
+	    for my $argno (1..$::opt_N) {
+		my $arg = $quoted_args->[$argno-1];
+		if(defined $arg) {
+		    $job_line =~ s/\{$argno\}/$arg/g;
+		} else {
+		    $job_line =~ s/\{$argno\}//g;
+		}
+		$argno++;
+	    }
+	    $is_substituted = 1;
+	}
+	if (not $is_substituted) {
 	    # append args
 	    my $arg=join(" ",@$quoted_args);
 	    if($job_line) {
@@ -2776,7 +2926,42 @@ sub unget_command_line {
 sub more_arguments {
     # Returns:
     #   whether there are more arguments to be processed or not
-    return (@Global::unget_arg or not eof $Global::argfile);
+    my $fh = shift || $Global::argfile;
+    return (@Global::unget_arg or not eof $fh);
+}
+
+sub get_next_arg_from_fh {
+    # Returns:
+    #   next argument from file handle
+    #   undef if end of file
+    my $fh = shift;
+    if(not more_arguments($fh)) {
+	return undef;
+    }
+    my $arg = <$fh>;
+    # Remove delimiter
+    $arg =~ s:$/$::;
+    if($Global::end_of_file_string and
+       $arg eq $Global::end_of_file_string) {
+	# Ignore the rest of input file
+	while (<$fh>) {}
+	return undef;
+    }
+    if($Global::ignore_empty) {
+	if($arg =~ /^\s*$/) {
+	    return get_next_arg_from_fh($fh);
+	}
+    }
+    if($Global::max_lines and more_arguments()) {
+	if($arg =~ /\s$/) {
+	    # Trailing space => continued on next line
+	    $arg .= get_next_arg_from_fh($fh);
+	}
+    }
+    if($Global::input_is_filename) {
+	$arg = shell_quote($arg);
+    }
+    return $arg;
 }
 
 sub get_next_arg {
@@ -2787,34 +2972,11 @@ sub get_next_arg {
     if(@Global::unget_arg) {
 	$arg = shift @Global::unget_arg;
     } else {
-	if(not more_arguments()) {
-	    return undef;
+	$arg = get_next_arg_from_fh($Global::argfile);
+	if(defined $arg) {
+	    $Global::total_jobs++;
 	}
-	$arg = <$Global::argfile>;
-	chomp $arg;
-	if($Global::end_of_file_string and
-	   $arg eq $Global::end_of_file_string) {
-	    # Ignore the rest of STDIN
-	    while (<$Global::argfile>) {}
-	    return undef;
-	}
-	if($Global::ignore_empty) {
-	    if($arg =~ /^\s*$/) {
-		return get_next_arg();
-	    }
-	}
-	if($Global::max_lines and more_arguments()) {
-	    if($arg =~ /\s$/) {
-		# Trailing space => continued on next line
-		$arg .= get_next_arg();
-	    }
-	}
-	if($Global::input_is_filename) {
-	    $arg = shell_quote($arg);
-	}
-	$Global::total_jobs++;
     }
-    debug("Next arg: !".$arg."!\n");
     return $arg;
 }
 
@@ -3542,6 +3704,7 @@ sub usage {
     print "Usage:\n";
     print "$Global::progname [options] [command [arguments]] < list_of_arguments)\n";
     print "$Global::progname [options] [command [arguments]] ::: arguments\n";
+    print "$Global::progname [options] [command [arguments]] :::: argfile(s)\n";
     print "\n";
     print "See 'man $Global::progname' for the options\n";
 }

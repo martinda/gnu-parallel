@@ -272,8 +272,8 @@ line 2
 ### Test --no-run-if-empty and -r: This should give no output
 ### Test --help and -h: Help output (just check we get the same amount of lines)
 Output from -h and --help
-4
-4
+6
+6
 ### Test --version: Version output (just check we get the same amount of lines)
 7
 ### Test --verbose and -t
