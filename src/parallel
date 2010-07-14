@@ -80,12 +80,20 @@ B<{.}> can be used the same places as B<{}>. The replacement string
 B<{.}> can be changed with B<-U>.
 
 
-=item B<{>I<n>B<}>
+=item B<{>I<n>B<}> (beta testing)
 
 Argument from argument file I<n> or the I<n>'th argument. See B<-a>
 and B<-N>.
 
 B<{>I<n>B<}> can be used the same places as B<{}>.
+
+
+=item B<{>I<n>.B<}> (beta testing)
+
+Argument from argument file I<n> or the I<n>'th argument without
+extension. Similar to B<{.}>. See B<-a> and B<-N>.
+
+B<{>I<n>.B<}> can be used the same places as B<{.}>.
 
 
 =item B<:::> I<arguments> (beta testing)
@@ -111,9 +119,9 @@ stdin (standard input) will be passed to the first process run.
 If B<--arg-file> is set arguments from that file will be appended.
 
 
-=item B<::::> I<argfiles> (beta test)
+=item B<::::> I<argfiles> (beta testing)
 
-Alternative version of B<-a> I<argfile1> B<-a> I<argfile2> ...
+Another way to write B<-a> I<argfile1> B<-a> I<argfile2> ...
 
 See B<-a>.
 
@@ -419,7 +427,7 @@ Implies B<-X> unless B<-m> is set.
 
 Use at most I<max-args> arguments per command line. Like B<-n> but
 also makes replacement strings B<{1}> .. B<{>I<max-args>B<}> that
-represents argument 1 .. I<max-args>. If too few args the {I<n>} will
+represents argument 1 .. I<max-args>. If too few args the B<{>I<n>B<}> will
 be empty.
 
 This will set the owner of the homedir to the user:
@@ -2127,19 +2135,31 @@ sub generate_command_line {
 	    }
 	    $is_substituted = 1;
 	}
-	if(defined $job_line and $::opt_N and $job_line =~/\{\d+\}/o) {
-	    # substitute {#} with args
-	    my $argno=1;
-	    for my $argno (1..$::opt_N) {
-		my $arg = $quoted_args->[$argno-1];
-		if(defined $arg) {
-		    $job_line =~ s/\{$argno\}/$arg/g;
-		} else {
-		    $job_line =~ s/\{$argno\}//g;
+	if(defined $job_line and $::opt_N) {
+	    if($job_line =~/\{\d+\}/o) {
+		# substitute {#} with args
+		for my $argno (1..$::opt_N) {
+		    my $arg = $quoted_args->[$argno-1];
+		    if(defined $arg) {
+			$job_line =~ s/\{$argno\}/$arg/g;
+		    } else {
+			$job_line =~ s/\{$argno\}//g;
+		    }
 		}
-		$argno++;
+		$is_substituted = 1;
 	    }
-	    $is_substituted = 1;
+	    if($job_line =~/\{\d+\.\}/o) {
+		# substitute {#.} with args
+		for my $argno (1..$::opt_N) {
+		    my $arg = no_extension($quoted_args->[$argno-1]);
+		    if(defined $arg) {
+			$job_line =~ s/\{$argno\.\}/$arg/g;
+		    } else {
+			$job_line =~ s/\{$argno\.\}//g;
+		    }
+		}
+		$is_substituted = 1;
+	    }
 	}
 	if (not $is_substituted) {
 	    # append args

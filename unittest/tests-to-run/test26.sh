@@ -42,3 +42,6 @@ parallel -kv echo {2} {1} :::: <(echo a) <(echo b) <(echo c)
 echo '### Multiple -a: nonexistent'
 stdout parallel -kv echo {2} {1} :::: nonexist nonexist2
 stdout parallel -kv -a nonexist -a nonexist2 echo {2} {1}
+
+echo '### Test {#.}'
+parallel -kv -a <(echo a-noext) -a <(echo b-withext.extension) -a <(echo c-ext.gif) echo {3.} {2.} {1.}
