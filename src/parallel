@@ -150,6 +150,15 @@ B<{6}> will refer to the line with the same line number from the 6th
 file.
 
 
+=item B<--arg-file-sep> I<sep-str> (unimplemented)
+
+Use I<sep-str> instead of B<::::> as separator string between command
+and argument files. Useful if B<::::> is used for something else by the
+command.
+
+See also: B<::::>.
+
+
 =item B<--arg-sep> I<sep-str> (beta testing)
 
 Use I<sep-str> instead of B<:::> as separator string. Useful if B<:::>
@@ -806,12 +815,12 @@ B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {.}_thumb.jpg>
 
 This will generate an uncompressed version of .gz-files next to the .gz-file:
 
-B<ls *.gz | parallel zcat {} ">>B<"{.}>
+B<parallel zcat {} ">>B<"{.} ::: *.gz>
 
 Quoting of > is necessary to postpone the redirection. Another
 solution is to quote the whole command:
 
-B<ls *.gz | parallel "zcat {} >>B<{.}">
+B<parallel "zcat {} >>B<{.}" ::: *.gz>
 
 Other special shell charaters (such as * ; $ > < | >> <<) also needs
 to be put in quotes, as they may otherwise be interpreted by the shell
@@ -840,12 +849,12 @@ often useful.
 
 Create a directory for each zip-file and unzip it in that dir:
 
-B<ls *zip | parallel 'mkdir {.}; cd {.}; unzip ../{}'>
+B<parallel 'mkdir {.}; cd {.}; unzip ../{}' ::: *.zip>
 
 Recompress all .gz files in current directory using B<bzip2> running 1
 job per CPU core in parallel:
 
-B<ls *.gz | parallel -j+0 "zcat {} | bzip2 >>B<{.}.bz2 && rm {}">
+B<parallel -j+0 "zcat {} | bzip2 >>B<{.}.bz2 && rm {}" ::: *.gz>
 
 Convert all WAV files to MP3 using LAME:
 
@@ -911,11 +920,11 @@ B<-u>.
 
 Compare the output of:
 
-B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
+B<parallel traceroute ::: foss.org.my debian.org freenetproject.org>
 
 to the output of:
 
-B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -u traceroute>
+B<parallel -u traceroute ::: foss.org.my debian.org freenetproject.org>
 
 
 =head1 EXAMPLE: Keep order of output same as order of input
@@ -935,7 +944,7 @@ If you remove B<-k> some of the lines may come out in the wrong order.
 
 Another example is B<traceroute>:
 
-B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel traceroute>
+B<parallel traceroute ::: foss.org.my debian.org freenetproject.org>
 
 will give traceroute of foss.org.my, debian.org and
 freenetproject.org, but it will be sorted according to which job
@@ -943,7 +952,7 @@ completed first.
 
 To keep the order the same as input run:
 
-B<(echo foss.org.my; echo debian.org; echo freenetproject.org) | parallel -k traceroute>
+B<parallel -k traceroute ::: foss.org.my debian.org freenetproject.org>
 
 This will make sure the traceroute to foss.org.my will be printed
 first.
@@ -954,7 +963,7 @@ first.
 B<grep -r> greps recursively through directories. On multicore CPUs
 GNU B<parallel> can often speed this up.
 
-find . -type f | parallel -k -j150% -n 1000 -m grep -H -n STRING {}
+B<find . -type f | parallel -k -j150% -n 1000 -m grep -H -n STRING {}>
 
 This will run 1.5 job per core, and give 1000 arguments to B<grep>.
 
@@ -1346,7 +1355,7 @@ and the last half of the line is from another process. The example
 B<Parallel grep> cannot be done reliably with B<make -j> because of
 this.
 
-(Very early versions of GNU Parallel was coincidently implemented
+(Very early versions of GNU B<parallel> were coincidently implemented
 using B<make -j>).
 
 
@@ -1382,47 +1391,46 @@ start. GNU B<parallel> only requires one step.
 Here are the examples from B<ppss>'s manual page with the equivalent
 using GNU B<parallel>:
 
-./ppss.sh standalone -d /path/to/files -c 'gzip '
+B<1> ./ppss.sh standalone -d /path/to/files -c 'gzip '
 
-find /path/to/files -type f | parallel -j+0 gzip
+B<1> find /path/to/files -type f | parallel -j+0 gzip
 
-./ppss.sh standalone -d /path/to/files -c 'cp "$ITEM" /destination/dir '
+B<2> ./ppss.sh standalone -d /path/to/files -c 'cp "$ITEM" /destination/dir '
 
-find /path/to/files -type f | parallel -j+0 cp {} /destination/dir
+B<2> find /path/to/files -type f | parallel -j+0 cp {} /destination/dir
 
-./ppss.sh standalone -f list-of-urls.txt -c 'wget -q '
+B<3> ./ppss.sh standalone -f list-of-urls.txt -c 'wget -q '
 
-parallel -a list-of-urls.txt wget -q
+B<3> parallel -a list-of-urls.txt wget -q
 
-./ppss.sh standalone -f list-of-urls.txt -c 'wget -q "$ITEM"'
+B<4> ./ppss.sh standalone -f list-of-urls.txt -c 'wget -q "$ITEM"'
 
-parallel -a list-of-urls.txt wget -q {}
+B<4> parallel -a list-of-urls.txt wget -q {}
 
-./ppss config -C config.cfg -c 'encode.sh ' -d /source/dir -m 192.168.1.100 -u ppss -k ppss-key.key -S ./encode.sh -n nodes.txt -o /some/output/dir --upload --download
-
-./ppss deploy -C config.cfg
-
+B<5> ./ppss config -C config.cfg -c 'encode.sh ' -d /source/dir -m
+192.168.1.100 -u ppss -k ppss-key.key -S ./encode.sh -n nodes.txt -o
+/some/output/dir --upload --download ; ./ppss deploy -C config.cfg ;
 ./ppss start -C config
 
-# parallel does not use configs. If you want a different username put it in nodes.txt: user@hostname
+B<5> # parallel does not use configs. If you want a different username put it in nodes.txt: user@hostname
 
-find source/dir -type f | parallel --sshloginfile nodes.txt --trc {.}.mp3 lame -a {} -o {.}.mp3 --preset standard --quiet
+B<5> find source/dir -type f | parallel --sshloginfile nodes.txt --trc {.}.mp3 lame -a {} -o {.}.mp3 --preset standard --quiet
 
-./ppss stop -C config.cfg
+B<6> ./ppss stop -C config.cfg
 
-killall -TERM parallel
+B<6> killall -TERM parallel
 
-./ppss pause -C config.cfg
+B<7> ./ppss pause -C config.cfg
 
-Press: CTRL-Z or killall -SIGTSTP parallel
+B<7> Press: CTRL-Z or killall -SIGTSTP parallel
 
-./ppss continue -C config.cfg
+B<8> ./ppss continue -C config.cfg
 
-Enter: fg or killall -SIGCONT parallel
+B<8> Enter: fg or killall -SIGCONT parallel
 
-./ppss.sh status -C config.cfg
+B<9> ./ppss.sh status -C config.cfg
 
-killall -SIGUSR1 parallel # Not quite equivalent: Only shows the currently running jobs
+B<9> killall -SIGUSR2 parallel
 
 
 =head2 DIFFERENCES BETWEEN pexec AND GNU Parallel
@@ -1432,49 +1440,49 @@ B<pexec> is also a tool for running jobs in parallel.
 Here are the examples from B<pexec>'s info page with the equivalent
 using GNU B<parallel>:
 
-pexec -o sqrt-%s.dat -p "$(seq 10)" -e NUM -n 4 -c -- \
+B<1> pexec -o sqrt-%s.dat -p "$(seq 10)" -e NUM -n 4 -c -- \
   'echo "scale=10000;sqrt($NUM)" | bc'
 
-seq 10 | parallel -j4 'echo "scale=10000;sqrt({})" | bc > sqrt-{}.dat'
+B<1> seq 10 | parallel -j4 'echo "scale=10000;sqrt({})" | bc > sqrt-{}.dat'
 
-pexec -p "$(ls myfiles*.ext)" -i %s -o %s.sort -- sort
+B<2> pexec -p "$(ls myfiles*.ext)" -i %s -o %s.sort -- sort
 
-ls myfiles*.ext | parallel sort {} ">{}.sort"
+B<2> ls myfiles*.ext | parallel sort {} ">{}.sort"
 
-pexec -f image.list -n auto -e B -u star.log -c -- \
+B<3> pexec -f image.list -n auto -e B -u star.log -c -- \
   'fistar $B.fits -f 100 -F id,x,y,flux -o $B.star'
 
-parallel -a image.list -j+0 \
+B<3> parallel -a image.list -j+0 \
   'fistar {}.fits -f 100 -F id,x,y,flux -o {}.star' 2>star.log
 
-pexec -r *.png -e IMG -c -o - -- \
+B<4> pexec -r *.png -e IMG -c -o - -- \
   'convert $IMG ${IMG%.png}.jpeg ; "echo $IMG: done"'
 
-ls *.png | parallel 'convert {} {.}.jpeg; echo {}: done'
+B<4> ls *.png | parallel 'convert {} {.}.jpeg; echo {}: done'
 
-pexec -r *.png -i %s -o %s.jpg -c 'pngtopnm | pnmtojpeg'
+B<5> pexec -r *.png -i %s -o %s.jpg -c 'pngtopnm | pnmtojpeg'
 
-ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {}.jpg'
+B<5> ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {}.jpg'
 
-for p in *.png ; do echo ${p%.png} ; done | \
+B<6> for p in *.png ; do echo ${p%.png} ; done | \
   pexec -f - -i %s.png -o %s.jpg -c 'pngtopnm | pnmtojpeg'
 
-ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {.}.jpg'
+B<6> ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {.}.jpg'
 
-LIST=$(for p in *.png ; do echo ${p%.png} ; done)
+B<7> LIST=$(for p in *.png ; do echo ${p%.png} ; done)
   pexec -r $LIST -i %s.png -o %s.jpg -c 'pngtopnm | pnmtojpeg'
 
-ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {.}.jpg'
+B<7> ls *.png | parallel 'pngtopnm < {} | pnmtojpeg > {.}.jpg'
 
-pexec -n 8 -r *.jpg -y unix -e IMG -c \
+B<8> pexec -n 8 -r *.jpg -y unix -e IMG -c \
   'pexec -j -m blockread -d $IMG | \
   jpegtopnm | pnmscale 0.5 | pnmtojpeg | \
   pexec -j -m blockwrite -s th_$IMG'
 
-GNU B<parallel> does not support mutexes directly but uses B<mutex> to
+B<8> GNU B<parallel> does not support mutexes directly but uses B<mutex> to
 do that.
 
-ls *jpg | parallel -j8 'mutex -m blockread cat {} | jpegtopnm |' \
+B<8> ls *jpg | parallel -j8 'mutex -m blockread cat {} | jpegtopnm |' \
   'pnmscale 0.5 | pnmtojpeg | mutex -m blockwrite cat > th_{}'
 
 
@@ -1489,32 +1497,32 @@ the section B<DIFFERENCES BETWEEN xargs AND GNU Parallel>.
 Here are the examples from B<xjobs>'s man page with the equivalent
 using GNU B<parallel>:
 
-ls -1 *.zip | xjobs unzip
+B<1> ls -1 *.zip | xjobs unzip
 
-ls *.zip | parallel unzip
+B<1> ls *.zip | parallel unzip
 
-ls -1 *.zip | xjobs -n unzip
+B<2> ls -1 *.zip | xjobs -n unzip
 
-ls *.zip | parallel unzip >/dev/null
+B<2> ls *.zip | parallel unzip >/dev/null
 
-find . -name '*.bak' | xjobs gzip
+B<3> find . -name '*.bak' | xjobs gzip
 
-find . -name '*.bak' | parallel gzip
+B<3> find . -name '*.bak' | parallel gzip
 
-ls -1 *.jar | sed 's/\(.*\)/\1 > \1.idx/' | xjobs jar tf
+B<4> ls -1 *.jar | sed 's/\(.*\)/\1 > \1.idx/' | xjobs jar tf
 
-ls *.jar | parallel jar tf {} '>' {}.idx
+B<4> ls *.jar | parallel jar tf {} '>' {}.idx
 
-xjobs -s script
+B<5> xjobs -s script
 
-cat script | parallel
+B<5> cat script | parallel
 
-mkfifo /var/run/my_named_pipe;
+B<6> mkfifo /var/run/my_named_pipe;
 xjobs -s /var/run/my_named_pipe &
 echo unzip 1.zip >> /var/run/my_named_pipe;
 echo tar cf /backup/myhome.tar /home/me >> /var/run/my_named_pipe
 
-mkfifo /var/run/my_named_pipe;
+B<6> mkfifo /var/run/my_named_pipe;
 cat /var/run/my_named_pipe | parallel &
 echo unzip 1.zip >> /var/run/my_named_pipe;
 echo tar cf /backup/myhome.tar /home/me >> /var/run/my_named_pipe
@@ -1539,7 +1547,7 @@ using GNU B<parallel>:
 
 prll -s 'mogrify -flip $1' *.jpg
 
-ls *.jpg | parallel mogrify -flip
+parallel mogrify -flip ::: *.jpg
 
 
 =head2 DIFFERENCES BETWEEN dxargs AND GNU Parallel
@@ -1570,49 +1578,49 @@ B<xapply> can run jobs in parallel on the local computer.
 Here are the examples from B<xapply>'s man page with the equivalent
 using GNU B<parallel>:
 
-xapply '(cd %1 && make all)' */
+B<1> xapply '(cd %1 && make all)' */
 
-parallel 'cd {} && make all' ::: */
+B<1> parallel 'cd {} && make all' ::: */
 
-xapply -f 'diff %1 ../version5/%1' manifest | more
+B<2> xapply -f 'diff %1 ../version5/%1' manifest | more
 
-parallel diff {} ../version5/{} < manifest | more
+B<2> parallel diff {} ../version5/{} < manifest | more
 
-xapply -p/dev/null -f 'diff %1 %2' manifest1 checklist1
+B<3> xapply -p/dev/null -f 'diff %1 %2' manifest1 checklist1
 
-parallel diff {1} {2} :::: manifest1 checklist1
+B<3> parallel diff {1} {2} :::: manifest1 checklist1
 
-xapply 'indent' *.c
+B<4> xapply 'indent' *.c
 
-parallel indent ::: *.c
+B<4> parallel indent ::: *.c
 
-find ~ksb/bin -type f ! -perm -111 -print | xapply -f -v 'chmod a+x' -
+B<5> find ~ksb/bin -type f ! -perm -111 -print | xapply -f -v 'chmod a+x' -
 
-find ~ksb/bin -type f ! -perm -111 -print | parallel -v chmod a+x
+B<5> find ~ksb/bin -type f ! -perm -111 -print | parallel -v chmod a+x
 
-find */ -... | fmt 960 1024 | xapply -f -i /dev/tty 'vi' -
+B<6> find */ -... | fmt 960 1024 | xapply -f -i /dev/tty 'vi' -
 
-sh <(find */ -... | parallel -s 1024 echo vi)
+B<6> sh <(find */ -... | parallel -s 1024 echo vi)
 
-find ... | xapply -f -5 -i /dev/tty 'vi' - - - - -
+B<7> find ... | xapply -f -5 -i /dev/tty 'vi' - - - - -
 
-sh <(find ... |parallel -n5 echo vi)
+B<7> sh <(find ... |parallel -n5 echo vi)
 
-xapply -fn "" /etc/passwd
+B<8> xapply -fn "" /etc/passwd
 
-parallel -k echo < /etc/passwd
+B<8> parallel -k echo < /etc/passwd
 
-tr ':' '\012' < /etc/passwd | xapply -7 -nf 'chown %1 %6' - - - - - - -
+B<9> tr ':' '\012' < /etc/passwd | xapply -7 -nf 'chown %1 %6' - - - - - - -
 
-tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}
+B<9> tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}
 
-xapply '[ -d %1/RCS ] || echo %1' */
+B<10> xapply '[ -d %1/RCS ] || echo %1' */
 
-parallel '[ -d {}/RCS ] || echo {}' ::: */
+B<10> parallel '[ -d {}/RCS ] || echo {}' ::: */
 
-xapply -f '[ -f %1 ] && echo %1' List | ...
+B<11> xapply -f '[ -f %1 ] && echo %1' List | ...
 
-parallel '[ -f {} ] && echo {}' < List | ...
+B<11> parallel '[ -f {} ] && echo {}' < List | ...
 
 
 =head2 DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel
@@ -1805,9 +1813,9 @@ reap_if_needed();
 drain_job_queue();
 cleanup();
 if($::opt_halt_on_error) {
-    exit $Global::halt_on_error_exitstatus;
+    wait_and_exit $Global::halt_on_error_exitstatus;
 } else {
-    exit(min($Global::exitstatus,254));
+    wait_and_exit(min($Global::exitstatus,254));
 }
 
 sub parse_options {
@@ -1832,6 +1840,7 @@ sub parse_options {
     $Global::halt_on_error_exitstatus = 0;
     $Global::total_jobs = 0;
     $Global::arg_sep = ":::";
+    $Global::arg_file_sep = ":::";
 
     Getopt::Long::Configure ("bundling","require_order");
     # Add options from .parallelrc
@@ -1878,6 +1887,7 @@ sub parse_options {
 	       "progress" => \$::opt_progress,
 	       "eta" => \$::opt_eta,
 	       "arg-sep|argsep=s" => \$::opt_arg_sep,
+	       "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
 	       # xargs-compatibility - implemented, man, unittest
 	       "max-procs|P=s" => \$::opt_P,
 	       "delimiter|d=s" => \$::opt_d,
@@ -1926,10 +1936,11 @@ sub parse_options {
     if(defined $::opt_N and $::opt_N) { $Global::max_number_of_args = $::opt_N; }
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_arg_sep) { $Global::arg_sep = $::opt_arg_sep; }
-    if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; exit(0); }
-    if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; exit(0); }
-    if(defined $::opt_max_line_length_allowed) { print real_max_length(),"\n"; exit(0); }
-    if(defined $::opt_version) { version(); exit(0); }
+    if(defined $::opt_arg_file_sep) { $Global::arg_file_sep = $::opt_arg_file_sep; }
+    if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; wait_and_exit(0); }
+    if(defined $::opt_number_of_cores) { print no_of_cores(),"\n"; wait_and_exit(0); }
+    if(defined $::opt_max_line_length_allowed) { print real_max_length(),"\n"; wait_and_exit(0); }
+    if(defined $::opt_version) { version(); wait_and_exit(0); }
     if(defined $::opt_show_limits) { show_limits(); }
     if(defined @::opt_sshlogin) { @Global::sshlogin = @::opt_sshlogin; }
     if(defined $::opt_sshloginfile) { read_sshloginfile($::opt_sshloginfile); }
@@ -1968,13 +1979,13 @@ sub parse_options {
 	@ARGV=@new_argv;
     }
 
-    if(grep /^::::$/o, @ARGV) {
+    if(grep /^$Global::arg_file_sep$/o, @ARGV) {
 	# convert :::: to multiple -a
 	my @new_argv = ();
 	my @argument_files;
 	while(@ARGV) {
 	    my $arg = shift @ARGV;
-	    if($arg eq "::::") {
+	    if($arg eq $Global::arg_file_sep) {
 		@argument_files = @ARGV;
 		@ARGV=();
 	    } else {
@@ -2082,7 +2093,7 @@ sub open_or_exit {
 	print STDERR "$Global::progname: ".
 	    "Cannot open input file `$file': ".
 	    "No such file or directory\n";
-	exit(255);
+	wait_and_exit(255);
     }
     return $fh;
 }
@@ -2213,7 +2224,7 @@ sub get_multiple_args {
 			      . $max_length_of_command_line .
 			      ") at number $number_of_args: ".
 			      (substr($next_arg,0,50))."...\n");
-		exit(255);
+		wait_and_exit(255);
 	    }
 	    if(defined $quoted_args[0]) {
 		last;
@@ -2222,7 +2233,7 @@ sub get_multiple_args {
 			      . $max_length_of_command_line .
 			      ") at number $number_of_args: ".
 			      (substr($next_arg,0,50))."...\n");
-		exit(255);
+		wait_and_exit(255);
 	    }
 	}
 	if($Global::max_number_of_args and
@@ -2504,7 +2515,7 @@ sub processes_available_by_system_limit {
 	    # The child takes one process slot
 	    # It will be killed later
 	    sleep 100000;
-	    exit(0);
+	    wait_and_exit(0);
 	} else {
 	    $max_system_proc_reached = 1;
 	}
@@ -3485,7 +3496,7 @@ sub sshcommand_of_sshlogin {
 		} else {
 		    debug($master,"\n");
 		    `$master`;
-		    exit(0);
+		    wait_and_exit(0);
 		}
 	    }
 	} else {
@@ -3725,10 +3736,16 @@ sub reaper {
 # Usage
 #
 
+sub wait_and_exit {
+    # If we do not wait, we sometimes get segfault
+    wait();
+    exit(shift);
+}
+
 sub die_usage {
     # Returns: N/A
     usage();
-    exit(255);
+    wait_and_exit(255);
 }
 
 sub usage {

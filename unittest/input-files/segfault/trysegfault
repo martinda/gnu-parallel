@@ -1,0 +1,16 @@
+stdout parallel -i -s28 -0 true from \{\} to x{}y < items-0.xi |egrep -v 'exit|Command|\.\.\.'
+
+# Fejler
+#stdout parallel -Di -s28 -0 true from \{\} to x{}y < items-0.xi > /dev/null
+# stdout parallel -Di -s28 -0 echo from \{\} to x{}y < items-0.xi > /dev/null
+
+#grep Segmentation /tmp/out && cat >/tmp/:out < /tmp/out
+
+# Denne fejler: seq 1 100 | parallel --eta trysegfault
+#stdout stdout /usr/local/bin/parallel -Di -s26 -0 echo from \{\} to x{}y < items-0.xi > /tmp/out;
+#grep Segmentation /tmp/out && cat >/tmp/:out < /tmp/out
+
+
+
+#/usr/local/bin/parallel -s26 -0 echo  < items-0.xi > /tmp/out
+

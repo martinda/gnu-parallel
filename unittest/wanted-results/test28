@@ -1,0 +1,3 @@
+### Test of segfaulting issue
+This gave /home/tange/bin/stdout: line 3: 20374 Segmentation fault      "$@" 2>&1
+before adding wait() before exit
