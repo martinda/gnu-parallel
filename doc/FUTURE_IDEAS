@@ -5,11 +5,61 @@ sql :foo 'select * from bar' | parallel --colsep '\s+\|\s+' do_stuff {4} {1}
 
 parallel -a table_file --colsep '\s+' do_stuff {4} {1}
 
+if(defined $::opt_colsep and defined @::opt_a and @::opt_a > 1) {
+   # must be done after converting :::: to -a -a
+   warn("--colsep incompatible with multiple argument files. Ignoring --colsep");
+   $::opt_colsep = undef;
+}
+
+if($::opt_colsep) {
+  # read input either from -a or from stdin
+  my $max_cols = 0;
+  my @table;
+  my $lineno = 0;
+  $Global::input_is_filename = 0; # cheat get_next_arg into not quoting
+  while get_next_arg {
+    my @cols = split /$::opt_colsep/o, $_;
+    if ($Global::trim) {
+       for(@cols) { s/^\s+//; s/\s+$//; }
+    }
+    $max_cols = max($#cols+1,$max_cols);
+    @table[$lineno++] = @cols;
+  }
+  $::opt_N = $max_cols;
+  for ($lineno = 0; $lineno <= $#table; $lineno++) {
+    if (not defined $table[$lineno][$max_col-1]) {
+      # Make sure the table has the same columns for all rows
+      $table[$lineno][$max_col-1] = "";
+    }
+    unget_arg(@table[$lineno]);
+  }
+}
+
 --autocolsep: Læs alle linjer.
 Prøv fastlængde: Find tegn, som står i alle linjer på de samme pladser. Risiko for falske pos
 Prøv fieldsep: Find eet tegn, som optræder det samme antal gange i alle linjer (tab sep)
 Prøv klyngesep: Find den samme klynge tegn, som står samme antal gange i alle linjer (' | ' sep)
 Fjern whitespace før og efter colonne
+
+hvis der er n af tegn A og 2n af tegn B, så 
+
+  a | b | c
+
+Simpleste: tab sep
+
+for hver linje
+  max,min count for hver char
+
+for hver char
+  if max == min :
+    potentiel
+    min_potentiel = min(min_potentiel,min)
+
+for potentiel:
+  if min % min_potentiel = 0: sepchars += potentiel,no of sepchars += min / min_potentiel
+
+colsep = [sepchars]{no_of_sepchars}
+
 
 # Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
 # argumenter, der er? Lav system limits lokalt og lad det være max

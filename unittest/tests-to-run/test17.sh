@@ -161,8 +161,8 @@ stdout ssh $SERVER1 ls '/tmp/parallel.file*' || echo OK
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls '/tmp/parallel.file*' || echo OK
 
-echo '### --trc - multiple argument'
-parallel -v --transfer --cleanup -Sparallel@$SERVER2 cat {2} {1} :::: /tmp/test17rel <(sort -r /tmp/test17abs)
+echo '### --transfer --cleanup - multiple argument files'
+parallel -kv --transfer --cleanup -Sparallel@$SERVER2 cat {2} {1} :::: /tmp/test17rel <(sort -r /tmp/test17abs)
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls '/tmp/parallel.file*' || echo OK
 
