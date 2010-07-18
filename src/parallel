@@ -2016,7 +2016,7 @@ sub parse_options {
 	    my $in_fh = gensym;
 	    for (my $fileno = 0; $fileno <= $#::opt_a; $fileno++) {
 		$in_fh = open_or_exit($::opt_a[$fileno]);
-		for (my $lineno=0; 
+		for (my $lineno=0;
 		     $content[$fileno][$lineno] = get_next_arg_from_fh($in_fh);
 		     $lineno++) {
 		    $max_lineno = max($max_lineno,$lineno);
@@ -2067,7 +2067,8 @@ sub parse_options {
 
     parse_sshlogin();
 
-    if(remote_hosts() and ($Global::xargs or $Global::Xargs)) {
+    if(remote_hosts() and ($Global::xargs or $Global::Xargs)
+       and not $::opt_N) {
 	print STDERR ("Warning: using -X or -m with --sshlogin may fail\n");
     }
 
@@ -2087,6 +2088,9 @@ sub parse_options {
 }
 
 sub open_or_exit {
+    # Returns:
+    #   file handle to read-opened file
+    #   exits if file cannot be opened otherwise
     my $file = shift;
     my $fh = gensym;
     if(not open($fh,"<",$file)) {
@@ -3104,7 +3108,7 @@ sub progress {
 	    $eta = sprintf("ETA: %ds ", $Private::eta);
 	}
     }
-    
+
     if(length $status > $termcols) {
 	# sshlogin1:XX/XX/XX%/XX.Xs sshlogin2:XX/XX/XX%/XX.Xs sshlogin3:XX/XX/XX%/XX.Xs
 	$header = "Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete";
@@ -3738,6 +3742,7 @@ sub reaper {
 
 sub wait_and_exit {
     # If we do not wait, we sometimes get segfault
+    # Returns: N/A
     wait();
     exit(shift);
 }

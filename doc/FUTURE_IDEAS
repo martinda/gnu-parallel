@@ -1,4 +1,3 @@
-No: too many differences Unittests from xargs findutils-4.4.2/xargs/testsuite
 Import sql
 
 inputfile tabel, Split colonner til {n}
@@ -11,9 +10,6 @@ Prøv fastlængde: Find tegn, som står i alle linjer på de samme pladser. Risi
 Prøv fieldsep: Find eet tegn, som optræder det samme antal gange i alle linjer (tab sep)
 Prøv klyngesep: Find den samme klynge tegn, som står samme antal gange i alle linjer (' | ' sep)
 Fjern whitespace før og efter colonne
-
---trc combined with {#}
-
 
 # Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
 # argumenter, der er? Lav system limits lokalt og lad det være max
