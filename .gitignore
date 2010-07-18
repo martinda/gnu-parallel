@@ -5,3 +5,6 @@ config.log
 config.status
 parallel-*.bz2*
 stamp-h1
+actual-results
+tmp
+video

@@ -15,6 +15,14 @@ echo a
 a
 echo b
 b
+echo a
+a
+echo b
+b
+echo a
+a
+echo b
+b
 ### Test stdin goes to first command only
 cat -
 via first cat

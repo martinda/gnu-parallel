@@ -31,10 +31,14 @@ Installation of GNU Parallel is a simple as:
 
 After this you should be able to do:
 
-  (echo foss.org.my; echo gnu.org; echo freenetproject.org) | parallel traceroute
+  parallel traceroute ::: foss.org.my gnu.org freenetproject.org
 
 This will run traceroute to 3 different hosts in parallel and print
 the output when the traceroutes are done.
+
+Watch the intro video for a quick introduction:
+http://www.youtube.com/watch?v=OpaiGYxkSuQ or at
+http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
 
 
 = New versions =

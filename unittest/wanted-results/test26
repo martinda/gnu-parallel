@@ -1,3 +1,49 @@
+### Test ::::
+### Change --arg-file-sep
+1 5
+2 6
+3 7
+4 8
+5 9
+6 10
+7 11
+8 12
+9 13
+10 14
+15
+1 5
+2 6
+3 7
+4 8
+5 9
+6 10
+7 11
+8 12
+9 13
+10 14
+15
+1 5
+2 6
+3 7
+4 8
+5 9
+6 10
+7 11
+8 12
+9 13
+10 14
+15
+1 5
+2 6
+3 7
+4 8
+5 9
+6 10
+7 11
+8 12
+9 13
+10 14
+15
 ### Test xapply --max-replace-args
 2 1 0
 5 4 3
@@ -94,3 +140,6 @@ b a
 ### Multiple -a: nonexistent
 parallel: Cannot open input file `nonexist': No such file or directory
 parallel: Cannot open input file `nonexist': No such file or directory
+### Test {#.}
+echo c-ext b-withext a-noext
+c-ext b-withext a-noext

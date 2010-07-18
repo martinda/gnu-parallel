@@ -1813,7 +1813,7 @@ reap_if_needed();
 drain_job_queue();
 cleanup();
 if($::opt_halt_on_error) {
-    wait_and_exit $Global::halt_on_error_exitstatus;
+    wait_and_exit($Global::halt_on_error_exitstatus);
 } else {
     wait_and_exit(min($Global::exitstatus,254));
 }
@@ -1840,7 +1840,7 @@ sub parse_options {
     $Global::halt_on_error_exitstatus = 0;
     $Global::total_jobs = 0;
     $Global::arg_sep = ":::";
-    $Global::arg_file_sep = ":::";
+    $Global::arg_file_sep = "::::";
 
     Getopt::Long::Configure ("bundling","require_order");
     # Add options from .parallelrc

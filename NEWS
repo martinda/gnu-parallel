@@ -1,3 +1,54 @@
+2010XXXX
+
+* Arguments can now be given on the command line. Example:
+  parallel bzip2 ::: *.txt
+
+* xapply like functionality. Example:
+  parallel diff {1} {2} :::: filelist1 filelist2
+  parallel diff {1} {2} ">"{1.}-{2.}.diff :::: filelist1 filelist2
+
+* Arch Linux package. Thanks to Peter Simons <simons at cryp dot to>
+
+* Mandriva package. Thanks to Sandro Cazzaniga <kharec at mandriva dot
+  org>
+
+* -L -l -n -s now implies -X unless -m is set
+
+
+20100620
+
+* New video showing the new options.
+  http://www.youtube.com/watch?v=OpaiGYxkSuQ or at
+  http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
+
+* 100% options complete with xargs. All options for xargs can now be
+  used in GNU Parallel - even the more exotic.
+
+* --basefile for transferring basedata. When running jobs on remote
+  computers --basefile will transfer files before the first jobs is
+  run. It can be used to transfer data that remains the same for each
+  job such as scripts or lookup tables.
+
+* --progress shows progress. To see how many jobs is running on each
+  server use --progress. It can be turned on even after GNU Parallel
+  is started.
+
+* --eta shows estimated time left in seconds.
+
+* --halt-on-error stops if an error occurs. GNU Parallel will default
+  to run all jobs - even if some of them fail. With --halt-on-error
+  GNU Parallel can ignore errors, wait for the currently running jobs
+  to finish, or stop immediately when an error occurs.
+
+
+20100601
+
+* GNU Parallel now has support for running jobs on remote machines
+
+* Intro video http://www.youtube.com/watch?v=LlXDtd_pRaY
+  http://openvideo.dailymotion.com/video/xdmqwz_gnu-parallel-script-processing-and_tech 
+
+
 20100424
 
 * GNU Parallel is now official GNU software

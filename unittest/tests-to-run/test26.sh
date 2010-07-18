@@ -1,5 +1,12 @@
 #!/bin/bash
 
+echo '### Test ::::'
+echo '### Change --arg-file-sep'
+parallel --arg-file-sep :::: -k echo {1} {2} :::: <(seq 1 10) <(seq 5 15)
+parallel --arg-file-sep .--- -k echo {1} {2} .--- <(seq 1 10) <(seq 5 15)
+parallel --argfilesep :::: -k echo {1} {2} :::: <(seq 1 10) <(seq 5 15)
+parallel --argfilesep .--- -k echo {1} {2} .--- <(seq 1 10) <(seq 5 15)
+
 echo '### Test xapply --max-replace-args'
 seq 0 7 | parallel -k --max-replace-args=3 echo {3} {2} {1}
 echo '### Test -N'
