@@ -211,7 +211,7 @@ stdout xargs -eEOF echo < eofstr.xi
 stdout parallel -k -eEOF echo < eofstr.xi
 echo '###  -e echo < eof_.xi'
 stdout xargs -e echo < eof_.xi
-stdout parallel -k -e echo < eof_.xi
+stdout parallel -e -k echo < eof_.xi
 echo '###  -E_ echo < eof1.xi'
 stdout xargs -E_ echo < eof1.xi
 stdout parallel -k -E_ echo < eof1.xi

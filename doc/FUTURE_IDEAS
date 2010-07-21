@@ -1,3 +1,20 @@
+Code refactor: move :::: and ::: processing.
+
+
+Example:
+
+Given a list of URLs, list all URLs that fail to download. Print the
+line number and the URL.
+
+cat urlfile | parallel "wget {} 2>>/dev/null || grep -n {} urlfile"
+
+EXAMPLE: 
+
+Copy foo.es.ext to foo.ext:
+
+ls *.es.* | perl -pe 'print; s/\.es//' | parallel -N2 cp {1} {2}
+
+
 Import sql
 
 inputfile tabel, Split colonner til {n}
