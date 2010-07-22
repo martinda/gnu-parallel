@@ -8,7 +8,8 @@ unittest: ../src/parallel tests-to-run/* wanted-results/*
 	echo 1+2 | bc | mop || (echo bc is required for unittest; /bin/false)
 	stdout gawk | mop || (echo gawk is required for unittest; /bin/false)
 	expect -c 'spawn cat; puts "expect is installed"' || (echo expect is required for unittest; /bin/false)
-	sh Start.sh
+	time sh Start.sh
+	date
 
 clean:
 	rm -rf input-files/random_dirs_no_newline

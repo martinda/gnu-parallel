@@ -847,6 +847,11 @@ Even small shell scripts can be run by GNU B<parallel>:
 
 B<find . | parallel 'a={}; name=${a##*/}; upper=$(echo "$name" | tr "[:lower:]" "[:upper:]"); echo "$name - $upper"'>
 
+Given a list of URLs, list all URLs that fail to download. Print the
+line number and the URL.
+
+B<cat urlfile | parallel "wget {} 2>>B</dev/null || grep -n {} urlfile">
+
 
 =head1 EXAMPLE: Removing file extension when processing files
 
@@ -1098,6 +1103,15 @@ Convert *.mp3 to *.ogg running one process per CPU core on local computer and se
 
   parallel --trc {.}.ogg -j+0 -S server2,: \
   'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg' ::: *.mp3
+
+=head1 EXAMPLE: Use multiple inputs in one command
+
+Copy files like foo.es.ext to foo.ext:
+
+B<ls *.es.* | perl -pe 'print; s/\.es//' | parallel -N2 cp {1} {2}>
+
+The perl command spits out 2 lines for each input. GNU B<parallel>
+takes 2 inputs (using B<-N2>) and replaces {1} and {2} with the inputs.
 
 
 =head1 EXAMPLE: Working as cat | sh. Ressource inexpensive jobs and evaluation
@@ -1827,7 +1841,7 @@ if($::opt_halt_on_error) {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100709;
+    $Global::version = 20100722;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -1905,6 +1919,7 @@ sub parse_options {
 	       "eof|e:s" => \$::opt_E,
 	       "max-args|n=i" => \$::opt_n,
 	       "max-replace-args|N=i" => \$::opt_N,
+	       "colsep|col-sep=s" => \$::opt_colsep,
 	       "help|h" => \$::opt_help,
 	       "L=i" => \$::opt_L,
 	       "max-lines|l:i" => \$::opt_l,
@@ -1969,7 +1984,7 @@ sub parse_options {
     $Global::input_is_filename ||= (@ARGV);
 
     if(@::opt_a) {
-	# must be done after 
+	# must be done after
 	# convert_argfiles_from_command_line_to_multiple_opt_a
 	if($#::opt_a == 0) {
 	    # One -a => xargs compatibility
@@ -1980,8 +1995,8 @@ sub parse_options {
 	}
     }
 
-    if(($::opt_l || $::opt_L || $::opt_n || $::opt_N || $::opt_s) and not
-       ($::opt_m or $::opt_X)) {
+    if(($::opt_l || $::opt_L || $::opt_n || $::opt_N || $::opt_s ||
+	$::opt_colsep) and not ($::opt_m or $::opt_X)) {
 	# The options --max-line, -l, -L, --max-args, -n, --max-chars, -s
 	# do not make sense without -X or -m
 	# so default to -X
@@ -2041,18 +2056,13 @@ sub read_args_from_command_line {
     # Returns:
     #    @ARGV without ::: and following args
     if(not @::opt_a) { push @::opt_a, "/dev/null"; }
-    
     # Input: @ARGV = command option ::: arg arg arg
     my @new_argv = ();
     while(@ARGV) {
 	my $arg = shift @ARGV;
 	if($arg eq $Global::arg_sep) {
 	    $Global::input_is_filename = (@new_argv);
-	    if($Global::input_is_filename) {
-		unget_arg(shell_quote(@ARGV));
-	    } else {
-		unget_arg(@ARGV);
-	    }
+	    push @Global::unget_lines, @ARGV;
 	    $Global::total_jobs += @ARGV;
 	    @ARGV=();
 	    last;
@@ -2921,6 +2931,8 @@ sub max {
 #    $Global::total_started = total jobs started
 #    $Global::total_jobs = total jobs to be started at all
 #    $Global::total_completed = total jobs completed
+#    @Global::unget_arg = arguments quoted as needed ready to use
+#    @Global::unget_lines = raw argument lines - needs quoting and splitting
 
 sub init_run_jobs {
     # Remember the original STDOUT and STDERR
@@ -3006,14 +3018,21 @@ sub more_arguments {
     # Returns:
     #   whether there are more arguments to be processed or not
     my $fh = shift || $Global::argfile;
-    return (@Global::unget_arg or not eof $fh);
+    return (@Global::unget_arg or @Global::unget_lines or not eof $fh);
 }
 
 sub get_next_arg_from_fh {
     # Returns:
-    #   next argument from file handle
+    #   next argument from file handle - quoted if needed
     #   undef if end of file
     my $fh = shift;
+    if(not $Private::unget{$fh}) {
+	@{$Private::unget{$fh}} = ();
+    }
+    my $unget_ref = $Private::unget{$fh};
+    if(@$unget_ref) {
+	return shift @$unget_ref;
+    }
     if(not more_arguments($fh)) {
 	return undef;
     }
@@ -3037,6 +3056,13 @@ sub get_next_arg_from_fh {
 	    $arg .= get_next_arg_from_fh($fh);
 	}
     }
+    if($::opt_colsep) {
+	# split this into columns
+	push @$unget_ref, split /$::opt_colsep/o, $arg;
+	$::opt_N = $#$unget_ref+1;
+	$Global::max_number_of_args = $::opt_N;
+	$arg = shift @$unget_ref;
+    }
     if($Global::input_is_filename) {
 	$arg = shell_quote($arg);
     }
@@ -3050,6 +3076,41 @@ sub get_next_arg {
     my $arg;
     if(@Global::unget_arg) {
 	$arg = shift @Global::unget_arg;
+    } elsif(@Global::unget_lines) {
+	$arg = shift @Global::unget_lines;
+	if($Global::end_of_file_string and
+	   $arg eq $Global::end_of_file_string) {
+	    # Ignore the rest of input file
+	    @Global::unget_lines = ();
+	    return undef;
+	}
+	if($Global::ignore_empty) {
+	    if($arg =~ /^\s*$/) {
+		return get_next_arg();
+	    }
+	}
+	if($Global::max_lines and more_arguments()) {
+	    if($arg =~ /\s$/) {
+		# Trailing space => continued on next line
+		$arg .= get_next_arg();
+	    }
+	}
+	if($::opt_colsep) {
+	    # split this into columns
+	    my @columns = split /$::opt_colsep/o, $arg;
+	    $::opt_N = $#columns+1;
+	    $Global::max_number_of_args = $::opt_N;
+	    if($Global::input_is_filename) {
+		unget_arg(shell_quote(@columns));
+	    } else {
+		unget_arg(@columns);
+	    }
+	    $arg = get_next_arg();
+	} else {
+	    if($Global::input_is_filename) {
+		$arg = shell_quote($arg);
+	    }
+	}
     } else {
 	$arg = get_next_arg_from_fh($Global::argfile);
 	if(defined $arg) {
