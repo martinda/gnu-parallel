@@ -53,7 +53,7 @@ http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
 
 Command to execute.  If I<command> or the following arguments contain
 {} every instance will be substituted with the input line. Setting a
-command also invokes B<-f>.
+command also invokes B<--file>.
 
 If I<command> is given, GNU B<parallel> will behave similar to B<xargs>. If
 I<command> is not given GNU B<parallel> will behave similar to B<cat | sh>.
@@ -202,16 +202,30 @@ removed on the remote server.  Directories created will not be removed
 B<--cleanup> is ignored when not used with B<--transfer> or B<--return>.
 
 
+=item B<--colsep> I<regexp> (beta testing)
+
+=item B<-C> I<regexp> (beta testing)
+
+Column separator. The input will be treated as a table with I<regexp>
+separating the columns. The n'th column can be access using
+B<{>I<n>B<}> or B<{>I<n>.B<}>. E.g. B<{3}> is the 3rd column.
+
+B<--colsep> implies B<--trim rl>.
+
+I<regexp> is a Perl Regular Expression:
+http://perldoc.perl.org/perlre.html
+
+
 =item B<--command>
 
-=item B<-c>
+=item B<-c> (Use B<--command> as B<-c> may be removed in later versions)
 
 Line is a command.  The input line contains more than one argument or
 the input line needs to be evaluated by the shell. This is the default
-if I<command> is not set. Can be reversed with B<-f>.
+if I<command> is not set. Can be reversed with B<--file>.
 
 Most people will never need this because GNU B<parallel> normally
-selects the correct B<-f> or B<-c>.
+selects the correct B<--file> or B<--command>.
 
 
 =item B<--delimiter> I<delim>
@@ -256,14 +270,14 @@ Implies B<--progress>.
 
 =item B<--file>
 
-=item B<-f>
+=item B<-f> (Use B<--file> as B<-f> may be removed in later versions)
 
 Line is a filename.  The input line contains a filename that will be
 quoted so it is not evaluated by the shell. This is the default if
-I<command> is set. Can be reversed with B<-c>.
+I<command> is set. Can be reversed with B<--command>.
 
 Most people will never need this because GNU B<parallel> normally
-selects the correct B<-f> or B<-c>.
+selects the correct B<--file> or B<--command>.
 
 
 =item B<--group>
@@ -407,6 +421,20 @@ Implies B<-X> unless B<-m> is set.
 Use ssh's ControlMaster to make ssh connections faster. Useful if jobs
 run remote and are very fast to run. This is disabled for sshlogins
 that specify their own ssh command.
+
+
+=item B<--xargs>
+
+=item B<-m>
+
+Multiple. Insert as many arguments as the command line length
+permits. If B<{}> is not used the arguments will be appended to the
+line.  If B<{}> is used multiple times each B<{}> will be replaced
+with all the arguments.
+
+Support for B<-m> with B<--sshlogin> is limited and may fail.
+
+See also B<-X> for context replace.
 
 
 =item B<--progress>
@@ -655,6 +683,34 @@ Transfer, Return, Cleanup. Short hand for:
 B<--transfer> B<--return> I<filename> B<--cleanup>
 
 
+=item B<--trim> <n|l|r|lr|rl> (unimplemented)
+
+Trim white space in input.
+
+=over 4
+
+=item n
+
+No trim. Input is not modified. This is the default.
+
+=item l
+
+Left trim. Remove white space from start of input. E.g. " a bc " -> "a bc ".
+
+=item r
+
+Right trim. Remove white space from end of input. E.g. " a bc " -> " a bc".
+
+=item lr
+
+=item rl
+
+Both trim. Remove white space from both start and end of input. E.g. "
+a bc " -> "a bc". This is the default if B<--colsep> is used.
+
+=back
+
+
 =item B<--ungroup>
 
 =item B<-u>
@@ -694,18 +750,6 @@ B<--silent>. See also B<-t>.
 =item B<-V>
 
 Print the version GNU B<parallel> and exit.
-
-
-=item B<--xargs>
-
-=item B<-m>
-
-Multiple. Insert as many arguments as the command line length
-permits. If B<{}> is not used the arguments will be appended to the
-line.  If B<{}> is used multiple times each B<{}> will be replaced
-with all the arguments.
-
-Support for B<-m> with B<--sshlogin> is limited and may fail.
 
 
 =item B<-X>
@@ -1136,8 +1180,8 @@ To run 100 processes simultaneously do:
 
 B<parallel -j 100 < jobs_to_run>
 
-As there is not a I<command> the option B<-c> is default because the
-jobs needs to be evaluated by the shell.
+As there is not a I<command> the option B<--command> is default
+because the jobs needs to be evaluated by the shell.
 
 
 =head1 QUOTING
@@ -1861,6 +1905,7 @@ sub parse_options {
     $Global::total_jobs = 0;
     $Global::arg_sep = ":::";
     $Global::arg_file_sep = "::::";
+    $Global::trim = 'n';
 
     Getopt::Long::Configure ("bundling","require_order");
     # Add options from .parallelrc
@@ -1908,6 +1953,7 @@ sub parse_options {
 	       "eta" => \$::opt_eta,
 	       "arg-sep|argsep=s" => \$::opt_arg_sep,
 	       "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
+	       "trim=s" => \$::opt_trim,
 	       # xargs-compatibility - implemented, man, unittest
 	       "max-procs|P=s" => \$::opt_P,
 	       "delimiter|d=s" => \$::opt_d,
@@ -1919,7 +1965,7 @@ sub parse_options {
 	       "eof|e:s" => \$::opt_E,
 	       "max-args|n=i" => \$::opt_n,
 	       "max-replace-args|N=i" => \$::opt_N,
-	       "colsep|col-sep=s" => \$::opt_colsep,
+	       "colsep|col-sep|C=s" => \$::opt_colsep,
 	       "help|h" => \$::opt_help,
 	       "L=i" => \$::opt_L,
 	       "max-lines|l:i" => \$::opt_l,
@@ -1949,13 +1995,11 @@ sub parse_options {
     if(defined $::opt_U) { $Global::replace_no_ext = $::opt_U; }
     if(defined $::opt_i and $::opt_i) { $Global::replacestring = $::opt_i; }
     if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
-    if(defined $::opt_L and $::opt_L or defined $::opt_l) {
-	$Global::max_lines = $::opt_l || $::opt_L || 1;
-	$Global::max_number_of_args = $Global::max_lines;
-    }
     if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
     if(defined $::opt_N and $::opt_N) { $Global::max_number_of_args = $::opt_N; }
     if(defined $::opt_help) { die_usage(); }
+    if(defined $::opt_colsep) { $Global::trim = 'lr'; }
+    if(defined $::opt_trim) { $Global::trim = $::opt_trim; }
     if(defined $::opt_arg_sep) { $Global::arg_sep = $::opt_arg_sep; }
     if(defined $::opt_arg_file_sep) { $Global::arg_file_sep = $::opt_arg_file_sep; }
     if(defined $::opt_number_of_cpus) { print no_of_cpus(),"\n"; wait_and_exit(0); }
@@ -1970,6 +2014,10 @@ sub parse_options {
 	push @Global::ret_files, @::opt_trc;
 	$::opt_transfer = 1;
 	$::opt_cleanup = 1;
+    }
+    if(defined $::opt_L and $::opt_L or defined $::opt_l) {
+	$Global::max_lines = $::opt_l || $::opt_L || 1;
+	$Global::max_number_of_args ||= $Global::max_lines;
     }
 
     if(grep /^$Global::arg_sep$/o, @ARGV) {
@@ -2119,6 +2167,9 @@ sub argfiles_xapply_style {
     for (my $lineno=0; $lineno <= $max_lineno; $lineno++) {
 	for (my $fileno = 0; $fileno <= $#::opt_a; $fileno++) {
 	    my $arg = $content[$fileno][$lineno];
+	    if($Global::trim ne 'n') {
+		$arg = trim($arg);
+	    }
 	    if(defined $arg) {
 		unget_arg($arg);
 	    } else {
@@ -2347,6 +2398,32 @@ sub xargs_computations {
 	     $spaces,$length_of_command_no_args,$length_of_context);
     }
     return (@Calculated::xargs_computations);
+}
+
+
+sub trim {
+    # Removes white space as specifed by --trim:
+    # n = nothing
+    # l = start
+    # r = end
+    # lr|rl = both
+    # Returns:
+    #   string with white space removed as needed
+    my (@strings) = (@_);
+    my $arg;
+    if($Global::trim eq "n") {
+	# skip
+    } elsif($Global::trim eq "l") {
+	for $arg (@strings) { $arg =~ s/^\s+//; }
+    } elsif($Global::trim eq "r") {
+	for $arg (@strings) { $arg =~ s/\s+$//; }
+    } elsif($Global::trim eq "rl" or $Global::trim eq "lr") {
+	for $arg (@strings) { $arg =~ s/^\s+//; $arg =~ s/\s+$//; }
+    } else {
+	print STDERR "$Global::progname: --trim must be one of: r l rl lr\n";
+	wait_and_exit(255);
+    }
+    return wantarray ? @strings : "@strings";
 }
 
 
@@ -2933,6 +3010,14 @@ sub max {
 #    $Global::total_completed = total jobs completed
 #    @Global::unget_arg = arguments quoted as needed ready to use
 #    @Global::unget_lines = raw argument lines - needs quoting and splitting
+#
+# Flow:
+# Get_line: Line is read from file or stdin. Delimiter is chopped
+# Get_line_argv: Line is read from ARGV - no delimiter
+# Get column: Multiple -a or --colsep
+# Get column: @ARGV
+# Quote column:
+# get_quoted_args
 
 sub init_run_jobs {
     # Remember the original STDOUT and STDERR
@@ -3026,23 +3111,27 @@ sub get_next_arg_from_fh {
     #   next argument from file handle - quoted if needed
     #   undef if end of file
     my $fh = shift;
+    my $arg;
     if(not $Private::unget{$fh}) {
 	@{$Private::unget{$fh}} = ();
     }
     my $unget_ref = $Private::unget{$fh};
     if(@$unget_ref) {
-	return shift @$unget_ref;
+	# Ungotten arg exists
+	$arg = shift @$unget_ref;
+    } else {
+	if(not more_arguments($fh)) {
+	    return undef;
+	}
+	$arg = <$fh>;
+	# Remove delimiter
+	$arg =~ s:$/$::;
     }
-    if(not more_arguments($fh)) {
-	return undef;
-    }
-    my $arg = <$fh>;
-    # Remove delimiter
-    $arg =~ s:$/$::;
     if($Global::end_of_file_string and
        $arg eq $Global::end_of_file_string) {
 	# Ignore the rest of input file
 	while (<$fh>) {}
+	@$unget_ref = ();
 	return undef;
     }
     if($Global::ignore_empty) {
@@ -3058,7 +3147,11 @@ sub get_next_arg_from_fh {
     }
     if($::opt_colsep) {
 	# split this into columns
-	push @$unget_ref, split /$::opt_colsep/o, $arg;
+	if($Global::trim ne 'n') {
+	    push @$unget_ref, split /$::opt_colsep/o, $arg;
+	} else {
+	    push @$unget_ref, trim(split /$::opt_colsep/o, $arg);
+	}
 	$::opt_N = $#$unget_ref+1;
 	$Global::max_number_of_args = $::opt_N;
 	$arg = shift @$unget_ref;
@@ -3071,11 +3164,11 @@ sub get_next_arg_from_fh {
 
 sub get_next_arg {
     # Returns:
-    #   next argument from input
+    #   next argument from input quoted and trimmed as needed
     #   undef if end of file
     my $arg;
     if(@Global::unget_arg) {
-	$arg = shift @Global::unget_arg;
+	return shift @Global::unget_arg;
     } elsif(@Global::unget_lines) {
 	$arg = shift @Global::unget_lines;
 	if($Global::end_of_file_string and
@@ -3100,13 +3193,19 @@ sub get_next_arg {
 	    my @columns = split /$::opt_colsep/o, $arg;
 	    $::opt_N = $#columns+1;
 	    $Global::max_number_of_args = $::opt_N;
+	    if($Global::trim ne 'n') {
+		@columns = trim(@columns);
+	    }
 	    if($Global::input_is_filename) {
 		unget_arg(shell_quote(@columns));
 	    } else {
 		unget_arg(@columns);
 	    }
-	    $arg = get_next_arg();
+	    return get_next_arg();
 	} else {
+	    if($Global::trim ne 'n') {
+		$arg = trim($arg);
+	    }
 	    if($Global::input_is_filename) {
 		$arg = shell_quote($arg);
 	    }
@@ -3859,11 +3958,11 @@ sub usage {
 sub version {
     # Returns: N/A
     print join("\n",
-	       "$Global::progname $Global::version",
+	       "GNU $Global::progname $Global::version",
 	       "Copyright (C) 2007,2008,2009,2010 Ole Tange and Free Software Foundation, Inc.",
 	       "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
 	       "This is free software: you are free to change and redistribute it.",
-	       "$Global::progname comes with no warranty.",
+	       "GNU $Global::progname comes with no warranty.",
 	       "",
 	       "Web site: http://www.gnu.org/software/${Global::progname}\n"
 	);
