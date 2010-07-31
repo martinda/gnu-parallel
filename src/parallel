@@ -150,7 +150,7 @@ B<{6}> will refer to the line with the same line number from the 6th
 file.
 
 
-=item B<--arg-file-sep> I<sep-str> (unimplemented)
+=item B<--arg-file-sep> I<sep-str> (beta testing)
 
 Use I<sep-str> instead of B<::::> as separator string between command
 and argument files. Useful if B<::::> is used for something else by the
@@ -683,7 +683,7 @@ Transfer, Return, Cleanup. Short hand for:
 B<--transfer> B<--return> I<filename> B<--cleanup>
 
 
-=item B<--trim> <n|l|r|lr|rl> (unimplemented)
+=item B<--trim> <n|l|r|lr|rl> (beta testing)
 
 Trim white space in input.
 
@@ -3145,7 +3145,7 @@ sub get_next_arg_from_fh {
 	    $arg .= get_next_arg_from_fh($fh);
 	}
     }
-    if($::opt_colsep) {
+    if(not @$unget_ref and $::opt_colsep) {
 	# split this into columns
 	if($Global::trim ne 'n') {
 	    push @$unget_ref, split /$::opt_colsep/o, $arg;
@@ -3154,11 +3154,13 @@ sub get_next_arg_from_fh {
 	}
 	$::opt_N = $#$unget_ref+1;
 	$Global::max_number_of_args = $::opt_N;
+	debug("unget_ref: @$unget_ref\n");
 	$arg = shift @$unget_ref;
     }
     if($Global::input_is_filename) {
 	$arg = shell_quote($arg);
     }
+    debug($arg);
     return $arg;
 }
 

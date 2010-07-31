@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<?xml-stylesheet type='text/xsl' href='interface.xsl'?>
+<interface uri="http://gfxmonk.net/dist/0install/parallel.xml" xmlns="http://zero-install.sourceforge.net/2004/injector/interface" xmlns:compile="http://zero-install.sourceforge.net/2006/namespaces/0compile">
+	<name>GNU parallel</name>
+	<summary>a shell tool for executing jobs in parallel locally or using remote computers</summary>
+	<description>
+GNU parallel is a shell tool for executing jobs in parallel locally or
+using remote computers. A job is typically a single command or a small
+script that has to be run for each of the lines in the input. The
+typical input is a list of files, a list of hosts, a list of users, a
+list of URLs, or a list of tables.
+
+If you use xargs today you will find GNU parallel very easy to use as GNU
+parallel is written to have the same options as xargs. If you write loops in
+shell, you will find GNU parallel may be able to replace most of the loops and
+make them run faster by running several jobs in parallel. If you use ppss or
+pexec you will find GNU parallel will often make the command easier to read.
+
+GNU parallel makes sure output from the commands is the same output as you would
+get had you run the commands sequentially. This makes it possible to use output
+from GNU parallel as input for other programs.
+
+For each line of input GNU parallel will execute command with the line as
+arguments. If no command is given, the line of input is executed. Several lines
+will be run in parallel. GNU parallel can often be used as a substitute for
+xargs or cat | sh.</description>
+	<homepage>http://www.gnu.org/software/parallel/</homepage>
+	<category>Utility</category>
+	<publish mode="third-party" xmlns="http://gfxmonk.net/dist/0install"/>
+	<needs-terminal/>
+
+	<group main="src/parallel">
+		<implementation id="sha1new=3bd5646ca0c38217df8278433803b44e33272954" released="2010-06-24" version="20100620">
+			<archive extract="parallel-20100620" href="http://ftp.gnu.org/gnu/parallel/parallel-20100620.tar.bz2" size="88834" type="application/x-bzip-compressed-tar"/>
+		</implementation>
+	</group>
+</interface>
+<!-- Base64 Signature
+iEYEABECAAYFAkxNeuMACgkQ/lhgK1iJTtJ5FwCZAVLBgAZshQd1fUQ1/lGICaGW2OYAoKfFDkTs
+5AChfjV1AOaKA1izTI45
+
+-->
