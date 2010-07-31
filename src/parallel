@@ -2058,7 +2058,7 @@ sub parse_options {
 	my @args = ();
 	while(more_arguments()) {
 	    # This will read all arguments and compute $Global::total_jobs
-	    push @args, get_next_arg();
+	    push @args, get_arg();
 	}
 	unget_arg(@args);
     }
@@ -2158,7 +2158,7 @@ sub argfiles_xapply_style {
     for (my $fileno = 0; $fileno <= $#::opt_a; $fileno++) {
 	$in_fh = open_or_exit($::opt_a[$fileno]);
 	for (my $lineno=0;
-	     $content[$fileno][$lineno] = get_next_arg_from_fh($in_fh);
+	     $content[$fileno][$lineno] = get_arg_from_fh($in_fh);
 	     $lineno++) {
 	    $max_lineno = max($max_lineno,$lineno);
 	}
@@ -2213,6 +2213,32 @@ sub no_extension {
     $no_ext =~ s:\.[^/\.]*$::; # Remove .ext from argument
     return $no_ext;
 }
+
+sub trim {
+    # Removes white space as specifed by --trim:
+    # n = nothing
+    # l = start
+    # r = end
+    # lr|rl = both
+    # Returns:
+    #   string with white space removed as needed
+    my (@strings) = (@_);
+    my $arg;
+    if($Global::trim eq "n") {
+	# skip
+    } elsif($Global::trim eq "l") {
+	for $arg (@strings) { $arg =~ s/^\s+//; }
+    } elsif($Global::trim eq "r") {
+	for $arg (@strings) { $arg =~ s/\s+$//; }
+    } elsif($Global::trim eq "rl" or $Global::trim eq "lr") {
+	for $arg (@strings) { $arg =~ s/^\s+//; $arg =~ s/\s+$//; }
+    } else {
+	print STDERR "$Global::progname: --trim must be one of: r l rl lr\n";
+	wait_and_exit(255);
+    }
+    return wantarray ? @strings : "@strings";
+}
+
 
 sub generate_command_line {
     # Returns:
@@ -2295,7 +2321,7 @@ sub get_multiple_args {
 	$length_of_command_no_args,$length_of_context) =
 	    xargs_computations($command);
     my $number_of_args = 0;
-    while (defined($next_arg = get_next_arg())) {
+    while (defined($next_arg = get_arg())) {
 	my $next_arg_no_ext = no_extension($next_arg);
 	push (@quoted_args, $next_arg);
 	push (@quoted_args_no_ext, $next_arg_no_ext);
@@ -2401,32 +2427,6 @@ sub xargs_computations {
 }
 
 
-sub trim {
-    # Removes white space as specifed by --trim:
-    # n = nothing
-    # l = start
-    # r = end
-    # lr|rl = both
-    # Returns:
-    #   string with white space removed as needed
-    my (@strings) = (@_);
-    my $arg;
-    if($Global::trim eq "n") {
-	# skip
-    } elsif($Global::trim eq "l") {
-	for $arg (@strings) { $arg =~ s/^\s+//; }
-    } elsif($Global::trim eq "r") {
-	for $arg (@strings) { $arg =~ s/\s+$//; }
-    } elsif($Global::trim eq "rl" or $Global::trim eq "lr") {
-	for $arg (@strings) { $arg =~ s/^\s+//; $arg =~ s/\s+$//; }
-    } else {
-	print STDERR "$Global::progname: --trim must be one of: r l rl lr\n";
-	wait_and_exit(255);
-    }
-    return wantarray ? @strings : "@strings";
-}
-
-
 sub shell_quote {
     # Quote the string so shell will not expand any special chars
     # Returns:
@@ -2484,9 +2484,7 @@ sub context_replace {
     return $job_line;
 }
 
-#
-# Number of processes, filehandles, max length of command line
-#
+sub __NUMBER_OF_PROCESSES_FILEHANDLES_MAX_LENGTH_OF_COMMAND_LINE__ {}
 
 # Maximal command line length (for -m and -X)
 sub max_length_of_command_line {
@@ -2620,7 +2618,7 @@ sub processes_available_by_system_limit {
 
 	# If there are no more command lines, then we have a process
 	# per command line, so no need to go further
-	($next_command_line, $args_ref) = next_command_line();
+	($next_command_line, $args_ref) = get_command_line();
 	if(defined $next_command_line) {
 	    push(@command_lines, $next_command_line, $args_ref);
 	}
@@ -2989,9 +2987,7 @@ sub max {
 }
 
 
-#
-# Running and printing the jobs
-#
+sub __RUNNING_AND_PRINTING_THE_JOBS__ {}
 
 # Variable structure:
 #    $Global::running{$pid}{'seq'} = printsequence
@@ -3045,187 +3041,6 @@ sub login_and_host {
     return $1;
 }
 
-sub next_command_line_with_sshlogin {
-    # Returns:
-    #   next command to run with ssh command wrapping if remote
-    my $sshlogin = shift;
-    my ($next_command_line, $args_ref) = next_command_line();
-    my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
-    my ($pre,$post)=("","");
-    if($next_command_line and $serverlogin ne ":") {
-	for my $file (@$args_ref) {
-	    if($::opt_transfer) {
-		# --transfer
-		$pre .= sshtransfer($sshlogin,$file).";";
-	    }
-	    if(@Global::ret_files) {
-		# --return or --trc
-		$post .= sshreturn($sshlogin,$file).";";
-	    }
-	    if($::opt_cleanup) {
-		# --cleanup
-		$post .= sshcleanup($sshlogin,$file).";";
-	    }
-	}
-	if($post) {
-	    # We need to save the exit status of the job
-	    $post = '_EXIT_status=$?; '.$post.' exit $_EXIT_status;';
-	}
-	return ($pre . "$sshcmd $serverlogin "
-		.shell_quote($next_command_line).";".$post);
-    } else {
-	return $next_command_line;
-    }
-}
-
-sub next_command_line {
-    # Returns:
-    #   next command line
-    #   list of arguments for the line
-    my ($cmd_line,$args_ref);
-    if(@Global::unget_next_command_line) {
-	$cmd_line = shift @Global::unget_next_command_line;
-	$args_ref = shift @Global::unget_next_command_line;
-    } else {
-	do {
-	    ($cmd_line,$args_ref) = generate_command_line($Global::command);
-	} while (defined $cmd_line and $cmd_line =~ /^\s*$/); # Skip empty lines
-    }
-    return ($cmd_line,$args_ref);
-}
-
-sub unget_command_line {
-    # Returns: N/A
-    push @Global::unget_next_command_line, @_;
-}
-
-sub more_arguments {
-    # Returns:
-    #   whether there are more arguments to be processed or not
-    my $fh = shift || $Global::argfile;
-    return (@Global::unget_arg or @Global::unget_lines or not eof $fh);
-}
-
-sub get_next_arg_from_fh {
-    # Returns:
-    #   next argument from file handle - quoted if needed
-    #   undef if end of file
-    my $fh = shift;
-    my $arg;
-    if(not $Private::unget{$fh}) {
-	@{$Private::unget{$fh}} = ();
-    }
-    my $unget_ref = $Private::unget{$fh};
-    if(@$unget_ref) {
-	# Ungotten arg exists
-	$arg = shift @$unget_ref;
-    } else {
-	if(not more_arguments($fh)) {
-	    return undef;
-	}
-	$arg = <$fh>;
-	# Remove delimiter
-	$arg =~ s:$/$::;
-    }
-    if($Global::end_of_file_string and
-       $arg eq $Global::end_of_file_string) {
-	# Ignore the rest of input file
-	while (<$fh>) {}
-	@$unget_ref = ();
-	return undef;
-    }
-    if($Global::ignore_empty) {
-	if($arg =~ /^\s*$/) {
-	    return get_next_arg_from_fh($fh);
-	}
-    }
-    if($Global::max_lines and more_arguments()) {
-	if($arg =~ /\s$/) {
-	    # Trailing space => continued on next line
-	    $arg .= get_next_arg_from_fh($fh);
-	}
-    }
-    if(not @$unget_ref and $::opt_colsep) {
-	# split this into columns
-	if($Global::trim ne 'n') {
-	    push @$unget_ref, split /$::opt_colsep/o, $arg;
-	} else {
-	    push @$unget_ref, trim(split /$::opt_colsep/o, $arg);
-	}
-	$::opt_N = $#$unget_ref+1;
-	$Global::max_number_of_args = $::opt_N;
-	debug("unget_ref: @$unget_ref\n");
-	$arg = shift @$unget_ref;
-    }
-    if($Global::input_is_filename) {
-	$arg = shell_quote($arg);
-    }
-    debug($arg);
-    return $arg;
-}
-
-sub get_next_arg {
-    # Returns:
-    #   next argument from input quoted and trimmed as needed
-    #   undef if end of file
-    my $arg;
-    if(@Global::unget_arg) {
-	return shift @Global::unget_arg;
-    } elsif(@Global::unget_lines) {
-	$arg = shift @Global::unget_lines;
-	if($Global::end_of_file_string and
-	   $arg eq $Global::end_of_file_string) {
-	    # Ignore the rest of input file
-	    @Global::unget_lines = ();
-	    return undef;
-	}
-	if($Global::ignore_empty) {
-	    if($arg =~ /^\s*$/) {
-		return get_next_arg();
-	    }
-	}
-	if($Global::max_lines and more_arguments()) {
-	    if($arg =~ /\s$/) {
-		# Trailing space => continued on next line
-		$arg .= get_next_arg();
-	    }
-	}
-	if($::opt_colsep) {
-	    # split this into columns
-	    my @columns = split /$::opt_colsep/o, $arg;
-	    $::opt_N = $#columns+1;
-	    $Global::max_number_of_args = $::opt_N;
-	    if($Global::trim ne 'n') {
-		@columns = trim(@columns);
-	    }
-	    if($Global::input_is_filename) {
-		unget_arg(shell_quote(@columns));
-	    } else {
-		unget_arg(@columns);
-	    }
-	    return get_next_arg();
-	} else {
-	    if($Global::trim ne 'n') {
-		$arg = trim($arg);
-	    }
-	    if($Global::input_is_filename) {
-		$arg = shell_quote($arg);
-	    }
-	}
-    } else {
-	$arg = get_next_arg_from_fh($Global::argfile);
-	if(defined $arg) {
-	    $Global::total_jobs++;
-	}
-    }
-    return $arg;
-}
-
-sub unget_arg {
-    # Returns: N/A
-    push @Global::unget_arg, @_;
-}
-
 sub drain_job_queue {
     # Returns: N/A
     if($::opt_progress) {
@@ -3277,7 +3092,7 @@ sub progress {
     #   list of workers
     #   header that will fit on the screen
     #   status message that will fit on the screen
-    my $termcols = columns();
+    my $termcols = terminal_columns();
     my ($status, $header)=("x"x($termcols+1),"");
     my @workers = sort keys %Global::host;
     my %sshlogin = map { $_ eq ":" ? ($_=>"local") : ($_=>$_) } @workers;
@@ -3412,7 +3227,7 @@ sub progress {
     return ("workerlist" => $workerlist, "header" => $header, "status" => $status);
 }
 
-sub columns {
+sub terminal_columns {
     # Get the number of columns of the display
     # Returns:
     #   number of columns of the screen
@@ -3458,7 +3273,7 @@ sub start_another_job {
     my $sshlogin = shift;
     # Do we have enough file handles to start another job?
     if(enough_file_handles()) {
-	my $command = next_command_line_with_sshlogin($sshlogin);
+	my $command = get_command_line_with_sshlogin($sshlogin);
 	if(defined $command) {
 	    debug("Command to run on '$sshlogin': $command\n");
 	    my %jobinfo = start_job($command,$sshlogin);
@@ -3602,11 +3417,190 @@ sub print_job {
     close $out;
     close $err;
 }
+sub __READING_AND_QUOTING_ARGUMENTS__ {}
 
-#
-# Remote ssh
-#
+sub get_command_line_with_sshlogin {
+    # Returns:
+    #   next command to run with ssh command wrapping if remote
+    my $sshlogin = shift;
+    my ($next_command_line, $args_ref) = get_command_line();
+    my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
+    my ($pre,$post)=("","");
+    if($next_command_line and $serverlogin ne ":") {
+	for my $file (@$args_ref) {
+	    if($::opt_transfer) {
+		# --transfer
+		$pre .= sshtransfer($sshlogin,$file).";";
+	    }
+	    if(@Global::ret_files) {
+		# --return or --trc
+		$post .= sshreturn($sshlogin,$file).";";
+	    }
+	    if($::opt_cleanup) {
+		# --cleanup
+		$post .= sshcleanup($sshlogin,$file).";";
+	    }
+	}
+	if($post) {
+	    # We need to save the exit status of the job
+	    $post = '_EXIT_status=$?; '.$post.' exit $_EXIT_status;';
+	}
+	return ($pre . "$sshcmd $serverlogin "
+		.shell_quote($next_command_line).";".$post);
+    } else {
+	return $next_command_line;
+    }
+}
 
+sub get_command_line {
+    # Returns:
+    #   next command line
+    #   list of arguments for the line
+    my ($cmd_line,$args_ref);
+    if(@Global::unget_next_command_line) {
+	$cmd_line = shift @Global::unget_next_command_line;
+	$args_ref = shift @Global::unget_next_command_line;
+    } else {
+	do {
+	    ($cmd_line,$args_ref) = generate_command_line($Global::command);
+	} while (defined $cmd_line and $cmd_line =~ /^\s*$/); # Skip empty lines
+    }
+    return ($cmd_line,$args_ref);
+}
+
+sub unget_command_line {
+    # Returns: N/A
+    push @Global::unget_next_command_line, @_;
+}
+
+sub more_arguments {
+    # Returns:
+    #   whether there are more arguments to be processed or not
+    my $fh = shift || $Global::argfile;
+    return (@Global::unget_arg or @Global::unget_lines or not eof $fh);
+}
+
+sub get_arg_from_fh {
+    # Returns:
+    #   next argument from file handle - quoted if needed
+    #   undef if end of file
+    my $fh = shift;
+    my $arg;
+    if(not $Private::unget{$fh}) {
+	@{$Private::unget{$fh}} = ();
+    }
+    my $unget_ref = $Private::unget{$fh};
+    if(@$unget_ref) {
+	# Ungotten arg exists
+	$arg = shift @$unget_ref;
+    } else {
+	if(not more_arguments($fh)) {
+	    return undef;
+	}
+	$arg = <$fh>;
+	# Remove delimiter
+	$arg =~ s:$/$::;
+    }
+    if($Global::end_of_file_string and
+       $arg eq $Global::end_of_file_string) {
+	# Ignore the rest of input file
+	while (<$fh>) {}
+	@$unget_ref = ();
+	return undef;
+    }
+    if($Global::ignore_empty) {
+	if($arg =~ /^\s*$/) {
+	    return get_arg_from_fh($fh);
+	}
+    }
+    if($Global::max_lines and more_arguments()) {
+	if($arg =~ /\s$/) {
+	    # Trailing space => continued on next line
+	    $arg .= get_arg_from_fh($fh);
+	}
+    }
+    if(not @$unget_ref and $::opt_colsep) {
+	# split this into columns
+	if($Global::trim ne 'n') {
+	    push @$unget_ref, split /$::opt_colsep/o, $arg;
+	} else {
+	    push @$unget_ref, trim(split /$::opt_colsep/o, $arg);
+	}
+	$::opt_N = $#$unget_ref+1;
+	$Global::max_number_of_args = $::opt_N;
+	debug("unget_ref: @$unget_ref\n");
+	$arg = shift @$unget_ref;
+    }
+    if($Global::input_is_filename) {
+	$arg = shell_quote($arg);
+    }
+    debug($arg);
+    return $arg;
+}
+
+sub get_arg {
+    # Returns:
+    #   next argument from input quoted and trimmed as needed
+    #   undef if end of file
+    my $arg;
+    if(@Global::unget_arg) {
+	return shift @Global::unget_arg;
+    } elsif(@Global::unget_lines) {
+	$arg = shift @Global::unget_lines;
+	if($Global::end_of_file_string and
+	   $arg eq $Global::end_of_file_string) {
+	    # Ignore the rest of input file
+	    @Global::unget_lines = ();
+	    return undef;
+	}
+	if($Global::ignore_empty) {
+	    if($arg =~ /^\s*$/) {
+		return get_arg();
+	    }
+	}
+	if($Global::max_lines and more_arguments()) {
+	    if($arg =~ /\s$/) {
+		# Trailing space => continued on next line
+		$arg .= get_arg();
+	    }
+	}
+	if($::opt_colsep) {
+	    # split this into columns
+	    my @columns = split /$::opt_colsep/o, $arg;
+	    $::opt_N = $#columns+1;
+	    $Global::max_number_of_args = $::opt_N;
+	    if($Global::trim ne 'n') {
+		@columns = trim(@columns);
+	    }
+	    if($Global::input_is_filename) {
+		unget_arg(shell_quote(@columns));
+	    } else {
+		unget_arg(@columns);
+	    }
+	    return get_arg();
+	} else {
+	    if($Global::trim ne 'n') {
+		$arg = trim($arg);
+	    }
+	    if($Global::input_is_filename) {
+		$arg = shell_quote($arg);
+	    }
+	}
+    } else {
+	$arg = get_arg_from_fh($Global::argfile);
+	if(defined $arg) {
+	    $Global::total_jobs++;
+	}
+    }
+    return $arg;
+}
+
+sub unget_arg {
+    # Returns: N/A
+    push @Global::unget_arg, @_;
+}
+
+sub __REMOTE_SSH__ {}
 sub read_sshloginfile {
     # Returns: N/A
     my $file = shift;
@@ -3818,10 +3812,8 @@ sub cleanup_basefile {
     print `$cmd`;
 }
 
-#
-# Signal handling
-#
-
+sub __SIGNAL_HANDLING__ {}
+ 
 sub list_running_jobs {
     # Returns: N/A
     for my $v (values %Global::running) {
@@ -3930,9 +3922,7 @@ sub reaper {
     $Private::reaperlevel--;
 }
 
-#
-# Usage
-#
+sub __USAGE__ {}
 
 sub wait_and_exit {
     # If we do not wait, we sometimes get segfault
@@ -3981,9 +3971,7 @@ sub show_limits {
 }
 
 
-#
-# Debugging
-#
+sub __DEBUGGING__ {}
 
 sub debug {
     # Returns: N/A
