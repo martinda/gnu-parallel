@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <?xml-stylesheet type='text/xsl' href='interface.xsl'?>
-<interface uri="http://gfxmonk.net/dist/0install/parallel.xml" xmlns="http://zero-install.sourceforge.net/2004/injector/interface" xmlns:compile="http://zero-install.sourceforge.net/2006/namespaces/0compile">
+<interface uri="http://git.savannah.gnu.org/cgit/parallel.git/plain/packager/0install/parallel.xml" xmlns="http://zero-install.sourceforge.net/2004/injector/interface">
 	<name>GNU parallel</name>
 	<summary>a shell tool for executing jobs in parallel locally or using remote computers</summary>
 	<description>
@@ -26,7 +26,6 @@ will be run in parallel. GNU parallel can often be used as a substitute for
 xargs or cat | sh.</description>
 	<homepage>http://www.gnu.org/software/parallel/</homepage>
 	<category>Utility</category>
-	<publish mode="third-party" xmlns="http://gfxmonk.net/dist/0install"/>
 	<needs-terminal/>
 
 	<group main="src/parallel">
@@ -36,7 +35,7 @@ xargs or cat | sh.</description>
 	</group>
 </interface>
 <!-- Base64 Signature
-iEYEABECAAYFAkxNeuMACgkQ/lhgK1iJTtJ5FwCZAVLBgAZshQd1fUQ1/lGICaGW2OYAoKfFDkTs
-5AChfjV1AOaKA1izTI45
+iEYEABECAAYFAkxVV0MACgkQ/lhgK1iJTtKMHgCgoeHZqlsD7xQ03mO0t3Z1vWs0GC8AnAgRxpwx
+VlXG5z7FLaQNHt+b2Cg8
 
 -->
