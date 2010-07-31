@@ -1,37 +1,11 @@
-Unittest: parallel --trim fj ::: echo
-
-Unittest: ending in space continuted on next line. Both needs quoting only once.
-(echo '> '; echo '> '; echo '>') | parallel --max-lines 3 echo
 
 example with colsep
 
---colsep should default to remove whitespace before and after
---donttrim --keepwhitespace
+Unittest: --colsep + multiple -a
+
 
 Unittest: eof string on ::: 
 Unittest: quoting efter colsplit
-
-echo '>/dev/null' | parallel echo
-
-echo 'a%c%b' | parallel --colsep % echo {1} {3} {2}
-(echo 'a%c%b'; echo a%c%b%d) | parallel --colsep % echo {1} {3} {2} {4}
-(echo a%c%b; echo d%f%e) | parallel --colsep % echo {1} {3} {2}
-parallel --colsep % echo {1} {3} {2} ::: a%c%b d%f%e
-
-parallel --colsep % echo {1} {3} {2} ::: a%c%b
-
-parallel --colsep % echo {1} {3} {2} {4} ::: a%c%b a%c%b%d 
-
-(echo 'a%c%%b'; echo a%c%b%d) | parallel -k --colsep %+ echo {1} {3} {2} {4}
-
-parallel -k --colsep %+ echo {1} {3} {2} {4} ::: a%c%%b a%c%b%d
-
-(echo 'a% c %%b'; echo a%c% b %d) | parallel -k --colsep %+ echo {1} {3} {2} {4}
-
-(echo 'a% c %%b'; echo a%c% b %d) | parallel -k --colsep %+ echo '"{1}_{3}_{2}_{4}"'
-(echo 'a% c %%b'; echo a%c% b %d) | parallel -k -C %+ echo '"{1}_{3}_{2}_{4}"'
-(echo 'a% c %%b'; echo a%c% b %d) | parallel -k --trim n --colsep %+ echo '"{1}_{3}_{2}_{4}"'
-parallel -k -C %+ echo '"{1}_{3}_{2}_{4}"' ::: 'a% c %%b' 'a%c% b %d'
 
 Better screenshot on http://freshmeat.net/projects/parallel
 Better examples.

@@ -2110,7 +2110,7 @@ sub read_args_from_command_line {
 	my $arg = shift @ARGV;
 	if($arg eq $Global::arg_sep) {
 	    $Global::input_is_filename = (@new_argv);
-	    push @Global::unget_lines, @ARGV;
+	    unget_argv(@ARGV);
 	    $Global::total_jobs += @ARGV;
 	    @ARGV=();
 	    last;
@@ -2158,7 +2158,7 @@ sub argfiles_xapply_style {
     for (my $fileno = 0; $fileno <= $#::opt_a; $fileno++) {
 	$in_fh = open_or_exit($::opt_a[$fileno]);
 	for (my $lineno=0;
-	     $content[$fileno][$lineno] = get_arg_from_fh($in_fh);
+	     $content[$fileno][$lineno] = get_arg($in_fh);
 	     $lineno++) {
 	    $max_lineno = max($max_lineno,$lineno);
 	}
@@ -2305,7 +2305,7 @@ sub generate_command_line {
 		$job_line = $arg;
 	    }
 	}
-	debug("Return jobline(".length($job_line)."): !$job_line!\n");
+	debug("Return jobline(",length($job_line),"): !",$job_line,"!\n");
     }
     return ($job_line,$quoted_args);
 }
@@ -2407,9 +2407,9 @@ sub xargs_computations {
 		    - $no_of_replace * length($Global::replacestring)
 		    - $no_of_no_ext * length($Global::replace_no_ext);
 		$spaces = 0;
-		debug("length_of_command_no_args $length_of_command_no_args\n");
-		debug("length_of_context $length_of_context\n");
-		debug("no_of_replace $no_of_replace no_of_no_ext $no_of_no_ext\n");
+		debug("length_of_command_no_args ",$length_of_command_no_args,"\n");
+		debug("length_of_context ",$length_of_context,"\n");
+		debug("no_of_replace ",$no_of_replace," no_of_no_ext ",$no_of_no_ext,"\n");
 	    } else {
 		# remove all {}s
 		$c =~ s/\Q$Global::replacestring\E|\Q$Global::replace_no_ext\E//og;
@@ -2509,7 +2509,7 @@ sub max_length_limited_by_opt_s {
     # Returns:
     #   min(opt_s, number of chars on the longest command line allowed)
     if(is_acceptable_command_line_length($::opt_s)) {
-	debug("-s is OK: $::opt_s\n");
+	debug("-s is OK: ",$::opt_s,"\n");
 	return $::opt_s;
     }
     # -s is too long: Find the correct
@@ -3480,116 +3480,124 @@ sub more_arguments {
     return (@Global::unget_arg or @Global::unget_lines or not eof $fh);
 }
 
-sub get_arg_from_fh {
+sub get_line_from_fh {
     # Returns:
-    #   next argument from file handle - quoted if needed
+    #   next line from file handle from file or stdin. Delimiter removed
     #   undef if end of file
     my $fh = shift;
     my $arg;
-    if(not $Private::unget{$fh}) {
-	@{$Private::unget{$fh}} = ();
+    if(@Global::unget_argv) {
+	# Ungotten args from command line exists
+	debug("get_line_from_fh ",$Global::unget_argv[0],"\n");
+	return shift @Global::unget_argv;
     }
-    my $unget_ref = $Private::unget{$fh};
+    if(not $Global::unget_line{$fh}) {
+	@{$Global::unget_line{$fh}} = ();
+    }
+    my $unget_ref = $Global::unget_line{$fh};
     if(@$unget_ref) {
 	# Ungotten arg exists
-	$arg = shift @$unget_ref;
-    } else {
-	if(not more_arguments($fh)) {
-	    return undef;
-	}
-	$arg = <$fh>;
-	# Remove delimiter
-	$arg =~ s:$/$::;
+	debug("get_line_from_fh ",$$unget_ref[0],"\n");
+	return shift @$unget_ref;
     }
+    if(eof($fh)) {
+	return undef;
+    }
+    $arg = <$fh>;
+    # Remove delimiter
+    $arg =~ s:$/$::;
     if($Global::end_of_file_string and
        $arg eq $Global::end_of_file_string) {
 	# Ignore the rest of input file
 	while (<$fh>) {}
-	@$unget_ref = ();
 	return undef;
     }
     if($Global::ignore_empty) {
 	if($arg =~ /^\s*$/) {
-	    return get_arg_from_fh($fh);
+	    return get_line_from_fh($fh);
 	}
     }
-    if($Global::max_lines and more_arguments()) {
+    if($Global::max_lines and not eof($fh)) {
 	if($arg =~ /\s$/) {
 	    # Trailing space => continued on next line
-	    $arg .= get_arg_from_fh($fh);
+	    $arg .= get_line_from_fh($fh);
 	}
     }
-    if(not @$unget_ref and $::opt_colsep) {
-	# split this into columns
-	if($Global::trim ne 'n') {
-	    push @$unget_ref, split /$::opt_colsep/o, $arg;
-	} else {
-	    push @$unget_ref, trim(split /$::opt_colsep/o, $arg);
-	}
+    debug("get_line_from_fh ",$arg,"\n");
+    return $arg;
+}
+
+sub unget_line_from_fh {
+    # Returns: N/A
+    my $fh = shift;
+    if(not $Global::unget_line{$fh}) {
+	@{$Global::unget_line{$fh}} = ();
+    }
+    my $unget_ref = $Global::unget_line{$fh};
+    push @$unget_ref, @_;
+}
+
+sub unget_argv {
+    # Returns: N/A
+    push @Global::unget_argv, @_;
+}
+
+sub get_column {
+    # Return:
+    #   Column unquoted untrimmed
+    #   undef if no more
+    my $fh = shift;
+    if(not $Global::unget_col{$fh}) {
+	@{$Global::unget_col{$fh}} = ();
+    }
+    my $unget_ref = $Global::unget_col{$fh};
+    if(@$unget_ref) {
+	# Ungotten col exists
+	return shift @$unget_ref;
+    }
+    my $line = get_line_from_fh($fh);
+    if(defined $line) {
+	push @$unget_ref, split /$::opt_colsep/o, $line;
 	$::opt_N = $#$unget_ref+1;
 	$Global::max_number_of_args = $::opt_N;
-	debug("unget_ref: @$unget_ref\n");
-	$arg = shift @$unget_ref;
+	debug("col_unget_ref: @$unget_ref\n");
+	return shift @$unget_ref;
+    } else {
+	return undef;
     }
-    if($Global::input_is_filename) {
-	$arg = shell_quote($arg);
+}
+
+sub unget_column {
+    # Returns: N/A
+    my $fh = shift;
+    if(not $Global::unget_col{$fh}) {
+	@{$Global::unget_col{$fh}} = ();
     }
-    debug($arg);
-    return $arg;
+    my $unget_ref = $Global::unget_col{$fh};
+    push @$unget_ref, @_;
 }
 
 sub get_arg {
     # Returns:
-    #   next argument from input quoted and trimmed as needed
+    #   next argument quoted and trimmed as needed
+    #     (from $Global::argfile or $fh if given)
     #   undef if end of file
     my $arg;
+    my $fh = shift || $Global::argfile;
     if(@Global::unget_arg) {
 	return shift @Global::unget_arg;
-    } elsif(@Global::unget_lines) {
-	$arg = shift @Global::unget_lines;
-	if($Global::end_of_file_string and
-	   $arg eq $Global::end_of_file_string) {
-	    # Ignore the rest of input file
-	    @Global::unget_lines = ();
-	    return undef;
-	}
-	if($Global::ignore_empty) {
-	    if($arg =~ /^\s*$/) {
-		return get_arg();
-	    }
-	}
-	if($Global::max_lines and more_arguments()) {
-	    if($arg =~ /\s$/) {
-		# Trailing space => continued on next line
-		$arg .= get_arg();
-	    }
-	}
-	if($::opt_colsep) {
-	    # split this into columns
-	    my @columns = split /$::opt_colsep/o, $arg;
-	    $::opt_N = $#columns+1;
-	    $Global::max_number_of_args = $::opt_N;
-	    if($Global::trim ne 'n') {
-		@columns = trim(@columns);
-	    }
-	    if($Global::input_is_filename) {
-		unget_arg(shell_quote(@columns));
-	    } else {
-		unget_arg(@columns);
-	    }
-	    return get_arg();
-	} else {
-	    if($Global::trim ne 'n') {
-		$arg = trim($arg);
-	    }
-	    if($Global::input_is_filename) {
-		$arg = shell_quote($arg);
-	    }
-	}
+    }
+    if($::opt_colsep) {
+	$arg = get_column($fh);
     } else {
-	$arg = get_arg_from_fh($Global::argfile);
-	if(defined $arg) {
-	    $Global::total_jobs++;
+	$arg = get_line_from_fh($fh);
+    }
+    if(defined $arg) {
+	if($Global::trim ne 'n') {
+	    $arg = trim($arg);
+	}
+	if($Global::input_is_filename) {
+	    $arg = shell_quote($arg);
 	}
     }
     return $arg;
@@ -3976,6 +3984,7 @@ sub __DEBUGGING__ {}
 sub debug {
     # Returns: N/A
     $Global::debug or return;
+    @_ = grep { defined $_ ? $_ : "" } @_;
     if($Global::original_stdout) {
 	print $Global::original_stdout @_;
     } else {

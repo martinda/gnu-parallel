@@ -1,0 +1,34 @@
+### Test of quoting of > bug
+>/dev/null
+### Test of quoting of > bug if line continuation
+> > >
+### Test of --trim illegal
+parallel: --trim must be one of: r l rl lr
+### Test of --colsep
+a b c
+a b c {4}
+a b c d
+a b c
+d e f
+a b c
+d e f
+a b c
+a b c {4}
+a b c d
+### Test of --colsep as regexp
+a b c {4}
+a b c d
+a b c {4}
+a b c d
+a b c {4}
+a b c d
+a_b_c_{4}
+a_b_c_d
+### Test of -C
+a_b_c_{4}
+a_b_c_d
+### Test of --trim n
+a_b_\ c\ _{4}
+a_\ b\ _c_d
+a_b_c_{4}
+a_b_c_d
