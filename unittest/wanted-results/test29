@@ -4,6 +4,24 @@
 > > >
 ### Test of --trim illegal
 parallel: --trim must be one of: r l rl lr
+### Test of eof string on :::
+foo
+ole
+### Test of ignore-empty string on :::
+foo
+ole
+bar
+### Test of trailing space continuation
+foo ole bar
+quux
+foo ole bar
+quux
+foo ole bar
+quux
+foo ole
+foo ole 
+foo ole bar
+quux
 ### Test of --colsep
 a b c
 a b c {4}
@@ -15,6 +33,13 @@ d e f
 a b c
 a b c {4}
 a b c d
+### Test of tab as colsep
+abc def
+ghi jkl
+abc def
+ghi jkl
+### Test of quoting after colsplit
+>/tmp/null >/dev/null
 ### Test of --colsep as regexp
 a b c {4}
 a b c d

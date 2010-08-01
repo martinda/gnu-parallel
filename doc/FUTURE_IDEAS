@@ -1,22 +1,41 @@
 
-example with colsep
+
+# Gzip all files in parallel
+parallel gzip ::: *
+
+# Convert *.wav to *.mp3 using LAME running one process per CPU core:
+parallel -j+0 lame {} -o {.}.mp3 ::: *.wav
+
+# Make an uncompressed version of all *.gz
+parallel zcat {} ">"{.} ::: *.gz
+
+# Recompress all .gz files using bzip2 running 1 job per CPU core:
+find . -name '*.gz' | parallel -j+0 "zcat {} | bzip2 >{.}.bz2 && rm {}"
+
+# Create a directory for each zip-file and unzip it in that dir
+parallel 'mkdir {.}; cd {.}; unzip ../{}' ::: *.zip
+
+# Convert all *.mp3 in subdirs to *.ogg running 
+#   one process per CPU core on local computer and server2
+find . -name '*.mp3' | parallel --trc {.}.ogg -j+0 -S server2,: \
+         'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg'
+
+# Run mycmd on column 1-3 of each row of TAB separated values
+parallel -a table_file.tsv --colsep '\t' mycmd -o {2} {3} -i {1}
+
+# Run traceroute in parallel, but keep the output order the same
+parallel -k traceroute ::: foss.org.my debian.org freenetproject.org
+
+
 
 Unittest: --colsep + multiple -a
-
-
-Unittest: eof string on ::: 
-Unittest: quoting efter colsplit
-
-Better screenshot on http://freshmeat.net/projects/parallel
-Better examples.
-Size: 640x480
 
 Import sql
 
 inputfile tabel, Split colonner til {n}
-sql :foo 'select * from bar' | parallel --colsep '\s+\|\s+' do_stuff {4} {1}
+sql :foo 'select * from bar' | parallel --colsep '\|' do_stuff {4} {1}
 
-parallel -a table_file --colsep '\s+' do_stuff {4} {1}
+
 
 if(defined $::opt_colsep and defined @::opt_a and @::opt_a > 1) {
    # must be done after converting :::: to -a -a

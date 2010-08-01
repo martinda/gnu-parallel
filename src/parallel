@@ -1157,6 +1157,26 @@ B<ls *.es.* | perl -pe 'print; s/\.es//' | parallel -N2 cp {1} {2}>
 The perl command spits out 2 lines for each input. GNU B<parallel>
 takes 2 inputs (using B<-N2>) and replaces {1} and {2} with the inputs.
 
+=head1 EXAMPLE: Use a table as input
+
+Content of table_file.tsv:
+
+  foo<TAB>bar
+  baz <TAB> quux
+
+To run:
+
+  cmd -o bar -i foo
+  cmd -o quux -i baz
+
+you can run:
+
+  parallel -a table_file.tsv --colsep '\t' cmd -o {2} -i {1}
+
+Note: The default for GNU B<parallel> is to remove the spaces around the columns. To keep the spaces:
+
+  parallel -a table_file.tsv --trim n --colsep '\t' cmd -o {2} -i {1}
+
 
 =head1 EXAMPLE: Working as cat | sh. Ressource inexpensive jobs and evaluation
 
@@ -2110,9 +2130,25 @@ sub read_args_from_command_line {
 	my $arg = shift @ARGV;
 	if($arg eq $Global::arg_sep) {
 	    $Global::input_is_filename = (@new_argv);
-	    unget_argv(@ARGV);
-	    $Global::total_jobs += @ARGV;
-	    @ARGV=();
+	    while(@ARGV) {
+		my $arg = shift @ARGV;
+		if($Global::end_of_file_string and
+		   $arg eq $Global::end_of_file_string) {
+		    # Ignore the rest of ARGV
+		    @ARGV=();
+		}
+		if($Global::ignore_empty) {
+		    if($arg =~ /^\s*$/) { next; }
+		}
+		if($Global::max_lines and $#ARGV >=0) {
+		    if($arg =~ /\s$/) {
+			# Trailing space => continued on next line
+			$arg .= shift @ARGV;
+		    }
+		}
+		unget_argv($arg);
+		$Global::total_jobs++;
+	    }
 	    last;
 	} else {
 	    push @new_argv, $arg;
@@ -3477,7 +3513,9 @@ sub more_arguments {
     # Returns:
     #   whether there are more arguments to be processed or not
     my $fh = shift || $Global::argfile;
-    return (@Global::unget_arg or @Global::unget_lines or not eof $fh);
+    return (@Global::unget_argv or @{$Global::unget_line{$fh}} or
+	    @{$Global::unget_col{$fh}} or @Global::unget_arg or not
+	    eof $fh);
 }
 
 sub get_line_from_fh {
@@ -3517,10 +3555,13 @@ sub get_line_from_fh {
 	    return get_line_from_fh($fh);
 	}
     }
-    if($Global::max_lines and not eof($fh)) {
+    if($Global::max_lines) {
 	if($arg =~ /\s$/) {
 	    # Trailing space => continued on next line
-	    $arg .= get_line_from_fh($fh);
+	    my $cont = get_line_from_fh($fh);
+	    if(defined $cont) {
+		$arg .= $cont;
+	    }
 	}
     }
     debug("get_line_from_fh ",$arg,"\n");
