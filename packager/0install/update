@@ -1,0 +1,20 @@
+#!/bin/bash
+
+
+version=$1
+if [ -z "${version}" ]; then
+	echo "usage: update <version>"
+	exit 1
+fi
+set -ex
+url="http://ftp.gnu.org/gnu/parallel/parallel-${version}.tar.bz2"
+file="/tmp/parallel-${version}.tgz"
+wget "$url" -O "${file}"
+( cd "$(dirname "$0")" && \
+	0publish \
+		--add-version ${version} \
+		--archive-url="${url}" \
+		--archive-file="${file}" \
+		--archive-extract="parallel-${version}" \
+		--set-released=today \
+		--xmlsign parallel.xml )

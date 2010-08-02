@@ -1,0 +1,2 @@
+#!/bin/sh
+0launch http://0install.net/2007/interfaces/FeedLint.xml http://git.savannah.gnu.org/cgit/parallel.git/plain/packager/0install/parallel.xml
