@@ -815,11 +815,11 @@ B<ls | parallel -m mv {} destdir>
 
 To remove the files I<pict0000.jpg> .. I<pict9999.jpg> you could do:
 
-B<seq -f %04g 0 9999 | parallel rm pict{}.jpg>
+B<seq -w 0 9999 | parallel rm pict{}.jpg>
 
 You could also do:
 
-B<seq -f %04g 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -m rm>
+B<seq -w 0 9999 | perl -pe 's/(.*)/pict$1.jpg/' | parallel -m rm>
 
 The first will run B<rm> 10000 times, while the last will only run
 B<rm> as many times needed to keep the command line length short
@@ -827,7 +827,7 @@ enough to avoid B<Argument list too long> (it typically runs 1-2 times).
 
 You could also run:
 
-B<seq -f %04g 0 9999 | parallel -X rm pict{}.jpg>
+B<seq -w 0 9999 | parallel -X rm pict{}.jpg>
 
 This will also only run B<rm> as many times needed to keep the command
 line length short enough.
@@ -925,6 +925,21 @@ foo) you can do:
 
 B<ls *.tar.gz| parallel -U {tar} 'echo {tar}|parallel "mkdir -p {.} ; tar -C {.} -xf {.}.tar.gz"'>
 
+=head1 EXAMPLE: Download 10 images for each of the past 30 days
+
+Let us assume a website stores images like:
+
+   http://www.website.com/path/to/YYYYMMDD_##.jpg
+
+where YYYYMMDD is the date and ## is the number 01-10.  This will
+generate the past 30 days as YYYYMMDD:
+
+B<seq 1 30 | parallel date -d '"today -{} days"' +%Y%m%d>
+
+Based on this we can let GNU B<parallel> generate 10 B<wget>s per day:
+
+B<I<the above> | parallel -I {o} seq -w 1 10 "|" parallel wget
+http://www.website.com/path/to/{o}_{}.jpg>
 
 =head1 EXAMPLE: Rewriting a for-loop and a while-loop
 
@@ -1278,7 +1293,7 @@ the currently running jobs are finished before exiting.
 
 The environment variable $PARALLEL_PID is set by GNU B<parallel> and
 is visible to the jobs started from GNU B<parallel>. This makes it
-possible for the jobs to communicate directly to GNU <parallel>.
+possible for the jobs to communicate directly to GNU B<parallel>.
 
 B<Example:> If each of the jobs tests a solution and one of jobs finds
 the solution the job can tell GNU B<parallel> not to start more jobs
@@ -1320,6 +1335,8 @@ The file ~/.parallelrc will be read if it exists. It should be
 formatted like the environment variable $PARALLEL. Lines starting with
 '#' will be ignored.
 
+Options on the command line takes precedence over the environment
+variable $PARALLEL which takes precedence over the file ~/.parallelrc.
 
 =head1 EXIT STATUS
 

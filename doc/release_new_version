@@ -78,7 +78,8 @@ Newsgroups: comp.unix.shell,comp.unix.admin
 
 <<<<<
 to:parallel@gnu.org, bug-parallel@gnu.org, info-gnu@gnu.org, bug-directory@gnu.org
-cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>
+cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
+   Tim Cuthbertson <tim3d.junk@gmail.com>
 
 Subject: GNU Parallel 20100722 released
 
@@ -88,12 +89,22 @@ download at: http://ftp.gnu.org/gnu/parallel/
 New in this release:
 
 * With --colsep a table can be used as input. Example:
-  cat table | parallel --colsep '\s+' echo col1 {1} col2 {2}
+  cat tab_sep_table | parallel --colsep '\t' echo col1 {1} col2 {2}
 
 * --trim can remove white space around arguments.
 
 * Zero install package. Thanks to Tim Cuthbertson <tim3d dot junk at
   gmail dot com>
+
+* OpenSUSE package. Thanks to Markus Ammer <mkmm at gmx-topmail dot
+  de>
+
+* Web review http://oentend.blogspot.com/2010/08/gnu-parallel.html
+  Thanks to Pavel Nuzhdin <pnzhdin at gmail dot com>
+
+* Web review http://psung.blogspot.com/2010/08/gnu-parallel.html
+  Thanks to Phil Sung
+
 
 = About GNU Parallel =
 
