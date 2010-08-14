@@ -1,5 +1,7 @@
-Default sshloginfile ~/.parallel/sshloginfile
---sshloginfile .. or -S .. means use default sshloginfile
+Added --sshloginfile .. or -S .. means use ~/.parallel/sshloginfile
+
+Changed .parallelrc to .parallel/config to avoid having two files in ~/
+
 
 # Allow 7 to run. After then 7th is started, block untill one is dead
 parallel --mutex uniqidentifier -j7 command

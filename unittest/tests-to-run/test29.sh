@@ -13,7 +13,7 @@ echo '### Test of eof string on :::'
 parallel -E ole echo ::: foo ole bar
 
 echo '### Test of ignore-empty string on :::'
-parallel -r echo ::: foo '' ole bar
+parallel -k -r echo ::: foo '' ole bar
 
 echo '### Test of trailing space continuation'
 (echo foo; echo '';echo 'ole ';echo bar;echo quux) | xargs -r -L2 echo

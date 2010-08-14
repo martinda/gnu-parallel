@@ -4,7 +4,7 @@ ssh -l parallel parallel-server2 echo\ 1;
 1
 ssh parallel-server3 echo\ 2;
 2
-### Test ~/.parallelrc
+### Test ~/.parallel/config
 ssh -l parallel parallel-server2 echo\ 1;
 1
 ssh parallel-server3 echo\ 2;

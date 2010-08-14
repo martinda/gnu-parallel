@@ -600,6 +600,8 @@ The sshlogin must not require a password.
 The sshlogin ':' is special, it means 'no ssh' and will therefore run
 on the local computer.
 
+The sshlogin '..' is special, it read sshlogins from ~/.parallel/sshloginfile
+
 To specify more sshlogins separate the sshlogins by comma or repeat
 the options multiple times.
 
@@ -632,6 +634,9 @@ lines. Empty lines and lines starting with '#' are ignored. Example:
   16/:
 
 When using a different ssh program the last argument must be the hostname.
+
+The sshloginfile '..' is special, it read sshlogins from
+~/.parallel/sshloginfile
 
 
 =item B<--silent>
@@ -1329,14 +1334,15 @@ B<-j> take an argument and thus both need to be at the end of a group.
 
 =back
 
-=head1 INIT FILE (RC FILE)
+=head1 CONFIG FILE
 
-The file ~/.parallelrc will be read if it exists. It should be
+The file ~/.parallel/config will be read if it exists. It should be
 formatted like the environment variable $PARALLEL. Lines starting with
 '#' will be ignored.
 
 Options on the command line takes precedence over the environment
-variable $PARALLEL which takes precedence over the file ~/.parallelrc.
+variable $PARALLEL which takes precedence over the file
+~/.parallel/config.
 
 =head1 EXIT STATUS
 
@@ -1945,10 +1951,10 @@ sub parse_options {
     $Global::trim = 'n';
 
     Getopt::Long::Configure ("bundling","require_order");
-    # Add options from .parallelrc
-    my $parallelrc = $ENV{'HOME'}."/.parallelrc";
-    if(-r $parallelrc) {
-	open (IN, "<", $parallelrc) || die;
+    # Add options from .parallel/config
+    my $parallel_config = $ENV{'HOME'}."/.parallel/config";
+    if(-r $parallel_config) {
+	open (IN, "<", $parallel_config) || die;
 	while(<IN>) {
 	    /^\s*\#/ and next;
 	    chomp;
@@ -3670,6 +3676,9 @@ sub __REMOTE_SSH__ {}
 sub read_sshloginfile {
     # Returns: N/A
     my $file = shift;
+    if($file eq "..") {
+	$file = $ENV{'HOME'}."/.parallel/sshloginfile";
+    }
     open(IN, $file) || die "Cannot open $file";
     while(<IN>) {
 	chomp;
@@ -3684,7 +3693,13 @@ sub parse_sshlogin {
     if(not @Global::sshlogin) { @Global::sshlogin = (":"); }
     for my $sshlogin (@Global::sshlogin) {
 	# Split up -S sshlogin,sshlogin
-	push (@login, (split /,/, $sshlogin));
+	for my $s (split /,/, $sshlogin) {
+	    if ($s eq "..") {
+		read_sshloginfile($s);
+	    } else {
+		push (@login, $s);
+	    }
+	}
     }
     for my $sshlogin (@login) {
 	if($sshlogin =~ s:^(\d*)/::) {
