@@ -1,14 +1,11 @@
-Added --sshloginfile .. or -S .. means use ~/.parallel/sshloginfile
-
-Changed .parallelrc to .parallel/config to avoid having two files in ~/
-
+# sem -j+0
+# sem gzip foo ";" echo done
 
 # Allow 7 to run. After then 7th is started, block untill one is dead
 parallel --mutex uniqidentifier -j7 command
 parallel --automutex  -j7 command
 mdm.screen find dir -execdir mdm-run cmd {} \;
 find dir -execdir parallel --automutex cmd {} \;
-getppid
 
 fex syntax for splitting fields
 http://www.semicomplete.com/projects/fex/

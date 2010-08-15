@@ -93,6 +93,8 @@ New in this release:
 
 * --trim can remove white space around arguments.
 
+* NixOS package. Thanks to Ludovic Courtès <ludo at gnu dot org>
+
 * Zero install package. Thanks to Tim Cuthbertson <tim3d dot junk at
   gmail dot com>
 
