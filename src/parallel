@@ -1987,14 +1987,50 @@ use strict;
 do_not_reap();
 parse_options();
 init_run_jobs();
-start_more_jobs();
+if($Global::semaphore) {
+    run_as_semaphore();
+} else {
+    start_more_jobs();
+}
 reap_if_needed();
 drain_job_queue();
 cleanup();
+if($Global::semaphore) {
+    exit $Global::exitstatus;
+}
 if($::opt_halt_on_error) {
     wait_and_exit($Global::halt_on_error_exitstatus);
 } else {
     wait_and_exit(min($Global::exitstatus,254));
+}
+
+sub run_as_semaphore {
+    my $sem = Semaphore->new($Semaphore::name,$Global::host{':'}{'max_no_of_running'});
+    $sem->acquire();
+    debug("run");
+    $Global::argfile = open_or_exit("/dev/null");
+    unget_arg("");
+    if($Semaphore::fg) {
+	start_more_jobs();
+	$sem->release();
+    } else {
+	# If run in the background, the PID will change
+	# therefore release and re-acquire the semaphore
+	$sem->release();
+	if(not fork()) {
+	    # child
+	    # Get a semaphore for this pid
+	    my $child_sem = Semaphore->new($Semaphore::name,$Global::host{':'}{'max_no_of_running'});
+	    $child_sem->acquire();
+	    start_more_jobs();
+	    reap_if_needed();
+	    drain_job_queue();
+	    cleanup();
+	    $child_sem->release();
+	} else {
+	    exit(0);
+	}
+    }
 }
 
 sub parse_options {
@@ -2209,6 +2245,22 @@ sub parse_options {
 	print STDERR ("Warning: using -X or -m with --sshlogin may fail\n");
     }
 
+    # Semaphore defaults
+    # Must be done before computing number of processes
+    $Global::semaphore ||= ($0 =~ m:(^|/)sem$:); # called as 'sem'
+    if($Global::semaphore) {
+	$Semaphore::timeout = $::opt_semaphoretimeout || 0;
+	if(defined $::opt_semaphorename) {
+	    $Semaphore::name = $::opt_semaphorename;
+	} else {
+	    $Semaphore::name = `tty`;
+	    chomp $Semaphore::name;
+	}
+	$Semaphore::fg = $::opt_fg;
+	$Semaphore::wait = $::opt_wait;
+	$Global::default_simultaneous_sshlogins = 1;
+    }
+
     # Needs to be done after setting $Global::command and $Global::command_line_max_len
     # as '-m' influences the number of commands that needs to be run
     if(defined $::opt_P) {
@@ -2221,14 +2273,6 @@ sub parse_options {
 	    $Global::host{$sshlogin}{'max_no_of_running'} =
 		$Global::default_simultaneous_sshlogins;
 	}
-    }
-
-    # Semaphore defaults
-    if($Global::semaphore) {
-	$Semaphore::timeout = $::opt_semaphoretimeout || 0;
-	$Semaphore::name = $::opt_semaphorename || `tty`;
-	$Semaphore::fg = $::opt_fg;
-	$Semaphore::wait = $::opt_wait;
     }
 }
 
@@ -2768,11 +2812,13 @@ sub processes_available_by_system_limit {
     do {
 	$system_limit++;
 
-	# If there are no more command lines, then we have a process
-	# per command line, so no need to go further
-	($next_command_line, $args_ref) = get_command_line();
-	if(defined $next_command_line) {
-	    push(@command_lines, $next_command_line, $args_ref);
+	if(not $Global::semaphore) {
+	    # If there are no more command lines, then we have a process
+	    # per command line, so no need to go further
+	    ($next_command_line, $args_ref) = get_command_line();
+	    if(defined $next_command_line) {
+		push(@command_lines, $next_command_line, $args_ref);
+	    }
 	}
 
 	# Every simultaneous process uses 2 filehandles when grouping
@@ -2792,7 +2838,7 @@ sub processes_available_by_system_limit {
 	} else {
 	    $max_system_proc_reached = 1;
 	}
-	debug("Time to fork ten procs ", time-$time, " process ", $system_limit);
+	debug("Time to fork ten procs: ", time-$time, " (processes so far: ", $system_limit,")\n");
 	if(time-$time > 2) {
 	    # It took more than 2 second to fork ten processes. We should stop forking.
 	    # Let us give the system a little slack
@@ -2802,7 +2848,7 @@ sub processes_available_by_system_limit {
 	    $spawning_too_slow = 1;
 	}
     } while($system_limit < $wanted_processes
-	    and defined $next_command_line
+	    and (defined $next_command_line or $Global::semaphore)
 	    and $more_filehandles
 	    and not $max_system_proc_reached
 	    and not $spawning_too_slow);
@@ -4237,6 +4283,8 @@ sub new {
     my $class = shift;
     my $id = shift;
     my $count = shift;
+    $id=~s/([^-_a-z0-9])/unpack("H*",$1)/ige; # Convert non-word chars to hex
+    $id="id-".$id; # To distinguish it from a process id
     my $parallel_locks = $ENV{'HOME'}."/.parallel/semaphores";
     -d $parallel_locks or mkdir $parallel_locks;
     my $lockdir = "$parallel_locks/$id";
@@ -4249,7 +4297,7 @@ sub new {
 	'idfile' => $lockdir."/".$id,
 	'pid' => $$,
 	'pidfile' => $lockdir."/".$$,
-	'count' => $count
+	'count' => $count + 1 # nlinks returns a link for the 'id-' as well
     }, ref($class) || $class;
 }
 
@@ -4260,7 +4308,7 @@ sub acquire {
 	::debug("Remove dead locks");
 	my $lockdir = $self->{'lockdir'};
 	for my $d (<$lockdir/*>) {
-	    $d =~ m:$lockdir/([0-9]+):o or next;
+	    $d =~ m:$lockdir/([0-9]+)$:o or next;
 	    if(not kill 0, $1) {
 		::debug("Dead: $d");
 		unlink $d;
@@ -4273,7 +4321,7 @@ sub acquire {
 	sleep 1;
 	# TODO if timeout: last
     }
-    ::debug("got $self->{'pid'}");
+    ::debug("acquired $self->{'pid'}\n");
 }
 
 sub release {
@@ -4288,7 +4336,7 @@ sub release {
 	} 
 	$self->unlock();
     }
-    ::debug("released $self->{'pid'}");
+    ::debug("released $self->{'pid'}\n");
 }
 
 
@@ -4297,6 +4345,7 @@ sub atomic_link_if_count_less_than {
     my ($self) = shift;
     my ($retval) = 0;
     $self->lock();
+    ::debug($self->nlinks()."<".$self->{'count'});
     if($self->nlinks() < $self->{'count'}) {
 	-d $self->{'lockdir'} || mkdir $self->{'lockdir'};
 	if(not -e $self->{'idfile'}) {
@@ -4313,6 +4362,7 @@ sub atomic_link_if_count_less_than {
 sub nlinks {
     my $self = shift;
     if(-e $self->{'idfile'}) {
+	::debug("nlinks".((stat(_))[3])."\n");
 	return (stat(_))[3];
     } else {
 	return 0;
@@ -4336,10 +4386,10 @@ sub unlock {
     my $self = shift;
     unlink $self->{'lockfile'};
     close $self->{'lockfh'};
-    ::debug("unlocked");
+    ::debug("unlocked\n");
 }
 
 # Keep perl -w happy
-$Private::control_path = $Semaphore::timeout = $Semaphore::name =
-$Semaphore::wait = $Semaphore::fg = 0;
+$Private::control_path = $Semaphore::timeout =
+$Semaphore::wait = 0;
 

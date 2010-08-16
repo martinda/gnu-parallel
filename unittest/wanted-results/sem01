@@ -1,4 +1,67 @@
-### Test mutex. This should take 3 seconds
-foo
-foo
-foo
+### Test mutex. This should not mix output
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+done
+### Test default id = --id `tty`
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+done
+### Test semaphore 2 jobs running simultaneously
+job1
+job2
+job1
+job2
+done
+### Test if parallel invoked as sem will run parallel --semaphore
+job1
+job2
+job1
+job2
+done
+### Test similar example as from man page
+0.5
+0.1
+0.2
+done 0.1
+0.3
+done 0.5
+done 0.2
+0.4
+done 0.3
+done 0.4

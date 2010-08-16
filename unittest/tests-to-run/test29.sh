@@ -10,7 +10,7 @@ echo '### Test of --trim illegal'
 stdout parallel --trim fj ::: echo
 
 echo '### Test of eof string on :::'
-parallel -E ole echo ::: foo ole bar
+parallel -k -E ole echo ::: foo ole bar
 
 echo '### Test of ignore-empty string on :::'
 parallel -k -r echo ::: foo '' ole bar

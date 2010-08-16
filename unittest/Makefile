@@ -8,6 +8,7 @@ unittest: ../src/parallel tests-to-run/* wanted-results/*
 	echo 1+2 | bc | mop || (echo bc is required for unittest; /bin/false)
 	stdout gawk | mop || (echo gawk is required for unittest; /bin/false)
 	expect -c 'spawn cat; puts "expect is installed"' || (echo expect is required for unittest; /bin/false)
+	echo | pv -qL 10 || (echo pv is required for unittest; /bin/false)
 	time sh Start.sh
 	date
 
