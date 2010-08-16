@@ -12,6 +12,8 @@ B<parallel> [options] [I<command> [arguments]] B<:::> arguments
 
 B<parallel> [options] [I<command> [arguments]] B<::::> argfile(s)
 
+B<parallel> --semaphore [options] I<command>
+
 =head1 DESCRIPTION
 
 GNU B<parallel> is a shell tool for executing jobs in parallel locally
@@ -342,7 +344,10 @@ use B<-I> instead.
 
 =item B<-P> I<N>
 
-Run up to N jobs in parallel.  0 means as many as possible. Default is 9.
+Run up to N jobs in parallel.  0 means as many as possible. Default is
+9.
+
+If B<--semaphore> is set default is 1 thus making a mutex.
 
 
 =item B<--jobs> I<+N>
@@ -580,6 +585,18 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
+=item B<--semaphore> (not implemented)
+
+Work as a counting semaphore. B<--semaphore> will cause GNU
+B<parallel> to start I<command> in the background. When the number of
+simultaneous jobs is reached, GNU B<parallel> will wait for one of
+these to complete before starting another command.
+
+Used with B<--fg> and B<--semaphorename>.
+
+The command B<sem> is an alias for B<parallel --semaphore>.
+
+
 =item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
 
 =item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
@@ -783,6 +800,11 @@ GNU B<parallel> can work similar to B<xargs -n1>.
 To compress all html files using B<gzip> run:
 
 B<find . -name '*.html' | parallel gzip>
+
+If the file names may contain a newline use B<-0>. Substitute FOO BAR with
+FUBAR in all files in this dir and subdirs:
+
+B<find . -type f -print0 | parallel -q0 perl -i -pe 's/FOO BAR/FUBAR/g'>
 
 
 =head1 EXAMPLE: Reading arguments from command line

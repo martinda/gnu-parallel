@@ -1,0 +1,4 @@
+### Test mutex. This should take 3 seconds
+foo
+foo
+foo

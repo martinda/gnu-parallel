@@ -2,10 +2,10 @@
 # sem gzip foo ";" echo done
 
 # Allow 7 to run. After then 7th is started, block untill one is dead
-parallel --mutex uniqidentifier -j7 command
-parallel --automutex  -j7 command
+parallel --semaphore --id uniqidentifier -j7 command
+parallel --semaphore  -j7 command
 mdm.screen find dir -execdir mdm-run cmd {} \;
-find dir -execdir parallel --automutex cmd {} \;
+find dir -execdir parallel --semaphore cmd {} \;
 
 fex syntax for splitting fields
 http://www.semicomplete.com/projects/fex/

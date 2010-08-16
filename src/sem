@@ -36,7 +36,8 @@ Command to execute. The command may be followed by arguments for the command.
 
 =item B<-j> I<N>
 
-Run up to N commands in parallel. Default is 9.
+Run up to N commands in parallel. Default is 1 thus acting like a
+mutex.
 
 
 =item B<--id> I<id>
@@ -91,21 +92,13 @@ Report bugs to <bug-parallel@gnu.org>.
 
 =head1 AUTHOR
 
-Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
-
-Copyright (C) 2008,2009,2010 Ole Tange, http://ole.tange.dk
-
 Copyright (C) 2010 Ole Tange, http://ole.tange.dk and Free Software
 Foundation, Inc.
-
-Parts of the manual concerning B<xargs> compatibility is inspired by
-the manual of B<xargs> from GNU findutils 4.4.2.
-
 
 
 =head1 LICENSE
 
-Copyright (C) 2007,2008,2009,2010 Free Software Foundation, Inc.
+Copyright (C) 2010 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -223,10 +216,9 @@ B<parallel>(1)
 
 =cut
 
+use strict;
 use Symbol qw(gensym);
-#use strict;
 use Getopt::Long;
-use Fcntl 'LOCK_EX', 'LOCK_NB';
 
 Getopt::Long::Configure ("bundling","require_order");
 GetOptions("debug|D" => \$::opt_D,
@@ -241,7 +233,7 @@ $Global::debug = $::opt_D;
 $Global::version = 20100814;
 $Global::progname = 'sem';
 
-my $count = 9; # Default 9
+my $count = 1; # Default 1 = mutex
 if($::opt_count) {
     $count = $::opt_count + 1;
 }
@@ -251,6 +243,9 @@ if($::opt_wait) {
 my $id = $::opt_id;
 my $fg = $::opt_fg || $::opt_wait;
 $::opt_timeout = $::opt_timeout;
+if(defined $::opt_version) {
+    version();
+}
 
 if(not defined $id) {
     # $id = getppid(); 
@@ -312,16 +307,28 @@ sub debug {
     # Returns: N/A
     $Global::debug or return;
     @_ = grep { defined $_ ? $_ : "" } @_;
-    print @_;
+    print map {$_,"\n" } @_;
 }
 
 package Semaphore;
+
+# This package provides a counting semaphore
+#
+# If a process dies without releasing the semaphore the next process
+# that needs that entry will clean up dead semaphores
+#
+# The semaphores are stored in ~/.parallel/semaphores/id-<name> Each
+# file in ~/.parallel/semaphores/id-<name>/ is the process ID of the
+# process holding the entry. If the process dies, the entry can be
+# taken by another process.
+
+use Fcntl qw(:DEFAULT :flock);
 
 sub new {
     my $class = shift;
     my $id = shift;
     my $count = shift;
-    my $parallel_locks = $ENV{'HOME'}."/.parallel/locks";
+    my $parallel_locks = $ENV{'HOME'}."/.parallel/semaphores";
     -d $parallel_locks or mkdir $parallel_locks;
     my $lockdir = "$parallel_locks/$id";
     my $lockfile = $lockdir.".lock";
@@ -408,7 +415,7 @@ sub lock {
     open $self->{'lockfh'}, ">", $self->{'lockfile'}
 	or die "Can't open semaphore file $self->{'lockfile'}: $!";
     chmod 0666, $self->{'lockfile'}; # assuming you want it a+rw
-    while(not flock $self->{'lockfh'}, LOCK_EX|LOCK_NB) {
+    while(not flock $self->{'lockfh'}, LOCK_EX()|LOCK_NB()) {
 	::debug("Cannot lock $self->{'lockfile'}");
 	# TODO if timeout: last
 	sleep 1;
