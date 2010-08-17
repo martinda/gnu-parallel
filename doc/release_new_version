@@ -81,7 +81,7 @@ to:parallel@gnu.org, bug-parallel@gnu.org, info-gnu@gnu.org, bug-directory@gnu.o
 cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Tim Cuthbertson <tim3d.junk@gmail.com>, Ludovic Courtès <ludo@gnu.org>,
    Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin <pnzhdin@gmail.com>,
-   ((psung@alum.mit.edu))
+   Phil Sung <psung@alum.mit.edu>
 
 Subject: GNU Parallel 20100722 released
 
@@ -112,7 +112,7 @@ New in this release:
   Thanks to Pavel Nuzhdin <pnzhdin at gmail dot com>
 
 * Web review http://psung.blogspot.com/2010/08/gnu-parallel.html
-  Thanks to Phil Sung ((<psung at alum dot mit dot edu>))
+  Thanks to Phil Sung <psung at alum dot mit dot edu>
 
 
 = About GNU Parallel =

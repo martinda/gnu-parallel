@@ -1,6 +1,8 @@
 # Examples of sem
 
 Weird bug - only interactive
+perlipc: Complete Dissociation of Child from Parent
+Setting $SIG{CHLD} to 'IGNORE'
 
 echo '### BUG: Test --fg followed by --bg'
 parallel -u --fg --semaphore seq 1 10 '|' pv -qL 20

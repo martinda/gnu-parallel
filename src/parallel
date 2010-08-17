@@ -1451,6 +1451,93 @@ There are a lot programs with some of the functionality of GNU
 B<parallel>. GNU B<parallel> strives to include the best of the
 functionality without sacrifying ease of use.
 
+=head2 SUMMARY TABLE
+
+The following features are in some of the comparable tools:
+
+Execution
+ E1. Running jobs in parallel
+ E2. List running jobs
+ E3. Finish running jobs, but do not start new jobs
+ E4. Number of running jobs can depend on number of cpus
+ E5. Finish running jobs, but do not start new jobs after first failure
+
+Outputs
+ O1. Grouping output so output from different jobs do not mix
+ O2. Send stderr to stderr
+ O3. Send stdout to stdout
+ O4. Order of output can be same as order of input
+ O5. Stdout only from the command
+ O6. Stderr only from the command
+
+Inputs
+ I1. Arguments can be read from stdin
+ I2. Arguments can be read from a file
+ I3. Arguments can be read from multiple files
+ I4. Arguments can be read from command line
+ I5. Arguments can be read from a table
+ I6. Line oriented input as default (Quoting of special chars not needed)
+
+Manipulation of input
+ M1. Composed command
+ M2. Multiple arguments can fill up an execution line
+ M3. Arguments can be put anywhere in the execution line
+ M4. Multiple arguments can be put anywhere in the execution line
+ M5. Arguments can be replaced with context
+ M6. Input can be treated as complete execution line
+
+Remote execution
+ R1. Jobs can be run on remote computers
+ R2. Basefiles can be transferred
+ R3. Argument files can be transferred
+ R4. Result files can be transferred
+ R5. Cleanup of transferred files
+ R6. No config files needed
+ R7. Do not run more than SSHD's MaxStartup can handle
+ R8. Configurable SSH command
+
+Semaphore
+ S1. Possibility to work as a mutex
+ S2. Possibility to work as a counting semaphore
+
+Legend
+ - = no
+ x = not applicable
+ ID = yes
+
+As every new version of the programs are not tested the table may be
+outdated. Please file a bug-report if you find errors.
+
+parallel: E1 E2 E3 E4 E5 O1 O2 O3 O4 O5 O6 I1 I2 I3 I4 I5 I6 M1 M2 M3
+M4 M5 M6 R1 R2 R3 R4 R5 R6 R7 R8 S1 S2
+
+xargs:    E1  -  -  -  -  - O2 O3  - O5 O6 I1 I2  -  -  -  -  - M2 M3  -
+ -  -  -  -  -  -  -  x  -  -  -
+
+find -exec: - -  -  x  -  x O2 O3 O4 O5 O6  -  -  -  -  -  -  - M2 M3  -
+ -  -  -  -  -  -  -  -  -  x  x
+
+make -j: E1 - - - E5 O1 O2 O3 - x O6 - - - - - - - - - - - - - - - - -
+- - -
+
+ppss: E1 E2 ?E3 E4 - O1 - - x - - I1 I2 - - - I6 M1 - M3 - - M6 R1 R2
+ R3 R4 - - ?R7 - -
+
+pexec: E1 - - E4 - O1 O2 O3 - O5 O6 I1 I2 - I4 I5 - M1 - M3 - - M6 R1
+ - - - - R6 - S1 -
+
+xjobs: TODO
+
+prll: TODO
+
+dxargs: TODO
+
+mdm/middelman: TODO
+
+xapply: TODO
+
+ClusterSSH: TODO
+
 
 =head2 DIFFERENCES BETWEEN xargs AND GNU Parallel
 
@@ -2031,6 +2118,10 @@ sub acquire_semaphore {
 	# therefore release and re-acquire the semaphore
 	$sem->release();
 	if(fork()) {
+	    # TODO figure out the race condition that requires this sleep 1
+	    # sem --fg seq 21 30
+	    # sem --bg seq 31 40
+	    sleep(1);
 	    exit(0);
 	} else {
 	    # child
@@ -3553,7 +3644,6 @@ sub start_job {
     debug("$Global::total_running processes. Starting: $command\n");
     #print STDERR "LEN".length($command)."\n";
     $Private::job_start_sequence++;
-
     if(@::opt_a and $Private::job_start_sequence == 1) {
 	# Give STDIN to the first job if using -a
 	$pid = open3("<&STDIN", ">&STDOUT", ">&STDERR", $command) ||
