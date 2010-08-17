@@ -184,7 +184,7 @@ Multiple B<-B> can be specified to transfer more basefiles. The
 I<file> will be transferred the same way as B<--transfer>.
 
 
-=item B<--bg> (not implemented)
+=item B<--bg> (beta testing)
 
 Run command in background thus GNU B<parallel> will not wait for
 completion of the command before exiting. This is the default if
@@ -281,7 +281,7 @@ jobs. GNU B<parallel> normally only reads the next job to run.
 Implies B<--progress>.
 
 
-=item B<--fg> (not implemented)
+=item B<--fg> (beta testing)
 
 Run command in foreground thus GNU B<parallel> will wait for
 completion of the command before exiting.
@@ -606,7 +606,7 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
-=item B<--semaphore> (not implemented)
+=item B<--semaphore> (beta testing)
 
 Work as a counting semaphore. B<--semaphore> will cause GNU
 B<parallel> to start I<command> in the background. When the number of
@@ -623,9 +623,9 @@ Used with B<--fg>, B<--wait>, and B<--semaphorename>.
 The command B<sem> is an alias for B<parallel --semaphore>.
 
 
-=item B<--semaphorename> I<name> (not implemented)
+=item B<--semaphorename> I<name> (beta testing)
 
-=item B<--id> I<name> (not implemented)
+=item B<--id> I<name>
 
 The name of the semaphore to use. The semaphore can be shared between
 multiple processes.
@@ -817,7 +817,7 @@ B<--silent>. See also B<-t>.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--wait> (not implemented)
+=item B<--wait> (beta testing)
 
 Wait for all commands to complete.
 
@@ -855,6 +855,8 @@ If the file names may contain a newline use B<-0>. Substitute FOO BAR with
 FUBAR in all files in this dir and subdirs:
 
 B<find . -type f -print0 | parallel -q0 perl -i -pe 's/FOO BAR/FUBAR/g'>
+
+Note B<-q> is needed because of the space in 'FOO BAR'.
 
 
 =head1 EXAMPLE: Reading arguments from command line
@@ -1658,12 +1660,16 @@ B<8> pexec -n 8 -r *.jpg -y unix -e IMG -c \
   jpegtopnm | pnmscale 0.5 | pnmtojpeg | \
   pexec -j -m blockwrite -s th_$IMG'
 
-B<8> GNU B<parallel> does not support mutexes directly but uses B<mutex> to
-do that.
+B<8> Combining GNU B<parallel> and GNU B<sem>.
 
-B<8> ls *jpg | parallel -j8 'mutex -m blockread cat {} | jpegtopnm |' \
-  'pnmscale 0.5 | pnmtojpeg | mutex -m blockwrite cat > th_{}'
+B<8> ls *jpg | parallel -j8 'sem --id blockread cat {} | jpegtopnm |' \
+  'pnmscale 0.5 | pnmtojpeg | sem --id blockwrite cat > th_{}'
 
+B<8> If reading and writing is done to the same disk, this may be
+faster as only one process will be either reading or writing:
+
+B<8> ls *jpg | parallel -j8 'sem --id diskio cat {} | jpegtopnm |' \
+  'pnmscale 0.5 | pnmtojpeg | sem --id diskio cat > th_{}'
 
 =head2 DIFFERENCES BETWEEN xjobs AND GNU Parallel
 
@@ -1749,6 +1755,7 @@ B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
 
 B<cat files | parallel -j+0 cmd>
 
+B<find dir -execdir sem -j+0 cmd {} \;>
 
 =head2 DIFFERENCES BETWEEN xapply AND GNU Parallel
 
@@ -1823,10 +1830,9 @@ B<cat hostlist | parallel ssh {} do_stuff>
 
 =head1 BUGS
 
-Filenames beginning with '-' can cause some commands to give
-unexpected results, as it will often be interpreted as an option.
+=head2 Quoting of newline
 
-Because the way newline is quoted this will not work:
+Because of the way newline is quoted this will not work:
 
 echo 1,2,3 | parallel -vkd, "echo 'a{}'"
 
@@ -1834,6 +1840,11 @@ However, this will work:
 
 echo 1,2,3 | parallel -vkd, echo a{}
 
+=head2 Startup speed
+
+GNU B<parallel> is slow at starting up. Half of the startup time is
+spent finding the maximal length of a command line. Setting B<-s> will
+remove this part of the startup time.
 
 =head1 REPORTING BUGS
 
@@ -1987,16 +1998,16 @@ use strict;
 do_not_reap();
 parse_options();
 init_run_jobs();
+my $sem;
 if($Global::semaphore) {
-    run_as_semaphore();
-} else {
-    start_more_jobs();
+    $sem = acquire_semaphore();
 }
+start_more_jobs();
 reap_if_needed();
 drain_job_queue();
 cleanup();
 if($Global::semaphore) {
-    exit $Global::exitstatus;
+    $sem->release();
 }
 if($::opt_halt_on_error) {
     wait_and_exit($Global::halt_on_error_exitstatus);
@@ -2004,39 +2015,37 @@ if($::opt_halt_on_error) {
     wait_and_exit(min($Global::exitstatus,254));
 }
 
-sub run_as_semaphore {
+sub acquire_semaphore {
+    # Acquires semaphore. If needed: spawns to the background
+    # Returns:
+    #    The semaphore to be released when jobs is complete
     my $sem = Semaphore->new($Semaphore::name,$Global::host{':'}{'max_no_of_running'});
     $sem->acquire();
     debug("run");
     $Global::argfile = open_or_exit("/dev/null");
     unget_arg("");
     if($Semaphore::fg) {
-	start_more_jobs();
-	$sem->release();
+	# skip
     } else {
 	# If run in the background, the PID will change
 	# therefore release and re-acquire the semaphore
 	$sem->release();
-	if(not fork()) {
+	if(fork()) {
+	    exit(0);
+	} else {
 	    # child
 	    # Get a semaphore for this pid
-	    my $child_sem = Semaphore->new($Semaphore::name,$Global::host{':'}{'max_no_of_running'});
-	    $child_sem->acquire();
-	    start_more_jobs();
-	    reap_if_needed();
-	    drain_job_queue();
-	    cleanup();
-	    $child_sem->release();
-	} else {
-	    exit(0);
+	    $sem = Semaphore->new($Semaphore::name,$Global::host{':'}{'max_no_of_running'});
+	    $sem->acquire();
 	}
     }
+    return $sem;
 }
 
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100722;
+    $Global::version = 20100817;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -4289,6 +4298,7 @@ sub new {
     -d $parallel_locks or mkdir $parallel_locks;
     my $lockdir = "$parallel_locks/$id";
     my $lockfile = $lockdir.".lock";
+    if($count < 1) { die "Semaphore count = $count"; }
     return bless {
 	'lockfile' => $lockfile,
 	'lockfh' => Symbol::gensym(),

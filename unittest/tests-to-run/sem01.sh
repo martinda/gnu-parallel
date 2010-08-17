@@ -6,10 +6,10 @@ parallel -u --semaphore seq 11 20 '|' pv -qL 100
 parallel --semaphore --wait
 echo done
 
-echo '### Test default id = --id `tty`'
+echo '### Test default id = --id `tty` and --semaphorename'
 parallel --id `tty` -u --semaphore seq 1 10 '|' pv -qL 20
 parallel -u --semaphore seq 11 20 '|' pv -qL 100
-parallel --id `tty` --semaphore --wait
+parallel --semaphorename `tty` --semaphore --wait
 echo done
 
 echo '### Test semaphore 2 jobs running simultaneously'
@@ -29,4 +29,11 @@ for i in 0.5 0.1 0.2 0.3 0.4 ; do
   echo $i
   sem -j+0 sleep $i ";" echo done $i
 done
+sem --wait
+
+echo '### BUG: Test --fg followed by --bg'
+parallel -u --fg --semaphore seq 1 10 '|' pv -qL 20
+parallel -u --bg --semaphore seq 11 20 '|' pv -qL 20
+parallel -u --fg --semaphore seq 21 30 '|' pv -qL 20
+parallel -u --bg --semaphore seq 31 40 '|' pv -qL 20
 sem --wait

@@ -1,11 +1,16 @@
-# sem -j+0
-# sem gzip foo ";" echo done
+# Examples of sem
 
-# Allow 7 to run. After then 7th is started, block untill one is dead
-parallel --semaphore --id uniqidentifier -j7 command
-parallel --semaphore  -j7 command
-mdm.screen find dir -execdir mdm-run cmd {} \;
-find dir -execdir parallel --semaphore cmd {} \;
+Weird bug - only interactive
+
+echo '### BUG: Test --fg followed by --bg'
+parallel -u --fg --semaphore seq 1 10 '|' pv -qL 20
+parallel -u --bg --semaphore seq 11 20 '|' pv -qL 20
+parallel -u --fg --semaphore seq 21 30 '|' pv -qL 20
+parallel -u --bg --semaphore seq 31 40 '|' pv -qL 20
+sem --wait
+
+find . -execdir sem -j100 'sleep 4; echo {}' \; ; sem --wait
+
 
 fex syntax for splitting fields
 http://www.semicomplete.com/projects/fex/
