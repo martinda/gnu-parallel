@@ -37,6 +37,12 @@ echo '### Test of tab as colsep'
 printf 'def\tabc\njkl\tghi' | parallel -k --colsep '\t' echo {2} {1}
 parallel -k -a <(printf 'def\tabc\njkl\tghi') --colsep '\t' echo {2} {1}
 
+echo '### Test of multiple -a plus colsep'
+parallel -k -a <(printf 'def\njkl\n') -a <(printf 'abc\tghi\nmno\tpqr') --colsep '\t' echo {2} {1}
+
+echo '### Test of multiple -a no colsep'
+parallel -k -a <(printf 'ghi\npqr\n') -a <(printf 'abc\tdef\njkl\tmno') echo {2} {1}
+
 echo '### Test of quoting after colsplit'
 parallel --colsep % echo {2} {1} ::: '>/dev/null%>/tmp/null'
 

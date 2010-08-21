@@ -1,15 +1,6 @@
+Bug: seq 1 10 | stdout parallel --eta echo
+
 # Examples of sem
-
-Weird bug - only interactive
-perlipc: Complete Dissociation of Child from Parent
-Setting $SIG{CHLD} to 'IGNORE'
-
-echo '### BUG: Test --fg followed by --bg'
-parallel -u --fg --semaphore seq 1 10 '|' pv -qL 20
-parallel -u --bg --semaphore seq 11 20 '|' pv -qL 20
-parallel -u --fg --semaphore seq 21 30 '|' pv -qL 20
-parallel -u --bg --semaphore seq 31 40 '|' pv -qL 20
-sem --wait
 
 find . -execdir sem -j100 'sleep 4; echo {}' \; ; sem --wait
 
@@ -18,45 +9,11 @@ fex syntax for splitting fields
 http://www.semicomplete.com/projects/fex/
 sql :foo 'select * from bar' | parallel --fex '|{1,2}' do_stuff {2} {1}
 
-
-Unittest: --colsep + multiple -a
-
 Import sql
 
 inputfile tabel, Split colonner til {n}
 sql :foo 'select * from bar' | parallel --colsep '\|' do_stuff {4} {1}
 
-
-
-if(defined $::opt_colsep and defined @::opt_a and @::opt_a > 1) {
-   # must be done after converting :::: to -a -a
-   warn("--colsep incompatible with multiple argument files. Ignoring --colsep");
-   $::opt_colsep = undef;
-}
-
-if($::opt_colsep) {
-  # read input either from -a or from stdin
-  my $max_cols = 0;
-  my @table;
-  my $lineno = 0;
-  $Global::input_is_filename = 0; # cheat get_next_arg into not quoting
-  while get_next_arg {
-    my @cols = split /$::opt_colsep/o, $_;
-    if ($Global::trim) {
-       for(@cols) { s/^\s+//; s/\s+$//; }
-    }
-    $max_cols = max($#cols+1,$max_cols);
-    @table[$lineno++] = @cols;
-  }
-  $::opt_N = $max_cols;
-  for ($lineno = 0; $lineno <= $#table; $lineno++) {
-    if (not defined $table[$lineno][$max_col-1]) {
-      # Make sure the table has the same columns for all rows
-      $table[$lineno][$max_col-1] = "";
-    }
-    unget_arg(@table[$lineno]);
-  }
-}
 
 --autocolsep: Læs alle linjer.
 Prøv fastlængde: Find tegn, som står i alle linjer på de samme pladser. Risiko for falske pos
@@ -116,6 +73,9 @@ find music-files -type f | parallel -j+0 lame {} -o {.}.mp3
 
 find music-files -type f | parallel -j+0 -S :,computer1.examle.com,computer2.example.com \
 --eta --trc {.}.mp3 lame {} -o {.}.mp3
+
+# Colsep
+# sem
 
 
 =head1 YouTube video

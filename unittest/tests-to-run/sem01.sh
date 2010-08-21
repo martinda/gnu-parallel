@@ -24,16 +24,17 @@ sem -u -j2  'echo job2; sleep 0.5; echo job2'
 sem --wait
 echo done
 
-echo '### Test similar example as from man page'
-for i in 0.5 0.1 0.2 0.3 0.4 ; do
-  echo $i
-  sem -j+0 sleep $i ";" echo done $i
+echo '### Test similar example as from man page - run 2 jobs simultaneously'
+echo 'Expect done: 1 2 5 3 4'
+for i in 5 1 2 3 4 ; do
+  echo Scheduling $i
+  sem -j2 -u echo starting $i ";" sleep $i ";" echo done $i
 done
 sem --wait
 
-echo '### BUG: Test --fg followed by --bg'
-parallel -u --fg --semaphore seq 1 10 '|' pv -qL 20
-parallel -u --bg --semaphore seq 11 20 '|' pv -qL 20
-parallel -u --fg --semaphore seq 21 30 '|' pv -qL 20
-parallel -u --bg --semaphore seq 31 40 '|' pv -qL 20
+echo '### Test --fg followed by --bg'
+parallel -u --fg --semaphore seq 1 10 '|' pv -qL 30
+parallel -u --bg --semaphore seq 11 20 '|' pv -qL 30
+parallel -u --fg --semaphore seq 21 30 '|' pv -qL 30
+parallel -u --bg --semaphore seq 31 40 '|' pv -qL 30
 sem --wait

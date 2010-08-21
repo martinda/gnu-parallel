@@ -38,6 +38,14 @@ abc def
 ghi jkl
 abc def
 ghi jkl
+### Test of multiple -a plus colsep
+abc def
+ghi jkl
+mno
+pqr
+### Test of multiple -a no colsep
+abc	def ghi
+jkl	mno pqr
 ### Test of quoting after colsplit
 >/tmp/null >/dev/null
 ### Test of --colsep as regexp
