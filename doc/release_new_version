@@ -37,6 +37,14 @@ With the same things that goes in the announce mail
 make dist
 make dist-bzip2
 
+== Test the package ==
+
+cp parallel-$YYYYMMDD.tar.bz2 /tmp
+cd /tmp
+tar xjvf parallel-$YYYYMMDD.tar.bz2
+cd parallel-$YYYYMMDD
+./configure && make && sudo make install
+
 == Upload ==
 
 YYYYMMDD=`yyyymmdd`
@@ -83,9 +91,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin <pnzhdin@gmail.com>,
    Phil Sung <psung@alum.mit.edu>
 
-Subject: GNU Parallel 20100722 released
+Subject: GNU Parallel 20100822 released
 
-GNU Parallel 20100722 has been released. It is available for
+GNU Parallel 20100822 has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:

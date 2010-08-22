@@ -1,3 +1,32 @@
+20100822
+
+* Counting semaphore functionality: start a job in the background. If
+  N jobs are already running, wait for one to complete. Examples:
+  sem 'sleep 2; echo foo'; sem 'sleep 1; echo bar'; sem --wait
+  sem -j2 'sleep 2; echo foo'; sem -j2 'sleep 1; echo bar'; sem --wait
+
+* With --colsep a table can be used as input. Example:
+  cat tab_sep_table | parallel --colsep '\t' echo col1 {1} col2 {2}
+
+* --trim can remove white space around arguments.
+
+* --sshloginfile '..' means use ~/.parallel/sshloginfile
+
+* Zero install package. Thanks to Tim Cuthbertson <tim3d dot junk at
+  gmail dot com>
+
+* OpenSUSE package. Thanks to Markus Ammer <mkmm at gmx-topmail dot
+  de>
+
+* NixOS package. Thanks to Ludovic Courtès <ludo at gnu dot org>
+
+* Web review http://oentend.blogspot.com/2010/08/gnu-parallel.html
+  Thanks to Pavel Nuzhdin <pnzhdin at gmail dot com>
+
+* Web review http://psung.blogspot.com/2010/08/gnu-parallel.html
+  Thanks to Phil Sung <psung at alum dot mit dot edu>
+
+
 20100722
 
 * Arguments can now be given on the command line. Example:

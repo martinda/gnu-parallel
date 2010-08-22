@@ -2164,7 +2164,7 @@ sub acquire_semaphore {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100817;
+    $Global::version = 20100822;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
