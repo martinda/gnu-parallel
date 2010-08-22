@@ -1298,6 +1298,39 @@ As there is not a I<command> the option B<--command> is default
 because the jobs needs to be evaluated by the shell.
 
 
+=head1 EXAMPLE: Working as mutex and counting semaphore
+
+The command B<sem> is an alias for B<parallel --semaphore>.
+
+A counting semaphore will allow a given number of jobs to be started
+in the background.  When the number of jobs are running in the
+background, GNU B<sem> will wait for one of these to complete before
+starting another command. B<sem --wait> will wait for all jobs to
+complete.
+
+Run 10 jobs in parallel in the background:
+
+  for i in `ls *.log` ; do
+    echo $i
+    sem -j10 gzip $i ";" echo done
+  done
+  sem --wait
+
+A mutex is a counting semaphore allowing only one job to run. This
+will edit the file I<myfile> and prepends the file with lines with the
+numbers 1 to 3.
+
+  seq 1 3 | parallel sem sed -i -e 'i{}' myfile
+
+As I<myfile> can be very big it is important only one process edits
+the file at the same time.
+
+Name the semaphore to have multiple different semaphores active at the
+same time:
+
+  seq 1 3 | parallel sem --id mymutex sed -i -e 'i{}' myfile
+
+
 =head1 QUOTING
 
 For more advanced use quoting may be an issue. The following will
