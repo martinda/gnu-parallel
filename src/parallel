@@ -1234,6 +1234,11 @@ With the file I<mycomputers> containing the list of computers it becomes:
   find logs/ -name '*.gz' | parallel --sshloginfile mycomputers \
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
+If the file I<~/.parallel/sshloginfile> contains the list of computers
+the special short hand I<-S ..> can be used:
+
+  find logs/ -name '*.gz' | parallel -S .. \
+    --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
 =head1 EXAMPLE: Distributing work to local and remote computers
 

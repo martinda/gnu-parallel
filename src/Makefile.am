@@ -12,11 +12,11 @@ sem.1: sem.pod Makefile
 
 parallel.html: parallel Makefile
 	pod2html $(srcdir)/parallel > $(srcdir)/parallel.html
-	rm $(srcdir)/pod2htm*
+	rm -f $(srcdir)/pod2htm*
 
 sem.html: sem.pod Makefile
 	pod2html $(srcdir)/sem.pod > $(srcdir)/sem.html
-	rm $(srcdir)/pod2htm*
+	rm -f $(srcdir)/pod2htm*
 
 sem: parallel
 	ln -s parallel sem
