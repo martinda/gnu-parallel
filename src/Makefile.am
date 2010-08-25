@@ -19,7 +19,7 @@ sem.html: sem.pod Makefile
 	rm -f $(srcdir)/pod2htm*
 
 sem: parallel
-	ln -s parallel sem
+	ln -fs parallel sem
 
 DISTCLEANFILES = parallel.1 sem.1 parallel.html sem.html
 EXTRA_DIST = parallel sem parallel.1 sem.1 parallel.html sem.html sem.pod
