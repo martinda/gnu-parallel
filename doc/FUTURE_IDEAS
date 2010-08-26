@@ -1,3 +1,6 @@
+Bugfix: --eta/--progress with 0 jobs gave division by zero.
+Bugfix in Makefile by Piotr Jaroszyński <p dot jaroszynski at gmail dot com> 
+
 fex syntax for splitting fields
 http://www.semicomplete.com/projects/fex/
 sql :foo 'select * from bar' | parallel --fex '|{1,2}' do_stuff {2} {1}

@@ -1,4 +1,14 @@
 ### Test of --eta
 16
+### Test of --eta with no jobs
+
+Computers / CPU cores / Max jobs to run
+1:local / - / 9
+
 ### Test of --progress
 16
+### Test of --progress with no jobs
+
+Computers / CPU cores / Max jobs to run
+1:local / - / 9
+

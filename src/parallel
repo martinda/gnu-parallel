@@ -3458,13 +3458,15 @@ sub progress {
 	$status = $eta .
 	    join(" ",map
 		 {
-		     my $completed = ($Global::host{$_}{'completed'}||0);
-		     my $running = $Global::host{$_}{'no_of_running'};
-		     my $time = $completed ? (time-$^T)/($completed) : "0";
-		     sprintf("%s:%d/%d/%d%%/%.1fs ",
-			     $sshlogin{$_}, $running, $completed,
-			     ($running+$completed)*100
-			     / $Global::total_started, $time);
+		     if($Global::total_started) {
+			 my $completed = ($Global::host{$_}{'completed'}||0);
+			 my $running = $Global::host{$_}{'no_of_running'};
+			 my $time = $completed ? (time-$^T)/($completed) : "0";
+			 sprintf("%s:%d/%d/%d%%/%.1fs ",
+				 $sshlogin{$_}, $running, $completed,
+				 ($running+$completed)*100
+				 / $Global::total_started, $time);
+		     }
 		 } @workers);
     }
     if(length $status > $termcols) {
