@@ -1,6 +1,6 @@
 Summary:	Shell tool for executing jobs in parallel
 Name: 		parallel
-Version: 	20100722
+Version: 	20100822
 Release: 	1
 License: 	GPL
 Group: 		Productivity/File utilities
@@ -49,6 +49,8 @@ make install prefix=$RPM_BUILD_ROOT%{_prefix} exec_prefix=$RPM_BUILD_ROOT%{_pref
     mandir=$RPM_BUILD_ROOT%{_mandir}
 
 rm $RPM_BUILD_ROOT%{_docdir}/parallel.html
+rm $RPM_BUILD_ROOT%{_docdir}/sem.html
+rm $RPM_BUILD_ROOT%{_docdir}/sql.html
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -57,9 +59,11 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 /usr/bin/*
 /usr/share/man/man1/*
-%doc README NEWS src/parallel.html
+%doc README NEWS src/parallel.html src/sem.html src/sql.html
 
 
 %changelog
+* Fri Aug 27 2010 Ole Tange
+- Untested upgrade to current git-version of source.
 * Sat Aug 08 2010 Markus Ammer
 - Initial package setup.
