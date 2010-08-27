@@ -89,7 +89,7 @@ to:parallel@gnu.org, bug-parallel@gnu.org, info-gnu@gnu.org, bug-directory@gnu.o
 cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Tim Cuthbertson <tim3d.junk@gmail.com>, Ludovic Courtès <ludo@gnu.org>,
    Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin <pnzhdin@gmail.com>,
-   Phil Sung <psung@alum.mit.edu>
+   Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>
 
 Subject: GNU Parallel 20100822 released
 
@@ -99,7 +99,9 @@ download at: http://ftp.gnu.org/gnu/parallel/
 New in this release:
 
 * First community generated bugfixes
-  Piotr Jaroszyński <p.jaroszynski@gmail.com>
+
+* Alt Linux package of GNU Parallel. Thanks to Michael Shigorin <mike
+  at altlinux dot org>
 
 = About GNU Parallel =
 
