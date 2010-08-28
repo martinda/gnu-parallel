@@ -4,7 +4,14 @@ config.h
 config.log
 config.status
 parallel-*.bz2*
+parallel-*.tar.gz
 stamp-h1
 actual-results
 tmp
 video
+src/parallel.1
+src/parallel.html
+src/sem.1
+src/sem.html
+src/sql.1
+src/sql.html

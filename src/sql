@@ -593,7 +593,7 @@ sub Usage {
 	print map{ "$_\n" } @_;
 	print "\n";
     }
-    print `cat $0 | pod2man | man -l -`;
+    print "sql [-hnr] [--table-size] [--db-size] [-p pass-through] [-s string] dburl [command]\n";
 }
 
 sub get_alias {

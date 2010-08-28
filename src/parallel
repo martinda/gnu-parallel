@@ -640,6 +640,12 @@ If the semaphore is not released within secs seconds, take it anyway.
 Implies B<--semaphore>.
 
 
+=item B<--skip-first-line>
+
+Do not use the first line of input (used by GNU B<parallel> itself
+when called with B<--shebang>).
+
+
 =item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
 
 =item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
@@ -839,6 +845,21 @@ Support for B<-X> with B<--sshlogin> is limited and may fail.
 =item B<-x>
 
 Exit if the size (see the B<-s> option) is exceeded.
+
+
+=item B<--shebang>
+
+=item B<-Y>
+
+GNU B<Parallel> can be called as a shebang (#!) command as the first line of a script. Like this:
+
+  #!/usr/bin/parallel -Yr traceroute
+
+  foss.org.my
+  debian.org
+  freenetproject.org
+
+For this to work B<--shebang> or B<-Y> must be set as the first option.
 
 
 =back
@@ -2191,6 +2212,17 @@ sub parse_options {
     $Global::arg_file_sep = "::::";
     $Global::trim = 'n';
 
+    # This must be done first as this may exec myself
+    if(defined $ARGV[0] and ($ARGV[0]=~/^-Y/ or $ARGV[0]=~/^--shebang /)) {
+	# Program is called from #! line in script
+	$ARGV[0]=~s/^-Y //; # remove -Y if on its own
+	$ARGV[0]=~s/^-Y/-/; # remove -Y if bundled with other options
+	$ARGV[0]=~s/^--shebang //; # remove --shebang if it is set
+	my $argfile = pop @ARGV;
+	# exec myself to split @ARGV into separate fields
+	exec "$0 --skip-first-line -a $argfile @ARGV";
+    }
+
     Getopt::Long::Configure ("bundling","require_order");
     # Add options from .parallel/config
     my $parallel_config = $ENV{'HOME'}."/.parallel/config";
@@ -2265,6 +2297,9 @@ sub parse_options {
 	       "fg" => \$::opt_fg,
 	       "bg" => \$::opt_bg,
 	       "wait" => \$::opt_wait,
+	       # Shebang #!/usr/bin/parallel -Yotheroptions
+	       "Y|shebang" => \$::opt_shebang,
+	       "skip-first-line" => \$::opt_skip_first_line,
 	) || die_usage();
     $Global::debug = (defined $::opt_D);
     if(defined $::opt_m) { $Global::xargs = 1; }
@@ -2334,6 +2369,9 @@ sub parse_options {
 	if($#::opt_a == 0) {
 	    # One -a => xargs compatibility
 	    $Global::argfile = open_or_exit($::opt_a[0]);
+	    if($::opt_skip_first_line) {
+		<$Global::argfile>; # Read first line and forget it
+	    }
 	} else {
 	    # Multiple -a => xapply style
 	    argfiles_xapply_style();
@@ -2489,6 +2527,9 @@ sub argfiles_xapply_style {
     my $in_fh = gensym;
     for (my $fileno = 0; $fileno <= $#::opt_a; $fileno++) {
 	$in_fh = open_or_exit($::opt_a[$fileno]);
+	if($::opt_skip_first_line and $fileno == 0) {
+	    <$in_fh>; # Read first line and forget it
+	}
 	for (my $lineno=0;
 	     $content[$fileno][$lineno] = get_arg($in_fh);
 	     $lineno++) {
@@ -4530,6 +4571,7 @@ sub unlock {
 }
 
 # Keep perl -w happy
-$Private::control_path = $Semaphore::timeout =
-$Semaphore::wait = 0;
+
+$Private::control_path = $Semaphore::timeout = $Semaphore::wait =
+$::opt_skip_first_line = $::opt_shebang = 0 ;
 

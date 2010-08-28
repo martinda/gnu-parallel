@@ -2,9 +2,16 @@ fex syntax for splitting fields
 http://www.semicomplete.com/projects/fex/
 sql :foo 'select * from bar' | parallel --fex '|{1,2}' do_stuff {2} {1}
 
-Import sql
-
+Example:
 sql :foo 'select * from bar' | parallel --colsep '\|' do_stuff {4} {1}
+
+Virker shebang?
+#!/usr/bin/sql -t
+
+GNU kræver:
+--version
+--help
+-h
 
 
 --autocolsep: Læs alle linjer.
