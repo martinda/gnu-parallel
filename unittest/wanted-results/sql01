@@ -1,0 +1,91 @@
+### Test of #! -Y with file as input
+Testing if -Y works
+Yes it does
+### Test of #! --shebang with file as input
+Testing if --shebang works
+Yes it does
+### Test reading sql on command line
+Test reading SQL from command line
+Yes it does
+### Test reading sql from file
+Test reading SQL from file works
+Yes it does
+### Test dburl with username password host port
+Test reading SQL from file works
+Yes it does
+### Test .dburl.aliases
+Test if .dburl.aliases works
+Yes it does
+### Test --noheaders --no-headers -n
+abc 1
+def 3
+abc 1
+def 3
+abc 1
+def 3
+### Test --sep -s
+2 1
+2 1
+### Test --passthrough -p
+<TABLE BORDER=1><TR><TH>id</TH><TH>data</TH></TR><TR><TD>1</TD><TD>abc</TD></TR><TR><TD>3</TD><TD>def</TD></TR></TABLE>
+<TABLE BORDER=1><TR><TH>id</TH><TH>data</TH></TR><TR><TD>1</TD><TD>abc</TD></TR><TR><TD>3</TD><TD>def</TD></TR></TABLE>
+### Test --html
+<TABLE BORDER=1><TR><TH>id</TH><TH>data</TH></TR><TR><TD>1</TD><TD>abc</TD></TR><TR><TD>3</TD><TD>def</TD></TR></TABLE>
+### Test --show-processlist|proclist|listproc
+      2      17     108
+      2      17     108
+      2      17     108
+### Test --db-size --dbsize
+      3      12      89
+      3      12      89
+### Test --table-size --tablesize
+30
+30
+### Test --debug
+mysql -C     --host=localhost --user=sqlunittest --port=3306 --password=CB5A1FFFA5A sqlunittest
+Test if --debug works
+Yes it does
+### Test --version -V
+      7      43     306
+      7      43     306
+### Test -r
+  psql     -h 127.0.0.3 -U nongood -p 2227 
+psql: could not connect to server: Connection refused
+	Is the server running on host "127.0.0.3" and accepting
+	TCP/IP connections on port 2227?
+  psql     -h 127.0.0.3 -U nongood -p 2227 
+psql: could not connect to server: Connection refused
+	Is the server running on host "127.0.0.3" and accepting
+	TCP/IP connections on port 2227?
+  psql     -h 127.0.0.3 -U nongood -p 2227 
+psql: could not connect to server: Connection refused
+	Is the server running on host "127.0.0.3" and accepting
+	TCP/IP connections on port 2227?
+### Test --retries=s
+  psql     -h 127.0.0.3 -U nongood -p 2227 
+psql: could not connect to server: Connection refused
+	Is the server running on host "127.0.0.3" and accepting
+	TCP/IP connections on port 2227?
+  psql     -h 127.0.0.3 -U nongood -p 2227 
+psql: could not connect to server: Connection refused
+	Is the server running on host "127.0.0.3" and accepting
+	TCP/IP connections on port 2227?
+  psql     -h 127.0.0.3 -U nongood -p 2227 
+psql: could not connect to server: Connection refused
+	Is the server running on host "127.0.0.3" and accepting
+	TCP/IP connections on port 2227?
+  psql     -h 127.0.0.3 -U nongood -p 2227 
+psql: could not connect to server: Connection refused
+	Is the server running on host "127.0.0.3" and accepting
+	TCP/IP connections on port 2227?
+### Test --help -h
+Usage:
+sql [options] dburl [sqlcommand]
+sql [options] dburl < sql_command_file
+
+See 'man sql' for the options
+Usage:
+sql [options] dburl [sqlcommand]
+sql [options] dburl < sql_command_file
+
+See 'man sql' for the options

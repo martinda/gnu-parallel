@@ -6,8 +6,9 @@ sql - execute a command on a database determined by a dburl
 
 =head1 SYNOPSIS
 
-B<sql> [B<-hnr>] [B<--table-size>] [B<--db-size>] [B<-p> I<pass-through>] [B<-s> I<string>] I<dburl> [I<command>]
+B<sql> [B<-hnr>] [B<--table-size>] [B<--db-size>] [B<-p> I<pass-through>] [B<-s> I<string>] I<dburl> [I<sqlcommand>]
 
+B<#!/usr/bin/sql> --shebang [options] I<dburl>
 
 =head1 DESCRIPTION
 
@@ -110,6 +111,12 @@ retry the command. Default is I<--retries 1>.
 Field separator. Use I<string> as seperator between columns.
 
 
+=item B<--skip-first-line>
+
+Do not use the first line of input (used by GNU B<sql> itself
+when called with B<--shebang>).
+
+
 =item B<--table-size>
 
 =item B<--tablesize>
@@ -123,6 +130,18 @@ Size of tables. Show the size of the tables in the database.
 
 Print the version GNU B<sql> and exit.
 
+
+=item B<--shebang>
+
+=item B<-Y>
+
+GNU B<sql> can be called as a shebang (#!) command as the first line of a script. Like this:
+
+  #!/usr/bin/sql -Y mysql:///
+
+  select * from users;
+
+For this to work B<--shebang> or B<-Y> must be set as the first option.
 
 =back
 
@@ -172,6 +191,19 @@ sql -n mysql:/// 'show tables' | parallel sql mysql:/// delete from {};
 
 sql -n pg:/// '\dt' | awk '{print $3}' | parallel -r sql pg:/// drop table {};
 
+=head2 Run as a script
+
+Create a script called I<demosql>:
+
+ #!/usr/bin/sql -Y mysql:///
+
+ select * from users;
+
+Then do:
+
+ chmod 755 demosql; ./demosql
+
+
 =head1 REPORTING BUGS
 
 GNU B<sql> is part of GNU B<parallel>. Report bugs to <bug-parallel@gnu.org>.
@@ -179,7 +211,7 @@ GNU B<sql> is part of GNU B<parallel>. Report bugs to <bug-parallel@gnu.org>.
 
 =head1 AUTHOR
 
-Copyright (C) 2008,2009,2010 Ole Tange, Ange Optimization http://ange.dk
+Copyright (C) 2008,2009,2010 Ole Tange http://ole.tange.dk
 
 =head1 LICENSE
 
@@ -310,17 +342,8 @@ B<mysql>(1), B<psql>(1), B<sqlplus>(1), B<rlwrap>(1)
 
 use Getopt::Long;
 use strict;
-Getopt::Long::Configure ("bundling","require_order");
-GetOptions("passthrough|p=s@" => \$::opt_p,
-	   "sep|s=s" => \$::opt_s,
-	   "html" => \$::opt_html,
-	   "show-processlist|proclist|listproc" => \$::opt_processlist,
-	   "db-size|dbsize" => \$::opt_dbsize,
-	   "table-size|tablesize" => \$::opt_tablesize,
-	   "noheaders|no-headers|n" => \$::opt_n,
-	   "r" => \$::opt_retry,
-	   "retries=s" => \$::opt_retries,
-	   "debug" => \$::opt_debug);
+
+parse_options();
 
 my $pass_through_options = (defined $::opt_p) ? join(" ",@{$::opt_p}) : "";
 
@@ -376,6 +399,45 @@ do {
 
 $Global::Initfile && unlink $Global::Initfile;
 exit ($err);
+
+sub parse_options {
+    $Global::version = 20100822;
+    $Global::progname = 'sql';
+
+    # This must be done first as this may exec myself
+    if(defined $ARGV[0] and ($ARGV[0]=~/^-Y/ or $ARGV[0]=~/^--shebang /)) {
+	# Program is called from #! line in script
+	$ARGV[0]=~s/^-Y //; # remove -Y if on its own
+	$ARGV[0]=~s/^-Y/-/; # remove -Y if bundled with other options
+	$ARGV[0]=~s/^--shebang //; # remove --shebang if it is set
+	my $argfile = pop @ARGV;
+	# exec myself to split @ARGV into separate fields
+	exec "$0 --skip-first-line < $argfile @ARGV";
+    }
+    Getopt::Long::Configure ("bundling","require_order");
+    GetOptions("passthrough|p=s@" => \$::opt_p,
+	       "sep|s=s" => \$::opt_s,
+	       "html" => \$::opt_html,
+	       "show-processlist|proclist|listproc" => \$::opt_processlist,
+	       "db-size|dbsize" => \$::opt_dbsize,
+	       "table-size|tablesize" => \$::opt_tablesize,
+	       "noheaders|no-headers|n" => \$::opt_n,
+	       "r" => \$::opt_retry,
+	       "retries=s" => \$::opt_retries,
+	       "debug" => \$::opt_debug,
+	       # Shebang #!/usr/bin/parallel -Yotheroptions
+	       "Y|shebang" => \$::opt_shebang,
+	       "skip-first-line" => \$::opt_skip_first_line,
+	       # GNU requirements
+	       "help|h" => \$::opt_help,
+	       "version|V" => \$::opt_version,
+	) || die_usage();
+
+    if(defined $::opt_help) { die_usage(); }
+    if(defined $::opt_version) { version(); exit(0); }
+}
+
+
 
 sub database_driver_alias {
     my $driver = shift;
@@ -497,7 +559,6 @@ sub oracle_commands {
 	"$rlwrap sqlplus ".$common_options;
     return($batch_command,$interactive_command);
 }
-
 
 # Return the code for 'show processlist' in the chosen database dialect
 sub processlist {
@@ -694,4 +755,34 @@ sub undef_if_empty {
     return $_[0];
 }
 
+sub version {
+    # Returns: N/A
+    print join("\n",
+	       "GNU $Global::progname $Global::version",
+	       "Copyright (C) 2009,2010 Ole Tange and Free Software Foundation, Inc.",
+	       "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
+	       "This is free software: you are free to change and redistribute it.",
+	       "GNU $Global::progname comes with no warranty.",
+	       "",
+	       "Web site: http://www.gnu.org/software/${Global::progname}\n"
+	);
+}
+
+sub die_usage {
+    # Returns: N/A
+    usage();
+    exit(255);
+}
+
+sub usage {
+    # Returns: N/A
+    print "Usage:\n";
+    print "$Global::progname [options] dburl [sqlcommand]\n";
+    print "$Global::progname [options] dburl < sql_command_file\n";
+    print "\n";
+    print "See 'man $Global::progname' for the options\n";
+}
+
+
 # TODO --list-databases: psql -l eller '\l'. mysql show databases. Oracle ?
+$::opt_skip_first_line = $::opt_shebang = 0;

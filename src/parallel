@@ -14,6 +14,8 @@ B<parallel> [options] [I<command> [arguments]] B<::::> argfile(s)
 
 B<parallel> --semaphore [options] I<command>
 
+B<#!/usr/bin/parallel> --shebang [options] [I<command> [arguments]]
+
 =head1 DESCRIPTION
 
 GNU B<parallel> is a shell tool for executing jobs in parallel locally
@@ -1535,7 +1537,8 @@ Inputs
  I3. Arguments can be read from multiple files
  I4. Arguments can be read from command line
  I5. Arguments can be read from a table
- I6. Line oriented input as default (Quoting of special chars not needed)
+ I6. Arguments can be read from the same file using #! (shebang)
+ I7. Line oriented input as default (Quoting of special chars not needed)
 
 Manipulation of input
  M1. Composed command
@@ -1567,22 +1570,22 @@ Legend
 As every new version of the programs are not tested the table may be
 outdated. Please file a bug-report if you find errors.
 
-parallel: E1 E2 E3 E4 E5 O1 O2 O3 O4 O5 O6 I1 I2 I3 I4 I5 I6 M1 M2 M3
-M4 M5 M6 R1 R2 R3 R4 R5 R6 R7 R8 S1 S2
+parallel: E1 E2 E3 E4 E5 O1 O2 O3 O4 O5 O6 I1 I2 I3 I4 I5 I6 I7 M1 M2
+M3 M4 M5 M6 R1 R2 R3 R4 R5 R6 R7 R8 S1 S2
 
-xargs:    E1  -  -  -  -  - O2 O3  - O5 O6 I1 I2  -  -  -  -  - M2 M3  -
+xargs:    E1  -  -  -  -  - O2 O3  - O5 O6 I1 I2  -  -  -  -  - - M2 M3  -
  -  -  -  -  -  -  -  x  -  -  -
 
-find -exec: - -  -  x  -  x O2 O3 O4 O5 O6  -  -  -  -  -  -  - M2 M3  -
+find -exec: - -  -  x  -  x O2 O3 O4 O5 O6  -  -  -  -  -  -  - - M2 M3  -
  -  -  -  -  -  -  -  -  -  x  x
 
-make -j: E1 - - - E5 O1 O2 O3 - x O6 - - - - - - - - - - - - - - - - -
+make -j: E1 - - - E5 O1 O2 O3 - x O6 - - - - - - - - - - - - - - - - - -
 - - -
 
-ppss: E1 E2 ?E3 E4 - O1 - - x - - I1 I2 - - - I6 M1 - M3 - - M6 R1 R2
+ppss: E1 E2 ?E3 E4 - O1 - - x - - I1 I2 - - - - I7 M1 - M3 - - M6 R1 R2
  R3 R4 - - ?R7 - -
 
-pexec: E1 - - E4 - O1 O2 O3 - O5 O6 I1 I2 - I4 I5 - M1 - M3 - - M6 R1
+pexec: E1 - - E4 - O1 O2 O3 - O5 O6 I1 I2 - I4 I5 - - M1 - M3 - - M6 R1
  - - - - R6 - S1 -
 
 xjobs: TODO
@@ -2223,7 +2226,6 @@ sub parse_options {
 	exec "$0 --skip-first-line -a $argfile @ARGV";
     }
 
-    Getopt::Long::Configure ("bundling","require_order");
     # Add options from .parallel/config
     my $parallel_config = $ENV{'HOME'}."/.parallel/config";
     if(-r $parallel_config) {
@@ -2237,6 +2239,7 @@ sub parse_options {
     }
     # Add options from shell variable $PARALLEL
     $ENV{'PARALLEL'} and unshift @ARGV, split/\n/, $ENV{'PARALLEL'};
+    Getopt::Long::Configure ("bundling","require_order");
     GetOptions("debug|D" => \$::opt_D,
 	       "xargs|m" => \$::opt_m,
 	       "X" => \$::opt_X,
@@ -2388,7 +2391,8 @@ sub parse_options {
     }
 
     # Semaphore defaults
-    # Must be done before computing number of processes and max_line_length as no args
+    # Must be done before computing number of processes and max_line_length
+    # because when running as a semaphore GNU Parallel does not read args
     $Global::semaphore ||= ($0 =~ m:(^|/)sem$:); # called as 'sem'
     if($Global::semaphore) {
 	# A semaphore does not take input from neither stdin nor file
@@ -2407,7 +2411,7 @@ sub parse_options {
     }
 
     if(defined $::opt_eta) {
-	# must be done after opt_a
+	# must be done after opt_a because we need to read all args
 	$::opt_progress = $::opt_eta;
 	my @args = ();
 	while(more_arguments()) {
@@ -2493,7 +2497,7 @@ sub read_args_from_command_line {
 }
 
 sub convert_argfiles_from_command_line_to_multiple_opt_a {
-    # convert :::: to multiple -a
+    # Convert :::: to multiple -a
     # Remove :::: from @ARGV and move the following arguments to @::opt_a
     # Returns:
     #    @ARGV without :::: and following args
@@ -2518,6 +2522,7 @@ sub argfiles_xapply_style {
     # Convert the n files into one queue
     # Every n'th entry is from the same file
     # Set opt_N to read n entries per invocation
+    # Returns: N/A
     $Global::argfile = open_or_exit("/dev/null");
     $::opt_N = $#::opt_a+1;
     $Global::max_number_of_args = $#::opt_a+1;

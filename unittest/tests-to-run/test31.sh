@@ -2,7 +2,7 @@
 
 echo '### Test of #! with file as input'
 cat >/tmp/shebang <<EOF
-#!/usr/local/bin/parallel -Yr echo
+#!/usr/local/bin/parallel -Yrk echo
 A
 B
 C
@@ -12,7 +12,7 @@ chmod 755 /tmp/shebang
 
 echo '### Test of #! with 2 files as input'
 cat >/tmp/shebang <<EOF
-#!/usr/local/bin/parallel -Yr -a /tmp/123 echo
+#!/usr/local/bin/parallel -Yrk -a /tmp/123 echo
 A
 B
 C

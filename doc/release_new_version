@@ -58,6 +58,18 @@ gpg -b parallel-$YYYYMMDD.tar.bz2
 YYYYMMDD=`yyyymmdd`
 echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
 
+== Download and test ==
+
+cd /tmp
+wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
+tar xjvf parallel-$YYYYMMDD.tar.bz2
+cd parallel-$YYYYMMDD
+make -j && sudo make -j install
+
+== Update OpenSUSE build system ==
+
+https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
+
 == Update Savannah ==
 
 https://savannah.gnu.org/news/submit.php?group=parallel
@@ -85,23 +97,42 @@ http://groups.google.com/group/comp.unix.shell/post
 Newsgroups: comp.unix.shell,comp.unix.admin
 
 <<<<<
+from:tange@gnu.org
 to:parallel@gnu.org, bug-parallel@gnu.org, info-gnu@gnu.org, bug-directory@gnu.org
 cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Tim Cuthbertson <tim3d.junk@gmail.com>, Ludovic Courtès <ludo@gnu.org>,
    Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin <pnzhdin@gmail.com>,
-   Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>
+   Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>,
+   Andrew McFague <amcfague@wgen.net>
 
-Subject: GNU Parallel 20100822 released
+Subject: GNU Parallel 2010XXXX released
 
-GNU Parallel 20100822 has been released. It is available for
+GNU Parallel 2010XXXX has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
+
+* sql - a small script to access sql bases from the command line which
+  is a handy companion to parallel --colsep
+
+* Using --shebang GNU Parallel can be used as the parser for a script.
+  E.g: #!/usr/bin/parallel --shebang traceroute (followed by lines of
+  hosts)
 
 * First community generated bugfixes
 
 * Alt Linux package of GNU Parallel. Thanks to Michael Shigorin <mike
   at altlinux dot org>
+
+* Untested CentOS, Fedora, Mandriva, RedHat, and SUSE packages
+  available through OpenSUSE build service:
+  https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
+
+* Review of GNU Parallel. Thanks to Andrew McFague amcfague at wgen dot net
+  http://www.andrew-mcfague.com/linux/utilities-linux/
+  commands-every-serious-nix-user-should-know/#parallel
+
+* First 1000 views of the intro video
 
 = About GNU Parallel =
 

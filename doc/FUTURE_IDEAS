@@ -1,17 +1,19 @@
+sql: Added unittest, --shebang, --version, --help.
+parallel: bugfix in unittest.
+
+== FEX ==
+
 fex syntax for splitting fields
 http://www.semicomplete.com/projects/fex/
 sql :foo 'select * from bar' | parallel --fex '|{1,2}' do_stuff {2} {1}
 
+== SQL ==
 Example:
 sql :foo 'select * from bar' | parallel --colsep '\|' do_stuff {4} {1}
 
-Virker shebang?
-#!/usr/bin/sql -t
+== Build ==
 
-GNU kræver:
---version
---help
--h
+build.opensuse.org
 
 
 --autocolsep: Læs alle linjer.
@@ -51,10 +53,6 @@ colsep = [sepchars]{no_of_sepchars}
 # TODO Debian package
 
 # TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
-# TAGS: parallel | parallel processing | multicore | multiprocessor | Clustering/Distributed Networks
-# job control | multiple jobs | parallelization | text processing | cluster | filters
-# Clustering Tools | Command Line Tools | Utilities | System Administration
-# Bash parallel
 
 =head1 YouTube video2
 
@@ -235,25 +233,9 @@ If there are nomore jobs (STDIN is eof) then make sure to
 distribute the arguments evenly if running -X.
 
 
-=head1 search terms
-
-GNU parallel execution shell bash script simultaneous concurrent linux
-scripting run xargs ppss code.google.com/p/ppss/
-
 =head1 options
 
-One char options not used: F G J K P Q Y
-
-Skilletegn i sshlogin:
-#=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
-# Skilletegn:
-# No: "#!&()?\<>|;*'~ shellspecial
-# No: @.- part of user@i.p.n.r i.p.n.r host-name
-# No: , separates different sshlogins
-# No: space Will make it hard to do: 8/server1,server2
-# Maybe: / 8//usr/bin/myssh,//usr/bin/ssh
-# %/=:_^
-
+One char options not used: A D F G J K O Q R T Z
 
 
 =head2 mutex
