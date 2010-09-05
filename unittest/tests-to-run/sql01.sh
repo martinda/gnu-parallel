@@ -49,9 +49,12 @@ echo :sqlunittest mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest >> 
 sql :sqlunittest "SELECT 'Yes it does' as 'Test if .dburl.aliases works';"
 
 echo "### Test --noheaders --no-headers -n"
-sql -n :sqlunittest 'select * from unittest' | parallel --colsep '\t' echo {2} {1}
-sql --noheaders :sqlunittest 'select * from unittest' | parallel --colsep '\t' echo {2} {1}
-sql --no-headers :sqlunittest 'select * from unittest' | parallel --colsep '\t' echo {2} {1}
+sql -n :sqlunittest 'select * from unittest order by id' \
+| parallel -k --colsep '\t' echo {2} {1}
+sql --noheaders :sqlunittest 'select * from unittest order by id' \
+| parallel -k --colsep '\t' echo {2} {1}
+sql --no-headers :sqlunittest 'select * from unittest order by id' \
+| parallel -k --colsep '\t' echo {2} {1}
 
 echo "### Test --sep -s";
 sql --no-headers -s : pg:/// 'select 1,2' | parallel --colsep ':' echo {2} {1}

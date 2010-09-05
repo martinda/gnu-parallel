@@ -6,9 +6,10 @@ sql - execute a command on a database determined by a dburl
 
 =head1 SYNOPSIS
 
-B<sql> [B<-hnr>] [B<--table-size>] [B<--db-size>] [B<-p> I<pass-through>] [B<-s> I<string>] I<dburl> [I<sqlcommand>]
+B<sql> [B<-hnr>] [B<--table-size>] [B<--db-size>] [B<-p>
+I<pass-through>] [B<-s> I<string>] I<dburl> [I<sqlcommand>]
 
-B<#!/usr/bin/sql> --shebang [options] I<dburl>
+B<#!/usr/bin/sql> B<--shebang> [options] I<dburl>
 
 =head1 DESCRIPTION
 
@@ -202,6 +203,12 @@ Create a script called I<demosql>:
 Then do:
 
  chmod 755 demosql; ./demosql
+
+=head2 Use --colsep to process multiple columns
+
+Use GNU B<parallel>'s B<--colsep> to separate columns:
+
+ sql :mydburl 'select * from bar' | parallel --colsep '\t' do_stuff {4} {1}
 
 
 =head1 REPORTING BUGS
@@ -401,7 +408,7 @@ $Global::Initfile && unlink $Global::Initfile;
 exit ($err);
 
 sub parse_options {
-    $Global::version = 20100822;
+    $Global::version = 20100901;
     $Global::progname = 'sql';
 
     # This must be done first as this may exec myself

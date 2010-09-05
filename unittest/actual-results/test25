@@ -23,21 +23,25 @@ echo a
 a
 echo b
 b
-### Test stdin goes to first command only
+### Test stdin goes to first command only ("-" as argument)
 cat -
 via first cat
 cat -
-cat
-via cat
-echo b
-b
-cat
-via cat
-echo b
-b
+via pseudotty
+### Test stdin goes to first command only ("cat" as argument)
 echo a
 a
 cat
+via pseudotty
+### Test stdin goes to first command only
+cat
+via cat
+echo b
+b
+cat
+via cat
+echo b
+b
 ### Bug made 4 5 go before 1 2 3
 1
 2

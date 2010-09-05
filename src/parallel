@@ -1937,9 +1937,13 @@ B<6> find */ -... | fmt 960 1024 | xapply -f -i /dev/tty 'vi' -
 
 B<6> sh <(find */ -... | parallel -s 1024 echo vi)
 
+B<6> find */ -... | parallel -s 1024 -Xuj1 vi
+
 B<7> find ... | xapply -f -5 -i /dev/tty 'vi' - - - - -
 
 B<7> sh <(find ... |parallel -n5 echo vi)
+
+B<7> find ... |parallel -n5 -uj1 vi
 
 B<8> xapply -fn "" /etc/passwd
 
@@ -2193,7 +2197,7 @@ sub acquire_semaphore {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100822;
+    $Global::version = 20100901;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -3404,6 +3408,7 @@ sub init_run_jobs {
     $Global::total_running = 0;
     $Global::total_started = 0;
     $Global::total_completed = 0;
+    $Global::tty_taken = 0;
     $SIG{USR1} = \&list_running_jobs;
     $SIG{USR2} = \&toggle_progress;
     $Global::original_sigterm = $SIG{TERM};
@@ -3731,13 +3736,20 @@ sub start_job {
     if(@::opt_a and $Private::job_start_sequence == 1) {
 	# Give STDIN to the first job if using -a
 	$pid = open3("<&STDIN", ">&STDOUT", ">&STDERR", $command) ||
-	    die("open3 failed. Report a bug to <bug-parallel\@gnu.org>\n");
+	    die("open3 (with -a) failed. Report a bug to <bug-parallel\@gnu.org>\n");
 	# Re-open to avoid complaining
 	open STDIN, "<&", $Global::original_stdin
 	    or die "Can't dup \$Global::original_stdin: $!";
+    } elsif (not $Global::tty_taken and -c "/dev/tty" and
+	     open(DEVTTY, "/dev/tty")) {
+	# Give /dev/tty to the command if no one else is using it
+	$pid = open3("<&DEVTTY", ">&STDOUT", ">&STDERR", $command) ||
+	    die("open3 (with /dev/tty) failed. Report a bug to <bug-parallel\@gnu.org>\n");
+	$Global::tty_taken = $pid;
+	close DEVTTY;
     } else {
 	$pid = open3(gensym, ">&STDOUT", ">&STDERR", $command) ||
-	    die("open3 failed. Report a bug to <bug-parallel\@gnu.org>\n");
+	    die("open3 (with gensym) failed. Report a bug to <bug-parallel\@gnu.org>\n");
     }
     debug("started: $command\n");
     open STDOUT, ">&", $Global::original_stdout
@@ -4278,6 +4290,10 @@ sub reaper {
 	$Global::running{$stiff} or next;
 	$Global::running{$stiff}{'exitstatus'} = $? >> 8;
 	debug("died ($Global::running{$stiff}{'exitstatus'}): $Global::running{$stiff}{'seq'}");
+	if($stiff == $Global::tty_taken) {
+	    # The process that died had the tty => release it
+	    $Global::tty_taken = 0;
+	}
 	# Force printing now if the job failed and we are going to exit
 	my $print_now = ($Global::running{$stiff}{'exitstatus'} and
 	    $::opt_halt_on_error and $::opt_halt_on_error == 2);

@@ -1,15 +1,20 @@
-sql: Added unittest, --shebang, --version, --help.
-parallel: bugfix in unittest.
+== SQL ==
+
+/etc/sql/aliases
+~/.sql/aliases
+
+
+== STDIN ==
+
+BSD xargs -o (open /dev/tty) is now default for the job running in foreground.
+Useful for: ls | parallel -Xuj1 vi.
+Unittest for tty commands using the command 'script'.
 
 == FEX ==
 
 fex syntax for splitting fields
 http://www.semicomplete.com/projects/fex/
 sql :foo 'select * from bar' | parallel --fex '|{1,2}' do_stuff {2} {1}
-
-== SQL ==
-Example:
-sql :foo 'select * from bar' | parallel --colsep '\|' do_stuff {4} {1}
 
 == Build ==
 

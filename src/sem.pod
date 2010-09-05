@@ -72,9 +72,12 @@ Wait for all commands to complete.
 
 =head1 EXAMPLE: Gzipping *.log
 
+Run one gzip process per CPU core. Block until a CPU core becomes
+available.
+
   for i in `ls *.log` ; do
     echo $i
-    sem gzip $i ";" echo done
+    sem -j+0 gzip $i ";" echo done
   done
   sem --wait
 
