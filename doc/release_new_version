@@ -72,6 +72,8 @@ https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 
 == Update Savannah ==
 
+Content from release mail:
+
 https://savannah.gnu.org/news/submit.php?group=parallel
 https://savannah.gnu.org/news/approve.php?group=parallel
 
@@ -85,6 +87,7 @@ http://www.gnu.org/software/parallel/man.html
 
 pod2html src/parallel > ../parallel-web/parallel/man.html
 cd ../parallel-web/parallel
+cvs up
 cvs ci
 
 == Update Freshmeat ==
@@ -105,9 +108,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>,
    Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>
 
-Subject: GNU Parallel 2010XXXX released
+Subject: GNU Parallel 20100906 released
 
-GNU Parallel 2010XXXX has been released. It is available for
+GNU Parallel 20100906 has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:

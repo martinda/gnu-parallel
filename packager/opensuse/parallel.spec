@@ -1,6 +1,6 @@
 Summary:	Shell tool for executing jobs in parallel
 Name: 		parallel
-Version: 	20100822
+Version: 	20100906
 Release: 	1
 License: 	GPL
 Group: 		Productivity/File utilities
@@ -61,8 +61,9 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/man/man1/*
 %doc README NEWS src/parallel.html src/sem.html src/sql.html
 
-
 %changelog
+* Mon Sep 06 2010 Ole Tange
+- Upgrade to current git-version of source. Tested on build.opensuse.org 
 * Fri Aug 27 2010 Ole Tange
 - Untested upgrade to current git-version of source.
 * Sat Aug 08 2010 Markus Ammer
