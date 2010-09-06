@@ -29,7 +29,7 @@ GNU B<sql> is often used in combination with GNU B<parallel>.
 =item I<dburl>
 
 A DBURL has the following syntax:
-vendor://[user[:password]@][host][:port]/[database]
+vendor://[[user][:password]@][host][:port]/[database]
 
 See the section DBURL below.
 
@@ -408,7 +408,7 @@ $Global::Initfile && unlink $Global::Initfile;
 exit ($err);
 
 sub parse_options {
-    $Global::version = 20100901;
+    $Global::version = 20100906;
     $Global::progname = 'sql';
 
     # This must be done first as this may exec myself
@@ -718,7 +718,7 @@ sub check_permissions {
 sub parse_dburl {
     my $url = shift;
     my %options = ();
-    # mysql://[user[:password]@][host][:port]/[database[/jobnr]]
+    # mysql://[[user][:password]@][host][:port]/[database[/jobnr]]
 
     if($url=~m!((?:oracle|ora|mysql|pg|postgres|postgresql)(?:s|ssl|)):// # Databasedriver ($1)
                (?:

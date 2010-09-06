@@ -3,12 +3,7 @@
 /etc/sql/aliases
 ~/.sql/aliases
 
-
-== STDIN ==
-
-BSD xargs -o (open /dev/tty) is now default for the job running in foreground.
-Useful for: ls | parallel -Xuj1 vi.
-Unittest for tty commands using the command 'script'.
+sqlite2 sqlite3 support
 
 == FEX ==
 

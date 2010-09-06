@@ -14,6 +14,7 @@ src/parallel: $Global::version = 20100422;
 
 YYYYMMDD=`yyyymmdd`
 perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/parallel
+perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/sql
 
 === Autoconf/automake ===
 
@@ -79,6 +80,13 @@ https://savannah.gnu.org/news/approve.php?group=parallel
 
 doc/pod2savannah_publicinfo src/parallel | klipper-stdin
 https://savannah.gnu.org/project/admin/editgroupinfo.php?group=parallel
+
+== Update Twitter ==
+
+#GNU #parallel 20100906 released. See what is new in this release
+http://nd.gd/2j Watch the intro video http://nd.gd/0s
+
+https://savannah.gnu.org/news/?group=parallel
 
 == Update website ==
 

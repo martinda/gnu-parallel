@@ -8,6 +8,8 @@ URL: 		ftp://ftp.gnu.org/gnu/parallel
 Source0: 	%{name}-%{version}.tar.bz2
 BuildArch:	noarch
 BuildRoot: 	%{_tmppath}/%{name}-%{version}-buildroot
+Requires:       perl
+Recommends:     ssh rsync
 
 %description
 GNU Parallel is a shell tool for executing jobs in parallel using one

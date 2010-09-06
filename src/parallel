@@ -2128,8 +2128,9 @@ A copy of the full license is included in the file as cc-by-sa.txt.
 
 =head1 DEPENDENCIES
 
-GNU B<parallel> uses Perl, and the Perl modules Getopt::Long, IPC::Open3,
-Symbol, IO::File, POSIX, and File::Temp.
+GNU B<parallel> uses Perl, and the Perl modules Getopt::Long,
+IPC::Open3, Symbol, IO::File, POSIX, and File::Temp. For remote usage
+it also uses Rsync with Ssh.
 
 
 =head1 SEE ALSO
