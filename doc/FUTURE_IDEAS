@@ -1,7 +1,8 @@
 == SQL ==
 
-/etc/sql/aliases
-~/.sql/aliases
+Unittest:
+dburl = :
+dburl = null
 
 sqlite2 sqlite3 support
 

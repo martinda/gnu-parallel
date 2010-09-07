@@ -162,11 +162,11 @@ mysqlssl), Oracle (oracle, ora), PostgreSQL (postgresql, pg, pgsql,
 postgres), PostgreSQL with SSL (postgresqlssl, pgs, pgsqlssl,
 postgresssl, pgssl, postgresqls, pgsqls, postgress)
 
-Aliases must start with ':' and is read from 
-dburl.aliases.dist, dburl.aliases and ~/.dburl.aliases. The user's own 
-~/.dburl.aliases should only be readable by the user.
+Aliases must start with ':' and are read from 
+/etc/sql/aliases and ~/.sql/aliases. The user's own
+~/.sql/aliases should only be readable by the user.
 
-Example of dburl.aliases:
+Example of aliases:
 
  :myalias1 pg://user:pa55w0rd@pg.example.com/db
  :myalias2 ora://scott:tiger@ora1.example.com/xe
@@ -334,11 +334,9 @@ installed, GNU B<sql> will have a command history for Oracle.
 
 =head1 FILES
 
-~/.dburl.aliases - user's own aliases with DBURLs 
+~/.sql/aliases - user's own aliases with DBURLs
 
-dburl.aliases - user's own aliases with DBURLs 
-
-dburl.aliases.dist - common aliases with DBURLs
+/etc/sql/aliases - common aliases with DBURLs
 
 
 =head1 SEE ALSO
@@ -353,8 +351,12 @@ use strict;
 parse_options();
 
 my $pass_through_options = (defined $::opt_p) ? join(" ",@{$::opt_p}) : "";
-
-my %dburl = parse_dburl(get_alias(shift));
+my $dburl_or_alias = shift;
+if (not defined $dburl_or_alias) {
+    Usage("No DBURL given");
+    exit -1;
+}
+my %dburl = parse_dburl(get_alias($dburl_or_alias));
 
 my $interactive_command;
 my $batch_command;
@@ -676,10 +678,20 @@ sub get_alias {
     } else {
 	($path) = $0 =~ m|^(.*)/|;
     }
+
+    my @deprecated = ("$ENV{HOME}/.dburl.aliases",
+		      "$path/dburl.aliases", "$path/dburl.aliases.dist");
+    for (@deprecated) {
+	if(-r $_) {
+	    print STDERR "$_ is deprecated. Use .sql/aliases instead (read man sql)\n";
+	}
+    }
     my @urlalias=();
+    check_permissions("$ENV{HOME}/.sql/aliases");
     check_permissions("$ENV{HOME}/.dburl.aliases");
-    my @search=("$ENV{HOME}/.dburl.aliases", "$path/dburl.aliases",
-		"$path/dburl.aliases.dist");
+    my @search = ("$ENV{HOME}/.sql/aliases",
+		  "$ENV{HOME}/.dburl.aliases", "/etc/sql/aliases",
+		  "$path/dburl.aliases", "$path/dburl.aliases.dist");
     for my $alias_file (@search) {
 	if(-r $alias_file) {
 	    push @urlalias, `cat "$alias_file"`;
@@ -749,7 +761,7 @@ sub parse_dburl {
 	$options{database} = undef_if_empty($6);
 	$options{job} = undef_if_empty($7);
     } else {
-	Usage("$url is not a valid DB-URL");
+	Usage("$url is not a valid DBURL");
 	exit -1;
     }
     return %options;
