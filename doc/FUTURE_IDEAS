@@ -6,6 +6,11 @@ dburl = null
 
 sqlite2 sqlite3 support
 
+parallel: --hashbang alias for --shebang.
+sql: .dburl.aliases -> .sql/aliases.
+unittest passes.
+
+
 == FEX ==
 
 fex syntax for splitting fields

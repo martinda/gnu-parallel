@@ -13,8 +13,8 @@ Yes it does
 ### Test dburl with username password host port
 Test reading SQL from file works
 Yes it does
-### Test .dburl.aliases
-Test if .dburl.aliases works
+### Test .sql/aliases
+Test if .sql/aliases works
 Yes it does
 ### Test --noheaders --no-headers -n
 abc 1
@@ -32,9 +32,9 @@ def 3
 ### Test --html
 <TABLE BORDER=1><TR><TH>id</TH><TH>data</TH></TR><TR><TD>1</TD><TD>abc</TD></TR><TR><TD>3</TD><TD>def</TD></TR></TABLE>
 ### Test --show-processlist|proclist|listproc
-      2      17     108
-      2      17     108
-      2      17     108
+      2      17
+      2      17
+      2      17
 ### Test --db-size --dbsize
       3      12      89
       3      12      89

@@ -851,6 +851,8 @@ Exit if the size (see the B<-s> option) is exceeded.
 
 =item B<--shebang>
 
+=item B<--hashbang>
+
 =item B<-Y>
 
 GNU B<Parallel> can be called as a shebang (#!) command as the first line of a script. Like this:
@@ -2221,11 +2223,13 @@ sub parse_options {
     $Global::trim = 'n';
 
     # This must be done first as this may exec myself
-    if(defined $ARGV[0] and ($ARGV[0]=~/^-Y/ or $ARGV[0]=~/^--shebang /)) {
+    if(defined $ARGV[0] and ($ARGV[0]=~/^-Y/ or $ARGV[0]=~/^--shebang / or
+       $ARGV[0]=~/^--hashbang /)) {
 	# Program is called from #! line in script
 	$ARGV[0]=~s/^-Y //; # remove -Y if on its own
 	$ARGV[0]=~s/^-Y/-/; # remove -Y if bundled with other options
 	$ARGV[0]=~s/^--shebang //; # remove --shebang if it is set
+	$ARGV[0]=~s/^--hashbang //; # remove --hashbang if it is set
 	my $argfile = pop @ARGV;
 	# exec myself to split @ARGV into separate fields
 	exec "$0 --skip-first-line -a $argfile @ARGV";
@@ -2306,7 +2310,7 @@ sub parse_options {
 	       "bg" => \$::opt_bg,
 	       "wait" => \$::opt_wait,
 	       # Shebang #!/usr/bin/parallel -Yotheroptions
-	       "Y|shebang" => \$::opt_shebang,
+	       "Y|shebang|hashbang" => \$::opt_shebang,
 	       "skip-first-line" => \$::opt_skip_first_line,
 	) || die_usage();
     $Global::debug = (defined $::opt_D);

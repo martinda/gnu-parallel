@@ -44,9 +44,9 @@ sql mysql:///tange </tmp/unittest.sql
 echo '### Test dburl with username password host port'
 sql mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest </tmp/unittest.sql
 
-echo "### Test .dburl.aliases"
-echo :sqlunittest mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest >> ~/.dburl.aliases
-sql :sqlunittest "SELECT 'Yes it does' as 'Test if .dburl.aliases works';"
+echo "### Test .sql/aliases"
+echo :sqlunittest mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest >> ~/.sql/aliases
+sql :sqlunittest "SELECT 'Yes it does' as 'Test if .sql/aliases works';"
 
 echo "### Test --noheaders --no-headers -n"
 sql -n :sqlunittest 'select * from unittest order by id' \
@@ -71,9 +71,9 @@ sql --html mysql:///tange 'select * from unittest'
 echo
 
 echo "### Test --show-processlist|proclist|listproc";
-sql --show-processlist :sqlunittest | wc
-sql --proclist :sqlunittest | wc
-sql --listproc :sqlunittest | wc
+sql --show-processlist :sqlunittest | wc -lw
+sql --proclist :sqlunittest | wc -lw
+sql --listproc :sqlunittest | wc -lw
 
 echo "### Test --db-size --dbsize";
 sql --dbsize :sqlunittest | wc

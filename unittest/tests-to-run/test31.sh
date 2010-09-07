@@ -10,6 +10,26 @@ EOF
 chmod 755 /tmp/shebang
 /tmp/shebang
 
+echo '### Test of #! --shebang'
+cat >/tmp/shebang <<EOF
+#!/usr/local/bin/parallel --shebang -rk echo
+A
+B
+C
+EOF
+chmod 755 /tmp/shebang
+/tmp/shebang
+
+echo '### Test of #! --hashbang'
+cat >/tmp/shebang <<EOF
+#!/usr/local/bin/parallel --hashbang -rk echo
+A
+B
+C
+EOF
+chmod 755 /tmp/shebang
+/tmp/shebang
+
 echo '### Test of #! with 2 files as input'
 cat >/tmp/shebang <<EOF
 #!/usr/local/bin/parallel -Yrk -a /tmp/123 echo
