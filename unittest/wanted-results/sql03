@@ -1,0 +1,21 @@
+### Test reading sql from url command line
+Test reading SQL from command line
+Yes it works
+### Test reading sql from url command line %-quoting
+Test %-quoting SQL from command line
+Yes it works
+### Test .sql/aliases with url on commandline
+Test if .sql/aliases with %-quoting works
+Yes it works
+### Test cyclic alias .sql/aliases
+:cyclic3 is a cyclic alias
+### Test empty dburl
+Error:
+ is not a valid DBURL
+
+sql [-hnr] [--table-size] [--db-size] [-p pass-through] [-s string] dburl [command]
+### Test dburl :
+Error:
+: is not defined in /home/tange/.sql/aliases /home/tange/.dburl.aliases /etc/sql/aliases /usr/local/bin/dburl.aliases /usr/local/bin/dburl.aliases.dist
+
+sql [-hnr] [--table-size] [--db-size] [-p pass-through] [-s string] dburl [command]

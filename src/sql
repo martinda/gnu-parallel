@@ -176,7 +176,8 @@ Example of aliases:
  :myalias4 mysql://:33333/mydb
  # Alias for an alias
  :m        :myalias4
-
+ # the sortest alias possible
+ :       sqlite:////tmp/mydefault.sqlite
 
 =head1 EXAMPLES
 
@@ -451,6 +452,7 @@ sub parse_options {
 
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_version) { version(); exit(0); }
+    $Global::debug = $::opt_debug;
 }
 
 sub database_driver_alias {
@@ -703,6 +705,7 @@ sub get_alias {
     if ($alias !~ /^:/) {
 	return $alias;
     }
+
     # Find the alias
     my $path;
     if (-l $0) {
@@ -729,7 +732,15 @@ sub get_alias {
 	    push @urlalias, `cat "$alias_file"`;
 	}
     }
-    my ($alias_part,$rest) = $alias=~/(:\w+)(.*)/;
+    my ($alias_part,$rest) = $alias=~/(:\w*)(.*)/;
+    # If we saw this before: we have an alias loop
+    if(grep {$_ eq $alias_part } @Private::seen_aliases) {
+	print STDERR "$alias_part is a cyclic alias\n";
+	exit -1;
+    } else {
+	push @Private::seen_aliases, $alias_part;
+    }
+
     my $dburl;
     for (@urlalias) {
 	/^$alias_part\s+(\S+)/ and do { $dburl = $1; last; }
@@ -739,6 +750,7 @@ sub get_alias {
 	return get_alias($dburl.$rest);
     } else {
 	Usage("$alias is not defined in @search");
+	exit(-1);
     }
 }
 
@@ -768,7 +780,7 @@ sub parse_dburl {
                ((?:oracle|ora|mysql|pg|postgres|postgresql)(?:s|ssl|)|
                  (?:sqlite|sqlite2|sqlite3)):// # Databasedriver ($1)
                (?:
-                ([^:@]*) # Username ($2)
+                ([^:@/][^:@]*|) # Username ($2)
                 (?:
                  :([^@]*) # Password ($3)
                 )?
@@ -793,12 +805,35 @@ sub parse_dburl {
 	$options{host} = undef_if_empty($4);
 	$options{port} = undef_if_empty($5);
 	$options{database} = undef_if_empty($6);
-	$options{statement} = undef_if_empty($7);
+	$options{statement} = undef_if_empty(uri_unescape($7));
+	debug("databasedriver ",$options{databasedriver}, " user ", $options{user},
+	      " password ", $options{password}, " host ", $options{host},
+	      " port ", $options{port}, " database ", $options{database},
+	      " statement ",$options{statement}, "\n");
     } else {
 	Usage("$url is not a valid DBURL");
 	exit -1;
     }
     return %options;
+}
+
+sub uri_unescape {
+    # Copied from http://cpansearch.perl.org/src/GAAS/URI-1.55/URI/Escape.pm
+    # to avoid depending on URI::Escape
+    # Note from RFC1630:  "Sequences which start with a percent sign
+    # but are not followed by two hexadecimal characters are reserved
+    # for future extension"
+    my $str = shift;
+    if (@_ && wantarray) {
+	# not executed for the common case of a single argument
+	my @str = ($str, @_);  # need to copy
+	foreach (@str) {
+	    s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+	}
+	return @str;
+    }
+    $str =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg if defined $str;
+    $str;
 }
 
 sub undef_if_empty {
@@ -841,6 +876,12 @@ sub usage {
     print "See 'man $Global::progname' for the options\n";
 }
 
+sub debug {
+    # Returns: N/A
+    $Global::debug or return;
+    @_ = grep { defined $_ ? $_ : "" } @_;
+    print @_;
+}
 
 # TODO --list-databases: psql -l eller '\l'. mysql show databases. Oracle ?
 $::opt_skip_first_line = $::opt_shebang = 0;

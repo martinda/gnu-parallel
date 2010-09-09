@@ -1,16 +1,3 @@
-== SQL ==
-
-Unittest:
-dburl = :
-dburl = null
-
-Denne med '?' skal vel også virke:
- sql mysql:///mydb?'SELECT * FROM foo'
-el.
- sql 'mysql:///mydb?SELECT * FROM foo'
-
-
-
 == FEX ==
 
 fex syntax for splitting fields

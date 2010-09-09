@@ -46,6 +46,7 @@ sql mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest </tmp/unittest.sq
 
 echo "### Test .sql/aliases"
 echo :sqlunittest mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest >> ~/.sql/aliases
+perl -i -ne '$seen{$_}++ || print' ~/.sql/aliases
 sql :sqlunittest "SELECT 'Yes it does' as 'Test if .sql/aliases works';"
 
 echo "### Test --noheaders --no-headers -n"
