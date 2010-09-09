@@ -116,37 +116,22 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>,
    Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>
 
-Subject: GNU Parallel 20100906 released
+Subject: GNU Parallel 2010XXXX released
 
-GNU Parallel 20100906 has been released. It is available for
+GNU Parallel 2010XXXX has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* Using --shebang GNU Parallel can be used as the parser for a script.
-  E.g: #!/usr/bin/parallel --shebang traceroute (followed by lines of
-  hosts)
-
-* First community generated bugfixes
-
-* Alt Linux package of GNU Parallel. Thanks to Michael Shigorin <mike
-  at altlinux dot org>
-
-* Sunfreeware package of GNU Parallel. Thanks to Steven M. Christensen
-  <sunfreeware at gmail.com>
-
-* Untested CentOS, Fedora, Mandriva, RedHat, and SUSE packages
-  available through OpenSUSE build service:
+* Untested Debian and xUbuntu packages available through OpenSUSE
+  build service:
   https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 
-* Review of GNU Parallel. Thanks to Andrew McFague amcfague at wgen dot net
-  http://www.andrew-mcfague.com/linux/utilities-linux/
-  commands-every-serious-nix-user-should-know/#parallel
+* BSD xargs -o (open /dev/tty) is now default for the job running in
+  foreground. Useful for interactive commands like:
+  ls | parallel -Xuj1 vi
 
-* First 1000 views of the intro video
-
-* sql - a small script to access sql bases from the command line which
-  is a handy companion to parallel --colsep
+* Renamed .dburl.aliases to .sql/aliases and /etc/sql/aliases.
 
 = About GNU Parallel =
 

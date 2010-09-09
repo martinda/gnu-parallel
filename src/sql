@@ -370,6 +370,9 @@ if($database_driver eq "mysql" or
     ($batch_command,$interactive_command) = postgresql_commands($database_driver,%dburl);
 } elsif($database_driver eq "oracle") {
     ($batch_command,$interactive_command) = oracle_commands($database_driver,%dburl);
+} elsif($database_driver eq "sqlite" or
+	$database_driver eq "sqlite3") {
+    ($batch_command,$interactive_command) = sqlite_commands($database_driver,%dburl);
 }
 
 my $err;
@@ -470,7 +473,11 @@ sub database_driver_alias {
 				 "postgresqls" => "postgresqlssl",
 				 "pgsqls" => "postgresqlssl",
 				 "postgress" => "postgresqlssl",
-				 "pgs" => "postgresqlssl");
+				 "pgs" => "postgresqlssl",
+				 "sqlite" => "sqlite",
+				 "sqlite2" => "sqlite",
+				 "sqlite3" => "sqlite3",
+	);
     return $database_driver_alias{$driver};
 }
 
@@ -490,7 +497,7 @@ sub mysql_commands {
 	$ssl="--ssl";
     }
     # -C: Compression if both ends support it
-    $batch_command = 
+    $batch_command =
 	"mysql -C $pass_through_options $no_headers $html $ssl $host $user $port $password $database";
     $interactive_command = $batch_command;
     return($batch_command,$interactive_command);
@@ -511,7 +518,7 @@ sub postgresql_commands {
     if ($database_driver eq "postgresqlssl") {
 	$ssl="PGSSLMODE=require";
     }
-    $batch_command = 
+    $batch_command =
 	"$ssl $password psql $pass_through_options $sep $no_headers $html $host $user $port $database";
     $interactive_command = $batch_command;
 
@@ -562,12 +569,32 @@ sub oracle_commands {
     my $ssl = "";
     # -L: Do not re-ask for password if it is wrong
     my $common_options = "-L $pass_through_options '$user$password\@$tns' \@$Global::Initfile";
-    my $batch_command = 
-	"sqlplus -S ".$common_options;
-    my $interactive_command = 
-	"$rlwrap sqlplus ".$common_options;
+    my $batch_command =	"sqlplus -S ".$common_options;
+    my $interactive_command = "$rlwrap sqlplus ".$common_options;
     return($batch_command,$interactive_command);
 }
+
+sub sqlite_commands {
+    my ($database_driver,%opt) = (@_);
+    if(not find_command_in_path($database_driver)) {
+	print STDERR "Database driver '$database_driver' not supported\n";
+	exit -1;
+    }
+    my $sep = defined($::opt_s) ? "-separator '$::opt_s'" : "";
+    my $password = defined($opt{'password'}) ? "--password=".$opt{'password'} : "";
+    my $host = defined($opt{'host'}) ? "--host=".$opt{'host'} : "";
+    my $port = defined($opt{'port'}) ? "--port=".$opt{'port'} : "";
+    my $user = defined($opt{'user'}) ? "--user=".$opt{'user'} : "";
+    my $database = defined($opt{'database'}) ? $opt{'database'} : "";
+    my $html = defined($::opt_html) ? "-html" : "";
+    my $no_headers = defined($::opt_n) ? "-noheader" : "-header";
+    my $ssl = "";
+    $batch_command =
+	"$database_driver $pass_through_options $sep $no_headers $html $database";
+    $interactive_command = $batch_command;
+    return($batch_command,$interactive_command);
+}
+
 
 # Return the code for 'show processlist' in the chosen database dialect
 sub processlist {
@@ -614,6 +641,10 @@ sub dbsize {
 	     "SELECT ".
 	     "    pg_database_size('".$dburl{'database'}."') AS bytes,".
 	     "    pg_size_pretty(pg_database_size('".$dburl{'database'}."')) AS human_readable;"),
+	 "sqlite" => (
+	     "SELECT ".(undef_as_zero(-s $dburl{'database'}))." AS bytes;"),
+	 "sqlite3" => (
+	     "SELECT ".(undef_as_zero(-s $dburl{'database'}))." AS bytes;"),
 	);
     if($processlist{$dbdriver}) {
 	return $processlist{$dbdriver};
@@ -639,11 +670,15 @@ sub tablesize {
     if($processlist{$dbdriver}) {
 	return $processlist{$dbdriver};
     } else {
-	print STDERR "dbsize is not implemented for $dbdriver\n";
+	print STDERR "table size is not implemented for $dbdriver\n";
 	exit 1;
     }
 }
 
+sub undef_as_zero {
+    my $a = shift;
+    return $a ? $a : 0;
+}
 
 sub is_stdin_terminal {
     return (-t STDIN);
@@ -732,7 +767,8 @@ sub parse_dburl {
     my %options = ();
     # mysql://[[user][:password]@][host][:port]/[database[/jobnr]]
 
-    if($url=~m!((?:oracle|ora|mysql|pg|postgres|postgresql)(?:s|ssl|)):// # Databasedriver ($1)
+    if($url=~m!((?:oracle|ora|mysql|pg|postgres|postgresql)(?:s|ssl|)|
+                 (?:sqlite|sqlite2|sqlite3)):// # Databasedriver ($1)
                (?:
                 ([^:@]*) # Username ($2)
                 (?:
@@ -745,12 +781,8 @@ sub parse_dburl {
                 ([^/]*)? # Port ($5)
                )?
                (?:
-                /+
-                ([^/]*)? # Database ($6)
-                (?:
-                 /+
-                 ([^/]*)? # Job ($7)
-                )?
+                /
+                (.*)? # Database ($6)
                )?
               !x) {
 	$options{databasedriver} = undef_if_empty($1);
@@ -759,7 +791,6 @@ sub parse_dburl {
 	$options{host} = undef_if_empty($4);
 	$options{port} = undef_if_empty($5);
 	$options{database} = undef_if_empty($6);
-	$options{job} = undef_if_empty($7);
     } else {
 	Usage("$url is not a valid DBURL");
 	exit -1;
