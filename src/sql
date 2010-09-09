@@ -393,6 +393,10 @@ if(defined $::opt_tablesize) {
     unshift @ARGV, tablesize($database_driver,%dburl);
 }
 
+if($dburl{'statement'}) {
+    unshift @ARGV,$dburl{'statement'};
+}
+
 do {
     if(@ARGV) {
 	$::opt_debug and print "$batch_command\n";
@@ -448,8 +452,6 @@ sub parse_options {
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_version) { version(); exit(0); }
 }
-
-
 
 sub database_driver_alias {
     my $driver = shift;
@@ -675,11 +677,6 @@ sub tablesize {
     }
 }
 
-sub undef_as_zero {
-    my $a = shift;
-    return $a ? $a : 0;
-}
-
 sub is_stdin_terminal {
     return (-t STDIN);
 }
@@ -765,7 +762,7 @@ sub check_permissions {
 sub parse_dburl {
     my $url = shift;
     my %options = ();
-    # mysql://[[user][:password]@][host][:port]/[database[/jobnr]]
+    # mysql://[[user][:password]@][host][:port]/[database[?sql statement]]
 
     if($url=~m!((?:oracle|ora|mysql|pg|postgres|postgresql)(?:s|ssl|)|
                  (?:sqlite|sqlite2|sqlite3)):// # Databasedriver ($1)
@@ -782,7 +779,11 @@ sub parse_dburl {
                )?
                (?:
                 /
-                (.*)? # Database ($6)
+                ([^?]*)? # Database ($6)
+               )?
+               (?:
+                \?
+                (.*)? # Statement ($7)
                )?
               !x) {
 	$options{databasedriver} = undef_if_empty($1);
@@ -791,6 +792,7 @@ sub parse_dburl {
 	$options{host} = undef_if_empty($4);
 	$options{port} = undef_if_empty($5);
 	$options{database} = undef_if_empty($6);
+	$options{statement} = undef_if_empty($7);
     } else {
 	Usage("$url is not a valid DBURL");
 	exit -1;
@@ -803,6 +805,11 @@ sub undef_if_empty {
 	return undef;
     }
     return $_[0];
+}
+
+sub undef_as_zero {
+    my $a = shift;
+    return $a ? $a : 0;
 }
 
 sub version {

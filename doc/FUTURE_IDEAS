@@ -4,7 +4,11 @@ Unittest:
 dburl = :
 dburl = null
 
-sqlite2 sqlite3 support
+Denne med '?' skal vel også virke:
+ sql mysql:///mydb?'SELECT * FROM foo'
+el.
+ sql 'mysql:///mydb?SELECT * FROM foo'
+
 
 
 == FEX ==
