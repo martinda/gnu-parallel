@@ -149,21 +149,21 @@ For this to work B<--shebang> or B<-Y> must be set as the first option.
 =head1 DBURL
 
 A DBURL has the following syntax:
-[sql:]vendor://[user[:password]@][host][:port]/[database][?sqlstatement]
+[sql:]vendor://[user[:password]@][host][:port]/[database][?sqlquery]
 
 Examples: 
  mysql://user:pa55w0rd@mysqlserver/database
  sql:oracle://scott:tiger@oracleserver/xe
  postgresql://user:pa55w0rd@pg.example.com/db
  pg:///
- sqlite2:////tmp/db.sqlite?select * from foo;
+ sql:sqlite2:////tmp/db.sqlite?select * from foo;
  sqlite3:///../db.sqlite3?select%20*%20from%20foo;
 
 Currently supported vendors: MySQL (mysql), MySQL with SSL (mysqls,
 mysqlssl), Oracle (oracle, ora), PostgreSQL (postgresql, pg, pgsql,
 postgres), PostgreSQL with SSL (postgresqlssl, pgs, pgsqlssl,
-postgresssl, pgssl, postgresqls, pgsqls, postgress), SQLite (sqlite2,
-sqlite3).
+postgresssl, pgssl, postgresqls, pgsqls, postgress), SQLite2 (sqlite,
+sqlite2), SQLite3 (sqlite3).
 
 Aliases must start with ':' and are read from 
 /etc/sql/aliases and ~/.sql/aliases. The user's own
@@ -181,8 +181,8 @@ Example of aliases:
  :m      :myalias4
  # the sortest alias possible
  :       sqlite2:////tmp/mydefault.sqlite
- # Including an SQL statement
- :stm    sqlite:////tmp/file.sqlite?select * from foo;
+ # Including an SQL query
+ :query  sqlite:////tmp/file.sqlite?select * from foo;
 
 =head1 EXAMPLES
 
@@ -333,9 +333,11 @@ A copy of the full license is included in the file as cc-by-sa.txt.
 =head1 DEPENDENCIES
 
 GNU B<sql> uses Perl. If B<mysql> is installed, MySQL dburls will
-work. If B<psql> is installed, PostgreSQL dburls will work. If
-B<sqlplus> is installed, Oracle dburls will work. If B<rlwrap> is
-installed, GNU B<sql> will have a command history for Oracle.
+work. If B<psql> is installed, PostgreSQL dburls will work.  If
+B<sqlite> is installed, SQLite2 dburls will work.  If B<sqlite3> is
+installed, SQLite3 dburls will work. If B<sqlplus> is installed,
+Oracle dburls will work. If B<rlwrap> is installed, GNU B<sql> will
+have a command history for Oracle.
 
 
 =head1 FILES
@@ -347,7 +349,7 @@ installed, GNU B<sql> will have a command history for Oracle.
 
 =head1 SEE ALSO
 
-B<mysql>(1), B<psql>(1), B<sqlplus>(1), B<rlwrap>(1)
+B<mysql>(1), B<psql>(1), B<rlwrap>(1), B<sqlite>(1), B<sqlite3>(1), B<sqlplus>(1)
 
 =cut
 
@@ -399,8 +401,8 @@ if(defined $::opt_tablesize) {
     unshift @ARGV, tablesize($database_driver,%dburl);
 }
 
-if($dburl{'statement'}) {
-    unshift @ARGV,$dburl{'statement'};
+if($dburl{'query'}) {
+    unshift @ARGV,$dburl{'query'};
 }
 
 do {
@@ -779,7 +781,7 @@ sub check_permissions {
 sub parse_dburl {
     my $url = shift;
     my %options = ();
-    # sql:mysql://[[user][:password]@][host][:port]/[database[?sql statement]]
+    # sql:mysql://[[user][:password]@][host][:port]/[database[?sql query]]
 
     if($url=~m!(?:sql:)? # You can prefix with 'sql:'
                ((?:oracle|ora|mysql|pg|postgres|postgresql)(?:s|ssl|)|
@@ -801,7 +803,7 @@ sub parse_dburl {
                )?
                (?:
                 \?
-                (.*)? # Statement ($7)
+                (.*)? # Query ($7)
                )?
               !x) {
 	$options{databasedriver} = undef_if_empty($1);
@@ -810,12 +812,12 @@ sub parse_dburl {
 	$options{host} = undef_if_empty($4);
 	$options{port} = undef_if_empty($5);
 	$options{database} = undef_if_empty($6);
-	$options{statement} = undef_if_empty(uri_unescape($7));
+	$options{query} = undef_if_empty(uri_unescape($7));
 	debug("dburl $url\n");
 	debug("databasedriver ",$options{databasedriver}, " user ", $options{user},
 	      " password ", $options{password}, " host ", $options{host},
 	      " port ", $options{port}, " database ", $options{database},
-	      " statement ",$options{statement}, "\n");
+	      " query ",$options{query}, "\n");
     } else {
 	Usage("$url is not a valid DBURL");
 	exit -1;
