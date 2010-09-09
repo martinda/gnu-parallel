@@ -762,9 +762,10 @@ sub check_permissions {
 sub parse_dburl {
     my $url = shift;
     my %options = ();
-    # mysql://[[user][:password]@][host][:port]/[database[?sql statement]]
+    # sql:mysql://[[user][:password]@][host][:port]/[database[?sql statement]]
 
-    if($url=~m!((?:oracle|ora|mysql|pg|postgres|postgresql)(?:s|ssl|)|
+    if($url=~m!(?:sql:)? # You can prefix with 'sql:'
+               ((?:oracle|ora|mysql|pg|postgres|postgresql)(?:s|ssl|)|
                  (?:sqlite|sqlite2|sqlite3)):// # Databasedriver ($1)
                (?:
                 ([^:@]*) # Username ($2)
