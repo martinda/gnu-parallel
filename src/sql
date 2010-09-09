@@ -149,18 +149,21 @@ For this to work B<--shebang> or B<-Y> must be set as the first option.
 =head1 DBURL
 
 A DBURL has the following syntax:
-vendor://[user[:password]@][host][:port]/[database]
+[sql:]vendor://[user[:password]@][host][:port]/[database][?sqlstatement]
 
 Examples: 
  mysql://user:pa55w0rd@mysqlserver/database
- oracle://scott:tiger@oracleserver/xe
+ sql:oracle://scott:tiger@oracleserver/xe
  postgresql://user:pa55w0rd@pg.example.com/db
  pg:///
+ sqlite2:////tmp/db.sqlite?select * from foo;
+ sqlite3:///../db.sqlite3?select%20*%20from%20foo;
 
 Currently supported vendors: MySQL (mysql), MySQL with SSL (mysqls,
 mysqlssl), Oracle (oracle, ora), PostgreSQL (postgresql, pg, pgsql,
 postgres), PostgreSQL with SSL (postgresqlssl, pgs, pgsqlssl,
-postgresssl, pgssl, postgresqls, pgsqls, postgress)
+postgresssl, pgssl, postgresqls, pgsqls, postgress), SQLite (sqlite2,
+sqlite3).
 
 Aliases must start with ':' and are read from 
 /etc/sql/aliases and ~/.sql/aliases. The user's own
@@ -175,9 +178,11 @@ Example of aliases:
  # Short form of mysql://`whoami`:nopassword@localhost:33333/mydb
  :myalias4 mysql://:33333/mydb
  # Alias for an alias
- :m        :myalias4
+ :m      :myalias4
  # the sortest alias possible
- :       sqlite:////tmp/mydefault.sqlite
+ :       sqlite2:////tmp/mydefault.sqlite
+ # Including an SQL statement
+ :stm    sqlite:////tmp/file.sqlite?select * from foo;
 
 =head1 EXAMPLES
 
@@ -743,7 +748,7 @@ sub get_alias {
 
     my $dburl;
     for (@urlalias) {
-	/^$alias_part\s+(\S+)/ and do { $dburl = $1; last; }
+	/^$alias_part\s+(\S+.*)/ and do { $dburl = $1; last; }
     }
 
     if($dburl) {
@@ -806,6 +811,7 @@ sub parse_dburl {
 	$options{port} = undef_if_empty($5);
 	$options{database} = undef_if_empty($6);
 	$options{statement} = undef_if_empty(uri_unescape($7));
+	debug("dburl $url\n");
 	debug("databasedriver ",$options{databasedriver}, " user ", $options{user},
 	      " password ", $options{password}, " host ", $options{host},
 	      " port ", $options{port}, " database ", $options{database},

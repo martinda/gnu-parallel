@@ -25,6 +25,11 @@ echo :cyclic3 :cyclic >> ~/.sql/aliases
 perl -i -ne '$seen{$_}++ || print' ~/.sql/aliases
 stdout sql ":cyclic3?SELECT 'NO IT DID NOT' as 'Test if :cyclic is found works';"
 
+echo "### Test alias with statement .sql/aliases"
+echo ":testselect sqlite:////tmp/file.sqlite?SELECT 'It works' AS 'Test statement in alias';" >> ~/.sql/aliases
+perl -i -ne '$seen{$_}++ || print' ~/.sql/aliases
+stdout sql :testselect
+
 echo "### Test empty dburl"
 stdout sql ''
 
