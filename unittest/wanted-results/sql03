@@ -9,6 +9,9 @@ Test if .sql/aliases with %-quoting works
 Yes it works
 ### Test cyclic alias .sql/aliases
 :cyclic3 is a cyclic alias
+### Test alias with statement .sql/aliases
+Test statement in alias
+It works
 ### Test empty dburl
 Error:
  is not a valid DBURL
