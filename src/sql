@@ -355,6 +355,7 @@ B<mysql>(1), B<psql>(1), B<rlwrap>(1), B<sqlite>(1), B<sqlite3>(1), B<sqlplus>(1
 
 use Getopt::Long;
 use strict;
+use File::Temp qw/tempfile tempdir/;
 
 parse_options();
 
@@ -401,14 +402,19 @@ if(defined $::opt_tablesize) {
     unshift @ARGV, tablesize($database_driver,%dburl);
 }
 
+my $queryfile = "";
 if($dburl{'query'}) {
-    unshift @ARGV,$dburl{'query'};
+    my $fh;
+    ($fh,$queryfile) = tempfile(SUFFIX => ".sql");
+    print $fh $dburl{'query'};
+    close $fh;
+    $batch_command = "cat $queryfile - | $batch_command";
 }
 
 do {
     if(@ARGV) {
 	$::opt_debug and print "$batch_command\n";
-	open(M,"|$batch_command") || die("mysql/psql/sqlplus not in path");
+	open(M,"| $batch_command") || die("mysql/psql/sqlplus not in path");
 	print M "@ARGV";
 	close M;
     } elsif (is_stdin_terminal()) {
@@ -421,11 +427,13 @@ do {
     $err = $?>>8;
 } while (--$retries and $err);
 
+$queryfile and unlink $queryfile;
+
 $Global::Initfile && unlink $Global::Initfile;
 exit ($err);
 
 sub parse_options {
-    $Global::version = 20100906;
+    $Global::version = 20100914;
     $Global::progname = 'sql';
 
     # This must be done first as this may exec myself
@@ -828,6 +836,7 @@ sub parse_dburl {
 sub uri_unescape {
     # Copied from http://cpansearch.perl.org/src/GAAS/URI-1.55/URI/Escape.pm
     # to avoid depending on URI::Escape
+    # This section is (C) Gisle Aas.
     # Note from RFC1630:  "Sequences which start with a percent sign
     # but are not followed by two hexadecimal characters are reserved
     # for future extension"

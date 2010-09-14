@@ -12,6 +12,30 @@ Yes it works
 ### Test alias with statement .sql/aliases
 Test statement in alias
 It works
+Test statement in alias
+It works
+Test statement in alias
+It works
+### Test alias followed by SQL as arg
+Test statement in alias
+It works
+Arg on cmdline
+### Test alias with query followed by SQL as arg
+Test statement in alias
+It works
+Query added to alias
+Arg on cmdline
+### Test alias with statement .sql/aliases
+Test statement in alias
+It works
+Query added to alias
+Query from stdin
+Test statement in alias
+It works
+Query added to alias
+Query added to alias
+Query from stdin
+Query from stdin
 ### Test empty dburl
 Error:
  is not a valid DBURL

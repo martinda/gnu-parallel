@@ -1870,9 +1870,12 @@ B<prll> is also a tool for running jobs in parallel. It does not
 support running jobs on remote computers.
 
 B<prll> encourages using BASH aliases and BASH functions instead of
-scripts. GNU B<parallel> will never support running aliases and
-functions (see why http://www.perlmonks.org/index.pl?node_id=484296)
-but scripts or composed commands work just fine.
+scripts. GNU B<parallel> can use the aliases and functions that are
+defined at login (using: B<parallel bash -ci myalias>) but it will
+never support running aliases and functions that are defined defined
+later (see why
+http://www.perlmonks.org/index.pl?node_id=484296). However, scripts or
+composed commands work just fine.
 
 B<prll> generates a lot of status information on STDERR which makes it
 harder to use the STDERR output of the job directly as input for

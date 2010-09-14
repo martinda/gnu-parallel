@@ -25,7 +25,7 @@ echo no output |parallel -kv ::: 'echo a' 'cat'
 EOF
 chmod 755 /tmp/parallel-script-for-script2
 echo via pseudotty | script -q -f -c /tmp/parallel-script-for-script2 /dev/null
-sleep 1
+sleep 2
 echo '### Test stdin goes to first command only'
 echo via cat |parallel --arg-sep .--- -kv .--- 'cat' 'echo b'
 echo via cat |parallel -kv ::: 'cat' 'echo b'
