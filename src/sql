@@ -7,7 +7,10 @@ sql - execute a command on a database determined by a dburl
 =head1 SYNOPSIS
 
 B<sql> [B<-hnr>] [B<--table-size>] [B<--db-size>] [B<-p>
-I<pass-through>] [B<-s> I<string>] I<dburl> [I<sqlcommand>]
+I<pass-through>] [B<-s> I<string>] I<dburl> [I<commands>]
+
+B<sql> [B<-hnr>] [B<--table-size>] [B<--db-size>] [B<-p>
+I<pass-through>] [B<-s> I<string>] I<dburl> < commandfile
 
 B<#!/usr/bin/sql> B<--shebang> [options] I<dburl>
 
@@ -19,8 +22,8 @@ clients. So far the focus has been on giving a common way to specify
 login information (protocol, username, password, hostname, and port
 number), size (database and table size), and running queries.
 
-The database is addressed using a dburl. If I<command> is left out you
-will get that database's interactive shell.
+The database is addressed using a DBURL. If I<commands> are left out
+you will get that database's interactive shell.
 
 GNU B<sql> is often used in combination with GNU B<parallel>.
 
@@ -29,22 +32,19 @@ GNU B<sql> is often used in combination with GNU B<parallel>.
 =item I<dburl>
 
 A DBURL has the following syntax:
-vendor://[[user][:password]@][host][:port]/[database]
+[sql:]vendor://[[user][:password]@][host][:port]/[database][?sqlquery]
 
 See the section DBURL below.
 
-=item I<command>
+=item I<commands>
 
-The SQL command to run.
+The SQL commands to run. Each argument will have a newline appended.
 
-Example: select 1+2
+Example: "SELECT 1+2;" "SELECT 'SQL';"
 
-If you use * or ? remember to quote them, as the shell may otherwise
-expand them.
+If no commands are given SQL is read from the keyboard or STDIN.
 
-If no command is given SQL is read from the keyboard or STDIN.
-
-Example: echo 'select 1+2' | sql mysql:///
+Example: echo 'SELECT 1+2;' | sql mysql:///
 
 
 =item B<--db-size>
@@ -73,6 +73,15 @@ HTML output. Turn on HTML tabular output.
 =item B<--listproc>
 
 Show the list of running queries.
+
+
+=item B<--show-tables>
+
+=item B<--list-tables>
+
+=item B<--table-list>
+
+List the tables in the database
 
 
 =item B<--noheaders>
@@ -151,7 +160,11 @@ For this to work B<--shebang> or B<-Y> must be set as the first option.
 A DBURL has the following syntax:
 [sql:]vendor://[user[:password]@][host][:port]/[database][?sqlquery]
 
-Examples: 
+To quote special characters use %-encoding specified in
+http://tools.ietf.org/html/rfc3986#section-2.1 (E.g. a password
+containing '/' would contain '%2F').
+
+Examples:
  mysql://user:pa55w0rd@mysqlserver/database
  sql:oracle://scott:tiger@oracleserver/xe
  postgresql://user:pa55w0rd@pg.example.com/db
@@ -394,6 +407,10 @@ if(defined $::opt_processlist) {
     unshift @ARGV, processlist($database_driver,%dburl);
 }
 
+if(defined $::opt_tablelist) {
+    unshift @ARGV, tablelist($database_driver,%dburl);
+}
+
 if(defined $::opt_dbsize) {
     unshift @ARGV, dbsize($database_driver,%dburl);
 }
@@ -453,6 +470,8 @@ sub parse_options {
 	       "sep|s=s" => \$::opt_s,
 	       "html" => \$::opt_html,
 	       "show-processlist|proclist|listproc" => \$::opt_processlist,
+	       "show-tables|showtables|listtables|list-tables|tablelist|table-list"
+	       => \$::opt_tablelist,
 	       "db-size|dbsize" => \$::opt_dbsize,
 	       "table-size|tablesize" => \$::opt_tablesize,
 	       "noheaders|no-headers|n" => \$::opt_n,
@@ -621,7 +640,7 @@ sub sqlite_commands {
 sub processlist {
     my $dbdriver = shift;
     my %dburl = @_;
-    my %processlist = 
+    my %statement =
 	("mysql" => "show processlist;",
 	 "postgresql" => ("SELECT ".
 			  "    datname AS database,".
@@ -639,10 +658,27 @@ sub processlist {
 		      "AND username IS NOT NULL ".
 		      "ORDER BY CPU_TIME DESC;"),
 	);
-    if($processlist{$dbdriver}) {
-	return $processlist{$dbdriver};
+    if($statement{$dbdriver}) {
+	return $statement{$dbdriver};
     } else {
 	print STDERR "processlist is not implemented for $dbdriver\n";
+	exit 1;
+    }
+}
+
+# Return the code for 'show tables' in the chosen database dialect
+sub tablelist {
+    my $dbdriver = shift;
+    my %dburl = @_;
+    my %statement =
+	("mysql" => "show tables;",
+	 "postgresql" => '\dt',
+	 "oracle" => ("SELECT object_name FROM user_objects WHERE object_type = 'TABLE';"),
+	);
+    if($statement{$dbdriver}) {
+	return $statement{$dbdriver};
+    } else {
+	print STDERR "tablelist is not implemented for $dbdriver\n";
 	exit 1;
     }
 }
@@ -651,7 +687,7 @@ sub processlist {
 sub dbsize {
     my $dbdriver = shift;
     my %dburl = @_;
-    my %processlist = 
+    my %statement =
 	("mysql" => (
 	     'SELECT '.
 	     '    table_schema "Data Base Name", '.
@@ -667,8 +703,8 @@ sub dbsize {
 	 "sqlite3" => (
 	     "SELECT ".(undef_as_zero(-s $dburl{'database'}))." AS bytes;"),
 	);
-    if($processlist{$dbdriver}) {
-	return $processlist{$dbdriver};
+    if($statement{$dbdriver}) {
+	return $statement{$dbdriver};
     } else {
 	print STDERR "dbsize is not implemented for $dbdriver\n";
 	exit 1;
@@ -680,7 +716,7 @@ sub dbsize {
 sub tablesize {
     my $dbdriver = shift;
     my $database = shift;
-    my %processlist = 
+    my %statement =
 	("postgresql" => (
 	     "SELECT relname, relpages*8 AS kb, reltuples::int AS \"live+dead rows\" ".
 	     "FROM pg_class c ".
@@ -688,8 +724,8 @@ sub tablesize {
 	 "mysql" => (
 	     "select table_name, TABLE_ROWS, DATA_LENGTH,INDEX_LENGTH from INFORMATION_SCHEMA.tables;"),
 	);
-    if($processlist{$dbdriver}) {
-	return $processlist{$dbdriver};
+    if($statement{$dbdriver}) {
+	return $statement{$dbdriver};
     } else {
 	print STDERR "table size is not implemented for $dbdriver\n";
 	exit 1;
@@ -816,12 +852,12 @@ sub parse_dburl {
                 (.*)? # Query ($7)
                )?
               !x) {
-	$options{databasedriver} = undef_if_empty($1);
-	$options{user} = undef_if_empty($2);
-	$options{password} = undef_if_empty($3);
-	$options{host} = undef_if_empty($4);
-	$options{port} = undef_if_empty($5);
-	$options{database} = undef_if_empty($6);
+	$options{databasedriver} = undef_if_empty(uri_unescape($1));
+	$options{user} = undef_if_empty(uri_unescape($2));
+	$options{password} = undef_if_empty(uri_unescape($3));
+	$options{host} = undef_if_empty(uri_unescape($4));
+	$options{port} = undef_if_empty(uri_unescape($5));
+	$options{database} = undef_if_empty(uri_unescape($6));
 	$options{query} = undef_if_empty(uri_unescape($7));
 	debug("dburl $url\n");
 	debug("databasedriver ",$options{databasedriver}, " user ", $options{user},
