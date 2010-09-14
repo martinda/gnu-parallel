@@ -10,6 +10,9 @@ sql :pg_foo?'\dt %0a SELECT * FROM users'
 
 cat ~/.sql/aliases | parallel --colsep '\s' sql {1} '"select 0.14159+3;" | grep -q 3.14159 || (echo dead: {1}; exit 1)'
 
+--list-tables
+select OBJECT_NAME from user_objects where object_type = 'TABLE'; 
+
 == FEX ==
 
 fex syntax for splitting fields

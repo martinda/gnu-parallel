@@ -50,3 +50,7 @@ stdout sql ''
 echo "### Test dburl :"
 stdout sql ':'
 
+echo "### Test oracle with multiple arguments on the command line"
+echo ":oraunittest oracle://hr:hr@/xe" >> ~/.sql/aliases
+perl -i -ne '$seen{$_}++ || print' ~/.sql/aliases
+sql :oraunittest "WHENEVER SQLERROR EXIT FAILURE" "SELECT 'arg2' FROM DUAL;" "SELECT 'arg3' FROM DUAL;"

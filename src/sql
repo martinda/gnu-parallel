@@ -406,7 +406,7 @@ my $queryfile = "";
 if($dburl{'query'}) {
     my $fh;
     ($fh,$queryfile) = tempfile(SUFFIX => ".sql");
-    print $fh $dburl{'query'};
+    print $fh $dburl{'query'},"\n";
     close $fh;
     $batch_command = "cat $queryfile - | $batch_command";
 }
@@ -415,7 +415,9 @@ do {
     if(@ARGV) {
 	$::opt_debug and print "$batch_command\n";
 	open(M,"| $batch_command") || die("mysql/psql/sqlplus not in path");
-	print M "@ARGV";
+	for(@ARGV) {
+	    print M "$_\n";
+	}
 	close M;
     } elsif (is_stdin_terminal()) {
 	$::opt_debug and print "$interactive_command\n";

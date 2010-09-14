@@ -19,16 +19,19 @@ It works
 ### Test alias followed by SQL as arg
 Test statement in alias
 It works
+'Arg on cmdline'
 Arg on cmdline
 ### Test alias with query followed by SQL as arg
 Test statement in alias
 It works
 Query added to alias
+'Arg on cmdline'
 Arg on cmdline
 ### Test alias with statement .sql/aliases
 Test statement in alias
 It works
 Query added to alias
+'Query from stdin'
 Query from stdin
 Test statement in alias
 It works
@@ -46,3 +49,14 @@ Error:
 : is not defined in /home/tange/.sql/aliases /home/tange/.dburl.aliases /etc/sql/aliases /usr/local/bin/dburl.aliases /usr/local/bin/dburl.aliases.dist
 
 sql [-hnr] [--table-size] [--db-size] [-p pass-through] [-s string] dburl [command]
+### Test oracle with multiple arguments on the command line
+
+'ARG2'
+------------
+arg2
+
+
+'ARG3'
+------------
+arg3
+
