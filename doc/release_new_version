@@ -44,7 +44,7 @@ cp parallel-$YYYYMMDD.tar.bz2 /tmp
 cd /tmp
 tar xjvf parallel-$YYYYMMDD.tar.bz2
 cd parallel-$YYYYMMDD
-./configure && make && sudo make install
+./configure && make -j && sudo make -j install
 
 == Upload ==
 
@@ -70,6 +70,7 @@ make -j && sudo make -j install
 == Update OpenSUSE build system ==
 
 https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
+cd ~/privat/parallel/packager/obs ; make
 
 == Update Savannah ==
 

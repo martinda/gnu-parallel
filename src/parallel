@@ -1542,8 +1542,8 @@ Outputs
  O2. Send stderr to stderr
  O3. Send stdout to stdout
  O4. Order of output can be same as order of input
- O5. Stdout only from the command
- O6. Stderr only from the command
+ O5. Stdout only contains stdout from the command
+ O6. Stderr only contains stdout from the command
 
 Inputs
  I1. Arguments can be read from stdin
@@ -1571,6 +1571,7 @@ Remote execution
  R6. No config files needed
  R7. Do not run more than SSHD's MaxStartup can handle
  R8. Configurable SSH command
+ R9. Retry if connection breaks occationally
 
 Semaphore
  S1. Possibility to work as a mutex
@@ -1582,37 +1583,47 @@ Legend
  ID = yes
 
 As every new version of the programs are not tested the table may be
-outdated. Please file a bug-report if you find errors.
+outdated. Please file a bug-report if you find errors (See REPORTING
+BUGS).
 
 parallel: E1 E2 E3 E4 E5 O1 O2 O3 O4 O5 O6 I1 I2 I3 I4 I5 I6 I7 M1 M2
-M3 M4 M5 M6 R1 R2 R3 R4 R5 R6 R7 R8 S1 S2
+M3 M4 M5 M6 R1 R2 R3 R4 R5 R6 R7 R8 R9 S1 S2
 
 xargs:    E1  -  -  -  -  - O2 O3  - O5 O6 I1 I2  -  -  -  -  - - M2 M3  -
- -  -  -  -  -  -  -  x  -  -  -
+ -  -  -  -  -  -  -  x  -  -  - -
 
 find -exec: - -  -  x  -  x O2 O3 O4 O5 O6  -  -  -  -  -  -  - - M2 M3  -
- -  -  -  -  -  -  -  -  -  x  x
+ -  -  -  -  -  -  -  -  -  - x  x
 
 make -j: E1 - - - E5 O1 O2 O3 - x O6 - - - - - - - - - - - - - - - - - -
-- - -
+- - - -
 
 ppss: E1 E2 ?E3 E4 - O1 - - x - - I1 I2 - - - - I7 M1 - M3 - - M6 R1 R2
- R3 R4 - - ?R7 - -
+ R3 R4 - - ?R7 ? ? - -
 
 pexec: E1 - - E4 - O1 O2 O3 - O5 O6 I1 I2 - I4 I5 - - M1 - M3 - - M6 R1
- - - - - R6 - S1 -
+ - - - - R6 - - - S1 -
 
-xjobs: TODO
+xjobs: TODO - Please file a bug-report if you know what features xjobs
+supports (See REPORTING BUGS).
 
-prll: TODO
+prll: TODO - Please file a bug-report if you know what features prll
+supports (See REPORTING BUGS).
 
-dxargs: TODO
+dxargs: TODO - Please file a bug-report if you know what features dxargs
+supports (See REPORTING BUGS).
 
-mdm/middelman: TODO
+mdm/middelman: TODO - Please file a bug-report if you know what
+features mdm/middelman supports (See REPORTING BUGS).
 
-xapply: TODO
+xapply: TODO - Please file a bug-report if you know what features xapply
+supports (See REPORTING BUGS).
 
-ClusterSSH: TODO
+paexec: TODO - Please file a bug-report if you know what features paexec
+supports (See REPORTING BUGS).
+
+ClusterSSH: TODO - Please file a bug-report if you know what features ClusterSSH
+supports (See REPORTING BUGS).
 
 
 =head2 DIFFERENCES BETWEEN xargs AND GNU Parallel
@@ -1876,7 +1887,7 @@ echo unzip 1.zip >> /var/run/my_named_pipe;
 echo tar cf /backup/myhome.tar /home/me >> /var/run/my_named_pipe
 
 
-=head2 DIFFERENCES BETWEEN prll AND GNU parallel
+=head2 DIFFERENCES BETWEEN prll AND GNU Parallel
 
 B<prll> is also a tool for running jobs in parallel. It does not
 support running jobs on remote computers.
@@ -1979,6 +1990,51 @@ B<11> xapply -f '[ -f %1 ] && echo %1' List | ...
 B<11> parallel '[ -f {} ] && echo {}' < List | ...
 
 
+=head2 DIFFERENCES BETWEEN paexec AND GNU Parallel
+
+B<paexec> can run jobs in parallel on both the local and remote computers.
+
+B<paexec> requires commands to print a blank line as the last
+output. This means you will have to write a wrapper for most programs.
+
+B<paexec> has a job dependency facility so a job can depend on another
+job to be executed successfully. Sort of a poor-man's B<make>.
+
+Here are the examples from B<paexec>'s example catalog with the equivalent
+using GNU B<parallel>:
+
+=over 1
+
+=item 1_div_X_run:
+
+  ../../paexec -s -l -c "`pwd`/1_div_X_cmd" -n +1 <<EOF [...]
+  parallel echo {} '|' `pwd`/1_div_X_cmd <<EOF [...]
+
+=item all_substr_run:
+
+  ../../paexec -lp -c "`pwd`/all_substr_cmd" -n +3 <<EOF [...]
+  parallel echo {} '|' `pwd`/all_substr_cmd <<EOF [...]
+
+=item cc_wrapper_run:
+
+  ../../paexec -c "env CC=gcc CFLAGS=-O2 `pwd`/cc_wrapper_cmd" \
+             -n 'host1 host2' \
+             -t '/usr/bin/ssh -x' <<EOF [...]
+  parallel echo {} '|' "env CC=gcc CFLAGS=-O2 `pwd`/cc_wrapper_cmd" \
+             -S host1,host2 <<EOF [...]
+  # This is not exactly the same, but avoids the wrapper
+  parallel gcc -O2 -c -o {.}.o {} \
+             -S host1,host2 <<EOF [...]
+
+=item toupper_run:
+
+  ../../paexec -lp -c "`pwd`/toupper_cmd" -n +10 <<EOF [...]
+  parallel echo {} '|' ./toupper_cmd <<EOF [...]
+  # Without the wrapper:
+  parallel echo {} '| awk {print\ toupper\(\$0\)}' <<EOF [...]
+
+=back
+
 =head2 DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel
 
 ClusterSSH solves a different problem than GNU B<parallel>.
@@ -1993,7 +2049,7 @@ computing. If more than one machine is listed in B<-S> GNU B<parallel> may
 only use one of these (e.g. if there are 8 jobs to be run and one
 machine has 8 cores).
 
-GNU B<parallel> can be used as a poor-mans version of ClusterSSH:
+GNU B<parallel> can be used as a poor-man's version of ClusterSSH:
 
 B<cat hostlist | parallel ssh {} do_stuff>
 
@@ -2012,9 +2068,16 @@ echo 1,2,3 | parallel -vkd, echo a{}
 
 =head2 Startup speed
 
-GNU B<parallel> is slow at starting up. Half of the startup time is
-spent finding the maximal length of a command line. Setting B<-s> will
-remove this part of the startup time.
+GNU B<parallel> is slow at starting up. Half of the startup time on
+the local computer is spent finding the maximal length of a command
+line. Setting B<-s> will remove this part of the startup time.
+
+When using multiple computers GNU B<parallel> opens B<ssh> connections
+to them to figure out how many connections can be used reliably
+simultaneously (Namely SSHD's MaxStartup). This test is done for each
+host in serial, so if your --sshloginfile contains many hosts it may
+be slow.
+
 
 =head1 REPORTING BUGS
 
@@ -2215,7 +2278,7 @@ sub acquire_semaphore {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100906;
+    $Global::version = 20100922;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;

@@ -1,24 +1,9 @@
-== Retry ==
-
-Bugfix: --keeporder with -j100% mixed up order of first job
-parallel: Unittest for --retries
-
-== FSCONS ==
-
-Annoncer foredrag til FSCONS
-
-I will be at FSCONS 2010-11-07 talking about GNU Parallel.
-http://www.fscons.org/fs/gnu-parallel
-
 == SQL ==
 
 Example with %0a as newline
-sql :pg_foo?'\dt %0a SELECT * FROM users'
+sql :my_postgres?'\dt %0a SELECT * FROM users'
 
 cat ~/.sql/aliases | parallel --colsep '\s' sql {1} '"select 0.14159+3;" | grep -q 3.14159 || (echo dead: {1}; exit 1)'
-
---list-tables
-select OBJECT_NAME from user_objects where object_type = 'TABLE'; 
 
 == FEX ==
 
