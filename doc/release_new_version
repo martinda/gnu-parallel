@@ -83,7 +83,7 @@ https://savannah.gnu.org/project/admin/editgroupinfo.php?group=parallel
 
 == Update Twitter ==
 
-#GNU #parallel 20100906 released. See what is new in this release
+#GNU #parallel 20100922 released. See what is new in this release
 http://nd.gd/2j Watch the intro video http://nd.gd/0s
 
 https://savannah.gnu.org/news/?group=parallel
@@ -116,22 +116,36 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>,
    Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>
 
-Subject: GNU Parallel 2010XXXX released
+Subject: GNU Parallel 20100922 released
 
-GNU Parallel 2010XXXX has been released. It is available for
+GNU Parallel 20100922 has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
+
+* See GNU Parallel live at FSCONS 2010-11-07:
+  http://www.fscons.org/fs/gnu-parallel
 
 * Untested Debian and xUbuntu packages available through OpenSUSE
   build service:
   https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 
+* Using --retries a job will be retried on another computer if it
+  fails. This is useful if some jobs fail for no apparent reason (such
+  as network failure).
+
 * BSD xargs -o (open /dev/tty) is now default for the job running in
   foreground. Useful for interactive commands like:
   ls | parallel -Xuj1 vi
 
+* GNU sql now supports SQLite.
+
 * Renamed .dburl.aliases to .sql/aliases and /etc/sql/aliases.
+
+* GNU sql now support --list-tables
+
+* Alias for DBURL can contain '?query' part with %-quoting.
+
 
 = About GNU Parallel =
 

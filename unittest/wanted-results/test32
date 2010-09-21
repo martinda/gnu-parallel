@@ -1,0 +1,27 @@
+### Test of --retries
+echo 1
+1
+echo 2
+2
+echo 3
+3
+echo 4
+4
+echo 5
+5
+echo 6
+6
+echo 7
+7
+echo 8
+8
+echo 9
+9
+echo 10
+10
+### Test of --retries - it should run 13 jobs in total
+13
+### Test of --retries - it should run 25 jobs in total
+25
+### Test of --retries - it should run 49 jobs in total
+49

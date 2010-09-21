@@ -31,6 +31,14 @@ begin
 29
 30
 end
+### Test --keep-order
+job0
+job1
+job2
+### Test --keeporder
+job0
+job1
+job2
 ### Test SIGTERM
 1
 2

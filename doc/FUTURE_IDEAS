@@ -1,24 +1,7 @@
 == Retry ==
 
---retries n
-If a job fails, retry it on another computer. Do this n times. If there are fewer than n computers in --sshlogin GNU parallel will re-use the computers. This is useful if some jobs fail for no apparent reason (such as network failure).
-
-When the command dies and fails:
-Update $Global::failed_command{$test_failed}
-If max n has been reached for all: fail
-
-What if all jobs in the queue failed for this sshlogin so only undef is left for this sshlogin?
-
-BUG: Rækkeflg er forkert.
-(seq 0 1) | parallel -kj100%  -S 1/:,2/parallel@server2 -vq perl -e 'sleep 1;print "job{}\n";exit({})' 
-OK: (seq 0 1) | parallel -kj2  -S 1/:,2/parallel@server2 -vq perl -e 'sleep 1;print "job{}\n";exit({})' 
-Fejlen eksisterer også i 20100906 og 20100822
-
-perl -e sleep\ 1\;print\ \"job0\\n\"\;exit\(0\)ARRAY(0x965e928)perl -e sleep\ 1\;print\ \"job1\\n\"\;exit\(1\)ARRAY(0x9727bc0)perl -e sleep\ 1\;print\ \"job2\\n\"\;exit\(2\)ARRAY(0x9727a70)Limited to procs: 3
-Wanted procs: 1
-Time to fork ten procs:  (processes so far: 1)
-perl -e sleep\ 1\;print\ \"job1\\n\"\;exit\(1\)ARRAY(0x9727bc0)perl -e sleep\ 1\;print\ \"job2\\n\"\;exit\(2\)ARRAY(0x9727a70)perl -e sleep\ 1\;print\ \"job0\\n\"\;exit\(0\)ARRAY(0x965e928)Limited to procs: 1
-Running jobs on parallel@server2: 0
+Bugfix: --keeporder with -j100% mixed up order of first job
+parallel: Unittest for --retries
 
 == FSCONS ==
 
@@ -96,11 +79,12 @@ find music-files -type f | parallel -j+0 lame {} -o {.}.mp3
 # Give us progress information
 # For 'foo.wav' call the output file 'foo.mp3'
 
-find music-files -type f | parallel -j+0 -S :,computer1.examle.com,computer2.example.com \
+find music-files -type f | parallel -j+0 -S :,server1,server2 \
 --eta --trc {.}.mp3 lame {} -o {.}.mp3
 
 # Colsep
 # sem
+# --retry
 
 
 =head1 YouTube video
