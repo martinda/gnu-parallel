@@ -60,3 +60,19 @@ arg2
 ------------
 arg3
 
+### Test oracle with \n arguments on the command line
+
+	 1
+----------
+	 1
+
+
+	 2
+----------
+	 2
+
+
+	 3
+----------
+	 3
+

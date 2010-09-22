@@ -95,6 +95,7 @@ http://www.gnu.org/software/parallel/
 http://www.gnu.org/software/parallel/man.html
 
 pod2html src/parallel > ../parallel-web/parallel/man.html
+pod2html src/sql > ../parallel-web/parallel/sql.html
 cd ../parallel-web/parallel
 cvs up
 cvs ci

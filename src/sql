@@ -6,11 +6,9 @@ sql - execute a command on a database determined by a dburl
 
 =head1 SYNOPSIS
 
-B<sql> [B<-hnr>] [B<--table-size>] [B<--db-size>] [B<-p>
-I<pass-through>] [B<-s> I<string>] I<dburl> [I<commands>]
+B<sql> [options] I<dburl> [I<commands>]
 
-B<sql> [B<-hnr>] [B<--table-size>] [B<--db-size>] [B<-p>
-I<pass-through>] [B<-s> I<string>] I<dburl> < commandfile
+B<sql> [options] I<dburl> < commandfile
 
 B<#!/usr/bin/sql> B<--shebang> [options] I<dburl>
 
@@ -38,9 +36,15 @@ See the section DBURL below.
 
 =item I<commands>
 
-The SQL commands to run. Each argument will have a newline appended.
+The SQL commands to run. Each argument will have a newline
+appended.
 
 Example: "SELECT 1+2;" "SELECT 'SQL';"
+
+If the arguments contain '\n' or '\x0a' this will be replaced with a
+newline:
+
+Example: "SELECT 1+2;\n SELECT 'SQL';"
 
 If no commands are given SQL is read from the keyboard or STDIN.
 
@@ -195,39 +199,109 @@ Example of aliases:
  # the sortest alias possible
  :       sqlite2:////tmp/mydefault.sqlite
  # Including an SQL query
- :query  sqlite:////tmp/file.sqlite?select * from foo;
+ :query  sqlite:////tmp/file.sqlite?SELECT * FROM foo;
 
 =head1 EXAMPLES
 
+=head2 Get an interactive prompt
+
+The most basic use of GNU B<sql> is to get an interactive prompt:
+
+B<sql sql:oracle://scott:tiger@oracleserver/xe>
+
+If you have setup an alias you can do:
+
+B<sql :myora>
+
+
+=head2 Run a query
+
+To run a query directly from the command line:
+
+B<sql :myalias "DELETE FROM users WHERE name LIKE '%tange%';">
+
+Oracle requires newlines after each statement. This can be done like
+this:
+
+B<sql :myora "SELECT 1 FROM dual;" "SELECT 2 FROM dual;">
+
+Or this:
+
+B<sql :myora "SELECT 1 FROM dual;\nSELECT 2 FROM dual;">
+
+
 =head2 Copy a PostgreSQL database
 
-pg_dump my_database | sql pg://user:pass@pgserver/my_new_db
+To copy a PostgreSQL database use pg_dump to generate the dump and GNU
+B<sql> to import it:
+
+B<pg_dump my_database | sql pg://user:pass@pgserver/my_new_db>
+
 
 =head2 Empty all tables in a MySQL database
 
-sql -n mysql:/// 'show tables' | parallel sql mysql:/// delete from {};
+Using GNU B<parallel> it is easy to empty all tables without dropping them:
+
+B<sql -n mysql:/// 'show tables' | parallel sql mysql:/// DELETE FROM {};>
+
 
 =head2 Drop all tables in a PostgreSQL database
 
-sql -n pg:/// '\dt' | awk '{print $3}' | parallel -r sql pg:/// drop table {};
+To drop all tables in a PostgreSQL database do:
+
+B<sql -n pg:/// '\dt' | parallel --colsep '\|' -r sql pg:/// DROP TABLE {2};>
+
 
 =head2 Run as a script
 
-Create a script called I<demosql>:
+Instead of doing:
 
- #!/usr/bin/sql -Y mysql:///
+B<sql mysql:/// < sqlfile>
 
- select * from users;
+you can combine the sqlfile with the DBURL to make a
+UNIX-script. Create a script called I<demosql>:
+
+B<#!/usr/bin/sql -Y mysql:///>
+
+B<SELECT * FROM users;>
 
 Then do:
 
- chmod 755 demosql; ./demosql
+B<chmod 755 demosql; ./demosql>
+
 
 =head2 Use --colsep to process multiple columns
 
 Use GNU B<parallel>'s B<--colsep> to separate columns:
 
- sql :mydburl 'select * from bar' | parallel --colsep '\t' do_stuff {4} {1}
+B<sql -s '\t' :mydburl 'SELECT * FROM bar;' | parallel --colsep '\t' do_stuff {4} {1}>
+
+
+=head2 Retry if the connection fails
+
+If the access to the database fails occationally B<--retries> can help
+make sure the query succeeds:
+
+B<sql --retries 5 :myalias 'SELECT * FROM really_big_table;'>
+
+
+=head2 Get info about the running database system
+
+Show how big the database is:
+
+B<sql --db-size :myalias>
+
+List the tables:
+
+B<sql --list-tables :myalias>
+
+List the size of the tables:
+
+B<sql --table-size :myalias>
+
+List the running processes:
+
+B<sql --show-processlist :myalias>
 
 
 =head1 REPORTING BUGS
@@ -433,6 +507,8 @@ do {
 	$::opt_debug and print "$batch_command\n";
 	open(M,"| $batch_command") || die("mysql/psql/sqlplus not in path");
 	for(@ARGV) {
+	    s/\\n/\n/g;
+	    s/\\x0a/\n/gi;
 	    print M "$_\n";
 	}
 	close M;

@@ -1,9 +1,13 @@
+== Bug ==
+
+(echo ; echo abc ; echo abc; echo ; echo bbc) | parallel --colsep b -v echo {1}{2}
+
 == SQL ==
 
 Example with %0a as newline
 sql :my_postgres?'\dt %0a SELECT * FROM users'
 
-cat ~/.sql/aliases | parallel --colsep '\s' sql {1} '"select 0.14159+3;" | grep -q 3.14159 || (echo dead: {1}; exit 1)'
+cat ~/.sql/aliases | parallel --colsep '\s' sql {1} '"select 0.14+3;" | grep -q 3.14 || (echo dead: {1}; exit 1)'
 
 == FEX ==
 
