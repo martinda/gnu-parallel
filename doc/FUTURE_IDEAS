@@ -75,6 +75,38 @@ find music-files -type f | parallel -j+0 -S :,server1,server2 \
 # sem
 # --retry
 
+(echo a1.txt; echo b1.txt; echo c1.txt; echo a2.txt; echo b2.txt; echo c2.txt;)| \
+parallel -X -N 3 my-program --file={}
+
+(echo a1.txt; echo b1.txt; echo c1.txt; echo d1.txt; echo e1.txt; echo f1.txt;)| \
+parallel -X my-program --file={}
+
+# First job controls the tty
+# -u needed because output should not be saved for later
+
+find . -type f | parallel -uXj1 vim
+find . -type f | parallel -uXj1 emacs
+
+# If you have 1000 files only one contains 'foobar'
+# stop when this one is found
+
+find . -type f | parallel  grep -l foobar | head -1
+
+
+# To test a list of hosts are up and pingable save this
+# to a file called machinesup
+
+#!/usr/bin/parallel --shebang --no-run-if-empty ping -c 3 {} >/dev/null 2>&1
+
+google.com
+yahoo.com
+nowhere.gone
+
+# Then:
+#   chmod 755 machinesup
+#   ./machinesup || echo Some machines are down
+
+
 
 =head1 YouTube video
 

@@ -116,37 +116,25 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Tim Cuthbertson <tim3d.junk@gmail.com>, Ludovic Courtès <ludo@gnu.org>,
    Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin <pnzhdin@gmail.com>,
    Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>,
-   Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>
+   Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>,
+   Chris Howey <howeyc@gmail.com>
 
-Subject: GNU Parallel 20100922 released
+Subject: GNU Parallel 2010XXXX released
 
-GNU Parallel 20100922 has been released. It is available for
+GNU Parallel 2010XXXX has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* FreeBSD port. Thanks to Chris Howey <howeyc at gmail dot com>
+
+* First review on print:
+  http://www.linux-magazine.com/Issues/2010 Nov 2010
+
+Old in this release:
+
 * See GNU Parallel live at FSCONS 2010-11-07:
   http://www.fscons.org/fs/gnu-parallel
-
-* Untested Debian and xUbuntu packages available through OpenSUSE
-  build service:
-  https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
-
-* Using --retries a job will be retried on another computer if it
-  fails. This is useful if some jobs fail for no apparent reason (such
-  as network failure).
-
-* BSD xargs -o (open /dev/tty) is now default for the job running in
-  foreground. Useful for interactive commands like:
-  ls | parallel -Xuj1 vi
-
-* GNU sql now supports SQLite.
-
-* Renamed .dburl.aliases to .sql/aliases and /etc/sql/aliases.
-
-* GNU sql now support --list-tables
-
-* Alias for DBURL can contain '?query' part with %-quoting.
 
 
 = About GNU Parallel =

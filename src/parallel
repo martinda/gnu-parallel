@@ -462,7 +462,8 @@ with all the arguments.
 
 Support for B<-m> with B<--sshlogin> is limited and may fail.
 
-See also B<-X> for context replace.
+See also B<-X> for context replace. If in doubt use B<-X> as that will
+most likely do what is needed.
 
 
 =item B<--progress>
@@ -843,12 +844,18 @@ Implies B<--semaphore>.
 
 =item B<-X>
 
-xargs with context replace. This works like B<-m> except if B<{}> is part
-of a word (like I<pic{}.jpg>) then the whole word will be
-repeated. Normally B<-X> will do the right thing, whereas B<-m> can
-give surprising results if B<{}> is used as part of a word.
+Multiple arguments with context replace. Insert as many arguments as
+the command line length permits. If B<{}> is not used the arguments
+will be appended to the line.  If B<{}> is used as part of a word
+(like I<pic{}.jpg>) then the whole word will be repeated. If B<{}> is
+used multiple times each B<{}> will be replaced with the arguments.
+
+Normally B<-X> will do the right thing, whereas B<-m> can give
+unexpected results if B<{}> is used as part of a word.
 
 Support for B<-X> with B<--sshlogin> is limited and may fail.
+
+See also B<-m>.
 
 
 =item B<--exit>
@@ -1369,6 +1376,36 @@ same time:
 
   seq 1 3 | parallel sem --id mymutex sed -i -e 'i{}' myfile
 
+
+=head1 EXAMPLE: Start editor with filenames from stdin (standard input)
+
+You can use GNU Parallel to start interactive programs like emacs or vi:
+
+B<cat filelist | parallel -uXj1 emacs>
+
+B<cat filelist | parallel -uXj1 vi>
+
+If there are more files than will fit on a single command line, the
+editor will be started again with the remaining files.
+
+
+=head1 EXAMPLE: GNU Parallel as queue system/batch manager
+
+GNU Parallel can work as a simple job queue system or batch manager.
+The idea is to put the jobs into a file and have GNU Parallel read
+from that continuously. As GNU Parallel will stop at end of file we
+use tail to continue reading:
+
+B<echo >>B<jobqueue>; B<tail -f jobqueue | parallel>
+
+To submit your jobs to the queue:
+
+B<echo my_command my_arg >>>B< jobqueue>
+
+You can of course use B<-S> to distribute the jobs to remote
+computers:
+
+B<echo >>B<jobqueue>; B<tail -f jobqueue | parallel -S ..>
 
 =head1 QUOTING
 
