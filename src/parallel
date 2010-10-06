@@ -1407,6 +1407,29 @@ computers:
 
 B<echo >>B<jobqueue>; B<tail -f jobqueue | parallel -S ..>
 
+
+=head1 EXAMPLE: GNU Parallel as dir processor
+
+If you have a dir in which users drop files that needs to be processed
+you can do this on GNU/Linux (If you know what B<inotifywait> is
+called on other platforms file a bug report):
+
+B<inotifywait -q -m -r -e CLOSE_WRITE --format %w%f my_dir | parallel
+-u echo>
+
+This will run the command B<echo> on each file put into B<my_dir> or
+subdirs of B<my_dir>.
+
+The B<-u> is needed because of a small bug in GNU B<parallel>. If that
+proves to be a problem, file a bug report.
+
+You can of course use B<-S> to distribute the jobs to remote
+computers:
+
+B<inotifywait -q -m -r -e CLOSE_WRITE --format %w%f my_dir | parallel -S ..
+-u echo>
+
+
 =head1 QUOTING
 
 For more advanced use quoting may be an issue. The following will
@@ -2576,6 +2599,10 @@ sub parse_options {
 	    $Global::host{$sshlogin}{'max_no_of_running'} =
 		$Global::default_simultaneous_sshlogins;
 	}
+    }
+
+    if(-t $Global::argfile) {
+	print STDERR "$Global::progname: Input is tty. Press CTRL-D to exit.\n";
     }
 }
 
