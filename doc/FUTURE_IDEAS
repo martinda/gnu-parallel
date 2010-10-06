@@ -1,13 +1,7 @@
-== Change number of jobs while running ==
-
-Read -j from file. If the file is changed when a job completes the
-file is re-read and the new number of jobs computed. If the number is
-lower than before currently running jobs will be allowed to finish but
-new jobs will not be started.
-
 == Bug ==
 
 (echo ; echo abc ; echo abc; echo ; echo bbc) | parallel --colsep b -v echo {1}{2}
+(echo ; echo abc ; echo abc; echo ; echo bbc) | parallel --colsep d -v echo {1}{2}
 
 == SQL ==
 
