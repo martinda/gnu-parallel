@@ -4239,7 +4239,11 @@ sub get_column {
     }
     my $line = get_line_from_fh($fh);
     if(defined $line) {
-	push @$unget_ref, split /$::opt_colsep/o, $line;
+	if($line ne "") {
+	    push @$unget_ref, split /$::opt_colsep/o, $line;
+	} else {
+	    push @$unget_ref, "";
+	}
 	$::opt_N = $#$unget_ref+1;
 	$Global::max_number_of_args = $::opt_N;
 	debug("col_unget_ref: @$unget_ref\n");

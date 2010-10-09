@@ -65,3 +65,10 @@ a_b_\ c\ _{4}
 a_\ b\ _c_d
 a_b_c_{4}
 a_b_c_d
+### Test of bug: If input is empty string
+echo {2}
+{2}
+echo ac
+ac
+echo ac
+ac

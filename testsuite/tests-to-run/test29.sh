@@ -60,3 +60,6 @@ echo '### Test of -C'
 echo '### Test of --trim n'
 (echo 'a% c %%b'; echo a%c% b %d) | parallel -k --trim n --colsep %+ echo '"{1}_{3}_{2}_{4}"'
 parallel -k -C %+ echo '"{1}_{3}_{2}_{4}"' ::: 'a% c %%b' 'a%c% b %d'
+
+echo '### Test of bug: If input is empty string'
+(echo ; echo abcbdbebf;echo abc) | parallel --colsep b -v echo {1}{2}
