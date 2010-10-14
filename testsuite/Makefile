@@ -11,6 +11,8 @@ testsuite: ../src/parallel tests-to-run/* wanted-results/*
 	echo | pv -qL 10 || (echo pv is required for testsuite; /bin/false)
 	echo | script -c echo -q /dev/null || (echo script is required for testsuite; /bin/false)
 	niceload true || (echo niceload is required for testsuite; /bin/false)
+	which burnP6 || (echo burnP6 is required for testsuite; /bin/false)
+	which timeout || (echo timeout is required for testsuite; /bin/false)
 	time sh Start.sh
 	date
 

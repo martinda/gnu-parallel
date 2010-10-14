@@ -852,6 +852,16 @@ B<--silent>. See also B<-t>.
 
 Print the version GNU B<parallel> and exit.
 
+=item B<--workdir> I<dir> (unimplemented)
+
+=item B<-W> I<dir> (unimplemented)
+
+Files transferred using B<--transfer> and B<--return> will be relative
+to workdir on remote machines, and the command will be executed in
+that dir. The special workdir B<...> will create a workdir i
+B<~/.parallel/workdirs/> on the remote machines and will be removed if
+using B<--cleanup>.
+
 
 =item B<--wait> (beta testing)
 
@@ -1076,7 +1086,7 @@ B<seq 1 30 | parallel date -d '"today -{} days"' +%Y%m%d>
 
 Based on this we can let GNU B<parallel> generate 10 B<wget>s per day:
 
-B<I<the above> | parallel -I {o} seq -w 1 10 "|" parallel wget
+I<the above> B<| parallel -I {o} seq -w 1 10 "|" parallel wget
 http://www.website.com/path/to/{o}_{}.jpg>
 
 =head1 EXAMPLE: Rewriting a for-loop and a while-loop
@@ -1563,6 +1573,16 @@ B<-j> take an argument and thus both need to be at the end of a group.
 
 =head1 CONFIG FILE
 
+The file ~/.parallel/config (formerly known as .parallelrc) will be
+read if it exists.  Lines starting with '#' will be ignored. It can be
+formatted like the environment variable $PARALLEL, but it is often
+easier to simply put each option on its own line.
+
+Options on the command line takes precedence over the environment
+variable $PARALLEL which takes precedence over the file
+~/.parallel/config.
+
+
 The file ~/.parallel/config will be read if it exists. It should be
 formatted like the environment variable $PARALLEL. Lines starting with
 '#' will be ignored.
@@ -1703,7 +1723,7 @@ M1 -  M3 -  -  M6
 O1 -  -  x  -  -
 E1 E2 ?E3 E4 - -
 R1 R2 R3 R4 -  -  ?R7 ? ?
-- -
+-  -
 
 pexec:
 I1 I2 -  I4 I5 -  -
@@ -2387,7 +2407,7 @@ sub acquire_semaphore {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20100922;
+    $Global::version = 20101014;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -2423,15 +2443,17 @@ sub parse_options {
     }
 
     # Add options from .parallel/config
-    my $parallel_config = $ENV{'HOME'}."/.parallel/config";
-    if(-r $parallel_config) {
-	open (IN, "<", $parallel_config) || die;
-	while(<IN>) {
-	    /^\s*\#/ and next;
-	    chomp;
-	    unshift @ARGV, $_;
+    for my $parallel_config ($ENV{'HOME'}."/.parallel/config",
+			     $ENV{'HOME'}."/.parallelrc") {
+	if(-r $parallel_config) {
+	    open (IN, "<", $parallel_config) || die;
+	    while(<IN>) {
+		/^\s*\#/ and next;
+		chomp;
+		unshift @ARGV, $_;
+	    }
+	    close IN;
 	}
-	close IN;
     }
     # Add options from shell variable $PARALLEL
     $ENV{'PARALLEL'} and unshift @ARGV, split/\n/, $ENV{'PARALLEL'};
@@ -2463,6 +2485,7 @@ sub parse_options {
 	       "transfer" => \$::opt_transfer,
 	       "cleanup" => \$::opt_cleanup,
 	       "basefile|B=s" => \@::opt_basefile,
+	       "workdir|W=s" => \$::opt_workdir,
 	       "halt-on-error|H=s" => \$::opt_halt_on_error,
 	       "retries=i" => \$::opt_retries,
 	       "progress" => \$::opt_progress,
@@ -3184,7 +3207,7 @@ sub processes_available_by_system_limit {
     my ($next_command_line, $args_ref);
     my $more_filehandles;
     my $max_system_proc_reached=0;
-    my $spawning_too_slow=0;
+    my $slow_spawining_warning_printed=0;
     my $time = time;
     my %fh;
     my @children;
@@ -3226,19 +3249,18 @@ sub processes_available_by_system_limit {
 	    $max_system_proc_reached = 1;
 	}
 	debug("Time to fork ten procs: ", time-$time, " (processes so far: ", $system_limit,")\n");
-	if(time-$time > 2) {
-	    # It took more than 2 second to fork ten processes. We should stop forking.
-	    # Let us give the system a little slack
-	    debug("\nLimiting processes to: $system_limit-10%=".
-		  (int ($system_limit * 0.9)+1)."\n");
-	    $system_limit = int ($system_limit * 0.9)+1;
-	    $spawning_too_slow = 1;
+	if(time-$time > 2 and not $slow_spawining_warning_printed) {
+	    # It took more than 2 second to fork ten processes.
+	    # Give the user a warning. He can press Ctrl-C if this
+	    # sucks.
+	    print STDERR ("Warning: Starting 10 extra processes takes > 2 sec.\n",
+			  "Consider adjusting -j. Press CTRL-C to stop.\n");
+	    $slow_spawining_warning_printed = 1;
 	}
     } while($system_limit < $wanted_processes
 	    and (defined $next_command_line or $Global::semaphore)
 	    and $more_filehandles
-	    and not $max_system_proc_reached
-	    and not $spawning_too_slow);
+	    and not $max_system_proc_reached);
     if($system_limit < $wanted_processes and not $more_filehandles) {
 	print STDERR ("Warning: Only enough filehandles to run ",
 		      $system_limit, " jobs in parallel. ",
@@ -3247,10 +3269,6 @@ sub processes_available_by_system_limit {
     if($system_limit < $wanted_processes and $max_system_proc_reached) {
 	print STDERR ("Warning: Only enough available processes to run ",
 		      $system_limit, " jobs in parallel.\n");
-    }
-    if($system_limit < $wanted_processes and $spawning_too_slow) {
-	print STDERR ("Warning: Starting 10 extra processes takes > 2 sec.\n",
-		      "Limiting to ", $system_limit, " jobs in parallel.\n");
     }
     # Cleanup: Close the files
     for (values %fh) { close $_ }
@@ -4910,6 +4928,6 @@ sub unlock {
 
 # Keep perl -w happy
 
-$Private::control_path = $Semaphore::timeout = $Semaphore::wait =
+$::opt_workdir = $Private::control_path = $Semaphore::timeout = $Semaphore::wait =
 $::opt_skip_first_line = $::opt_shebang = 0 ;
 

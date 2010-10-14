@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo '### Test of --retries'
-seq 1 10 | parallel --retries 2 -v -S 4.3.2.1,: echo
+seq 1 10 | parallel -k --retries 2 -v -S 4.3.2.1,: echo
 
 echo '### Test of --retries - it should run 13 jobs in total'
 seq 0 12 | parallel --progress -kj100% --retries 1 -S 12/nlv.pi.dk,1/:,parallel@server2 -vq \
