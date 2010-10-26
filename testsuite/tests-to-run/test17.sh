@@ -9,8 +9,8 @@ export LANG=C
 echo '### Test --transfer --return --cleanup'
 
 rm -rf /tmp/parallel.file*
-stdout ssh $SERVER1 rm -rf 'tmp/parallel.file*'  '/tmp/parallel.file*' 
-stdout ssh parallel@$SERVER2 rm -rf 'tmp/parallel.file*' '/tmp/parallel.file*' 
+stdout ssh $SERVER1 rm -rf 'tmp/parallel.file*'  '/tmp/parallel.file*'
+stdout ssh parallel@$SERVER2 rm -rf 'tmp/parallel.file*' '/tmp/parallel.file*'
 (seq 1 3;echo '>fire';seq 5 10; /bin/echo ' : & ) \n*.jpg'; echo '/./sub dir'; seq 13 20) >/tmp/test17
 echo '# Create some weirdly files in /tmp'
 mkdir -p /tmp/parallel.file
@@ -19,8 +19,8 @@ cat /tmp/test17 | parallel -k /bin/echo /tmp/parallel.file{}.file >/tmp/test17ab
 cat /tmp/test17 | parallel -k /bin/echo tmp/parallel.file{}.file >/tmp/test17rel
 
 echo '### --transfer - abspath'
-stdout ssh $SERVER1 'rm -rf tmp/parallel.file*' 
-stdout ssh parallel@$SERVER2 'rm -rf tmp/parallel.file*'
+stdout ssh $SERVER1 'rm -rf /tmp/parallel.file*'
+stdout ssh parallel@$SERVER2 'rm -rf /tmp/parallel.file*'
 cat /tmp/test17abs | parallel -k --transfer --sshlogin $SERVER1,parallel@$SERVER2 cat {}";"rm {}
 # One of these should give the empty dir /tmp/parallel.file
 echo good if no file
@@ -62,7 +62,7 @@ ls /tmp/parallel.file*out /tmp/parallel.file/*out
 
 echo '### --return - relpath'
 rm -rf /tmp/parallel.file*out
-cat /tmp/test17rel | parallel -k --return {.}.out --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp ';'echo {} ">"{.}.out
+cat /tmp/test17rel | parallel -k --return {.}.out --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp/parallel.file ';'echo {} ">"{.}.out
 ls tmp/parallel.file*out tmp/parallel.file/*out
 
 echo '### --return - multiple files'
@@ -74,7 +74,7 @@ ls tmp/parallel.file*out tmp/parallel.file/*out tmp/parallel.file*done tmp/paral
 echo '### --return --cleanup - abspath'
 rm -rf /tmp/parallel.file*out /tmp/parallel.file/*out /tmp/parallel.file*done /tmp/parallel.file/*done
 cat /tmp/test17abs | parallel -k --return {.}.out --return {}.done --cleanup \
-  --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp ';'echo {} ">"{.}.out';'echo {} ">"{}.done';'
+  --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp/parallel.file ';'echo {} ">"{.}.out';'echo {} ">"{}.done';'
 ls /tmp/parallel.file*out /tmp/parallel.file/*out /tmp/parallel.file*done /tmp/parallel.file/*done
 echo good if no file
 stdout ssh $SERVER1 ls '/tmp/parallel.file*' || echo OK
@@ -84,7 +84,7 @@ stdout ssh parallel@$SERVER2 ls '/tmp/parallel.file*' || echo OK
 echo '### --return --cleanup - relpath'
 rm -rf tmp/parallel.file*out tmp/parallel.file/*out tmp/parallel.file*done tmp/parallel.file/*done
 cat /tmp/test17rel | parallel -k --return {.}.out --return {}.done --cleanup \
-  --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp ';'echo {} ">"{.}.out';'echo {} ">"{}.done';'
+  --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp/parallel.file ';'echo {} ">"{.}.out';'echo {} ">"{}.done';'
 ls tmp/parallel.file*out tmp/parallel.file/*out tmp/parallel.file*done tmp/parallel.file/*done
 echo good if no file
 stdout ssh $SERVER1 ls 'tmp/parallel.file*' || echo OK
@@ -94,7 +94,7 @@ stdout ssh parallel@$SERVER2 ls 'tmp/parallel.file*' || echo OK
 echo '### --return --cleanup - multiple returns'
 rm -rf tmp/parallel.file*out tmp/parallel.file/*out tmp/parallel.file*done tmp/parallel.file/*done
 cat /tmp/test17rel | parallel -k --return {.}.out --return {}.done --cleanup \
-  --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp ';'echo {} ">"{.}.out';'echo {} ">"{}.done';'
+  --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp/parallel.file ';'echo {} ">"{.}.out';'echo {} ">"{}.done';'
 ls /tmp/parallel.file*out /tmp/parallel.file/*out /tmp/parallel.file*done /tmp/parallel.file/*done
 echo good if no file
 stdout ssh $SERVER1 ls 'tmp/parallel.file*' || echo OK
@@ -104,7 +104,7 @@ stdout ssh parallel@$SERVER2 ls 'tmp/parallel.file*' || echo OK
 echo '### --transfer --return --cleanup - abspath'
 rm -rf /tmp/parallel.file*out /tmp/parallel.file/*out /tmp/parallel.file*done /tmp/parallel.file/*done
 cat /tmp/test17abs | parallel -k --transfer --return {.}.out --return {}.done --cleanup \
-  --sshlogin $SERVER1,parallel@$SERVER2 mkdir -p tmp ';'cat {} ">"{.}.out';'cat {} ">"{}.done';'
+  --sshlogin $SERVER1,parallel@$SERVER2 cat {} ">"{.}.out';'cat {} ">"{}.done';'
 ls /tmp/parallel.file*out /tmp/parallel.file/*out /tmp/parallel.file*done /tmp/parallel.file/*done
 echo good if no file
 stdout ssh $SERVER1 ls '/tmp/parallel.file*' || echo OK

@@ -1,7 +1,27 @@
-== Bug ==
+parallel: Implemented $PARALLEL_SEQ and $PARALLEL_PID.
+-v now only show the command to be run. Use -vv to see the surrounding ssh wrapping.
+--workdir implemented. Spelling mistakes.
 
-(echo ; echo abc ; echo abc; echo ; echo bbc) | parallel --colsep b -v echo {1}{2}
-(echo ; echo abc ; echo abc; echo ; echo bbc) | parallel --colsep d -v echo {1}{2}
+== Compare ==
+
+http://code.google.com/p/spawntool/
+http://code.google.com/p/push/
+
+== Bug? ==
+
+.parallel/config with --long-options
+
+time find . -type f | parallel -j+0 --eta -S..,: --progress --trc {}.gz gzip  {}
+
+== Bug --eta ==
+
+Only negative.
+
+== Workdir ==
+
+Bug: {2} in --return
+parallel -N2 --workdir ... --cleanup --transfer --return {2}.2 -S .. -v echo {} ">{2}.2" ::: ./tmp/foo ./tmp/bar
+
 
 == SQL ==
 

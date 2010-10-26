@@ -1,4 +1,5 @@
 ### Test -k
+Warning: Only enough filehandles to run 20 jobs in parallel. Raising ulimit -n may help
 begin
 1
 2
@@ -41,14 +42,6 @@ job1
 job2
 ### Test SIGTERM
 1
-2
-3
-4
-5
-6
-7
-8
-9
 10
 11
 12
@@ -58,3 +51,22 @@ job2
 16
 17
 18
+2
+3
+4
+5
+6
+7
+8
+9
+parallel: SIGTERM received. No new jobs will be started.
+parallel: Waiting for these 9 jobs to finish. Send SIGTERM again to stop now.
+parallel: sleep 3; echo 10
+parallel: sleep 3; echo 11
+parallel: sleep 3; echo 12
+parallel: sleep 3; echo 13
+parallel: sleep 3; echo 14
+parallel: sleep 3; echo 15
+parallel: sleep 3; echo 16
+parallel: sleep 3; echo 17
+parallel: sleep 3; echo 18

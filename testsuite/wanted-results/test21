@@ -1,11 +1,11 @@
 ### Test $PARALLEL
 1
-ssh -l parallel parallel-server2 echo\ 1;
+ssh -l parallel parallel-server2 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; echo\ 1;
 1
-ssh parallel-server3 echo\ 2;
+ssh parallel-server3 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; echo\ 2;
 2
 ### Test ~/.parallel/config
-ssh -l parallel parallel-server2 echo\ 1;
+ssh -l parallel parallel-server2 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; echo\ 1;
 1
-ssh parallel-server3 echo\ 2;
+ssh parallel-server3 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; echo\ 2;
 2

@@ -117,7 +117,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin <pnzhdin@gmail.com>,
    Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>,
    Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>,
-   Chris Howey <howeyc@gmail.com>
+   Chris Howey <howeyc@gmail.com>, Fethican Coşkuner <fethicanc@gmail.com>,
+   Rogério Brito <rbrito@ime.usp.br>, Jonathan Palardy <jonathan.palardy@gmail.com>,
+   Koen Vervloesem <koen@vervloesem.eu>,
 
 Subject: GNU Parallel 2010XXXX released
 
@@ -126,10 +128,45 @@ download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* Using -j myfile the number of jobs can be changed while GNU Parallel
+  is running simply by changing the content of myfile.
+
+* Slow spawning error is now only a warning.
+
+* If stdin is a tty and input is read from stdin you now get a
+  warning.
+
+* GNU sql: \n and \x0a in arguments is replaced with newline.
+
+* Patch for Debian package and spelling mistakes. Thanks to Rogério
+  Brito <rbrito at ime dot usp dot br>
+
+* Mac OS X Homebrew package. Thanks to Jonathan Palardy <jonathan dot
+  palardy at gmail dot com>
+
 * FreeBSD port. Thanks to Chris Howey <howeyc at gmail dot com>
 
-* First review on print:
+* Pardus package. Thanks to Fethican Coşkuner
+  <fethicanc at gmail dot com>
+
+* First review in Chinese. Thanks to 曾義峰:
+  http://antbsd.twbbs.org/~ant/wordpress/?p=2876
+
+* First review in print:
   http://www.linux-magazine.com/Issues/2010 Nov 2010
+
+* First review in Spanish:
+  http://www.muylinux.com/2010/10/18/gnu-parallel-computacion-paralela-a-golpe-de-comando
+
+* First review in Dutch thanks to Koen Vervloesem <koen at vervloesem
+  dot eu>:
+  http://techworld.nl/technologie/33493/gebruik-al-je-processorkernen-met-gnu-parallel.html
+
+* 3500 views of the intro video:
+  http://www.youtube.com/watch?v=OpaiGYxkSuQ
+
+* As usual a bunch of bugfixes and more usage examples in the man
+  page.
 
 Old in this release:
 

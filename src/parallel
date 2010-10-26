@@ -18,7 +18,7 @@ B<#!/usr/bin/parallel> --shebang [options] [I<command> [arguments]]
 
 =head1 DESCRIPTION
 
-GNU B<parallel> is a shell tool for executing jobs in parallel locally
+GNU B<parallel> is a shell tool for executing jobs concurrently locally
 or using remote computers. A job is typically a single command or a
 small script that has to be run for each of the lines in the
 input. The typical input is a list of files, a list of hosts, a list
@@ -28,7 +28,7 @@ If you use B<xargs> today you will find GNU B<parallel> very easy to
 use as GNU B<parallel> is written to have the same options as
 B<xargs>. If you write loops in shell, you will find GNU B<parallel>
 may be able to replace most of the loops and make them run faster by
-running several jobs in parallel. If you use B<ppss> or B<pexec> you
+running several jobs simultaneously. If you use B<ppss> or B<pexec> you
 will find GNU B<parallel> will often make the command easier to read.
 
 GNU B<parallel> makes sure output from the commands is the same output
@@ -383,7 +383,7 @@ If B<--semaphore> is set default is 1 thus making a mutex.
 
 Add N to the number of CPU cores.  Run this many jobs in parallel. For
 compute intensive jobs B<-j> +0 is useful as it will run
-number-of-cpu-cores jobs in parallel. See also
+number-of-cpu-cores jobs simultaneously. See also
 B<--use-cpus-instead-of-cores>.
 
 
@@ -831,7 +831,7 @@ Use the replacement string I<replace-str> instead of {.} for input line without 
 =item B<--use-cpus-instead-of-cores>
 
 Count the number of physical CPUs instead of CPU cores. When computing
-how many jobs to run in parallel relative to the number of CPU cores
+how many jobs to run simultaneously relative to the number of CPU cores
 you can ask GNU B<parallel> to instead look at the number of physical
 CPUs. This will make sense for computers that have hyperthreading as
 two jobs running on one CPU with hyperthreading will run slower than
@@ -852,14 +852,15 @@ B<--silent>. See also B<-t>.
 
 Print the version GNU B<parallel> and exit.
 
-=item B<--workdir> I<dir> (unimplemented)
 
-=item B<-W> I<dir> (unimplemented)
+=item B<--workdir> I<mydir> (beta testing)
+
+=item B<-W> I<mydir> (beta testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
-to workdir on remote machines, and the command will be executed in
-that dir. The special workdir B<...> will create a workdir i
-B<~/.parallel/workdirs/> on the remote machines and will be removed if
+to I<mydir> on remote machines, and the command will be executed in
+that dir. The special workdir B<...> will create a workdir in
+B<~/.parallel/tmp/> on the remote machines and will be removed if
 using B<--cleanup>.
 
 
@@ -1130,7 +1131,7 @@ B<cat list | parallel "do_something {} scale {.}.jpg ; do_step2 <{} {.}" | proce
 
 =head1 EXAMPLE: Group output lines
 
-When runnning jobs that output data, you often do not want the output
+When running jobs that output data, you often do not want the output
 of multiple jobs to run together. GNU B<parallel> defaults to grouping the
 output of each job, so the output is printed when the job finishes. If
 you want the output to be printed while the job is running you can use
@@ -1346,12 +1347,12 @@ Note: The default for GNU B<parallel> is to remove the spaces around the columns
 B<parallel -a table_file.tsv --trim n --colsep '\t' cmd -o {2} -i {1}>
 
 
-=head1 EXAMPLE: Working as cat | sh. Ressource inexpensive jobs and evaluation
+=head1 EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation
 
 GNU B<parallel> can work similar to B<cat | sh>.
 
-A ressource inexpensive job is a job that takes very little CPU, disk
-I/O and network I/O. Ping is an example of a ressource inexpensive
+A resource inexpensive job is a job that takes very little CPU, disk
+I/O and network I/O. Ping is an example of a resource inexpensive
 job. wget is too - if the webpages are small.
 
 The content of the file jobs_to_run:
@@ -1382,7 +1383,7 @@ background, GNU B<sem> will wait for one of these to complete before
 starting another command. B<sem --wait> will wait for all jobs to
 complete.
 
-Run 10 jobs in parallel in the background:
+Run 10 jobs concurrently in the background:
 
   for i in `ls *.log` ; do
     echo $i
@@ -1531,16 +1532,30 @@ the currently running jobs are finished before exiting.
 
 =over 9
 
-=item $PARALLEL_PID - unimplemented
+=item $PARALLEL_PID
 
 The environment variable $PARALLEL_PID is set by GNU B<parallel> and
 is visible to the jobs started from GNU B<parallel>. This makes it
 possible for the jobs to communicate directly to GNU B<parallel>.
+Remember to quote the $, so it gets evaluated by the correct
+shell.
 
 B<Example:> If each of the jobs tests a solution and one of jobs finds
 the solution the job can tell GNU B<parallel> not to start more jobs
 by: B<kill -TERM $PARALLEL_PID>. This only works on the local
 computer.
+
+
+=item $PARALLEL_SEQ
+
+$PARALLEL_SEQ will be set to the sequence number of the job
+running. Remember to quote the $, so it gets evaluated by the correct
+shell.
+
+B<Example:>
+
+B<seq 1 10 | parallel -N2 echo seq:'$'PARALLEL_SEQ arg1:{1} arg2:{2}>
+
 
 =item $PARALLEL
 
@@ -1786,7 +1801,16 @@ B<xargs> has no support for grouping the output, therefore output may
 run together, e.g. the first half of a line is from one process and
 the last half of the line is from another process. The example
 B<Parallel grep> cannot be done reliably with B<xargs> because of
-this.
+this. To see this in action try:
+
+  parallel perl -e '\$a=\"1{}\"x10000000\;print\ \$a,\"\\n\"' '>' {} ::: a b c d e f
+  ls -l a b c d e f
+  parallel -kP4 -n1 grep 1 > out.par ::: a b c d e f
+  echo a b c d e f | xargs -P4 -n1 grep 1 > out.xargs-unbuf
+  echo a b c d e f | xargs -P4 -n1 grep --line-buffered 1 > out.xargs-linebuf
+  echo a b c d e f | xargs -n1 grep --line-buffered 1 > out.xargs-serial
+  ls -l out*
+  md5sum out*
 
 B<xargs> has no support for keeping the order of the output, therefore
 if running jobs in parallel using B<xargs> the output of the second
@@ -2461,7 +2485,7 @@ sub parse_options {
     GetOptions("debug|D" => \$::opt_D,
 	       "xargs|m" => \$::opt_m,
 	       "X" => \$::opt_X,
-	       "v" => \$::opt_v,
+	       "v" => \@::opt_v,
 	       "silent" => \$::opt_silent,
 	       "keep-order|keeporder|k" => \$::opt_k,
 	       "group|g" => \$::opt_g,
@@ -2524,10 +2548,10 @@ sub parse_options {
 	       "Y|shebang|hashbang" => \$::opt_shebang,
 	       "skip-first-line" => \$::opt_skip_first_line,
 	) || die_usage();
+    if(defined @::opt_v) { $Global::verbose = $#::opt_v+1; } # Convert -v -v to v=2
     $Global::debug = (defined $::opt_D);
     if(defined $::opt_m) { $Global::xargs = 1; }
     if(defined $::opt_X) { $Global::Xargs = 1; }
-    if(defined $::opt_v) { $Global::verbose = 1; }
     if(defined $::opt_silent) { $Global::verbose = 0; }
     if(defined $::opt_k) { $Global::keeporder = 1; }
     if(defined $::opt_g) { $Global::grouped = 1; }
@@ -3179,7 +3203,7 @@ sub compute_number_of_processes_for_sshlogins {
 }
 
 sub compute_number_of_processes {
-    # Number of processes wanted and limited by system ressources
+    # Number of processes wanted and limited by system resources
     # Returns:
     #   Number of processes
     my $opt_P = shift;
@@ -3622,6 +3646,15 @@ sub undef_as_zero {
     return $a ? $a : 0;
 }
 
+sub hostname {
+    if(not $Private::hostname) {
+	my $hostname = `hostname`;
+	chomp($hostname);
+	$Private::hostname = $hostname || "nohostname";
+    }
+    return $Private::hostname;
+}
+
 sub __RUNNING_AND_PRINTING_THE_JOBS__ {}
 
 # Variable structure:
@@ -3994,7 +4027,12 @@ sub start_job {
 	}
     }
     if($Global::verbose and not $Global::grouped) {
-	print STDOUT $command,"\n";
+	if($Global::verbose == 1) {
+	    print STDOUT $clean_command,"\n";
+	} else {
+	    # Verbose level > 1: Print the rsync and stuff
+	    print STDOUT $command,"\n";
+	}
     }
     $Global::total_running++;
     $Global::total_started++;
@@ -4008,6 +4046,8 @@ sub start_job {
 	$Private::job_start_sequence++;
 	$job_start_sequence = $Private::job_start_sequence;
     }
+    $ENV{'PARALLEL_SEQ'} = $job_start_sequence;
+    $ENV{'PARALLEL_PID'} = $$;
     debug("$Global::total_running processes. Starting ($job_start_sequence): $command\n");
     if(@::opt_a and $job_start_sequence == 1) {
 	# Give STDIN to the first job if using -a
@@ -4062,11 +4102,17 @@ sub print_job {
     my $out = $fhs->{out};
     my $err = $fhs->{err};
     my $command = $fhs->{command};
+    my $clean_command = $fhs->{clean_command};
 
     debug(">>joboutput $command\n");
     if($Global::verbose and $Global::grouped) {
-	print STDOUT $command,"\n";
-	# If STDOUT and STDERR is merged, we want the command to be printed first
+	if($Global::verbose == 1) {
+	    print STDOUT $clean_command,"\n";
+	} else {
+	    # Verbose level > 1: Print the rsync and stuff
+	    print STDOUT $command,"\n";
+	}
+	# If STDOUT and STDERR are merged, we want the command to be printed first
 	# so flush to avoid STDOUT being buffered
 	flush STDOUT;
     }
@@ -4120,6 +4166,7 @@ sub get_command_line_with_sshlogin {
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
     my ($pre,$post)=("","");
     if($next_command_line and $serverlogin ne ":") {
+	$Global::transfer_seq++;
 	for my $file (@$args_ref) {
 	    if($::opt_transfer) {
 		# --transfer
@@ -4138,11 +4185,37 @@ sub get_command_line_with_sshlogin {
 	    # We need to save the exit status of the job
 	    $post = '_EXIT_status=$?; '.$post.' exit $_EXIT_status;';
 	}
-	return ($pre . "$sshcmd $serverlogin "
-		.shell_quote($next_command_line).";".$post,$clean_command);
+	my $parallel_env = 'PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;'.
+	    'PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\;';
+	if($::opt_workdir) {
+	    return ($pre . "$sshcmd $serverlogin $parallel_env ".shell_quote("cd ".workdir()." && ")
+		    .shell_quote($next_command_line).";".$post,$clean_command);
+	} else {
+	    return ($pre . "$sshcmd $serverlogin $parallel_env "
+		    .shell_quote($next_command_line).";".$post,$clean_command);
+	}
     } else {
 	return ($next_command_line,$clean_command);
     }
+}
+
+sub workdir {
+    # Returns:
+    #   the workdir on a remote machine
+    my $workdir;
+    if(defined $::opt_workdir) {
+	if($::opt_workdir ne "...") {
+	    $workdir = $::opt_workdir;
+	    $workdir =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
+	    $workdir =~ s:/+$::; # Remove ending / if any
+	    $workdir =~ s:^\./::g; # Remove starting ./ if any
+	} else {
+	    $workdir = ".parallel/tmp/".hostname()."-".$$."-".$Global::transfer_seq;
+	}
+    } else {
+	$workdir = ".";
+    }
+    return $workdir;
 }
 
 sub get_command_line {
@@ -4424,7 +4497,9 @@ sub control_path_dir {
     # Returns:
     #   path to directory
     if(not $Private::control_path_dir) {
-	$Private::control_path_dir = tempdir("/tmp/parallel-ssh-XXXX", CLEANUP => 1 );
+	$Private::control_path_dir =
+	    tempdir($ENV{'HOME'}."/.parallel/tmp/control_path_dir-XXXX",
+		    CLEANUP => 1);
     }
     return $Private::control_path_dir;
 }
@@ -4450,7 +4525,29 @@ sub sshcleanup {
     #   ssh command needed to remove file from sshlogin
     my ($sshlogin,$file) = (@_);
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
-    return "$sshcmd $serverlogin rm -f ".shell_quote($file);
+    my $workdir = workdir();
+    my $removeworkdir = "";
+    my @subworkdirs = parentdirs_of($file);
+
+    if(@subworkdirs) {
+	$removeworkdir = "; rmdir 2>/dev/null ".join(" ",map { $workdir."/".$_ } @subworkdirs);
+    }
+    my $relpath = ($file !~ m:^/:); # Is the path relative?
+    my $cleandir = ($relpath ? $workdir : "");
+    return "$sshcmd $serverlogin rm -f ".shell_quote($file.$removeworkdir)." ";
+}
+
+sub parentdirs_of {
+    # Return:
+    #   all parentdirs except . of this dir or file sorted descending by length
+    my $d = shift;
+    my @parents = ();
+    while($d =~ s:/[^/]+$::) {
+	if($d ne ".") {
+	    push @parents, $d;
+	}
+    }
+    return @parents;
 }
 
 sub sshtransferreturn {
@@ -4463,32 +4560,39 @@ sub sshtransferreturn {
     $file =~ s:^\./::g; # Remove ./ if any
     my $relpath = ($file !~ m:^/:); # Is the path relative?
     # Use different subdirs depending on abs or rel path
-    my $rsync_destdir = ($relpath ? "./" : "/");
     if($transfer) {
 	# Abs path: rsync -rlDzRE /home/tange/dir/subdir/file.gz server:/
-	# Rel path: rsync -rlDzRE ./subdir/file.gz server:./
+	# Rel path: rsync -rlDzRE ./subdir/file.gz server:.parallel/tmp/tempid/
+	# Rel path: rsync -rlDzRE ./subdir/file.gz server:$workdir/
+	my $remote_workdir = workdir($file);
+	my $rsync_destdir = ($relpath ? $remote_workdir : "/");
 	if($relpath) {
 	    $file = "./".$file;
 	}
 	if(-r shell_unquote($file)) {
-	    return "rsync $rsync_opt $file $serverlogin:$rsync_destdir";
+	    my $mkremote_workdir =
+		$remote_workdir eq "." ? "true" : "ssh $serverlogin mkdir -p $rsync_destdir";
+	    return "$mkremote_workdir; rsync $rsync_opt $file $serverlogin:$rsync_destdir";
 	} else {
 	    print STDERR "Warning: $file is not readable and will not be transferred\n";
 	    return "true"; # dummy command to run
 	}
     } else {
+	# Return or cleanup
 	my $noext = no_extension($file); # Remove .ext before prepending ./
 	my @cmd = ();
+	my $rsync_destdir = ($relpath ? "./" : "/");
 	for my $ret_file (@Global::ret_files) {
 	    my $remove = $removesource ? "--remove-source-files" : "";
-	    # If relative path: prepend ./ (to avoid problems with ':')
-	    my $replaced = ($relpath ? "./" : "") .
+	    # If relative path: prepend workdir/./ to avoid problems if the dir contains ':'
+	    # and to get the right relative return path
+	    my $replaced = ($relpath ? workdir()."/./" : "") .
 		context_replace($ret_file,[$file],[$noext]);
 	    # --return
 	    # Abs path: rsync -rlDzRE server:/home/tange/dir/subdir/file.gz /
 	    # Rel path: rsync -rlDzRE server:./subsir/file.gz ./
-	    push(@cmd, "rsync $rsync_opt $remove $serverlogin:"
-		.shell_quote($replaced)." ".$rsync_destdir);
+	    push(@cmd, "rsync $rsync_opt $remove $serverlogin:".
+		shell_quote($replaced) . " ".$rsync_destdir);
 	}
 	return join(";",@cmd);
     }
@@ -4746,7 +4850,6 @@ sub my_memory_usage {
     #   0 otherwise
     use strict;
     use FileHandle;
-
 
     my $pid = $$;
     if(-e "/proc/$pid/stat") {

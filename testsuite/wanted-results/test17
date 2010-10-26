@@ -93,6 +93,8 @@ file20
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ### --return - abspath
 /tmp/parallel.file : & ) \n*.jpg.out
 /tmp/parallel.file/sub dir.out
@@ -262,8 +264,6 @@ tmp/parallel.file9.out
 tmp/parallel.file>fire.file.done
 tmp/parallel.file>fire.out
 good if no file
-ls: cannot access tmp/parallel.file*: No such file or directory
-OK
 ### --return --cleanup - multiple returns
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
@@ -306,8 +306,6 @@ OK
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 good if no file
-ls: cannot access tmp/parallel.file*: No such file or directory
-OK
 ### --transfer --return --cleanup - abspath
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
@@ -572,63 +570,63 @@ good if no file
 ls: cannot access /tmp/parallel.file*: No such file or directory
 OK
 ### --transfer --cleanup - multiple argument files
-rsync -rlDzRE -essh ./tmp/parallel.file1.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file\>fire.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file\\\>fire.file\ tmp/parallel.file1.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file1.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file\\\>fire.file; exit $_EXIT_status;
+cat /tmp/parallel.file\>fire.file tmp/parallel.file1.file
 file>fire
 file1
-rsync -rlDzRE -essh ./tmp/parallel.file2.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file9.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file9.file\ tmp/parallel.file2.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file2.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file9.file; exit $_EXIT_status;
+cat /tmp/parallel.file9.file tmp/parallel.file2.file
 file9
 file2
-rsync -rlDzRE -essh ./tmp/parallel.file3.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file8.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file8.file\ tmp/parallel.file3.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file3.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file8.file; exit $_EXIT_status;
+cat /tmp/parallel.file8.file tmp/parallel.file3.file
 file8
 file3
-rsync -rlDzRE -essh ./tmp/parallel.file\>fire.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file7.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file7.file\ tmp/parallel.file\\\>fire.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file\\\>fire.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file7.file; exit $_EXIT_status;
+cat /tmp/parallel.file7.file tmp/parallel.file\>fire.file
 file7
 file>fire
-rsync -rlDzRE -essh ./tmp/parallel.file5.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file6.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file6.file\ tmp/parallel.file5.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file5.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file6.file; exit $_EXIT_status;
+cat /tmp/parallel.file6.file tmp/parallel.file5.file
 file6
 file5
-rsync -rlDzRE -essh ./tmp/parallel.file6.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file5.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file5.file\ tmp/parallel.file6.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file6.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file5.file; exit $_EXIT_status;
+cat /tmp/parallel.file5.file tmp/parallel.file6.file
 file5
 file6
-rsync -rlDzRE -essh ./tmp/parallel.file7.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file3.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file3.file\ tmp/parallel.file7.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file7.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file3.file; exit $_EXIT_status;
+cat /tmp/parallel.file3.file tmp/parallel.file7.file
 file3
 file7
-rsync -rlDzRE -essh ./tmp/parallel.file8.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file20.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file20.file\ tmp/parallel.file8.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file8.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file20.file; exit $_EXIT_status;
+cat /tmp/parallel.file20.file tmp/parallel.file8.file
 file20
 file8
-rsync -rlDzRE -essh ./tmp/parallel.file9.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file2.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file2.file\ tmp/parallel.file9.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file9.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file2.file; exit $_EXIT_status;
+cat /tmp/parallel.file2.file tmp/parallel.file9.file
 file2
 file9
-rsync -rlDzRE -essh ./tmp/parallel.file10.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file19.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file19.file\ tmp/parallel.file10.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file10.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file19.file; exit $_EXIT_status;
+cat /tmp/parallel.file19.file tmp/parallel.file10.file
 file19
 file10
-rsync -rlDzRE -essh ./tmp/parallel.file\ :\ \&\ \)\ \\n\*.jpg.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file18.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file18.file\ tmp/parallel.file\\\ :\\\ \\\&\\\ \\\)\\\ \\\\n\\\*.jpg.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file\\\ :\\\ \\\&\\\ \\\)\\\ \\\\n\\\*.jpg.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file18.file; exit $_EXIT_status;
+cat /tmp/parallel.file18.file tmp/parallel.file\ :\ \&\ \)\ \\n\*.jpg.file
 file18
 file : & ) \n*.jpg
-rsync -rlDzRE -essh ./tmp/parallel.file/sub\ dir.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file17.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file17.file\ tmp/parallel.file/./sub\\\ dir.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file/./sub\\\ dir.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file17.file; exit $_EXIT_status;
+cat /tmp/parallel.file17.file tmp/parallel.file/./sub\ dir.file
 file17
 file/./sub dir
-rsync -rlDzRE -essh ./tmp/parallel.file13.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file16.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file16.file\ tmp/parallel.file13.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file13.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file16.file; exit $_EXIT_status;
+cat /tmp/parallel.file16.file tmp/parallel.file13.file
 file16
 file13
-rsync -rlDzRE -essh ./tmp/parallel.file14.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file15.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file15.file\ tmp/parallel.file14.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file14.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file15.file; exit $_EXIT_status;
+cat /tmp/parallel.file15.file tmp/parallel.file14.file
 file15
 file14
-rsync -rlDzRE -essh ./tmp/parallel.file15.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file14.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file14.file\ tmp/parallel.file15.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file15.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file14.file; exit $_EXIT_status;
+cat /tmp/parallel.file14.file tmp/parallel.file15.file
 file14
 file15
-rsync -rlDzRE -essh ./tmp/parallel.file16.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file13.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file13.file\ tmp/parallel.file16.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file16.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file13.file; exit $_EXIT_status;
+cat /tmp/parallel.file13.file tmp/parallel.file16.file
 file13
 file16
-rsync -rlDzRE -essh ./tmp/parallel.file17.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file10.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file10.file\ tmp/parallel.file17.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file17.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file10.file; exit $_EXIT_status;
+cat /tmp/parallel.file10.file tmp/parallel.file17.file
 file10
 file17
-rsync -rlDzRE -essh ./tmp/parallel.file18.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file1.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file1.file\ tmp/parallel.file18.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file18.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file1.file; exit $_EXIT_status;
+cat /tmp/parallel.file1.file tmp/parallel.file18.file
 file1
 file18
-rsync -rlDzRE -essh ./tmp/parallel.file19.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file/sub\ dir.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file/./sub\\\ dir.file\ tmp/parallel.file19.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file19.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file/./sub\\\ dir.file; exit $_EXIT_status;
+cat /tmp/parallel.file/./sub\ dir.file tmp/parallel.file19.file
 file/./sub dir
 file19
-rsync -rlDzRE -essh ./tmp/parallel.file20.file parallel@parallel-server2:./;rsync -rlDzRE -essh /tmp/parallel.file\ :\ \&\ \)\ \\n\*.jpg.file parallel@parallel-server2:/;ssh parallel@parallel-server2 cat\ /tmp/parallel.file\\\ :\\\ \\\&\\\ \\\)\\\ \\\\n\\\*.jpg.file\ tmp/parallel.file20.file;_EXIT_status=$?; ssh parallel@parallel-server2 rm -f tmp/parallel.file20.file;ssh parallel@parallel-server2 rm -f /tmp/parallel.file\\\ :\\\ \\\&\\\ \\\)\\\ \\\\n\\\*.jpg.file; exit $_EXIT_status;
+cat /tmp/parallel.file\ :\ \&\ \)\ \\n\*.jpg.file tmp/parallel.file20.file
 file : & ) \n*.jpg
 file20

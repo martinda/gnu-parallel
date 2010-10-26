@@ -122,7 +122,7 @@ retry the command. Default is I<--retries 1>.
 
 =item B<-s> I<string>
 
-Field separator. Use I<string> as seperator between columns.
+Field separator. Use I<string> as separator between columns.
 
 
 =item B<--skip-first-line>
