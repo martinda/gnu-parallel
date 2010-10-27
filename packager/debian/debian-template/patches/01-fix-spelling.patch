@@ -1,0 +1,52 @@
+Description: Fix spelling errors in some manpages
+Author: Rogério Brito <rbrito@ime.usp.br>
+Forwarded: no
+Last-Update: 2010-10-24
+
+--- a/src/parallel
++++ b/src/parallel
+@@ -1095,7 +1095,7 @@
+ 
+ =head1 EXAMPLE: Group output lines
+ 
+-When runnning jobs that output data, you often do not want the output
++When running jobs that output data, you often do not want the output
+ of multiple jobs to run together. GNU B<parallel> defaults to grouping the
+ output of each job, so the output is printed when the job finishes. If
+ you want the output to be printed while the job is running you can use
+@@ -1311,12 +1311,12 @@
+ B<parallel -a table_file.tsv --trim n --colsep '\t' cmd -o {2} -i {1}>
+ 
+ 
+-=head1 EXAMPLE: Working as cat | sh. Ressource inexpensive jobs and evaluation
++=head1 EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation
+ 
+ GNU B<parallel> can work similar to B<cat | sh>.
+ 
+-A ressource inexpensive job is a job that takes very little CPU, disk
+-I/O and network I/O. Ping is an example of a ressource inexpensive
++A resource inexpensive job is a job that takes very little CPU, disk
++I/O and network I/O. Ping is an example of a resource inexpensive
+ job. wget is too - if the webpages are small.
+ 
+ The content of the file jobs_to_run:
+@@ -2976,7 +2976,7 @@
+ # Number of parallel processes to run
+ 
+ sub compute_number_of_processes {
+-    # Number of processes wanted and limited by system ressources
++    # Number of processes wanted and limited by system resources
+     # Returns:
+     #   Number of processes
+     my $opt_P = shift;
+--- a/src/sql
++++ b/src/sql
+@@ -118,7 +118,7 @@
+ 
+ =item B<-s> I<string>
+ 
+-Field separator. Use I<string> as seperator between columns.
++Field separator. Use I<string> as separator between columns.
+ 
+ 
+ =item B<--skip-first-line>
