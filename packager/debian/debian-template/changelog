@@ -1,3 +1,46 @@
+parallel (20100922-4) unstable; urgency=low
+
+  * Change package to be non-native.
+  * Move to format "3.0 (quilt)".
+  * debian/compat:
+    + update to 7.
+  * debian/rules:
+    + don't configure the package in the clean target.
+    + create a configure (and configure-stamp) target.
+  * debian/control:
+    + update debhelper dependency to >= 7.
+    + add dh-autoreconf to build-dependency.
+    + indicate that the package conforms to Policy 3.9.1.
+    + set myself as maintainer and Ole as uploader.
+  * debian/rules:
+    + use dh(7) style file with autoreconf add-on.
+  * debian/doc-base:
+    + properly register the documentation with doc-base.
+  * debian/patches:
+    + include some patches to fix spelling errors detected by lintian.
+  * debian/dirs:
+    + remove, not needed.
+
+ -- Rogério Brito <rbrito@ime.usp.br>  Mon, 25 Oct 2010 03:44:37 -0200
+
+parallel (20100922-3) unstable; urgency=low
+
+  * New upstream version - 3rd try
+
+ -- Ole Tange <ole@tange.dk>  Tue, 21 Sep 2010 22:15:05 +0200
+
+parallel (20100922-2) unstable; urgency=low
+
+  * New upstream version
+
+ -- Ole Tange <ole@tange.dk>  Tue, 21 Sep 2010 22:13:53 +0200
+
+parallel (20100922-1) unstable; urgency=low
+
+  * New upstream version
+
+ -- Ole Tange <ole@tange.dk>  Tue, 21 Sep 2010 22:12:22 +0200
+
 parallel (20100906-1) unstable; urgency=low
 
   * New upstream version
