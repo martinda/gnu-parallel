@@ -153,6 +153,10 @@ files. The arguments can be accessed in the command as B<{1}>
 B<{6}> will refer to the line with the same line number from the 6th
 file.
 
+Example: Print the number on the opposing sides of a six sided die.
+
+B<parallel -a <(seq 6) -a <(seq 6 -1 1) echo>
+
 
 =item B<--arg-file-sep> I<sep-str> (beta testing)
 
@@ -3887,7 +3891,7 @@ sub progress {
 	$header = "Computer:jobs completed";
 	$status = $eta .
 	    join(" ",map
-		       { sprintf("%s:%d/%d",
+		       { sprintf("%s:%d",
 				 $sshlogin{$_},
 				 ($Global::host{$_}{'completed'}||0)) }
 		       @workers);
@@ -3897,7 +3901,7 @@ sub progress {
 	$header = "Computer:jobs completed";
 	$status = $eta .
 	    join(" ",map
-		       { sprintf("%s:%d/%d",
+		       { sprintf("%s:%d",
 				 $workerno{$_},
 				 ($Global::host{$_}{'completed'}||0)) }
 		       @workers);
@@ -4396,6 +4400,8 @@ sub read_sshloginfile {
     open(IN, $file) || die "Cannot open $file";
     while(<IN>) {
 	chomp;
+	/^\s*#/ and next;
+	/^\s*$/ and next;
 	push @Global::sshlogin, $_;
     }
     close IN;
