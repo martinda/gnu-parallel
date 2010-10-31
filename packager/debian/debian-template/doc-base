@@ -1,0 +1,11 @@
+Document: parallel
+Title: Manual of GNU parallel
+Author: Ole Tange
+Abstract: This manual describes the use of GNU parallel,
+ provides an introduction to the subject and also presents
+ comparisons against similar utilities.
+Section: System/Administration
+
+Format: HTML
+Index: /usr/share/doc/parallel/parallel.html
+Files: /usr/share/doc/parallel/*.html
