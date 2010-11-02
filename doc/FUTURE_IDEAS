@@ -289,24 +289,9 @@ distribute the arguments evenly if running -X.
 
 =head1 options
 
-One char options not used: A D F G J K O Q R T Z
+One char options not used: A F G K O Q R T Z
 
-
-=head2 mutex
-
-mutex -b -n -l lockid -m max_locks [command]
-mutex -u lockid
-
--b run command in background 
--l lockfile will lock using the lockid
--n nonblocking
--m maximal number of locks (default 1)
--u unlock
-
-If command given works like: mutex -l lockfile -n number_of_locks ; command; mutex -u lockfile
-If -b given works like: mutex -l lockfile -n number_of_locks ; (command; mutex -u lockfile)&
-
-Kan vi finde på lockid som giver mening?
+=head1 sem
 
 Parallelize so this can be done:
 mdm.screen find dir -execdir mdm-run cmd {} \;
@@ -314,15 +299,6 @@ Maybe:
 find dir -execdir par$ --communication-file /tmp/comfile cmd {} \;
 
 find dir -execdir mutex -j4 -b cmd {} \;
-
-=head2 Comfile
-
-This will put a lock on /tmp/comfile. The number of locks is the number of running commands.
-If the number is smaller than -j then it will start a process in the background ( cmd & ),
-otherwise wait.
-
-par$ --wait /tmp/comfile will wait until no more locks on the file
-
 
 
 =head1 Unlikely

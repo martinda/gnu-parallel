@@ -555,6 +555,19 @@ from the terminal.  Only run the command line if the response starts
 with 'y' or 'Y'.  Implies B<-t>.
 
 
+=item B<--profile> I<profilename>
+
+=item B<-J> I<profilename>
+
+Use profile I<profilename> for options. This is useful if you want to
+have multiple profiles. You could have one profile for running jobs in
+parallel on the local machine and a different profile for running jobs
+on remote machines. See the section PROFILE FILES for examples.
+
+I<profilename> corresponds to the file ~/.parallel/I<profilename>.
+
+Default: config
+
 =item B<--quote>
 
 =item B<-q>
@@ -1574,10 +1587,8 @@ B<seq 1 10 | parallel -N2 echo seq:'$'PARALLEL_SEQ arg1:{1} arg2:{2}>
 =item $PARALLEL
 
 The environment variable $PARALLEL will be used as default options for
-GNU B<parallel>. However, because some options take arguments the
-options need to be split into groups in which only the last option
-takes an argument. Each group of options should be put on a line of its
-own.
+GNU B<parallel>. If the variable contains special shell characters
+(e.g. $, *, or space) then these need to be to be escaped with \.
 
 B<Example:>
 
@@ -1591,16 +1602,14 @@ B<cat list | parallel -j1 -k -v -S"myssh user@server" ls>
 
 can be written as:
 
-B<cat list | PARALLEL="-kvj1>
+B<cat list | PARALLEL='-kvj1 -S myssh\ user@server' parallel echo>
 
-B<-Smyssh user@server" parallel echo>
-
-Notice the newline in the middle is needed because both B<-S> and
-B<-j> take an argument and thus both need to be at the end of a group.
+Notice the \ in the middle is needed because 'myssh' and 'user@server'
+must be one argument.
 
 =back
 
-=head1 CONFIG FILE
+=head1 DEFAULT PROFILE (CONFIG FILE)
 
 The file ~/.parallel/config (formerly known as .parallelrc) will be
 read if it exists.  Lines starting with '#' will be ignored. It can be
@@ -1611,14 +1620,29 @@ Options on the command line takes precedence over the environment
 variable $PARALLEL which takes precedence over the file
 ~/.parallel/config.
 
+=head1 PROFILE FILES
 
-The file ~/.parallel/config will be read if it exists. It should be
-formatted like the environment variable $PARALLEL. Lines starting with
-'#' will be ignored.
-
-Options on the command line takes precedence over the environment
-variable $PARALLEL which takes precedence over the file
+If B<--profile> set, GNU B<parallel> will read the profile from that file instead of 
 ~/.parallel/config.
+
+Example: Profile for running every command with B<-j+0> and B<nice>
+
+  echo -j+0 nice > ~/.parallel/nice_profile
+  parallel -J nice_profile bzip2 -9 ::: *
+
+Example: Profile for running a perl script before every command:
+
+  echo "perl -e '\$a=\$\$; print \$a,\" \",'\$PARALLEL_SEQ',\" \";';" > ~/.parallel/pre_perl
+  parallel -J pre_perl echo ::: *
+
+Note how the $ and " need to be quoted using \.
+
+Example: Profile for running distributed jobs with B<nice> on the
+remote machines:
+
+  echo -S .. nice > ~/.parallel/dist
+  parallel -J dist --trc {.}.bz2 bzip2 -9 ::: *
+
 
 =head1 EXIT STATUS
 
@@ -2391,9 +2415,9 @@ B<xjobs>(1), B<prll>(1), B<dxargs>(1), B<mdm>(1)
 use IPC::Open3;
 use Symbol qw(gensym);
 use IO::File;
-use POSIX qw/:sys_wait_h setsid/;
-use File::Temp qw/tempfile tempdir/;
-use Getopt::Long;
+use POSIX qw(:sys_wait_h setsid);
+use File::Temp qw(tempfile tempdir);
+use Getopt::Long qw(GetOptionsFromArray);
 use strict;
 
 do_not_reap();
@@ -2442,6 +2466,84 @@ sub acquire_semaphore {
     return $sem;
 }
 
+sub get_options_from_array {
+    # Run GetOptionsFromArray on @array
+    # Returns:
+    #   true if parsing worked
+    #   false if parsing failed
+    #   @array is changed
+    my $array_ref = shift;
+    return GetOptionsFromArray
+	($array_ref,
+	 "debug|D" => \$::opt_D,
+	 "xargs|m" => \$::opt_m,
+	 "X" => \$::opt_X,
+	 "v" => \@::opt_v,
+	 "silent" => \$::opt_silent,
+	 "keep-order|keeporder|k" => \$::opt_k,
+	 "group|g" => \$::opt_g,
+	 "ungroup|u" => \$::opt_u,
+	 "command|c" => \$::opt_c,
+	 "file|f" => \$::opt_f,
+	 "null|0" => \$::opt_0,
+	 "quote|q" => \$::opt_q,
+	 "I=s" => \$::opt_I,
+	 "extensionreplace|U=s" => \$::opt_U,
+	 "jobs|j=s" => \$::opt_P,
+	 "max-line-length-allowed" => \$::opt_max_line_length_allowed,
+	 "number-of-cpus" => \$::opt_number_of_cpus,
+	 "number-of-cores" => \$::opt_number_of_cores,
+	 "use-cpus-instead-of-cores" => \$::opt_use_cpus_instead_of_cores,
+	 "sshlogin|S=s" => \@::opt_sshlogin,
+	 "sshloginfile=s" => \$::opt_sshloginfile,
+	 "controlmaster|M" => \$::opt_controlmaster,
+	 "return=s" => \@::opt_return,
+	 "trc=s" => \@::opt_trc,
+	 "transfer" => \$::opt_transfer,
+	 "cleanup" => \$::opt_cleanup,
+	 "basefile|B=s" => \@::opt_basefile,
+	 "workdir|W=s" => \$::opt_workdir,
+	 "halt-on-error|H=s" => \$::opt_halt_on_error,
+	 "retries=i" => \$::opt_retries,
+	 "progress" => \$::opt_progress,
+	 "eta" => \$::opt_eta,
+	 "arg-sep|argsep=s" => \$::opt_arg_sep,
+	 "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
+	 "trim=s" => \$::opt_trim,
+	 "profile|J=s" => \$::opt_profile,
+	 # xargs-compatibility - implemented, man, unittest
+	 "max-procs|P=s" => \$::opt_P,
+	 "delimiter|d=s" => \$::opt_d,
+	 "max-chars|s=i" => \$::opt_s,
+	 "arg-file|a=s" => \@::opt_a,
+	 "no-run-if-empty|r" => \$::opt_r,
+	 "replace|i:s" => \$::opt_i,
+	 "E=s" => \$::opt_E,
+	 "eof|e:s" => \$::opt_E,
+	 "max-args|n=i" => \$::opt_n,
+	 "max-replace-args|N=i" => \$::opt_N,
+	 "colsep|col-sep|C=s" => \$::opt_colsep,
+	 "help|h" => \$::opt_help,
+	 "L=i" => \$::opt_L,
+	 "max-lines|l:i" => \$::opt_l,
+	 "interactive|p" => \$::opt_p,
+	 "verbose|t" => \$::opt_verbose,
+	 "version|V" => \$::opt_version,
+	 "show-limits" => \$::opt_show_limits,
+	 "exit|x" => \$::opt_x,
+	 # Semaphore
+	 "semaphore" => \$::opt_semaphore,
+	 "semaphoretimeout=i" => \$::opt_semaphoretimeout,
+	 "semaphorename|id=s" => \$::opt_semaphorename,
+	 "fg" => \$::opt_fg,
+	 "bg" => \$::opt_bg,
+	 "wait" => \$::opt_wait,
+	 # Shebang #!/usr/bin/parallel -Yotheroptions
+	 "Y|shebang|hashbang" => \$::opt_shebang,
+	 "skip-first-line" => \$::opt_skip_first_line,
+	);
+}
+
 sub parse_options {
     # Returns: N/A
     # Defaults:
@@ -2467,101 +2569,8 @@ sub parse_options {
     $Global::arg_file_sep = "::::";
     $Global::trim = 'n';
 
-    # This must be done first as this may exec myself
-    if(defined $ARGV[0] and ($ARGV[0]=~/^-Y/ or $ARGV[0]=~/^--shebang / or
-       $ARGV[0]=~/^--hashbang /)) {
-	# Program is called from #! line in script
-	$ARGV[0]=~s/^-Y //; # remove -Y if on its own
-	$ARGV[0]=~s/^-Y/-/; # remove -Y if bundled with other options
-	$ARGV[0]=~s/^--shebang //; # remove --shebang if it is set
-	$ARGV[0]=~s/^--hashbang //; # remove --hashbang if it is set
-	my $argfile = pop @ARGV;
-	# exec myself to split @ARGV into separate fields
-	exec "$0 --skip-first-line -a $argfile @ARGV";
-    }
+    @ARGV=read_options();
 
-    # Add options from .parallel/config
-    for my $parallel_config ($ENV{'HOME'}."/.parallel/config",
-			     $ENV{'HOME'}."/.parallelrc") {
-	if(-r $parallel_config) {
-	    open (IN, "<", $parallel_config) || die;
-	    while(<IN>) {
-		/^\s*\#/ and next;
-		chomp;
-		unshift @ARGV, $_;
-	    }
-	    close IN;
-	}
-    }
-    # Add options from shell variable $PARALLEL
-    $ENV{'PARALLEL'} and unshift @ARGV, split/\n/, $ENV{'PARALLEL'};
-    Getopt::Long::Configure ("bundling","require_order");
-    GetOptions("debug|D" => \$::opt_D,
-	       "xargs|m" => \$::opt_m,
-	       "X" => \$::opt_X,
-	       "v" => \@::opt_v,
-	       "silent" => \$::opt_silent,
-	       "keep-order|keeporder|k" => \$::opt_k,
-	       "group|g" => \$::opt_g,
-	       "ungroup|u" => \$::opt_u,
-	       "command|c" => \$::opt_c,
-	       "file|f" => \$::opt_f,
-	       "null|0" => \$::opt_0,
-	       "quote|q" => \$::opt_q,
-	       "I=s" => \$::opt_I,
-	       "extensionreplace|U=s" => \$::opt_U,
-	       "jobs|j=s" => \$::opt_P,
-	       "max-line-length-allowed" => \$::opt_max_line_length_allowed,
-	       "number-of-cpus" => \$::opt_number_of_cpus,
-	       "number-of-cores" => \$::opt_number_of_cores,
-	       "use-cpus-instead-of-cores" => \$::opt_use_cpus_instead_of_cores,
-	       "sshlogin|S=s" => \@::opt_sshlogin,
-	       "sshloginfile=s" => \$::opt_sshloginfile,
-	       "controlmaster|M" => \$::opt_controlmaster,
-	       "return=s" => \@::opt_return,
-	       "trc=s" => \@::opt_trc,
-	       "transfer" => \$::opt_transfer,
-	       "cleanup" => \$::opt_cleanup,
-	       "basefile|B=s" => \@::opt_basefile,
-	       "workdir|W=s" => \$::opt_workdir,
-	       "halt-on-error|H=s" => \$::opt_halt_on_error,
-	       "retries=i" => \$::opt_retries,
-	       "progress" => \$::opt_progress,
-	       "eta" => \$::opt_eta,
-	       "arg-sep|argsep=s" => \$::opt_arg_sep,
-	       "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
-	       "trim=s" => \$::opt_trim,
-	       # xargs-compatibility - implemented, man, unittest
-	       "max-procs|P=s" => \$::opt_P,
-	       "delimiter|d=s" => \$::opt_d,
-	       "max-chars|s=i" => \$::opt_s,
-	       "arg-file|a=s" => \@::opt_a,
-	       "no-run-if-empty|r" => \$::opt_r,
-	       "replace|i:s" => \$::opt_i,
-	       "E=s" => \$::opt_E,
-	       "eof|e:s" => \$::opt_E,
-	       "max-args|n=i" => \$::opt_n,
-	       "max-replace-args|N=i" => \$::opt_N,
-	       "colsep|col-sep|C=s" => \$::opt_colsep,
-	       "help|h" => \$::opt_help,
-	       "L=i" => \$::opt_L,
-	       "max-lines|l:i" => \$::opt_l,
-	       "interactive|p" => \$::opt_p,
-	       "verbose|t" => \$::opt_verbose,
-	       "version|V" => \$::opt_version,
-	       "show-limits" => \$::opt_show_limits,
-	       "exit|x" => \$::opt_x,
-	       # Semaphore
-	       "semaphore" => \$::opt_semaphore,
-	       "semaphoretimeout=i" => \$::opt_semaphoretimeout,
-	       "semaphorename|id=s" => \$::opt_semaphorename,
-	       "fg" => \$::opt_fg,
-	       "bg" => \$::opt_bg,
-	       "wait" => \$::opt_wait,
-	       # Shebang #!/usr/bin/parallel -Yotheroptions
-	       "Y|shebang|hashbang" => \$::opt_shebang,
-	       "skip-first-line" => \$::opt_skip_first_line,
-	) || die_usage();
     if(defined @::opt_v) { $Global::verbose = $#::opt_v+1; } # Convert -v -v to v=2
     $Global::debug = (defined $::opt_D);
     if(defined $::opt_m) { $Global::xargs = 1; }
@@ -2614,10 +2623,12 @@ sub parse_options {
     }
 
     if(grep /^$Global::arg_sep$/o, @ARGV) {
+	# Deal with :::
 	@ARGV=read_args_from_command_line();
     }
 
     if(grep /^$Global::arg_file_sep$/o, @ARGV) {
+	# Deal with ::::
 	@ARGV=convert_argfiles_from_command_line_to_multiple_opt_a();
     }
 
@@ -2711,6 +2722,67 @@ sub parse_options {
     if(-t $Global::argfile) {
 	print STDERR "$Global::progname: Input is tty. Press CTRL-D to exit.\n";
     }
+}
+
+sub read_options {
+    # Read options from command line, profile and $PARALLEL
+    # Returns:
+    #   @ARGV without --options
+    # This must be done first as this may exec myself
+    if(defined $ARGV[0] and ($ARGV[0]=~/^-Y/ or $ARGV[0]=~/^--shebang / or
+       $ARGV[0]=~/^--hashbang /)) {
+	# Program is called from #! line in script
+	$ARGV[0]=~s/^-Y //; # remove -Y if on its own
+	$ARGV[0]=~s/^-Y/-/; # remove -Y if bundled with other options
+	$ARGV[0]=~s/^--shebang //; # remove --shebang if it is set
+	$ARGV[0]=~s/^--hashbang //; # remove --hashbang if it is set
+	my $argfile = pop @ARGV;
+	# exec myself to split @ARGV into separate fields
+	exec "$0 --skip-first-line -a $argfile @ARGV";
+    }
+
+    Getopt::Long::Configure ("bundling","require_order");
+    # First check if there is a --profile to set $::opt_profile
+    my @ARGV_copy = @ARGV;
+    get_options_from_array (\@ARGV_copy) || die_usage();
+    # Add options from .parallel/config and other profiles
+    my @ARGV_profile = ();
+    my @ARGV_env = ();
+
+    my @config_profiles = ($ENV{'HOME'}."/.parallel/config",
+		    $ENV{'HOME'}."/.parallelrc");
+    my @profiles = @config_profiles;
+    if($::opt_profile) {
+	# --profile overrides default profiles
+	@profiles = ($ENV{'HOME'}."/.parallel/".$::opt_profile);
+    }
+    for my $profile (@profiles) {
+	if(-r $profile) {
+	    open (IN, "<", $profile) || die;
+	    while(<IN>) {
+		/^\s*\#/ and next;
+		chomp;
+		push @ARGV_profile, shell_unquote(split/(?<![\\])\s/, $_);
+	    }
+	    close IN;
+	} else {
+	    if(grep /^$profile$/, @config_profiles) {
+		# config file is not required to exist
+	    } else {
+		print STDERR "$profile not readable\n";
+		wait_and_exit(255);
+	    }
+	}
+    }
+    get_options_from_array(\@ARGV_profile) || die_usage();
+    # Add options from shell variable $PARALLEL
+    $ENV{'PARALLEL'} and @ARGV_env = shell_unquote(split/(?<![\\])\s/, $ENV{'PARALLEL'});
+    get_options_from_array(\@ARGV_env) || die_usage();
+    get_options_from_array(\@ARGV) || die_usage();
+
+    # Prepend non-options to @ARGV (such as commands like 'nice')
+    unshift @ARGV, @ARGV_profile, @ARGV_env;
+    return @ARGV;
 }
 
 sub read_args_from_command_line {
