@@ -153,10 +153,6 @@ files. The arguments can be accessed in the command as B<{1}>
 B<{6}> will refer to the line with the same line number from the 6th
 file.
 
-Example: Print the number on the opposing sides of a six sided die.
-
-B<parallel -a <(seq 6) -a <(seq 6 -1 1) echo>
-
 
 =item B<--arg-file-sep> I<sep-str> (beta testing)
 
@@ -1330,6 +1326,20 @@ B<ls *.es.* | perl -pe 'print; s/\.es//' | parallel -N2 cp {1} {2}>
 The perl command spits out 2 lines for each input. GNU B<parallel>
 takes 2 inputs (using B<-N2>) and replaces {1} and {2} with the inputs.
 
+Print the number on the opposing sides of a six sided die:
+
+B<parallel -a <(seq 6) -a <(seq 6 -1 1) echo>
+
+Convert files from all subdirs to PNG-files with consecutive numbers
+(useful for making input PNG's for B<ffmpeg>):
+
+B<parallel -a <(find . -type f | sort) -a <(seq 1 $(find . -type f|wc -l)) convert {1} {2}.png>
+
+Alternative version:
+
+B<find . -type f | sort | parallel convert {} \$PARALLEL_SEQ.png>
+
+
 =head1 EXAMPLE: Use a table as input
 
 Content of table_file.tsv:
@@ -2435,7 +2445,7 @@ sub acquire_semaphore {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20101014;
+    $Global::version = 201011002;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
