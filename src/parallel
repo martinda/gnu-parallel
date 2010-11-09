@@ -41,7 +41,7 @@ the line as arguments. If no I<command> is given, the line of input is
 executed. Several lines will be run in parallel. GNU B<parallel> can
 often be used as a substitute for B<xargs> or B<cat | bash>.
 
-Before looking at the options you may want to check out the examples
+Before looking at the options you may want to check out the B<EXAMPLE>s
 after the list of options. That will give you an idea of what GNU
 B<parallel> is capable of.
 
@@ -84,7 +84,26 @@ B<{.}> can be used the same places as B<{}>. The replacement string
 B<{.}> can be changed with B<-U>.
 
 
-=item B<{>I<n>B<}> (beta testing)
+=item B<{/}> (unimplemented)
+
+Basename of input line. This is a specialized replacement string
+with the directory part removed.
+
+B<{/}> can be used the same places as B<{}>. The replacement string
+B<{/}> can be changed with B<--basenamereplace>.
+
+
+=item B<{/.}> (unimplemented)
+
+Basename of input line without extension. This is a specialized
+replacement string with the directory and extension part removed. It
+is a combination of B<{/}> and B<{.}>.
+
+B<{/.}> can be used the same places as B<{}>. The replacement string
+B<{/.}> can be changed with B<--basenameextensionreplace>.
+
+
+=item B<{>I<n>B<}>
 
 Argument from argument file I<n> or the I<n>'th argument. See B<-a>
 and B<-N>.
@@ -92,15 +111,33 @@ and B<-N>.
 B<{>I<n>B<}> can be used the same places as B<{}>.
 
 
-=item B<{>I<n>.B<}> (beta testing)
+=item B<{>I<n>.B<}>
 
 Argument from argument file I<n> or the I<n>'th argument without
-extension. Similar to B<{.}>. See B<-a> and B<-N>.
+extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
 
-B<{>I<n>.B<}> can be used the same places as B<{.}>.
+B<{>I<n>.B<}> can be used the same places as B<{>I<n>B<}>.
 
 
-=item B<:::> I<arguments> (beta testing)
+=item B<{>I<n>/B<}> (unimplemented)
+
+Basename of argument from argument file I<n> or the I<n>'th argument.
+It is a combination of B<{>I<n>B<}> and B<{/}>.  See B<-a> and B<-N>.
+
+B<{>I<n>/B<}> can be used the same places as B<{>I<n>B<}>.
+
+
+=item B<{>I<n>/.B<}> (unimplemented)
+
+Basename of argument from argument file I<n> or the I<n>'th argument
+without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
+B<{.}>.  See B<-a> and B<-N>.
+
+B<{>I<n>/.B<}> can be used the same places as B<{>I<n>B<}>.
+
+
+
+=item B<:::> I<arguments>
 
 Use arguments from the command line as input instead of from stdin
 (standard input). Unlike other options for GNU B<parallel> B<:::> is
@@ -123,7 +160,7 @@ stdin (standard input) will be passed to the first process run.
 If B<--arg-file> is set arguments from that file will be appended.
 
 
-=item B<::::> I<argfiles> (beta testing)
+=item B<::::> I<argfiles>
 
 Another way to write B<-a> I<argfile1> B<-a> I<argfile2> ...
 
@@ -184,6 +221,16 @@ started. It will be removed if B<--cleanup> is active. The file may be
 a script to run or some common base data needed for the jobs.
 Multiple B<-B> can be specified to transfer more basefiles. The
 I<file> will be transferred the same way as B<--transfer>.
+
+
+=item B<--basenamereplace> I<replace-str> (unimplemented)
+
+Use the replacement string I<replace-str> instead of B<{/}> for basename of input line.
+
+
+=item B<--basenameextensionreplace> I<replace-str> (unimplemented)
+
+Use the replacement string I<replace-str> instead of B<{/.}> for basename of input line without extension.
 
 
 =item B<--bg> (beta testing)
