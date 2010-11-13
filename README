@@ -29,6 +29,10 @@ Installation of GNU Parallel is a simple as:
 
   ./configure && make && make install
 
+If you are not root you can install in ~/bin and ~/share:
+
+  ./configure --prefix=$HOME && make && make install
+
 After this you should be able to do:
 
   parallel traceroute ::: foss.org.my gnu.org freenetproject.org

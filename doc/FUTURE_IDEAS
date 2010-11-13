@@ -1,11 +1,11 @@
-parallel: Implemented $PARALLEL_SEQ and $PARALLEL_PID.
--v now only show the command to be run. Use -vv to see the surrounding ssh wrapping.
---workdir implemented. Spelling mistakes.
-
 == Compare ==
 
 http://code.google.com/p/spawntool/
 http://code.google.com/p/push/
+
+== Basename ==
+
+find mp3/ -iname "*.mp3" | parallel -j+0 lame -S -q1 --vbr-new -V6 -b 32 -B128 {} /mnt/sda1/tmp-zik/{/}
 
 == Bug? ==
 
