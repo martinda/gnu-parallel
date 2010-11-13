@@ -82,13 +82,6 @@ https://savannah.gnu.org/news/approve.php?group=parallel
 doc/pod2savannah_publicinfo src/parallel | klipper-stdin
 https://savannah.gnu.org/project/admin/editgroupinfo.php?group=parallel
 
-== Update Twitter ==
-
-#GNU #parallel 20100922 released. See what is new in this release
-http://nd.gd/2j Watch the intro video http://nd.gd/0s
-
-https://savannah.gnu.org/news/?group=parallel
-
 == Update website ==
 
 http://www.gnu.org/software/parallel/
@@ -103,6 +96,13 @@ cvs ci
 == Update Freshmeat ==
 
 http://freshmeat.net/projects/parallel/releases/new
+
+== Update Twitter ==
+
+#GNU Parallel 20101113 released. See what is new in this release
+http://nd.gd/2j Watch the intro video http://nd.gd/0s
+
+https://savannah.gnu.org/news/?group=parallel
 
 == Send announce ==
 
@@ -121,9 +121,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Rogério Brito <rbrito@ime.usp.br>, Jonathan Palardy <jonathan.palardy@gmail.com>,
    Koen Vervloesem <koen@vervloesem.eu>, R. Tyler Croy <tyler@monkeypox.org>
 
-Subject: GNU Parallel 2010XXXX released
+Subject: GNU Parallel 20101113 released
 
-GNU Parallel 2010XXXX has been released. It is available for
+GNU Parallel 20101113 has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
