@@ -17,4 +17,5 @@ wget "$url" -O "${file}"
 		--archive-file="${file}" \
 		--archive-extract="parallel-${version}" \
 		--set-released=today \
-		--xmlsign parallel.xml )
+		--xmlsign parallel.xml ) && \
+	git commit -am "0install: added version $version" -e
