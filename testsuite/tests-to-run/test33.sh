@@ -5,8 +5,8 @@ stdout parallel -j no_such_file echo ::: 1
 
 echo '### Test of -j filename'
 echo 3 >/tmp/jobs_to_run
-parallel -j /tmp/jobs_to_run -v sleep 0.{} ::: 9 8 7 6 5
-# Should give 7 8 9 5 6
+parallel -j /tmp/jobs_to_run -v sleep 0.{} ::: 9 8 7 6 4
+# Should give 7 8 9 4 6
 
 echo '### Test of -j filename with file content changing'
 (echo 1 >/tmp/jobs_to_run; sleep 3; echo 10 >/tmp/jobs_to_run) &

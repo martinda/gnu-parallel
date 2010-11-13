@@ -10,7 +10,7 @@ See 'man parallel' for the options
 sleep 0.7
 sleep 0.8
 sleep 0.9
-sleep 0.5
+sleep 0.4
 sleep 0.6
 ### Test of -j filename with file content changing
 sleep 3.3

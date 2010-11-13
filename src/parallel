@@ -858,6 +858,8 @@ not need this option.
 Verbose.  Print the job to be run on STDOUT. Can be reversed with
 B<--silent>. See also B<-t>.
 
+Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
+
 
 =item B<--version>
 
@@ -1091,7 +1093,7 @@ B<ls *.tar.gz| parallel -U {tar} 'echo {tar}|parallel "mkdir -p {.} ; tar -C {.}
 
 Let us assume a website stores images like:
 
-   http://www.website.com/path/to/YYYYMMDD_##.jpg
+   http://www.example.com/path/to/YYYYMMDD_##.jpg
 
 where YYYYMMDD is the date and ## is the number 01-10.  This will
 generate the past 30 days as YYYYMMDD:
@@ -1101,7 +1103,7 @@ B<seq 1 30 | parallel date -d '"today -{} days"' +%Y%m%d>
 Based on this we can let GNU B<parallel> generate 10 B<wget>s per day:
 
 I<the above> B<| parallel -I {o} seq -w 1 10 "|" parallel wget
-http://www.website.com/path/to/{o}_{}.jpg>
+http://www.example.com/path/to/{o}_{}.jpg>
 
 =head1 EXAMPLE: Rewriting a for-loop and a while-loop
 
@@ -1124,7 +1126,7 @@ B<cat list | parallel do_something | process_output>
 If the processing requires more steps the for-loop like this:
 
  (for x in `cat list` ; do
-   no_extension=${x%.png};
+   no_extension=${x%.*};
    do_something $x scale $no_extension.jpg
    do_step2 <$x $no_extension
  done) | process_output
@@ -1132,7 +1134,7 @@ If the processing requires more steps the for-loop like this:
 and while-loops like this:
 
  cat list | (while read x ; do
-   no_extension=${x%.png};
+   no_extension=${x%.*};
    do_something $x scale $no_extension.jpg
    do_step2 <$x $no_extension
  done) | process_output
@@ -2547,7 +2549,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 201011002;
+    $Global::version = 201011133;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -2730,27 +2732,25 @@ sub read_options {
     #   @ARGV without --options
     # This must be done first as this may exec myself
     if(defined $ARGV[0] and ($ARGV[0]=~/^-Y/ or $ARGV[0]=~/^--shebang / or
-       $ARGV[0]=~/^--hashbang /)) {
+			     $ARGV[0]=~/^--hashbang /)) {
 	# Program is called from #! line in script
-	$ARGV[0]=~s/^-Y //; # remove -Y if on its own
+	$ARGV[0]=~s/^-Y( |$)//; # remove -Y if on its own
 	$ARGV[0]=~s/^-Y/-/; # remove -Y if bundled with other options
-	$ARGV[0]=~s/^--shebang //; # remove --shebang if it is set
-	$ARGV[0]=~s/^--hashbang //; # remove --hashbang if it is set
+	$ARGV[0]=~s/^--shebang *//; # remove --shebang if it is set
+	$ARGV[0]=~s/^--hashbang *//; # remove --hashbang if it is set
 	my $argfile = pop @ARGV;
-	# exec myself to split @ARGV into separate fields
+	# exec myself to split $ARGV[0] into separate fields
 	exec "$0 --skip-first-line -a $argfile @ARGV";
     }
 
-    Getopt::Long::Configure ("bundling","require_order");
-    # First check if there is a --profile to set $::opt_profile
-    my @ARGV_copy = @ARGV;
-    get_options_from_array (\@ARGV_copy) || die_usage();
+    Getopt::Long::Configure("bundling","pass_through");
+    # Check if there is a --profile to set $::opt_profile
+    GetOptions("profile|J=s" => \$::opt_profile) || die_usage();
     # Add options from .parallel/config and other profiles
     my @ARGV_profile = ();
     my @ARGV_env = ();
-
     my @config_profiles = ($ENV{'HOME'}."/.parallel/config",
-		    $ENV{'HOME'}."/.parallelrc");
+			   $ENV{'HOME'}."/.parallelrc");
     my @profiles = @config_profiles;
     if($::opt_profile) {
 	# --profile overrides default profiles
@@ -2774,6 +2774,7 @@ sub read_options {
 	    }
 	}
     }
+    Getopt::Long::Configure("bundling","require_order");
     get_options_from_array(\@ARGV_profile) || die_usage();
     # Add options from shell variable $PARALLEL
     $ENV{'PARALLEL'} and @ARGV_env = shell_unquote(split/(?<![\\])\s/, $ENV{'PARALLEL'});
@@ -3812,7 +3813,7 @@ sub drain_job_queue {
     }
     my $last_header="";
     while($Global::total_running > 0) {
-	debug("jobs running: $Global::total_running Memory usage:".my_memory_usage()."\n");
+	debug("jobs running: ",$Global::total_running," Memory usage:".my_memory_usage()."\n");
 	sleep 1;
 	reaper(); # Some systems fail to catch the SIGCHLD
 	if($::opt_progress) {
@@ -4949,7 +4950,7 @@ sub my_memory_usage {
 
 	my @procinfo = split(/\s+/,$data);
 
-	return $procinfo[22];
+	return undef_as_zero($procinfo[22]);
     } else {
 	return 0;
     }

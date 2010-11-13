@@ -1,0 +1,75 @@
+### Test $PARALLEL
+a
+b
+c
+a
+b
+c
+a
+b
+c
+echo 1 echo 2 a
+1 echo 2 a
+echo 1 echo 2 b
+1 echo 2 b
+echo 1 echo 2 c
+1 echo 2 c
+a
+b
+c
+echo 1 echo 2 a
+1 echo 2 a
+echo 1 echo 2 b
+1 echo 2 b
+echo 1 echo 2 c
+1 echo 2 c
+### Test ugly quoting from $PARALLEL
+perl -pe '$a=1; print$a' /dev/fd/63
+1a
+perl -pe '$a=1; print$a' /dev/fd/62
+1b
+perl -pe "\$a=1; print\$a" /bin/gunzip
+1#!/bin/bash
+1PATH=${GZIP_BINDIR-'/bin'}:$PATH
+1exec gzip -d "$@"
+### Test ugly quoting from profile file
+perl -pe '$a=1; print $a' /dev/fd/63
+1a
+perl -pe '$a=1; print $a' /dev/fd/62
+1b
+echo /bin/gunzip
+/bin/gunzip
+ssh parallel-server3 ssh parallel@parallel-server2 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; perl\ -pe\ \"\\\$a=1\;\ print\ \\\$a\"\ /bin/gunzip;
+1#!/bin/bash
+1PATH=${GZIP_BINDIR-'/bin'}:$PATH
+1exec gzip -d "$@"
+### Test quoting of $ in command from profile file
+perl -pe '$a=1; print $a' /bin/gunzip
+1#!/bin/bash
+1PATH=${GZIP_BINDIR-'/bin'}:$PATH
+1exec gzip -d "$@"
+### Test quoting of $ in command from $PARALLEL
+perl -pe "\$a=1; print \$a" /bin/gunzip
+1#!/bin/bash
+1PATH=${GZIP_BINDIR-'/bin'}:$PATH
+1exec gzip -d "$@"
+### Test quoting of space in arguments (-S) from profile file
+perl -pe '$a=1; print $a' /bin/gunzip
+1#!/bin/bash
+1PATH=${GZIP_BINDIR-'/bin'}:$PATH
+1exec gzip -d "$@"
+### Test quoting of space in arguments (-S) from $PARALLEL
+perl -pe "\$a=1; print \$a" /bin/gunzip
+1#!/bin/bash
+1PATH=${GZIP_BINDIR-'/bin'}:$PATH
+1exec gzip -d "$@"
+### Test quoting of space in long arguments (--sshlogin) from profile file
+perl -pe '$a=1; print $a' /bin/gunzip
+1#!/bin/bash
+1PATH=${GZIP_BINDIR-'/bin'}:$PATH
+1exec gzip -d "$@"
+### Test quoting of space in arguments (-S) from $PARALLEL
+perl -pe "\$a=1; print \$a" /bin/gunzip
+1#!/bin/bash
+1PATH=${GZIP_BINDIR-'/bin'}:$PATH
+1exec gzip -d "$@"

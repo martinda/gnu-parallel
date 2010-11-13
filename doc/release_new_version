@@ -24,9 +24,9 @@ autoreconf --install -W gnu
 ./configure
 make && sudo make install
 
-== Unittest ==
+== Testsuite ==
 
-cd unittest; make unittest
+cd testsuite; make
 
 == Update NEWS ==
 
@@ -119,7 +119,7 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>,
    Chris Howey <howeyc@gmail.com>, Fethican Coşkuner <fethicanc@gmail.com>,
    Rogério Brito <rbrito@ime.usp.br>, Jonathan Palardy <jonathan.palardy@gmail.com>,
-   Koen Vervloesem <koen@vervloesem.eu>,
+   Koen Vervloesem <koen@vervloesem.eu>, R. Tyler Croy <tyler@monkeypox.org>
 
 Subject: GNU Parallel 2010XXXX released
 
@@ -130,6 +130,23 @@ New in this release:
 
 * Using -j myfile the number of jobs can be changed while GNU Parallel
   is running simply by changing the content of myfile.
+
+* Implemented --profile to use different .parallel/config for
+  different situations.
+
+* Ugly newlines in $PARALLEL and .parallel/config are no longer
+  needed.  Instead you have to use \ in front of special shell
+  characters.
+
+* --workdir puts the files transferred to remote machines in a
+  specified directory.
+
+* $PARALLEL_PID is set to the process id of GNU Parallel.
+
+* $PARALLEL_SEQ is set to the sequence number of the job.
+
+* -v now only shows the command to run. Use -v -v to show the
+   ssh/rsync wrapping.
 
 * Slow spawning error is now only a warning.
 
@@ -162,16 +179,18 @@ New in this release:
   dot eu>:
   http://techworld.nl/technologie/33493/gebruik-al-je-processorkernen-met-gnu-parallel.html
 
-* 3500 views of the intro video:
+* Blog review thanks to R. Tyler Croy <tyler at monkeypox dot org>:
+  http://unethicalblogger.com/posts/2010/11/gnuparallel_changed_my_life
+
+* 5000 views of the intro video:
   http://www.youtube.com/watch?v=OpaiGYxkSuQ
 
 * As usual a bunch of bugfixes and more usage examples in the man
   page.
 
-Old in this release:
-
-* See GNU Parallel live at FSCONS 2010-11-07:
-  http://www.fscons.org/fs/gnu-parallel
+* GNU Parallel was presented at FSCONS 2010-11-07:
+  http://www.fscons.org/fs/gnu-parallel Hopefully the
+  video will be online soon.
 
 
 = About GNU Parallel =

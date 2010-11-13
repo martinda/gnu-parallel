@@ -156,6 +156,13 @@ echo line 1Nline 2Nline 3 | parallel -k --delimiter N echo This is
 printf "delimiter NUL line 1\0line 2\0line 3" | parallel -k -d '\0' echo
 printf "delimiter TAB line 1\tline 2\tline 3" | parallel -k --delimiter '\t' echo
 
+echo '### Hans found a bug giving unitialized variable'
+echo >/tmp/parallel_f1
+echo >/tmp/parallel_f2'
+'
+echo /tmp/parallel_f1 /tmp/parallel_f2 | stdout parallel -kv --delimiter ' ' gzip
+rm /tmp/parallel_f*
+
 echo '### Test --max-chars and -s: Max number of chars in a line'
 (echo line 1;echo line 1;echo line 2) | parallel -k --max-chars 25 -X echo
 (echo line 1;echo line 1;echo line 2) | parallel -k -s 25 -X echo
