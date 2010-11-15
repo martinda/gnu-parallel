@@ -65,6 +65,7 @@ cd /tmp
 wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
 tar xjvf parallel-$YYYYMMDD.tar.bz2
 cd parallel-$YYYYMMDD
+./configure
 make -j && sudo make -j install
 
 == Update OpenSUSE build system ==
@@ -103,6 +104,9 @@ http://freshmeat.net/projects/parallel/releases/new
 http://nd.gd/2j Watch the intro video http://nd.gd/0s
 
 https://savannah.gnu.org/news/?group=parallel
+
+cat twitters | parallel -j1 echo @{} You have earlier shown interest in GNU Parallel. \
+A new version is out: http://nd.gd/2j '|' ttytter
 
 == Send announce ==
 

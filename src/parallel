@@ -2466,7 +2466,7 @@ use Symbol qw(gensym);
 use IO::File;
 use POSIX qw(:sys_wait_h setsid);
 use File::Temp qw(tempfile tempdir);
-use Getopt::Long qw(GetOptionsFromArray);
+use Getopt::Long;
 use strict;
 
 do_not_reap();
@@ -2516,15 +2516,22 @@ sub acquire_semaphore {
 }
 
 sub get_options_from_array {
-    # Run GetOptionsFromArray on @array
+    # Run GetOptions on @array
     # Returns:
     #   true if parsing worked
     #   false if parsing failed
     #   @array is changed
     my $array_ref = shift;
-    return GetOptionsFromArray
-	($array_ref,
-	 "debug|D" => \$::opt_D,
+    # A bit of shuffling of @ARGV needed as GetOptionsFromArray is not
+    # supported everywhere
+    my @save_argv;
+    my $this_is_ARGV = (\@::ARGV == $array_ref);
+    if(not $this_is_ARGV) {
+	@save_argv = @::ARGV;
+	@::ARGV = @{$array_ref};
+    }
+    my @retval = GetOptions
+	("debug|D" => \$::opt_D,
 	 "xargs|m" => \$::opt_m,
 	 "X" => \$::opt_X,
 	 "v" => \@::opt_v,
@@ -2591,6 +2598,11 @@ sub get_options_from_array {
 	 "Y|shebang|hashbang" => \$::opt_shebang,
 	 "skip-first-line" => \$::opt_skip_first_line,
 	);
+    if(not $this_is_ARGV) {
+	@{$array_ref} = @::ARGV;
+	@::ARGV = @save_argv;
+    }
+    return @retval;
 }
 
 sub parse_options {
