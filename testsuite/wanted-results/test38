@@ -1,0 +1,4 @@
+### Test with old perl libs
+### See if we get compile error
+perl
+### See if we read modules outside perllib

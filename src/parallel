@@ -2608,7 +2608,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20101113;
+    $Global::version = 20101115;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
