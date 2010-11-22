@@ -1,0 +1,70 @@
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+done
+a
+a
+a1b1^c1[.}c
+### BUG: The length for -X is not close to max (131072)
+      1   12821  131060
+### BUG: empty lines with --show-limit
+Maximal size of command: 131071
+Maximal used size of command: 131071
+
+Execution of  will continue now, and it will try to read its input
+and run commands; if this is not what you wanted to happen, please
+press CTRL-D or CTRL-C
+### Test -N
+1 2 3
+4 5
+### Test --arg-file-sep with files of different lengths
+1 3
+4
+### Test respect -s
+echo 1 22 333
+1 22 333
+echo 4444
+4444
+echo 55555
+55555
+echo 666666
+666666
+echo 7777777
+7777777
+echo 88888888
+88888888
+echo 999999999
+999999999
+### Test eof string after :::
+foo
+### Test -C and --trim rl
+a_b_c_{4}
+a_b_c_d
+### Test empty input
+### Test -m
+1 2
+### Test :::
+1
+### Test context_replace
+'a' 
+### Test -N2 {2}
+arg1:1 seq:1 arg2:2
+arg1:3 seq:2 arg2:4
+### Test -E (should only output foo ole)
+foo ole 
+foo ole 
+### Test -r (should only output foo ole bar\nquux)
+foo ole bar
+quux
+### Test of tab as colsep
+abc def
+ghi jkl
+abc def
+ghi jkl

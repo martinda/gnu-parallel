@@ -14,7 +14,7 @@ stdout xargs -d o -n1 echo < helloworld.xi
 stdout parallel -k -d o -n1 echo < helloworld.xi
 echo '###  -E_ -0 echo < eof_-0.xi'
 stdout xargs -E_ -0 echo < eof_-0.xi
-stdout parallel -k -E_ -0 echo < eof_-0.xi
+stdout parallel -X -k -E_ -0 echo < eof_-0.xi
 echo '###  -i -0 echo from \{\} to x{}y < items-0.xi'
 stdout xargs -i -0 echo from \{\} to x{}y < items-0.xi
 stdout parallel -k -i -0 echo from \{\} to x{}y < items-0.xi
@@ -23,10 +23,10 @@ stdout xargs -i -s26 -0 echo from \{\} to x{}y < items-0.xi
 stdout parallel -k -i -s26 -0 echo from \{\} to x{}y < items-0.xi
 echo '###  -l -0 echo < ldata-0.xi'
 stdout xargs -l -0 echo < ldata-0.xi
-stdout parallel -k -l -0 echo < ldata-0.xi
+stdout parallel -l -k -0 echo < ldata-0.xi
 echo '###  -l -0 echo < ldatab-0.xi'
 stdout xargs -l -0 echo < ldatab-0.xi
-stdout parallel -k -l -0 echo < ldatab-0.xi
+stdout parallel -l -k -0 echo < ldatab-0.xi
 echo '###  -L2 -0 echo < ldata-0.xi'
 stdout xargs -L2 -0 echo < ldata-0.xi
 stdout parallel -k -L2 -0 echo < ldata-0.xi
@@ -64,19 +64,19 @@ stdout xargs -r echo this plus that < blank.xi
 stdout parallel -k -r echo this plus that < blank.xi
 echo '###  -0 -s118 echo < stairs-0.xi'
 stdout xargs -0 -s118 echo < stairs-0.xi
-stdout parallel -k -0 -s118 echo < stairs-0.xi
+stdout parallel -k -X -0 -s118 echo < stairs-0.xi
 echo '###  -0 -s19 echo < stairs-0.xi'
 stdout xargs -0 -s19 echo < stairs-0.xi
-stdout parallel -k -0 -s19 echo < stairs-0.xi
+stdout parallel -k -X -0 -s19 echo < stairs-0.xi
 echo '###  -0 -s19 echo < stairs2-0.xi'
 stdout xargs -0 -s19 echo < stairs2-0.xi
-stdout parallel -k -0 -s19 echo < stairs2-0.xi
+stdout parallel -k -X -0 -s19 echo < stairs2-0.xi
 echo '###  -0 -s20 echo < stairs-0.xi'
 stdout xargs -0 -s20 echo < stairs-0.xi
-stdout parallel -k -0 -s20 echo < stairs-0.xi
+stdout parallel -k -X -0 -s20 echo < stairs-0.xi
 echo '###  -0 -s30 echo < stairs-0.xi'
 stdout xargs -0 -s30 echo < stairs-0.xi
-stdout parallel -k -0 -s30 echo < stairs-0.xi
+stdout parallel -k -X -0 -s30 echo < stairs-0.xi
 echo '###  -0 echo this plus that < space.xi'
 stdout xargs -0 echo this plus that < space.xi
 stdout parallel -k -0 echo this plus that < space.xi
@@ -109,7 +109,7 @@ stdout xargs -E_ -IARG echo from ARG to xARGy < eof_.xi
 stdout parallel -k -E_ -IARG echo from ARG to xARGy < eof_.xi
 echo '###  -s470 echo hi there < files.xi'
 stdout xargs -s470 echo hi there < files.xi
-stdout parallel -k -s470 echo hi there < files.xi
+stdout parallel -k -s470 -X echo hi there < files.xi
 echo '###  -IARG echo from ARG to xARGy -E_ < eof_.xi'
 stdout xargs -IARG echo from ARG to xARGy -E_ < eof_.xi
 stdout parallel -k -IARG echo from ARG to xARGy -E_ < eof_.xi
@@ -118,7 +118,7 @@ stdout xargs -IARG echo from ARG to xARGy < items.xi
 stdout parallel -k -IARG echo from ARG to xARGy < items.xi
 echo '###  -IARG -s15 echo ARG < stairs.xi'
 stdout xargs -IARG -s15 echo ARG < stairs.xi
-stdout parallel -k -IARG -s15 echo ARG < stairs.xi
+stdout parallel -k -IARG -X -s15 echo ARG < stairs.xi
 echo '###  -L2 echo < ldatab.xi'
 stdout xargs -L2 echo < ldatab.xi
 stdout parallel -k -L2 echo < ldatab.xi
@@ -154,31 +154,31 @@ stdout xargs echo < quotes.xi
 stdout parallel -k echo < quotes.xi
 echo '###  -s118 echo < stairs.xi'
 stdout xargs -s118 echo < stairs.xi
-stdout parallel -k -s118 echo < stairs.xi
+stdout parallel -k -X -s118 echo < stairs.xi
 echo '###  -s19 echo < stairs2.xi'
 stdout xargs -s19 echo < stairs2.xi
-stdout parallel -k -s19 echo < stairs2.xi
+stdout parallel -k -X -s19 echo < stairs2.xi
 echo '###  -s19 echo < stairs.xi'
 stdout xargs -s19 echo < stairs.xi
-stdout parallel -k -s19 echo < stairs.xi
+stdout parallel -k -X -s19 echo < stairs.xi
 echo '###  -s20 echo < stairs.xi'
 stdout xargs -s20 echo < stairs.xi
-stdout parallel -k -s20 echo < stairs.xi
+stdout parallel -k -X -s20 echo < stairs.xi
 echo '###  -s30 echo < stairs.xi'
 stdout xargs -s30 echo < stairs.xi
-stdout parallel -k -s30 echo < stairs.xi
+stdout parallel -k -X -s30 echo < stairs.xi
 echo '###  -s470 echo < files.xi'
 stdout xargs -s470 echo < files.xi
-stdout parallel -k -s470 echo < files.xi
+stdout parallel -k -X -s470 echo < files.xi
 echo '###  -s47 echo < files.xi'
 stdout xargs -s47 echo < files.xi
-stdout parallel -k -s47 echo < files.xi
+stdout parallel -k -X -s47 echo < files.xi
 echo '###  -s48 echo < files.xi'
 stdout xargs -s48 echo < files.xi
-stdout parallel -k -s48 echo < files.xi
+stdout parallel -k -X -s48 echo < files.xi
 echo '###  -s6 echo < files.xi'
 stdout xargs -s6 echo < files.xi
-stdout parallel -k -s6 echo < files.xi
+stdout parallel -k -X -s6 echo < files.xi
 echo '###  -iARG -s86 echo ARG is xARGx < files.xi'
 stdout xargs -iARG -s86 echo ARG is xARGx < files.xi
 stdout parallel -k -iARG -s86 echo ARG is xARGx < files.xi
@@ -241,7 +241,7 @@ stdout xargs -l2 echo < files.xi
 stdout parallel -k -l2 echo < files.xi
 echo '###  -s30 -t echo < stairs.xi'
 stdout xargs -s30 -t echo < stairs.xi
-stdout parallel -k -s30 -t echo < stairs.xi
+stdout parallel -k -X -s30 -t echo < stairs.xi
 echo '###  -t echo this plus that < space.xi'
 stdout xargs -t echo this plus that < space.xi
 stdout parallel -k -t echo this plus that < space.xi

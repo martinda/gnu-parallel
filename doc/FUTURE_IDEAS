@@ -1,3 +1,10 @@
+parallel: Argument handling re-written to OO. 
+The code is quite messy, the implementation is fairly slow, but the
+structure seems sound and it passes the testsuite.
+basename {/} and {/.} implemented.
+Flushing of STDERR and STDOUT after each job completes.
+
+
 == Compare ==
 
 http://code.google.com/p/spawntool/
@@ -22,6 +29,10 @@ Only negative.
 Bug: {2} in --return
 parallel -N2 --workdir ... --cleanup --transfer --return {2}.2 -S .. -v echo {} ">{2}.2" ::: ./tmp/foo ./tmp/bar
 
+== load ==
+
+Include niceload
+Have an option to not spawn new tasks until load is below a limit computed like number of jobs.
 
 == SQL ==
 

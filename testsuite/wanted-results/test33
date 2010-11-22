@@ -1,7 +1,7 @@
 ### Test of -j filename
 Parsing of --jobs/-j/--max-procs/-P failed
 Usage:
-parallel [options] [command [arguments]] < list_of_arguments)
+parallel [options] [command [arguments]] < list_of_arguments
 parallel [options] [command [arguments]] ::: arguments
 parallel [options] [command [arguments]] :::: argfile(s)
 

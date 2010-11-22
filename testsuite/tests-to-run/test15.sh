@@ -68,18 +68,16 @@ perl -e 'print "z"x1000000' | parallel echo 2>&1
 perl -e 'print "z"x1000000' | xargs echo 2>&1
 (seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -km -s 10 echo
 (seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout xargs -s 10 echo
-(seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -k -s 10 echo
+(seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -kX -s 10 echo
 echo '### Test -x'
 (seq 1 10; echo 12345; seq 12 15) | stdout parallel -j1 -km -s 10 -x echo
-(seq 1 10; echo 12345; seq 12 15) | stdout parallel -j1 -k -s 10 -x echo
+(seq 1 10; echo 12345; seq 12 15) | stdout parallel -j1 -kX -s 10 -x echo
 (seq 1 10; echo 12345; seq 12 15) | stdout xargs -s 10 -x echo
 (seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -km -s 10 -x echo
-(seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -k -s 10 -x echo
+(seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -kX -s 10 -x echo
 (seq 1 10; echo 1234; seq 12 15) | stdout xargs -s 10 -x echo
-echo '### Test bugfix if no command given'
-(echo echo; seq 1 5; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -km -s 10
-
-
+#echo '### Test bugfix if no command given'
+#(echo echo; seq 1 5; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -km -s 10
 
 echo '### Test -a and --arg-file: Read input from file instead of stdin'
 seq 1 10 >/tmp/$$
@@ -185,4 +183,4 @@ echo '### Test --verbose and -t'
 
 echo '### Test --show-limits'
 (echo b; echo c; echo f) | parallel -k --show-limits echo {}ar
-(echo b; echo c; echo f) | parallel -k --show-limits -s 100 echo {}ar
+(echo b; echo c; echo f) | parallel -kX --show-limits -s 100 echo {}ar

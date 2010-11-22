@@ -78,8 +78,8 @@ xargs: argument line too long
 3 4
 5 6
 7 8
-Command line too long (1000007 >= 10) at number 1: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 9 10
+Command line too long (1000007 >= 10) at number 6: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 1 2
 3 4
 5 6
@@ -90,19 +90,21 @@ xargs: argument line too long
 3 4
 5 6
 7 8
-Command line too long (1000007 >= 10) at number 1: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 9 10
+Command line too long (1000007 >= 10) at number 6: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 ### Test -x
 1 2
 3 4
 5 6
-Command line too long (15 >= 10) at number 3: 12345...
 7 8
+9 10
+Command line too long (10 >= 10) at number 6: 12345...
 1 2
 3 4
 5 6
-Command line too long (15 >= 10) at number 3: 12345...
 7 8
+9 10
+Command line too long (10 >= 10) at number 6: 12345...
 1 2
 3 4
 5 6
@@ -138,9 +140,6 @@ xargs: argument line too long
 13
 14
 15
-### Test bugfix if no command given
-Command line too long (1000002 >= 10) at number 1: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
-1 2 3 4 5
 ### Test -a and --arg-file: Read input from file instead of stdin
 1
 2

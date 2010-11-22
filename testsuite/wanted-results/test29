@@ -6,7 +6,6 @@
 parallel: --trim must be one of: r l rl lr
 ### Test of eof string on :::
 foo
-ole
 ### Test of ignore-empty string on :::
 foo
 ole
@@ -18,10 +17,10 @@ foo ole bar
 quux
 foo ole bar
 quux
+### Test of trailing space continuation with -E eof
 foo ole
 foo ole 
-foo ole bar
-quux
+foo ole 
 ### Test of --colsep
 a b c
 a b c {4}
@@ -40,9 +39,7 @@ abc def
 ghi jkl
 ### Test of multiple -a plus colsep
 abc def
-ghi jkl
-mno
-pqr
+mno jkl
 ### Test of multiple -a no colsep
 abc	def ghi
 jkl	mno pqr

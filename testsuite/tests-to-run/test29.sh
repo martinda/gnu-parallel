@@ -19,6 +19,7 @@ echo '### Test of trailing space continuation'
 (echo foo; echo '';echo 'ole ';echo bar;echo quux) | xargs -r -L2 echo
 (echo foo; echo '';echo 'ole ';echo bar;echo quux) | parallel -kr -L2 echo
 parallel -kr -L2 echo ::: foo '' 'ole ' bar quux
+echo '### Test of trailing space continuation with -E eof'
 (echo foo; echo '';echo 'ole ';echo bar;echo quux) | xargs -r -L2 -E bar echo
 (echo foo; echo '';echo 'ole ';echo bar;echo quux) | parallel -kr -L2 -E bar echo
 parallel -kr -L2 -E bar echo ::: foo '' 'ole ' bar quux

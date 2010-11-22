@@ -25,8 +25,7 @@ hell
 rld
 ###  -E_ -0 echo < eof_-0.xi
 one two _ three four
-one
-two
+one two
 ###  -i -0 echo from \{\} to x{}y < items-0.xi
 from one to xoney
 from  	
@@ -71,7 +70,7 @@ y
 ###  -i -s26 -0 echo from \{\} to x{}y < items-0.xi
 xargs: argument list too long
 from one to xoney
-Command line too long (42 >= 26) at number 1: \ \\\	\'
+Command line too long (42 >= 26) at number 2: \ \\\	\'
 '...
 ###  -l -0 echo < ldata-0.xi
 1 22 333 4444
@@ -84,6 +83,14 @@ Command line too long (42 >= 26) at number 1: \ \\\	\'
 88888888
 999999999
 1 22 333 4444
+55555 666666
+7777777
+88888888
+999999999 1 22
+333 4444 55555
+666666 7777777
+88888888
+999999999
 ###  -l -0 echo < ldatab-0.xi
  	
 1 22 333 4444 
@@ -96,6 +103,12 @@ Command line too long (42 >= 26) at number 1: \ \\\	\'
 88888888
 999999999 
  	
+1 22 333 4444 55555 666666
+7777777 88888888 999999999 1 22
+333 4444 55555
+666666 7777777
+88888888
+999999999 
 ###  -L2 -0 echo < ldata-0.xi
 1 22 333 4444 55555 666666
 7777777 88888888
@@ -1075,6 +1088,6 @@ foo bar
 echo baz ugh 
 baz ugh
 echo foo\ bar baz\ 
-echo ugh
+echo ugh 
 foo bar baz 
 ugh
