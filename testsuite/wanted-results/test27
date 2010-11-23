@@ -70,8 +70,8 @@ y
 ###  -i -s26 -0 echo from \{\} to x{}y < items-0.xi
 xargs: argument list too long
 from one to xoney
-Command line too long (42 >= 26) at number 2: \ \\\	\'
-'...
+Command line too long (42 >= 26) at number 2:  	
+...
 ###  -l -0 echo < ldata-0.xi
 1 22 333 4444
 55555 666666
@@ -965,7 +965,7 @@ from: can't read /var/mail/{}
 ###  -i -s26 echo from \{\} to x{}y < items.xi
 xargs: argument list too long
 from dumb to xdumby
-Command line too long (36 >= 26) at number 1: \ \\\	\...
+Command line too long (36 >= 26) at number 1:  	...
 ###  -i__ echo FIRST __ IS OK < quotes.xi
 FIRST this is IS OK
 FIRST quoted 	stuff   IS OK

@@ -2494,25 +2494,9 @@ if($::opt_skip_first_line) {
     # Skip the first line for the first file handle
     my $fh = $fhlist[0];
     <$fh>;
-#    for my $fh (@fhlist) { 
-#	<$fh>; # Read first line and forget it
-#    }
 }
 
 $Global::CommandLineQueue = CommandLineQueue->new(join(" ",@ARGV),\@fhlist,$Global::Xargs,$number_of_args,\@Global::ret_files);
-#my $cmdline = $cmdqueue->get();
-#
-#my_dump($cmdline);
-#print "Replaced(",length $cmdline->replaced(),"):",$cmdline->replaced(),"\n";
-#print $cmdline->len(),"\n";
-#
-#while(not $cmdqueue->empty()) {
-#    my $cmdline = $cmdqueue->get();
-#    print "Replaced(",length $cmdline->replaced(),"):",$cmdline->replaced(),"\n";
-#    my_dump($cmdline);
-#    print $cmdline->len(),"\n";
-#}
-#exit;
 
 init_run_jobs();
 if(defined $::opt_P) {
@@ -2771,9 +2755,6 @@ sub parse_options {
 	# A semaphore does not take input from neither stdin nor file
 	@::opt_a = ("/dev/null");
 	push(@Global::unget_argv, [Arg->new("")]);
-	#$Global::argfile = open_or_exit("/dev/null");
-	#$Global::arg_queue ||= ArgQueue->new([$Global::argfile]);
-	#$Global::arg_queue->unget(Arg->new(""));
 	$Semaphore::timeout = $::opt_semaphoretimeout || 0;
 	if(defined $::opt_semaphorename) {
 	    $Semaphore::name = $::opt_semaphorename;
@@ -2903,15 +2884,15 @@ sub read_args_from_command_line {
 		   $arg eq $Global::end_of_file_string) {
 		    # Ignore the rest of ARGV
 		    @ARGV=();
-		    if($prepend) {
+		    if(defined $prepend) {
 			push(@Global::unget_argv, [Arg->new($prepend)]);
 			$Global::total_jobs++;
 		    }
 		    last;
 		}
-		if($prepend) {
+		if(defined $prepend) {
 		    $arg = $prepend.$arg; # For line continuation
-		    $prepend = ""; #undef;
+		    $prepend = undef; #undef;
 		}
 		if($Global::max_lines) {
 		    if($arg =~ /\s$/) {
@@ -3028,72 +3009,6 @@ sub cleanup {
 #
 
 
-#sub generate_command_line {
-#    # Returns:
-#    #   the full job line to run
-#    #   list of quoted arguments on that line
-#    my $command = shift;
-#    my ($job_line,$last_good);
-#    my ($quoted_args) =
-#	get_multiple_args($command,Limits::Command::max_length());
-#
-#    if(@$quoted_args) {
-#	$job_line = $command;
-#	die;
-#	$job_line = context_replace($command, @$quoted_args);
-#	debug("Return jobline(",length($job_line),"): !",$job_line,"!\n");
-#    }
-#    return ($job_line,$quoted_args);
-#}
-
-# sub get_multiple_args { 
-#     # Returns:
-#     #   \@quoted_args - empty if no more args
-#     my ($command,$max_length_of_command_line) = (@_);
-#     my ($next_arg,@args,$arg_length);
-#     my $number_of_args = 0;
-#     $Global::arg_queue ||= ArgQueue->new($Global::argfile);
-#     while (defined($next_arg = $Global::arg_queue->get())) {
-# 	push (@args, $next_arg);
-# 	::debug("Next '$next_arg'\n");
-# 	$number_of_args++;
-# 
-# 	# Emulate xargs if there is a command and -x or -X is set
-# 	my $next_arg_len = 1;
-# 
-# 	my $job_line = context_replace($command, @args);
-# 	my $job_line_length = length $job_line;
-# 	    
-# 	if($job_line_length >= $max_length_of_command_line) {
-# 	    $Global::arg_queue ||= ArgQueue->new($Global::argfile);
-# 	    $Global::arg_queue->unget(pop @args);
-# 	    if($::opt_x and $number_of_args == 1 and 
-# 	       $job_line_length >= $max_length_of_command_line) {
-# 		# To be compatible with xargs -x
-# 	    }
-# 	    if(defined $args[0]) {
-# 		last;
-# 	    } else {
-# 		print STDERR ("Command line too long ($job_line_length >= "
-# 			      . $max_length_of_command_line .
-# 			      ") at number $number_of_args: ".
-# 			      (substr($next_arg,0,50))."...\n");
-# 		wait_and_exit(255);
-# 	    }
-# 	}
-# 	if($Global::max_number_of_args and
-# 	   $number_of_args >= $Global::max_number_of_args) {
-# 	    last;
-# 	}
-# 	if(not $Global::xargs and not $Global::Xargs) {
-# 	    # No xargs-mode: Just one argument per line
-# 	    last;
-# 	}
-#     }
-#     return (\@args);
-# }
-
-
 sub shell_quote {
     # Quote the string so shell will not expand any special chars
     # Returns:
@@ -3101,8 +3016,10 @@ sub shell_quote {
     my (@strings) = (@_);
     my $arg;
     for $arg (@strings) {
+	if($::oodebug and not defined $arg) {
+	    Carp::cluck($arg);
+	}
 	$arg =~ s/\\/\\\\/g;
-	
 	$arg =~ s/([\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
 	$arg =~ s/([\002-\011\013-\032])/\\$1/g;
 	$arg =~ s/([\n])/'\n'/g; # filenames with '\n' is quoted using \'
@@ -3110,6 +3027,13 @@ sub shell_quote {
     return wantarray ? @strings : "@strings";
 }
 
+sub shell_quote_scalar {
+    # Shell quote a scalar
+    my $a = shift;
+    $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
+    $a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
+    return $a;
+}
 
 sub shell_unquote {
     # Unquote strings from shell_quote
@@ -3125,60 +3049,6 @@ sub shell_unquote {
     }
     return wantarray ? @strings : "@strings";
 }
-
-
-# sub context_replace {
-#     return replace(1,@_);
-# }
-# 
-# sub replace {
-#     # Replace foo{...}bar
-#     # Returns:
-#     #   jobline with {...} expanded to the relevant args
-#     # $job_line, @args
-#     # Create replacement matrix:
-#     # $replace{n}{"{}"} = replacement of {} for arg n
-#     # $replace{-1}{"{n}"} = replacement of {n}
-#     my($context_replace, $job_line, @args) = (@_);
-#     my $context_regexp = $context_replace ? '\S*' : ''; # Regexp to match surrounding context
-#     my %replace;
-#     my %replace_single;
-#     my %replace_multi;
-#     die;
-#     for my $n (0 .. $#args) {
-# 	my $m = $n+1; 
-# 	$replace{'{}'} = $args[$n]->orig();  # {}
-# 	$replace{'{.}'} = $args[$n]->no_extension(); # {.}
-# 	$replace{'{/}'} = $args[$n]->basename(); # {/}
-# 	$replace{'{/.}'} = $args[$n]->basename_no_extension(); # {/.}
-# 	$replace_single{"{$m}"} = $replace{'{}'}; # {2}
-# 	$replace_single{"{$m.}"} = $replace{'{.}'}; # {2.}
-# 	$replace_single{"{$m/}"} = $replace{'{/}'}; # {2/}
-# 	$replace_single{"{$m/.}"} = $replace{'{/.}'}; # {2/.}
-# 	push(@{$replace_multi{$Global::replace{"{}"}}}, $replace{'{}'}); # {}
-# 	push(@{$replace_multi{$Global::replace{"{.}"}}}, $replace{'{.}'}); # {.}
-# 	push(@{$replace_multi{$Global::replace{"{/}"}}}, $replace{'{/}'}); # {/}
-# 	push(@{$replace_multi{$Global::replace{"{/.}"}}}, $replace{'{/.}'}); # {/.}
-#     }
-#     my $single_regexp = join('|', map {$_=~s/(\W)/\\$1/g; $_} sort keys %replace_single);
-#     my $replacements = 0;
-#     die;
-#     $replacements += ($job_line =~ s/($single_regexp)/$replace_single{$1}/ge);
-#     my $multi_regexp = join('|', map {$_=~s/(\W)/\\$1/g; $_} sort keys %replace_multi);
-#     $replacements += ($job_line =~ s/($context_regexp)($multi_regexp)($context_regexp)/
-# 		      join(" ",map {$1.$_.$3} @{$replace_multi{$2}})/gex);
-#     die;
-#     if(not $replacements) {
-# 	# no {...} in line. Add one and replace that
-# 	$job_line .=" {}";
-# 	$replacements += ($job_line =~ s/($context_regexp)($multi_regexp)($context_regexp)/
-# 			  join(" ",map {$1.$_.$3} @{$replace_multi{$2}})/gex);
-# 	if(not $replacements) {
-# 	    warn("No replacements. This should not happen");
-# 	}
-#     }
-#     return $job_line;
-# }
 
 sub __NUMBER_OF_PROCESSES_FILEHANDLES_MAX_LENGTH_OF_COMMAND_LINE__ {}
 
@@ -4378,7 +4248,7 @@ sub sshtransferreturn {
     #   ssh comands needed to transfer file to/from sshlogin
     my ($sshlogin,$file,$transfer,$removesource) = (@_);
     my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
-    my $rsync_opt = "-rlDzRE -e".shell_quote($sshcmd);
+    my $rsync_opt = "-rlDzRE -e".shell_quote_scalar($sshcmd);
     $file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
     $file =~ s:^\./::g; # Remove ./ if any
     my $relpath = ($file !~ m:^/:); # Is the path relative?
@@ -4417,7 +4287,7 @@ sub sshtransferreturn {
 	    # Abs path: rsync -rlDzRE server:/home/tange/dir/subdir/file.gz /
 	    # Rel path: rsync -rlDzRE server:./subsir/file.gz ./
 	    push(@cmd, "rsync $rsync_opt $remove $serverlogin:".
-		shell_quote($replaced) . " ".$rsync_destdir);
+		shell_quote_scalar($replaced) . " ".$rsync_destdir);
 	#}
 	return join(";",@cmd);
     }
@@ -4431,14 +4301,14 @@ sub setup_basefile {
     for my $sshlogin (keys %Global::host) {
 	if($sshlogin eq ":") { next }
 	my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
-	my $rsync_opt = "-rlDzR -e".shell_quote($sshcmd);
+	my $rsync_opt = "-rlDzR -e".shell_quote_scalar($sshcmd);
 	for my $file (@::opt_basefile) {
 	    my $f = $file;
 	    my $relpath = ($f !~ m:^/:); # Is the path relative?
 	    # Use different subdirs depending on abs or rel path
 	    my $rsync_destdir = ($relpath ? "./" : "/");
 	    $f =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
-	    $f = shell_quote($f);
+	    $f = shell_quote_scalar($f);
 	    $cmd .= "rsync $rsync_opt $f $serverlogin:$rsync_destdir &";
 	}
     }
@@ -4455,7 +4325,7 @@ sub cleanup_basefile {
 	if($sshlogin eq ":") { next }
 	my ($sshcmd,$serverlogin) = sshcommand_of_sshlogin($sshlogin);
 	for my $file (@::opt_basefile) {
-	    $cmd .= "$sshcmd $serverlogin rm -f ".shell_quote(shell_quote($file))."&";
+	    $cmd .= "$sshcmd $serverlogin rm -f ".shell_quote_scalar(shell_quote_scalar($file))."&";
 	}
     }
     $cmd .= "wait;";
@@ -4736,6 +4606,11 @@ sub my_dump {
 ##### OO Parts below
 ###
 
+package JobSlot;
+
+
+
+
 package CommandLine;
 
 sub new {
@@ -4753,8 +4628,8 @@ sub new {
 	'no_args' => undef, # Length of command with all replacement args removed
 	'context' => undef, # Length of context of an additional arg
     };
-    my($sum,%count);
-    ($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},%count) =
+    my($sum,%replacecount);
+    ($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},%replacecount) =
 	number_of_replacements($command,$context_replace);
     if($sum == 0) {
 	if($command eq "") {
@@ -4763,8 +4638,18 @@ sub new {
 	    $command .=" ".$Global::replace{'{}'}; # Add {} to the command if there are no {...}'s
         }
     }
-    ($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},%count) =
+    ($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},%replacecount) =
 	number_of_replacements($command,$context_replace);
+    my %positional_replace;
+    my %multi_replace;
+    for my $used (keys %replacecount) {
+	if($used =~ /^{(\d+)(\D*)}$/) {
+	    $positional_replace{$1} = '{'.$2.'}';
+	} else {
+	    $multi_replace{$used} = $used;
+	}
+    }
+
 #    if(not $max_number_of_args) {
 #	$max_number_of_args = 2**31; # As many as possible (-X or -m)
 #    }
@@ -4774,9 +4659,11 @@ sub new {
 	'arg_list' => [],
 	'arg_queue' => $arg_queue,
 	'max_number_of_args' => $max_number_of_args,
-	'replacecount' => \%count,
+	'replacecount' => \%replacecount,
 	'context_replace' => $context_replace,
 	'return_files' => $return_files,
+	'positional_replace' => \%positional_replace,
+	'multi_replace' => \%multi_replace,
     }, ref($class) || $class;
 }
 
@@ -4832,29 +4719,24 @@ sub populate {
 sub push {
     # Add one or more records as arguments
     my $self = shift;
-    for my $record (@_) {
-	push @{$self->{'arg_list'}}, $record;
-	#::my_dump($record);
-	my $arg_no = ($self->number_of_args()-1) * ($#$record+1);
-	
-	for my $arg (@$record) {
-	    $arg_no++;
-	    if(defined $arg) {
+    my $record = shift;
+    push @{$self->{'arg_list'}}, $record;
+    #::my_dump($record);
+    my $arg_no = ($self->number_of_args()-1) * ($#$record+1);
+    
+    for my $arg (@$record) {
+	$arg_no++;
+	if(defined $arg) {
+	    if($self->{'positional_replace'}{$arg_no}) {
 		for my $used (keys %{$self->{'replacecount'}}) {
-		    if($used =~ /^{(\d+)(\D*)}$/) {
-			my $positional = $1; # number if any
-			my $replacementfunction = "{".::undef_as_empty($2)."}"; # {} {/} {.} or {/.}
-			# Find the single replacements
-			if($arg_no == $positional) {
-			    $self->{'len'}{$used} += length $arg->replace($replacementfunction);
-			}
-		    } elsif($used =~ /^{(\D*)}$/) {
-			# Add to the multireplacement
-			$self->{'len'}{$used} += length $arg->replace($used);
-		    } else {
-			die;
-		    }
+		    my $replacementfunction = $self->{'positional_replace'}{$arg_no}; # {} {/} {.} or {/.}
+		    # Find the single replacements
+		    $self->{'len'}{$used} += length $arg->replace($replacementfunction);
 		}
+	    }
+	    for my $used (keys %{$self->{'multi_replace'}}) {
+		# Add to the multireplacement
+		$self->{'len'}{$used} += length $arg->replace($used);
 	    }
 	}
     }
@@ -4866,10 +4748,9 @@ sub pop {
     my $record = pop @{$self->{'arg_list'}};
     for my $arg (@$record) {
 	if(defined $arg) {
-	    $self->{'len'}{'{}'} -= length $arg->orig();
-	    $self->{'len'}{'{/}'} -= length $arg->basename();
-	    $self->{'len'}{'{.}'} -= length $arg->no_extension();
-	    $self->{'len'}{'{/.}'} -= length $arg->basename_no_extension();
+	    for my $replacement_string qw(keys %{$self->{'replacecount'}}) {
+		$self->{'len'}{$replacement_string} -= length $arg->replace($replacement_string);
+	    }
 	}
     }
     return $record;
@@ -4895,25 +4776,6 @@ sub len {
 	    }
 	}
 	$len += ($self->number_of_args()-1) * $self->{'len'}{'contextgroups'};
-
-#	# One space between two args
-#	$len += $self->number_of_args()-1;
-#	# The context is repeated for each arg
-#	$len += $self->number_of_args() * $self->{'len'}{'context'};
-#	# A context group inserts a space
-#	$len += $self->number_of_args() * ($self->{'len'}{'contextgroups'} -1);
-#	$len += -$self->{'len'}{'contextgroups'}+1;
-#	# Each replacement string may occur several times
-#	# Add the length for each time
-#	for my $replstring (keys %{$self->{'replacecount'}}) {
-#	    if(defined $self->{'len'}{$replstring}) {
-#		$len += $self->{'len'}{$replstring} * $self->{'replacecount'}{$replstring};
-#		$len -= length $Global::replace{$replstring};
-#	    }
-#
-#	}
-#	$len+= $self->number_of_args() +1;
-#	::my_dump($self);
     } else {
 	# Each replacement string may occur several times
 	# Add the length for each time
@@ -5018,7 +4880,7 @@ sub sshlogin_wrap {
 	$pre .= $self->sshtransfer($sshlogin);
 
 	for my $file ($self->cleanup()) {
-	    $cleanup .= ::sshcleanup($sshlogin,$file).";";
+	    $cleanup .= ::sshcleanup($sshlogin,::shell_quote_scalar($file)).";";
 	}
 	for my $file ($self->return()) {
 	    $post .= ::sshreturn($sshlogin,$file).";";
@@ -5031,11 +4893,12 @@ sub sshlogin_wrap {
 	my $parallel_env = 'PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;'.
 	    'PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\;';
 	if($::opt_workdir) {
-	    return ($pre . "$sshcmd $serverlogin $parallel_env ".::shell_quote("cd ".::workdir()." && ")
-		    .::shell_quote($next_command_line).";".$post,$clean_command);
+	    return ($pre . "$sshcmd $serverlogin $parallel_env "
+		    . ::shell_quote_scalar("cd ".::workdir()." && ")
+		    . ::shell_quote_scalar($next_command_line).";".$post,$clean_command);
 	} else {
 	    return ($pre . "$sshcmd $serverlogin $parallel_env "
-		    .::shell_quote($next_command_line).";".$post,$clean_command);
+		    .::shell_quote_scalar($next_command_line).";".$post,$clean_command);
 	}
     } else {
 	return ($next_command_line,$clean_command);
@@ -5062,7 +4925,7 @@ sub sshtransfer {
     my $sshlogin = shift;
     my $pre = "";
     for my $file ($self->transfer()) {
-	$pre .= ::sshtransferreturn($sshlogin,$file,1,0).";";
+	$pre .= ::sshtransferreturn($sshlogin,::shell_quote_scalar($file),1,0).";";
     }
     return $pre;
 }
@@ -5106,7 +4969,7 @@ sub replaced {
     }
     if($::oodebug and length($self->{'replaced'}) != ($self->len())) {
 	::my_dump($self);
-	Carp::cluck("replaced len=".length($self->{'replaced'})." computed=".($self->len())."\n");
+	Carp::cluck("replaced len=".length($self->{'replaced'})." computed=".($self->len()));
     }
     return $self->{'replaced'};
 }
@@ -5161,35 +5024,6 @@ sub replace_placeholders {
 	}
     }
 
-#    for my $n (0 .. $#args) {
-#	my $m = $n+1; 
-#	$replace{'{}'} = $args[$n]->replace('{}');
-#	$replace{'{.}'} = $args[$n]->replace('{.}');
-#	$replace{'{/}'} = $args[$n]->replace('{/}');
-#	$replace{'{/.}'} = $args[$n]->replace('{/.}');
-#	$replace_single{"{$m}"} = $replace{'{}'}; # {2}
-#	$replace_single{"{$m.}"} = $replace{'{.}'}; # {2.}
-#	$replace_single{"{$m/}"} = $replace{'{/}'}; # {2/}
-#	$replace_single{"{$m/.}"} = $replace{'{/.}'}; # {2/.}
-#
-#	CORE::push(@{$replace_multi{"{.}"}}, $replace{'{.}'}); # {.}
-#	CORE::push(@{$replace_multi{"{/}"}}, $replace{'{/}'}); # {/}
-#	CORE::push(@{$replace_multi{"{/.}"}}, $replace{'{/.}'}); # {/.}
-#	$replace_context[$n]{"{}"} = $replace{'{}'}; # {}
-#	$replace_context[$n]{"{.}"} = $replace{'{.}'}; # {.}
-#	$replace_context[$n]{"{/}"} = $replace{'{/}'}; # {/}
-#	$replace_context[$n]{"{/.}"} = $replace{'{/.}'}; # {/.}
-#    }
-    #::my_dump(%replace_single);
-    # Time: 0.146  0.392
-    # Time: 0.066  0.392
-    # Time: 0.046  0.372
-    # Time: 0.096  0.372
-    # Time: 0.066  0.402
-#    my $single_regexp = join('|', map {	$_=~s/(\W)/\\$1/g; $_} sort keys %replace_single);
-    # Time: 0.214  0.598
-    # Time: 0.204  0.538
-    # Time: 0.234  0.568
     my $replacements = 0;
     if(%replace_single) {
 	my $single_regexp = join('|', map {	$_=~s/(\W)/\\$1/g; $_} sort keys %replace_single);
@@ -5226,14 +5060,6 @@ sub replace_placeholders {
 	my $regexp=join("|",@k);
 	$orig_target =~s/($regexp)/$wordargs{$1}/g;
     }
-
-
-#    ::my_dump(@args);
-#    ::my_dump(@replace_context);
-#    ::my_dump($multi_regexp);
-#    ::my_dump($target);
-
-
     return $orig_target;
 }
 
@@ -5272,17 +5098,13 @@ sub get {
 	return ($cmd_line);
     } else {
 	my ($cmd_line);
-#	do {
-	    $cmd_line = CommandLine->new($self->{'command'},
-					 $self->{'arg_queue'},
-					 $self->{'context_replace'},
-					 $self->{'max_number_of_args'},
-					 $self->{'return_files'},
-		);
+	$cmd_line = CommandLine->new($self->{'command'},
+				     $self->{'arg_queue'},
+				     $self->{'context_replace'},
+				     $self->{'max_number_of_args'},
+				     $self->{'return_files'},
+	    );
 	$cmd_line->populate();
-#	::my_dump($cmd_line);
-#        } while (defined $cmd_line and $cmd_line =~ /^\s*$/); # Skip empty lines
-#        } while (defined $cmd_line); # Skip empty lines
 	::debug("cmd_line->number_of_args ".$cmd_line->number_of_args()."\n");
 	if($cmd_line->number_of_args() == 0) {
 	    # We did not get more args - maybe at EOF string?
@@ -5322,25 +5144,6 @@ sub size {
     }
     return $self->{'size'};
 }
-
-#sub generate_command_line {
-#    # Returns:
-#    #   the full job line to run
-#    #   list of quoted arguments on that line
-#    my $self = shift;
-#    my $command = $self->{'command'};
-#    my ($job_line,$last_good);
-#    my ($quoted_args) =
-#	::get_multiple_args($command,Limits::Command::max_length());
-#
-#    if(@$quoted_args) {
-#	$job_line = $command;
-#
-#	$job_line = ::context_replace($command, @$quoted_args);
-#	::debug("Return jobline(",length($job_line),"): !",$job_line,"!\n");
-#    }
-#    return ($job_line,$quoted_args);
-#}
 
 package Limits::Command;
 
@@ -5440,19 +5243,11 @@ sub new {
 
 sub get {
     my $self = shift;
-    my $arg;
     if(@{$self->{'unget'}}) {
-	$arg = shift @{$self->{'unget'}};
-	::debug("RecordQueue-get from unget $arg\n");
-	return $arg;
+	return shift @{$self->{'unget'}};
     }
-    if($::oodebug and $self->empty()) {
-	Carp::croak("RecordQueue->get should never be called if empty");
-    }
-    $arg = $self->{'arg_sub_queue'}->get();
-    ::debug("RecordQueue-get ".::undef_as_empty($arg)."\n");
     $self->{'arg_number'}++;
-    return $arg;
+    return $self->{'arg_sub_queue'}->get();
 }
 
 sub unget {
@@ -5502,7 +5297,7 @@ sub get {
 	my @out_record = ();
 	for my $arg (@$in_record) {
 	    ::debug("RecordColQueue::arg $arg\n");
-	    my $line = ::shell_unquote($arg->orig());
+	    my $line = $arg->orig();
 	    ::debug("line='$line'\n");
 	    if($line ne "") {
 		for my $s (split /$::opt_colsep/o, $line) {
@@ -5511,6 +5306,7 @@ sub get {
 	    } else {
 		push @out_record, Arg->new("");
 	    }
+	    
 	}
 	return \@out_record;
     } else {
@@ -5540,86 +5336,81 @@ package MultifileQueue;
 sub new {
     my $class = shift;
     my $fhs = shift;
-    my @unget = ();
     for my $fh (@$fhs) {
 	if(-t $fh) {
 	    print STDERR "$Global::progname: Input is tty. Press CTRL-D to exit.\n";
 	}
     }
     return bless {
-	'unget' => \@unget,
+	'unget' => \@Global::unget_argv,
 	'fhs' => $fhs,
     }, ref($class) || $class;
 }
 
 sub get {
     my $self = shift;
-    if(@Global::unget_argv) {
-        return shift @Global::unget_argv;
-    } else {
-	if(@{$self->{'unget'}}) {
-	    return shift @{$self->{'unget'}};
-	}
-	my @record = ();
-	my $prepend = undef;
-	my $empty = 1;
-	for my $fh (@{$self->{'fhs'}}) {
-	    ::debug("Reading $fh\n");
-	    if(eof($fh)) {
-		if(defined $prepend) {
-		    push @record, Arg->new($prepend);
-		    $empty = 0;
-		} else {
-#		    push @record, undef;
-		    push @record, Arg->new($prepend);
-		}
-		next;
-	    }
-	    my $arg = <$fh>;
-	    # Remove delimiter
-	    $arg =~ s:$/$::;
-	    if($Global::end_of_file_string and
-	       $arg eq $Global::end_of_file_string) {
-		# Ignore the rest of input file
-		while (<$fh>) {}
-		::debug("EOF-string $arg\n");
-		if(defined $prepend) {
-		    push @record, Arg->new($prepend);
-		    $empty = 0;
-		} else {
-#		    push @record, undef;
-		    push @record, Arg->new($prepend);
-		}
-		::debug("Is empty? $empty");
-		next;
-	    }
+    if(@{$self->{'unget'}}) {
+	return shift @{$self->{'unget'}};
+    }
+    my @record = ();
+    my $prepend = undef;
+    my $empty = 1;
+    for my $fh (@{$self->{'fhs'}}) {
+#	    ::debug("Reading $fh\n");
+	if(eof($fh)) {
 	    if(defined $prepend) {
-		$arg = $prepend.$arg; # For line continuation
-		$prepend = undef; #undef;
+		push @record, Arg->new($prepend);
+		$empty = 0;
+	    } else {
+#		    push @record, undef;
+		push @record, Arg->new($prepend||"");
 	    }
-	    if($Global::ignore_empty) {
-		if($arg =~ /^\s*$/) {
-		    redo; # Try the next line
-		}
-	    }
-	    if($Global::max_lines) {
-		if($arg =~ /\s$/) {
-		    # Trailing space => continued on next line
-		    $prepend = $arg;
-		    redo;
-		}
-	    }
-	    ::debug("ArgLineQueue->get '",$arg,"'\n");
-	    push @record, Arg->new($arg);
-	    $empty = 0;
+	    next;
 	}
-	if($empty) {
-	    ::debug("Return undef");
-	    return undef;
-	} else {
-	    ::debug("return [@record]");
-	    return [@record];
+	my $arg = <$fh>;
+	# Remove delimiter
+	$arg =~ s:$/$::;
+	if($Global::end_of_file_string and
+	   $arg eq $Global::end_of_file_string) {
+	    # Ignore the rest of input file
+	    while (<$fh>) {}
+	    ::debug("EOF-string $arg\n");
+	    if(defined $prepend) {
+		push @record, Arg->new($prepend);
+		$empty = 0;
+	    } else {
+#		    push @record, undef;
+		push @record, Arg->new($prepend);
+	    }
+	    ::debug("Is empty? $empty");
+	    next;
 	}
+	if(defined $prepend) {
+	    $arg = $prepend.$arg; # For line continuation
+	    $prepend = undef; #undef;
+	}
+	if($Global::ignore_empty) {
+	    if($arg =~ /^\s*$/) {
+		redo; # Try the next line
+	    }
+	}
+	if($Global::max_lines) {
+	    if($arg =~ /\s$/) {
+		# Trailing space => continued on next line
+		$prepend = $arg;
+		redo;
+	    }
+	}
+#	    ::debug("ArgLineQueue->get '",$arg,"'\n");
+	push @record, Arg->new($arg);
+	$empty = 0;
+    }
+    if($empty) {
+#	    ::debug("Return undef");
+	return undef;
+    } else {
+#	    ::debug("return [@record]");
+	return \@record;
     }
 }
 
@@ -5640,187 +5431,50 @@ sub empty {
     return $empty;
 }
 
-
-#package _ArgQueue;
-#
-#sub new {
-#    my $class = shift;
-#    my $fhs = shift;
-#    my @unget = ();
-#    my $arg_sub_queue;
-#    if($::opt_colsep) {
-#	# Open one file with colsep
-#	$arg_sub_queue->[0] = ArgColQueue->new($fhs->[0]);
-#    } else {
-#	# Open one or more files if multiple -a
-#	my $sub_queue_no = 0;
-#	for my $fh (@{$fhs}) {
-#	    $arg_sub_queue->[$sub_queue_no] = ArgNoColQueue->new($fh);
-#	}
-#    }
-#    return bless {
-#	'unget' => \@unget,
-#	'arg_number' => 0,
-#	'arg_sub_queue' => $arg_sub_queue,
-#    }, ref($class) || $class;
-#}
-#
-#sub get {
-#    my $self = shift;
-#    my $arg;
-#    if(@{$self->{'unget'}}) {
-#	$arg = shift @{$self->{'unget'}};
-#	::debug("ArgQueue-get from unget $arg\n");
-#	$self->{'arg_number'}++;
-#	return $arg;
-#    }
-#    # Read from the filehandles in round robin in case there is more than one
-#    my $sub_queue_no = $self->{'arg_number'} % ($#{$self->{'arg_sub_queue'}}+1);
-#    $arg = $self->{'arg_sub_queue'}->[$sub_queue_no]->get();
-#    ::debug("ArgQueue-get ".::undef_as_empty($arg)."\n");
-#    $self->{'arg_number'}++;
-#    return $arg;
-#}
-#
-#sub unget {
-#    my $self = shift;
-#    ::debug("ArgQueue-unget '@_'\n");
-#    unshift @{$self->{'unget'}}, @_;
-#    $self->{'arg_number'}--;
-#}
-#
-#sub arg_number {
-#    my $self = shift;
-#    return $self->{'arg_number'};
-#}
-#
-#sub empty {
-#    my $self = shift;
-#    my $empty = not @{$self->{'unget'}};
-#    for my $sub_queues (@{$self->{'arg_sub_queue'}}) {
-#	$empty &&= $sub_queues->empty();
-#    }
-#    ::debug("ArgQueue->empty $empty\n");
-#    return $empty;
-#}
-
 package Arg;
 
 sub new {
     my $class = shift;
     my $orig = shift;
-    ::debug("Arg->new '",$orig,"'\n");
-    if($Global::trim) {
-	$orig = trim_of($orig);
+    if($::oodebug and not defined $orig) {
+	Carp::cluck($orig);
     }
-    $orig =~ m:^(.*/)?([^/]*?)(\.[^/.]*)?$: or 
-	Carp::croak($orig." does not match an argument. File a bug report");
-    my $p1 = ::undef_as_empty($1);
-    my $p2 = ::undef_as_empty($2);
-    my $p3 = ::undef_as_empty($3);
     return bless {
 	'orig' => $orig,
-	'basename' => undef, #$p2.$p3, Problem if quoted or not
-	'no_extension' => undef, #$p1.$p2,
-	'basename_no_extension' => undef, #$p2,
-	'trim' => $::opt_trim,
     }, ref($class) || $class;
 }
 
 sub replace {
     my $self = shift;
-    my $replacement_string = shift;
-    my %jumptable = ("{}" => sub { $self->orig() },
-		     "{.}" => sub { $self->no_extension() },
-		     "{/}" => sub { $self->basename() },
-		     "{/.}" => sub { $self->basename_no_extension() },
-	);
-#    my %jumptable = ("{}" => \&orig(),
-#		     "{.}" => sub { $self->no_extension() },
-#		     "{/}" => sub { $self->basename() },
-#		     "{/.}" => sub { $self->basename_no_extension() },
-#	);
-    $self->{'jumptable'} = \%jumptable;
-#    Carp::cluck($replacement_string);
-#    warn($replacement_string);
-    return $self->{'jumptable'}{$replacement_string}();
+    my $replacement_string = shift; # {} {/} {.} {/.}
+    if(not defined $self->{$replacement_string}) {
+	my $s;
+	if($Global::trim eq "n") {
+	    $s = $self->{'orig'};
+	} else {
+	    $s = trim_of($self->{'orig'});
+	}
+	if($replacement_string eq "{}") {
+	    # skip
+	} elsif($replacement_string eq "{.}") {
+	    $s =~ s:\.[^/\.]*$::; # Remove .ext from argument
+	} elsif($replacement_string eq "{/}") {
+	    $s =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
+	} elsif($replacement_string eq "{/.}") {
+	    $s =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
+	    $s =~ s:\.[^/\.]*$::; # Remove .ext from argument
+	}
+	if($Global::CommandLineQueue->quote_args()) {
+	    $s = ::shell_quote_scalar($s);
+	}
+	$self->{$replacement_string} = $s;
+    }
+    return $self->{$replacement_string};
 }
 
 sub orig {
     my $self = shift;
-
-    if(not defined $self->{'myorig'}) {
-	if($Global::CommandLineQueue->quote_args()) {
-	    $self->{'myorig'} = ::shell_quote($self->{'orig'});
-	} else {
-	    $self->{'myorig'} = $self->{'orig'};
-	}
-    }
-    return $self->{'myorig'};
-}
-
-sub basename {
-    my $self = shift;
-    if(not defined $self->{'basename'}) {
-	if($Global::CommandLineQueue->quote_args()) {
-	    $self->{'basename'} = ::shell_quote(basename_of($self->{'orig'}));
-	} else {
-	    $self->{'basename'} = basename_of($self->{'orig'});
-	}
-    }
-    return $self->{'basename'};
-}
-
-sub no_extension {
-    my $self = shift;
-    if(not defined $self->{'no_extension'}) {
-	if($Global::CommandLineQueue->quote_args()) {
-	    $self->{'no_extension'} = ::shell_quote(no_extension_of($self->{'orig'}));
-	} else {
-	    $self->{'no_extension'} = no_extension_of($self->{'orig'});
-	}
-    }
-    return $self->{'no_extension'};
-}
-
-sub basename_no_extension {
-    my $self = shift;
-    if(not defined $self->{'basename_no_extension'}) {
-	if($Global::CommandLineQueue->quote_args()) {
-	    $self->{'basename_no_extension'} = ::shell_quote(no_extension_of(basename_of($self->{'orig'})));
-	} else {
-	    $self->{'basename_no_extension'} = no_extension_of(basename_of($self->{'orig'}));
-	}
-    }
-    return $self->{'basename_no_extension'};
-}
-
-sub trim {
-    my $self = shift;
-    if(not defined $self->{'trim'}) {
-	if($Global::CommandLineQueue->quote_args()) {
-	    $self->{'trim'} = ::shell_quote(trim_of($self->{'orig'}));
-	} else {
-	    $self->{'trim'} = trim_of($self->{'orig'});
-	}
-    }
-    return $self->{'trim'};
-}
-
-sub basename_of {
-    # Returns:
-    #   argument with dir removed if any
-    my $basename = shift;
-    $basename =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
-    return $basename;
-}
-
-sub no_extension_of {
-    # Returns:
-    #   argument with .extension removed if any
-    my $no_ext = shift;
-    $no_ext =~ s:\.[^/\.]*$::; # Remove .ext from argument
-    return $no_ext;
+    return $self->{'orig'};
 }
 
 sub trim_of {
@@ -5848,155 +5502,6 @@ sub trim_of {
     return wantarray ? @strings : "@strings";
 }
 
-
-#package _ArgColQueue;
-#
-#sub new {
-#    my $class = shift;
-#    my $fh = shift;
-#    my @unget = ();
-#    my $arg_line_queue = ArgLineQueue->new($fh);
-#    return bless {
-#	'unget' => \@unget,
-#	'fh' => $fh,
-#	'arg_line_queue' => $arg_line_queue,
-#    }, ref($class) || $class;
-#}
-#
-#sub get {
-#    my $self = shift;
-#    if(@{$self->{'unget'}}) {
-#	return shift @{$self->{'unget'}};
-#    }
-#    my $unget_ref=$self->{'unget'};
-#    my $line = $self->{'arg_line_queue'}->get();
-#    if(defined $line) {
-#	::debug("ArgColQueue::line $line\n");
-#        if($line ne "") {
-#	    for my $s (split /$::opt_colsep/o, $line) {
-#		push @$unget_ref, Arg->new($s);
-#	    }
-#        } else {
-#            push @$unget_ref, Arg->new("");
-#        }
-#        $::opt_N = $#$unget_ref+1;
-#        $Global::max_number_of_args = $::opt_N;
-#        ::debug("ArgColQueue_unget_ref: @$unget_ref\n");
-#        return shift @$unget_ref;
-#    } else {
-#        return undef;
-#    }
-#}
-#
-#sub unget {
-#    my $self = shift;
-#    unshift @{$self->{'unget'}}, @_;
-#}
-#
-#sub empty {
-#    my $self = shift;
-#    my $empty = (not @{$self->{'unget'}} and $self->{'arg_line_queue'}->empty());
-#    ::debug("ArgColQueue->empty $empty");
-#    return $empty;
-#}
-#
-#
-#
-##package _ArgNoColQueue;
-#
-#sub new {
-#    my $class = shift;
-#    my $fh = shift;
-#    my $linequeue = ArgLineQueue->new($fh);
-#    return bless {
-#	'linequeue' => $linequeue,
-#    }, ref($class) || $class;
-#}
-#
-#sub get {
-#    my $self = shift;
-#    my $arg = $self->{'linequeue'}->get();
-#    if(defined $arg) {
-#        return Arg->new($arg);
-#    } else {
-#	return undef;
-#    }
-#}
-#
-#sub empty {
-#    my $self = shift;
-#    my $empty = ($self->{'linequeue'}->empty());
-#    ::debug("ArgNoColQueue->empty $empty");
-#    return $empty;
-#}
-#
-##package _ArgLineQueue;
-#
-#@Global::unget_argv=();
-#
-#sub new {
-#    my $class = shift;
-#    my $fh = shift;
-#    my @unget = ();
-#    return bless {
-#	'unget' => \@unget,
-#	'fh' => $fh,
-#    }, ref($class) || $class;
-#}
-#
-#sub get {
-#    my $self = shift;
-#    if(@Global::unget_argv) {
-#        return shift @Global::unget_argv;
-#    } else {
-#	if(@{$self->{'unget'}}) {
-#	    return shift @{$self->{'unget'}};
-#	}
-#	my $fh =$self->{'fh'};
-#	if(eof($fh)) {
-#	    return undef;
-#	}
-#	my $arg = <$fh>;
-#	# Remove delimiter
-#	$arg =~ s:$/$::;
-#	if($Global::end_of_file_string and
-#	   $arg eq $Global::end_of_file_string) {
-#	    # Ignore the rest of input file
-#	    while (<$fh>) {}
-#	    return undef;
-#	}
-#	if($Global::ignore_empty) {
-#	    if($arg =~ /^\s*$/) {
-#		return $self->get();
-#	    }
-#	}
-#	if($Global::max_lines) {
-#	    if($arg =~ /\s$/) {
-#		# Trailing space => continued on next line
-#		my $cont = $self->get();
-#		if(defined $cont) {
-#		    $arg .= $cont;
-#		}
-#	    }
-#	}
-#	::debug("ArgLineQueue->get ",$arg,"\n");
-#	return $arg;
-#    }
-#}
-#
-#sub unget {
-#    my $self = shift;
-#    unshift @Global::unget_argv, @_;
-#    #push @{$self->{'unget'}}, @_;
-#}
-#
-#sub empty {
-#    my $self = shift;
-#    my $empty = (not @Global::unget_argv and not @{$self->{'unget'}} and eof($self->{'fh'}));
-#    ::debug("ArgLineQueue->empty $empty");
-#    return $empty;
-#}
-#
 
 package Semaphore;
 
