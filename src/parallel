@@ -3771,7 +3771,7 @@ sub start_more_jobs {
 	for my $sshlogin (values %Global::host) {
 	    debug("Running jobs on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
 	    while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
-		if($Global::CommandLineQueue->empty()) {
+		if($Global::JobQueue->empty()) {
 		    last;
 		}
 		debug("Try starting a job on ".$sshlogin->string()."\n");
@@ -3796,9 +3796,11 @@ sub start_another_job {
     #   1 if another jobs was started
     #   0 otherwise
     my $sshlogin = shift;
+#    ::my_dump($sshlogin);
+#    ::my_dump($Global::JobQueue);
     # Do we have enough file handles to start another job?
     if(enough_file_handles()) {
-	if($Global::CommandLineQueue->empty()) {
+	if($Global::JobQueue->empty()) {
 	    # No more commands to run
 	    return 0;
 	} else {
@@ -3835,7 +3837,7 @@ sub get_job_with_sshlogin {
     #   next command to run with no wrapping (clean_command)
     my $sshlogin = shift;
 
-    if($::oodebug and $Global::CommandLineQueue->empty()) {
+    if($::oodebug and $Global::JobQueue->empty()) {
 	Carp::confess("get_job_with_sshlogin should never be called if empty");
     }
     
@@ -3852,7 +3854,7 @@ sub get_job_with_sshlogin {
     my ($clean_command) = $next_command_line;
     if($clean_command =~ /^\s*$/) {
 	# Do not run empty lines
-	if(not $Global::CommandLineQueue->empty()) {
+	if(not $Global::JobQueue->empty()) {
 	    return get_job_with_sshlogin($sshlogin);
 	} else {
 	    return undef;
@@ -3862,8 +3864,9 @@ sub get_job_with_sshlogin {
     if($::opt_retries and $clean_command and
        $job->failed_here()) {
 	# This command with these args failed for this sshlogin
-	my ($no_of_failed_sshlogins,$min_failures) = $job->min_failures();
-	if($no_of_failed_sshlogins < keys %Global::host or
+	my ($no_of_failed_sshlogins,$min_failures) = $job->min_failed();
+	#::my_dump(($no_of_failed_sshlogins,$min_failures));
+	if($no_of_failed_sshlogins == keys %Global::host and
 	   $job->failed_here() == $min_failures) {
 	    # It failed the same or more times on another host:
 	    # run it on this host
@@ -3928,7 +3931,7 @@ sub parse_sshlogin {
 	$Global::host{$sshlogin_string}->set_jobs_running(0);
 	$Global::host{$sshlogin_string}->set_maxlength(Limits::Command::max_length());
     }
-    debug("sshlogin: ", my_dump(%Global::host),"\n");
+    #debug("sshlogin: ", my_dump(%Global::host),"\n");
     if($::opt_transfer or @::opt_return or $::opt_cleanup or @::opt_basefile) {
 	if(not remote_hosts()) {
 	    # There are no remote hosts
@@ -4095,8 +4098,9 @@ sub reaper {
 		    $retry_job = 0;
 		} else {
 		    # This command should be retried
-		    $Global::CommandLineQueue->unget($job);
+		    $Global::JobQueue->unget($job);
 		    $retry_job = 1;
+		    ::debug("Retry ".$job->seq()."\n");
 		}
 	    }
 	}
@@ -4752,7 +4756,7 @@ sub min_failed {
     #   the minimal number of times this command has failed
     my $self = shift;
     my $min_failures =
-	min(map { $self->{'failed'}{$_} }
+	::min(map { $self->{'failed'}{$_} }
 		keys %{$self->{'failed'}});
     my $number_of_sshlogins_failed_on = scalar keys %{$self->{'failed'}};
     return ($number_of_sshlogins_failed_on,$min_failures);
@@ -4773,6 +4777,7 @@ sub set_sshlogin {
     my $self = shift;
     my $sshlogin = shift;
     $self->{'sshlogin'} = $sshlogin;
+    delete $self->{'sshlogin_wrap'}; # If sshlogin is changed the wrap is wrong
 }
 
 sub sshlogin {
@@ -4999,6 +5004,10 @@ sub start {
     # Returns:
     #   job-object or undef if job not to run
     my $job = shift;
+    if($::oodebug and $job->{'commandline'}->{'commandline'}) {
+	Carp::confess($job);
+	die "jkj2";
+    }
 #    my $commandline = $job->{'commandline'};
     my $command = $job->sshlogin_wrap();
 #    my $clean_command = $commandline->replaced();
@@ -5085,7 +5094,6 @@ sub start {
 	or die "Can't dup \$Global::original_stdout: $!";
     open STDERR, ">&", $Global::original_stderr
 	or die "Can't dup \$Global::original_stderr: $!";
-    ::debug("started: $command\n");
     return $job;
 }
 
