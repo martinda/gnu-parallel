@@ -1,8 +1,10 @@
-parallel: Argument handling re-written to OO. 
-The code is quite messy, the implementation is fairly slow, but the
-structure seems sound and it passes the testsuite.
-basename {/} and {/.} implemented.
-Flushing of STDERR and STDOUT after each job completes.
+--command, -c, --file, and -f now obsoleted. --eta works again.
+Bugfix in testsuite for --retries.
+Lots of dead code removed.
+
+== Bug? ==
+
+locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ... -S .. --trc {/}.bz2 'zcat {} | bzip2 > {/}.bz2'
 
 
 == Compare ==
