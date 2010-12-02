@@ -1126,6 +1126,9 @@ Convert all WAV files to MP3 using LAME:
 
 B<find sounddir -type f -name '*.wav' | parallel -j+0 lame {} -o {.}.mp3>
 
+Put all converted in the same directory:
+
+B<find sounddir -type f -name '*.wav' | parallel -j+0 lame {} -o mydir/{/.}.mp3>
 
 =head1 EXAMPLE: Removing two file extensions when processing files and
 calling GNU Parallel from itself
