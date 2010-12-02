@@ -84,7 +84,7 @@ B<{.}> can be used the same places as B<{}>. The replacement string
 B<{.}> can be changed with B<-U>.
 
 
-=item B<{/}> (unimplemented)
+=item B<{/}> (beta testing)
 
 Basename of input line. This is a specialized replacement string
 with the directory part removed.
@@ -93,7 +93,7 @@ B<{/}> can be used the same places as B<{}>. The replacement string
 B<{/}> can be changed with B<--basenamereplace>.
 
 
-=item B<{/.}> (unimplemented)
+=item B<{/.}> (beta testing)
 
 Basename of input line without extension. This is a specialized
 replacement string with the directory and extension part removed. It
@@ -119,7 +119,7 @@ extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
 B<{>I<n>.B<}> can be used the same places as B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}> (unimplemented)
+=item B<{>I<n>/B<}> (beta testing)
 
 Basename of argument from argument file I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.  See B<-a> and B<-N>.
@@ -127,7 +127,7 @@ It is a combination of B<{>I<n>B<}> and B<{/}>.  See B<-a> and B<-N>.
 B<{>I<n>/B<}> can be used the same places as B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}> (unimplemented)
+=item B<{>I<n>/.B<}> (beta testing)
 
 Basename of argument from argument file I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -191,7 +191,7 @@ B<{6}> will refer to the line with the same line number from the 6th
 file.
 
 
-=item B<--arg-file-sep> I<sep-str> (beta testing)
+=item B<--arg-file-sep> I<sep-str>
 
 Use I<sep-str> instead of B<::::> as separator string between command
 and argument files. Useful if B<::::> is used for something else by the
@@ -200,7 +200,7 @@ command.
 See also: B<::::>.
 
 
-=item B<--arg-sep> I<sep-str> (beta testing)
+=item B<--arg-sep> I<sep-str>
 
 Use I<sep-str> instead of B<:::> as separator string. Useful if B<:::>
 is used for something else by the command.
@@ -223,12 +223,12 @@ Multiple B<-B> can be specified to transfer more basefiles. The
 I<file> will be transferred the same way as B<--transfer>.
 
 
-=item B<--basenamereplace> I<replace-str> (unimplemented)
+=item B<--basenamereplace> I<replace-str> (beta testing)
 
 Use the replacement string I<replace-str> instead of B<{/}> for basename of input line.
 
 
-=item B<--basenameextensionreplace> I<replace-str> (unimplemented)
+=item B<--basenameextensionreplace> I<replace-str> (beta testing)
 
 Use the replacement string I<replace-str> instead of B<{/.}> for basename of input line without extension.
 
@@ -264,9 +264,9 @@ removed on the remote server.  Directories created will not be removed
 B<--cleanup> is ignored when not used with B<--transfer> or B<--return>.
 
 
-=item B<--colsep> I<regexp> (beta testing)
+=item B<--colsep> I<regexp>
 
-=item B<-C> I<regexp> (beta testing)
+=item B<-C> I<regexp>
 
 Column separator. The input will be treated as a table with I<regexp>
 separating the columns. The n'th column can be access using
@@ -460,13 +460,13 @@ If the evaluated number is less than 1 then 1 will be used.  See also
 B<--use-cpus-instead-of-cores>.
 
 
-=item B<--jobs> I<procfile> (beta test)
+=item B<--jobs> I<procfile>
 
-=item B<-j> I<procfile> (beta test)
+=item B<-j> I<procfile>
 
-=item B<--max-procs> I<procfile> (beta test)
+=item B<--max-procs> I<procfile>
 
-=item B<-P> I<procfile> (beta test)
+=item B<-P> I<procfile>
 
 Read parameter from file. Use the content of I<procfile> as parameter
 for I<-j>. E.g. I<procfile> could contain the string 100% or +2 or
@@ -558,9 +558,9 @@ GNU B<parallel> will exit.
 Implies B<-X> unless B<-m> is set.
 
 
-=item B<--max-replace-args>=I<max-args> (beta test)
+=item B<--max-replace-args>=I<max-args>
 
-=item B<-N> I<max-args> (beta test)
+=item B<-N> I<max-args>
 
 Use at most I<max-args> arguments per command line. Like B<-n> but
 also makes replacement strings B<{1}> .. B<{>I<max-args>B<}> that
@@ -696,7 +696,7 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
-=item B<--semaphore> (beta testing)
+=item B<--semaphore>
 
 Work as a counting semaphore. B<--semaphore> will cause GNU
 B<parallel> to start I<command> in the background. When the number of
@@ -713,7 +713,7 @@ Used with B<--fg>, B<--wait>, and B<--semaphorename>.
 The command B<sem> is an alias for B<parallel --semaphore>.
 
 
-=item B<--semaphorename> I<name> (beta testing)
+=item B<--semaphorename> I<name>
 
 =item B<--id> I<name>
 
@@ -844,7 +844,7 @@ Transfer, Return, Cleanup. Short hand for:
 B<--transfer> B<--return> I<filename> B<--cleanup>
 
 
-=item B<--trim> <n|l|r|lr|rl> (beta testing)
+=item B<--trim> <n|l|r|lr|rl>
 
 Trim white space in input.
 
@@ -2578,6 +2578,8 @@ sub get_options_from_array {
 	 "quote|q" => \$::opt_q,
 	 "I=s" => \$::opt_I,
 	 "extensionreplace|U=s" => \$::opt_U,
+	 "basenamereplace=s" => \$::opt_basenamereplace,
+	 "basenameextensionreplace=s" => \$::opt_basenameextensionreplace,
 	 "jobs|j=s" => \$::opt_P,
 	 "max-line-length-allowed" => \$::opt_max_line_length_allowed,
 	 "number-of-cpus" => \$::opt_number_of_cpus,
