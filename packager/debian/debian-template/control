@@ -1,10 +1,9 @@
 Source: parallel
 Section: utils
 Priority: extra
-Maintainer: Rogério Brito <rbrito@ime.usp.br>
-Uploaders: Ole Tange <ole@tange.dk>
-Build-Depends: debhelper (>= 7.0.50~), dh-autoreconf
-Standards-Version: 3.9.1
+Maintainer: Ole Tange <ole@tange.dk>
+Build-Depends: debhelper (>= 5)
+Standards-Version: 3.8.3
 Homepage: https://www.gnu.org/software/parallel/
 
 Package: parallel

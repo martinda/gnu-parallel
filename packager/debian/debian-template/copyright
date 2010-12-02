@@ -31,8 +31,7 @@ License:
 
 The Debian packaging is:
 
-    Copyright © 2010 Ole Tange <ole@tange.dk>
-    Copyright © 2010 Rogério Theodoro de Brito <rbrito@ime.usp.br>
+    Copyright (C) 2010 Ole Tange <ole@tange.dk>
 
 and is licensed under the GPL version 3, 
 see `/usr/share/common-licenses/GPL-3'.

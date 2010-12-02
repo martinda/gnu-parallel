@@ -1,3 +1,29 @@
+20101202
+
+* Implemented {/} for the input line with the path removed (basename).
+
+* Implemented {/.} for the input line with extension and path removed
+  (basename).
+
+* Output from --progress is now sent to standard error instead of
+  standard output.
+
+* --eta was broken and counted down from 0. Now fixed.
+
+* Standard output and standard error are flushed after every job so if
+  standard output does not end with a newline it will still be grouped
+  with the rest of standard output.
+
+* --command, -c, --file, and -f are now removed as options. They were
+  never used in practice.
+
+* GetOptionsFromArray rewritten to work with old Perl libraries.
+
+* The file COPYING now contains the GNU General Public License 3
+
+* Major rewrite to make the code more object oriented and easier to
+  maintain in the future.
+
 20101113
 
 * Using -j myfile the number of jobs can be changed while GNU Parallel
