@@ -801,6 +801,14 @@ Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with B<-v>.
 
 
+=item B<--tmpdir> I<dirname>
+
+Directory for temporary files. GNU B<parallel> normally buffers output
+into temporary files in /tmp. By setting B<--tmpdir> you can use a
+different dir for the files. Setting B<--tmpdir> is equivalent to
+setting $TMPDIR.
+
+
 =item B<--verbose>
 
 =item B<-t>
@@ -1155,7 +1163,7 @@ Based on this we can let GNU B<parallel> generate 10 B<wget>s per day:
 I<the above> B<| parallel -I {o} seq -w 1 10 "|" parallel wget
 http://www.example.com/path/to/{o}_{}.jpg>
 
-=head1 EXAMPLE: Rewriting a for-loop and a while-loop
+=head1 EXAMPLE: Rewriting a for-loop and a while-read-loop
 
 for-loops like this:
 
@@ -1163,7 +1171,7 @@ for-loops like this:
     do_something $x
   done) | process_output
 
-and while-loops like this:
+and while-read-loops like this:
 
   cat list | (while read x ; do
     do_something $x
@@ -1241,6 +1249,22 @@ B<parallel -k traceroute ::: foss.org.my debian.org freenetproject.org>
 This will make sure the traceroute to foss.org.my will be printed
 first.
 
+A bit more complex example is downloading a huge file in chunks in
+parallel: Some internet connections will deliver more data if you
+download files in parallel. For downloading files in parallel see:
+"EXAMPLE: Download 10 images for each of the past 30 days". But if you
+are downloading a big file you can download the file in chunks in
+parallel.
+
+To download byte 10000000-19999999 you can use B<curl>:
+
+B<curl -r 10000000-19999999 http://example.com/the/big/file> > B<file.part>
+
+To download a 1 GB file we need 100 10MB chunks downloaded and
+combined in the correct order.
+
+B<seq 0 99 | parallel -k curl -r \
+    {}0000000-{}9999999 http://example.com/the/big/file> > B<file>
 
 =head1 EXAMPLE: Parallel grep
 
@@ -1634,6 +1658,11 @@ shell.
 B<Example:>
 
 B<seq 1 10 | parallel -N2 echo seq:'$'PARALLEL_SEQ arg1:{1} arg2:{2}>
+
+
+=item $TMPDIR
+
+Directory for temporary files. See: B<--tmpdir>.
 
 
 =item $PARALLEL
@@ -2597,6 +2626,8 @@ sub get_options_from_array {
 	 "cleanup" => \$::opt_cleanup,
 	 "basefile|B=s" => \@::opt_basefile,
 	 "workdir|W=s" => \$::opt_workdir,
+	 "tmpdir=s" => \$::opt_tmpdir,
+	 "tempdir=s" => \$::opt_tmpdir,
 	 "halt-on-error|H=s" => \$::opt_halt_on_error,
 	 "retries=i" => \$::opt_retries,
 	 "progress" => \$::opt_progress,
@@ -2693,6 +2724,7 @@ sub parse_options {
     if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
     if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
     if(defined $::opt_N and $::opt_N) { $Global::max_number_of_args = $::opt_N; }
+    if(defined $::opt_tmpdir) { $ENV{'TMPDIR'} = $::opt_tmpdir; }
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_colsep) { $Global::trim = 'lr'; }
     if(defined $::opt_trim) { $Global::trim = $::opt_trim; }
