@@ -223,7 +223,8 @@ A copy of the full license is included in the file as cc-by-sa.txt.
 
 =head1 DEPENDENCIES
 
-GNU B<niceload> uses Perl, and the Perl module POSIX.
+GNU B<niceload> uses Perl, and the Perl modules POSIX, and
+Getopt::Long.
 
 =head1 SEE ALSO
 

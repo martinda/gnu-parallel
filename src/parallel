@@ -593,6 +593,12 @@ Print the number of CPU cores and exit (used by GNU B<parallel> itself
 to determine the number of CPU cores on remote computers).
 
 
+=item B<--nice> I<niceness> (beta testing)
+
+Run the command at this niceness. This is especially useful when
+running composed commands or commands on remote computers.
+
+
 =item B<--interactive>
 
 =item B<-p>
@@ -2350,6 +2356,13 @@ simultaneously (Namely SSHD's MaxStartup). This test is done for each
 host in serial, so if your --sshloginfile contains many hosts it may
 be slow.
 
+=head2 --nice limits command length
+
+The current implementation of B<--nice> is too pessimistic in the max
+allowed command length. It only uses a little more than half of what
+it could. This affects -X and -m. If this becomes a real problem for
+you file a bug-report.
+
 
 =head1 REPORTING BUGS
 
@@ -2617,6 +2630,7 @@ sub get_options_from_array {
 	 "number-of-cpus" => \$::opt_number_of_cpus,
 	 "number-of-cores" => \$::opt_number_of_cores,
 	 "use-cpus-instead-of-cores" => \$::opt_use_cpus_instead_of_cores,
+	 "nice=i" => \$::opt_nice,
 	 "sshlogin|S=s" => \@::opt_sshlogin,
 	 "sshloginfile=s" => \$::opt_sshloginfile,
 	 "controlmaster|M" => \$::opt_controlmaster,
@@ -5289,6 +5303,11 @@ sub len {
 	    }
 	}
     }
+    if($::opt_nice) {
+	# Pessimistic length if --nice is set
+	# Worse than worst case: every char needs to be quoted with \
+	$len *= 2;
+    }
     return $len;
 }
 
@@ -5364,6 +5383,11 @@ sub replaced {
     my $self = shift;
     if(not defined $self->{'replaced'}) {
 	$self->{'replaced'} = $self->replace_placeholders($self->{'command'});
+	if($::opt_nice) {
+	    # Prepend nice -n19 bash -c
+	    # and quote
+	    $self->{'replaced'} = "nice -n".$::opt_nice." bash -c ".::shell_quote_scalar($self->{'replaced'});
+	}
     }
     if($::oodebug and length($self->{'replaced'}) != ($self->len())) {
 	::my_dump($self);
