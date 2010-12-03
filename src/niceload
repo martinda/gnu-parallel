@@ -1,0 +1,413 @@
+#!/usr/bin/perl -sw
+
+=head1 NAME
+
+niceload - run a program when the load is below a certain limit
+
+=head1 SYNOPSIS
+
+B<niceload> [-v] [-n=nice] [-l=load] [-t=time] [-s=time|-f=factor] command
+
+B<niceload> [-v] [-n=nice] [-l=load] [-t=time] [-s=time|-f=factor] -p=PID
+
+=head1 DESCRIPTION
+
+GNU B<niceload> will run a program when the load average is below a
+certain limit. When the limit is reached the program will be suspended
+for some time. Then resumed again for some time.  Then the load load
+average is checked again and we start over.
+
+If the load is 3.00 then the default settings will run a program
+like this:
+
+run 1 second, suspend (3.00-1.00) seconds, run 1 second, suspend
+(3.00-1.00) seconds, run 1 second, ...
+
+=head1 OPTIONS
+
+=over 9
+
+=item B<-n>=I<niceness>
+
+Sets niceness. See B<nice>(1).
+
+=item B<-l>=I<maxload>
+
+Max load. The maximal load average before suspending command. Default
+is 1.00.
+
+=item B<-t>=I<SEC>
+
+Recheck load time. Sleep SEC seconds before checking load
+again. Default is 1 second.
+
+=item B<-s>=I<SEC>
+
+Suspend time. Suspend the command this many seconds when the max load
+average is reached.
+
+=item B<-f>=I<FACTOR>
+
+Suspend time factor. Dynamically set B<-s> as max load average over limit * factor. Default is 1.
+
+=item B<-p>=I<PID>
+
+Process ID of process to suspend.
+
+=item B<-v>
+
+Verbose. Print some extra output on what is happening. Use B<-v> until
+you know what your are doing.
+
+=back
+
+=head1 EXAMPLE: See niceload in action
+
+In terminal 1 run: top
+
+In terminal 2 run:
+
+B<niceload perl -e '$|=1;do{$l==$r or print "."; $l=$r}until(($r=time-$^T)>50)'>
+
+This will print a '.' every second for 50 seconds and eat a lot of
+CPU. When the load rises to 1.0 the process is suspended.
+
+
+=head1 EXAMPLE: Run updatedb
+
+Running updatedb can often starve the system for disk I/O and thus result in a high load.
+
+Run updatedb but suspend updatedb if the load is above 2.00:
+
+B<niceload -l=2 updatedb>
+
+
+=head1 EXAMPLE: Run rsync
+
+rsync can just like updatedb starve the system for disk I/O and thus result in a high load.
+
+Run rsync but keep load below 3.4. If load reaches 7 sleep for
+(7-3.4)*12 seconds:
+
+B<niceload -l=3.4 -f=12 rsync -Ha /home/ /backup/home/>
+
+
+=head1 ENVIRONMENT VARIABLES
+
+None. In future versions $NICELOAD will be able to contain default settings.
+
+=head1 EXIT STATUS
+
+Exit status should be the same as the command being run (untested).
+
+=head1 REPORTING BUGS
+
+Report bugs to <bug-parallel@gnu.org>.
+
+=head1 AUTHOR
+
+Copyright (C) 2004-11-19 Ole Tange, http://ole.tange.dk
+
+Copyright (C) 2005,2006,2006,2008,2009,2010 Ole Tange, http://ole.tange.dk
+
+Copyright (C) 2010 Ole Tange, http://ole.tange.dk and Free Software
+Foundation, Inc.
+
+=head1 LICENSE
+
+Copyright (C) 2010 Free Software Foundation, Inc.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+at your option any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+=head2 Documentation license I
+
+Permission is granted to copy, distribute and/or modify this documentation
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the file fdl.txt.
+
+=head2 Documentation license II
+
+You are free:
+
+=over 9
+
+=item B<to Share>
+
+to copy, distribute and transmit the work
+
+=item B<to Remix>
+
+to adapt the work
+
+=back
+
+Under the following conditions:
+
+=over 9
+
+=item B<Attribution>
+
+You must attribute the work in the manner specified by the author or
+licensor (but not in any way that suggests that they endorse you or
+your use of the work).
+
+=item B<Share Alike>
+
+If you alter, transform, or build upon this work, you may distribute
+the resulting work only under the same, similar or a compatible
+license.
+
+=back
+
+With the understanding that:
+
+=over 9
+
+=item B<Waiver>
+
+Any of the above conditions can be waived if you get permission from
+the copyright holder.
+
+=item B<Public Domain>
+
+Where the work or any of its elements is in the public domain under
+applicable law, that status is in no way affected by the license.
+
+=item B<Other Rights>
+
+In no way are any of the following rights affected by the license:
+
+=over 2
+
+=item *
+
+Your fair dealing or fair use rights, or other applicable
+copyright exceptions and limitations;
+
+=item *
+
+The author's moral rights;
+
+=item *
+
+Rights other persons may have either in the work itself or in
+how the work is used, such as publicity or privacy rights.
+
+=back
+
+=back
+
+=over 9
+
+=item B<Notice>
+
+For any reuse or distribution, you must make clear to others the
+license terms of this work.
+
+=back
+
+A copy of the full license is included in the file as cc-by-sa.txt.
+
+=head1 DEPENDENCIES
+
+GNU B<niceload> uses Perl, and the Perl module POSIX.
+
+=head1 SEE ALSO
+
+B<parallel>(1), B<nice>(1)
+
+
+=cut
+
+sub help {
+    print q{
+Usage:
+   niceload [-v] [-n=nice] [-l=load] [-t=time] [-s=time|-f=factor] command
+   niceload [-v] [-n=nice] [-l=load] [-t=time] [-s=time|-f=factor] -p=PID
+};
+
+}
+
+if($f and $s) {
+    # You cannot have -s and -f
+    help();
+    exit;
+}
+
+my $nice       = $n || 0; # -n=0 Nice level (Default: 0)
+my $max_load   = $l || 1; # -l=1 Max acceptable load average (Default: 1)
+my $check_time = $t || 1; # -t=1 Seconds between checking load average (Default: 1)
+my $wait_factor;
+my $wait_time;
+if($s) {
+    $wait_time = $s;      # -s=sec Seconds to suspend process when load average is too high
+} else {
+    $wait_factor=$f || 1; # -f=1 compute wait_time dynamically as (load - limit) * factor
+}
+my $processid  = $p;      # Control this PID (Default: control the command)
+my $verbose = $v || $debug;
+
+@program = @ARGV;
+$SIG{CHLD} = \&REAPER;
+
+if($processid) {
+    $Child::fork = $processid;
+    init_signal_handling_attached_child();
+    my $child_pgrp = getpgrp $Child::fork;
+    suspend_resume($max_load,$check_time,$wait_time,$wait_factor,$child_pgrp);
+} elsif(@ARGV) {
+    if($Child::fork = fork) {
+	sleep 1; # Give child time to setpgrp(0,0);
+	init_signal_handling_my_child();
+	my $child_pgrp = getpgrp $Child::fork;
+	suspend_resume($max_load,$check_time,$wait_time,$wait_factor,$child_pgrp);
+    } else {
+	setpgrp(0,0);
+	$debug and debug("Child pid: $$, pgrp: ",getpgrp $$,"\n");
+	if($nice) {
+	    unshift(@program,"nice","-n",$nice);
+	}
+	$debug and debug("@program\n");
+	system(@program);
+	$debug and debug("Child exit\n");
+	exit;
+    }
+} else {
+    help();
+    exit;
+}
+
+sub debug {
+    print STDERR @_;
+}
+
+
+sub init_signal_handling_attached_child {
+    $SIG{INT}=\&sigint_attached_child;
+}
+
+sub sigint_attached_child {
+    # Let the attached child continue when detaching
+    kill_child_CONT();
+    exit;
+}
+
+sub init_signal_handling_my_child {
+    $SIG{INT}=\&kill_child_INT;
+    $SIG{TSTP}=\&kill_child_TSTP;
+    $SIG{CONT}=\&kill_child_CONT;
+}
+
+use POSIX ":sys_wait_h";
+
+sub REAPER {
+    my $stiff;
+    while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
+        # do something with $stiff if you want
+    }
+    $SIG{CHLD} = \&REAPER;                  # install *after* calling waitpid
+}
+
+sub kill_child_CONT {
+    $debug and debug("SIGCONT received. Killing $Child::fork\n");
+    kill CONT => -getpgrp($Child::fork);
+}
+
+sub kill_child_TSTP {
+    $debug and debug("SIGTSTP received. Killing $Child::fork and self\n");
+    kill TSTP => -getpgrp($Child::fork);
+    kill STOP => -$$;
+}
+
+sub kill_child_INT {
+    $debug and debug("SIGINT received. Killing $Child::fork Exit\n");
+    kill INT => -getpgrp($Child::fork);
+    exit;
+}
+
+sub suspend_resume {
+    my ($max_load,$check_time,$wait_time,$wait_factor,@pids) = @_;
+    $debug and debug("suspend_resume these @pids\n");
+    resume_pids(@pids);
+    while (pids_exist(@pids)) {
+	if ( loadavg() > $max_load ) {
+	    if($wait_factor) {
+		$wait_time = (loadavg()-$max_load) * $wait_factor;
+	    }
+	    $verbose and debug("suspending for $wait_time seconds\n");
+	    suspend_pids(@pids);
+	    sleep 1; # for some reason this statement is skipped
+	    sleep $wait_time;
+	    resume_pids(@pids);
+	}
+	$verbose and debug("running for $check_time second(s)\n");
+	sleep($check_time);
+    }
+}
+    
+sub pids_exist {
+    my (@pids) = @_;
+    my ($exists) = 0;
+    for $pid (@pids) {
+	if(-e "/proc/".$pid)  { $exists++ }
+	#if(kill 0 => $Child::fork) { $exists++ }
+    }
+    return $exists;
+}
+
+sub loadavg {
+    my ($loadavg);
+    if(open(IN,"/proc/loadavg")) {
+	# Linux specific (but fast)
+	my $upString = <IN>;
+	if($upString =~ m/^(\d+\.\d+)/) {
+	    $loadavg = $1;
+	} else {
+	    die;
+	}
+	close IN;
+    } elsif (open(IN,"uptime|")) {
+	my $upString = <IN>;
+	if($upString =~ m/average.\s*(\d+\.\d+)/) {
+	    $loadavg = $1;
+	} else {
+	    die;
+	}	
+	close IN;
+    }
+    return $loadavg;
+}
+
+sub suspend_pids {
+    my @pids = @_;
+    signal_pids("STOP",@pids);
+}
+
+sub resume_pids {
+    my @pids = @_;
+    signal_pids("CONT",@pids);
+}
+
+sub signal_pids {
+    my ($signal,@pids) = @_;
+
+    # local $SIG{$signal} = 'IGNORE';
+    for $pid (@pids) {
+	kill $signal => -$pid; # stop PID group
+    }
+}
+
+$v=$f=$l=$h=$n=$t=$s=$p=$h=$processid; # Ignore perl -w
