@@ -509,9 +509,12 @@ Implies B<-X> unless B<-m> is set.
 
 =item B<--load> I<max-load> (experimental)
 
-Do not start new jobs unless the load is less than I<max-load>. The
-load average is only sampled every 10 seconds to avoid stressing small
-machines.
+Do not start new jobs on a given machine unless the load is less than
+I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
+is a valid setting.
+
+The load average is only sampled every 10 seconds to avoid stressing
+small machines.
 
 
 =item B<--controlmaster> (experimental)
@@ -2993,8 +2996,7 @@ sub cleanup {
 
 sub shell_quote {
     my (@strings) = (@_);
-    my $arg;
-    for $arg (@strings) {
+    for my $a (@strings) {
 	$a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
 	$a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
 #	$arg =~ s/\\/\\\\/g;
@@ -3177,7 +3179,7 @@ sub drain_job_queue {
 	    start_more_jobs(); # These jobs may not be started because of loadavg
 	    sleep 1;
 	}
-    } while (not $Global::JobQueue->empty());
+    } while (not $Global::start_no_new_jobs and not $Global::JobQueue->empty());
 
     if($::opt_progress) {
 	print $Global::original_stderr "\n";
