@@ -25,6 +25,7 @@ parallel -k -X echo {2.} ::: /a/number1.c a/number2.c number3.c /a/number4 a/num
 
 SERVER1=parallel-server3
 SERVER2=parallel-server2
+rm -rf tmp
 
 echo "### Test combined --return {/}_{/.}_{#/.}_{#/}_{#.}"
 stdout parallel -k -Xv --cleanup --return tmp/{/}_{/.}_{2/.}_{2/}_{2.}/file -S parallel@$SERVER2 \
