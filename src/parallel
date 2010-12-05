@@ -605,8 +605,10 @@ to determine the number of CPU cores on remote computers).
 
 =item B<--nice> I<niceness> (beta testing)
 
-Run the command at this niceness. This is especially useful when
-running composed commands or commands on remote computers.
+Run the command at this niceness. For simple commands you can just add
+B<nice> in front of the command. But if the command consists of more
+sub commands (Like: ls|wc) then prepending B<nice> will not always
+work. B<--nice> will make sure all sub commands are niced.
 
 
 =item B<--interactive>
@@ -2528,6 +2530,7 @@ use Carp;
 $::oodebug=0;
 $Global::original_sigterm = $SIG{TERM};
 $SIG{TERM} = sub {}; # Dummy until jobs really start
+open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
 
 do_not_reap();
 parse_options();
@@ -3544,15 +3547,20 @@ sub parse_sshlogin {
 	if(not remote_hosts()) {
 	    # There are no remote hosts
 	    if(defined @::opt_trc) {
-		print STDERR "Warning: --trc ignored as there are no remote --sshlogin\n";
+		print $Global::original_stderr
+		    "Warning: --trc ignored as there are no remote --sshlogin\n";
 	    } elsif (defined $::opt_transfer) {
-		print STDERR "Warning: --transfer ignored as there are no remote --sshlogin\n";
+		print $Global::original_stderr
+		    "Warning: --transfer ignored as there are no remote --sshlogin\n";
 	    } elsif (defined @::opt_return) {
-		print STDERR "Warning: --return ignored as there are no remote --sshlogin\n";
+		print $Global::original_stderr
+		    "Warning: --return ignored as there are no remote --sshlogin\n";
 	    } elsif (defined $::opt_cleanup) {
-		print STDERR "Warning: --cleanup ignored as there are no remote --sshlogin\n";
+		print $Global::original_stderr
+		    "Warning: --cleanup ignored as there are no remote --sshlogin\n";
 	    } elsif (defined @::opt_basefile) {
-		print STDERR "Warning: --basefile ignored as there are no remote --sshlogin\n";
+		print $Global::original_stderr
+		    "Warning: --basefile ignored as there are no remote --sshlogin\n";
 	    }
 	}
     }
@@ -3612,14 +3620,14 @@ sub __SIGNAL_HANDLING__ {}
 sub list_running_jobs {
     # Returns: N/A
     for my $v (values %Global::running) {
-	print STDERR "$Global::progname: ",$v->replaced(),"\n";
+	print $Global::original_stderr "$Global::progname: ",$v->replaced(),"\n";
     }
 }
 
 sub start_no_new_jobs {
     # Returns: N/A
     $SIG{TERM} = $Global::original_sigterm;
-    print STDERR
+    print $Global::original_stderr
 	("$Global::progname: SIGTERM received. No new jobs will be started.\n",
 	 "$Global::progname: Waiting for these ", scalar(keys %Global::running),
 	 " jobs to finish. Send SIGTERM again to stop now.\n");
@@ -3698,16 +3706,18 @@ sub reaper {
 		if($::opt_halt_on_error) {
 		    if($::opt_halt_on_error == 1) {
 			# If halt on error == 1 we should gracefully exit
-			print STDERR ("$Global::progname: Starting no more jobs. ",
-				      "Waiting for ", scalar(keys %Global::running),
-				      " jobs to finish. This job failed:\n",
-				      $job->replaced(),"\n");
+			print $Global::original_stderr
+			    ("$Global::progname: Starting no more jobs. ",
+			     "Waiting for ", scalar(keys %Global::running),
+			     " jobs to finish. This job failed:\n",
+			     $job->replaced(),"\n");
 			$Global::start_no_new_jobs++;
 			$Global::halt_on_error_exitstatus = $job->exitstatus();
 		    } elsif($::opt_halt_on_error == 2) {
 			# If halt on error == 2 we should exit immediately
-			print STDERR ("$Global::progname: This job failed:\n",
-				      $job->replaced(),"\n");
+			print $Global::original_stderr
+			    ("$Global::progname: This job failed:\n",
+			     $job->replaced(),"\n");
 			exit ($job->exitstatus());
 		    }
 		}
@@ -3835,7 +3845,7 @@ sub my_dump {
         if ($@) {
             my $err =  "Neither Data::Dump nor Data::Dumper is installed\n".
                 "Not dumping output\n";
-            print STDERR $err;
+            print $Global::original_stderr $err;
             return $err;
         } else {
             return Dumper(@dump_this);
@@ -4028,11 +4038,11 @@ sub compute_max_loadavg {
 		close IN;
 		$load = $self->compute_max_loadavg($opt_P_file);
 	    } else {
-		print STDERR "Cannot open $loadspec\n";
+		print $Global::original_stderr "Cannot open $loadspec\n";
 		exit(255);
 	    }
 	} else {
-	    print STDERR "Parsing of --load failed\n";
+	    print $Global::original_stderr "Parsing of --load failed\n";
 	    ::die_usage();
 	}
 	if($load < 0.01) {
@@ -4132,19 +4142,22 @@ sub processes_available_by_system_limit {
 	    # It took more than 2 second to fork ten processes.
 	    # Give the user a warning. He can press Ctrl-C if this
 	    # sucks.
-	    print STDERR ("Warning: Starting 10 extra processes takes > 2 sec.\n",
-			  "Consider adjusting -j. Press CTRL-C to stop.\n");
+	    print $Global::original_stderr
+		("Warning: Starting 10 extra processes takes > 2 sec.\n",
+		 "Consider adjusting -j. Press CTRL-C to stop.\n");
 	    $slow_spawining_warning_printed = 1;
 	}
     }
     if($system_limit < $wanted_processes and not $more_filehandles) {
-	print STDERR ("Warning: Only enough filehandles to run ",
-		      $system_limit, " jobs in parallel. ",
-		      "Raising ulimit -n may help\n");
+	print $Global::original_stderr
+	    ("Warning: Only enough filehandles to run ",
+	     $system_limit, " jobs in parallel. ",
+	     "Raising ulimit -n may help\n");
     }
     if($system_limit < $wanted_processes and $max_system_proc_reached) {
-	print STDERR ("Warning: Only enough available processes to run ",
-		      $system_limit, " jobs in parallel.\n");
+	print $Global::original_stderr
+	    ("Warning: Only enough available processes to run ",
+	     $system_limit, " jobs in parallel.\n");
     }
     # Cleanup: Close the files
     for (values %fh) { close $_ }
@@ -4178,7 +4191,7 @@ sub simultaneous_sshlogin_limit {
 	    $self->simultaneous_sshlogin($wanted_processes));
     if($ssh_limit < $wanted_processes) {
 	my $serverlogin = $self->serverlogin();
-	print STDERR
+	print $Global::original_stderr
 	    ("Warning: ssh to $serverlogin only allows ",
 	     "for $ssh_limit simultaneous logins.\n",
 	     "You may raise this by changing ",
@@ -4252,11 +4265,11 @@ sub user_requested_processes {
 		close IN;
 		$processes = $self->user_requested_processes($opt_P_file);
 	    } else {
-		print STDERR "Cannot open $opt_P\n";
+		print $Global::original_stderr "Cannot open $opt_P\n";
 		exit(255);
 	    }
 	} else {
-	    print STDERR "Parsing of --jobs/-j/--max-procs/-P failed\n";
+	    print $Global::original_stderr "Parsing of --jobs/-j/--max-procs/-P failed\n";
 	    ::die_usage();
 	}
 	if($processes < 1) {
@@ -4289,8 +4302,9 @@ sub ncpus {
 	    if($ncpu =~ /^[0-9]+$/) {
 		$self->{'ncpus'} = $ncpu;
 	    } else {
-		print STDERR ("Warning: Could not figure out ",
-			      "number of cpus on $serverlogin. Using 1\n");
+		print $Global::original_stderr 
+		    ("Warning: Could not figure out ",
+		     "number of cpus on $serverlogin. Using 1\n");
 		$self->{'ncpus'} = 1;
 	    }
 	}
@@ -4792,7 +4806,8 @@ sub sshtransfer {
 		$remote_workdir eq "." ? "true" : "ssh $serverlogin mkdir -p $rsync_destdir";
 	    $pre .= "$mkremote_workdir; rsync $rsync_opt ".::shell_quote_scalar($file)." $serverlogin:$rsync_destdir;";
 	} else {
-	    print STDERR "Warning: $file is not readable and will not be transferred\n";
+	    print $Global::original_stderr
+		"Warning: $file is not readable and will not be transferred\n";
 	}
     }
     return $pre;
