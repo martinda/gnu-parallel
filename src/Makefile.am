@@ -2,9 +2,9 @@ bin_SCRIPTS = parallel sem sql niceload
 man_MANS = parallel.1 sem.1 sql.1 niceload.1
 doc_DATA = parallel.html sem.html sql.html niceload.html
 
-parallel.1: parallel Makefile
+parallel.1: parallel.pod Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 $(srcdir)/parallel > $(srcdir)/parallel.1
+		--section=1 $(srcdir)/parallel.pod > $(srcdir)/parallel.1
 
 sem.1: sem.pod Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
@@ -38,4 +38,7 @@ sem: parallel
 	ln -fs parallel sem
 
 DISTCLEANFILES = parallel.1 sem.1 sql.1 niceload.1 parallel.html sem.html sql.html niceload.html
-EXTRA_DIST = parallel sem sql niceload parallel.1 sem.1 sql.1 niceload.1 parallel.html sem.html sem.pod sql.html niceload.html
+EXTRA_DIST = parallel sem sql niceload \
+	parallel.1 sem.1 sql.1 niceload.1 \
+	parallel.html sem.html sql.html niceload.html \
+	sem.pod parallel.pod

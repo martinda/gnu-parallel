@@ -1,4 +1,4 @@
-#!/usr/bin/perl -sw
+#!/usr/bin/perl -w
 
 =head1 NAME
 
@@ -6,9 +6,9 @@ niceload - run a program when the load is below a certain limit
 
 =head1 SYNOPSIS
 
-B<niceload> [-v] [-n=nice] [-l=load] [-t=time] [-s=time|-f=factor] command
+B<niceload> [-v] [-n nice] [-l load] [-t time] [-s time|-f factor] command
 
-B<niceload> [-v] [-n=nice] [-l=load] [-t=time] [-s=time|-f=factor] -p=PID
+B<niceload> [-v] [-n nice] [-l load] [-t time] [-s time|-f factor] -p=PID
 
 =head1 DESCRIPTION
 
@@ -27,30 +27,30 @@ run 1 second, suspend (3.00-1.00) seconds, run 1 second, suspend
 
 =over 9
 
-=item B<-n>=I<niceness>
+=item B<-n> I<niceness>
 
 Sets niceness. See B<nice>(1).
 
-=item B<-l>=I<maxload>
+=item B<-l> I<maxload>
 
 Max load. The maximal load average before suspending command. Default
 is 1.00.
 
-=item B<-t>=I<SEC>
+=item B<-t> I<SEC>
 
 Recheck load time. Sleep SEC seconds before checking load
 again. Default is 1 second.
 
-=item B<-s>=I<SEC>
+=item B<-s> I<SEC>
 
 Suspend time. Suspend the command this many seconds when the max load
 average is reached.
 
-=item B<-f>=I<FACTOR>
+=item B<-f> I<FACTOR>
 
 Suspend time factor. Dynamically set B<-s> as max load average over limit * factor. Default is 1.
 
-=item B<-p>=I<PID>
+=item B<-p> I<PID>
 
 Process ID of process to suspend.
 
@@ -67,7 +67,7 @@ In terminal 1 run: top
 
 In terminal 2 run:
 
-B<niceload perl -e '$|=1;do{$l==$r or print "."; $l=$r}until(($r=time-$^T)>50)'>
+B<niceload perl -e '$|=1;do{$l==$r or print "."; $l=$r}until(($r=time-$^T)>>B<50)'>
 
 This will print a '.' every second for 50 seconds and eat a lot of
 CPU. When the load rises to 1.0 the process is suspended.
@@ -233,39 +233,46 @@ B<parallel>(1), B<nice>(1)
 
 =cut
 
-sub help {
-    print q{
-Usage:
-   niceload [-v] [-n=nice] [-l=load] [-t=time] [-s=time|-f=factor] command
-   niceload [-v] [-n=nice] [-l=load] [-t=time] [-s=time|-f=factor] -p=PID
-};
-
+use strict;
+use Getopt::Long;
+$Global::progname="niceload";
+$Global::version = 20101206;
+Getopt::Long::Configure("bundling","require_order");
+get_options_from_array(\@ARGV) || die_usage();
+if($::opt_version) {
+    version();
+    exit 0;
 }
-
-if($f and $s) {
-    # You cannot have -s and -f
+if($::opt_help) {
+    help();
+    exit 0;
+}
+if($::opt_factor and $::opt_suspend) {
+    # You cannot have --suspend and --factor
     help();
     exit;
 }
 
-my $nice       = $n || 0; # -n=0 Nice level (Default: 0)
-my $max_load   = $l || 1; # -l=1 Max acceptable load average (Default: 1)
-my $check_time = $t || 1; # -t=1 Seconds between checking load average (Default: 1)
+my $nice       = $::opt_nice || 0; # -n=0 Nice level (Default: 0)
+my $max_load   = $::opt_load || 1; # -l=1 Max acceptable load average (Default: 1)
+my $check_time = $::opt_recheck || 1; # -t=1 Seconds between checking load average (Default: 1)
 my $wait_factor;
 my $wait_time;
-if($s) {
-    $wait_time = $s;      # -s=sec Seconds to suspend process when load average is too high
+if($::opt_suspend) {
+    # --suspend=sec Seconds to suspend process when load average is too high
+    $wait_time = $::opt_suspend; 
 } else {
-    $wait_factor=$f || 1; # -f=1 compute wait_time dynamically as (load - limit) * factor
+    # --factor=1 compute wait_time dynamically as (load - limit) * factor
+    $wait_factor=$::opt_factor || 1; 
 }
-my $processid  = $p;      # Control this PID (Default: control the command)
-my $verbose = $v || $debug;
-
-@program = @ARGV;
+my $processid  = $::opt_pid;      # Control this PID (Default: control the command)
+my $verbose = $::opt_verbose || $::opt_debug;
+my @program = @ARGV;
 $SIG{CHLD} = \&REAPER;
 
 if($processid) {
     $Child::fork = $processid;
+    $::opt_verbose and print STDERR "Control $processid\n";
     init_signal_handling_attached_child();
     my $child_pgrp = getpgrp $Child::fork;
     suspend_resume($max_load,$check_time,$wait_time,$wait_factor,$child_pgrp);
@@ -277,13 +284,13 @@ if($processid) {
 	suspend_resume($max_load,$check_time,$wait_time,$wait_factor,$child_pgrp);
     } else {
 	setpgrp(0,0);
-	$debug and debug("Child pid: $$, pgrp: ",getpgrp $$,"\n");
+	debug("Child pid: $$, pgrp: ",getpgrp $$,"\n");
 	if($nice) {
 	    unshift(@program,"nice","-n",$nice);
 	}
-	$debug and debug("@program\n");
+	debug("@program\n");
 	system(@program);
-	$debug and debug("Child exit\n");
+	debug("Child exit\n");
 	exit;
     }
 } else {
@@ -291,10 +298,74 @@ if($processid) {
     exit;
 }
 
-sub debug {
-    print STDERR @_;
+sub get_options_from_array {
+    # Run GetOptions on @array
+    # Returns:
+    #   true if parsing worked
+    #   false if parsing failed
+    #   @array is changed
+    my $array_ref = shift;
+    # A bit of shuffling of @ARGV needed as GetOptionsFromArray is not
+    # supported everywhere
+    my @save_argv;
+    my $this_is_ARGV = (\@::ARGV == $array_ref);
+    if(not $this_is_ARGV) {
+	@save_argv = @::ARGV;
+	@::ARGV = @{$array_ref};
+    }
+    my @retval = GetOptions
+	("debug|D" => \$::opt_debug,
+	 "load|l=s" => \$::opt_load,
+	 "factor|f=s" => \$::opt_factor,
+	 "suspend|s=s" => \$::opt_suspend,
+	 "recheck|t=s" => \$::opt_recheck,
+	 "nice|n=i" => \$::opt_nice,
+	 "help|h" => \$::opt_help,
+	 "process|pid|p=s" => \$::opt_pid,
+	 "verbose|v" => \$::opt_verbose,
+	 "version|V" => \$::opt_version,
+	);
+    if(not $this_is_ARGV) {
+	@{$array_ref} = @::ARGV;
+	@::ARGV = @save_argv;
+    }
+    return @retval;
 }
 
+sub die_usage {
+    help();
+    exit 1;
+}
+
+sub help {
+    print q{
+Usage:
+   niceload [-v] [-n=niceness] [-l=loadavg] [-t=recheck_sec] [-s=suspend_sec|-f=factor] command
+   niceload [-v] [-n=niceness] [-l=loadavg] [-t=recheck_sec] [-s=suspend_sec|-f=factor] command
+};
+}
+
+
+
+sub debug {
+    if($::opt_debug) {
+	print STDERR @_;
+    }
+}
+
+sub version {
+    # Returns: N/A
+    print join("\n",
+	       "GNU $Global::progname $Global::version",
+	       "Copyright (C) 2004,2005,2006,2007,2008,2009 Ole Tange",
+	       "Copyright (C) 2010 Ole Tange and Free Software Foundation, Inc.",
+	       "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
+	       "This is free software: you are free to change and redistribute it.",
+	       "GNU $Global::progname comes with no warranty.",
+	       "",
+	       "Web site: http://www.gnu.org/software/parallel\n"
+	);
+}
 
 sub init_signal_handling_attached_child {
     $SIG{INT}=\&sigint_attached_child;
@@ -323,38 +394,38 @@ sub REAPER {
 }
 
 sub kill_child_CONT {
-    $debug and debug("SIGCONT received. Killing $Child::fork\n");
+    debug("SIGCONT received. Killing $Child::fork\n");
     kill CONT => -getpgrp($Child::fork);
 }
 
 sub kill_child_TSTP {
-    $debug and debug("SIGTSTP received. Killing $Child::fork and self\n");
+    debug("SIGTSTP received. Killing $Child::fork and self\n");
     kill TSTP => -getpgrp($Child::fork);
     kill STOP => -$$;
 }
 
 sub kill_child_INT {
-    $debug and debug("SIGINT received. Killing $Child::fork Exit\n");
+    debug("SIGINT received. Killing $Child::fork Exit\n");
     kill INT => -getpgrp($Child::fork);
     exit;
 }
 
 sub suspend_resume {
     my ($max_load,$check_time,$wait_time,$wait_factor,@pids) = @_;
-    $debug and debug("suspend_resume these @pids\n");
+    debug("suspend_resume these @pids\n");
     resume_pids(@pids);
     while (pids_exist(@pids)) {
 	if ( loadavg() > $max_load ) {
 	    if($wait_factor) {
 		$wait_time = (loadavg()-$max_load) * $wait_factor;
 	    }
-	    $verbose and debug("suspending for $wait_time seconds\n");
+	    $::opt_verbose and print STDERR "suspending for $wait_time seconds\n";
 	    suspend_pids(@pids);
 	    sleep 1; # for some reason this statement is skipped
 	    sleep $wait_time;
 	    resume_pids(@pids);
 	}
-	$verbose and debug("running for $check_time second(s)\n");
+	$::opt_verbose and print STDERR "running for $check_time second(s)\n";
 	sleep($check_time);
     }
 }
@@ -362,7 +433,7 @@ sub suspend_resume {
 sub pids_exist {
     my (@pids) = @_;
     my ($exists) = 0;
-    for $pid (@pids) {
+    for my $pid (@pids) {
 	if(-e "/proc/".$pid)  { $exists++ }
 	#if(kill 0 => $Child::fork) { $exists++ }
     }
@@ -406,9 +477,7 @@ sub signal_pids {
     my ($signal,@pids) = @_;
 
     # local $SIG{$signal} = 'IGNORE';
-    for $pid (@pids) {
+    for my $pid (@pids) {
 	kill $signal => -$pid; # stop PID group
     }
 }
-
-$v=$f=$l=$h=$n=$t=$s=$p=$h=$processid; # Ignore perl -w

@@ -140,6 +140,9 @@ New in this release:
 * Implemented --load to wait until the load is below a limit before
   starting another job on that computer.
 
+* Implemented --nice set the niceness of jobs running both locally and
+  remotely.
+
 * Review with focus on clusters. Thanks to Taylor Gillespie
   http://www.unixpronews.com/unixpronews-49-20101019GNUParallelSpeedUpProcessingWithMulticoresClusters.html
 
