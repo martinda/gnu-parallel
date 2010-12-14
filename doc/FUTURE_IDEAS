@@ -1,6 +1,15 @@
---command, -c, --file, and -f now obsoleted. --eta works again.
-Bugfix in testsuite for --retries.
-Lots of dead code removed.
+parallel: --dryrun implemented. --return of multiple files with
+-X. --return of files containing space.
+
+
+== Bug ==
+
+--trc {}' 'done
+
+echo 1' '2 | parallel -vv --trc {}' 'done -S nlv.pi.dk touch {}' 'done
+
+(echo 1' '2;echo a' 'b) | parallel -qvv --trc {}' 'done -S nlv.pi.dk touch {}' 'done
+
 
 == Bug? ==
 

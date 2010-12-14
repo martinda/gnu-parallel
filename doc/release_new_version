@@ -134,6 +134,9 @@ download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* GNU niceload is now part of GNU Parallel. GNU niceload slows down a
+  program if the load average is above a certain limit.
+
 * Implemented --tmpdir to buffer standard output and standard error in
   a different place.
 

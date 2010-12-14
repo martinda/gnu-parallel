@@ -2,7 +2,7 @@
 
 =head1 NAME
 
-niceload - run a program when the load is below a certain limit
+niceload - slow down a program when the load average is above a certain limit
 
 =head1 SYNOPSIS
 

@@ -136,6 +136,7 @@ sub get_options_from_array {
 	 "tempdir=s" => \$::opt_tmpdir,
 	 "halt-on-error|H=s" => \$::opt_halt_on_error,
 	 "retries=i" => \$::opt_retries,
+	 "dry-run|dryrun" => \$::opt_dryrun,
 	 "progress" => \$::opt_progress,
 	 "eta" => \$::opt_eta,
 	 "arg-sep|argsep=s" => \$::opt_arg_sep,
@@ -2301,7 +2302,7 @@ sub return {
     my $self = shift;
     my @return = ();
     for my $return (@{$self->{'commandline'}{'return_files'}}) {
-	CORE::push @return, $self->{'commandline'}->replace_placeholders($return);
+	CORE::push @return, $self->{'commandline'}->replace_placeholders($return,1);
     }
     return @return;
 }
@@ -2452,13 +2453,16 @@ sub start {
 	    print $Global::original_stderr "$command\n";
 	}
     }
-    if($Global::verbose and not $Global::grouped) {
-	if($Global::verbose == 1) {
+    if(($::opt_dryrun or $Global::verbose) and not $Global::grouped) {
+	if($Global::verbose <= 1) {
 	    print STDOUT $job->replaced(),"\n";
 	} else {
 	    # Verbose level > 1: Print the rsync and stuff
 	    print STDOUT $command,"\n";
 	}
+    }
+    if($::opt_dryrun) {
+	$command = "true";
     }
     $Global::total_running++;
     $Global::total_started++;
@@ -2536,8 +2540,8 @@ sub print {
     my $err = $self->stderr();
     my ($command) = $self->sshlogin_wrap();
 
-    if($Global::verbose and $Global::grouped) {
-	if($Global::verbose == 1) {
+    if(($::opt_dryrun or $Global::verbose) and $Global::grouped) {
+	if($Global::verbose <= 1) {
 	    print STDOUT $self->replaced(),"\n";
 	} else {
 	    # Verbose level > 1: Print the rsync and stuff
@@ -2838,7 +2842,7 @@ sub number_of_replacements {
 sub replaced {
     my $self = shift;
     if(not defined $self->{'replaced'}) {
-	$self->{'replaced'} = $self->replace_placeholders($self->{'command'});
+	$self->{'replaced'} = $self->replace_placeholders($self->{'command'},0);
 	if($::opt_nice) {
 	    # Prepend nice -n19 bash -c
 	    # and quote
@@ -2854,8 +2858,9 @@ sub replaced {
 
 sub replace_placeholders {
     my $self = shift;
-    my($target) = shift;
-    my($context_replace) = $self->{'context_replace'};
+    my $target = shift;
+    my $quote_special_chars = shift;
+    my $context_replace = $self->{'context_replace'};
 
     my $context_regexp = $context_replace ? '\S*' : ''; # Regexp to match surrounding context
     if($self->number_of_args() == 0) {
@@ -2897,13 +2902,13 @@ sub replace_placeholders {
 			   0 .. $#args);
 	    }
 	} else {
-	    die;
+	    die('This should not happen. Contact <parallel@gnu.org>.');
 	}
     }
 
     my $replacements = 0;
     if(%replace_single) {
-	my $single_regexp = join('|', map {	$_=~s/(\W)/\\$1/g; $_} sort keys %replace_single);
+	my $single_regexp = join('|', map { $_=~s/(\W)/\\$1/g; $_} sort keys %replace_single);
 	$replacements += ($target =~ s/($single_regexp)/$replace_single{$1}/ge);
     }
     my $orig_target = $target;
@@ -2913,29 +2918,62 @@ sub replace_placeholders {
 	    $a=~s/(\W)/\\$1/g; $a
 				} @used_multi);
 	my %wordargs;
-	while($target =~ s/(\S*($multi_regexp)\S*)/\0/o) {
-	    my $wordarg = $1;
-	    my $pattern = $2;
-	    if($self->{'context_replace'}) {
-		my $substituted = $wordarg;
-		my @all=();
-		for my $argref (@replace_context) {
-		    # for each argument convert a{}b to a1b a2b
+	if($quote_special_chars) {
+	    while($target =~ s/(.*($multi_regexp).*)/\0/o) {
+		my $wordarg = $1;
+		my $pattern = $2;
+		if($self->{'context_replace'}) {
 		    my $substituted = $wordarg;
-		    $substituted =~ s/($multi_regexp)/$argref->{$Global::replace_rev{$1}}/g;
-		    CORE::push @all,$substituted;
+		    my @all=();
+		    for my $argref (@replace_context) {
+			# for each argument convert a{}b to a1b a2b
+			my $substituted = $wordarg;
+			$substituted =~ s/($multi_regexp)/$argref->{$Global::replace_rev{$1}}/g;
+			CORE::push @all,$substituted;
+		    }
+		    $wordargs{$wordarg} = join" ",@all;
+		    return @all;
+		} else {
+		    my $substituted = $wordarg;
+		    $substituted =~ s/($multi_regexp)/join(" ",map {$_} @{$replace_multi{$Global::replace_rev{$1}}})/eg;
+		    $wordargs{$wordarg} = $substituted;
 		}
-		$wordargs{$wordarg} = join" ",@all;
-	    } else {
-		my $substituted = $wordarg;
-		$substituted =~ s/($multi_regexp)/join(" ",map {$_} @{$replace_multi{$Global::replace_rev{$1}}})/eg;
-		$wordargs{$wordarg} = $substituted;
+	    }
+	} else {
+	    while($target =~ s/(\S*($multi_regexp)\S*)/\0/o) {
+		my $wordarg = $1;
+		my $pattern = $2;
+		if($self->{'context_replace'}) {
+		    my $substituted = $wordarg;
+		    my @all=();
+		    for my $argref (@replace_context) {
+			# for each argument convert a{}b to a1b a2b
+			my $substituted = $wordarg;
+			$substituted =~ s/($multi_regexp)/$argref->{$Global::replace_rev{$1}}/g;
+			CORE::push @all,$substituted;
+		    }
+		    $wordargs{$wordarg} = join" ",@all;
+		} else {
+		    my $substituted = $wordarg;
+		    $substituted =~ s/($multi_regexp)/join(" ",map {$_} @{$replace_multi{$Global::replace_rev{$1}}})/eg;
+		    $wordargs{$wordarg} = $substituted;
+		}
 	    }
 	}
+
 	my @k=keys %wordargs;
 	for(@k) {s/(\W)/\\$1/g};
 	my $regexp=join("|",@k);
-	$orig_target =~s/($regexp)/$wordargs{$1}/g;
+	if($quote_special_chars) {
+	    # When --return'ing a file with added special chars
+	    # they need to be quoted.
+	    # E.g. --trc 'a {}'
+	    # Not really pretty. Can this be done better?
+	    $orig_target =~s/($regexp)/::shell_unquote($wordargs{$1})/ge;
+	    $orig_target = ::shell_quote_scalar($orig_target);
+	} else {
+	    $orig_target =~s/($regexp)/$wordargs{$1}/g;
+	}
     }
     return $orig_target;
 }

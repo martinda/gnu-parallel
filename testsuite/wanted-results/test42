@@ -24,13 +24,16 @@ number2
 number2.c
 ### Test {#.}
 a/number2
-### Test combined --return {/}_{/.}_{#/.}_{#/}_{#.}
+### Test combined -X --return {/}_{/.}_{#/.}_{#/}_{#.} with files containing space
 Warning: using -X or -m with --sshlogin may fail
-mkdir -p tmp/number1.c_number1_number2_number2.c_a/number2 tmp/number2.c_number2_number2_number2.c_a/number2 tmp/number3.c_number3_number2_number2.c_a/number2 tmp/number4_number4_number2_number2.c_a/number2 tmp/number5_number5_number2_number2.c_a/number2 tmp/number6_number6_number2_number2.c_a/number2 ;touch tmp/number1.c_number1_number2_number2.c_a/number2/file tmp/number2.c_number2_number2_number2.c_a/number2/file tmp/number3.c_number3_number2_number2.c_a/number2/file tmp/number4_number4_number2_number2.c_a/number2/file tmp/number5_number5_number2_number2.c_a/number2/file tmp/number6_number6_number2_number2.c_a/number2/file
+mkdir -p tmp/number1.c_number1_number2_number2.c_a/number2 tmp/number2.c_number2_number2_number2.c_a/number2 tmp/number3.c_number3_number2_number2.c_a/number2 tmp/number4_number4_number2_number2.c_a/number2 tmp/number5_number5_number2_number2.c_a/number2 tmp/number6_number6_number2_number2.c_a/number2 tmp/number\ 7_number\ 7_number2_number2.c_a/number2 tmp/number\ \<8\|8\>_number\ \<8\|8\>_number2_number2.c_a/number2 ;touch tmp/number1.c_number1_number2_number2.c_a/number2/file tmp/number2.c_number2_number2_number2.c_a/number2/file tmp/number3.c_number3_number2_number2.c_a/number2/file tmp/number4_number4_number2_number2.c_a/number2/file tmp/number5_number5_number2_number2.c_a/number2/file tmp/number6_number6_number2_number2.c_a/number2/file tmp/number\ 7_number\ 7_number2_number2.c_a/number2/file tmp/number\ \<8\|8\>_number\ \<8\|8\>_number2_number2.c_a/number2/file
 tmp
 tmp/number6_number6_number2_number2.c_a
 tmp/number6_number6_number2_number2.c_a/number2
 tmp/number6_number6_number2_number2.c_a/number2/file
+tmp/number <8|8>_number <8|8>_number2_number2.c_a
+tmp/number <8|8>_number <8|8>_number2_number2.c_a/number2
+tmp/number <8|8>_number <8|8>_number2_number2.c_a/number2/file
 tmp/number3.c_number3_number2_number2.c_a
 tmp/number3.c_number3_number2_number2.c_a/number2
 tmp/number3.c_number3_number2_number2.c_a/number2/file
@@ -46,3 +49,8 @@ tmp/number1.c_number1_number2_number2.c_a/number2/file
 tmp/number4_number4_number2_number2.c_a
 tmp/number4_number4_number2_number2.c_a/number2
 tmp/number4_number4_number2_number2.c_a/number2/file
+tmp/number 7_number 7_number2_number2.c_a
+tmp/number 7_number 7_number2_number2.c_a/number2
+tmp/number 7_number 7_number2_number2.c_a/number2/file
+### Here we ought to test -m --return {/}_{/.}_{#/.}_{#/}_{#.} with files containing space
+### But we will wait for a real world scenario
