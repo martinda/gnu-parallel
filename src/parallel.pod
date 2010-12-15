@@ -1590,28 +1590,84 @@ B<inotifywait -q -m -r -e CLOSE_WRITE --format %w%f my_dir | parallel -S ..
 
 =head1 QUOTING
 
-For more advanced use quoting may be an issue. The following will
-print the filename for each line that has exactly 2 columns:
+GNU B<parallel> is very liberal in quoting. You only need to quote
+characters that have special meaning in shell:
+
+( ) $ ` ' " < > ; | \
+
+and depending on context these needs to be quoted, too:
+
+* ~ & # ! ? space * {
+
+When you want to use a shell variable you need to quote the
+$-sign. Here is an example using $PARALLEL_SEQ. This variable is set
+by GNU B<parallel> itself, so the evaluation of the $ must be done by
+the sub shell started by GNU B<parallel>:
+
+B<seq 1 10 | parallel -N2 echo seq:\$PARALLEL_SEQ arg1:{1} arg2:{2}>
+
+If the variable is set before GNU B<parallel> starts you can do this:
+
+B<VAR=this_is_set_before_starting>
+
+B<echo test | parallel echo {} $VAR>
+
+Prints: B<test this_is_set_before_starting>
+
+If the variable should not be evaluated by the shell starting GNU
+B<parallel> but be evaluated by the sub shell started by GNU
+B<parallel>, then you need to quote it:
+
+B<echo test | parallel VAR=this_is_set_after_starting \; echo {} \$VAR>
+
+Prints: B<test this_is_set_after_starting>
+
+$$ is the shell variable containing the process id of the shell. This
+will print the process id of the shell running GNU B<parallel>:
+
+B<seq 1 10 | parallel echo $$>
+
+And this will print the process ids of the sub shells started by GNU
+B<parallel>.
+
+B<seq 1 10 | parallel echo \$\$>
+
+If the special characters should not be evaluated by the sub shell
+then you need to protect it against evaluation from both the shell
+starting GNU B<parallel> and the sub shell:
+
+B<echo test | parallel echo {} \\\$VAR>
+
+Prints: B<test $VAR>
+
+GNU B<parallel> can protect against evaluation by the sub shell by
+using -q:
+
+B<echo test | parallel -q echo {} \$VAR>
+
+Prints: B<test $VAR>
+
+This is particularly useful if you have lots of quoting. If you want to run a perl script like this:
 
 B<perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file>
 
-This can be done by GNU B<parallel> using:
+It needs to be quoted like this:
 
-B<ls | parallel "perl -ne '/^\\S+\\s+\\S+$/ and print \$ARGV,\"\\n\"'">
+B<ls | parallel  perl -ne '/^\\S+\\s+\\S+\$/\ and\ print\ \$ARGV,\"\\n\"'>
 
-Notice how \'s, "'s, and $'s needs to be quoted. GNU B<parallel> can do
-the quoting by using option B<-q>:
+Notice how spaces, \'s, "'s, and $'s need to be quoted. GNU B<parallel>
+can do the quoting by using option -q:
 
 B<ls | parallel -q  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"'>
 
-However, this means you cannot make the shell interpret special
-characters. For example this B<will not work>:
+However, this means you cannot make the sub shell interpret special
+characters. For example this WILL NOT WORK:
 
 B<ls *.gz | parallel -q "zcat {} >>B<{.}">
 
 B<ls *.gz | parallel -q "zcat {} | bzip2 >>B<{.}.bz2">
 
-because > and | need to be interpreted by the shell.
+because > and | need to be interpreted by the sub shell.
 
 If you get errors like:
 
