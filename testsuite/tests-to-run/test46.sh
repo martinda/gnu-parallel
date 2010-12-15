@@ -12,3 +12,8 @@ echo '### Test --trc with >|< added in filename'
 echo original > '/tmp/parallel space file'
 echo '/tmp/parallel space file' | parallel --trc "{} >|<" -S $SERVER1 cat {} ">{}\\ \\>\\|\\<"
 cat '/tmp/parallel space file >|<'
+
+echo '### Test --return with fixed string (Gave undef warnings)'
+touch a
+echo a | stdout parallel --return b -S .. echo ">b" && echo OK
+rm a b

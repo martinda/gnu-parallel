@@ -312,6 +312,15 @@ occurs as a line of input, the rest of the input is ignored.  If
 neither B<-E> nor B<-e> is used, no end of file string is used.
 
 
+=item B<--dry-run>
+
+Print the job to run on standard output, but do not run the job. Use
+B<-v -v> to include the ssh/rsync wrapping if the job would be run on
+a remote computer. Do not count on this literaly, though, as the job
+may be scheduled on another computer or the local computer if : is in
+the list.
+
+
 =item B<--eof>[=I<eof-str>]
 
 =item B<-e>[I<eof-str>]
@@ -831,8 +840,7 @@ setting $TMPDIR.
 
 =item B<-t>
 
-Print the command line on the standard error output before executing
-it.
+Print the job to be run on standard error.
 
 See also B<-v> and B<-p>.
 
@@ -928,8 +936,8 @@ not need this option.
 
 =item B<-v>
 
-Verbose.  Print the job to be run on STDOUT. Can be reversed with
-B<--silent>. See also B<-t>.
+Verbose.  Print the job to be run on standard output. Can be reversed
+with B<--silent>. See also B<-t>.
 
 Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 

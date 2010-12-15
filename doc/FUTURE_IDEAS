@@ -1,17 +1,4 @@
-parallel: --dryrun implemented. --return of multiple files with
--X. --return of files containing space.
-
-
-== Bug ==
-
---trc {}' 'done
-
-echo 1' '2 | parallel -vv --trc {}' 'done -S nlv.pi.dk touch {}' 'done
-
-(echo 1' '2;echo a' 'b) | parallel -qvv --trc {}' 'done -S nlv.pi.dk touch {}' 'done
-
-
-== Bug? ==
+= Bug? ==
 
 locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ... -S .. --trc {/}.bz2 'zcat {} | bzip2 > {/}.bz2'
 
@@ -21,29 +8,15 @@ locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ..
 http://code.google.com/p/spawntool/
 http://code.google.com/p/push/
 
-== Basename ==
-
-find mp3/ -iname "*.mp3" | parallel -j+0 lame -S -q1 --vbr-new -V6 -b 32 -B128 {} /mnt/sda1/tmp-zik/{/}
-
 == Bug? ==
 
 .parallel/config with --long-options
 
 time find . -type f | parallel -j+0 --eta -S..,: --progress --trc {}.gz gzip  {}
 
-== Bug --eta ==
-
-Only negative.
-
 == Workdir ==
 
-Bug: {2} in --return
 parallel -N2 --workdir ... --cleanup --transfer --return {2}.2 -S .. -v echo {} ">{2}.2" ::: ./tmp/foo ./tmp/bar
-
-== load ==
-
-Include niceload
-Have an option to not spawn new tasks until load is below a limit computed like number of jobs.
 
 == SQL ==
 

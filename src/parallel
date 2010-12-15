@@ -510,6 +510,9 @@ sub shell_unquote {
     my (@strings) = (@_);
     my $arg;
     for $arg (@strings) {
+	if(not defined $arg) {
+	    $arg = "";
+	}
 	$arg =~ s/'\n'/\n/g; # filenames with '\n' is quoted using \'
 	$arg =~ s/\\([\002-\011\013-\032])/$1/g;
 	$arg =~ s/\\([\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/$1/g;
