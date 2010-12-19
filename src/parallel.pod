@@ -659,7 +659,7 @@ default.
 If the stdin (standard input) only contains whitespace, do not run the command.
 
 
-=item B<--retries> I<n>
+=item B<--retries> I<n> (beta testing)
 
 If a job fails, retry it on another computer. Do this I<n> times. If
 there are fewer than I<n> computers in B<--sshlogin> GNU parallel will
@@ -1599,7 +1599,10 @@ and depending on context these needs to be quoted, too:
 
 * ~ & # ! ? space * {
 
-When you want to use a shell variable you need to quote the
+Therefore most people will never need more quoting than putting '\'
+in front of the special characters.
+
+However, when you want to use a shell variable you need to quote the
 $-sign. Here is an example using $PARALLEL_SEQ. This variable is set
 by GNU B<parallel> itself, so the evaluation of the $ must be done by
 the sub shell started by GNU B<parallel>:
@@ -1614,6 +1617,14 @@ B<echo test | parallel echo {} $VAR>
 
 Prints: B<test this_is_set_before_starting>
 
+It is a little more tricky if the variable contains more than one space in a row:
+
+B<VAR="two  spaces  between  each  word">
+
+B<echo test | parallel echo {} \'"$VAR"\'>
+
+Prints: B<test two  spaces  between  each  word>
+
 If the variable should not be evaluated by the shell starting GNU
 B<parallel> but be evaluated by the sub shell started by GNU
 B<parallel>, then you need to quote it:
@@ -1621,6 +1632,12 @@ B<parallel>, then you need to quote it:
 B<echo test | parallel VAR=this_is_set_after_starting \; echo {} \$VAR>
 
 Prints: B<test this_is_set_after_starting>
+
+It is a little more tricky if the variable contains space:
+
+B<echo test | parallel VAR='"two  spaces  between  each  word"' echo {} \'"$VAR"\'>
+
+Prints: B<test two  spaces  between  each  word>
 
 $$ is the shell variable containing the process id of the shell. This
 will print the process id of the shell running GNU B<parallel>:
@@ -1661,7 +1678,7 @@ can do the quoting by using option -q:
 B<ls | parallel -q  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"'>
 
 However, this means you cannot make the sub shell interpret special
-characters. For example this WILL NOT WORK:
+characters. For example because of B<-q> this WILL NOT WORK:
 
 B<ls *.gz | parallel -q "zcat {} >>B<{.}">
 

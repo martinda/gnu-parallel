@@ -1,3 +1,28 @@
+Til QUOTING:
+
+FN="two  spaces"
+echo 1 | parallel -q echo {} "$FN"
+# Prints 2 spaces between 'two' and 'spaces'
+
+-q will not work with composed commands as it will quote the ; as
+well. So composed commands have to be quoted by hand:
+
+# Using export:
+FN2="two  spaces"
+export FN2
+echo 1 | parallel echo {} \"\$FN2\" \; echo \"\$FN2\" {}
+# Prints 2 spaces between 'two' and 'spaces'
+
+# Without export:
+FN3="two  spaces"
+echo 1 | parallel echo {} \""$FN3"\" \; echo \'"$FN3"\' {}
+
+# By quoting the space in the variable
+FN4='two\ \ spaces'
+echo 1 | parallel echo {} $FN4 \; echo $FN4 {}
+
+
+
 = Bug? ==
 
 locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ... -S .. --trc {/}.bz2 'zcat {} | bzip2 > {/}.bz2'

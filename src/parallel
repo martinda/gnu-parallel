@@ -36,9 +36,8 @@ if($::opt_skip_first_line) {
     <$fh>;
 }
 
-$Global::CommandLineQueue = CommandLineQueue->new(
+$Global::JobQueue = JobQueue->new(
     join(" ",@ARGV),\@fhlist,$Global::Xargs,$number_of_args,\@Global::ret_files);
-$Global::JobQueue = JobQueue->new($Global::CommandLineQueue);
 
 init_run_jobs();
 my $sem;
@@ -485,10 +484,6 @@ sub shell_quote {
     for my $a (@strings) {
 	$a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
 	$a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
-#	$arg =~ s/\\/\\\\/g;
-#	$arg =~ s/([\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
-#	$arg =~ s/([\002-\011\013-\032])/\\$1/g;
-#	$arg =~ s/([\n])/'\n'/g; # filenames with '\n' is quoted using \'
     }
     return wantarray ? @strings : "@strings";
 }
@@ -869,7 +864,7 @@ sub start_more_jobs {
 	    }
 	}
 	for my $sshlogin (values %Global::host) {
-	    debug("Running jobs on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
+	    debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
 	    if($::opt_load and $sshlogin->loadavg_too_high()) {
 		# The load is too high or unknown
 		next;
@@ -880,14 +875,16 @@ sub start_more_jobs {
 		}
 		debug("Try starting a job on ".$sshlogin->string()."\n");
 		if(start_another_job($sshlogin) == 0) {
-		    # No more jobs to start
+		    # No more jobs to start on this $sshlogin
+		    debug("Empty after retry: ",$Global::JobQueue->empty(),"\n");
 		    last;
 		}
 		debug("Job started on ".$sshlogin->string()."\n");
 		$sshlogin->inc_jobs_running();
 		$jobs_started++;
 	    }
-	    debug("Running jobs on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
+	    debug("Running jobs after on ".$sshlogin->string().": ".$sshlogin->jobs_running()
+		  ." of ".$sshlogin->max_jobs_running() ."\n");
 	}
     }
     return $jobs_started;
@@ -1575,8 +1572,8 @@ sub processes_available_by_system_limit {
     my $wanted_processes = shift;
 
     my $system_limit=0;
-    my @command_lines=();
-    my ($next_command_line, $args_ref);
+    my @jobs=();
+    my ($job, $args_ref);
     my $more_filehandles=1;
     my $max_system_proc_reached=0;
     my $slow_spawining_warning_printed=0;
@@ -1591,19 +1588,24 @@ sub processes_available_by_system_limit {
     for my $i (1..8) {
 	open($fh{"init-$i"},"</dev/null");
     }
-    while($system_limit < $wanted_processes
-	  and (not $Global::CommandLineQueue->empty() or $Global::semaphore)
-	  and $more_filehandles
-	  and not $max_system_proc_reached) {
-	$system_limit++;
-
-	if(not $Global::semaphore) {
+    my $count_jobs_already_read = $Global::JobQueue->next_seq();
+    while(1) {
+	$system_limit >= $wanted_processes and last;
+	not $more_filehandles and last;
+	$max_system_proc_reached and last;
+	if($Global::semaphore) {
+	} elsif(defined $::opt_retries and $count_jobs_already_read) {
+	    # For retries we may need to run all jobs on this sshlogin
+	    # so include the already read jobs for this sshlogin
+	    $count_jobs_already_read--;
+	} else {
 	    # If there are no more command lines, then we have a process
 	    # per command line, so no need to go further
-
-	    ($next_command_line) = $Global::CommandLineQueue->get();
-	    push(@command_lines, $next_command_line);
+	    $Global::JobQueue->empty() and last;
+	    ($job) = $Global::JobQueue->get();
+	    push(@jobs, $job);
 	}
+	$system_limit++;
 
 	# Every simultaneous process uses 2 filehandles when grouping
 	$more_filehandles = open($fh{$system_limit*2},"</dev/null")
@@ -1655,7 +1657,7 @@ sub processes_available_by_system_limit {
 
     #wait();
     # Cleanup: Unget the command_lines (and args_refs)
-    $Global::CommandLineQueue->unget(@command_lines);
+    $Global::JobQueue->unget(@jobs);
     if($self->string() ne ":" and
        $system_limit > $Global::default_simultaneous_sshlogins) {
 	$system_limit =
@@ -2014,12 +2016,19 @@ package JobQueue;
 
 sub new {
     my $class = shift;
-    my $commandlinequeue = shift;
+    my $command = shift;
+    my $read_from = shift;
+    my $context_replace = shift;
+    my $max_number_of_args = shift;
+    my $return_files = shift;
+    my $commandlinequeue = CommandLineQueue->new(
+	$command,$read_from,$context_replace,$max_number_of_args,$return_files);
     my @unget = ();
     return bless {
 	'unget' => \@unget,
 	'commandlinequeue' => $commandlinequeue,
 	'total_jobs' => undef,
+	'next_seq' => 1,
     }, ref($class) || $class;
 }
 
@@ -2033,6 +2042,8 @@ sub get {
 	my $commandline = $self->{'commandlinequeue'}->get();
 	if(defined $commandline) {
 	    my $job = Job->new($commandline);
+	    $job->set_seq($self->{'next_seq'});
+	    $self->{'next_seq'}++;
 	    return $job;
 	} else {
 	    return undef;
@@ -2066,6 +2077,17 @@ sub total_jobs {
     return $self->{'total_jobs'};
 }
 
+sub next_seq {
+    my $self = shift;
+
+    return $self->{'next_seq'};
+}
+
+sub quote_args {
+    my $self = shift;
+    return $self->{'commandlinequeue'}->quote_args();
+}
+    
 
 package Job;
 
@@ -2450,7 +2472,7 @@ sub start {
 		    or die "Can't dup \$oldout: $!";
 		open STDERR, ">&", $Global::original_stderr
 		    or die "Can't dup \$oldout: $!";
-		return undef;
+		$command = "true"; # Run the command 'true'
 	    }
 	} else {
 	    print $Global::original_stderr "$command\n";
@@ -2469,11 +2491,6 @@ sub start {
     }
     $Global::total_running++;
     $Global::total_started++;
-    if(not $job->seq()) {
-	# This is a new (non-retried) job: Give it a new seq
-	$Private::job_start_sequence++;
-	$job->set_seq($Private::job_start_sequence);
-    }
     $ENV{'PARALLEL_SEQ'} = $job->seq();
     $ENV{'PARALLEL_PID'} = $$;
     ::debug("$Global::total_running processes. Starting (".$job->seq()."): $command\n");
@@ -3375,7 +3392,7 @@ sub replace {
 	    $s =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
 	    $s =~ s:\.[^/\.]*$::; # Remove .ext from argument
 	}
-	if($Global::CommandLineQueue->quote_args()) {
+	if($Global::JobQueue->quote_args()) {
 	    $s = ::shell_quote_scalar($s);
 	}
 	$self->{$replacement_string} = $s;
