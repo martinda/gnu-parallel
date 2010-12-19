@@ -56,8 +56,7 @@ http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
 =item I<command>
 
 Command to execute.  If I<command> or the following arguments contain
-{} every instance will be substituted with the input line. Setting a
-command also invokes B<--file>.
+{} every instance will be substituted with the input line.
 
 If I<command> is given, GNU B<parallel> will behave similar to B<xargs>. If
 I<command> is not given GNU B<parallel> will behave similar to B<cat | sh>.
@@ -278,18 +277,6 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
-=item B<--command>
-
-=item B<-c> (Use B<--command> as B<-c> may be removed in later versions)
-
-Line is a command.  The input line contains more than one argument or
-the input line needs to be evaluated by the shell. This is the default
-if I<command> is not set. Can be reversed with B<--file>.
-
-Most people will never need this because GNU B<parallel> normally
-selects the correct B<--file> or B<--command>.
-
-
 =item B<--delimiter> I<delim>
 
 =item B<-d> I<delim>
@@ -347,18 +334,6 @@ completion of the command before exiting.
 See also: B<--bg>
 
 Implies B<--semaphore>.
-
-
-=item B<--file>
-
-=item B<-f> (Use B<--file> as B<-f> may be removed in later versions)
-
-Line is a filename.  The input line contains a filename that will be
-quoted so it is not evaluated by the shell. This is the default if
-I<command> is set. Can be reversed with B<--command>.
-
-Most people will never need this because GNU B<parallel> normally
-selects the correct B<--file> or B<--command>.
 
 
 =item B<--group>
@@ -1498,8 +1473,7 @@ To run 100 processes simultaneously do:
 
 B<parallel -j 100 < jobs_to_run>
 
-As there is not a I<command> the option B<--command> is default
-because the jobs needs to be evaluated by the shell.
+As there is not a I<command> the jobs will be evaluated by the shell.
 
 
 =head1 EXAMPLE: Working as mutex and counting semaphore

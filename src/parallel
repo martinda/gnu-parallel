@@ -36,8 +36,17 @@ if($::opt_skip_first_line) {
     <$fh>;
 }
 
+my $command;
+if(@ARGV) {
+    if($Global::quoting) {
+	$command = shell_quote(@ARGV);
+    } else {
+	$command = join(" ", @ARGV);
+    }
+}
+
 $Global::JobQueue = JobQueue->new(
-    join(" ",@ARGV),\@fhlist,$Global::Xargs,$number_of_args,\@Global::ret_files);
+    $command,\@fhlist,$Global::Xargs,$number_of_args,\@Global::ret_files);
 
 init_run_jobs();
 my $sem;
@@ -142,7 +151,7 @@ sub get_options_from_array {
 	 "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
 	 "trim=s" => \$::opt_trim,
 	 "profile|J=s" => \$::opt_profile,
-	 # xargs-compatibility - implemented, man, unittest
+	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$::opt_P,
 	 "delimiter|d=s" => \$::opt_d,
 	 "max-chars|s=i" => \$::opt_s,
@@ -183,7 +192,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20101206;
+    $Global::version = 20101217;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -201,7 +210,6 @@ sub parse_options {
     $Global::default_simultaneous_sshlogins = 9;
     $Global::exitstatus = 0;
     $Global::halt_on_error_exitstatus = 0;
-    $Global::total_jobs = 0;
     $Global::arg_sep = ":::";
     $Global::arg_file_sep = "::::";
     $Global::trim = 'n';
@@ -292,14 +300,6 @@ sub parse_options {
     }
     if(defined $::opt_eta) {
 	$::opt_progress = $::opt_eta;
-    }
-
-    if(@ARGV) {
-	if($Global::quoting) {
-	    $Global::command = shell_quote(@ARGV);
-	} else {
-	    $Global::command = join(" ", @ARGV);
-	}
     }
 
     parse_sshlogin();
@@ -404,7 +404,6 @@ sub read_args_from_command_line {
 		    @ARGV=();
 		    if(defined $prepend) {
 			push(@Global::unget_argv, [Arg->new($prepend)]);
-			$Global::total_jobs++;
 		    }
 		    last;
 		}
@@ -420,7 +419,6 @@ sub read_args_from_command_line {
 		    }
 		}
 		push(@Global::unget_argv, [Arg->new($arg)]);
-		$Global::total_jobs++;
 	    }
 	    last;
 	} else {
@@ -891,14 +889,12 @@ sub start_more_jobs {
 }
 
 sub start_another_job {
-    # Grab a job from @Global::command, start it at sshlogin
+    # Grab a job from Global::JobQueue, start it at sshlogin
     # and remember the pid, the STDOUT and the STDERR handles
     # Returns:
     #   1 if another jobs was started
     #   0 otherwise
     my $sshlogin = shift;
-#    ::my_dump($sshlogin);
-#    ::my_dump($Global::JobQueue);
     # Do we have enough file handles to start another job?
     if(enough_file_handles()) {
 	if($Global::JobQueue->empty()) {
@@ -1015,15 +1011,9 @@ sub parse_sshlogin {
 	}
     }
     for my $sshlogin_string (@login) {
-	if($sshlogin_string =~ s:^(\d*)/:: and $1) {
-	    # Override default autodetected ncpus unless zero or missing
-	    $Global::host{$sshlogin_string} = SSHLogin->new($sshlogin_string);
-	    $Global::host{$sshlogin_string}->set_ncpus($1);
-	} else {
-	    $Global::host{$sshlogin_string} = SSHLogin->new($sshlogin_string);
-	}
-	$Global::host{$sshlogin_string}->set_jobs_running(0);
-	$Global::host{$sshlogin_string}->set_maxlength(Limits::Command::max_length());
+	my $sshlogin = SSHLogin->new($sshlogin_string);
+	$sshlogin->set_maxlength(Limits::Command::max_length());
+	$Global::host{$sshlogin->string()} = $sshlogin;
     }
     #debug("sshlogin: ", my_dump(%Global::host),"\n");
     if($::opt_transfer or @::opt_return or $::opt_cleanup or @::opt_basefile) {
@@ -1347,15 +1337,21 @@ package SSHLogin;
 
 sub new {
     my $class = shift;
-    my $string = shift;
+    my $sshlogin_string = shift;
+    my $ncpus;
+    if($sshlogin_string =~ s:^(\d*)/:: and $1) {
+	# Override default autodetected ncpus unless zero or missing
+	$ncpus = $1;
+    }
+    my $string = $sshlogin_string;
     my @unget = ();
     return bless {
 	'string' => $string,
-	'jobs_running' => undef,
+	'jobs_running' => 0,
 	'jobs_completed' => 0,
 	'maxlength' => undef,
 	'max_jobs_running' => undef,
-	'ncpus' => undef,
+	'ncpus' => $ncpus,
 	'sshcommand' => undef,
 	'serverlogin' => undef,
 	'control_path_dir' => undef,
@@ -2096,6 +2092,7 @@ sub new {
     my $commandline = shift;
     return bless {
 	'commandline' => $commandline,
+	'workdir' => undef,
 	'seq' => undef,
 	'stdout' => undef,
 	'stderr' => undef,
@@ -2248,7 +2245,6 @@ sub sshlogin_wrap {
 	if($serverlogin eq ":") {
 	    $self->{'sshlogin_wrap'} = $next_command_line;
 	} else {
-	    $Global::transfer_seq++;
 	    # --transfer
 	    $pre .= $self->sshtransfer();
 	    # --return
@@ -2263,7 +2259,7 @@ sub sshlogin_wrap {
 		'PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\;';
 	    if($::opt_workdir) {
 		$self->{'sshlogin_wrap'} = ($pre . "$sshcmd $serverlogin $parallel_env "
-					    . ::shell_quote_scalar("cd ".workdir()." && ")
+					    . ::shell_quote_scalar("cd ".$self->workdir()." && ")
 					    . ::shell_quote_scalar($next_command_line).";".$post);
 	    } else {
 		$self->{'sshlogin_wrap'} = ($pre . "$sshcmd $serverlogin $parallel_env "
@@ -2304,7 +2300,7 @@ sub sshtransfer {
 	# Abs path: rsync -rlDzRE /home/tange/dir/subdir/file.gz server:/
 	# Rel path: rsync -rlDzRE ./subdir/file.gz server:.parallel/tmp/tempid/
 	# Rel path: rsync -rlDzRE ./subdir/file.gz server:$workdir/
-	my $remote_workdir = workdir($file);
+	my $remote_workdir = $self->workdir($file);
 	my $rsync_destdir = ($relpath ? $remote_workdir : "/");
 	if($relpath) {
 	    $file = "./".$file;
@@ -2352,7 +2348,7 @@ sub sshreturn {
 	my $remove = $::opt_cleanup ? "--remove-source-files" : "";
 	# If relative path: prepend workdir/./ to avoid problems if the dir contains ':'
 	# and to get the right relative return path
-	my $replaced = ($relpath ? workdir()."/./" : "") . $file;
+	my $replaced = ($relpath ? $self->workdir()."/./" : "") . $file;
 	# --return
 	# Abs path: rsync -rlDzRE server:/home/tange/dir/subdir/file.gz /
 	# Rel path: rsync -rlDzRE server:./subsir/file.gz ./
@@ -2370,7 +2366,7 @@ sub sshcleanup {
     my ($sshlogin) = $self->sshlogin();
     my $sshcmd = $sshlogin->sshcommand();
     my $serverlogin = $sshlogin->serverlogin();
-    my $workdir = workdir();
+    my $workdir = $self->workdir();
     my $removeworkdir = "";
     my $cleancmd = "";
 
@@ -2403,20 +2399,24 @@ sub cleanup {
 sub workdir {
     # Returns:
     #   the workdir on a remote machine
-    my $workdir;
-    if(defined $::opt_workdir) {
-	if($::opt_workdir ne "...") {
-	    $workdir = $::opt_workdir;
-	    $workdir =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
-	    $workdir =~ s:/+$::; # Remove ending / if any
-	    $workdir =~ s:^\./::g; # Remove starting ./ if any
+    my $self = shift;
+    if(not defined $self->{'workdir'}) {
+	my $workdir;
+	if(defined $::opt_workdir) {
+	    if($::opt_workdir ne "...") {
+		$workdir = $::opt_workdir;
+		$workdir =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
+		$workdir =~ s:/+$::; # Remove ending / if any
+		$workdir =~ s:^\./::g; # Remove starting ./ if any
+	    } else {
+		$workdir = ".parallel/tmp/".::hostname()."-".$$."-".$self->{'seq'};
+	    }
 	} else {
-	    $workdir = ".parallel/tmp/".::hostname()."-".$$."-".$Global::transfer_seq;
+	    $workdir = ".";
 	}
-    } else {
-	$workdir = ".";
+	$self->{'workdir'} = $workdir;
     }
-    return $workdir;
+    return $self->{'workdir'};
 }
 
 sub parentdirs_of {
@@ -2442,22 +2442,20 @@ sub start {
 	die "jkj2";
     }
     my $command = $job->sshlogin_wrap();
-    my ($pid,$name);
+    my $pid;
     if($Global::grouped) {
-	my (%out,%err,$outname,$errname);
+	my ($outfh,$errfh,$name);
 	# To group we create temporary files for STDOUT and STDERR
 	# To avoid the cleanup unlink the files immediately (but keep them open)
-	$outname = ++$Private::TmpFilename;
-	($out{$outname},$name) = ::tempfile(SUFFIX => ".par");
+	($outfh,$name) = ::tempfile(SUFFIX => ".par");
 	unlink $name;
-	$errname = ++$Private::TmpFilename;
-	($err{$errname},$name) = ::tempfile(SUFFIX => ".par");
+	($errfh,$name) = ::tempfile(SUFFIX => ".par");
 	unlink $name;
 
-	open STDOUT, '>&', $out{$outname} or die "Can't redirect STDOUT: $!";
-	open STDERR, '>&', $err{$errname} or die "Can't dup STDOUT: $!";
-	$job->set_stdout($out{$outname});
-	$job->set_stderr($err{$errname});
+	open STDOUT, '>&', $outfh or die "Can't redirect STDOUT: $!";
+	open STDERR, '>&', $errfh or die "Can't dup STDOUT: $!";
+	$job->set_stdout($outfh);
+	$job->set_stderr($errfh);
     }
 
     if($Global::interactive or $Global::stderr_verbose) {
@@ -3011,7 +3009,7 @@ sub new {
     my @unget = ();
     return bless {
 	'unget' => \@unget,
-	'command' => $Global::command,
+	'command' => $command,
 	'arg_queue' => RecordQueue->new($read_from,$::opt_colsep),
 	'context_replace' => $context_replace,
 	'max_number_of_args' => $max_number_of_args,
