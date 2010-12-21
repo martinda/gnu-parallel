@@ -15,6 +15,7 @@ src/parallel: $Global::version = 20100422;
 YYYYMMDD=`yyyymmdd`
 perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/parallel
 perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/sql
+perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/niceload
 
 === Autoconf/automake ===
 

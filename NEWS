@@ -1,3 +1,34 @@
+20101222
+
+* GNU niceload is now part of GNU Parallel. GNU niceload slows down a
+  program if the load average is above a certain limit.
+
+* Implemented --tmpdir to buffer standard output and standard error in
+  a different place.
+
+* Implemented --load to wait until the load is below a limit before
+  starting another job on that computer.
+
+* Implemented --nice set the niceness of jobs running both locally and
+  remotely.
+
+* Implemented --dry-run to print the job without running it.
+
+* Implemented --tty as the old default of assigning a tty to the first
+  job causes problems.
+
+* Review with focus on clusters. Thanks to Taylor Gillespie
+  http://www.unixpronews.com/unixpronews-49-20101019GNUParallelSpeedUpProcessingWithMulticoresClusters.html
+
+* Review with focus on protein similarity. 
+  http://kevinformatics.tumblr.com/post/2142473893/cluster-like-computing-using-gnu-parallel
+
+* Review in Spanish.
+  http://gr3p.com/2010/12/gnu-parallel-acelera-tus-scripts-en-linux
+
+* Quite a few bug fixes and man page updates.
+
+
 20101202
 
 * Implemented {/} for the input line with the path removed (basename).
@@ -23,6 +54,7 @@
 
 * Major rewrite to make the code more object oriented and easier to
   maintain in the future.
+
 
 20101113
 
