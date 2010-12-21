@@ -1,3 +1,6 @@
+cleanup of transferred files in workdir fixed.
+-T implemented as ssh/rsync sometimes hang due to getting a tty.
+
 Til QUOTING:
 
 FN="two  spaces"
@@ -309,7 +312,8 @@ distribute the arguments evenly if running -X.
 
 =head1 options
 
-One char options not used: A F G K O Q R T Z
+One char options not used: A F G K O Q R T Z c f
+-T terminal
 
 =head1 sem
 

@@ -22,7 +22,7 @@ rm -fr autom4te.cache aclocal.m4 config.h config.h.in config.log Makefile.in mis
 rm -rf src/Makefile.in
 autoreconf --install -W gnu
 ./configure
-make && sudo make install
+make -j && sudo make install
 
 == Testsuite ==
 
@@ -89,9 +89,14 @@ https://savannah.gnu.org/news/approve.php?group=parallel
 
 http://www.gnu.org/software/parallel/
 http://www.gnu.org/software/parallel/man.html
+http://www.gnu.org/software/parallel/sql.html
+http://www.gnu.org/software/parallel/sem.html
+http://www.gnu.org/software/parallel/niceload.html
 
-pod2html src/parallel > ../parallel-web/parallel/man.html
+pod2html src/parallel.pod > ../parallel-web/parallel/man.html
 pod2html src/sql > ../parallel-web/parallel/sql.html
+pod2html src/niceload > ../parallel-web/parallel/niceload.html
+pod2html src/sem.pod > ../parallel-web/parallel/sem.html
 cd ../parallel-web/parallel
 cvs up
 cvs ci
@@ -125,11 +130,13 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>,
    Chris Howey <howeyc@gmail.com>, Fethican Coşkuner <fethicanc@gmail.com>,
    Rogério Brito <rbrito@ime.usp.br>, Jonathan Palardy <jonathan.palardy@gmail.com>,
-   Koen Vervloesem <koen@vervloesem.eu>, R. Tyler Croy <tyler@monkeypox.org>
+   Koen Vervloesem <koen@vervloesem.eu>, R. Tyler Croy <tyler@monkeypox.org>,
+   ryoichiro.suzuki@gmail.com,kerick@shiftedbit.net,
+   Christian Faulhammer <fauli@gentoo.org>
 
-Subject: GNU Parallel 20101202 released
+Subject: GNU Parallel 20101222 released
 
-GNU Parallel 20101202 has been released. It is available for
+GNU Parallel 20101222 has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
@@ -146,13 +153,26 @@ New in this release:
 * Implemented --nice set the niceness of jobs running both locally and
   remotely.
 
+* Implemented --dry-run to print the job without running it.
+
+* Implemented --tty as the old default of assigning a tty to the first
+  job causes problems.
+
 * Review with focus on clusters. Thanks to Taylor Gillespie
   http://www.unixpronews.com/unixpronews-49-20101019GNUParallelSpeedUpProcessingWithMulticoresClusters.html
+
+* Review with focus on protein similarity. 
+  http://kevinformatics.tumblr.com/post/2142473893/cluster-like-computing-using-gnu-parallel
+
+* Review in Spanish.
+  http://gr3p.com/2010/12/gnu-parallel-acelera-tus-scripts-en-linux
+
+* Quite a few bug fixes and man page updates.
 
 = About GNU Parallel =
 
 GNU Parallel is a shell tool for executing jobs in parallel using one
-or more machines. A job is typically a single command or a small
+or more computers. A job is typically a single command or a small
 script that has to be run for each of the lines in the input. The
 typical input is a list of files, a list of hosts, a list of users, a
 list of URLs, or a list of tables.

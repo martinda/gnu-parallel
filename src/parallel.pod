@@ -246,18 +246,18 @@ Implies B<--semaphore>.
 =item B<--cleanup>
 
 Remove transferred files. B<--cleanup> will remove the transferred files
-on the remote server after processing is done.
+on the remote computer after processing is done.
 
   find log -name '*gz' | parallel \
     --sshlogin server.example.com --transfer --return {.}.bz2 \
     --cleanup "zcat {} | bzip -9 >{.}.bz2"
 
-With B<--transfer> the file transferred to the remote server will be
-removed on the remote server.  Directories created will not be removed
+With B<--transfer> the file transferred to the remote computer will be
+removed on the remote computer.  Directories created will not be removed
 - even if they are empty.
 
-With B<--return> the file transferred from the remote server will be
-removed on the remote server.  Directories created will not be removed
+With B<--return> the file transferred from the remote computer will be
+removed on the remote computer.  Directories created will not be removed
 - even if they are empty.
 
 B<--cleanup> is ignored when not used with B<--transfer> or B<--return>.
@@ -493,12 +493,12 @@ Implies B<-X> unless B<-m> is set.
 
 =item B<--load> I<max-load> (experimental)
 
-Do not start new jobs on a given machine unless the load is less than
+Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
 is a valid setting.
 
 The load average is only sampled every 10 seconds to avoid stressing
-small machines.
+small computers.
 
 
 =item B<--controlmaster> (experimental)
@@ -610,8 +610,8 @@ with 'y' or 'Y'.  Implies B<-t>.
 
 Use profile I<profilename> for options. This is useful if you want to
 have multiple profiles. You could have one profile for running jobs in
-parallel on the local machine and a different profile for running jobs
-on remote machines. See the section PROFILE FILES for examples.
+parallel on the local computer and a different profile for running jobs
+on remote computers. See the section PROFILE FILES for examples.
 
 I<profilename> corresponds to the file ~/.parallel/I<profilename>.
 
@@ -644,23 +644,23 @@ reason (such as network failure).
 
 =item B<--return> I<filename>
 
-Transfer files from remote servers. B<--return> is used with
-B<--sshlogin> when the arguments are files on the remote servers. When
+Transfer files from remote computers. B<--return> is used with
+B<--sshlogin> when the arguments are files on the remote computers. When
 processing is done the file I<filename> will be transferred
-from the remote server using B<rsync> and will be put relative to
+from the remote computer using B<rsync> and will be put relative to
 the default login dir. E.g.
 
   echo foo/bar.txt | parallel \
     --sshlogin server.example.com --return {.}.out touch {.}.out
 
-This will transfer the file I<$HOME/foo/bar.out> from the server
+This will transfer the file I<$HOME/foo/bar.out> from the computer
 I<server.example.com> to the file I<foo/bar.out> after running
 B<touch foo/bar.out> on I<server.example.com>.
 
   echo /tmp/foo/bar.txt | parallel \
     --sshlogin server.example.com --return {.}.out touch {.}.out
 
-This will transfer the file I</tmp/foo/bar.out> from the server
+This will transfer the file I</tmp/foo/bar.out> from the computer
 I<server.example.com> to the file I</tmp/foo/bar.out> after running
 B<touch /tmp/foo/bar.out> on I<server.example.com>.
 
@@ -742,9 +742,9 @@ when called with B<--shebang>).
 
 =item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
 
-Distribute jobs to remote servers. The jobs will be run on a list of
-remote servers.  GNU B<parallel> will determine the number of CPU
-cores on the remote servers and run the number of jobs as specified by
+Distribute jobs to remote computers. The jobs will be run on a list of
+remote computers.  GNU B<parallel> will determine the number of CPU
+cores on the remote computers and run the number of jobs as specified by
 B<-j>.  If the number I<ncpu> is given GNU B<parallel> will use this
 number for number of CPU cores on the host. Normally I<ncpu> will not
 be needed.
@@ -803,6 +803,17 @@ Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with B<-v>.
 
 
+=item B<--tty> (beta testing)
+
+=item B<-T> (beta testing)
+
+Open terminal tty. If GNU B<parallel> is used for starting an
+interactive program then this option may be needed. It will start only
+one job at a time (i.e. B<-j1>), not buffer the output (i.e. B<-u>),
+and it will open a tty for the job. When the job is done, the next job
+will get the tty.
+
+
 =item B<--tmpdir> I<dirname>
 
 Directory for temporary files. GNU B<parallel> normally buffers output
@@ -822,22 +833,22 @@ See also B<-v> and B<-p>.
 
 =item B<--transfer>
 
-Transfer files to remote servers. B<--transfer> is used with
+Transfer files to remote computers. B<--transfer> is used with
 B<--sshlogin> when the arguments are files and should be transferred to
-the remote servers. The files will be transferred using B<rsync> and
+the remote computers. The files will be transferred using B<rsync> and
 will be put relative to the default login dir. E.g.
 
   echo foo/bar.txt | parallel \
     --sshlogin server.example.com --transfer wc
 
-This will transfer the file I<foo/bar.txt> to the server
+This will transfer the file I<foo/bar.txt> to the computer
 I<server.example.com> to the file I<$HOME/foo/bar.txt> before running
 B<wc foo/bar.txt> on I<server.example.com>.
 
   echo /tmp/foo/bar.txt | parallel \
     --sshlogin server.example.com --transfer wc
 
-This will transfer the file I<foo/bar.txt> to the server
+This will transfer the file I<foo/bar.txt> to the computer
 I<server.example.com> to the file I</tmp/foo/bar.txt> before running
 B<wc /tmp/foo/bar.txt> on I<server.example.com>.
 
@@ -929,9 +940,9 @@ Print the version GNU B<parallel> and exit.
 =item B<-W> I<mydir> (beta testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
-to I<mydir> on remote machines, and the command will be executed in
+to I<mydir> on remote computers, and the command will be executed in
 that dir. The special workdir B<...> will create a workdir in
-B<~/.parallel/tmp/> on the remote machines and will be removed if
+B<~/.parallel/tmp/> on the remote computers and will be removed if
 using B<--cleanup>.
 
 
@@ -1323,16 +1334,16 @@ GNU B<parallel> will try to determine the number of CPU cores on each
 of the remote computers, so B<-j+0> will run one job per CPU core -
 even if the remote computers do not have the same number of CPU cores.
 
-If the number of CPU cores on the remote servers is not identified
+If the number of CPU cores on the remote computers is not identified
 correctly the number of CPU cores can be added in front. Here the
-server has 8 CPU cores.
+computer has 8 CPU cores.
 
   seq 1 10 | parallel --sshlogin 8/server.example.com echo
 
 
 =head1 EXAMPLE: Transferring of files
 
-To recompress gzipped files with B<bzip2> using a remote server run:
+To recompress gzipped files with B<bzip2> using a remote computer run:
 
   find logs/ -name '*.gz' | \
     parallel --sshlogin server.example.com \
@@ -1363,7 +1374,7 @@ computer and the files transferred from the remote computer:
     parallel --sshlogin server.example.com \
     --transfer --return {.}.bz2 --cleanup "zcat {} | bzip2 -9 >{.}.bz2"
 
-If you want run on several servers add the servers to I<--sshlogin>
+If you want run on several computers add the computers to I<--sshlogin>
 either using ',' or multiple I<--sshlogin>:
 
   find logs/ -name '*.gz' | \
@@ -1513,9 +1524,9 @@ same time:
 
 You can use GNU Parallel to start interactive programs like emacs or vi:
 
-B<cat filelist | parallel -uXj1 emacs>
+B<cat filelist | parallel -T -X emacs>
 
-B<cat filelist | parallel -uXj1 vi>
+B<cat filelist | parallel -T -X vi>
 
 If there are more files than will fit on a single command line, the
 editor will be started again with the remaining files.
@@ -1792,7 +1803,7 @@ Example: Profile for running a perl script before every command:
 Note how the $ and " need to be quoted using \.
 
 Example: Profile for running distributed jobs with B<nice> on the
-remote machines:
+remote computers:
 
   echo -S .. nice > ~/.parallel/dist
   parallel -J dist --trc {.}.bz2 bzip2 -9 ::: *
@@ -2385,14 +2396,14 @@ using GNU B<parallel>:
 ClusterSSH solves a different problem than GNU B<parallel>.
 
 ClusterSSH runs the same command with the same arguments on a list of
-machines - one per machine. This is typically used for administrating
-several machines that are almost identical.
+computers - one per computer. This is typically used for administrating
+several computers that are almost identical.
 
 GNU B<parallel> runs the same (or different) commands with different
-arguments in parallel possibly using remote machines to help
-computing. If more than one machine is listed in B<-S> GNU B<parallel> may
+arguments in parallel possibly using remote computers to help
+computing. If more than one computer is listed in B<-S> GNU B<parallel> may
 only use one of these (e.g. if there are 8 jobs to be run and one
-machine has 8 cores).
+computer has 8 cores).
 
 GNU B<parallel> can be used as a poor-man's version of ClusterSSH:
 

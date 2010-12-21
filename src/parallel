@@ -142,6 +142,7 @@ sub get_options_from_array {
 	 "workdir|W=s" => \$::opt_workdir,
 	 "tmpdir=s" => \$::opt_tmpdir,
 	 "tempdir=s" => \$::opt_tmpdir,
+	 "tty|T" => \$::opt_tty,
 	 "halt-on-error|H=s" => \$::opt_halt_on_error,
 	 "retries=i" => \$::opt_retries,
 	 "dry-run|dryrun" => \$::opt_dryrun,
@@ -192,7 +193,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20101217;
+    $Global::version = 20101220;
     $Global::progname = 'parallel';
     $Global::debug = 0;
     $Global::verbose = 0;
@@ -234,7 +235,9 @@ sub parse_options {
     if(defined $::opt_U) { $Global::replace{'{.}'} = $::opt_U; }
     if(defined $::opt_i and $::opt_i) { $Global::replace{'{}'} = $::opt_i; }
     if(defined $::opt_basenamereplace) { $Global::replace{'{/}'} = $::opt_basenamereplace; }
-    if(defined $::opt_basenameextensionreplace) { $Global::replace{'{/.}'} = $::opt_basenameextensionreplace; }
+    if(defined $::opt_basenameextensionreplace) {
+	$Global::replace{'{/.}'} = $::opt_basenameextensionreplace;
+    }
     if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
     if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
     if(defined $::opt_N and $::opt_N) { $Global::max_number_of_args = $::opt_N; }
@@ -245,8 +248,12 @@ sub parse_options {
     if(defined $::opt_arg_sep) { $Global::arg_sep = $::opt_arg_sep; }
     if(defined $::opt_arg_file_sep) { $Global::arg_file_sep = $::opt_arg_file_sep; }
     if(defined $::opt_number_of_cpus) { print SSHLogin::no_of_cpus(),"\n"; wait_and_exit(0); }
-    if(defined $::opt_number_of_cores) { print SSHLogin::no_of_cores(),"\n"; wait_and_exit(0); }
-    if(defined $::opt_max_line_length_allowed) { print CommandMaxLength::real_max_length(),"\n"; wait_and_exit(0); }
+    if(defined $::opt_number_of_cores) {
+	print SSHLogin::no_of_cores(),"\n"; wait_and_exit(0);
+    }
+    if(defined $::opt_max_line_length_allowed) {
+	print Limits::Command::real_max_length(),"\n"; wait_and_exit(0);
+    }
     if(defined $::opt_version) { version(); wait_and_exit(0); }
     if(defined $::opt_show_limits) { show_limits(); }
     if(defined @::opt_sshlogin) { @Global::sshlogin = @::opt_sshlogin; }
@@ -258,6 +265,16 @@ sub parse_options {
     if(defined $::opt_fg) { $Global::semaphore = 1; }
     if(defined $::opt_bg) { $Global::semaphore = 1; }
     if(defined $::opt_wait) { $Global::semaphore = 1; }
+    if(defined $::opt_tty) {
+	# Defaults for --tty: -j1 -u
+	# Can be overridden with -jXXX -g
+	if(not defined $::opt_P) {
+	    $::opt_P = 1;
+	}
+	if(not defined $::opt_g) {
+	    $Global::grouped = 0;
+	}
+    }
     if(defined @::opt_trc) {
 	push @Global::ret_files, @::opt_trc;
 	$::opt_transfer = 1;
@@ -625,7 +642,7 @@ sub init_run_jobs {
     }
 }
 
-sub login_and_host {
+sub __login_and_host {
     # Returns:
     #   login@hostname
     my $sshlogin = shift;
@@ -757,9 +774,9 @@ sub progress {
 	$status = $eta .
 	    join(" ",map
 		 { sprintf("%s:%d/%d/%d%%",
-			   $sshlogin{$_}, 
+			   $sshlogin{$_},
 			   $Global::host{$_}->jobs_running(),
-			   ($Global::host{$_}->jobs_completed()||0),		      
+			   ($Global::host{$_}->jobs_completed()||0),
 			   ($Global::host{$_}->jobs_running()+
 			    ($Global::host{$_}->jobs_completed()||0))*100
 			   / $Global::total_started) }
@@ -771,9 +788,9 @@ sub progress {
 	$status = $eta .
 	    join(" ",map
 		 { sprintf("%s:%d/%d/%d%%",
-			   $workerno{$_}, 
+			   $workerno{$_},
 			   $Global::host{$_}->jobs_running(),
-			   ($Global::host{$_}->jobs_completed()||0),		      
+			   ($Global::host{$_}->jobs_completed()||0),
 			   ($Global::host{$_}->jobs_running()+
 			    ($Global::host{$_}->jobs_completed()||0))*100
 			   / $Global::total_started) }
@@ -933,7 +950,7 @@ sub get_job_with_sshlogin {
     if($::oodebug and $Global::JobQueue->empty()) {
 	Carp::confess("get_job_with_sshlogin should never be called if empty");
     }
-    
+
     my ($job) = $Global::JobQueue->get();
     if(not defined $job) {
 	# No more jobs
@@ -1089,7 +1106,7 @@ sub cleanup_basefile {
 }
 
 sub __SIGNAL_HANDLING__ {}
- 
+
 sub list_running_jobs {
     # Returns: N/A
     for my $v (values %Global::running) {
@@ -1369,7 +1386,7 @@ sub string {
 
 sub jobs_running {
     my $self = shift;
- 
+
     return ($self->{'jobs_running'} || "0");
 }
 
@@ -1383,10 +1400,10 @@ sub dec_jobs_running {
     $self->{'jobs_running'}--;
 }
 
-sub set_jobs_running {
-    my $self = shift;
-    $self->{'jobs_running'} = 0;
-}
+#sub set_jobs_running {
+#    my $self = shift;
+#    $self->{'jobs_running'} = shift;
+#}
 
 sub set_maxlength {
     my $self = shift;
@@ -1786,7 +1803,7 @@ sub ncpus {
 	    if($ncpu =~ /^[0-9]+$/) {
 		$self->{'ncpus'} = $ncpu;
 	    } else {
-		print $Global::original_stderr 
+		print $Global::original_stderr
 		    ("Warning: Could not figure out ",
 		     "number of cpus on $serverlogin. Using 1\n");
 		$self->{'ncpus'} = 1;
@@ -1794,7 +1811,7 @@ sub ncpus {
 	}
     }
     return $self->{'ncpus'};
-}    
+}
 
 sub no_of_cpus {
     # Returns:
@@ -2045,7 +2062,7 @@ sub get {
 	    return undef;
 	}
     }
-} 
+}
 
 sub unget {
     my $self = shift;
@@ -2083,7 +2100,7 @@ sub quote_args {
     my $self = shift;
     return $self->{'commandlinequeue'}->quote_args();
 }
-    
+
 
 package Job;
 
@@ -2098,8 +2115,8 @@ sub new {
 	'stderr' => undef,
 	'pid' => undef,
 	# hash of { SSHLogins => number of times the command failed there }
-	'failed' => undef, 
-	'sshlogin' => undef, 
+	'failed' => undef,
+	'sshlogin' => undef,
 	# The commandline wrapped with rsync and ssh
 	'sshlogin_wrap' => undef,
 	'exitstatus' => undef,
@@ -2378,8 +2395,8 @@ sub sshcleanup {
 		join(" ",map { ::shell_quote_scalar($workdir."/".$_) } @subworkdirs);
 	}
 	my $relpath = ($file !~ m:^/:); # Is the path relative?
-	my $cleandir = ($relpath ? $workdir : "");
-	$cleancmd .= "$sshcmd $serverlogin rm -f ".::shell_quote_scalar($file.$removeworkdir).";";
+	my $cleandir = ($relpath ? $workdir."/" : "");
+	$cleancmd .= "$sshcmd $serverlogin rm -f ".::shell_quote_scalar($cleandir.$file.$removeworkdir).";";
     }
     return $cleancmd;
 }
@@ -2499,7 +2516,7 @@ sub start {
 	# Re-open to avoid complaining
 	open STDIN, "<&", $Global::original_stdin
 	    or die "Can't dup \$Global::original_stdin: $!";
-    } elsif (not $Global::tty_taken and -c "/dev/tty" and
+    } elsif ($::opt_tty and not $Global::tty_taken and -c "/dev/tty" and
 	     open(DEVTTY, "/dev/tty")) {
 	# Give /dev/tty to the command if no one else is using it
 	$pid = ::open3("<&DEVTTY", ">&STDOUT", ">&STDERR", $command) ||
@@ -2712,7 +2729,7 @@ sub push {
     push @{$self->{'arg_list'}}, $record;
     #::my_dump($record);
     my $arg_no = ($self->number_of_args()-1) * ($#$record+1);
-    
+
     for my $arg (@$record) {
 	$arg_no++;
 	if(defined $arg) {
@@ -2770,7 +2787,7 @@ sub len {
 	# Add the length for each time
 	for my $replstring (keys %{$self->{'replacecount'}}) {
 	    if(defined $self->{'len'}{$replstring}) {
-		$len += $self->{'len'}{$replstring} * 
+		$len += $self->{'len'}{$replstring} *
 		    $self->{'replacecount'}{$replstring};
 	    }
 	    if($Global::replace{$replstring}) {
@@ -2791,7 +2808,7 @@ sub len {
 
 sub multi_regexp {
     if(not $CommandLine::multi_regexp) {
-	$CommandLine::multi_regexp = 
+	$CommandLine::multi_regexp =
 	"(?:".
 	join("|",map {my $a=$_; $a =~ s/(\W)/\\$1/g; $a}
 	     ($Global::replace{"{}"},
@@ -2812,7 +2829,7 @@ sub number_of_replacements {
     my $sum = 0;
     my $cmd = $command;
     my $multi_regexp = 	multi_regexp();
-    my $replacement_regexp = 
+    my $replacement_regexp =
 	"(?:".
 	'\{\d+/?\.?\}'. # {n}, {n.} {n/.} {n/}
 	'|'.
@@ -2827,7 +2844,7 @@ sub number_of_replacements {
 	}
 	$sum++;
     }
-    
+
     my $number_of_context_groups = 0;
     my $no_args;
     my $context;
@@ -2911,11 +2928,11 @@ sub replace_placeholders {
 	    CORE::push @used_multi, $replacementfunction;
 	    if($self->{'context_replace'}) {
 		for my $n (0 .. $#args) {
-		    $replace_context[$n]{$replacementfunction} = 
+		    $replace_context[$n]{$replacementfunction} =
 			$args[$n]->replace($replacementfunction);
 		}
 	    } else {
-		CORE::push(@{$replace_multi{$replacementfunction}}, 
+		CORE::push(@{$replace_multi{$replacementfunction}},
 			   map { $args[$_]->replace($replacementfunction) }
 			   0 .. $#args);
 	    }
@@ -3238,7 +3255,6 @@ sub get {
 	    } else {
 		push @out_record, Arg->new("");
 	    }
-	    
 	}
 	return \@out_record;
     } else {
@@ -3348,7 +3364,7 @@ sub unget {
 
 sub empty {
     my $self = shift;
-    my $empty = (not @Global::unget_argv 
+    my $empty = (not @Global::unget_argv
 		 and not @{$self->{'unget'}});
     for my $fh (@{$self->{'fhs'}}) {
 	$empty &&= eof($fh);
@@ -3498,7 +3514,7 @@ sub release {
 	if($self->nlinks() == 1) {
 	    unlink $self->{'idfile'};
 	    rmdir $self->{'lockdir'};
-	} 
+	}
 	$self->unlock();
     }
     ::debug("released $self->{'pid'}\n");

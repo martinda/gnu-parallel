@@ -81,6 +81,17 @@ available.
   done
   sem --wait
 
+=head1 EXAMPLE: Protecting pod2html from itself
+
+pod2html creates two files: pod2htmd.tmp and pod2htmi.tmp which it
+does not clean up. It uses these two files for a short time. But if
+you run multiple pod2html in parallel (e.g. in a Makefile with make
+-j) you need to protect pod2html from running twice at the same
+time. B<sem> running as a mutex will do just that:
+
+  sem --fg --id pod2html pod2html foo.pod > foo.html
+  sem --fg --id pod2html rm -f pod2htmd.tmp pod2htmi.tmp
+
 
 =head1 BUGS
 
