@@ -1,3 +1,5 @@
+Testsuite: sem without ~/.parallel
+
 cleanup of transferred files in workdir fixed.
 -T implemented as ssh/rsync sometimes hang due to getting a tty.
 

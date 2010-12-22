@@ -3465,7 +3465,9 @@ sub new {
     my $count = shift;
     $id=~s/([^-_a-z0-9])/unpack("H*",$1)/ige; # Convert non-word chars to hex
     $id="id-".$id; # To distinguish it from a process id
-    my $parallel_locks = $ENV{'HOME'}."/.parallel/semaphores";
+    my $parallel_dir = $ENV{'HOME'}."/.parallel";
+    -d $parallel_dir or mkdir $parallel_dir;
+    my $parallel_locks = $parallel_dir."/semaphores";
     -d $parallel_locks or mkdir $parallel_locks;
     my $lockdir = "$parallel_locks/$id";
     my $lockfile = $lockdir.".lock";
