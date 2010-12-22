@@ -85,7 +85,7 @@ parallel-server3 rsync --server --sender -lDrRze.iLsf --remove-source-files . ./
 'newline2.out
 parallel-server3 rsync --server --sender -lDrRze.iLsf --remove-source-files . ././tmp/parallel.file.'
 'newline2.out2
-parallel-server3 rm -f tmp/parallel.file.'
+parallel-server3 rm -f ./tmp/parallel.file.'
 'newline2; rmdir 2>/dev/null ./tmp
 -l parallel parallel-server2 rsync --server -lDErRze.iLsf . .
 parallel@parallel-server2 PARALLEL_SEQ=1;export PARALLEL_SEQ;PARALLEL_PID=00000;export PARALLEL_PID; cat tmp/parallel.file.'
@@ -97,7 +97,7 @@ parallel@parallel-server2 PARALLEL_SEQ=1;export PARALLEL_SEQ;PARALLEL_PID=00000;
 'newline1.out
 -l parallel parallel-server2 rsync --server --sender -lDrRze.iLsf --remove-source-files . ././tmp/parallel.file.'
 'newline1.out2
-parallel@parallel-server2 rm -f tmp/parallel.file.'
+parallel@parallel-server2 rm -f ./tmp/parallel.file.'
 'newline1; rmdir 2>/dev/null ./tmp
 ### Test use special ssh with > 9 simultaneous
 1

@@ -1,4 +1,26 @@
-### Test of --retries
+### Test of --retries - it should run 13 jobs in total
+13
+### Test of --retries - it should run 25 jobs in total
+25
+### Test of --retries - it should run 49 jobs in total
+49
+### Bug with --retries
+8
+8
+2
+1
+1
+1
+1
+### These were not affected by the bug
+8
+8
+1
+4
+4
+4
+2
+### Test of --retries on unreachable host
 echo 1
 1
 echo 2
@@ -19,9 +41,3 @@ echo 9
 9
 echo 10
 10
-### Test of --retries - it should run 13 jobs in total
-13
-### Test of --retries - it should run 25 jobs in total
-25
-### Test of --retries - it should run 49 jobs in total
-49

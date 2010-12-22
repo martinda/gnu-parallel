@@ -1,8 +1,34 @@
---command, -c, --file, and -f now obsoleted. --eta works again.
-Bugfix in testsuite for --retries.
-Lots of dead code removed.
+Testsuite: sem without ~/.parallel
 
-== Bug? ==
+cleanup of transferred files in workdir fixed.
+-T implemented as ssh/rsync sometimes hang due to getting a tty.
+
+Til QUOTING:
+
+FN="two  spaces"
+echo 1 | parallel -q echo {} "$FN"
+# Prints 2 spaces between 'two' and 'spaces'
+
+-q will not work with composed commands as it will quote the ; as
+well. So composed commands have to be quoted by hand:
+
+# Using export:
+FN2="two  spaces"
+export FN2
+echo 1 | parallel echo {} \"\$FN2\" \; echo \"\$FN2\" {}
+# Prints 2 spaces between 'two' and 'spaces'
+
+# Without export:
+FN3="two  spaces"
+echo 1 | parallel echo {} \""$FN3"\" \; echo \'"$FN3"\' {}
+
+# By quoting the space in the variable
+FN4='two\ \ spaces'
+echo 1 | parallel echo {} $FN4 \; echo $FN4 {}
+
+
+
+= Bug? ==
 
 locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ... -S .. --trc {/}.bz2 'zcat {} | bzip2 > {/}.bz2'
 
@@ -12,29 +38,15 @@ locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ..
 http://code.google.com/p/spawntool/
 http://code.google.com/p/push/
 
-== Basename ==
-
-find mp3/ -iname "*.mp3" | parallel -j+0 lame -S -q1 --vbr-new -V6 -b 32 -B128 {} /mnt/sda1/tmp-zik/{/}
-
 == Bug? ==
 
 .parallel/config with --long-options
 
 time find . -type f | parallel -j+0 --eta -S..,: --progress --trc {}.gz gzip  {}
 
-== Bug --eta ==
-
-Only negative.
-
 == Workdir ==
 
-Bug: {2} in --return
 parallel -N2 --workdir ... --cleanup --transfer --return {2}.2 -S .. -v echo {} ">{2}.2" ::: ./tmp/foo ./tmp/bar
-
-== load ==
-
-Include niceload
-Have an option to not spawn new tasks until load is below a limit computed like number of jobs.
 
 == SQL ==
 
@@ -302,7 +314,8 @@ distribute the arguments evenly if running -X.
 
 =head1 options
 
-One char options not used: A F G K O Q R T Z
+One char options not used: A F G K O Q R T Z c f
+-T terminal
 
 =head1 sem
 

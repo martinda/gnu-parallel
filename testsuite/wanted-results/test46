@@ -1,0 +1,6 @@
+### Test --trc with space added in filename
+original
+### Test --trc with >|< added in filename
+original
+### Test --return with fixed string (Gave undef warnings)
+OK
