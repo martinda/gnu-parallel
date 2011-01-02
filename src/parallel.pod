@@ -398,8 +398,8 @@ use B<-I> instead.
 
 =item B<-P> I<N>
 
-Run up to N jobs in parallel.  0 means as many as possible. Default is
-9.
+Number of jobslots. Run up to N jobs in parallel.  0 means as many as
+possible. Default is 9.
 
 If B<--semaphore> is set default is 1 thus making a mutex.
 
@@ -1534,10 +1534,10 @@ editor will be started again with the remaining files.
 
 =head1 EXAMPLE: GNU Parallel as queue system/batch manager
 
-GNU Parallel can work as a simple job queue system or batch manager.
-The idea is to put the jobs into a file and have GNU Parallel read
-from that continuously. As GNU Parallel will stop at end of file we
-use tail to continue reading:
+GNU B<parallel> can work as a simple job queue system or batch manager.
+The idea is to put the jobs into a file and have GNU B<parallel> read
+from that continuously. As GNU B<parallel> will stop at end of file we
+use B<tail> to continue reading:
 
 B<echo >>B<jobqueue>; B<tail -f jobqueue | parallel>
 
@@ -1550,6 +1550,26 @@ computers:
 
 B<echo >>B<jobqueue>; B<tail -f jobqueue | parallel -S ..>
 
+There are a two small issues when using GNU B<parallel> as queue
+system/batch manager:
+
+=over 2
+
+=item *
+
+You will get a warning if you do not submit JobSlots jobs within the
+first second. E.g. if you have 8 cores and use B<-j+2> you have to submit
+10 jobs. These can be dummy jobs (e.g. B<echo foo>). You can also simply
+ignore the warning.
+
+=item *
+
+Jobs will be run immediately, but output from jobs will only be
+printed when JobSlots more jobs has been started. E.g. if you have 10
+jobslots then the output from the first completed job will only be
+printed when job 11 is started.
+
+=back
 
 =head1 EXAMPLE: GNU Parallel as dir processor
 

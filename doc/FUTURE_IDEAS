@@ -1,7 +1,8 @@
-Testsuite: sem without ~/.parallel
+parallel: spread arguments between all jobslots when reaching EOF of input
 
-cleanup of transferred files in workdir fixed.
--T implemented as ssh/rsync sometimes hang due to getting a tty.
+codecoverage
+
+Testsuite: sem without ~/.parallel
 
 Til QUOTING:
 
@@ -43,10 +44,6 @@ http://code.google.com/p/push/
 .parallel/config with --long-options
 
 time find . -type f | parallel -j+0 --eta -S..,: --progress --trc {}.gz gzip  {}
-
-== Workdir ==
-
-parallel -N2 --workdir ... --cleanup --transfer --return {2}.2 -S .. -v echo {} ">{2}.2" ::: ./tmp/foo ./tmp/bar
 
 == SQL ==
 
@@ -94,11 +91,6 @@ colsep = [sepchars]{no_of_sepchars}
 # TODO max_line_length on remote
 # TODO compute how many can be transferred within max_line_length
 # TODO Unittest with filename that is long and requires a lot of quoting. Will there be to many
-# TODO --max-number-of-jobs print the system limited number of jobs
-
-# TODO Debian package
-
-# TODO to kill from a run script parallel should set PARALLEL_PID that can be sig termed
 
 =head1 YouTube video2
 
@@ -314,8 +306,7 @@ distribute the arguments evenly if running -X.
 
 =head1 options
 
-One char options not used: A F G K O Q R T Z c f
--T terminal
+One char options not used: A F G K O Q R Z c f
 
 =head1 sem
 

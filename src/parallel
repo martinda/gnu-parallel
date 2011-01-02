@@ -3,7 +3,7 @@
 use IPC::Open3;
 use Symbol qw(gensym);
 use IO::File;
-use POSIX qw(:sys_wait_h setsid);
+use POSIX qw(:sys_wait_h setsid ceil);
 use File::Temp qw(tempfile tempdir);
 use Getopt::Long;
 use strict;
@@ -47,6 +47,9 @@ if(@ARGV) {
 
 $Global::JobQueue = JobQueue->new(
     $command,\@fhlist,$Global::Xargs,$number_of_args,\@Global::ret_files);
+for my $sshlogin (values %Global::host) {
+    $sshlogin->max_jobs_running();
+}
 
 init_run_jobs();
 my $sem;
@@ -193,8 +196,9 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20101222;
+    $Global::version = 20110101;
     $Global::progname = 'parallel';
+    $Global::infinity = 2**31;
     $Global::debug = 0;
     $Global::verbose = 0;
     $Global::grouped = 1;
@@ -214,6 +218,7 @@ sub parse_options {
     $Global::arg_sep = ":::";
     $Global::arg_file_sep = "::::";
     $Global::trim = 'n';
+    $Global::max_jobs_running = 0;
 
     @ARGV=read_options();
 
@@ -330,9 +335,10 @@ sub parse_options {
     }
 
     if(not defined $::opt_P) {
-	for my $sshlogin (values %Global::host) {
-	    $sshlogin->set_max_jobs_running($Global::default_simultaneous_sshlogins);
-	}
+	$::opt_P = "+0";
+	#for my $sshlogin (values %Global::host) {
+	#    $sshlogin->set_max_jobs_running($Global::default_simultaneous_sshlogins);
+	#}
     }
 }
 
@@ -495,7 +501,7 @@ sub cleanup {
 
 
 sub shell_quote {
-    my (@strings) = (@_);
+    my @strings = (@_);
     for my $a (@strings) {
 	$a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
 	$a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
@@ -517,7 +523,7 @@ sub shell_unquote {
     # Unquote strings from shell_quote
     # Returns:
     #   string with shell quoting removed
-    my (@strings) = (@_);
+    my @strings = (@_);
     my $arg;
     for $arg (@strings) {
 	if(not defined $arg) {
@@ -709,7 +715,7 @@ sub progress {
     #   header that will fit on the screen
     #   status message that will fit on the screen
     my $termcols = terminal_columns();
-    my ($status, $header)=("x"x($termcols+1),"");
+    my ($status, $header) = ("x"x($termcols+1),"");
     my @workers = sort keys %Global::host;
     my %sshlogin = map { $_ eq ":" ? ($_=>"local") : ($_=>$_) } @workers;
     my $workerno = 1;
@@ -918,7 +924,7 @@ sub start_another_job {
 	    # No more commands to run
 	    return 0;
 	} else {
-	    my ($job) = get_job_with_sshlogin($sshlogin);
+	    my $job = get_job_with_sshlogin($sshlogin);
 	    if(not defined $job) {
 		# No command available for that sshlogin
 		return 0;
@@ -951,7 +957,7 @@ sub get_job_with_sshlogin {
 	Carp::confess("get_job_with_sshlogin should never be called if empty");
     }
 
-    my ($job) = $Global::JobQueue->get();
+    my $job = $Global::JobQueue->get();
     if(not defined $job) {
 	# No more jobs
 	return undef;
@@ -960,8 +966,8 @@ sub get_job_with_sshlogin {
     if($::oodebug and not defined $job->{'commandline'}) {
 	Carp::confess("get_job_with_sshlogin job->commandline should never be empty");
     }
-    my ($next_command_line) = $job->replaced();
-    my ($clean_command) = $next_command_line;
+    my $next_command_line = $job->replaced();
+    my $clean_command = $next_command_line;
     if($clean_command =~ /^\s*$/) {
 	# Do not run empty lines
 	if(not $Global::JobQueue->empty()) {
@@ -1015,7 +1021,7 @@ sub read_sshloginfile {
 
 sub parse_sshlogin {
     # Returns: N/A
-    my (@login);
+    my @login;
     if(not @Global::sshlogin) { @Global::sshlogin = (":"); }
     for my $sshlogin (@Global::sshlogin) {
 	# Split up -S sshlogin,sshlogin
@@ -1427,7 +1433,11 @@ sub inc_jobs_completed {
 
 sub set_max_jobs_running {
     my $self = shift;
+    if(defined $self->{'max_jobs_running'}) {
+	$Global::max_jobs_running -= $self->{'max_jobs_running'};
+    }
     $self->{'max_jobs_running'} = shift;
+    $Global::max_jobs_running += $self->{'max_jobs_running'};
 }
 
 sub loadavg_too_high {
@@ -1551,8 +1561,7 @@ sub compute_max_loadavg {
 sub max_jobs_running {
     my $self = shift;
     if(not defined $self->{'max_jobs_running'}) {
-	$self->{'max_jobs_running'} =
-	    $self->compute_number_of_processes($::opt_P);
+	$self->set_max_jobs_running($self->compute_number_of_processes($::opt_P));
     }
     return $self->{'max_jobs_running'};
 }
@@ -1584,12 +1593,14 @@ sub processes_available_by_system_limit {
     my $self = shift;
     my $wanted_processes = shift;
 
-    my $system_limit=0;
-    my @jobs=();
-    my ($job, $args_ref);
-    my $more_filehandles=1;
-    my $max_system_proc_reached=0;
-    my $slow_spawining_warning_printed=0;
+    my $system_limit = 0;
+    my @jobs = ();
+    my $job;
+    my @args = ();
+    my $arg;
+    my $more_filehandles = 1;
+    my $max_system_proc_reached = 0;
+    my $slow_spawining_warning_printed = 0;
     my $time = time;
     my %fh;
     my @children;
@@ -1612,11 +1623,20 @@ sub processes_available_by_system_limit {
 	    # so include the already read jobs for this sshlogin
 	    $count_jobs_already_read--;
 	} else {
-	    # If there are no more command lines, then we have a process
-	    # per command line, so no need to go further
-	    $Global::JobQueue->empty() and last;
-	    ($job) = $Global::JobQueue->get();
-	    push(@jobs, $job);
+	    if($::opt_X or $::opt_m) {
+		# The arguments may have to be re-spread over several jobslots
+		# So pessimistically only read one arg per jobslot
+		# instead of a full commandline
+		$Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->empty() and last;
+		($arg) = $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->get();
+		push(@args, $arg);
+	    } else {
+		# If there are no more command lines, then we have a process
+		# per command line, so no need to go further
+		$Global::JobQueue->empty() and last;
+		($job) = $Global::JobQueue->get();
+		push(@jobs, $job);
+	    }
 	}
 	$system_limit++;
 
@@ -1667,9 +1687,9 @@ sub processes_available_by_system_limit {
 	kill 9, $pid;
 	waitpid($pid,0);
     }
-
     #wait();
-    # Cleanup: Unget the command_lines (and args_refs)
+    # Cleanup: Unget the command_lines or the @args
+    $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->unget(@args);
     $Global::JobQueue->unget(@jobs);
     if($self->string() ne ":" and
        $system_limit > $Global::default_simultaneous_sshlogins) {
@@ -1756,7 +1776,7 @@ sub user_requested_processes {
 	    $processes = $1;
 	    if($processes == 0) {
 		# -P 0 = infinity (or at least close)
-		$processes = 2**31;
+		$processes = $Global::infinity;
 	    }
 	} elsif (-f $opt_P) {
 	    $Global::max_procs_file = $opt_P;
@@ -2257,7 +2277,7 @@ sub sshlogin_wrap {
 	}
 	my $sshcmd = $sshlogin->sshcommand();
 	my $serverlogin = $sshlogin->serverlogin();
-	my ($next_command_line) = $self->replaced();
+	my $next_command_line = $self->replaced();
 	my ($pre,$post,$cleanup)=("","","");
 	if($serverlogin eq ":") {
 	    $self->{'sshlogin_wrap'} = $next_command_line;
@@ -2380,7 +2400,7 @@ sub sshcleanup {
     # Returns:
     #   ssh command needed to remove files from sshlogin
     my $self = shift;
-    my ($sshlogin) = $self->sshlogin();
+    my $sshlogin = $self->sshlogin();
     my $sshcmd = $sshlogin->sshcommand();
     my $serverlogin = $sshlogin->serverlogin();
     my $workdir = $self->workdir();
@@ -2573,7 +2593,7 @@ sub print {
     $Global::grouped or return;
     my $out = $self->stdout();
     my $err = $self->stderr();
-    my ($command) = $self->sshlogin_wrap();
+    my $command = $self->sshlogin_wrap();
 
     if(($::opt_dryrun or $Global::verbose) and $Global::grouped) {
 	if($Global::verbose <= 1) {
@@ -2677,6 +2697,7 @@ sub populate {
     # Add arguments from arg_queue until the number of arguments or
     # max line length is reached
     my $self = shift;
+#    my $first_time_empty = 1;
     my $next_arg;
     while (not $self->{'arg_queue'}->empty()) {
 	$next_arg = $self->{'arg_queue'}->get();
@@ -2711,10 +2732,27 @@ sub populate {
 	    }
 	}
     }
+    if($self->{'arg_queue'}->empty() and not $CommandLine::already_spread) {
+	# EOF => Spread the arguments over all jobslots (unless they
+	# are already spread)
+	$CommandLine::already_spread++;
+	if($self->number_of_args() > 1) {
+	    $self->{'max_number_of_args'} =
+		::ceil($self->number_of_args()/$Global::max_jobs_running);
+	    $Global::JobQueue->{'commandlinequeue'}->{'max_number_of_args'} =
+		$self->{'max_number_of_args'};
+	    $self->{'arg_queue'}->unget($self->pop_all());
+	    while($self->number_of_args() < $self->{'max_number_of_args'}) {
+		$self->push($self->{'arg_queue'}->get());
+	    }
+	}
+    }
+
     if($self->number_of_args() > 0) {
 	# Fill up if we have a half completed line
 	if(defined $self->{'max_number_of_args'}) {
 	    # If you want a number of args and do not have it then fill out the rest with empties
+	    # so magic strings like '{2}' will be replaced with empty.
 	    while($self->number_of_args() < $self->{'max_number_of_args'}) {
 		$self->push([Arg->new("")]);
 	    }
@@ -2760,6 +2798,17 @@ sub pop {
 	}
     }
     return $record;
+}
+
+sub pop_all {
+    # Remove all arguments
+    my $self = shift;
+    my @popped = @{$self->{'arg_list'}};
+    for my $replacement_string qw(keys %{$self->{'replacecount'}}) {
+	$self->{'len'}{$replacement_string} = 0;
+    }
+    $self->{'arg_list'} = [];
+    return @popped;
 }
 
 sub number_of_args {
@@ -3047,7 +3096,7 @@ sub get {
 	my $cmd_line = shift @{$self->{'unget'}};
 	return ($cmd_line);
     } else {
-	my ($cmd_line);
+	my $cmd_line;
 	$cmd_line = CommandLine->new($self->{'command'},
 				     $self->{'arg_queue'},
 				     $self->{'context_replace'},
@@ -3427,7 +3476,7 @@ sub trim_of {
     # lr|rl = both
     # Returns:
     #   string with white space removed as needed
-    my (@strings) = map { defined $_ ? $_ : "" } (@_);
+    my @strings = map { defined $_ ? $_ : "" } (@_);
     my $arg;
     if($Global::trim eq "n") {
 	# skip
@@ -3508,7 +3557,7 @@ sub acquire {
 }
 
 sub release {
-    my ($self) = shift;
+    my $self = shift;
     unlink $self->{'pidfile'};
     if($self->nlinks() == 1) {
 	# This is the last link, so atomic cleanup
@@ -3525,8 +3574,8 @@ sub release {
 
 sub atomic_link_if_count_less_than {
     # Link $file1 to $file2 if nlinks to $file1 < $count
-    my ($self) = shift;
-    my ($retval) = 0;
+    my $self = shift;
+    my $retval = 0;
     $self->lock();
     ::debug($self->nlinks()."<".$self->{'count'});
     if($self->nlinks() < $self->{'count'}) {
@@ -3553,7 +3602,7 @@ sub nlinks {
 }
 
 sub lock {
-    my ($self) = shift;
+    my $self = shift;
     open $self->{'lockfh'}, ">", $self->{'lockfile'}
 	or die "Can't open semaphore file $self->{'lockfile'}: $!";
     chmod 0666, $self->{'lockfile'}; # assuming you want it a+rw
