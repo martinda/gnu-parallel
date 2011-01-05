@@ -2784,9 +2784,9 @@ sub populate {
 	    }
 	}
     }
-    if($self->{'arg_queue'}->empty() and not $CommandLine::already_spread) {
-	# EOF => Spread the arguments over all jobslots (unless they
-	# are already spread)
+    if(($::opt_m or $::opt_X) and not $CommandLine::already_spread and $self->{'arg_queue'}->empty()) {
+	# -m or -X and EOF => Spread the arguments over all jobslots
+	# (unless they are already spread)
 	$CommandLine::already_spread++;
 	if($self->number_of_args() > 1) {
 	    $self->{'max_number_of_args'} =
