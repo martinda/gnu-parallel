@@ -117,6 +117,7 @@ sub get_options_from_array {
 	 "xargs|m" => \$::opt_m,
 	 "X" => \$::opt_X,
 	 "v" => \@::opt_v,
+	 "joblog=s" => \$::opt_joblog,
 	 "silent" => \$::opt_silent,
 	 "keep-order|keeporder|k" => \$::opt_k,
 	 "group|g" => \$::opt_g,
@@ -339,6 +340,12 @@ sub parse_options {
 	#for my $sshlogin (values %Global::host) {
 	#    $sshlogin->set_max_jobs_running($Global::default_simultaneous_sshlogins);
 	#}
+    }
+    if($::opt_joblog) {
+	if(not open($Global::joblog,">$::opt_joblog")) {
+	    print STDERR "Cannot write to --joblog $::opt_joblog\n";
+	    ::wait_and_exit(255);
+	}
     }
 }
 
@@ -1173,6 +1180,7 @@ sub reaper {
 	$job or next;
 	$job->set_exitstatus($? >> 8);
 	debug("died (".$job->exitstatus()."): ".$job->seq());
+	$job->set_endtime();
 	if($stiff == $Global::tty_taken) {
 	    # The process that died had the tty => release it
 	    $Global::tty_taken = 0;
@@ -2192,6 +2200,34 @@ sub set_pid {
     $self->{'pid'} = $pid;
 }
 
+sub starttime {
+    my $self = shift;
+    return $self->{'starttime'};
+}
+
+sub set_starttime {
+    my $self = shift;
+    my $starttime = shift || time;
+    $self->{'starttime'} = $starttime;
+}
+
+sub runtime {
+    my $self = shift;
+    return $self->{'endtime'}-$self->{'starttime'};
+}
+
+sub endtime {
+    my $self = shift;
+    return $self->{'endtime'};
+}
+
+sub set_endtime {
+    my $self = shift;
+    my $endtime = shift || time;
+    $self->{'endtime'} = $endtime;
+}
+
+
 sub failed {
     # return number of times failed for this $sshlogin
     my $self = shift;
@@ -2548,6 +2584,7 @@ sub start {
 	    die("open3 (with gensym) failed. Report a bug to <bug-parallel\@gnu.org>\n");
     }
     $job->set_pid($pid);
+    $job->set_starttime();
     open STDOUT, ">&", $Global::original_stdout
 	or die "Can't dup \$Global::original_stdout: $!";
     open STDERR, ">&", $Global::original_stderr
@@ -2594,6 +2631,21 @@ sub print {
     my $out = $self->stdout();
     my $err = $self->stderr();
     my $command = $self->sshlogin_wrap();
+
+    if($Global::joblog) {
+	my $cmd;
+	if($Global::verbose <= 1) {
+	    $cmd = $self->replaced();
+	} else {
+	    # Verbose level > 1: Print the rsync and stuff
+	    $cmd = $command;
+	}
+	printf $Global::joblog 
+	    join("\t", $self->seq(), $self->sshlogin()->string(),
+		 $self->starttime(), $self->runtime(), $cmd
+	    ). "\n";
+	flush $Global::joblog;
+    }
 
     if(($::opt_dryrun or $Global::verbose) and $Global::grouped) {
 	if($Global::verbose <= 1) {
