@@ -30,31 +30,31 @@ ls | parallel -kv rm -- {.}/abc-{.}-{} 2>&1
 #test05.sh:find . -type d -print0 |  perl -0 -pe 's:^./::' | parallel -0 -v rm -- {}/abc-{}-{} 2>&1 \
 #test05.sh:find . -type d -print0 |  perl -0 -pe 's:^./::' | parallel -0 -v rmdir -- {} 2>&1 \
 echo '### Test -m'
-(echo foo;echo bar;echo joe.gif) | parallel -km echo 1{}2{.}3 A{.}B{.}C
-(echo foo;echo bar;echo joe.gif) | parallel -kX echo 1{}2{.}3 A{.}B{.}C
-seq 1 6 | parallel -k printf '{}.gif\\n' | parallel -km echo a{}b{.}c{.}
-seq 1 6 | parallel -k printf '{}.gif\\n' | parallel -kX echo a{}b{.}c{.}
+(echo foo;echo bar;echo joe.gif) | parallel -j1 -km echo 1{}2{.}3 A{.}B{.}C
+(echo foo;echo bar;echo joe.gif) | parallel -j1 -kX echo 1{}2{.}3 A{.}B{.}C
+seq 1 6 | parallel -k printf '{}.gif\\n' | parallel -j1 -km echo a{}b{.}c{.}
+seq 1 6 | parallel -k printf '{}.gif\\n' | parallel -j1 -kX echo a{}b{.}c{.}
 echo '### Test -m with 60000 args'
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -km echo a{}b{.}c{.} | mop -d 4 "|md5sum" "| wc"
+seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -km echo a{}b{.}c{.} | mop -d 4 "|md5sum" "| wc"
 echo '### Test -X with 60000 args'
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -kX echo a{}b{.}c{.} | mop -d 4 "|md5sum" "| wc"
+seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b{.}c{.} | mop -d 4 "|md5sum" "| wc"
 echo '### Test -X with 60000 args and 5 expansions'
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -kX echo a{}b{.}c{.}{.}{} | wc -l
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -kX echo a{}b{.}c{.}{.} | wc -l
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -kX echo a{}b{.}c{.} | wc -l
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -kX echo a{}b{.}c | wc -l
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -kX echo a{}b | wc -l
+seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b{.}c{.}{.}{} | wc -l
+seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b{.}c{.}{.} | wc -l
+seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b{.}c{.} | wc -l
+seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b{.}c | wc -l
+seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b | wc -l
 echo '### Test {.} does not repeat more than {}'
-seq 1 15 | perl -pe 's/$/.gif\n/' | parallel -s 80 -kX echo a{}b{.}c{.}
-seq 1 15 | perl -pe 's/$/.gif\n/' | parallel -s 80 -km echo a{}b{.}c{.}
-seq 1 15 | perl -pe 's/$/.gif/' | parallel -s 80 -kX echo a{}b{.}c{.}
-seq 1 15 | perl -pe 's/$/.gif/' | parallel -s 80 -km echo a{}b{.}c{.}
+seq 1 15 | perl -pe 's/$/.gif\n/' | parallel -j1 -s 80 -kX echo a{}b{.}c{.}
+seq 1 15 | perl -pe 's/$/.gif\n/' | parallel -j1 -s 80 -km echo a{}b{.}c{.}
+seq 1 15 | perl -pe 's/$/.gif/'   | parallel -j1 -s 80 -kX echo a{}b{.}c{.}
+seq 1 15 | perl -pe 's/$/.gif/'   | parallel -j1 -s 80 -km echo a{}b{.}c{.}
 
 echo '### Test -I with shell meta chars'
-seq 1 60000 | parallel -I :: -X echo a::b::c:: | wc -l
-seq 1 60000 | parallel -I '<>' -X echo 'a<>b<>c<>' | wc -l
-seq 1 60000 | parallel -I '<' -X echo 'a<b<c<' | wc -l
-seq 1 60000 | parallel -I '>' -X echo 'a>b>c>' | wc -l
+seq 1 60000 | parallel -j1 -I :: -X echo a::b::c:: | wc -l
+seq 1 60000 | parallel -j1 -I '<>' -X echo 'a<>b<>c<>' | wc -l
+seq 1 60000 | parallel -j1 -I '<' -X echo 'a<b<c<' | wc -l
+seq 1 60000 | parallel -j1 -I '>' -X echo 'a>b>c>' | wc -l
 
 echo '### Test {.}'
 echo a | parallel -qX echo  "'"{.}"' "
@@ -63,8 +63,8 @@ echo a | parallel -qX echo  "'{.}'"
 | parallel -k -j0
 echo '### Test -I with -X and -m'
 seq 1 10 | parallel -k 'seq 1 {.} | 'parallel' -k -I :: echo {.} ::'
-seq 1 10 | parallel -k 'seq 1 {.} | 'parallel' -X -k -I :: echo a{.} b::'
-seq 1 10 | parallel -k 'seq 1 {.} | 'parallel' -m -k -I :: echo a{.} b::'
+seq 1 10 | parallel -k 'seq 1 {.} | 'parallel' -j1 -X -k -I :: echo a{.} b::'
+seq 1 10 | parallel -k 'seq 1 {.} | 'parallel' -j1 -m -k -I :: echo a{.} b::'
 echo '### Test -i'
 (echo a; echo END; echo b) | parallel -k -i -eEND echo repl{.}ce
 echo '### Test --replace'

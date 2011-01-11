@@ -37,8 +37,8 @@ parallel -kj 1 ::: "sleep 1; echo 1" "echo 2" "echo 3"
 echo '### Bug did not quote'
 echo '>' | parallel -v echo
 parallel -v echo ::: '>'
-(echo '>'; echo  2) | parallel -vX echo
-parallel -X echo ::: '>' 2
+(echo '>'; echo  2) | parallel -j1 -vX echo
+parallel -X -j1 echo ::: '>' 2
 echo '### Must not quote'
 echo 'echo | wc -l' | parallel -v
 parallel -v ::: 'echo | wc -l'

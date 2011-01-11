@@ -1122,6 +1122,8 @@ Even small shell scripts can be run by GNU B<parallel>:
 
 B<find . | parallel 'a={}; name=${a##*/}; upper=$(echo "$name" | tr "[:lower:]" "[:upper:]"); echo "$name - $upper"'>
 
+B<ls | parallel 'mv {} "$(echo {} | tr "[:upper:]" "[:lower:]")"'>
+
 Given a list of URLs, list all URLs that fail to download. Print the
 line number and the URL.
 
@@ -2003,7 +2005,7 @@ B<xargs> deals badly with special characters (such as space, ' and
   touch important_file
   touch 'not important_file'
   ls not* | xargs rm
-  mkdir -p '12" records'
+  mkdir -p "My brother's 12\" records"
   ls | xargs rmdir
 
 You can specify B<-0> or B<-d "\n">, but many input generators are not

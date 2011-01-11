@@ -2,8 +2,6 @@
 
 # Test xargs compatibility
 
-
-
 echo '### Test -p --interactive'
 cat >/tmp/parallel-script-for-expect <<_EOF
 #!/bin/bash
@@ -27,12 +25,11 @@ expect "echo opt--interactive 1"
 send "y\n"
 expect "echo opt--interactive 2"
 send "n\n"
+expect "opt--interactive 1"
 expect "echo opt--interactive 3"
 send "y\n"
-expect "opt--interactive 1"
 expect "opt--interactive 3"
 _EOF
-
 
 echo '### Test -L -l and --max-lines'
 (echo a_b;echo c) | parallel -km -L2  echo
@@ -183,4 +180,4 @@ echo '### Test --verbose and -t'
 
 echo '### Test --show-limits'
 (echo b; echo c; echo f) | parallel -k --show-limits echo {}ar
-(echo b; echo c; echo f) | parallel -kX --show-limits -s 100 echo {}ar
+(echo b; echo c; echo f) | parallel -j1 -kX --show-limits -s 100 echo {}ar

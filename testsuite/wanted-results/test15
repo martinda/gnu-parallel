@@ -2,16 +2,17 @@
 spawn /tmp/parallel-script-for-expect
 echo opt-p 1 ?...y
 echo opt-p 2 ?...n
-echo opt-p 3 ?...y
 opt-p 1
+echo opt-p 3 ?...y
 opt-p 3
 echo opt--interactive 1 ?...y
 echo opt--interactive 2 ?...n
-echo opt--interactive 3 ?...y
 opt--interactive 1
+echo opt--interactive 3 ?...y
 opt--interactive 3
 ### Test -L -l and --max-lines
-a_b c
+a_b
+c
 a_b c
 a_b c
 a_b
@@ -79,7 +80,7 @@ xargs: argument line too long
 5 6
 7 8
 9 10
-Command line too long (1000007 >= 10) at number 6: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+Command line too long (1000007 >= 10) at number 5: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 1 2
 3 4
 5 6
@@ -91,20 +92,20 @@ xargs: argument line too long
 5 6
 7 8
 9 10
-Command line too long (1000007 >= 10) at number 6: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+Command line too long (1000007 >= 10) at number 5: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 ### Test -x
 1 2
 3 4
 5 6
 7 8
 9 10
-Command line too long (10 >= 10) at number 6: 12345...
+Command line too long (10 >= 10) at number 5: 12345...
 1 2
 3 4
 5 6
 7 8
 9 10
-Command line too long (10 >= 10) at number 6: 12345...
+Command line too long (10 >= 10) at number 5: 12345...
 1 2
 3 4
 5 6
