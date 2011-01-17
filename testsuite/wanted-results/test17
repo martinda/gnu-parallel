@@ -220,8 +220,6 @@ tmp/parallel.file>fire.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 good if no file
-ls: cannot access /tmp/parallel.file*: No such file or directory
-OK
 ### --return --cleanup - relpath
 tmp/parallel.file : & ) \n*.jpg.file.done
 tmp/parallel.file : & ) \n*.jpg.out
@@ -394,6 +392,8 @@ OK
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ### --transfer --return --cleanup - multiple files
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
@@ -435,6 +435,8 @@ OK
 /tmp/parallel.file9.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
 ### --trc - abspath
@@ -523,6 +525,8 @@ tmp/parallel.file9.out
 tmp/parallel.file>fire.file.done
 tmp/parallel.file>fire.out
 good if no file
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
 ### --trc - multiple files

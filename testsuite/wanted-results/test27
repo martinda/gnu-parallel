@@ -25,7 +25,8 @@ hell
 rld
 ###  -E_ -0 echo < eof_-0.xi
 one two _ three four
-one two
+one
+two
 ###  -i -0 echo from \{\} to x{}y < items-0.xi
 from one to xoney
 from  	
@@ -270,7 +271,8 @@ three
 ###  -r echo this plus that < blank.xi
 ###  -0 -s118 echo < stairs-0.xi
 1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22 333 4444 55555 666666 7777777 88888888 999999999
-1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22 333 4444 55555 666666 7777777 88888888 999999999
+1 22 333 4444 55555 666666 7777777 88888888 999999999
+1 22 333 4444 55555 666666 7777777 88888888 999999999
 ###  -0 -s19 echo < stairs-0.xi
 1 22 333 4444
 55555 666666
@@ -312,7 +314,8 @@ three
 88888888
 7777777
 666666 55555
-4444 333 22 1
+4444 333
+22 1
 ###  -0 -s20 echo < stairs-0.xi
 1 22 333 4444
 55555 666666
@@ -342,7 +345,8 @@ three
 666666 7777777 88888888
 999999999 1 22 333 4444
 55555 666666 7777777
-88888888 999999999
+88888888
+999999999
 ###  -0 echo this plus that < space.xi
 this plus that 
  	
@@ -401,7 +405,8 @@ from two to xtwoy
 hi there /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4 /src/gnu/autoconf-1.11/configure
 hi there /src/gnu/autoconf-1.11/configure.in /src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
 hi there /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4 /src/gnu/autoconf-1.11/configure
-hi there /src/gnu/autoconf-1.11/configure.in /src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
+hi there /src/gnu/autoconf-1.11/configure.in /src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
+hi there /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
 ###  -IARG echo from ARG to xARGy -E_ < eof_.xi
 from one to xoney -E_
 from two to xtwoy -E_
@@ -629,7 +634,8 @@ an embedded   newline
 with 'single	quotes' as well.
 ###  -s118 echo < stairs.xi
 1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22 333 4444 55555 666666 7777777 88888888 999999999
-1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22 333 4444 55555 666666 7777777 88888888 999999999
+1 22 333 4444 55555 666666 7777777 88888888 999999999
+1 22 333 4444 55555 666666 7777777 88888888 999999999
 ###  -s19 echo < stairs2.xi
 999999999
 88888888
@@ -650,7 +656,8 @@ with 'single	quotes' as well.
 88888888
 7777777
 666666 55555
-4444 333 22 1
+4444 333
+22 1
 ###  -s19 echo < stairs.xi
 1 22 333 4444
 55555 666666
@@ -701,12 +708,14 @@ with 'single	quotes' as well.
 666666 7777777 88888888
 999999999 1 22 333 4444
 55555 666666 7777777
-88888888 999999999
+88888888
+999999999
 ###  -s470 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4 /src/gnu/autoconf-1.11/configure /src/gnu/autoconf-1.11/configure.in
 /src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4 /src/gnu/autoconf-1.11/configure /src/gnu/autoconf-1.11/configure.in
-/src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
+/src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
+/src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
 ###  -s47 echo < files.xi
 /src/gnu/autoconf-1.11
 /src/gnu/autoconf-1.11/README
@@ -1059,14 +1068,16 @@ echo 88888888 999999999
 88888888 999999999
 echo 1 22 333 4444 55555
 echo 666666 7777777 88888888
-echo 999999999 1 22 333 4444
-echo 55555 666666 7777777
-echo 88888888 999999999
 1 22 333 4444 55555
+echo 999999999 1 22 333 4444
 666666 7777777 88888888
+echo 55555 666666 7777777
 999999999 1 22 333 4444
+echo 88888888
 55555 666666 7777777
-88888888 999999999
+echo 999999999
+88888888
+999999999
 ###  -t echo this plus that < space.xi
 echo this plus that 
 this plus that

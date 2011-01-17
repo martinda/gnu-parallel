@@ -55,12 +55,16 @@ tmp/parallel.file2.out
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ### --return --cleanup - multiple returns
 /tmp/parallel.file1.file.done
 /tmp/parallel.file1.out
 /tmp/parallel.file2.file.done
 /tmp/parallel.file2.out
 good if no file
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
 ### --transfer --return --cleanup - abspath
@@ -81,11 +85,15 @@ OK
 good if no file
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ### --transfer --return --cleanup - multiple files
 /tmp/parallel.file1.file.done
 /tmp/parallel.file1.out
 /tmp/parallel.file2.file.done
 /tmp/parallel.file2.out
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
 ### --trc - abspath
@@ -104,6 +112,8 @@ tmp/parallel.file1.out
 tmp/parallel.file2.file.done
 tmp/parallel.file2.out
 good if no file
+ls: cannot access tmp/parallel.file*: No such file or directory
+OK
 ls: cannot access tmp/parallel.file*: No such file or directory
 OK
 ### --trc - multiple files

@@ -13,7 +13,7 @@ echo '### Test -N is not broken by distribution - single line'
 seq 9 | parallel  -N 10  echo
 
 echo '### Test -N is not broken by distribution - two lines'
-seq 19 | parallel  -N 10  echo
+seq 19 | parallel -k -N 10  echo
 
 
 

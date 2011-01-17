@@ -17,7 +17,7 @@ echo via first cat |parallel -T -kv cat ::: - -
 EOF
 chmod 755 /tmp/parallel-script-for-script
 echo via pseudotty | script -q -f -c /tmp/parallel-script-for-script /dev/null
-sleep 1
+sleep 2
 echo '### Test stdin goes to first command only ("cat" as argument)'
 cat >/tmp/parallel-script-for-script2 <<EOF
 #!/bin/bash

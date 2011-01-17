@@ -5,11 +5,11 @@ seq 1 40 | parallel -j 0 seq 1 10  | sort |md5sum
 seq 1 40 | parallel -j 0 seq 1 10 '| parallel -j 3 echo' | sort |md5sum
 
 echo '### Test of xargs -m and -X'
-seq 1 60000 | parallel -m echo  | mop -d 4 "|sort |md5sum" "| wc"
-(echo foo;echo bar) | parallel -m echo 1{}2{}3 A{}B{}C
-(echo foo;echo bar) | parallel -X echo 1{}2{}3 A{}B{}C
-seq 1 60000 | parallel -m echo a{}b{}c | mop -d 4 "|sort |md5sum" "| wc"
-seq 1 60000 | parallel -m echo a{}b{}c | \
+seq 1 60000 | parallel -j1 -m echo  | mop -d 4 "|sort |md5sum" "| wc"
+(echo foo;echo bar) | parallel -j1 -m echo 1{}2{}3 A{}B{}C
+(echo foo;echo bar) | parallel -j1 -X echo 1{}2{}3 A{}B{}C
+seq 1 60000 | parallel -m -j1 echo a{}b{}c | mop -d 4 "|sort |md5sum" "| wc"
+seq 1 60000 | parallel -m -j1 echo a{}b{}c | \
   mop -q "|sort |md5sum" :par
 echo -n "Chars per line: "
 CHAR=$(cat ~/.mop/:par | wc -c)

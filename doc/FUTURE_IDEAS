@@ -1,3 +1,11 @@
+max_jobs_running could be resat if -j is a changed file.
+dummy children was not killed if cmd line was too long.
+default number of jobs for --semaphore set to 1.
+test25 had race condition.
+test22 -j10 added.
+test13 -j9 added.
+test47 remote cleanup added before test.
+test17 remote cleanup added before test.
 parallel: spread arguments between all jobslots when reaching EOF of input
 
 codecoverage

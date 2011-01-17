@@ -197,7 +197,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110101;
+    $Global::version = 20110111;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -320,6 +320,9 @@ sub parse_options {
 	$Semaphore::fg = $::opt_fg;
 	$Semaphore::wait = $::opt_wait;
 	$Global::default_simultaneous_sshlogins = 1;
+	if(not defined $::opt_P) {
+	    $::opt_P = 1;
+	}
     }
     if(defined $::opt_eta) {
 	$::opt_progress = $::opt_eta;
@@ -1244,6 +1247,12 @@ sub __USAGE__ {}
 sub wait_and_exit {
     # If we do not wait, we sometimes get segfault
     # Returns: N/A
+    for (keys %Global::unkilled_children) {
+	kill 9, $_;
+	waitpid($_,0);
+	delete $Global::unkilled_children{$_};
+    }
+	
     wait();
     exit(shift);
 }
@@ -1445,7 +1454,10 @@ sub set_max_jobs_running {
 	$Global::max_jobs_running -= $self->{'max_jobs_running'};
     }
     $self->{'max_jobs_running'} = shift;
-    $Global::max_jobs_running += $self->{'max_jobs_running'};
+    if(defined $self->{'max_jobs_running'}) {
+	# max_jobs_running could be resat if -j is a changed file
+	$Global::max_jobs_running += $self->{'max_jobs_running'};
+    }
 }
 
 sub loadavg_too_high {
@@ -1657,12 +1669,13 @@ sub processes_available_by_system_limit {
 	my $child;
 	if($child = fork()) {
 	    push (@children,$child);
+	    $Global::unkilled_children{$child} = 1;
 	} elsif(defined $child) {
 	    # The child takes one process slot
 	    # It will be killed later
 	    $SIG{TERM} = $Global::original_sigterm;
-	    sleep 100000;
-	    wait_and_exit(0);
+	    sleep 10000000;
+	    exit(0);
 	} else {
 	    $max_system_proc_reached = 1;
 	}
@@ -1694,6 +1707,7 @@ sub processes_available_by_system_limit {
     for my $pid (@children) {
 	kill 9, $pid;
 	waitpid($pid,0);
+	delete $Global::unkilled_children{$pid};
     }
     #wait();
     # Cleanup: Unget the command_lines or the @args
