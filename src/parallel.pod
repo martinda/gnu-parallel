@@ -390,6 +390,17 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
+=item B<--joblog> I<logfile> (beta testing)
+
+Logfile for executed jobs. Saved a list of the executed jobs to
+I<logfile> in the following format: sequence number, sshlogin, start
+time as seconds since epoch, run time in seconds, bytes in files
+transfered, bytes in files returned, command run.
+
+To convert the times into ISO-8601 strict do:
+B<perl -a -F"\t" -ne 'chomp($F[2]=`date -d \@$F[2] +%FT%T`); print join("\t",@F)'>
+
+
 =item B<--jobs> I<N>
 
 =item B<-j> I<N>

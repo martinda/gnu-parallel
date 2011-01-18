@@ -1055,7 +1055,7 @@ FIRST with 'single	quotes' as well. IS OK
 /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
 /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
-###  -s30 -t echo < stairs.xi
+###  -s30 -t echo < stairs.xi - xargs
 echo 1 22 333 4444 55555 
 1 22 333 4444 55555
 echo 666666 7777777 88888888 
@@ -1066,6 +1066,7 @@ echo 55555 666666 7777777
 55555 666666 7777777
 echo 88888888 999999999 
 88888888 999999999
+###  -s30 -t echo < stairs.xi - parallel
 echo 1 22 333 4444 55555
 echo 666666 7777777 88888888
 1 22 333 4444 55555

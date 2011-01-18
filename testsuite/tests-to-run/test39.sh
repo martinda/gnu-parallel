@@ -38,7 +38,7 @@ echo '### Test empty input'
 </dev/null parallel -j +0 echo
 
 echo '### Test -m'
-seq 1 2 | parallel -m echo
+seq 1 2 | parallel -k -m echo
 
 echo '### Test :::'
 parallel echo ::: 1

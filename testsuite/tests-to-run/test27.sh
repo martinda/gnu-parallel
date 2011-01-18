@@ -239,8 +239,9 @@ stdout parallel -k -l1 -n4 echo < files.xi
 echo '###  -l2 echo < files.xi'
 stdout xargs -l2 echo < files.xi
 stdout parallel -k -l2 echo < files.xi
-echo '###  -s30 -t echo < stairs.xi'
+echo '###  -s30 -t echo < stairs.xi - xargs'
 stdout xargs -s30 -t echo < stairs.xi
+echo '###  -s30 -t echo < stairs.xi - parallel'
 stdout parallel -k -X -s30 -t echo < stairs.xi
 echo '###  -t echo this plus that < space.xi'
 stdout xargs -t echo this plus that < space.xi
