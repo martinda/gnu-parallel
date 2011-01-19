@@ -19,3 +19,11 @@
 48894
 588895
 6888896
+### Test --spreadstdin - similar to the failing below
+### Test --spreadstdin - this failed during devel
+8a7095c1c23bfadc311fe6b16d950582  -
+8a7095c1c23bfadc311fe6b16d950582  -
+### Test --spreadstdin -k
+8a7095c1c23bfadc311fe6b16d950582  -
+### Test --spreadstdin --files
+8a7095c1c23bfadc311fe6b16d950582  -
