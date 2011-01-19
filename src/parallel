@@ -78,42 +78,56 @@ if($::opt_halt_on_error) {
 sub spreadstdin {
     # read a record
     # print it to the first jobs that is ready
-    my @jobs = values %Global::running;
     my $first = 0;
     my $second = 0;
     my $sleep = 0.1;
     my $max_sleep = 0.1;
     my $record;
-    my $rest = "";
+    my $partial = "";
     my $buf = "";
     my $block_max = 1000_000;
     my $rec_start = undef;
     my $rec_end = undef;
     my $err;
     while(read(STDIN,$buf,$block_max)) {
-	$record = $rest.$buf;
-	if(($::opt_recstart and $record =~ s/($::opt_recstart.*?)$//smo)
-	   or
-	   ($::opt_recend and $record =~ s/$::opt_recend(.*?)$//smo)) {
-	    $rest = $1;
+	$record = $partial.$buf;
+	if(eof STDIN) {
+	    # There is no partial record at the end of file
+	    $partial = "";
+	} else {
+	    if(($::opt_recstart and $record =~ s/(.*)($::opt_recstart.*?)$/$1/os)
+	       or
+	       ($::opt_recend and $record =~ s/(.*$::opt_recend)(.*?)$/$1/os)) {
+		$partial = $2;
+	    }
 	}
 	::debug("Read record: ".length($record)."\n");
       write_record: while(defined $record) {
-	  for my $job (@jobs) {
+	  # Sorting according to sequence is necessary for -k to work
+	  for my $job (sort { $a->seq() <=> $b->seq() } values %Global::running) {
 	      if($job->remaining()) {
+		  # Part of the job's last record has not finished being written
 		  $job->complete_write();
 	      } else {
-		  $job->write($record);
-		  $record = undef;
-		  $first++;
-		  $sleep=1;
-		  last write_record;
+		  if($job->datawritten() > 0) {
+		      # if opt -k:
+		      #   close stdin
+		      #   start another (maybe done by start more?)
+		      my $fh = $job->stdin();
+		      close $fh;
+		  } else {
+		      $job->write($record);
+		      $record = undef;
+		      $first++;
+		      $sleep=1;
+		      last write_record;
+		  }
 	      }
 	  }
 	  # Rotate jobs to spread the input
-	  @jobs = ($jobs[$#jobs],@jobs[0..$#jobs-1]);
+#	  @jobs = ($jobs[$#jobs],@jobs[0..$#jobs-1]);
 	  usleep($sleep);
-	  $sleep *= 1.1;
+	  $sleep *= 1.1; # exponential back off
 	  $max_sleep = max($max_sleep, $sleep);
 	  $second++;
       }
@@ -121,17 +135,18 @@ sub spreadstdin {
     my $flush_done;
     do {
 	$flush_done = 1;
-	for my $job (@jobs) {
+	# Make sure everything is written to the jobs
+	for my $job (values %Global::running) {
 	    if($job->remaining()) {
 		$job->complete_write();
 		$flush_done = 0;
 	    }
 	}
 	usleep($sleep);
-	$sleep *= 1.1;
+	$sleep *= 1.1; # exponential back off
     } while (not $flush_done);
 
-    for my $job (@jobs) {
+    for my $job (values %Global::running) {
 	my $fh = $job->stdin();
 	close $fh;
     }
@@ -228,6 +243,7 @@ sub get_options_from_array {
 	 "spreadstdin" => \$::opt_spreadstdin,
 	 "recstart=s" => \$::opt_recstart,
 	 "recend=s" => \$::opt_recend,
+	 "files" => \$::opt_files,
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$::opt_P,
 	 "delimiter|d=s" => \$::opt_d,
@@ -269,7 +285,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110118;
+    $Global::version = 20110119;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -420,7 +436,7 @@ sub parse_options {
         } else {
             print $Global::joblog
                 join("\t", "Seq", "Host", "Starttime", "Runtime",
-                     "Trans", "Return", "Command"
+                     "Send", "Receive", "Command"
                 ). "\n";
         }
     }
@@ -2227,8 +2243,10 @@ sub new {
         'seq' => undef, # $PARALLEL_SEQ
         'stdin' => undef, # filehandle for stdin (used for --spreadstdin)
         'stdout' => undef, # filehandle for stdout (used for --group)
+        'stdoutfilename' => undef, # filename for writing stdout to (used for --files)
         'stderr' => undef, # filehandle for stderr (used for --group)
         'remaining' => "", # remaining data not sent to stdin (used for --spreadstdin)
+	'datawritten' => 0, # amount of data sent via stdin (used for --spreadstdin)
         'transfersize' => 0, # size of files using --transfer
         'returnsize' => 0, # size of files using --return
         'pid' => undef,
@@ -2266,6 +2284,17 @@ sub set_stdout {
 sub stdout {
     my $self = shift;
     return $self->{'stdout'};
+}
+
+sub set_stdoutfilename {
+    my $self = shift;
+    my $stdoutfilename = shift;
+    $self->{'stdoutfilename'} = $stdoutfilename;
+}
+
+sub stdoutfilename {
+    my $self = shift;
+    return $self->{'stdoutfilename'};
 }
 
 sub stderr {
@@ -2311,6 +2340,7 @@ sub complete_write {
     } else {
 	# Remove the part that was written
 	substr($self->{'remaining'},0,$len) = "";
+	$self->{'datawritten'} += $len;
     }
 }
 
@@ -2323,6 +2353,10 @@ sub remaining {
     }
 }
 
+sub datawritten {
+    my $self = shift;
+    return $self->{'datawritten'};
+}
 
 sub pid {
     my $self = shift;
@@ -2489,7 +2523,9 @@ sub transfer {
 	    for my $arg (@$record) {
 		CORE::push @transfer, $arg->orig();
 		# filesize
-		$self->{'transfersize'} += (stat($arg->orig()))[7];
+		if(-e $arg->orig()) {
+		    $self->{'transfersize'} += (stat($arg->orig()))[7];
+		}
 	    }
 	}
     }
@@ -2691,7 +2727,8 @@ sub start {
 	# To group we create temporary files for STDOUT and STDERR
 	# To avoid the cleanup unlink the files immediately (but keep them open)
 	($outfh,$name) = ::tempfile(SUFFIX => ".par");
-	unlink $name;
+	$job->set_stdoutfilename($name);
+	$::opt_files or unlink $name;
 	($errfh,$name) = ::tempfile(SUFFIX => ".par");
 	unlink $name;
 
@@ -2815,7 +2852,7 @@ sub print {
 	# so flush to avoid STDOUT being buffered
 	flush STDOUT;
     }
-    seek $_, 0, 0 for $out, $err;
+    seek $err, 0, 0;
     if($Global::debug) {
 	print STDERR "ERR:\n";
     }
@@ -2824,14 +2861,20 @@ sub print {
 	print STDERR $buf;
     }
     flush STDERR;
-    if($Global::debug) {
-	print STDOUT "OUT:\n";
+
+    if($::opt_files) {
+	print STDOUT $self->{'stdoutfilename'},"\n";
+    } else {
+	seek $out, 0, 0;
+	if($Global::debug) {
+	    print STDOUT "OUT:\n";
+	}
+	while(sysread($out,$buf,1000_000)) {
+	    print STDOUT $buf;
+	}
+	flush STDOUT;
+	::debug("<<joboutput $command\n");
     }
-    while(sysread($out,$buf,1000_000)) {
-	print STDOUT $buf;
-    }
-    flush STDOUT;
-    ::debug("<<joboutput $command\n");
     close $out;
     close $err;
 }

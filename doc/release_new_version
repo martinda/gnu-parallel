@@ -43,7 +43,7 @@ make dist-bzip2
 
 YYYYMMDD=`yyyymmdd`
 cp parallel-$YYYYMMDD.tar.bz2 /tmp
-cd /tmp
+pushd /tmp
 tar xjvf parallel-$YYYYMMDD.tar.bz2
 cd parallel-$YYYYMMDD
 ./configure && make -j && sudo make -j install
@@ -64,8 +64,9 @@ echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org
 
 == Download and test ==
 
-cd /tmp
+pushd /tmp
 wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
+#wget http://alpha.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
 tar xjvf parallel-$YYYYMMDD.tar.bz2
 cd parallel-$YYYYMMDD
 ./configure

@@ -393,11 +393,12 @@ use B<-I> instead.
 =item B<--joblog> I<logfile> (beta testing)
 
 Logfile for executed jobs. Saved a list of the executed jobs to
-I<logfile> in the following format: sequence number, sshlogin, start
-time as seconds since epoch, run time in seconds, bytes in files
-transfered, bytes in files returned, command run.
+I<logfile> in the following TAB separated format: sequence number,
+sshlogin, start time as seconds since epoch, run time in seconds,
+bytes in files transfered, bytes in files returned, command run.
 
 To convert the times into ISO-8601 strict do:
+
 B<perl -a -F"\t" -ne 'chomp($F[2]=`date -d \@$F[2] +%FT%T`); print join("\t",@F)'>
 
 
@@ -410,7 +411,7 @@ B<perl -a -F"\t" -ne 'chomp($F[2]=`date -d \@$F[2] +%FT%T`); print join("\t",@F)
 =item B<-P> I<N>
 
 Number of jobslots. Run up to N jobs in parallel.  0 means as many as
-possible. Default is 9.
+possible. Default is +0 which will run one job per CPU core.
 
 If B<--semaphore> is set default is 1 thus making a mutex.
 
@@ -2477,7 +2478,7 @@ you file a bug-report.
 
 =head1 REPORTING BUGS
 
-Report bugs to <bug-parallel@gnu.org>.
+Report bugs to <bug-parallel@gnu.org> or https://savannah.gnu.org/bugs/?func=additem&group=parallel
 
 
 =head1 AUTHOR
