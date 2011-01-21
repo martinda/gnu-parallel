@@ -1064,8 +1064,7 @@ sub get_job_with_sshlogin {
     if($::oodebug and not defined $job->{'commandline'}) {
         Carp::confess("get_job_with_sshlogin job->commandline should never be empty");
     }
-    my $next_command_line = $job->replaced();
-    my $clean_command = $next_command_line;
+    my $clean_command = $job->replaced();
     if($clean_command =~ /^\s*$/) {
         # Do not run empty lines
         if(not $Global::JobQueue->empty()) {
@@ -1089,6 +1088,8 @@ sub get_job_with_sshlogin {
             # Find another job to run
             my $nextjob;
             if(not $Global::JobQueue->empty()) {
+		# This can potentially recurse for all args
+                no warnings 'recursion';
                 $nextjob = get_job_with_sshlogin($sshlogin);
             }
             # Push the command back on the queue
