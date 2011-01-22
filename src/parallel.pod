@@ -243,6 +243,22 @@ See also: B<--fg>
 Implies B<--semaphore>.
 
 
+=item B<--block> I<size> (beta testing)
+
+=item B<--block-size> I<size> (beta testing)
+
+Size of block in bytes. The size can be postfixed with K, M, G, or T
+which would multiply the size with 1024, 1048576, 1073741824, or
+1099511627776 respectively.
+
+GNU B<parallel> tries to meet the block size but can be off by the
+length of one record.
+
+I<size> defaults to 1M.
+
+See B<--pipe> for use of this.
+
+
 =item B<--cleanup>
 
 Remove transferred files. B<--cleanup> will remove the transferred files
@@ -537,6 +553,43 @@ See also B<-X> for context replace. If in doubt use B<-X> as that will
 most likely do what is needed.
 
 
+=item B<--output-as-files> (beta testing)
+
+=item B<--outputasfiles> (beta testing)
+
+=item B<--files> (beta testing)
+
+Instead of printing the output to stdout (standard output) the output
+of each job is saved in a file and the filename is then printed.
+
+
+=item B<--pipe> (beta testing)
+
+=item B<--spreadstdin> (beta testing)
+
+Spread input to jobs on stdin. Read a block of data from stdin
+(standard input) and give one block of data as input to one job.
+
+The block size is determined by B<--block>. The regular expressions
+B<--recstart> and B<--recend> tell GNU B<parallel> how a record starts
+and/or ends. The block read will have the final partial record removed
+before the block is passed on to the job. The partial record will be
+prepended to next block.
+
+If B<--recstart> is given this will be used to split at record start.
+
+If B<--recend> is given this will be used to split at record end.
+
+If both B<--recstart> and B<--recend> are given both will have to
+match to find a split position.
+
+If neither B<--recstart> nor B<--recend> are given B<--recend>
+defaults to '\n'. To have no record separator use B<--recend "">.
+
+If B<--output-as-files> is set the output will not be the output of
+the jobs but a list of files containing the output of the jobs run.
+
+
 =item B<--progress>
 
 Show progress of computations. List the computers involved in the task
@@ -644,6 +697,24 @@ default.
 =item B<-r>
 
 If the stdin (standard input) only contains whitespace, do not run the command.
+
+
+=item B<--recstart> I<startregexp> (beta testing)
+
+=item B<--recend> I<endregexp> (beta testing)
+
+If B<--recstart> is given I<startregexp> will be used to split at record start.
+
+If B<--recend> is given I<endregexp> will be used to split at record end.
+
+If both B<--recstart> and B<--recend> are given the regular expression
+I<startregexp>I<endregexp> will have to match to find a split
+position.
+
+If neither B<--recstart> nor B<--recend> are given B<--recend>
+defaults to '\n'. To have no record separator use B<--recend "">.
+
+B<--recstart> and B<--recend> used with B<--pipe>.
 
 
 =item B<--retries> I<n> (beta testing)
@@ -780,6 +851,9 @@ For examples: see B<--sshloginfile>.
 The remote host must have GNU B<parallel> installed.
 
 B<--sshlogin> is known to cause problems with B<-m> and B<-X>.
+
+B<--sshlogin> is often used with B<--transfer>, B<--return>,
+B<--cleanup>, and B<--trc>.
 
 
 =item B<--sshloginfile> I<filename>
@@ -2487,17 +2561,16 @@ Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
 
 Copyright (C) 2008,2009,2010 Ole Tange, http://ole.tange.dk
 
-Copyright (C) 2010 Ole Tange, http://ole.tange.dk and Free Software
-Foundation, Inc.
+Copyright (C) 2010,2011 Ole Tange, http://ole.tange.dk and Free
+Software Foundation, Inc.
 
 Parts of the manual concerning B<xargs> compatibility is inspired by
 the manual of B<xargs> from GNU findutils 4.4.2.
 
 
-
 =head1 LICENSE
 
-Copyright (C) 2007,2008,2009,2010 Free Software Foundation, Inc.
+Copyright (C) 2007,2008,2009,2010,2011 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

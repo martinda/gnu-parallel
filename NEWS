@@ -1,3 +1,37 @@
+20110122
+
+* --joblog makes a simple log of completed jobs.
+
+* -X now spreads arguments between job slots when reaching last
+  argument. Use -j1 to avoid this.
+
+* People on the email list have voted -j+0 to be the new default
+  instead of -j9.
+
+* First review in Polish. Thanks to Patryk Krawaczyński.
+  http://nfsec.pl/root/2458
+
+* Review in Spanish (in print).
+  https://www.linux-magazine.es/issue/67/moreinfo.html
+
+* Review in English. Thanks to Brian Gough.
+  http://blogs.fsfe.org/bjg/2011/01/gnu-parallel-a-map-operator-for-the-command-line/
+
+* Review in French. Thanks to Denis Dordoigne.
+  http://linuxfr.org/2010/12/29/27715.html
+
+* Review in Spanish.
+  http://gufete.net/index.php?entry=entry110116-200022
+
+* Article with advanced recursive example. Thanks to Ruarí Ødegaard
+  http://my.opera.com/ruario/blog/2011/01/18/fun-with-gnu-parallel
+
+* Use case for memcache.
+  http://www.dctrwatson.com/2010/12/how-to-dump-memcache-keyvalue-pairs-fast/
+
+* Bug fixes and man page updates.
+
+
 20101222
 
 * GNU niceload is now part of GNU Parallel. GNU niceload slows down a

@@ -1,3 +1,4 @@
+--block
 parallel: --joblog implemented. Testsuite missing.
 parallel: --spreadstdin prototype. Testsuite missing.
 

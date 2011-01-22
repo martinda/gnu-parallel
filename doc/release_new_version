@@ -137,9 +137,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    ryoichiro.suzuki@gmail.com,kerick@shiftedbit.net,
    Christian Faulhammer <fauli@gentoo.org>
 
-Subject: GNU Parallel 2011XXXX released
+Subject: GNU Parallel 20110122 released
 
-GNU Parallel 2011XXXX has been released. It is available for
+GNU Parallel 20110122 has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
@@ -166,6 +166,9 @@ New in this release:
 
 * Review in Spanish.
   http://gufete.net/index.php?entry=entry110116-200022
+
+* Article with advanced recursive example. Thanks to Ruarí Ødegaard
+  http://my.opera.com/ruario/blog/2011/01/18/fun-with-gnu-parallel
 
 * Use case for memcache.
   http://www.dctrwatson.com/2010/12/how-to-dump-memcache-keyvalue-pairs-fast/
