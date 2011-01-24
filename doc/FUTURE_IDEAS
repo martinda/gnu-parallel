@@ -1,6 +1,7 @@
---block
-parallel: --joblog implemented. Testsuite missing.
-parallel: --spreadstdin prototype. Testsuite missing.
+-N for --pipe. Fixed race condition in --pipe.
+Tests for --pipe.
+Passes testsuite.
+
 
 codecoverage
 

@@ -1,0 +1,92 @@
+### Test --pipe
+### Test -N even
+1
+2
+ole
+3
+4
+ole
+5
+6
+ole
+7
+8
+ole
+9
+10
+ole
+ole
+### Test -N odd
+1
+2
+ole
+3
+4
+ole
+5
+6
+ole
+7
+8
+ole
+9
+10
+ole
+11
+ole
+### Test -N even+2
+1
+2
+ole
+3
+4
+ole
+5
+6
+ole
+7
+8
+ole
+9
+10
+ole
+11
+12
+ole
+ole
+ole
+### Test --recstart + --recend
+0d53a19cdc880668a7c745794dcafbf1  -
+### Race condition bug - 1 - would block
+### Race condition bug - 2 - would block
+### Test --block size=1
+
+
+
+
+
+
+
+
+
+
+0
+1
+1
+2
+3
+4
+5
+6
+7
+8
+9
+### Test --block size=1M -j10 --files - more jobs than data
+8a7095c1c23bfadc311fe6b16d950582  -
+8a7095c1c23bfadc311fe6b16d950582  -
+### Test --block size=1M -j1 - more data than cpu
+8a7095c1c23bfadc311fe6b16d950582  -
+### Test --block size=1M -j1 - more data than cpu
+8a7095c1c23bfadc311fe6b16d950582  -
+### Test --pipe default settings
+8a7095c1c23bfadc311fe6b16d950582  -

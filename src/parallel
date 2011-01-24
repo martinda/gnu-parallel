@@ -60,11 +60,13 @@ if($Global::semaphore) {
 }
 $SIG{TERM} = \&start_no_new_jobs;
 start_more_jobs();
-if($::opt_spreadstdin) {
+if($::opt_pipe) {
     spreadstdin();
 }
 reap_if_needed();
+::debug("Start draining\n");
 drain_job_queue();
+::debug("Done draining\n");
 cleanup();
 if($Global::semaphore) {
     $sem->release();
@@ -92,38 +94,85 @@ sub spreadstdin {
 	# If both --recstart and --recend is given then both must match
 	$recstart = $::opt_recstart;
 	$recend = $::opt_recend;
-	$recerror = "Warning: --recend and --recstart unmatched";
+	$recerror = "Warning: --recend and --recstart unmatched. Is --blocksize too small?";
     } elsif(defined($::opt_recstart)) {
 	# If --recstart is given it must match start of record
 	$recstart = $::opt_recstart;
 	$recend = "";
-	$recerror = "Warning: --recstart unmatched";
+	$recerror = "Warning: --recstart unmatched. Is --blocksize too small?";
     } elsif(defined($::opt_recend)) {
 	# If --recend is given then it must match end of record
 	$recstart = "";
 	$recend = $::opt_recend;
-	$recerror = "Warning: --recend unmatched";
+	$recerror = "Warning: --recend unmatched. Is --blocksize too small?";
     }
 
     while(read(STDIN,$buf,$::opt_blocksize)) {
 	$record = $partial.$buf;
-	if(eof STDIN) {
-	    # There is no partial record at the end of file
-	    $partial = "";
+	if($Global::max_number_of_args) {
+	    # -N => (start..*?end){n}
+	    while($record =~ s/(($recstart.*?$recend){$Global::max_number_of_args})($recstart.*)$/$1/os) {
+		$partial = $3;
+		::debug("Read record: ".length($record)."\n");
+		write_record_to_pipe($record);
+		$record = $partial;
+	    }
+	    if(eof STDIN) {
+		# There is no partial record at the end of file
+		write_record_to_pipe($record);
+	    }
 	} else {
 	    if($record =~ s/(.*$recend)($recstart.*?)$/$1/os) {
 		$partial = $2;
 	    } else {
 		print $Global::original_stderr $recerror,"\n";
 	    }
+	    ::debug("Read record: ".length($record)."\n");
+	    write_record_to_pipe($record);
+	    if(eof STDIN) {
+		# There is no partial record at the end of file
+		write_record_to_pipe($partial);
+	    }
 	}
-	::debug("Read record: ".length($record)."\n");
-	my $reap_needed = 0;
-      write_record: while(defined $record) {
+    }
+    ::debug("Done reading STDIN\n");
+    flush_and_close_pipes();
+    ::debug("Done flushing to children\n");
+    $Global::start_no_new_jobs = 1;
+}
+
+sub flush_and_close_pipes {
+    my $flush_done;
+    my $sleep = 0.1;
+    do {
+	$flush_done = 1;
+	# Make sure everything is written to the jobs
+	do_not_reap();
+	for my $job (values %Global::running) {
+	    if($job->remaining()) {
+		$job->complete_write();
+		$flush_done = 0;
+	    }
+	}
+	reap_if_needed();
+	usleep($sleep);
+	$sleep *= 1.1; # exponential back off
+    } while (not $flush_done);
+    do_not_reap();
+    for my $job (values %Global::running) {
+	my $fh = $job->stdin();
+	close $fh;
+    }
+    reap_if_needed();
+}
+
+sub write_record_to_pipe {
+    my $record = shift;
+    my $sleep = 0.1; # 0.1 ms
+  write_record: while(1) {
 	  # Sorting according to sequence is necessary for -k to work
 	  do_not_reap(); # If Global::running is changed the for loop has a race condition
 	  for my $job (sort { $a->seq() <=> $b->seq() } values %Global::running) {
-	      ::debug("Looking at ",$job," ");
 	      ::debug("Looking at ",$job->seq(),"-",$job->remaining(),"-",$job->datawritten(),"\n");
 	      if($job->remaining()) {
 		  # Part of the job's last record has not finished being written
@@ -132,53 +181,23 @@ sub spreadstdin {
 		  if($job->datawritten() > 0) {
 		      # There is no data remaining and we have written data before:
 		      # So this means we have completed writing a block.
-		      # close stdin 
+		      # close stdin
 		      # This will cause the job to finish and when it dies we will spawn another job
 		      my $fh = $job->stdin();
 		      close $fh;
-		      $reap_needed = 1;
 		  } else {
 		      $job->write($record);
-		      $record = undef;
-		      $first++;
-		      $sleep=1;
+		      $sleep = 0.1;
 		      last write_record;
 		  }
 	      }
 	  }
 	  reap_if_needed();
-	  # Rotate jobs to spread the input
-#	  @jobs = ($jobs[$#jobs],@jobs[0..$#jobs-1]);
 	  usleep($sleep);
 	  $sleep *= 1.1; # exponential back off
-	  $max_sleep = max($max_sleep, $sleep);
-	  $second++;
       }
-	if($reap_needed) {
-	    # One of more jobs finished in last round
-	    reap_if_needed();
-	}
-    }
-    my $flush_done;
-    do {
-	$flush_done = 1;
-	# Make sure everything is written to the jobs
-	for my $job (values %Global::running) {
-	    if($job->remaining()) {
-		$job->complete_write();
-		$flush_done = 0;
-	    }
-	}
-	usleep($sleep);
-	$sleep *= 1.1; # exponential back off
-    } while (not $flush_done);
-
-    for my $job (values %Global::running) {
-	my $fh = $job->stdin();
-	close $fh;
-    }
-    $Global::start_no_new_jobs = 1;
-    ::debug("Blocks send directly: $first Delays: $second Max sleep ms: $max_sleep\n");
+    reap_if_needed();
+    return;
 }
 
 sub acquire_semaphore {
@@ -237,7 +256,7 @@ sub get_options_from_array {
 	 "quote|q" => \$::opt_q,
 	 "I=s" => \$::opt_I,
 	 "extensionreplace|U=s" => \$::opt_U,
-	 "basenamereplace=s" => \$::opt_basenamereplace,
+	 "basenamereplace|bnr=s" => \$::opt_basenamereplace,
 	 "basenameextensionreplace=s" => \$::opt_basenameextensionreplace,
 	 "jobs|j=s" => \$::opt_P,
 	 "load=s" => \$::opt_load,
@@ -267,7 +286,7 @@ sub get_options_from_array {
 	 "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
 	 "trim=s" => \$::opt_trim,
 	 "profile|J=s" => \$::opt_profile,
-	 "pipe|spreadstdin" => \$::opt_spreadstdin,
+	 "pipe|spreadstdin" => \$::opt_pipe,
 	 "recstart=s" => \$::opt_recstart,
 	 "recend=s" => \$::opt_recend,
 	 "files|output-as-files|outputasfiles" => \$::opt_files,
@@ -381,7 +400,7 @@ sub parse_options {
     if(defined @::opt_sshlogin) { @Global::sshlogin = @::opt_sshlogin; }
     if(defined $::opt_sshloginfile) { read_sshloginfile($::opt_sshloginfile); }
     if(defined @::opt_return) { push @Global::ret_files, @::opt_return; }
-    if(not defined $::opt_recstart and 
+    if(not defined $::opt_recstart and
        not defined $::opt_recend) { $::opt_recend = "\n"; }
     if(not defined $::opt_blocksize) { $::opt_blocksize = "1M"; }
     $::opt_blocksize = multiply_binary_prefix($::opt_blocksize);
@@ -809,8 +828,17 @@ sub drain_job_queue {
     my $last_header="";
     do {
         while($Global::total_running > 0) {
-            debug("jobs running: ",$Global::total_running," Memory usage:".my_memory_usage()."\n");
+            debug("jobs running: ",$Global::total_running," ",scalar keys %Global::running, " Memory usage:".my_memory_usage()."\n");
             sleep 1;
+	    if($::opt_pipe) {
+		# When using --pipe sometimes file handles are not closed properly
+		do_not_reap();
+		for my $job (values %Global::running) {
+		    my $fh = $job->stdin();
+		    close $fh;
+		}
+		reap_if_needed();
+	    }
             reaper(); # Some systems fail to catch the SIGCHLD
             if($::opt_progress) {
                 my %progress = progress();
@@ -1038,7 +1066,7 @@ sub start_more_jobs {
                 next;
             }
             while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
-                if($Global::JobQueue->empty() and not $::opt_spreadstdin) {
+                if($Global::JobQueue->empty() and not $::opt_pipe) {
                     last;
                 }
                 debug("Try starting a job on ".$sshlogin->string()."\n");
@@ -1067,7 +1095,7 @@ sub start_another_job {
     my $sshlogin = shift;
     # Do we have enough file handles to start another job?
     if(enough_file_handles()) {
-        if($Global::JobQueue->empty() and not $::opt_spreadstdin) {
+        if($Global::JobQueue->empty() and not $::opt_pipe) {
             # No more commands to run
             return 0;
         } else {
@@ -1390,7 +1418,6 @@ sub wait_and_exit {
         waitpid($_,0);
         delete $Global::unkilled_children{$_};
     }
-        
     wait();
     exit(shift);
 }
@@ -1483,6 +1510,9 @@ sub my_size {
         return total_size(@_);
     }
 }
+
+# Guvf vf n grfg gb frr vs bguref ner ernqvat zl pbqr. Cyrnfr rznvy
+# pbbxvr@gnatr.qx jura lbh ernq guvf
 
 sub my_dump {
     # Returns:
@@ -2808,7 +2838,7 @@ sub start {
     $ENV{'PARALLEL_SEQ'} = $job->seq();
     $ENV{'PARALLEL_PID'} = $$;
     ::debug("$Global::total_running processes. Starting (".$job->seq()."): $command\n");
-    if($::opt_spreadstdin) {
+    if($::opt_pipe) {
 	my ($in);
 	$pid = ::open3($in, ">&OUT", ">&ERR", $command) ||
 	    die("open3 (with spreadstdin) failed. Report a bug to <bug-parallel\@gnu.org>\n");
@@ -3001,7 +3031,7 @@ sub populate {
     # Add arguments from arg_queue until the number of arguments or
     # max line length is reached
     my $self = shift;
-    if($::opt_spreadstdin) {
+    if($::opt_pipe) {
 	# Do no read any args
 	$self->push([Arg->new("")]);
 	return;
@@ -3413,7 +3443,7 @@ sub get {
 	    );
 	$cmd_line->populate();
 	::debug("cmd_line->number_of_args ".$cmd_line->number_of_args()."\n");
-	if(not $::opt_spreadstdin and $cmd_line->number_of_args() == 0) {
+	if(not $::opt_pipe and $cmd_line->number_of_args() == 0) {
 	    # We did not get more args - maybe at EOF string?
 	    return undef;
 	} else {

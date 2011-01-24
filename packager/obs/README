@@ -1,4 +1,4 @@
 make
-Edit parallel.spec
+Edit home\:tange/parallel/parallel.spec
 Then go to https://build.opensuse.org/package/files?package=parallel&project=home%3Atange
 and add all the files

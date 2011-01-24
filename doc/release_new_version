@@ -47,6 +47,7 @@ pushd /tmp
 tar xjvf parallel-$YYYYMMDD.tar.bz2
 cd parallel-$YYYYMMDD
 ./configure && make -j && sudo make -j install
+pushd
 
 == Upload ==
 
@@ -135,43 +136,50 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Rogério Brito <rbrito@ime.usp.br>, Jonathan Palardy <jonathan.palardy@gmail.com>,
    Koen Vervloesem <koen@vervloesem.eu>, R. Tyler Croy <tyler@monkeypox.org>,
    ryoichiro.suzuki@gmail.com,kerick@shiftedbit.net,
-   Christian Faulhammer <fauli@gentoo.org>
+   Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>
 
-Subject: GNU Parallel 20110122 released
+Subject: GNU Parallel 2011XXXX released
 
-GNU Parallel 20110122 has been released. It is available for
+GNU Parallel 2011XXXX has been released. It is available for
 download at: http://ftp.gnu.org/gnu/parallel/
+
+This is a major release as the --pipe option introduces a new way to
+work. To learn about --pipe see the example section for uses of
+--pipe.
+
+But rest assured: No old functionality is changed.
 
 New in this release:
 
-* --joblog makes a simple log of completed jobs.
+* --pipe splits piped data into blocks. Each block is piped to a
+  program for processing. The piping and the programs will be run in
+  parallel. Useful if the data you want to process is data for a
+  program and not arguments.
 
-* -X now spreads arguments between job slots when reaching last
-  argument. Use -j1 to avoid this.
+* --blocksize sets the blocksize in bytes for --pipe. The blocksize is
+  approximate. It can deviate as much as the size of one record.
+  Default is 1M.
 
-* People on the email list have voted -j+0 to be the new default
-  instead of -j9.
+* --recstart sets the regular expression matching the start of a
+  record. Default is "".
 
-* First review in Polish. Thanks to Patryk Krawaczyński.
-  http://nfsec.pl/root/2458
+* --recend sets the regular expression matching the end of a
+  record. Default is "\n". To specify none use --recend "".
 
-* Review in Spanish (in print).
-  https://www.linux-magazine.es/issue/67/moreinfo.html
+  If both --recstart and --recend are set, the end of a record must be
+  followed immediately by a start of a record. This is useful if
+  either recend or recstart can occur in the middle of a record.
 
-* Review in English. Thanks to Brian Gough.
-  http://blogs.fsfe.org/bjg/2011/01/gnu-parallel-a-map-operator-for-the-command-line/
+* --output-as-files will put the output of the programs into files and
+  instead of giving the output GNU Parallel will output the name of
+  these files.
 
-* Review in French. Thanks to Denis Dordoigne.
-  http://linuxfr.org/2010/12/29/27715.html
+* -N set the number of records to read. If used with --blocksize
+  the block read will at most be --blocksize. -N is much slower
+  than --blocksize so avoid -N if performance is important.
 
-* Review in Spanish.
-  http://gufete.net/index.php?entry=entry110116-200022
-
-* Article with advanced recursive example. Thanks to Ruarí Ødegaard
-  http://my.opera.com/ruario/blog/2011/01/18/fun-with-gnu-parallel
-
-* Use case for memcache.
-  http://www.dctrwatson.com/2010/12/how-to-dump-memcache-keyvalue-pairs-fast/
+* Advanced recursive example. Thanks to Ruarí Ødegaard.
+  http://my.opera.com/ruario/blog/2011/01/24/editing-debian-packages-more-fun-with-gnu
 
 * Bug fixes and man page updates.
 

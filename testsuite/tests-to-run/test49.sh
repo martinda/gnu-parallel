@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo '### Test --spreadstdin - more procs than args'
-rm /tmp/parallel.ss.*
+rm -f /tmp/parallel.ss.*
 seq 1 5 | stdout parallel -j 10 --spreadstdin 'cat >/tmp/parallel.ss.$PARALLEL_SEQ' >/dev/null
 cat /tmp/parallel.ss.*
 

@@ -222,7 +222,9 @@ Multiple B<-B> can be specified to transfer more basefiles. The
 I<file> will be transferred the same way as B<--transfer>.
 
 
-=item B<--basenamereplace> I<replace-str> (beta testing)
+=item B<--basenamereplace> I<replace-str>
+
+=item B<--bnr> I<replace-str>
 
 Use the replacement string I<replace-str> instead of B<{/}> for basename of input line.
 
@@ -334,7 +336,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--eta>
+=item B<--eta> (alpha testing)
 
 Show the estimated number of seconds before finishing. This forces GNU
 B<parallel> to read all jobs before starting to find the number of
@@ -630,7 +632,11 @@ This will set the owner of the homedir to the user:
 
 B<tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}>
 
-Implies B<-X> unless B<-m> is set.
+Implies B<-X> unless B<-m> or <--pipe> is set.
+
+When used with B<--pipe> B<-N> is the number of records to read. This
+is much slower than B<--blocksize> so avoid it if performance is
+important.
 
 
 =item B<--max-line-length-allowed>
@@ -709,12 +715,13 @@ If B<--recend> is given I<endregexp> will be used to split at record end.
 
 If both B<--recstart> and B<--recend> are given the regular expression
 I<startregexp>I<endregexp> will have to match to find a split
-position.
+position. This is useful if either I<startregexp> or I<endregexp>
+match in the middle of a record.
 
-If neither B<--recstart> nor B<--recend> are given B<--recend>
+If neither B<--recstart> nor B<--recend> are given then B<--recend>
 defaults to '\n'. To have no record separator use B<--recend "">.
 
-B<--recstart> and B<--recend> used with B<--pipe>.
+B<--recstart> and B<--recend> are used with B<--pipe>.
 
 
 =item B<--retries> I<n> (beta testing)
