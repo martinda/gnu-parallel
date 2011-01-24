@@ -29,7 +29,7 @@ xargs or cat | sh.</description>
 	<needs-terminal/>
 
 	<group main="src/parallel">
-		<environment name="PATH" insert="src" mode="prepend" />
+		<environment insert="src" mode="prepend" name="PATH"/>
 		<implementation id="sha1new=3bd5646ca0c38217df8278433803b44e33272954" released="2010-06-24" version="20100620">
 			<archive extract="parallel-20100620" href="http://ftp.gnu.org/gnu/parallel/parallel-20100620.tar.bz2" size="88834" type="application/x-bzip-compressed-tar"/>
 		</implementation>
@@ -57,10 +57,14 @@ xargs or cat | sh.</description>
     <manifest-digest sha256="cf2d12cd3dc171678d49ca09badbb029832d776677552b002d80c37d3162ee95"/>
     <archive extract="parallel-20101222" href="http://ftp.gnu.org/gnu/parallel/parallel-20101222.tar.bz2" size="151264"/>
   </implementation>
+		<implementation id="sha1new=5f4293d94a95cd233d393e84fae1b449957352cb" released="2011-01-23" version="20110122">
+    <manifest-digest sha256="2d906f04c08fc90e9ad49034c6ab6695c8d3e6324422cd3854f6cdb3a25be9cd"/>
+    <archive extract="parallel-20110122" href="http://ftp.gnu.org/gnu/parallel/parallel-20110122.tar.bz2" size="157049"/>
+  </implementation>
 	</group>
 </interface>
 <!-- Base64 Signature
-iEYEABECAAYFAk0R7TIACgkQ/lhgK1iJTtIHKwCgvy5E2mpR7sajNgwoMJ7v54Nl9OkAnjLurHoR
-LLkifrxGwid2TjEwJuvV
+iEYEABECAAYFAk07dXYACgkQ/lhgK1iJTtJD0gCgqms/ye/usbsfx111rvpGqlnoILQAoMHdt+7x
+8OSb87azWNHURFt/YmMB
 
 -->
