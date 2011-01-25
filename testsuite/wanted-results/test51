@@ -1,4 +1,32 @@
 ### Test --pipe
+### Test --rrs -N1 --recend single
+1>12
+2>34
+3>45
+4>6
+
+### Test --rrs -N1 --recend alternate
+1>12
+2>34
+3>45
+4>6
+
+### Test --rrs -N1 --recend single
+1>12a34
+2>45a6
+
+### Test --rrs --recend single
+1>123445
+
+2>6
+### Test --rrs -N1 --recend alternate
+1>123445
+
+2>6
+### Test --rrs -N1 --recend single
+1>12a34
+
+2>45a6
 ### Test -N even
 1
 2

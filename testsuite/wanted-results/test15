@@ -15,39 +15,29 @@ a_b
 c
 a_b c
 a_b c
+### xargs -L1 echo
 a_b
 c
 a_b
 c
 a_b
 c
+Lines ending in space should continue on next line
+### xargs -L1 echo
 a_b c
 d
 a_b c
 d
 a_b c
 d
+### xargs -L2 echo
 a_b c d
 e
 a_b c d
 e
 a_b c d
 e
-a_b c
-d
-e
-a_b c
-d
-e
-a_b c
-d
-e
-a_b c d
-e
-a_b c d
-e
-a_b c d
-e
+### xargs -l echo
 a_b c
 d
 e
@@ -57,12 +47,31 @@ e
 a_b c
 d
 e
+### xargs -l2 echo
 a_b c d
 e
 a_b c d
 e
 a_b c d
 e
+### xargs -l1 echo
+a_b c
+d
+e
+a_b c
+d
+e
+a_b c
+d
+e
+### xargs --max-lines=2 echo
+a_b c d
+e
+a_b c d
+e
+a_b c d
+e
+### xargs --max-lines echo
 a_b c
 d
 e

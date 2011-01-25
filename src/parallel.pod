@@ -724,6 +724,17 @@ defaults to '\n'. To have no record separator use B<--recend "">.
 B<--recstart> and B<--recend> are used with B<--pipe>.
 
 
+=item B<--remove-rec-sep> (alpha testing)
+
+=item B<--removerecsep> (alpha testing)
+
+=item B<--rrs> (alpha testing)
+
+Remove the text matched by B<--recstart> and B<--recend> before piping
+it to the command.
+
+Only used with B<--pipe>.
+
 =item B<--retries> I<n> (beta testing)
 
 If a job fails, retry it on another computer. Do this I<n> times. If

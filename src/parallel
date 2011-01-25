@@ -106,6 +106,9 @@ sub spreadstdin {
 	$recend = $::opt_recend;
 	$recerror = "Warning: --recend unmatched. Is --blocksize too small?";
     }
+    # If $recstart/$recend contains '|' this should only apply to the regexp
+    $recstart = "(?:".$recstart.")";
+    $recend = "(?:".$recend.")";
 
     while(read(STDIN,$buf,$::opt_blocksize)) {
 	$record = $partial.$buf;
@@ -114,6 +117,12 @@ sub spreadstdin {
 	    while($record =~ s/(($recstart.*?$recend){$Global::max_number_of_args})($recstart.*)$/$1/os) {
 		$partial = $3;
 		::debug("Read record: ".length($record)."\n");
+		if($::opt_remove_rec_sep) {
+		    # Remove record separator
+		    $record =~ s/^$recstart//os;
+		    $record =~ s/$recend$//os;
+		    $record =~ s/$recstart$recend//gos;
+		}
 		write_record_to_pipe($record);
 		$record = $partial;
 	    }
@@ -126,6 +135,12 @@ sub spreadstdin {
 		$partial = $2;
 	    } else {
 		print $Global::original_stderr $recerror,"\n";
+	    }
+	    if($::opt_remove_rec_sep) {
+		# Remove record separator
+		$record =~ s/^$recstart//os;
+		$record =~ s/$recend$//os;
+		$record =~ s/$recstart$recend//gos;
 	    }
 	    ::debug("Read record: ".length($record)."\n");
 	    write_record_to_pipe($record);
@@ -289,6 +304,7 @@ sub get_options_from_array {
 	 "pipe|spreadstdin" => \$::opt_pipe,
 	 "recstart=s" => \$::opt_recstart,
 	 "recend=s" => \$::opt_recend,
+	 "remove-rec-sep|removerecsep|rrs" => \$::opt_remove_rec_sep,
 	 "files|output-as-files|outputasfiles" => \$::opt_files,
 	 "block|block-size|blocksize=s" => \$::opt_blocksize,
 	 # xargs-compatibility - implemented, man, testsuite
@@ -332,7 +348,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110122;
+    $Global::version = 20110126;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;

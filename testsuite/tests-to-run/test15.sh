@@ -32,32 +32,41 @@ expect "opt--interactive 3"
 _EOF
 
 echo '### Test -L -l and --max-lines'
-(echo a_b;echo c) | parallel -km -L2  echo
-(echo a_b;echo c) | parallel -k -L2  echo
-(echo a_b;echo c) | xargs -L2  echo
-(echo a_b;echo c) | parallel -km -L1  echo
-(echo a_b;echo c) | parallel -k -L1  echo
-(echo a_b;echo c) | xargs -L1  echo
-(echo a_b' ';echo c;echo d) | parallel -km -L1  echo
-(echo a_b' ';echo c;echo d) | parallel -k -L1  echo
-(echo a_b' ';echo c;echo d) | xargs -L1  echo
+(echo a_b;echo c) | parallel -km -L2 echo
+(echo a_b;echo c) | parallel -k -L2 echo
+(echo a_b;echo c) | xargs -L2 echo
+echo '### xargs -L1 echo'
+(echo a_b;echo c) | parallel -km -L1 echo
+(echo a_b;echo c) | parallel -k -L1 echo
+(echo a_b;echo c) | xargs -L1 echo
+echo 'Lines ending in space should continue on next line'
+echo '### xargs -L1 echo'
+(echo a_b' ';echo c;echo d) | parallel -km -L1 echo
+(echo a_b' ';echo c;echo d) | parallel -k -L1 echo
+(echo a_b' ';echo c;echo d) | xargs -L1 echo
+echo '### xargs -L2 echo'
 (echo a_b' ';echo c;echo d;echo e) | parallel -km -L2 echo
 (echo a_b' ';echo c;echo d;echo e) | parallel -k -L2 echo
 (echo a_b' ';echo c;echo d;echo e) | xargs -L2 echo
-(echo a_b' ';echo c;echo d;echo e) | parallel -km -l echo
-(echo a_b' ';echo c;echo d;echo e) | parallel -k -l echo
+echo '### xargs -l echo'
+(echo a_b' ';echo c;echo d;echo e) | parallel -km -l echo # This behaves wrong
+(echo a_b' ';echo c;echo d;echo e) | parallel -k -l echo # This behaves wrong
 (echo a_b' ';echo c;echo d;echo e) | xargs -l echo
+echo '### xargs -l2 echo'
 (echo a_b' ';echo c;echo d;echo e) | parallel -km -l2 echo
 (echo a_b' ';echo c;echo d;echo e) | parallel -k -l2 echo
 (echo a_b' ';echo c;echo d;echo e) | xargs -l2 echo
+echo '### xargs -l1 echo'
 (echo a_b' ';echo c;echo d;echo e) | parallel -km -l1 echo
 (echo a_b' ';echo c;echo d;echo e) | parallel -k -l1 echo
 (echo a_b' ';echo c;echo d;echo e) | xargs -l1 echo
+echo '### xargs --max-lines=2 echo'
 (echo a_b' ';echo c;echo d;echo e) | parallel -km --max-lines 2 echo
 (echo a_b' ';echo c;echo d;echo e) | parallel -k --max-lines 2 echo
 (echo a_b' ';echo c;echo d;echo e) | xargs --max-lines=2 echo
-(echo a_b' ';echo c;echo d;echo e) | parallel -km --max-lines echo
-(echo a_b' ';echo c;echo d;echo e) | parallel -k --max-lines echo
+echo '### xargs --max-lines echo'
+(echo a_b' ';echo c;echo d;echo e) | parallel -km --max-lines echo # This behaves wrong
+(echo a_b' ';echo c;echo d;echo e) | parallel -k --max-lines echo # This behaves wrong
 (echo a_b' ';echo c;echo d;echo e) | xargs --max-lines echo
 
 echo '### test too long args'

@@ -5,6 +5,26 @@ echo '### Test --pipe'
 seq 1 1000000 >/tmp/parallel-seq
 shuf --random-source=/tmp/parallel-seq /tmp/parallel-seq >/tmp/blocktest
 
+echo '### Test --rrs -N1 --recend single'
+echo 12a34a45a6 |
+  parallel -k --pipe --recend a -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+echo '### Test --rrs -N1 --recend alternate'
+echo 12a34b45a6 |
+  parallel -k --pipe --recend 'a|b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+echo '### Test --rrs -N1 --recend single'
+echo 12a34b45a6 |
+  parallel -k --pipe --recend 'b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+
+echo '### Test --rrs --recend single'
+echo 12a34a45a6 |
+  parallel -k --pipe --recend a --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+echo '### Test --rrs -N1 --recend alternate'
+echo 12a34b45a6 |
+  parallel -k --pipe --recend 'a|b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+echo '### Test --rrs -N1 --recend single'
+echo 12a34b45a6 |
+  parallel -k --pipe --recend 'b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+
 echo '### Test -N even'
 seq 1 10 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.1"
 

@@ -242,7 +242,8 @@ stdout parallel -k -l2 echo < files.xi
 echo '###  -s30 -t echo < stairs.xi - xargs'
 stdout xargs -s30 -t echo < stairs.xi
 echo '###  -s30 -t echo < stairs.xi - parallel'
-stdout parallel -k -X -s30 -t echo < stairs.xi
+echo 'Because of -t these lines can be flipped around therefore sort'
+stdout parallel -k -X -s30 -t echo < stairs.xi | sort 
 echo '###  -t echo this plus that < space.xi'
 stdout xargs -t echo this plus that < space.xi
 stdout parallel -k -t echo this plus that < space.xi
