@@ -2123,14 +2123,20 @@ sub no_of_cores_darwin {
 sub no_of_cpus_freebsd {
     # Returns:
     #   Number of physical CPUs on FreeBSD
-    my $no_of_cpus = `sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`;
+    my $no_of_cpus =
+	(`sysctl -a dev.cpu | grep \%parent | awk '{ print \$2 }' | uniq | wc -l | awk '{ print \$1 }'`
+	 or
+	 `sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`);
     return $no_of_cpus;
 }
 
 sub no_of_cores_freebsd {
     # Returns:
     #   Number of CPU cores on FreeBSD
-    my $no_of_cores = `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`;
+    my $no_of_cores =
+	(`sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`
+	 or
+	 `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`);
     return $no_of_cores;
 }
 
