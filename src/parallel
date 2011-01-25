@@ -11,7 +11,7 @@ use strict;
 use Carp;
 
 $::oodebug=0;
-$Global::original_sigterm = $SIG{TERM};
+$Global::original_sigterm = $SIG{TERM} || sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
 $SIG{TERM} = sub {}; # Dummy until jobs really start
 open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
 

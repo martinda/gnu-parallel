@@ -1,8 +1,3 @@
--N for --pipe. Fixed race condition in --pipe.
-Tests for --pipe.
-Passes testsuite.
-
-
 codecoverage
 
 Testsuite: sem without ~/.parallel
