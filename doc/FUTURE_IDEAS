@@ -1,3 +1,8 @@
+test if block size is too small to match a record sep in both -N mode and normal
+
+
+
+
 --remove-rec-sep
 test alternation with --recend 'a|b'
 echo 12a34a45a6 | src/parallel -k --pipe --recend a -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo'
