@@ -1,3 +1,6 @@
+Use recsep as splitstring instead of match
+my @vals = (split / /, $string)[0,2,5,7];
+
 test if block size is too small to match a record sep in both -N mode and normal
 
 

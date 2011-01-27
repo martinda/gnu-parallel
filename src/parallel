@@ -80,15 +80,9 @@ if($::opt_halt_on_error) {
 sub spreadstdin {
     # read a record
     # print it to the first jobs that is ready
-    my $first = 0;
-    my $second = 0;
     my $sleep = 0.1;
-    my $max_sleep = 0.1;
     my $record;
-    my $partial = "";
     my $buf = "";
-    my $rec_start = undef;
-    my $rec_end = undef;
     my ($recstart,$recend,$recerror);
     if(defined($::opt_recstart) and defined($::opt_recend)) {
 	# If both --recstart and --recend is given then both must match
@@ -117,30 +111,19 @@ sub spreadstdin {
 	    while($buf =~ s/((?:$recstart.*?$recend){$Global::max_number_of_args})($recstart.*)$/$2/os) {
 		$record = $1;
 		::debug("Read record -N: ".length($record)."\n");
-		if($::opt_remove_rec_sep) {
-		    # Remove record separator
-		    $record =~ s/$recend$recstart//gos;
-		    $record =~ s/^$recstart//os;
-		    $record =~ s/$recend$//os;
-		}
-		write_record_to_pipe(\$record);
+		write_record_to_pipe(\$record,$recstart,$recend);
 	    }
 	} else {
+	    # Find the last recend-recstart in $buf
 	    if($buf =~ s/(.*$recend)($recstart.*?)$/$2/os) {
 		$record = $1;
-		if($::opt_remove_rec_sep) {
-		    # Remove record separator
-		    $record =~ s/$recend$recstart//gos;
-		    $record =~ s/^$recstart//os;
-		    $record =~ s/$recend$//os;
-		}
-		::debug("Read record: ".length($record)."\n");
-		write_record_to_pipe(\$record);
+		::debug("Matched record: ".length($record)."/".length($buf)."\n");
+		write_record_to_pipe(\$record,$recstart,$recend);
 	    }
 	}
     }
     # If there is anything left in the buffer write it
-    write_record_to_pipe(\$buf);
+    write_record_to_pipe(\$buf,$recstart,$recend);
 
     ::debug("Done reading STDIN\n");
     flush_and_close_pipes();
@@ -157,7 +140,10 @@ sub flush_and_close_pipes {
 	do_not_reap();
 	for my $job (values %Global::running) {
 	    if($job->remaining()) {
-		$job->complete_write();
+		if($job->complete_write()) {
+		    # Some data was written
+		    $sleep = 0.1;
+		}
 		$flush_done = 0;
 	    }
 	}
@@ -175,6 +161,15 @@ sub flush_and_close_pipes {
 
 sub write_record_to_pipe {
     my $record_ref = shift;
+    my $recstart = shift;
+    my $recend = shift;
+    if(length $$record_ref == 0) { return; }
+    if($::opt_remove_rec_sep) {
+	# Remove record separator
+	$$record_ref =~ s/$recend$recstart//gos;
+	$$record_ref =~ s/^$recstart//os;
+	$$record_ref =~ s/$recend$//os;
+    }
     my $sleep = 0.1; # 0.1 ms
   write_record: while(1) {
 	  # Sorting according to sequence is necessary for -k to work

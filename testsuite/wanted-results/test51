@@ -81,8 +81,6 @@ ole
 11
 12
 ole
-ole
-ole
 ### Test --recstart + --recend
 3c20e43c58152da30261c5827a1f9084  -
 ### Race condition bug - 1 - would block
