@@ -160,11 +160,11 @@ New in this release:
   approximate. It can deviate as much as the size of one record.
   Default is 1M.
 
-* --recstart sets the regular expression matching the start of a
+* --recstart sets the string matching the start of a
   record. Default is "".
 
-* --recend sets the regular expression matching the end of a
-  record. Default is "\n". To specify none use --recend "".
+* --recend sets the string matching the end of a
+  record. Default is '\n'. To specify none use --recend "".
 
   If both --recstart and --recend are set, the end of a record must be
   followed immediately by a start of a record. This is useful if
@@ -175,8 +175,10 @@ New in this release:
   these files.
 
 * -N set the number of records to read. If used with --blocksize
-  the block read will at most be --blocksize. -N is much slower
-  than --blocksize so avoid -N if performance is important.
+  the block read will at most be --blocksize.
+
+* GNU Parallel is now on ohloh.net. Thanks to Wim Muskee.
+  https://www.ohloh.net/p/gnu-parallel
 
 * Advanced recursive example. Thanks to Ruarí Ødegaard.
   http://my.opera.com/ruario/blog/2011/01/24/editing-debian-packages-more-fun-with-gnu
@@ -186,17 +188,18 @@ New in this release:
 = About GNU Parallel =
 
 GNU Parallel is a shell tool for executing jobs in parallel using one
-or more computers. A job is typically a single command or a small
-script that has to be run for each of the lines in the input. The
-typical input is a list of files, a list of hosts, a list of users, a
-list of URLs, or a list of tables.
+or more computers. A job is can be a single command or a small script
+that has to be run for each of the lines in the input. The typical
+input is a list of files, a list of hosts, a list of users, a list of
+URLs, or a list of tables. A job can also be a command that reads from
+a pipe. GNU Parallel can then split the input and pipe it into
+commands in parallel.
 
-If you use xargs today you will find GNU Parallel very easy to use as
-GNU Parallel is written to have the same options as xargs. If you
-write loops in shell, you will find GNU Parallel may be able to
+If you use xargs and tee today you will find GNU Parallel very easy to
+use as GNU Parallel is written to have the same options as xargs. If
+you write loops in shell, you will find GNU Parallel may be able to
 replace most of the loops and make them run faster by running several
-jobs in parallel. If you use ppss or pexec you will find GNU Parallel
-will often make the command easier to read.
+jobs in parallel.
 
 GNU Parallel makes sure output from the commands is the same output as
 you would get had you run the commands sequentially. This makes it
