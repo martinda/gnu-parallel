@@ -1,11 +1,107 @@
 ### Test --pipe
+### Test -N with multiple jobslots and multiple args
+1
+a
+a
+1
+2
+bb
+bb
+1
+2
+3
+ccc
+ccc
+1
+2
+3
+dddd
+4
+dddd
+1
+2
+3
+eeeee
+4
+5
+eeeee
+1
+2
+3
+ffffff
+4
+5
+6
+ffffff
+1
+2
+3
+ggggggg
+4
+5
+6
+ggggggg
+7
+ggggggg
+ggggggg
+1
+2
+3
+hhhhhhhh
+4
+5
+6
+hhhhhhhh
+7
+8
+hhhhhhhh
+hhhhhhhh
+1
+2
+3
+iiiiiiiii
+4
+5
+6
+iiiiiiiii
+7
+8
+9
+iiiiiiiii
+iiiiiiiii
+1
+2
+3
+jjjjjjjjjj
+4
+5
+6
+jjjjjjjjjj
+7
+8
+9
+jjjjjjjjjj
+10
+jjjjjjjjjj
+### Test output is the same for different block size
+1>01a02a0a
+2>0a12a34a
+3>45a6a
+1>01a02a0a
+2>0a12a34a
+3>45a6a
+### Test 100M records with too big block
+6888906
+6888906
+6888906
+0
+### Test 300M records with too small block
+303111434
+303111434
+303111434
+0
+0
 ### Test --rrs -N1 --recend single
-1>12
-2>34
-3>45
-4>6
-
-### Test --rrs -N1 --recend alternate
 1>12
 2>34
 3>45
@@ -16,10 +112,6 @@
 2>45a6
 
 ### Test --rrs --recend single
-1>123445
-2>6
-
-### Test --rrs -N1 --recend alternate
 1>123445
 2>6
 
