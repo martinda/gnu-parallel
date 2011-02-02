@@ -85,7 +85,7 @@ Prøv fieldsep: Find eet tegn, som optræder det samme antal gange i alle linjer
 Prøv klyngesep: Find den samme klynge tegn, som står samme antal gange i alle linjer (' | ' sep)
 Fjern whitespace før og efter colonne
 
-hvis der er n af tegn A og 2n af tegn B, så 
+hvis der er n af tegn A og 2n af tegn B, så
 
   a | b | c
 
@@ -111,6 +111,160 @@ colsep = [sepchars]{no_of_sepchars}
 # TODO max_line_length on remote
 # TODO compute how many can be transferred within max_line_length
 # TODO Unittest with filename that is long and requires a lot of quoting. Will there be to many
+
+=head1 YouTube video --pipe
+
+cp parallel.fasta  parallel.mbox lucene.tar
+
+# GNU Parallel 20110205 - The FOSDEM Release
+
+I assume you already know GNU Parallel. If not watch the intro video first.
+
+GNU Parallel has so far worked similar to xargs. But the FOSDEM
+release of GNU Parallel introduces the new --pipe option. It makes GNU
+Parallel work similar to tee.
+
+tee pipes a copy of the output to a file and a copy to another
+program.
+
+seq 1 5 | tee myfile | wc
+
+Here it pipes a copy to the file myfile and to the command word count (wc).
+
+cat myfile
+
+and we can see the content is what we expected.
+
+The pipe option of GNU Parallel splits data into records and pipes a
+block of records into a program:
+
+seq 1 5 | parallel --pipe -N1 cat';' echo foo
+
+Here we pipe each number to the command cat and print foo after
+running cat.
+
+GNU Parallel does this in parallel starting one process per cpu so the
+order may be different because one command may finish before another.
+
+# RECORD SEPARATORS
+
+GNU Parallel splits on record separators.
+
+seq 1 5 | parallel --pipe --recend '\n' -N1 cat';' echo foo
+
+This is the example we saw before: the record separator is \n and
+--recend will keep the record separator at the end of the record.
+
+But if what your records start with a record separator? Here is a
+fast-a file:
+
+cat parallel.fasta
+
+Every record start with a >. To keep that with the record you use
+--recstart:
+
+cat parallel.fasta | parallel --pipe --recstart '>' -N1 cat';' echo foo
+
+But what if you have both? mbox files is an example that has both an
+ending and starting separator:
+
+cat parallel.mbox |
+parallel --pipe --recend '\n\n' --recstart 'From ' -N1 cat';' echo foo | less   #
+
+The two newlines are staying with the email before and the From_ stays with the next record.
+
+GNU Parallel cannot guarantee the first record will start with record
+separator and it cannot guarantee the last record will end with record
+separator. You will simply get what is first and last.
+
+But GNU Parallel _does_ guarantee that it will only split at record
+separators.
+
+# NUMBER OF RECORDS
+
+So far we have used -N1. This tells GNU Parallel to pipe one record to
+the program.
+
+seq 1 5 | parallel --pipe -N1 cat';' echo foo
+
+But we can choose any amount:
+
+seq 1 5 | parallel --pipe -N3 cat';' echo foo
+
+This will pipe blocks of 3 records into cat and if there is not enough the last will only get two.
+
+# BLOCKSIZE
+
+However, using -N is inefficient. It is faster to pipe a full block into the program.
+
+cat /usr/share/dict/words | parallel --pipe --blocksize 500k wc
+
+We here tell GNU Parallel to split on \n and pipe blocks of 500 KB to
+wc. 1 MB is the default:
+
+cat /usr/share/dict/words | parallel --pipe wc
+
+If you just have a bunch of bytes you often do not care about the
+record separator. To split input into chunks you can disable the
+--recend
+
+ls -l lucene.tar
+cat lucene.tar | parallel --pipe --recend '' -k gzip > lucene.tar.gz
+
+GNU Parallel will then split the input into 1 MB blocks; pipe that to
+gzip and -k will make sure the order of the output is kept before
+saving to the tar.gz file.
+
+The beauty of gzip is that if you concatenate two gzip files it is a
+valid gzip file. To test this:
+
+tar tvzf lucene.tar.gz #
+
+# OUTPUT AS FILE
+
+Sometimes the output of GNU Parallel cannot be mixed in a single stream like this:
+
+seq 1 10 | shuf | parallel --pipe -N 3 sort -n
+
+As you can see each block of 3 is sorted but the whole output is not sorted.
+
+GNU Parallel can give the output in file. GNU Parallel will the list the
+files created:
+
+seq 1 10 | shuf | parallel --pipe --files -N 3 sort -n
+
+Each of these files contains a sorted block:
+
+cat
+
+Sort has -m to merge sorted files into a sorted stream
+
+seq 1 10 | shuf | parallel --pipe --files -N 3 sort -n | parallel -mj1 sort -nm
+
+-m will append all the files behind the sort command and the -j1 will
+make sure we only run one command. The only part missing now is
+cleaning up by removing the temporary files. We can do that by
+appending rm
+
+seq 1 10 | shuf | parallel --pipe --files -N 3 sort -n |
+parallel -mj1 sort -nm {} ";"rm {}
+
+
+# Thank you for watching
+#
+# If you like GNU Parallel:
+# * Post this video on forums/blogs/Twitter/Facebook/Linkedin
+# * Join the mailing list http://lists.gnu.org/mailman/listinfo/parallel
+# * Request or write a review for your favourite magazine
+# * Request or build a package for your favourite distribution
+# * Invite me for your next conference (Contact http://ole.tange.dk)
+#
+# If GNU Parallel saves you money:
+# * (Have your company) donate to FSF https://my.fsf.org/donate/
+#
+# Find GNU Parallel at http://www.gnu.org/software/parallel/
+
+
 
 =head1 YouTube video2
 
@@ -177,7 +331,7 @@ it easy to distribute jobs to these.
 
 terminal2: ssh parallel@vh2.pi.dk
 ssh parallel@vh2.pi.dk
- and  
+ and
 
 PS1="\[\e[7m\]GNU Parallel:\[\033[01;34m\]\w\[\033[00m\e[27m\]$ "
 gunzip logs/*gz
@@ -362,7 +516,7 @@ find . -name '*.gz' | parallel -j+0 "zcat {} | bzip2 >{.}.bz2 && rm {}"
 # Create a directory for each zip-file and unzip it in that dir
 parallel 'mkdir {.}; cd {.}; unzip ../{}' ::: *.zip
 
-# Convert all *.mp3 in subdirs to *.ogg running 
+# Convert all *.mp3 in subdirs to *.ogg running
 #   one process per CPU core on local computer and server2
 find . -name '*.mp3' | parallel --trc {.}.ogg -j+0 -S server2,: \
          'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg'

@@ -28,8 +28,7 @@ If you use B<xargs> today you will find GNU B<parallel> very easy to
 use as GNU B<parallel> is written to have the same options as
 B<xargs>. If you write loops in shell, you will find GNU B<parallel>
 may be able to replace most of the loops and make them run faster by
-running several jobs simultaneously. If you use B<ppss> or B<pexec> you
-will find GNU B<parallel> will often make the command easier to read.
+running several jobs simultaneously.
 
 GNU B<parallel> makes sure output from the commands is the same output
 as you would get had you run the commands sequentially. This makes it
@@ -713,8 +712,8 @@ If B<--recstart> is given I<startstring> will be used to split at record start.
 If B<--recend> is given I<endstring> will be used to split at record end.
 
 If both B<--recstart> and B<--recend> are given the string
-I<startregexp>I<endregexp> will have to match to find a split
-position. This is useful if either I<startregexp> or I<endregexp>
+I<startstring>I<endstring> will have to match to find a split
+position. This is useful if either I<startstring> or I<endstring>
 match in the middle of a record.
 
 If neither B<--recstart> nor B<--recend> are given then B<--recend>
@@ -726,7 +725,7 @@ Use B<--regexp> to interpret B<--recstart> and B<--recend> as regular
 expressions. This is slow, however.
 
 
-=item B<--regexp> (unimplimented)
+=item B<--regexp> (beta test)
 
 Use B<--regexp> to interpret B<--recstart> and B<--recend> as regular
 expressions. This is slow, however.
@@ -742,6 +741,7 @@ Remove the text matched by B<--recstart> and B<--recend> before piping
 it to the command.
 
 Only used with B<--pipe>.
+
 
 =item B<--retries> I<n> (beta testing)
 
@@ -1601,6 +1601,34 @@ B<parallel -j 100 < jobs_to_run>
 As there is not a I<command> the jobs will be evaluated by the shell.
 
 
+=head1 EXAMPLE: Processing a big file using more cores
+
+To process a big file or some output you can use B<--pipe> to split up
+the data into blocks and pipe the blocks into the processing program.
+
+If the program is B<gzip -9> you can do:
+
+B<cat bigfile | parallel --pipe --recend '' -k gzip -9 >>B<bigfile.gz>
+
+This will split B<bigfile> into blocks of 1 MB and pass that to B<gzip
+-9> in parallel. One B<gzip> will be run per CPU core. The output of
+B<gzip -9> will be kept in order and saved to B<bigfile.gz>
+
+B<gzip> works fine if the output is appended, but some processing does
+not work like that - for example sorting. For this GNU B<parallel> can
+put the output of each command into a file. This will sort a big file
+in parallel:
+
+B<cat bigfile | parallel --pipe --files sort | parallel -Xj1 sort -m {} ';' rm {} >>B<bigfile.sort>
+
+Here B<bigfile> is split into blocks of around 1MB, each block ending
+in '\n' (which is the default for B<--recend>). Each block is passed
+to B<sort> and the output from B<sort> is saved into files. These
+files are passed to the second B<parallel> that runs B<sort -m> on the
+files before it removes the files. The output is saved to
+B<bigfile.sort>.
+
+
 =head1 EXAMPLE: Working as mutex and counting semaphore
 
 The command B<sem> is an alias for B<parallel --semaphore>.
@@ -1921,7 +1949,7 @@ variable $PARALLEL which takes precedence over the file
 
 =head1 PROFILE FILES
 
-If B<--profile> set, GNU B<parallel> will read the profile from that file instead of 
+If B<--profile> set, GNU B<parallel> will read the profile from that file instead of
 ~/.parallel/config.
 
 Example: Profile for running every command with B<-j+0> and B<nice>
