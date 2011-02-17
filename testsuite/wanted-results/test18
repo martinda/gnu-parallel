@@ -40,7 +40,7 @@
 19
 20
 ### Check warning if --transfer but file not found
-Warning: /tmp/noexistant/file is not readable and will not be transferred
+parallel: Warning: /tmp/noexistant/file is not readable and will not be transferred
 /tmp/noexistant/file
 ### Transfer for file starting with :
 remote-:.:
@@ -54,13 +54,13 @@ content-file: name.foo
 remote-file : name.foo.file : name
 content-file : name.foo
 ### Check warning if --transfer but not --sshlogin
-Warning: --transfer ignored as there are no remote --sshlogin
+parallel: Warning: --transfer ignored as there are no remote --sshlogin
 
 ### Check warning if --return but not --sshlogin
-Warning: --return ignored as there are no remote --sshlogin
+parallel: Warning: --return ignored as there are no remote --sshlogin
 
 ### Check warning if --cleanup but not --sshlogin
-Warning: --cleanup ignored as there are no remote --sshlogin
+parallel: Warning: --cleanup ignored as there are no remote --sshlogin
 
 ### Test --sshlogin -S --sshloginfile
 1

@@ -1,5 +1,5 @@
 ### Test --basefile with no --sshlogin
-Warning: --basefile ignored as there are no remote --sshlogin
+parallel: Warning: --basefile ignored as there are no remote --sshlogin
 
 ### Test --basefile + --cleanup + permissions
 script1 run 1

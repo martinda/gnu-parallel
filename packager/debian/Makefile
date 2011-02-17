@@ -10,7 +10,7 @@ build:
 
 clean:
 	rm -f parallel_*
-	cd parallel-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]; make distclean || true
+	rm -rf parallel-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]
 
 distclean:
 	rm -f parallel_*

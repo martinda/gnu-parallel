@@ -10,6 +10,8 @@ use Getopt::Long;
 use strict;
 use Carp;
 
+@ARGV and exit;
+
 $::oodebug=0;
 $Global::original_sigterm = $SIG{TERM} || sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
 $SIG{TERM} = sub {}; # Dummy until jobs really start
@@ -378,7 +380,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110130;
+    $Global::version = 20110205;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;

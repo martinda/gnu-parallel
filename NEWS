@@ -1,3 +1,56 @@
+20110205
+
+* --pipe splits piped data into blocks. Each block is piped to a
+  program for processing. The piping and the programs will be run in
+  parallel. Useful if the data you want to process is data for a
+  program and not arguments.
+
+* --blocksize sets the blocksize in bytes for --pipe. The blocksize is
+  approximate. It can deviate as much as the size of one record.
+  Default is 1M.
+
+* --recstart sets the string matching the start of a
+  record. Default is "".
+
+* --recend sets the string matching the end of a
+  record. Default is '\n'. To specify none use --recend "".
+
+  If both --recstart and --recend are set, the end of a record must be
+  followed immediately by a start of a record. This is useful if
+  either recend or recstart can occur in the middle of a record.
+
+* --remove-rec-sep removes the string matched by --recstart and
+  --recend.
+
+* --regexp will make GNU Parallel treat --recstart and --recend as
+  regular expressions.
+
+* --output-as-files will put the output of the programs into files and
+  instead of giving the output GNU Parallel will output the name of
+  these files.
+
+* -N if used with --pipe sets the number of records to read.
+
+* New video showing --pipe at
+  http://www.youtube.com/watch?v=1ntxT-47VPA
+
+* GNU Parallel was presented at FOSDEM.
+
+* Article in USENIX Magazine ;login: (print)
+  http://www.usenix.org/publications/login/2011-02/
+
+* GNU Parallel is now on ohloh.net. Thanks to Wim Muskee.
+  https://www.ohloh.net/p/gnu-parallel
+
+* Advanced recursive example. Thanks to Ruarí Ødegaard.
+  http://my.opera.com/ruario/blog/2011/01/24/editing-debian-packages-more-fun-with-gnu
+
+* Small example on using GNU Parallel through 0install (German).
+  http://forum.ubuntuusers.de/topic/gnu-parallel-mit-zero-install-kurzinfo-kein-wi/
+
+* Bug fixes and man page updates.
+
+
 20110122
 
 * --joblog makes a simple log of completed jobs.

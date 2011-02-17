@@ -140,65 +140,24 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    ryoichiro.suzuki@gmail.com,kerick@shiftedbit.net,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>
 
-Subject: GNU Parallel 20110205 (FOSDEM release) released
+Subject: GNU Parallel 2011XXXX released
 
-GNU Parallel 20110205 (the FOSDEM release) has been released. It is
-available for download at: http://ftp.gnu.org/gnu/parallel/
-
-This is a major release as the --pipe option introduces a new way to
-work. GNU Parallel has so far been similar to xargs, with --pipe it
-becomes somewhat similar to tee. To learn about --pipe see the example
-section for uses of --pipe.
-
-But rest assured: No old functionality is changed.
-
-If you want GNU Parallel to be part of your favourite distribution
-contact the people maintaining the distribution (complaining on
-Twitter is not enough).
+GNU Parallel 2011XXXX has been released. It is available for download
+at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* --pipe splits piped data into blocks. Each block is piped to a
-  program for processing. The piping and the programs will be run in
-  parallel. Useful if the data you want to process is data for a
-  program and not arguments.
+* Opscode Cookbook for Chef. Thanks to Joshua Timberman.
+  https://github.com/opscode/cookbooks/tree/master/gnu_parallel
 
-* --blocksize sets the blocksize in bytes for --pipe. The blocksize is
-  approximate. It can deviate as much as the size of one record.
-  Default is 1M.
+* The examples translated into Japanese. Thanks to Koshigoe.
+  http://w.koshigoe.jp/study/?%5Bsystem%5D+GNU+parallel+%BB%C8%CD%D1%CE%E3#l13
 
-* --recstart sets the string matching the start of a
-  record. Default is "".
+* A review of the --pipe option in German. Thanks to Mathias Huber.
+  http://www.linux-magazin.de/NEWS/GNU-Parallel-20110205-stueckelt-Daten
 
-* --recend sets the string matching the end of a
-  record. Default is '\n'. To specify none use --recend "".
-
-  If both --recstart and --recend are set, the end of a record must be
-  followed immediately by a start of a record. This is useful if
-  either recend or recstart can occur in the middle of a record.
-
-* --remove-rec-sep removes the string matched by --recstart and
-  --recend.
-
-* --regexp will make GNU Parallel treat --recstart and --recend as
-  regular expressions.
-
-* --output-as-files will put the output of the programs into files and
-  instead of giving the output GNU Parallel will output the name of
-  these files.
-
-* -N if used with --pipe sets the number of records to read.
-
-* GNU Parallel was presented at FOSDEM.
-
-* Article in USENIX Magazine ;login: (print)
-  http://www.usenix.org/publications/login/2011-02/
-
-* GNU Parallel is now on ohloh.net. Thanks to Wim Muskee.
-  https://www.ohloh.net/p/gnu-parallel
-
-* Advanced recursive example. Thanks to Ruarí Ødegaard.
-  http://my.opera.com/ruario/blog/2011/01/24/editing-debian-packages-more-fun-with-gnu
+* A small example of grepping maillogs. Thanks to François Maillet.
+  http://www.francoismaillet.com/blog/?p=399
 
 * Bug fixes and man page updates.
 

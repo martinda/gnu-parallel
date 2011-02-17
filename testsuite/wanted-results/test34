@@ -1,3 +1,3 @@
 ### Test too slow spawning
-Warning: Starting 10 extra processes takes > 2 sec.
+parallel: Warning: Starting 10 extra processes takes > 2 sec.
 Consider adjusting -j. Press CTRL-C to stop.
