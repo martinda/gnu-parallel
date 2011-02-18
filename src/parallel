@@ -10,8 +10,6 @@ use Getopt::Long;
 use strict;
 use Carp;
 
-@ARGV and exit;
-
 $::oodebug=0;
 $Global::original_sigterm = $SIG{TERM} || sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
 $SIG{TERM} = sub {}; # Dummy until jobs really start
@@ -339,6 +337,8 @@ sub get_options_from_array {
 	 "remove-rec-sep|removerecsep|rrs" => \$::opt_remove_rec_sep,
 	 "files|output-as-files|outputasfiles" => \$::opt_files,
 	 "block|block-size|blocksize=s" => \$::opt_blocksize,
+	 "tollef" => \$::opt_tollef,
+	 "gnu" => \$::opt_gnu,
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$::opt_P,
 	 "delimiter|d=s" => \$::opt_d,
@@ -353,7 +353,7 @@ sub get_options_from_array {
 	 "colsep|col-sep|C=s" => \$::opt_colsep,
 	 "help|h" => \$::opt_help,
 	 "L=i" => \$::opt_L,
-	 "max-lines|l:i" => \$::opt_l,
+	 "max-lines|l:s" => \$::opt_l,
 	 "interactive|p" => \$::opt_p,
 	 "verbose|t" => \$::opt_verbose,
 	 "version|V" => \$::opt_version,
@@ -380,7 +380,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110205;
+    $Global::version = 20110218;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -472,6 +472,16 @@ sub parse_options {
         push @Global::ret_files, @::opt_trc;
         $::opt_transfer = 1;
         $::opt_cleanup = 1;
+    }
+    if($::opt_tollef and not $::opt_gnu) {
+	# Behave like tollef parallel (from moreutils)
+	if(defined $::opt_l) {
+	    $::opt_load = $::opt_l;
+	    $::opt_l = undef;
+	}
+	if(not defined $::opt_arg_sep) {
+	    $Global::arg_sep = "--";
+	}
     }
     if(defined $::opt_L and $::opt_L or defined $::opt_l) {
         $Global::max_lines = $::opt_l || $::opt_L || 1;
@@ -1490,7 +1500,7 @@ sub version {
     # Returns: N/A
     print join("\n",
                "GNU $Global::progname $Global::version",
-               "Copyright (C) 2007,2008,2009,2010 Ole Tange and Free Software Foundation, Inc.",
+               "Copyright (C) 2007,2008,2009,2010,2011 Ole Tange and Free Software Foundation, Inc.",
                "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
                "This is free software: you are free to change and redistribute it.",
                "GNU $Global::progname comes with no warranty.",

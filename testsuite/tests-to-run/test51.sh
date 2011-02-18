@@ -6,16 +6,16 @@ seq 1 1000000 >/tmp/parallel-seq
 shuf --random-source=/tmp/parallel-seq /tmp/parallel-seq >/tmp/blocktest
 
 echo '### Test -N with multiple jobslots and multiple args'
-seq 1 1 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo a;sleep 0.1'
-seq 1 2 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo bb;sleep 0.1'
-seq 1 3 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo ccc;sleep 0.1'
-seq 1 4 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo dddd;sleep 0.1'
-seq 1 5 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo eeeee;sleep 0.1'
-seq 1 6 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo ffffff;sleep 0.1'
-seq 1 7 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo ggggggg;sleep 0.1'
-seq 1 8 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo hhhhhhhh;sleep 0.1'
-seq 1 9 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii;sleep 0.1'
-seq 1 10 | ../src/parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj;sleep 0.1'
+seq 1 1 | parallel -j2 -k -N 3 --pipe 'cat;echo a;sleep 0.1'
+seq 1 2 | parallel -j2 -k -N 3 --pipe 'cat;echo bb;sleep 0.1'
+seq 1 3 | parallel -j2 -k -N 3 --pipe 'cat;echo ccc;sleep 0.1'
+seq 1 4 | parallel -j2 -k -N 3 --pipe 'cat;echo dddd;sleep 0.1'
+seq 1 5 | parallel -j2 -k -N 3 --pipe 'cat;echo eeeee;sleep 0.1'
+seq 1 6 | parallel -j2 -k -N 3 --pipe 'cat;echo ffffff;sleep 0.1'
+seq 1 7 | parallel -j2 -k -N 3 --pipe 'cat;echo ggggggg;sleep 0.1'
+seq 1 8 | parallel -j2 -k -N 3 --pipe 'cat;echo hhhhhhhh;sleep 0.1'
+seq 1 9 | parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii;sleep 0.1'
+seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj;sleep 0.1'
 
 echo '### Test output is the same for different block size'
 echo -n 01a02a0a0a12a34a45a6a |
@@ -38,8 +38,8 @@ echo '### Test 100M records with too big block'
  echo start
  seq 1 1 | parallel -uj1 cat /tmp/blocktest\;true
  echo end
-) | stdout parallel -k --block 10M -j2 --pipe --recstart 'start\n' wc -c
-
+) | stdout parallel -k --block 10M -j2 --pipe --recstart 'start\n' wc -c |
+egrep -v '^0$'
 
 echo '### Test 300M records with too small block'
 (
@@ -52,9 +52,8 @@ echo '### Test 300M records with too small block'
  echo start
  seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true
  echo end
-) | stdout parallel -k --block 200M -j2 --pipe --recend 'end\n' wc -c
-
-
+) | stdout parallel -k --block 200M -j2 --pipe --recend 'end\n' wc -c |
+egrep -v '^0$'
 
 echo '### Test --rrs -N1 --recend single'
 echo 12a34a45a6 |

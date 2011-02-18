@@ -353,6 +353,12 @@ See also: B<--bg>
 Implies B<--semaphore>.
 
 
+=item B<--gnu>
+
+Behave like GNU B<parallel>. If B<--tollef> and B<--gnu> are both set,
+B<--gnu> takes precedence.
+
+
 =item B<--group>
 
 =item B<-g>
@@ -360,6 +366,7 @@ Implies B<--semaphore>.
 Group output.  Output from each jobs is grouped together and is only
 printed when the command is finished. STDERR first followed by STDOUT.
 B<-g> is the default. Can be reversed with B<-u>.
+
 
 =item B<--help>
 
@@ -932,6 +939,12 @@ Directory for temporary files. GNU B<parallel> normally buffers output
 into temporary files in /tmp. By setting B<--tmpdir> you can use a
 different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
+
+
+=item B<--tollef>
+
+Make GNU B<parallel> behave like Tollef's parallel command. To
+override use B<--gnu>.
 
 
 =item B<--verbose>

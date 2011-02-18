@@ -229,10 +229,10 @@ stdout xargs -i__ echo FIRST __ IS OK < quotes.xi
 stdout parallel -k -i__ echo FIRST __ IS OK < quotes.xi
 echo '###  -l echo < ldatab.xi'
 stdout xargs -l echo < ldatab.xi
-stdout parallel -k -l echo < ldatab.xi
+stdout parallel -l -k echo < ldatab.xi
 echo '###  -l echo < ldata.xi'
 stdout xargs -l echo < ldata.xi
-stdout parallel -k -l echo < ldata.xi
+stdout parallel -l -k echo < ldata.xi
 echo '###  -l1 -n4 echo < files.xi'
 stdout xargs -l1 -n4 echo < files.xi
 stdout parallel -k -l1 -n4 echo < files.xi

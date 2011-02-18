@@ -49,8 +49,8 @@ echo '### xargs -L2 echo'
 (echo a_b' ';echo c;echo d;echo e) | parallel -k -L2 echo
 (echo a_b' ';echo c;echo d;echo e) | xargs -L2 echo
 echo '### xargs -l echo'
-(echo a_b' ';echo c;echo d;echo e) | parallel -km -l echo # This behaves wrong
-(echo a_b' ';echo c;echo d;echo e) | parallel -k -l echo # This behaves wrong
+(echo a_b' ';echo c;echo d;echo e) | parallel -l -km echo # This behaves wrong
+(echo a_b' ';echo c;echo d;echo e) | parallel -l -k echo # This behaves wrong
 (echo a_b' ';echo c;echo d;echo e) | xargs -l echo
 echo '### xargs -l2 echo'
 (echo a_b' ';echo c;echo d;echo e) | parallel -km -l2 echo
@@ -65,8 +65,8 @@ echo '### xargs --max-lines=2 echo'
 (echo a_b' ';echo c;echo d;echo e) | parallel -k --max-lines 2 echo
 (echo a_b' ';echo c;echo d;echo e) | xargs --max-lines=2 echo
 echo '### xargs --max-lines echo'
-(echo a_b' ';echo c;echo d;echo e) | parallel -km --max-lines echo # This behaves wrong
-(echo a_b' ';echo c;echo d;echo e) | parallel -k --max-lines echo # This behaves wrong
+(echo a_b' ';echo c;echo d;echo e) | parallel --max-lines -km echo # This behaves wrong
+(echo a_b' ';echo c;echo d;echo e) | parallel --max-lines -k echo # This behaves wrong
 (echo a_b' ';echo c;echo d;echo e) | xargs --max-lines echo
 
 echo '### test too long args'
