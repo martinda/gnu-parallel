@@ -17,6 +17,12 @@ seq 1 8 | parallel -j2 -k -N 3 --pipe 'cat;echo hhhhhhhh;sleep 0.1'
 seq 1 9 | parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii;sleep 0.1'
 seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj;sleep 0.1'
 
+echo '### Test -l -N -L and -n with multiple jobslots and multiple args'
+seq 1 5 | parallel -kj2 -l 2 --pipe cat \; echo a
+seq 1 5 | parallel -kj2 -N 2 --pipe cat \; echo b
+seq 1 5 | parallel -kj2 -L 2 --pipe cat \; echo c
+seq 1 5 | parallel -kj2 -n 2 --pipe cat \; echo d
+
 echo '### Test output is the same for different block size'
 echo -n 01a02a0a0a12a34a45a6a |
   parallel -k -j1 --blocksize 100 --pipe --recend a  -N 3  'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1' 
