@@ -915,7 +915,9 @@ sub drain_job_queue {
             start_more_jobs(); # These jobs may not be started because of loadavg
             sleep 1;
         }
-    } while (not $Global::start_no_new_jobs and not $Global::JobQueue->empty());
+    } while ($Global::total_running > 0
+	     or
+	     not $Global::start_no_new_jobs and not $Global::JobQueue->empty());
 
     if($::opt_progress) {
         print $Global::original_stderr "\n";
@@ -1719,12 +1721,12 @@ sub loadavg {
             $update_loadavg_file = 1;
         }
     } else {
-        ::debug("NXfile: ".$self->{'loadavg_file'});
+        ::debug("No loadavg file: ".$self->{'loadavg_file'});
         $self->{'loadavg'} = undef;
         $update_loadavg_file = 1;
     }
     if($update_loadavg_file) {
-        ::debug("Updating".$self->{'loadavg_file'});
+        ::debug("Updating loadavg file".$self->{'loadavg_file'});
         $self->{'last_loadavg_update'} = time;
         -e $ENV{'HOME'}."/.parallel" or mkdir $ENV{'HOME'}."/.parallel";
         -e $ENV{'HOME'}."/.parallel/tmp" or mkdir $ENV{'HOME'}."/.parallel/tmp";
