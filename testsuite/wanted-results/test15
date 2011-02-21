@@ -1,14 +1,14 @@
 ### Test -p --interactive
 spawn /tmp/parallel-script-for-expect
-echo opt-p 1 ?...y
-echo opt-p 2 ?...n
+sleep 0.1; echo opt-p 1 ?...y
+sleep 0.1; echo opt-p 2 ?...n
+sleep 0.1; echo opt-p 3 ?...y
 opt-p 1
-echo opt-p 3 ?...y
 opt-p 3
-echo opt--interactive 1 ?...y
-echo opt--interactive 2 ?...n
+sleep 0.1; echo opt--interactive 1 ?...y
+sleep 0.1; echo opt--interactive 2 ?...n
+sleep 0.1; echo opt--interactive 3 ?...y
 opt--interactive 1
-echo opt--interactive 3 ?...y
 opt--interactive 3
 ### Test -L -l and --max-lines
 a_b

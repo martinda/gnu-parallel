@@ -574,8 +574,10 @@ sub read_options {
     # Add options from .parallel/config and other profiles
     my @ARGV_profile = ();
     my @ARGV_env = ();
-    my @config_profiles = ($ENV{'HOME'}."/.parallel/config",
-                           $ENV{'HOME'}."/.parallelrc");
+    my @config_profiles = (
+	"/etc/parallel/config",
+	$ENV{'HOME'}."/.parallel/config",
+	$ENV{'HOME'}."/.parallelrc");
     my @profiles = @config_profiles;
     if($::opt_profile) {
         # --profile overrides default profiles

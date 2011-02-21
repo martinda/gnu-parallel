@@ -147,11 +147,18 @@ at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* --tollef to be switch compatible with Tollef's parallel.
+
+* Site wide config file: /etc/parallel/config
+
 * Opscode Cookbook for Chef. Thanks to Joshua Timberman.
   https://github.com/opscode/cookbooks/tree/master/gnu_parallel
 
-* The examples translated into Japanese. Thanks to Koshigoe.
+* Man page examples translated into Japanese. Thanks to Koshigoe.
   http://w.koshigoe.jp/study/?%5Bsystem%5D+GNU+parallel+%BB%C8%CD%D1%CE%E3#l13
+
+* Review with examples in German. Thanks to M. Nieberg.
+  http://kenntwas.de/2011/linux/gnu-parallel/
 
 * A review of the --pipe option in German. Thanks to Mathias Huber.
   http://www.linux-magazin.de/NEWS/GNU-Parallel-20110205-stueckelt-Daten

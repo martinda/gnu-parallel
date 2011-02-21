@@ -78,13 +78,13 @@ echo 12a34b45a6 |
   parallel -k --pipe --recend 'b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 
 echo '### Test -N even'
-seq 1 10 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.1"
+seq 1 10 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.\$PARALLEL_SEQ"
 
 echo '### Test -N odd'
-seq 1 11 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.1"
+seq 1 11 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.\$PARALLEL_SEQ"
 
 echo '### Test -N even+2'
-seq 1 12 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.1"
+seq 1 12 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.\$PARALLEL_SEQ"
 
 echo '### Test --recstart + --recend'
 cat /tmp/blocktest | parallel -k --recstart 44 --recend "44" -j10 --pipe sort -n |md5sum

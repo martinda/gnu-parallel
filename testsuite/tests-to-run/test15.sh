@@ -6,8 +6,8 @@ echo '### Test -p --interactive'
 cat >/tmp/parallel-script-for-expect <<_EOF
 #!/bin/bash
 
-seq 1 3 | parallel -k -p  echo opt-p
-seq 1 3 | parallel -k --interactive  echo opt--interactive
+seq 1 3 | parallel -k -p "sleep 0.1; echo opt-p"
+seq 1 3 | parallel -k --interactive "sleep 0.1; echo opt--interactive"
 _EOF
 chmod 755 /tmp/parallel-script-for-expect
 
