@@ -512,6 +512,9 @@ Use at most I<max-lines> nonblank input lines per command line.
 Trailing blanks cause an input line to be logically continued on the
 next input line.
 
+B<-L 0> means read one line, but insert 0 arguments on the command
+line.
+
 Implies B<-X> unless B<-m> is set.
 
 
@@ -523,6 +526,9 @@ Synonym for the B<-L> option.  Unlike B<-L>, the I<max-lines> argument
 is optional.  If I<max-lines> is not specified, it defaults to one.
 The B<-l> option is deprecated since the POSIX standard specifies
 B<-L> instead.
+
+B<-l 0> means read one line, but insert 0 arguments on the command
+line.
 
 Implies B<-X> unless B<-m> is set.
 
@@ -621,6 +627,9 @@ I<max-args> arguments will be used if the size (see the B<-s> option)
 is exceeded, unless the B<-x> option is given, in which case
 GNU B<parallel> will exit.
 
+B<-n 0> means read one argument, but insert 0 arguments on the command
+line.
+
 Implies B<-X> unless B<-m> is set.
 
 
@@ -632,6 +641,9 @@ Use at most I<max-args> arguments per command line. Like B<-n> but
 also makes replacement strings B<{1}> .. B<{>I<max-args>B<}> that
 represents argument 1 .. I<max-args>. If too few args the B<{>I<n>B<}> will
 be empty.
+
+B<-N 0> means read one argument, but insert 0 arguments on the command
+line.
 
 This will set the owner of the homedir to the user:
 
@@ -1147,7 +1159,7 @@ B<parallel gzip ::: *.html>
 To convert *.wav to *.mp3 using LAME running one process per CPU core
 run:
 
-B<parallel -j+0 lame {} -o {.}.mp3 ::: *.wav>
+B<parallel lame {} -o {.}.mp3 ::: *.wav>
 
 
 =head1 EXAMPLE: Inserting multiple arguments
@@ -1267,15 +1279,15 @@ B<parallel 'mkdir {.}; cd {.}; unzip ../{}' ::: *.zip>
 Recompress all .gz files in current directory using B<bzip2> running 1
 job per CPU core in parallel:
 
-B<parallel -j+0 "zcat {} | bzip2 >>B<{.}.bz2 && rm {}" ::: *.gz>
+B<parallel "zcat {} | bzip2 >>B<{.}.bz2 && rm {}" ::: *.gz>
 
 Convert all WAV files to MP3 using LAME:
 
-B<find sounddir -type f -name '*.wav' | parallel -j+0 lame {} -o {.}.mp3>
+B<find sounddir -type f -name '*.wav' | parallel lame {} -o {.}.mp3>
 
 Put all converted in the same directory:
 
-B<find sounddir -type f -name '*.wav' | parallel -j+0 lame {} -o mydir/{/.}.mp3>
+B<find sounddir -type f -name '*.wav' | parallel lame {} -o mydir/{/.}.mp3>
 
 =head1 EXAMPLE: Removing two file extensions when processing files and
 calling GNU Parallel from itself
@@ -1458,8 +1470,8 @@ To include the local computer add the special sshlogin ':' to the list:
   :
 
 GNU B<parallel> will try to determine the number of CPU cores on each
-of the remote computers, so B<-j+0> will run one job per CPU core -
-even if the remote computers do not have the same number of CPU cores.
+of the remote computers, and run one job per CPU core - even if the
+remote computers do not have the same number of CPU cores.
 
 If the number of CPU cores on the remote computers is not identified
 correctly the number of CPU cores can be added in front. Here the
@@ -1542,7 +1554,7 @@ the special short hand I<-S ..> can be used:
 
 Convert *.mp3 to *.ogg running one process per CPU core on local computer and server2:
 
-  parallel --trc {.}.ogg -j+0 -S server2,: \
+  parallel --trc {.}.ogg -S server2,: \
   'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg' ::: *.mp3
 
 =head1 EXAMPLE: Use multiple inputs in one command
@@ -1587,6 +1599,14 @@ B<parallel -a table_file.tsv --colsep '\t' cmd -o {2} -i {1}>
 Note: The default for GNU B<parallel> is to remove the spaces around the columns. To keep the spaces:
 
 B<parallel -a table_file.tsv --trim n --colsep '\t' cmd -o {2} -i {1}>
+
+
+=head1 EXAMPLE: Run the same command 10 times
+
+If you want to run the same command with the same arguments 10 times
+in parallel you can do:
+
+B<seq 1 10 | parallel -n0 my_command my_args>
 
 
 =head1 EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation
@@ -1965,9 +1985,9 @@ variable $PARALLEL which takes precedence over the file
 If B<--profile> set, GNU B<parallel> will read the profile from that file instead of
 ~/.parallel/config.
 
-Example: Profile for running every command with B<-j+0> and B<nice>
+Example: Profile for running every command with B<-j-1> and B<nice>
 
-  echo -j+0 nice > ~/.parallel/nice_profile
+  echo -j-1 nice > ~/.parallel/nice_profile
   parallel -J nice_profile bzip2 -9 ::: *
 
 Example: Profile for running a perl script before every command:
@@ -2279,11 +2299,11 @@ using GNU B<parallel>:
 
 B<1> ./ppss.sh standalone -d /path/to/files -c 'gzip '
 
-B<1> find /path/to/files -type f | parallel -j+0 gzip
+B<1> find /path/to/files -type f | parallel gzip
 
 B<2> ./ppss.sh standalone -d /path/to/files -c 'cp "$ITEM" /destination/dir '
 
-B<2> find /path/to/files -type f | parallel -j+0 cp {} /destination/dir
+B<2> find /path/to/files -type f | parallel cp {} /destination/dir
 
 B<3> ./ppss.sh standalone -f list-of-urls.txt -c 'wget -q '
 
@@ -2338,7 +2358,7 @@ B<2> ls myfiles*.ext | parallel sort {} ">{}.sort"
 B<3> pexec -f image.list -n auto -e B -u star.log -c -- \
   'fistar $B.fits -f 100 -F id,x,y,flux -o $B.star'
 
-B<3> parallel -a image.list -j+0 \
+B<3> parallel -a image.list \
   'fistar {}.fits -f 100 -F id,x,y,flux -o {}.star' 2>star.log
 
 B<4> pexec -r *.png -e IMG -c -o - -- \
@@ -2459,11 +2479,11 @@ middleman(mdm) is also a tool for running jobs in parallel.
 Here are the shellscripts of http://mdm.berlios.de/usage.html ported
 to GNU B<parallel>:
 
-B<seq 1 19 | parallel -j+0 buffon -o - | sort -n >>B< result>
+B<seq 1 19 | parallel buffon -o - | sort -n >>B< result>
 
-B<cat files | parallel -j+0 cmd>
+B<cat files | parallel cmd>
 
-B<find dir -execdir sem -j+0 cmd {} \;>
+B<find dir -execdir sem cmd {} \;>
 
 =head2 DIFFERENCES BETWEEN xapply AND GNU Parallel
 

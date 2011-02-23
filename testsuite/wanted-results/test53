@@ -7,3 +7,9 @@ l0
 l0
 N0
 N0
+### Test replace {}
+replace curlies
+replace curlies
+### Test arguments on commandline
+args on cmdline
+args on cmdline
