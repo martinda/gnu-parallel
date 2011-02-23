@@ -526,3 +526,51 @@ parallel -a table_file.tsv --colsep '\t' mycmd -o {2} {3} -i {1}
 
 # Run traceroute in parallel, but keep the output order the same
 parallel -k traceroute ::: foss.org.my debian.org freenetproject.org
+
+
+Test of signal passing through ssh
+#!/bin/bash
+
+SERVER1=parallel-server3
+SERVER2=parallel-server2
+
+export BG_PROC
+
+start_remote_sleep() {
+  parallel -D -u -S parallel@$SERVER2 sleep ::: 370 &
+  BG_PROC=$!
+  while ! ssh parallel@$SERVER2 ps -A -o cmd | grep -q '^sleep 370' ; do
+    sleep 0.3
+  done
+}
+
+stop_local_parallel() {
+  kill -9 $BG_PROC
+}
+
+check_and_stop_remote_sleep() {
+  ssh parallel@$SERVER2 ps -A -o cmd | grep '^sleep 370' 
+  ssh parallel@$SERVER2 killall sleep
+}
+
+echo '### Test kill signals'
+start_remote_sleep 2>/dev/null
+kill -1 $BG_PROC
+check_and_stop_remote_sleep
+
+sub propagate_signal {
+    my $signal = shift;
+#    $signal = "KILL";
+    ::debug("Sending $signal to ",keys %Global::running);
+    kill $signal, keys %Global::running;
+    if(defined $Global::original_sig{$signal}) {
+	&{$Global::original_sig{$signal}};
+    }
+}
+
+my %do_not_propagate = map { $_ => 1 } qw(TTOU TTIN CONT TSTP __WARN__ __DIE__);
+for (keys %SIG) {
+    $do_not_propagate{$_} and next;
+    $SIG{$_} = eval 'sub { propagate_signal("'.$_.'"); };';
+}
+

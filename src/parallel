@@ -11,7 +11,8 @@ use strict;
 use Carp;
 
 $::oodebug=0;
-$Global::original_sigterm = $SIG{TERM} || sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
+$SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
+%Global::original_sig = %SIG;
 $SIG{TERM} = sub {}; # Dummy until jobs really start
 open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
 
@@ -428,8 +429,8 @@ sub parse_options {
         $Global::replace{'{/.}'} = $::opt_basenameextensionreplace;
     }
     if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
-    if(defined $::opt_n and $::opt_n) { $Global::max_number_of_args = $::opt_n; }
-    if(defined $::opt_N and $::opt_N) { $Global::max_number_of_args = $::opt_N; }
+    if(defined $::opt_n) { $Global::max_number_of_args = $::opt_n; }
+    if(defined $::opt_N) { $Global::max_number_of_args = $::opt_N; }
     if(defined $::opt_tmpdir) { $ENV{'TMPDIR'} = $::opt_tmpdir; }
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_colsep) { $Global::trim = 'lr'; }
@@ -483,9 +484,14 @@ sub parse_options {
 	    $Global::arg_sep = "--";
 	}
     }
-    if(defined $::opt_L and $::opt_L or defined $::opt_l) {
-        $Global::max_lines = $::opt_l || $::opt_L || 1;
-        $Global::max_number_of_args ||= $Global::max_lines;
+    for my $nlines ($::opt_L, $::opt_l) {
+	if(defined $nlines) {
+	    if($nlines eq "") {
+		$nlines = 1;
+	    }
+	    $Global::max_lines = $nlines;
+	    $Global::max_number_of_args ||= $Global::max_lines;
+	}
     }
     %Global::replace_rev = reverse %Global::replace;
 
@@ -1360,7 +1366,7 @@ sub list_running_jobs {
 
 sub start_no_new_jobs {
     # Returns: N/A
-    $SIG{TERM} = $Global::original_sigterm;
+    $SIG{TERM} = $Global::original_sig{TERM};
     print $Global::original_stderr
         ("$Global::progname: SIGTERM received. No new jobs will be started.\n",
          "$Global::progname: Waiting for these ", scalar(keys %Global::running),
@@ -1903,7 +1909,7 @@ sub processes_available_by_system_limit {
         } elsif(defined $child) {
             # The child takes one process slot
             # It will be killed later
-            $SIG{TERM} = $Global::original_sigterm;
+            $SIG{TERM} = $Global::original_sig{TERM};
             sleep 10000000;
             exit(0);
         } else {
@@ -2067,17 +2073,15 @@ sub ncpus {
             my $ncpu;
             if($::opt_use_cpus_instead_of_cores) {
                 $ncpu = qx(echo|$sshcmd $serverlogin parallel --number-of-cpus);
-                chomp($ncpu);
             } else {
                 $ncpu = qx(echo|$sshcmd $serverlogin parallel --number-of-cores);
-                chomp($ncpu);
             }
-            if($ncpu =~ /^[0-9]+$/) {
+            if($ncpu =~ /^\s*[0-9]+\s*$/s) {
                 $self->{'ncpus'} = $ncpu;
             } else {
                 print $Global::original_stderr
                     ("parallel: Warning: Could not figure out ",
-                     "number of cpus on $serverlogin. Using 1\n");
+                     "number of cpus on $serverlogin ($ncpu). Using 1\n");
                 $self->{'ncpus'} = 1;
             }
         }
@@ -3651,12 +3655,20 @@ sub new {
 }
 
 sub get {
+    # Returns:
+    #   reference to array of Arg-objects
     my $self = shift;
     if(@{$self->{'unget'}}) {
 	return shift @{$self->{'unget'}};
     }
     $self->{'arg_number'}++;
-    return $self->{'arg_sub_queue'}->get();
+    my $ret = $self->{'arg_sub_queue'}->get();
+    if(defined $Global::max_number_of_args
+       and $Global::max_number_of_args == 0) {
+	return [];
+    } else {
+	return $ret;
+    }
 }
 
 sub unget {
@@ -3693,6 +3705,8 @@ sub new {
 }
 
 sub get {
+    # Returns:
+    #   reference to array of Arg-objects
     my $self = shift;
     if(@{$self->{'unget'}}) {
 	return shift @{$self->{'unget'}};
