@@ -64,10 +64,9 @@ egrep -v '^0$'
 echo '### Test --rrs -N1 --recend single'
 echo 12a34a45a6 |
   parallel -k --pipe --recend a -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
-# Broken
-#echo '### Test --rrs -N1 --recend alternate'
-#echo 12a34b45a6 |
-#  parallel -k --pipe --recend 'a|b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+echo '### Test --rrs -N1 --regexp --recend alternate'
+echo 12a34b45a6 |
+  parallel -k --pipe --regexp --recend 'a|b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 echo '### Test --rrs -N1 --recend single'
 echo 12a34b45a6 |
   parallel -k --pipe --recend 'b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
@@ -75,11 +74,10 @@ echo 12a34b45a6 |
 echo '### Test --rrs --recend single'
 echo 12a34a45a6 |
   parallel -k --pipe --recend a --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
-# Broken
-#echo '### Test --rrs -N1 --recend alternate'
-#echo 12a34b45a6 |
-#  parallel -k --pipe --recend 'a|b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
-echo '### Test --rrs -N1 --recend single'
+echo '### Test --rrs --regexp --recend alternate'
+echo 12a34b45a6 |
+  parallel -k --pipe --regexp --recend 'a|b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+echo '### Test --rrs --recend single'
 echo 12a34b45a6 |
   parallel -k --pipe --recend 'b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 

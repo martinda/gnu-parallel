@@ -141,6 +141,12 @@ d
 3>45
 4>6
 
+### Test --rrs -N1 --regexp --recend alternate
+1>12
+2>34
+3>45
+4>6
+
 ### Test --rrs -N1 --recend single
 1>12a34
 2>45a6
@@ -149,7 +155,11 @@ d
 1>123445
 2>6
 
-### Test --rrs -N1 --recend single
+### Test --rrs --regexp --recend alternate
+1>123445
+2>6
+
+### Test --rrs --recend single
 1>12a34
 2>45a6
 

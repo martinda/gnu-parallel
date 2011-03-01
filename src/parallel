@@ -304,7 +304,7 @@ sub get_options_from_array {
 	 "basenamereplace|bnr=s" => \$::opt_basenamereplace,
 	 "basenameextensionreplace=s" => \$::opt_basenameextensionreplace,
 	 "jobs|j=s" => \$::opt_P,
-	 "load=s" => \$::opt_load,
+	 "load=f" => \$::opt_load,
 	 "max-line-length-allowed" => \$::opt_max_line_length_allowed,
 	 "number-of-cpus" => \$::opt_number_of_cpus,
 	 "number-of-cores" => \$::opt_number_of_cores,
@@ -322,7 +322,7 @@ sub get_options_from_array {
 	 "tmpdir=s" => \$::opt_tmpdir,
 	 "tempdir=s" => \$::opt_tmpdir,
 	 "tty|T" => \$::opt_tty,
-	 "halt-on-error|H=s" => \$::opt_halt_on_error,
+	 "halt-on-error|H=i" => \$::opt_halt_on_error,
 	 "retries=i" => \$::opt_retries,
 	 "dry-run|dryrun" => \$::opt_dryrun,
 	 "progress" => \$::opt_progress,
@@ -353,8 +353,8 @@ sub get_options_from_array {
 	 "max-replace-args|N=i" => \$::opt_N,
 	 "colsep|col-sep|C=s" => \$::opt_colsep,
 	 "help|h" => \$::opt_help,
-	 "L=i" => \$::opt_L,
-	 "max-lines|l:s" => \$::opt_l,
+	 "L=f" => \$::opt_L,
+	 "max-lines|l:f" => \$::opt_l,
 	 "interactive|p" => \$::opt_p,
 	 "verbose|t" => \$::opt_verbose,
 	 "version|V" => \$::opt_version,
@@ -381,7 +381,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110218;
+    $Global::version = 20110224;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -484,14 +484,23 @@ sub parse_options {
 	    $Global::arg_sep = "--";
 	}
     }
-    for my $nlines ($::opt_L, $::opt_l) {
-	if(defined $nlines) {
-	    if($nlines eq "") {
-		$nlines = 1;
-	    }
-	    $Global::max_lines = $nlines;
-	    $Global::max_number_of_args ||= $Global::max_lines;
+    if(defined $::opt_l) {
+	if($::opt_l eq "-0") {
+	    # -l -0 (swallowed -0)
+	    $::opt_l = 1;
+	    $::opt_0 = 1;
+	    $/ = "\0";
+	} elsif ($::opt_l == 0) {
+	    # If not given (or if 0 is given) => 1
+	    $::opt_l = 1;
 	}
+	$Global::max_lines = $::opt_l;
+	$Global::max_number_of_args ||= $Global::max_lines;
+    }
+
+    if(defined $::opt_L) {
+	$Global::max_lines = $::opt_L;
+	$Global::max_number_of_args ||= $Global::max_lines;
     }
     %Global::replace_rev = reverse %Global::replace;
 
@@ -3953,29 +3962,35 @@ sub new {
 	'id' => $id,
 	'idfile' => $lockdir."/".$id,
 	'pid' => $$,
-	'pidfile' => $lockdir."/".$$,
+	'pidfile' => $lockdir."/".$$.'@'.::hostname(),
 	'count' => $count + 1 # nlinks returns a link for the 'id-' as well
     }, ref($class) || $class;
 }
 
 sub acquire {
     my $self = shift;
+    my $exponential_backoff = 1;
     while(1) {
 	$self->atomic_link_if_count_less_than() and last;
 	::debug("Remove dead locks");
 	my $lockdir = $self->{'lockdir'};
 	for my $d (<$lockdir/*>) {
-	    $d =~ m:$lockdir/([0-9]+)$:o or next;
-	    if(not kill 0, $1) {
-		::debug("Dead: $d");
-		unlink $d;
-	    } else {
-		::debug("Alive: $d");
+	    $d =~ m:$lockdir/([0-9]+)\@([-\._a-z0-9])$:o or next;
+	    my ($pid, $host) = ($1,$2);
+	    if($host eq ::hostname()) {
+		if(not kill 0, $1) {
+		    ::debug("Dead: $d");
+		    unlink $d;
+		} else {
+		    ::debug("Alive: $d");
+		}
 	    }
 	}
 	# try again
 	$self->atomic_link_if_count_less_than() and last;
-	sleep 1;
+	::usleep(rand()*$exponential_backoff);
+	# Retry slower and slower up to 1 second
+	$exponential_backoff = ($exponential_backoff < 1000) ? ($exponential_backoff * 1.1) : ($exponential_backoff);
 	# TODO if timeout: last
     }
     ::debug("acquired $self->{'pid'}\n");

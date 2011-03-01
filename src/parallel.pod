@@ -46,7 +46,8 @@ B<parallel> is capable of.
 
 You can also watch the intro video for a quick introduction:
 http://www.youtube.com/watch?v=OpaiGYxkSuQ or at
-http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
+http://tinyogg.com/watch/TORaR/ http://tinyogg.com/watch/hfxKj/ and
+http://tinyogg.com/watch/YQuXd/
 
 =head1 OPTIONS
 
@@ -82,7 +83,7 @@ B<{.}> can be used the same places as B<{}>. The replacement string
 B<{.}> can be changed with B<-U>.
 
 
-=item B<{/}> (beta testing)
+=item B<{/}>
 
 Basename of input line. This is a specialized replacement string
 with the directory part removed.
@@ -91,7 +92,7 @@ B<{/}> can be used the same places as B<{}>. The replacement string
 B<{/}> can be changed with B<--basenamereplace>.
 
 
-=item B<{/.}> (beta testing)
+=item B<{/.}>
 
 Basename of input line without extension. This is a specialized
 replacement string with the directory and extension part removed. It
@@ -117,7 +118,7 @@ extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
 B<{>I<n>.B<}> can be used the same places as B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}> (beta testing)
+=item B<{>I<n>/B<}>
 
 Basename of argument from argument file I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.  See B<-a> and B<-N>.
@@ -125,7 +126,7 @@ It is a combination of B<{>I<n>B<}> and B<{/}>.  See B<-a> and B<-N>.
 B<{>I<n>/B<}> can be used the same places as B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}> (beta testing)
+=item B<{>I<n>/.B<}>
 
 Basename of argument from argument file I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -228,7 +229,7 @@ I<file> will be transferred the same way as B<--transfer>.
 Use the replacement string I<replace-str> instead of B<{/}> for basename of input line.
 
 
-=item B<--basenameextensionreplace> I<replace-str> (beta testing)
+=item B<--basenameextensionreplace> I<replace-str>
 
 Use the replacement string I<replace-str> instead of B<{/.}> for basename of input line without extension.
 
@@ -527,8 +528,7 @@ is optional.  If I<max-lines> is not specified, it defaults to one.
 The B<-l> option is deprecated since the POSIX standard specifies
 B<-L> instead.
 
-B<-l 0> means read one line, but insert 0 arguments on the command
-line.
+B<-l 0> is an alias for B<-l 1>.
 
 Implies B<-X> unless B<-m> is set.
 
@@ -675,7 +675,7 @@ Print the number of CPU cores and exit (used by GNU B<parallel> itself
 to determine the number of CPU cores on remote computers).
 
 
-=item B<--nice> I<niceness> (beta testing)
+=item B<--nice> I<niceness>
 
 Run the command at this niceness. For simple commands you can just add
 B<nice> in front of the command. But if the command consists of more
@@ -750,11 +750,11 @@ Use B<--regexp> to interpret B<--recstart> and B<--recend> as regular
 expressions. This is slow, however.
 
 
-=item B<--remove-rec-sep> (alpha testing)
+=item B<--remove-rec-sep> (beta testing)
 
-=item B<--removerecsep> (alpha testing)
+=item B<--removerecsep> (beta testing)
 
-=item B<--rrs> (alpha testing)
+=item B<--rrs> (beta testing)
 
 Remove the text matched by B<--recstart> and B<--recend> before piping
 it to the command.
@@ -1072,9 +1072,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (beta testing)
+=item B<--workdir> I<mydir>
 
-=item B<-W> I<mydir> (beta testing)
+=item B<-W> I<mydir>
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in
