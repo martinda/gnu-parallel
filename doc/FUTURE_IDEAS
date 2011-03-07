@@ -1,20 +1,4 @@
-Use recsep as splitstring instead of match
-my @vals = (split / /, $string)[0,2,5,7];
-
 test if block size is too small to match a record sep in both -N mode and normal
-
-
-
-
---remove-rec-sep
-test alternation with --recend 'a|b'
-echo 12a34a45a6 | src/parallel -k --pipe --recend a -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo'
-echo 12a34b45a6 | src/parallel -k --pipe --recend 'a|b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo'
-echo 12a34b45a6 | src/parallel -k --pipe --recend 'b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo'
-
-echo 12a34a45a6 | src/parallel -k --pipe --recend a --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo'
-echo 12a34b45a6 | src/parallel -k --pipe --recend 'a|b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo'
-echo 12a34b45a6 | src/parallel -k --pipe --recend 'b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo'
 
 Example:
 Chop mbox into emails

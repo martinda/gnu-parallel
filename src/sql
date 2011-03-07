@@ -39,16 +39,16 @@ See the section DBURL below.
 The SQL commands to run. Each argument will have a newline
 appended.
 
-Example: "SELECT 1+2;" "SELECT 'SQL';"
+Example: "SELECT * FROM foo;" "SELECT * FROM bar;"
 
 If the arguments contain '\n' or '\x0a' this will be replaced with a
 newline:
 
-Example: "SELECT 1+2;\n SELECT 'SQL';"
+Example: "SELECT * FROM foo;\n SELECT * FROM bar;"
 
 If no commands are given SQL is read from the keyboard or STDIN.
 
-Example: echo 'SELECT 1+2;' | sql mysql:///
+Example: echo 'SELECT * FROM foo;' | sql mysql:///
 
 
 =item B<--db-size>
@@ -104,7 +104,7 @@ The string following -p will be given to the database connection
 program as arguments. Multiple -p's will be joined with
 space. Example:
 
-I<-p "-U username"> can also be written I<-p -U -p username>.
+I<-p "-U scott"> can also be written I<-p -U -p scott>.
 
 
 =item B<-r>
@@ -153,7 +153,7 @@ GNU B<sql> can be called as a shebang (#!) command as the first line of a script
 
   #!/usr/bin/sql -Y mysql:///
 
-  select * from users;
+  SELECT * FROM foo;
 
 For this to work B<--shebang> or B<-Y> must be set as the first option.
 
@@ -169,12 +169,12 @@ http://tools.ietf.org/html/rfc3986#section-2.1 (E.g. a password
 containing '/' would contain '%2F').
 
 Examples:
- mysql://user:pa55w0rd@mysqlserver/database
- sql:oracle://scott:tiger@oracleserver/xe
- postgresql://user:pa55w0rd@pg.example.com/db
+ mysql://scott:tiger@my.example.com/mydb
+ sql:oracle://scott:tiger@ora.example.com/xe
+ postgresql://scott:tiger@pg.example.com/pgdb
  pg:///
- sql:sqlite2:////tmp/db.sqlite?select * from foo;
- sqlite3:///../db.sqlite3?select%20*%20from%20foo;
+ sql:sqlite2:////tmp/db.sqlite?SELECT * FROM foo;
+ sqlite3:///../db.sqlite3?SELECT%20*%20FROM%20foo;
 
 Currently supported vendors: MySQL (mysql), MySQL with SSL (mysqls,
 mysqlssl), Oracle (oracle, ora), PostgreSQL (postgresql, pg, pgsql,
@@ -188,8 +188,8 @@ Aliases must start with ':' and are read from
 
 Example of aliases:
 
- :myalias1 pg://user:pa55w0rd@pg.example.com/db
- :myalias2 ora://scott:tiger@ora1.example.com/xe
+ :myalias1 pg://scott:tiger@pg.example.com/pgdb
+ :myalias2 ora://scott:tiger@ora.example.com/xe
  # Short form of mysql://`whoami`:nopassword@localhost:3306/`whoami`
  :myalias3 mysql:///
  # Short form of mysql://`whoami`:nopassword@localhost:33333/mydb
@@ -197,9 +197,9 @@ Example of aliases:
  # Alias for an alias
  :m      :myalias4
  # the sortest alias possible
- :       sqlite2:////tmp/mydefault.sqlite
+ :       sqlite2:////tmp/db.sqlite
  # Including an SQL query
- :query  sqlite:////tmp/file.sqlite?SELECT * FROM foo;
+ :query  sqlite:////tmp/db.sqlite?SELECT * FROM foo;
 
 =head1 EXAMPLES
 
@@ -207,7 +207,7 @@ Example of aliases:
 
 The most basic use of GNU B<sql> is to get an interactive prompt:
 
-B<sql sql:oracle://scott:tiger@oracleserver/xe>
+B<sql sql:oracle://scott:tiger@ora.example.com/xe>
 
 If you have setup an alias you can do:
 
@@ -218,16 +218,16 @@ B<sql :myora>
 
 To run a query directly from the command line:
 
-B<sql :myalias "DELETE FROM users WHERE name LIKE '%tange%';">
+B<sql :myalias "SELECT * FROM foo;">
 
 Oracle requires newlines after each statement. This can be done like
 this:
 
-B<sql :myora "SELECT 1 FROM dual;" "SELECT 2 FROM dual;">
+B<sql :myora "SELECT * FROM foo;" "SELECT * FROM bar;">
 
 Or this:
 
-B<sql :myora "SELECT 1 FROM dual;\nSELECT 2 FROM dual;">
+B<sql :myora "SELECT * FROM foo;\nSELECT * FROM bar;">
 
 
 =head2 Copy a PostgreSQL database
@@ -235,7 +235,7 @@ B<sql :myora "SELECT 1 FROM dual;\nSELECT 2 FROM dual;">
 To copy a PostgreSQL database use pg_dump to generate the dump and GNU
 B<sql> to import it:
 
-B<pg_dump my_database | sql pg://user:pass@pgserver/my_new_db>
+B<pg_dump pg_database | sql pg://scott:tiger@pg.example.com/pgdb>
 
 
 =head2 Empty all tables in a MySQL database
@@ -263,7 +263,7 @@ UNIX-script. Create a script called I<demosql>:
 
 B<#!/usr/bin/sql -Y mysql:///>
 
-B<SELECT * FROM users;>
+B<SELECT * FROM foo;>
 
 Then do:
 
@@ -274,7 +274,7 @@ B<chmod 755 demosql; ./demosql>
 
 Use GNU B<parallel>'s B<--colsep> to separate columns:
 
-B<sql -s '\t' :mydburl 'SELECT * FROM bar;' | parallel --colsep '\t' do_stuff {4} {1}>
+B<sql -s '\t' :mydburl 'SELECT * FROM foo;' | parallel --colsep '\t' do_stuff {4} {1}>
 
 
 =head2 Retry if the connection fails
