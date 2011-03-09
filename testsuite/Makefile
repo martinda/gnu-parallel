@@ -27,3 +27,7 @@ dist:
 	mv /tmp/parallel.tar.bz2 parallel-$$(date +"%Y%m%d").tar.bz2
 	rsync -Havessh parallel-$$(date +"%Y%m%d").tar.bz2 download.savannah.nongnu.org:/releases/parallel/
 
+portable:
+	# Cache sudo password
+	sudo echo
+	time bash Portable.sh

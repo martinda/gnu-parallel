@@ -1515,6 +1515,20 @@ sub usage {
     print "See 'man $Global::progname' for the options\n";
 }
 
+sub die_bug {
+    my $bugid = shift;
+    print STDERR
+	("$Global::progname: This should not happen. You have found a bug.\n",
+	 "Please contact <parallel\@gnu.org> and include:\n",
+	 "* The version number: $Global::version\n",
+	 "* The bugid: $bugid\n",
+	 "* The command line being run\n",
+	 "* The files being read (put the files on a webserver if they are big)\n",
+	 "\n",
+	 "If you get the error on smaller/fewer files, please include those instead.\n");
+    ::wait_and_exit(255);
+}
+
 sub version {
     # Returns: N/A
     print join("\n",
@@ -3410,7 +3424,7 @@ sub replace_placeholders {
 			   0 .. $#args);
 	    }
 	} else {
-	    die('This should not happen. Contact <parallel@gnu.org>.');
+	    ::die_bug('replace_placeholders20110309');
 	}
     }
 
