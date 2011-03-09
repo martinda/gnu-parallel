@@ -1307,11 +1307,11 @@ Let us assume a website stores images like:
 where YYYYMMDD is the date and ## is the number 01-10.  This will
 generate the past 30 days as YYYYMMDD:
 
-B<seq 1 30 | parallel date -d '"today -{} days"' +%Y%m%d>
+B<seq 30 | parallel date -d '"today -{} days"' +%Y%m%d>
 
 Based on this we can let GNU B<parallel> generate 10 B<wget>s per day:
 
-I<the above> B<| parallel -I {o} seq -w 1 10 "|" parallel wget
+I<the above> B<| parallel -I {o} seq -w 10 "|" parallel wget
 http://www.example.com/path/to/{o}_{}.jpg>
 
 =head1 EXAMPLE: Rewriting a for-loop and a while-read-loop
@@ -1435,20 +1435,20 @@ handy).
 
 To run B<echo> on B<server.example.com>:
 
-  seq 1 10 | parallel --sshlogin server.example.com echo
+  seq 10 | parallel --sshlogin server.example.com echo
 
 To run commands on more than one remote computer run:
 
-  seq 1 10 | parallel --sshlogin server.example.com,server2.example.net echo
+  seq 10 | parallel --sshlogin server.example.com,server2.example.net echo
 
 Or:
 
-  seq 1 10 | parallel --sshlogin server.example.com \
+  seq 10 | parallel --sshlogin server.example.com \
     --sshlogin server2.example.net echo
 
 If the login username is I<foo> on I<server2.example.net> use:
 
-  seq 1 10 | parallel --sshlogin server.example.com \
+  seq 10 | parallel --sshlogin server.example.com \
     --sshlogin foo@server2.example.net echo
 
 To distribute the commands to a list of computers, make a file
@@ -1460,7 +1460,7 @@ I<mycomputers> with all the computers:
 
 Then run:
 
-  seq 1 10 | parallel --sshloginfile mycomputers echo
+  seq 10 | parallel --sshloginfile mycomputers echo
 
 To include the local computer add the special sshlogin ':' to the list:
 
@@ -1477,7 +1477,7 @@ If the number of CPU cores on the remote computers is not identified
 correctly the number of CPU cores can be added in front. Here the
 computer has 8 CPU cores.
 
-  seq 1 10 | parallel --sshlogin 8/server.example.com echo
+  seq 10 | parallel --sshlogin 8/server.example.com echo
 
 
 =head1 EXAMPLE: Transferring of files
@@ -1573,7 +1573,7 @@ B<parallel -a <(seq 6) -a <(seq 6 -1 1) echo>
 Convert files from all subdirs to PNG-files with consecutive numbers
 (useful for making input PNG's for B<ffmpeg>):
 
-B<parallel -a <(find . -type f | sort) -a <(seq 1 $(find . -type f|wc -l)) convert {1} {2}.png>
+B<parallel -a <(find . -type f | sort) -a <(seq $(find . -type f|wc -l)) convert {1} {2}.png>
 
 Alternative version:
 
@@ -1606,7 +1606,7 @@ B<parallel -a table_file.tsv --trim n --colsep '\t' cmd -o {2} -i {1}>
 If you want to run the same command with the same arguments 10 times
 in parallel you can do:
 
-B<seq 1 10 | parallel -n0 my_command my_args>
+B<seq 10 | parallel -n0 my_command my_args>
 
 
 =head1 EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation
@@ -1684,7 +1684,7 @@ A mutex is a counting semaphore allowing only one job to run. This
 will edit the file I<myfile> and prepends the file with lines with the
 numbers 1 to 3.
 
-  seq 1 3 | parallel sem sed -i -e 'i{}' myfile
+  seq 3 | parallel sem sed -i -e 'i{}' myfile
 
 As I<myfile> can be very big it is important only one process edits
 the file at the same time.
@@ -1692,7 +1692,7 @@ the file at the same time.
 Name the semaphore to have multiple different semaphores active at the
 same time:
 
-  seq 1 3 | parallel sem --id mymutex sed -i -e 'i{}' myfile
+  seq 3 | parallel sem --id mymutex sed -i -e 'i{}' myfile
 
 
 =head1 EXAMPLE: Start editor with filenames from stdin (standard input)
@@ -1787,7 +1787,7 @@ $-sign. Here is an example using $PARALLEL_SEQ. This variable is set
 by GNU B<parallel> itself, so the evaluation of the $ must be done by
 the sub shell started by GNU B<parallel>:
 
-B<seq 1 10 | parallel -N2 echo seq:\$PARALLEL_SEQ arg1:{1} arg2:{2}>
+B<seq 10 | parallel -N2 echo seq:\$PARALLEL_SEQ arg1:{1} arg2:{2}>
 
 If the variable is set before GNU B<parallel> starts you can do this:
 
@@ -1822,12 +1822,12 @@ Prints: B<test two  spaces  between  each  word>
 $$ is the shell variable containing the process id of the shell. This
 will print the process id of the shell running GNU B<parallel>:
 
-B<seq 1 10 | parallel echo $$>
+B<seq 10 | parallel echo $$>
 
 And this will print the process ids of the sub shells started by GNU
 B<parallel>.
 
-B<seq 1 10 | parallel echo \$\$>
+B<seq 10 | parallel echo \$\$>
 
 If the special characters should not be evaluated by the sub shell
 then you need to protect it against evaluation from both the shell
@@ -1936,7 +1936,7 @@ shell.
 
 B<Example:>
 
-B<seq 1 10 | parallel -N2 echo seq:'$'PARALLEL_SEQ arg1:{1} arg2:{2}>
+B<seq 10 | parallel -N2 echo seq:'$'PARALLEL_SEQ arg1:{1} arg2:{2}>
 
 
 =item $TMPDIR
@@ -2479,7 +2479,7 @@ middleman(mdm) is also a tool for running jobs in parallel.
 Here are the shellscripts of http://mdm.berlios.de/usage.html ported
 to GNU B<parallel>:
 
-B<seq 1 19 | parallel buffon -o - | sort -n >>B< result>
+B<seq 19 | parallel buffon -o - | sort -n >>B< result>
 
 B<cat files | parallel cmd>
 

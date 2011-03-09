@@ -55,7 +55,9 @@ Example: echo 'SELECT * FROM foo;' | sql mysql:///
 
 =item B<--dbsize>
 
-Size of database. Show the size of the database on disk.
+Size of database. Show the size of the database on disk. For Oracle
+this requires access to read the table I<dba_data_files> - the user
+I<system> has that.
 
 
 =item B<--help>
@@ -102,7 +104,7 @@ still prints number of rows found.
 
 The string following -p will be given to the database connection
 program as arguments. Multiple -p's will be joined with
-space. Example:
+space. Example: pass '-U' and the user name to the program:
 
 I<-p "-U scott"> can also be written I<-p -U -p scott>.
 
@@ -162,7 +164,7 @@ For this to work B<--shebang> or B<-Y> must be set as the first option.
 =head1 DBURL
 
 A DBURL has the following syntax:
-[sql:]vendor://[user[:password]@][host][:port]/[database][?sqlquery]
+[sql:]vendor://[[user][:password]@][host][:port]/[database][?sqlquery]
 
 To quote special characters use %-encoding specified in
 http://tools.ietf.org/html/rfc3986#section-2.1 (E.g. a password
@@ -267,14 +269,14 @@ B<SELECT * FROM foo;>
 
 Then do:
 
-B<chmod 755 demosql; ./demosql>
+B<chmod +x demosql; ./demosql>
 
 
 =head2 Use --colsep to process multiple columns
 
 Use GNU B<parallel>'s B<--colsep> to separate columns:
 
-B<sql -s '\t' :mydburl 'SELECT * FROM foo;' | parallel --colsep '\t' do_stuff {4} {1}>
+B<sql -s '\t' :myalias 'SELECT * FROM foo;' | parallel --colsep '\t' do_stuff {4} {1}>
 
 
 =head2 Retry if the connection fails
@@ -282,7 +284,7 @@ B<sql -s '\t' :mydburl 'SELECT * FROM foo;' | parallel --colsep '\t' do_stuff {4
 If the access to the database fails occationally B<--retries> can help
 make sure the query succeeds:
 
-B<sql --retries 5 :myalias 'SELECT * FROM really_big_table;'>
+B<sql --retries 5 :myalias 'SELECT * FROM really_big_foo;'>
 
 
 =head2 Get info about the running database system
@@ -834,6 +836,7 @@ sub Usage {
 
 sub get_alias {
     my $alias = shift;
+    $alias =~ s/^(sql:)*//; # Accept aliases prepended with sql:
     if ($alias !~ /^:/) {
 	return $alias;
     }

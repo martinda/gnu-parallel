@@ -10,7 +10,7 @@ echo '### Test --gnu'
 parallel -k --gnu echo ::: 1 2 3 -- a b c
 
 echo "### test global config"
-echo /etc/parallel/config | sudo parallel "echo --tollef > "
+echo /etc/parallel/config | sudo parallel "mkdir -p /etc/parallel; echo --tollef > "
 parallel -k echo -- 1 2 3 ::: a b c
 parallel -k --gnu echo ::: 1 2 3 -- a b c
 echo --gnu > ~/.parallel/config

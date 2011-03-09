@@ -49,6 +49,9 @@ echo :sqlunittest mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest >> 
 perl -i -ne '$seen{$_}++ || print' ~/.sql/aliases
 sql :sqlunittest "SELECT 'Yes it does' as 'Test if .sql/aliases works';"
 
+echo "### Test sql:sql::alias"
+sql sql:sql::sqlunittest "SELECT 'Yes it works' as 'Test sql:sql::alias';"
+
 echo "### Test --noheaders --no-headers -n"
 sql -n :sqlunittest 'select * from unittest order by id' \
 | parallel -k --colsep '\t' echo {2} {1}

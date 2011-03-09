@@ -16,6 +16,9 @@ Yes it does
 ### Test .sql/aliases
 Test if .sql/aliases works
 Yes it does
+### Test sql:sql::alias
+Test sql:sql::alias
+Yes it works
 ### Test --noheaders --no-headers -n
 abc 1
 def 3
