@@ -423,12 +423,12 @@ sub parse_options {
     if(defined $::opt_verbose) { $Global::stderr_verbose = 1; }
     if(defined $::opt_I) { $Global::replace{'{}'} = $::opt_I; }
     if(defined $::opt_U) { $Global::replace{'{.}'} = $::opt_U; }
-    if(defined $::opt_i and $::opt_i) { $Global::replace{'{}'} = $::opt_i; }
+    if(defined $::opt_i) { $Global::replace{'{}'} = $::opt_i; }
     if(defined $::opt_basenamereplace) { $Global::replace{'{/}'} = $::opt_basenamereplace; }
     if(defined $::opt_basenameextensionreplace) {
         $Global::replace{'{/.}'} = $::opt_basenameextensionreplace;
     }
-    if(defined $::opt_E and $::opt_E) { $Global::end_of_file_string = $::opt_E; }
+    if(defined $::opt_E) { $Global::end_of_file_string = $::opt_E; }
     if(defined $::opt_n) { $Global::max_number_of_args = $::opt_n; }
     if(defined $::opt_N) { $Global::max_number_of_args = $::opt_N; }
     if(defined $::opt_tmpdir) { $ENV{'TMPDIR'} = $::opt_tmpdir; }
@@ -1538,7 +1538,10 @@ sub version {
                "This is free software: you are free to change and redistribute it.",
                "GNU $Global::progname comes with no warranty.",
                "",
-               "Web site: http://www.gnu.org/software/${Global::progname}\n"
+               "Web site: http://www.gnu.org/software/${Global::progname}\n",
+	       "When using GNU Parallel for a publication please cite:\n",
+	       "O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ",
+	       ";login: The USENIX Magazine, February 2011:42-47.\n",
         );
 }
 

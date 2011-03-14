@@ -2611,11 +2611,16 @@ B<cat hostlist | parallel ssh {} do_stuff>
 
 Because of the way newline is quoted this will not work:
 
-echo 1,2,3 | parallel -vkd, "echo 'a{}'"
+echo 1,2,3 | parallel -vkd, "echo 'a{}b'"
 
-However, this will work:
+However, these will all work:
 
-echo 1,2,3 | parallel -vkd, echo a{}
+echo 1,2,3 | parallel -vkd, echo a{}b
+
+echo 1,2,3 | parallel -vkd, "echo 'a'{}'b'"
+
+echo 1,2,3 | parallel -vkd, "echo 'a'"{}"'b'"
+
 
 =head2 Startup speed
 
@@ -2639,10 +2644,16 @@ you file a bug-report.
 
 =head1 REPORTING BUGS
 
-Report bugs to <bug-parallel@gnu.org> or https://savannah.gnu.org/bugs/?func=additem&group=parallel
+Report bugs to <bug-parallel@gnu.org> or
+https://savannah.gnu.org/bugs/?func=additem&group=parallel
 
 
 =head1 AUTHOR
+
+When using GNU Parallel for a publication please cite:
+
+O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
+The USENIX Magazine, February 2011:42-47.
 
 Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
 

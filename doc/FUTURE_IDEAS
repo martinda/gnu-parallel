@@ -246,6 +246,10 @@ parallel -mj1 sort -nm {} ";"rm {}
 # If GNU Parallel saves you money:
 # * (Have your company) donate to FSF https://my.fsf.org/donate/
 #
+# If you use GNU Parallel for a publication please cite:
+# O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
+# The USENIX Magazine, February 2011:42-47.
+#
 # Find GNU Parallel at http://www.gnu.org/software/parallel/
 
 

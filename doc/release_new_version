@@ -159,9 +159,9 @@ New in this release:
 
   By putting --tollef in the site wide config file you can deinstall
   Tollef's parallel and install GNU Parallel instead without any
-  change for users or scripts. This is useful for packagers that do
-  not distribute GNU Parallel because the command name conflicts with
-  Tollef's parallel.
+  change for users or scripts. This is useful for packagers that
+  currently do not distribute GNU Parallel because the command name
+  conflicts with Tollef's parallel.
 
 * -L 0 -n 0, and -N 0 implemented. They will read one argument,
   but insert 0 arguments on the command line. Useful if you just want
@@ -176,6 +176,10 @@ New in this release:
 * Man page examples translated into Japanese. Thanks to Koshigoe.
   http://w.koshigoe.jp/study/?%5Bsystem%5D+GNU+parallel+%BB%C8%CD%D1%CE%E3#l13
 
+* Video of presentation from FSCONS 2010-11-07. The presenter was
+  _really_ hoarse that day (Something to do with loads of alcohol the
+  night before). http://vimeo.com/20838834
+
 * Review with examples in German. Thanks to M. Nieberg.
   http://kenntwas.de/2011/linux/gnu-parallel/
 
@@ -187,6 +191,9 @@ New in this release:
 
 * Using GNU Parallel instead of xargs. Thanks to James Cuff.
   http://blog.jcuff.net/2011/02/on-train-ride-in.html
+
+* Using GNU Parallel from 0install (German). Thanks to AdaMin.
+  http://forum.ubuntuusers.de/topic/gnu-parallel-mit-zero-install-kurzinfo-kein-wi/
 
 * Bug fixes and man page updates.
 
@@ -217,4 +224,8 @@ http://www.gnu.org/software/parallel/
 Watch the intro video on http://www.youtube.com/watch?v=OpaiGYxkSuQ or
 at http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
 
+When using GNU Parallel for a publication please cite:
+
+O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
+The USENIX Magazine, February 2011:42-47.
 >>>>>
