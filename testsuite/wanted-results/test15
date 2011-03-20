@@ -290,7 +290,7 @@ Output from -h and --help
 6
 6
 ### Test --version: Version output (just check we get the same amount of lines)
-7
+12
 ### Test --verbose and -t
 echo bar
 echo car

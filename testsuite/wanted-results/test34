@@ -1,14 +1,6 @@
+### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834
+1
+2
+3
 ### Test too slow spawning
-parallel: Warning: Starting 10 extra processes takes > 2 sec.
-Consider adjusting -j. Press CTRL-C to stop.
-1000000000
-1000000001
-1000000002
-1000000003
-1000000004
-1000000005
-1000000006
-1000000007
-1000000008
-1000000009
-1000000010
+OK

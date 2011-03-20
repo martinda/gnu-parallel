@@ -18,22 +18,23 @@ B<#!/usr/bin/parallel> --shebang [options] [I<command> [arguments]]
 
 =head1 DESCRIPTION
 
-GNU B<parallel> is a shell tool for executing jobs concurrently locally
-or using remote computers. A job is typically a single command or a
-small script that has to be run for each of the lines in the
-input. The typical input is a list of files, a list of hosts, a list
-of users, a list of URLs, or a list of tables.
+GNU B<parallel> is a shell tool for executing jobs in parallel using one
+or more computers. A job is can be a single command or a small script
+that has to be run for each of the lines in the input. The typical
+input is a list of files, a list of hosts, a list of users, a list of
+URLs, or a list of tables. A job can also be a command that reads from
+a pipe. GNU B<parallel> can then split the input and pipe it into
+commands in parallel.
 
-If you use B<xargs> today you will find GNU B<parallel> very easy to
-use as GNU B<parallel> is written to have the same options as
-B<xargs>. If you write loops in shell, you will find GNU B<parallel>
-may be able to replace most of the loops and make them run faster by
-running several jobs simultaneously.
+If you use xargs and tee today you will find GNU B<parallel> very easy to
+use as GNU B<parallel> is written to have the same options as xargs. If
+you write loops in shell, you will find GNU B<parallel> may be able to
+replace most of the loops and make them run faster by running several
+jobs in parallel.
 
-GNU B<parallel> makes sure output from the commands is the same output
-as you would get had you run the commands sequentially. This makes it
-possible to use output from GNU B<parallel> as input for other
-programs.
+GNU B<parallel> makes sure output from the commands is the same output as
+you would get had you run the commands sequentially. This makes it
+possible to use output from GNU B<parallel> as input for other programs.
 
 For each line of input GNU B<parallel> will execute I<command> with
 the line as arguments. If no I<command> is given, the line of input is
@@ -436,7 +437,7 @@ B<perl -a -F"\t" -ne 'chomp($F[2]=`date -d \@$F[2] +%FT%T`); print join("\t",@F)
 =item B<-P> I<N>
 
 Number of jobslots. Run up to N jobs in parallel.  0 means as many as
-possible. Default is +0 which will run one job per CPU core.
+possible. Default is 100% which will run one job per CPU core.
 
 If B<--semaphore> is set default is 1 thus making a mutex.
 
@@ -2646,6 +2647,24 @@ you file a bug-report.
 
 Report bugs to <bug-parallel@gnu.org> or
 https://savannah.gnu.org/bugs/?func=additem&group=parallel
+
+Your bugreport should always include:
+
+=over 2
+
+=item *
+
+The output of B<parallel --version>. If you are not running the latest
+released version you should specify why you believe the problem is not
+fixed in that version.
+
+=item *
+
+A complete example that others can run that shows the problem. A
+combination of B<seq>, B<echo>, and B<sleep> can reproduce most
+errors.
+
+=back
 
 
 =head1 AUTHOR

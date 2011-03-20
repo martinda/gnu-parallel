@@ -1,3 +1,8 @@
+Fixed: bug #32834: If input is generated slowly - do not complain
+-i with no args defaults to -i {}
+Use ::die_bug instead of die.
+
+
 test if block size is too small to match a record sep in both -N mode and normal
 
 Example:

@@ -30,7 +30,8 @@ GNU B<sql> is often used in combination with GNU B<parallel>.
 =item I<dburl>
 
 A DBURL has the following syntax:
-[sql:]vendor://[[user][:password]@][host][:port]/[database][?sqlquery]
+[sql:]vendor://
+[[user][:password]@][host][:port]/[database][?sqlquery]
 
 See the section DBURL below.
 
@@ -164,7 +165,8 @@ For this to work B<--shebang> or B<-Y> must be set as the first option.
 =head1 DBURL
 
 A DBURL has the following syntax:
-[sql:]vendor://[[user][:password]@][host][:port]/[database][?sqlquery]
+[sql:]vendor://
+[[user][:password]@][host][:port]/[database][?sqlquery]
 
 To quote special characters use %-encoding specified in
 http://tools.ietf.org/html/rfc3986#section-2.1 (E.g. a password
@@ -175,6 +177,7 @@ Examples:
  sql:oracle://scott:tiger@ora.example.com/xe
  postgresql://scott:tiger@pg.example.com/pgdb
  pg:///
+ postgresqlssl://scott@pg.example.com:3333/pgdb
  sql:sqlite2:////tmp/db.sqlite?SELECT * FROM foo;
  sqlite3:///../db.sqlite3?SELECT%20*%20FROM%20foo;
 

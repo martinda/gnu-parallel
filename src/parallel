@@ -14,7 +14,7 @@ $::oodebug=0;
 $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
 %Global::original_sig = %SIG;
 $SIG{TERM} = sub {}; # Dummy until jobs really start
-open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
+open $Global::original_stderr, ">&STDERR" or ::die_bug("Can't dup STDERR: $!");
 
 do_not_reap();
 parse_options();
@@ -264,7 +264,7 @@ sub acquire_semaphore {
 	} else {
 	    # child
 	    # Get a semaphore for this pid
-	    die "Can't start a new session: $!" if setsid() == -1;
+	    ::die_bug("Can't start a new session: $!") if setsid() == -1;
 	    $sem = Semaphore->new($Semaphore::name,$Global::host{':'}->max_jobs_running());
 	    $sem->acquire();
 	}
@@ -423,7 +423,9 @@ sub parse_options {
     if(defined $::opt_verbose) { $Global::stderr_verbose = 1; }
     if(defined $::opt_I) { $Global::replace{'{}'} = $::opt_I; }
     if(defined $::opt_U) { $Global::replace{'{.}'} = $::opt_U; }
-    if(defined $::opt_i) { $Global::replace{'{}'} = $::opt_i; }
+    if(defined $::opt_i) {
+	$Global::replace{'{}'} = $::opt_i eq "" ? "{}" : $::opt_i;
+    }
     if(defined $::opt_basenamereplace) { $Global::replace{'{/}'} = $::opt_basenamereplace; }
     if(defined $::opt_basenameextensionreplace) {
         $Global::replace{'{/.}'} = $::opt_basenameextensionreplace;
@@ -600,7 +602,7 @@ sub read_options {
     }
     for my $profile (@profiles) {
         if(-r $profile) {
-            open (IN, "<", $profile) || die;
+            open (IN, "<", $profile) || ::die_bug("read-profile: $profile");
             while(<IN>) {
                 /^\s*\#/ and next;
                 chomp;
@@ -879,9 +881,12 @@ sub __RUNNING_AND_PRINTING_THE_JOBS__ {}
 sub init_run_jobs {
     # Remember the original STDOUT and STDERR
     # Returns: N/A
-    open $Global::original_stdout, ">&STDOUT" or die "Can't dup STDOUT: $!";
-    open $Global::original_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
-    open $Global::original_stdin, "<&STDIN" or die "Can't dup STDIN: $!";
+    open $Global::original_stdout, ">&STDOUT" or
+	::die_bug("Can't dup STDOUT: $!");
+    open $Global::original_stderr, ">&STDERR" or
+	::die_bug("Can't dup STDERR: $!");
+    open $Global::original_stdin, "<&STDIN" or
+	::die_bug("Can't dup STDIN: $!");
     $Global::total_running = 0;
     $Global::total_started = 0;
     $Global::tty_taken = 0;
@@ -1262,7 +1267,7 @@ sub read_sshloginfile {
     if($file eq "..") {
         $file = $ENV{'HOME'}."/.parallel/sshloginfile";
     }
-    open(IN, $file) || die "Cannot open $file";
+    open(IN, $file) || ::die_bug("Cannot open $file");
     while(<IN>) {
         chomp;
         /^\s*#/ and next;
@@ -1738,7 +1743,7 @@ sub loadavg {
     # Should we update the loadavg file?
     my $update_loadavg_file = 0;
     if(-r $self->{'loadavg_file'}) {
-        open(UPTIME,"<".$self->{'loadavg_file'}) || die;
+        open(UPTIME,"<".$self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
         my $uptime_out = <UPTIME>;
         close UPTIME;
         # load average: 0.76, 1.53, 1.45
@@ -1818,7 +1823,7 @@ sub compute_max_loadavg {
             }
         } elsif (-f $loadspec) {
             # TODO this needs to be done for $loadspec
-            die;
+            ::die_bug("loadspec-unimplemented");
             $Global::max_procs_file = $loadspec;
             $Global::max_procs_file_last_mod = (stat($Global::max_procs_file))[9];
             if(open(IN, $Global::max_procs_file)) {
@@ -1895,10 +1900,13 @@ sub processes_available_by_system_limit {
         open($fh{"init-$i"},"</dev/null");
     }
     my $count_jobs_already_read = $Global::JobQueue->next_seq();
+    my $wait_time_for_getting_args = 0;
+    my $start_time = time;
     while(1) {
         $system_limit >= $wanted_processes and last;
         not $more_filehandles and last;
         $max_system_proc_reached and last;
+	my $before_getting_arg = time;
         if($Global::semaphore) {
         } elsif(defined $::opt_retries and $count_jobs_already_read) {
             # For retries we may need to run all jobs on this sshlogin
@@ -1920,6 +1928,7 @@ sub processes_available_by_system_limit {
                 push(@jobs, $job);
             }
         }
+	$wait_time_for_getting_args += time - $before_getting_arg;
         $system_limit++;
 
         # Every simultaneous process uses 2 filehandles when grouping
@@ -1927,7 +1936,6 @@ sub processes_available_by_system_limit {
             && open($fh{$system_limit*10+2},"</dev/null");
 
         # System process limit
-        $system_limit % 10 or $time=time;
         my $child;
         if($child = fork()) {
             push (@children,$child);
@@ -1941,13 +1949,19 @@ sub processes_available_by_system_limit {
         } else {
             $max_system_proc_reached = 1;
         }
-        ::debug("Time to fork ten procs: ", time-$time, " (processes so far: ", $system_limit,")\n");
-        if(time-$time > 2 and not $slow_spawining_warning_printed) {
-            # It took more than 2 second to fork ten processes.
+	my $forktime = time - $time - $wait_time_for_getting_args;
+        ::debug("Time to fork $system_limit procs: $wait_time_for_getting_args ",
+		$forktime,
+		" (processes so far: ", $system_limit,")\n");
+        if($system_limit > 10 and
+	   $forktime > 1 and
+	   $forktime > $system_limit * 0.01
+	   and not $slow_spawining_warning_printed) {
+            # It took more than 0.01 second to fork a processes on avg.
             # Give the user a warning. He can press Ctrl-C if this
             # sucks.
             print $Global::original_stderr
-                ("parallel: Warning: Starting 10 extra processes takes > 2 sec.\n",
+                ("parallel: Warning: Starting $system_limit processes took > $forktime sec.\n",
                  "Consider adjusting -j. Press CTRL-C to stop.\n");
             $slow_spawining_warning_printed = 1;
         }
@@ -2022,7 +2036,8 @@ sub simultaneous_sshlogin {
     my $serverlogin = $self->serverlogin();
     my $cmd = "$sshcmd $serverlogin echo simultaneouslogin 2>&1 &"x$wanted_processes;
     ::debug("Trying $wanted_processes logins at $serverlogin");
-    open (SIMUL, "($cmd)|grep simultaneouslogin | wc -l|") or die;
+    open (SIMUL, "($cmd)|grep simultaneouslogin | wc -l|") or
+	::die_bug("simultaneouslogin");
     my $ssh_limit = <SIMUL>;
     close SIMUL;
     chomp $ssh_limit;
@@ -2281,10 +2296,6 @@ sub sshcommand_of_sshlogin {
     #   login@host
     my $self = shift;
     my ($sshcmd, $serverlogin);
-    if($::oodebug and not defined $self->{'string'}) {
-        Carp::confess("No sshlogin");
-        die;
-    }
     if($self->{'string'} =~ /(.+) (\S+)$/) {
         # Own ssh command
         $sshcmd = $1; $serverlogin = $2;
@@ -2497,7 +2508,8 @@ sub set_stdin {
     my $self = shift;
     my $stdin = shift;
     # set non-blocking
-    fcntl($stdin, ::F_SETFL, ::O_NONBLOCK) or die "Couldn't set flags for HANDLE: $!\n";
+    fcntl($stdin, ::F_SETFL, ::O_NONBLOCK) or
+	::die_bug("Couldn't set flags for HANDLE: $!");
     $self->{'stdin'} = $stdin;
 }
 
@@ -2659,10 +2671,6 @@ sub sshlogin_wrap {
     my $self = shift;
     if(not defined $self->{'sshlogin_wrap'}) {
 	my $sshlogin = $self->sshlogin();
-	if($::oodebug and not defined $sshlogin) {
-	    Carp::confess("No sshlogin");
-	    die;
-	}
 	my $sshcmd = $sshlogin->sshcommand();
 	my $serverlogin = $sshlogin->serverlogin();
 	my $next_command_line = $self->replaced();
@@ -2883,17 +2891,12 @@ sub start {
     # Returns:
     #   job-object or undef if job not to run
     my $job = shift;
-    if($::oodebug and $job->{'commandline'}->{'commandline'}) {
-	Carp::confess($job);
-	die "jkj2";
-    }
     my $command = $job->sshlogin_wrap();
-
 
     if($Global::interactive or $Global::stderr_verbose) {
 	if($Global::interactive) {
 	    print $Global::original_stderr "$command ?...";
-	    open(TTY,"/dev/tty") || die;
+	    open(TTY,"/dev/tty") || ::die_bug("interactive-tty");
 	    my $answer = <TTY>;
 	    close TTY;
 	    my $run_yes = ($answer =~ /^\s*y/i);
@@ -2917,8 +2920,8 @@ sub start {
 	($errfh,$name) = ::tempfile(SUFFIX => ".par");
 	unlink $name;
 
-	open OUT, '>&', $outfh or die "Can't redirect STDOUT: $!";
-	open ERR, '>&', $errfh or die "Can't dup STDOUT: $!";
+	open OUT, '>&', $outfh or ::die_bug("Can't redirect STDOUT: $!");
+	open ERR, '>&', $errfh or ::die_bug("Can't dup STDOUT: $!");
 	$job->set_stdout($outfh);
 	$job->set_stderr($errfh);
     } else {
@@ -2944,27 +2947,27 @@ sub start {
     if($::opt_pipe) {
 	my ($in);
 	$pid = ::open3($in, ">&OUT", ">&ERR", $command) ||
-	    die("open3 (with spreadstdin) failed. Report a bug to <bug-parallel\@gnu.org>\n");
+	    ::die_bug("open3-pipe");
 	$job->set_stdin($in);
     } elsif(@::opt_a and $job->seq() == 1) {
 	# Give STDIN to the first job if using -a
 	*IN = *STDIN;
 	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $command) ||
-	    die("open3 (with -a) failed. Report a bug to <bug-parallel\@gnu.org>\n");
+	    ::die_bug("open3-a");
 	# Re-open to avoid complaining
 	open STDIN, "<&", $Global::original_stdin
-	    or die "Can't dup \$Global::original_stdin: $!";
+	    or ::die_bug("dup-\$Global::original_stdin: $!");
     } elsif ($::opt_tty and not $Global::tty_taken and -c "/dev/tty" and
 	     open(DEVTTY, "/dev/tty")) {
 	# Give /dev/tty to the command if no one else is using it
 	*IN = *DEVTTY;
 	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $command) ||
-	    die("open3 (with /dev/tty) failed. Report a bug to <bug-parallel\@gnu.org>\n");
+	    ::die_bug("open3-/dev/tty");
 	$Global::tty_taken = $pid;
 	close DEVTTY;
     } else {
 	$pid = ::open3(::gensym, ">&OUT", ">&ERR", $command) ||
-	    die("open3 (with gensym) failed. Report a bug to <bug-parallel\@gnu.org>\n");
+	    ::die_bug("open3-gensym");
     }
     $job->set_pid($pid);
     $job->set_starttime();
@@ -3971,7 +3974,7 @@ sub new {
     -d $parallel_locks or mkdir $parallel_locks;
     my $lockdir = "$parallel_locks/$id";
     my $lockfile = $lockdir.".lock";
-    if($count < 1) { die "Semaphore count = $count"; }
+    if($count < 1) { ::die_bug("semaphore-count: $count"); }
     return bless {
 	'lockfile' => $lockfile,
 	'lockfh' => Symbol::gensym(),
@@ -4038,7 +4041,8 @@ sub atomic_link_if_count_less_than {
     if($self->nlinks() < $self->{'count'}) {
 	-d $self->{'lockdir'} || mkdir $self->{'lockdir'};
 	if(not -e $self->{'idfile'}) {
-	    open (A, ">", $self->{'idfile'}) or die ">$self->{'idfile'}";
+	    open (A, ">", $self->{'idfile'}) or
+		::die_bug("write_idfile: $self->{'idfile'}");
 	    close A;
 	}
 	$retval = link $self->{'idfile'}, $self->{'pidfile'};
@@ -4061,7 +4065,7 @@ sub nlinks {
 sub lock {
     my $self = shift;
     open $self->{'lockfh'}, ">", $self->{'lockfile'}
-	or die "Can't open semaphore file $self->{'lockfile'}: $!";
+	or ::die_bug("Can't open semaphore file $self->{'lockfile'}: $!");
     chmod 0666, $self->{'lockfile'}; # assuming you want it a+rw
     while(not flock $self->{'lockfh'}, LOCK_EX()|LOCK_NB()) {
 	::debug("Cannot lock $self->{'lockfile'}");

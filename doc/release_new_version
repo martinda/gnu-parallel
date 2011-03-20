@@ -160,8 +160,8 @@ New in this release:
   By putting --tollef in the site wide config file you can deinstall
   Tollef's parallel and install GNU Parallel instead without any
   change for users or scripts. This is useful for packagers that
-  currently do not distribute GNU Parallel because the command name
-  conflicts with Tollef's parallel.
+  currently rename GNU Parallel or simply do not distribute GNU
+  Parallel because the command name conflicts with Tollef's parallel.
 
 * -L 0 -n 0, and -N 0 implemented. They will read one argument,
   but insert 0 arguments on the command line. Useful if you just want
@@ -175,6 +175,10 @@ New in this release:
 
 * Man page examples translated into Japanese. Thanks to Koshigoe.
   http://w.koshigoe.jp/study/?%5Bsystem%5D+GNU+parallel+%BB%C8%CD%D1%CE%E3#l13
+
+* GNU Parallel will be presented at:
+  - LUGA, Augsburg, 2011-03-26, http://www.luga.de/Aktionen/LIT-2011/Programm
+  - OSAA.dk, Aarhus, 2011-04-12
 
 * Video of presentation from FSCONS 2010-11-07. The presenter was
   _really_ hoarse that day (Something to do with loads of alcohol the
