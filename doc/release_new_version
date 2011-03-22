@@ -65,6 +65,7 @@ echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org
 
 == Download and test ==
 
+YYYYMMDD=`yyyymmdd`
 pushd /tmp
 rm parallel-$YYYYMMDD.tar.bz2
 wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
@@ -78,12 +79,17 @@ pushd
 == Update OpenSUSE build system ==
 
 https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
-cd ~/privat/parallel/packager/obs ; make
+cd ~/privat/parallel/packager/obs 
+em home:tange/parallel/parallel.spec
+find home:tange/parallel/* -type f | grep -v parallel.spec | parallel osc rm {}';' rm {}
+make
+Ret versionsnummeret fra 20100906-2 til YYYYMMDD-1
 
 == Update Savannah ==
 
 Content from release mail:
 
+cat doc/release_new_version | klipper-stdin
 https://savannah.gnu.org/news/submit.php?group=parallel
 https://savannah.gnu.org/news/approve.php?group=parallel
 
@@ -106,6 +112,11 @@ pod2html src/sem.pod > ../parallel-web/parallel/sem.html
 cd ../parallel-web/parallel
 cvs up
 cvs ci
+
+== Commit released version ==
+
+git diff
+git commit -a
 
 == Update Freshmeat ==
 
@@ -141,10 +152,10 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 2011XXXX released
+Subject: GNU Parallel 20110322 (the Japan release) released
 
-GNU Parallel 2011XXXX has been released. It is available for download
-at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20110322 (the Japan release) has been released. It is
+available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
@@ -156,6 +167,9 @@ New in this release:
   --tollef is set.
 
 * Site wide config file: /etc/parallel/config
+
+  This should solve the issue with some packagers renaming GNU
+  Parallel to gparallel to avoid the naming conflict.
 
   By putting --tollef in the site wide config file you can deinstall
   Tollef's parallel and install GNU Parallel instead without any

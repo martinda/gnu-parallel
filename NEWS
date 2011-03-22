@@ -1,3 +1,62 @@
+20110322
+
+* --tollef to be switch compatible with Tollef's parallel. This will
+  cause -l to mean --load, and the argument separator will be --
+  instead of :::
+
+* --gnu will force GNU Parallel to behave like GNU Parallel even if
+  --tollef is set.
+
+* Site wide config file: /etc/parallel/config
+
+  This should solve the issue with some packagers renaming GNU
+  Parallel to gparallel to avoid the naming conflict.
+
+  By putting --tollef in the site wide config file you can deinstall
+  Tollef's parallel and install GNU Parallel instead without any
+  change for users or scripts. This is useful for packagers that
+  currently rename GNU Parallel or simply do not distribute GNU
+  Parallel because the command name conflicts with Tollef's parallel.
+
+* -L 0 -n 0, and -N 0 implemented. They will read one argument,
+  but insert 0 arguments on the command line. Useful if you just want
+  to run the same command with the same arguments a number of times.
+
+* GNU Parallel is now in Fink. Thanks to Jesse Alama.
+  http://pdb.finkproject.org/pdb/package.php/parallel
+
+* Opscode Cookbook for Chef. Thanks to Joshua Timberman.
+  https://github.com/opscode/cookbooks/tree/master/gnu_parallel
+
+* Man page examples translated into Japanese. Thanks to Koshigoe.
+  http://w.koshigoe.jp/study/?%5Bsystem%5D+GNU+parallel+%BB%C8%CD%D1%CE%E3#l13
+
+* GNU Parallel will be presented at:
+  - LUGA, Augsburg, 2011-03-26, http://www.luga.de/Aktionen/LIT-2011/Programm
+  - OSAA.dk, Aarhus, 2011-04-12
+
+* Video of presentation from FSCONS 2010-11-07. The presenter was
+  _really_ hoarse that day (Something to do with loads of alcohol the
+  night before). http://vimeo.com/20838834
+
+* Review with examples in German. Thanks to M. Nieberg.
+  http://kenntwas.de/2011/linux/gnu-parallel/
+
+* A review of the --pipe option in German. Thanks to Mathias Huber.
+  http://www.linux-magazin.de/NEWS/GNU-Parallel-20110205-stueckelt-Daten
+
+* A small example of grepping maillogs. Thanks to François Maillet.
+  http://www.francoismaillet.com/blog/?p=399
+
+* Using GNU Parallel instead of xargs. Thanks to James Cuff.
+  http://blog.jcuff.net/2011/02/on-train-ride-in.html
+
+* Using GNU Parallel from 0install (German). Thanks to AdaMin.
+  http://forum.ubuntuusers.de/topic/gnu-parallel-mit-zero-install-kurzinfo-kein-wi/
+
+* Bug fixes and man page updates.
+
+
 20110205
 
 * --pipe splits piped data into blocks. Each block is piped to a
