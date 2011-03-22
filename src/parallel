@@ -81,7 +81,6 @@ if($::opt_halt_on_error) {
 sub spreadstdin {
     # read a record
     # print it to the first jobs that is ready
-    my $sleep = 0.1;
     my $record;
     my $buf = "";
     my ($recstart,$recend,$recerror);
@@ -173,7 +172,7 @@ sub nindex {
 
 sub flush_and_close_pipes {
     my $flush_done;
-    my $sleep = 0.1;
+    my $sleep = 0.05;
     do {
 	$flush_done = 1;
 	# Make sure everything is written to the jobs
@@ -181,8 +180,8 @@ sub flush_and_close_pipes {
 	for my $job (values %Global::running) {
 	    if($job->remaining()) {
 		if($job->complete_write()) {
-		    # Some data was written
-		    $sleep = 0.1;
+		    # Some data was written - reset sleep timer
+		    $sleep = 0.05;
 		}
 		$flush_done = 0;
 	    }
@@ -210,7 +209,8 @@ sub write_record_to_pipe {
 	$$record_ref =~ s/^$recstart//os;
 	$$record_ref =~ s/$recend$//os;
     }
-    my $sleep = 0.1; # 0.1 ms
+    # Keep the pipes hot, but if nothing happens sleep should back off
+    my $sleep = 0.00001; # 0.00001 ms - better performance on highend
   write_record: while(1) {
 	  # Sorting according to sequence is necessary for -k to work
 	  do_not_reap(); # If Global::running is changed the for loop has a race condition
@@ -219,8 +219,8 @@ sub write_record_to_pipe {
 	      if($job->remaining()) {
 		  # Part of the job's last record has not finished being written
 		  if($job->complete_write()) {
-		      # Something got written
-		      $sleep = 0.1;
+		      # Something got written - reset sleep timer
+		      $sleep = 0.00001;
 		  }
 	      } else {
 		  if($job->datawritten() > 0) {
@@ -232,14 +232,17 @@ sub write_record_to_pipe {
 		      close $fh;
 		  } else {
 		      $job->write($record_ref);
-		      $sleep = 0.1;
+		      # Something got written - reset sleep timer
+		      $sleep = 0.00001;
 		      last write_record;
 		  }
 	      }
 	  }
-	  reap_if_needed();
-	  usleep($sleep);
-	  $sleep *= 1.1; # exponential back off
+	  # Force reaping as sigchild is sometimes forgotten;
+	  if(not reaper()) {
+	      usleep($sleep);
+	      $sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep); # exponential back off
+	  }
       }
     reap_if_needed();
     return;
@@ -381,7 +384,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110322;
+    $Global::version = 20110323;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -852,8 +855,10 @@ sub hostname {
 }
 
 sub usleep {
-    my $ms = shift;
-    select(undef, undef, undef, $ms/1000);
+    # Sleep this many milliseconds.
+    my $secs = shift;
+    ::debug("Sleeping ",$secs," millisecs\n");
+    select(undef, undef, undef, $secs/1000);
 }
 
 sub multiply_binary_prefix {
@@ -906,34 +911,39 @@ sub drain_job_queue {
         reap_if_needed();
     }
     my $last_header="";
+    my $sleep = 0.2;
     do {
         while($Global::total_running > 0) {
             debug("jobs running: ",$Global::total_running," ",scalar keys %Global::running, " Memory usage:".my_memory_usage()."\n");
-            sleep 1;
+	    $sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
+	    usleep($sleep);
+	    do_not_reap();
 	    if($::opt_pipe) {
 		# When using --pipe sometimes file handles are not closed properly
-		do_not_reap();
 		for my $job (values %Global::running) {
 		    my $fh = $job->stdin();
 		    close $fh;
 		}
-		reap_if_needed();
 	    }
-            reaper(); # Some systems fail to catch the SIGCHLD
             if($::opt_progress) {
                 my %progress = progress();
-                do_not_reap();
                 if($last_header ne $progress{'header'}) {
                     print $Global::original_stderr "\n",$progress{'header'},"\n";
                     $last_header = $progress{'header'};
                 }
                 print $Global::original_stderr "\r",$progress{'status'};
-                reap_if_needed();
             }
+            # Sometimes SIGCHLD is not registered, so force reaper
+	    if(reaper()) {
+		# Child finished this time around: Reset sleep time
+		$sleep = 0.2;
+	    }
+	    reap_if_needed();
         }
         if(not $Global::JobQueue->empty()) {
             start_more_jobs(); # These jobs may not be started because of loadavg
-            sleep 1;
+	    $sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
+            usleep($sleep);
         }
     } while ($Global::total_running > 0
 	     or
@@ -1420,8 +1430,10 @@ sub reaper {
     do_not_reap();
     $Private::reaperlevel++;
     my $stiff;
+    my $children_reaped = 0;
     debug("Reaper called $Private::reaperlevel\n");
     while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
+	$children_reaped++;
         if($Global::sshmaster{$stiff}) {
             # This is one of the ssh -M: ignore
             next;
@@ -1488,6 +1500,7 @@ sub reaper {
     reap_if_needed();
     debug("Reaper exit $Private::reaperlevel\n");
     $Private::reaperlevel--;
+    return $children_reaped;
 }
 
 sub __USAGE__ {}
@@ -3989,7 +4002,7 @@ sub new {
 
 sub acquire {
     my $self = shift;
-    my $exponential_backoff = 1;
+    my $sleep = 1; # 1 ms
     while(1) {
 	$self->atomic_link_if_count_less_than() and last;
 	::debug("Remove dead locks");
@@ -4008,9 +4021,10 @@ sub acquire {
 	}
 	# try again
 	$self->atomic_link_if_count_less_than() and last;
-	::usleep(rand()*$exponential_backoff);
 	# Retry slower and slower up to 1 second
-	$exponential_backoff = ($exponential_backoff < 1000) ? ($exponential_backoff * 1.1) : ($exponential_backoff);
+	$sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
+	# Random to avoid every sleeping job waking up at the same time
+	::usleep(rand()*$sleep);
 	# TODO if timeout: last
     }
     ::debug("acquired $self->{'pid'}\n");
@@ -4064,13 +4078,16 @@ sub nlinks {
 
 sub lock {
     my $self = shift;
+    my $sleep = 100; # 100 ms
     open $self->{'lockfh'}, ">", $self->{'lockfile'}
 	or ::die_bug("Can't open semaphore file $self->{'lockfile'}: $!");
     chmod 0666, $self->{'lockfile'}; # assuming you want it a+rw
     while(not flock $self->{'lockfh'}, LOCK_EX()|LOCK_NB()) {
 	::debug("Cannot lock $self->{'lockfile'}");
 	# TODO if timeout: last
-	sleep 1;
+	$sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
+	# Random to avoid every sleeping job waking up at the same time
+	::usleep(rand()*$sleep);
     }
     ::debug("locked $self->{'lockfile'}");
 }

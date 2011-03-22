@@ -538,7 +538,7 @@ Implies B<-X> unless B<-m> is set.
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
-is a valid setting.
+for one per CPU is a valid setting.
 
 The load average is only sampled every 10 seconds to avoid stressing
 small computers.
