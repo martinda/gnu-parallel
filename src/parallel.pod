@@ -1209,15 +1209,14 @@ file:
 
 B<convert -geometry 120 foo.jpg thumb_foo.jpg>
 
-If the system has more than 1 CPU core it can be run with
-number-of-cpu-cores jobs in parallel (B<-j> +0). This will do that for
-all jpg files in a directory:
+This will run with number-of-cpu-cores jobs in parallel for all jpg
+files in a directory:
 
-B<ls *.jpg | parallel -j +0 convert -geometry 120 {} thumb_{}>
+B<ls *.jpg | parallel convert -geometry 120 {} thumb_{}>
 
 To do it recursively use B<find>:
 
-B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg>
+B<find . -name '*.jpg' | parallel convert -geometry 120 {} {}_thumb.jpg>
 
 Notice how the argument has to start with B<{}> as B<{}> will include path
 (e.g. running B<convert -geometry 120 ./foo/bar.jpg
@@ -1227,7 +1226,7 @@ generate files like ./foo/bar.jpg_thumb.jpg.
 Use B<{.}> to avoid the extra .jpg in the file name. This command will
 make files like ./foo/bar_thumb.jpg:
 
-B<find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {.}_thumb.jpg>
+B<find . -name '*.jpg' | parallel convert -geometry 120 {} {.}_thumb.jpg>
 
 
 =head1 EXAMPLE: Substitution and redirection
@@ -1267,6 +1266,10 @@ line number and the URL.
 
 B<cat urlfile | parallel "wget {} 2>>B</dev/null || grep -n {} urlfile">
 
+Create a mirror directory with the same filenames except all files and
+symlinks are empty files.
+
+B<cp -rs /the/source/dir mirror_dir; find mirror_dir -type l | parallel -m rm {} '&&' touch {}>
 
 =head1 EXAMPLE: Removing file extension when processing files
 
@@ -2228,17 +2231,17 @@ composed commands and redirection require using B<bash -c>.
 
 B<ls | parallel "wc {} >> B<{}.wc">
 
-becomes
+becomes (assuming you have 8 cores)
 
-B<ls | xargs -d "\n" -P9 -I {} bash -c "wc {} >>B< {}.wc">
+B<ls | xargs -d "\n" -P8 -I {} bash -c "wc {} >>B< {}.wc">
 
 and
 
 B<ls | parallel "echo {}; ls {}|wc">
 
-becomes
+becomes (assuming you have 8 cores)
 
-B<ls | xargs -d "\n" -P9 -I {} bash -c "echo {}; ls {}|wc">
+B<ls | xargs -d "\n" -P8 -I {} bash -c "echo {}; ls {}|wc">
 
 
 =head2 DIFFERENCES BETWEEN find -exec AND GNU Parallel
