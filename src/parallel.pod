@@ -4,6 +4,7 @@
 
 parallel - build and execute shell command lines from standard input in parallel
 
+
 =head1 SYNOPSIS
 
 B<parallel> [options] [I<command> [arguments]] < list_of_arguments
@@ -15,6 +16,7 @@ B<parallel> [options] [I<command> [arguments]] B<::::> argfile(s)
 B<parallel> --semaphore [options] I<command>
 
 B<#!/usr/bin/parallel> --shebang [options] [I<command> [arguments]]
+
 
 =head1 DESCRIPTION
 
@@ -49,6 +51,7 @@ You can also watch the intro video for a quick introduction:
 http://www.youtube.com/watch?v=OpaiGYxkSuQ or at
 http://tinyogg.com/watch/TORaR/ http://tinyogg.com/watch/hfxKj/ and
 http://tinyogg.com/watch/YQuXd/
+
 
 =head1 OPTIONS
 
@@ -421,7 +424,8 @@ use B<-I> instead.
 Logfile for executed jobs. Saved a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
 sshlogin, start time as seconds since epoch, run time in seconds,
-bytes in files transfered, bytes in files returned, command run.
+bytes in files transfered, bytes in files returned, exit status,
+and command run.
 
 To convert the times into ISO-8601 strict do:
 
@@ -1133,6 +1137,7 @@ For this to work B<--shebang> or B<-Y> must be set as the first option.
 
 =back
 
+
 =head1 EXAMPLE: Working as xargs -n1. Argument appending
 
 GNU B<parallel> can work similar to B<xargs -n1>.
@@ -1244,6 +1249,7 @@ Other special shell charaters (such as * ; $ > < | >> <<) also needs
 to be put in quotes, as they may otherwise be interpreted by the shell
 and not given to GNU B<parallel>.
 
+
 =head1 EXAMPLE: Composed commands
 
 A job can consist of several commands. This will print the number of
@@ -1271,6 +1277,7 @@ symlinks are empty files.
 
 B<cp -rs /the/source/dir mirror_dir; find mirror_dir -type l | parallel -m rm {} '&&' touch {}>
 
+
 =head1 EXAMPLE: Removing file extension when processing files
 
 When processing files removing the file extension using B<{.}> is
@@ -1293,6 +1300,7 @@ Put all converted in the same directory:
 
 B<find sounddir -type f -name '*.wav' | parallel lame {} -o mydir/{/.}.mp3>
 
+
 =head1 EXAMPLE: Removing two file extensions when processing files and
 calling GNU Parallel from itself
 
@@ -1301,6 +1309,7 @@ the corresponding dir (e.g foo.tar.gz will be extracted in the dir
 foo) you can do:
 
 B<ls *.tar.gz| parallel -U {tar} 'echo {tar}|parallel "mkdir -p {.} ; tar -C {.} -xf {.}.tar.gz"'>
+
 
 =head1 EXAMPLE: Download 10 images for each of the past 30 days
 
@@ -1317,6 +1326,19 @@ Based on this we can let GNU B<parallel> generate 10 B<wget>s per day:
 
 I<the above> B<| parallel -I {o} seq -w 10 "|" parallel wget
 http://www.example.com/path/to/{o}_{}.jpg>
+
+
+=head1 EXAMPLE: Process files from a tar file while unpacking
+
+If the files to be processed are in a tar file then unpacking one file
+and processing it immediately may be faster than first unpacking all
+files.
+
+B<tar xvf foo.tgz | perl -ne 'print $l;$l=$_;END{print $l}' |
+parallel echo>
+
+The Perl one-liner is needed to avoid race condition.
+
 
 =head1 EXAMPLE: Rewriting a for-loop and a while-read-loop
 
@@ -1420,6 +1442,7 @@ combined in the correct order.
 
 B<seq 0 99 | parallel -k curl -r \
     {}0000000-{}9999999 http://example.com/the/big/file> > B<file>
+
 
 =head1 EXAMPLE: Parallel grep
 
@@ -1554,12 +1577,14 @@ the special short hand I<-S ..> can be used:
   find logs/ -name '*.gz' | parallel -S .. \
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 
+
 =head1 EXAMPLE: Distributing work to local and remote computers
 
 Convert *.mp3 to *.ogg running one process per CPU core on local computer and server2:
 
   parallel --trc {.}.ogg -S server2,: \
   'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg' ::: *.mp3
+
 
 =head1 EXAMPLE: Use multiple inputs in one command
 
@@ -1750,6 +1775,7 @@ printed when job 11 is started.
 
 =back
 
+
 =head1 EXAMPLE: GNU Parallel as dir processor
 
 If you have a dir in which users drop files that needs to be processed
@@ -1770,6 +1796,10 @@ computers:
 
 B<inotifywait -q -m -r -e CLOSE_WRITE --format %w%f my_dir | parallel -S ..
 -u echo>
+
+If the files to be processed are in a tar file then unpacking one file
+and processing it immediately may be faster than first unpacking all
+files. Set up the dir processor as above and unpack into the dir.
 
 
 =head1 QUOTING
@@ -1973,6 +2003,7 @@ must be one argument.
 
 =back
 
+
 =head1 DEFAULT PROFILE (CONFIG FILE)
 
 The file ~/.parallel/config (formerly known as .parallelrc) will be
@@ -1983,6 +2014,7 @@ easier to simply put each option on its own line.
 Options on the command line takes precedence over the environment
 variable $PARALLEL which takes precedence over the file
 ~/.parallel/config.
+
 
 =head1 PROFILE FILES
 
@@ -2281,8 +2313,8 @@ The argument replace string ($ITEM) cannot be changed. Arguments must
 be quoted - thus arguments containing special characters (space '"&!*)
 may cause problems. More than one argument is not supported. File
 names containing newlines are not processed correctly. When reading
-input from a file null cannot be used terminator. B<ppss> needs to
-read the whole input file before starting any jobs.
+input from a file null cannot be used as a terminator. B<ppss> needs
+to read the whole input file before starting any jobs.
 
 Output and status information is stored in ppss_dir and thus requires
 cleanup when completed. If the dir is not removed before running
@@ -2796,16 +2828,18 @@ license terms of this work.
 
 A copy of the full license is included in the file as cc-by-sa.txt.
 
+
 =head1 DEPENDENCIES
 
 GNU B<parallel> uses Perl, and the Perl modules Getopt::Long,
 IPC::Open3, Symbol, IO::File, POSIX, and File::Temp. For remote usage
-it also uses Rsync with Ssh.
+it also uses rsync with ssh.
 
 
 =head1 SEE ALSO
 
-B<find>(1), B<xargs>(1), B<make>(1), B<pexec>(1), B<ppss>(1),
-B<xjobs>(1), B<prll>(1), B<dxargs>(1), B<mdm>(1)
+B<ssh>(1), B<rsync>(1), B<find>(1), B<xargs>(1), B<make>(1),
+B<pexec>(1), B<ppss>(1), B<xjobs>(1), B<prll>(1), B<dxargs>(1),
+B<mdm>(1),
 
 =cut

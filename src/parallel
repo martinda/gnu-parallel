@@ -565,7 +565,7 @@ sub parse_options {
         } else {
             print $Global::joblog
                 join("\t", "Seq", "Host", "Starttime", "Runtime",
-                     "Send", "Receive", "Command"
+                     "Send", "Receive", "Status", "Command"
                 ). "\n";
         }
     }
@@ -3037,8 +3037,10 @@ sub print {
 	}
 	printf $Global::joblog
 	    join("\t", $self->seq(), $self->sshlogin()->string(),
-		 $self->starttime(), $self->runtime(), $self->transfersize(), $self->returnsize(), $cmd
-	    ). "\n";
+		 $self->starttime(), $self->runtime(),
+		 $self->transfersize(), $self->returnsize(),
+		 $self->exitstatus(), $cmd
+		 ). "\n";
 	flush $Global::joblog;
     }
 
