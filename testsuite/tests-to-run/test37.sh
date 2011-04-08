@@ -31,6 +31,7 @@ PARALLEL='-k --jobs 1 -S '$SERVER1' perl -pe "\\$a=1; print\\$a"' parallel -v ::
 
 echo '### Test ugly quoting from profile file'
 cat <<EOF >~/.parallel/test_profile
+# testprofile
 -k --jobs 1 perl -pe '\$a=1; print \$a'
 EOF
 parallel -v -J test_profile ::: <(echo a) <(echo b)
@@ -58,6 +59,7 @@ PARALLEL='-k --jobs 1 -S ssh\ '$SERVER1'\ ssh\ parallel@'$SERVER2' perl -pe "\\$
 
 echo '### Test quoting of space in long arguments (--sshlogin) from profile file'
 cat <<EOF >~/.parallel/test_profile
+# testprofile
 -k --jobs 1 --sshlogin ssh\ $SERVER1\ ssh\ parallel@$SERVER2 perl -pe '\$a=1; print \$a'
 EOF
 parallel -v -J test_profile ::: /bin/gunzip

@@ -49,6 +49,10 @@ if(@ARGV) {
 
 $Global::JobQueue = JobQueue->new(
     $command,\@fhlist,$Global::Xargs,$number_of_args,\@Global::ret_files);
+if($::opt_eta) {
+    # Count the number of jobs before starting any
+    $Global::JobQueue->total_jobs();
+}
 for my $sshlogin (values %Global::host) {
     $sshlogin->max_jobs_running();
 }
@@ -1000,17 +1004,17 @@ sub progress {
         my $completed = 0;
         for(@workers) { $completed += $Global::host{$_}->jobs_completed() }
         if($completed) {
-	    my $jobs_left = ($Global::JobQueue->total_jobs() - $completed);
-            my $avgtime = (time-$Private::first_completed)/$completed;
+	    my $total = $Global::JobQueue->total_jobs();
+	    my $left = $total - $completed;
+	    my $pctcomplete = $completed / $total;
+	    my $timepassed = (time - $Private::first_completed);
+            my $avgtime = $timepassed / $completed;
 	    $Private::smoothed_avg_time ||= $avgtime;
-	    $Private::smoothed_avg_time = 0.90 * $Private::smoothed_avg_time + 0.10 * $avgtime;
-	    my $this_eta = $jobs_left * $Private::smoothed_avg_time;
-            #my $this_eta = ($Global::JobQueue->total_jobs() - $completed) * $avgtime;
-            #$Private::eta ||= $this_eta;
             # Smooth the eta so it does not jump wildly
-            #$Private::eta = 0.95 * $Private::eta + 0.05 * $this_eta;
-            #$eta = sprintf("ETA: %ds $avgtime", $Private::eta);
-            $eta = sprintf("ETA: %ds %dleft %.2favg  ", $this_eta, $jobs_left, $avgtime);
+	    $Private::smoothed_avg_time = (1 - $pctcomplete) *
+		$Private::smoothed_avg_time + $pctcomplete * $avgtime;
+	    my $this_eta = $left * $Private::smoothed_avg_time;
+            $eta = sprintf("ETA: %ds %dleft %.2favg  ", $this_eta, $left, $avgtime);
         }
     }
 
@@ -1282,7 +1286,10 @@ sub read_sshloginfile {
     if($file eq "..") {
         $file = $ENV{'HOME'}."/.parallel/sshloginfile";
     }
-    open(IN, $file) || ::die_bug("Cannot open $file");
+    if(not open(IN, $file)) {
+	print $Global::original_stderr "Cannot open $file\n";
+	exit(255);
+    }
     while(<IN>) {
         chomp;
         /^\s*#/ and next;
@@ -2380,7 +2387,6 @@ sub new {
         'unget' => \@unget,
         'commandlinequeue' => $commandlinequeue,
         'total_jobs' => undef,
-#        'next_seq' => 1,
     }, ref($class) || $class;
 }
 
