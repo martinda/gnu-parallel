@@ -6,22 +6,22 @@ seq 1 1000000 >/tmp/parallel-seq
 shuf --random-source=/tmp/parallel-seq /tmp/parallel-seq >/tmp/blocktest
 
 echo '### Test -N with multiple jobslots and multiple args'
-seq 1 1 | parallel -j2 -k -N 3 --pipe 'cat;echo a;sleep 0.1'
-seq 1 2 | parallel -j2 -k -N 3 --pipe 'cat;echo bb;sleep 0.1'
-seq 1 3 | parallel -j2 -k -N 3 --pipe 'cat;echo ccc;sleep 0.1'
-seq 1 4 | parallel -j2 -k -N 3 --pipe 'cat;echo dddd;sleep 0.1'
-seq 1 5 | parallel -j2 -k -N 3 --pipe 'cat;echo eeeee;sleep 0.1'
-seq 1 6 | parallel -j2 -k -N 3 --pipe 'cat;echo ffffff;sleep 0.1'
-seq 1 7 | parallel -j2 -k -N 3 --pipe 'cat;echo ggggggg;sleep 0.1'
-seq 1 8 | parallel -j2 -k -N 3 --pipe 'cat;echo hhhhhhhh;sleep 0.1'
-seq 1 9 | parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii;sleep 0.1'
-seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj;sleep 0.1'
+seq 1 1 | parallel -j2 -k -N 3 --pipe 'cat;echo a' | uniq
+seq 1 2 | parallel -j2 -k -N 3 --pipe 'cat;echo bb' | uniq
+seq 1 3 | parallel -j2 -k -N 3 --pipe 'cat;echo ccc' | uniq
+seq 1 4 | parallel -j2 -k -N 3 --pipe 'cat;echo dddd' | uniq
+seq 1 5 | parallel -j2 -k -N 3 --pipe 'cat;echo eeeee' | uniq
+seq 1 6 | parallel -j2 -k -N 3 --pipe 'cat;echo ffffff' | uniq
+seq 1 7 | parallel -j2 -k -N 3 --pipe 'cat;echo ggggggg' | uniq
+seq 1 8 | parallel -j2 -k -N 3 --pipe 'cat;echo hhhhhhhh' | uniq
+seq 1 9 | parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii' | uniq
+seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj' | uniq
 
 echo '### Test -l -N -L and -n with multiple jobslots and multiple args'
-seq 1 5 | parallel -kj2 -l 2 --pipe "cat; echo a; sleep 0.1"
-seq 1 5 | parallel -kj2 -N 2 --pipe "cat; echo b; sleep 0.1"
-seq 1 5 | parallel -kj2 -L 2 --pipe "cat; echo c; sleep 0.1"
-seq 1 5 | parallel -kj2 -n 2 --pipe "cat; echo d; sleep 0.1"
+seq 1 5 | parallel -kj2 -l 2 --pipe "cat; echo a" | uniq
+seq 1 5 | parallel -kj2 -N 2 --pipe "cat; echo b" | uniq
+seq 1 5 | parallel -kj2 -L 2 --pipe "cat; echo c" | uniq
+seq 1 5 | parallel -kj2 -n 2 --pipe "cat; echo d" | uniq
 
 echo '### Test output is the same for different block size'
 echo -n 01a02a0a0a12a34a45a6a |

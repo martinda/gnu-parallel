@@ -106,6 +106,13 @@ B<{/.}> can be used the same places as B<{}>. The replacement string
 B<{/.}> can be changed with B<--basenameextensionreplace>.
 
 
+=item B<{#}> (alpha testing)
+
+Sequence number of the job to run. The same as $PARALLEL_SEQ.
+
+The replacement string B<{#}> can be changed with B<--seqreplace>.
+
+
 =item B<{>I<n>B<}>
 
 Argument from argument file I<n> or the I<n>'th argument. See B<-a>
@@ -230,7 +237,8 @@ I<file> will be transferred the same way as B<--transfer>.
 
 =item B<--bnr> I<replace-str>
 
-Use the replacement string I<replace-str> instead of B<{/}> for basename of input line.
+Use the replacement string I<replace-str> instead of B<{/}> for
+basename of input line.
 
 
 =item B<--basenameextensionreplace> I<replace-str>
@@ -865,6 +873,12 @@ If the semaphore is not released within secs seconds, take it anyway.
 Implies B<--semaphore>.
 
 
+=item B<--seqreplace> I<replace-str>
+
+Use the replacement string I<replace-str> instead of B<{#}> for
+job sequence number.
+
+
 =item B<--skip-first-line>
 
 Do not use the first line of input (used by GNU B<parallel> itself
@@ -1452,6 +1466,14 @@ GNU B<parallel> can often speed this up.
 B<find . -type f | parallel -k -j150% -n 1000 -m grep -H -n STRING {}>
 
 This will run 1.5 job per core, and give 1000 arguments to B<grep>.
+
+To grep a big file in parallel use B<--pipe>:
+
+B<cat bigfile | parallel --pipe grep foo>
+
+Depending on your disks and CPUs it may be faster to read larger blocks:
+
+B<cat bigfile | parallel --pipe --block 10M grep foo>
 
 
 =head1 EXAMPLE: Using remote computers

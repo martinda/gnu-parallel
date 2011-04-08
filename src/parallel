@@ -306,6 +306,7 @@ sub get_options_from_array {
 	 "extensionreplace|U=s" => \$::opt_U,
 	 "basenamereplace|bnr=s" => \$::opt_basenamereplace,
 	 "basenameextensionreplace=s" => \$::opt_basenameextensionreplace,
+	 "seqreplace=s" => \$::opt_seqreplace,
 	 "jobs|j=s" => \$::opt_P,
 	 "load=f" => \$::opt_load,
 	 "max-line-length-allowed" => \$::opt_max_line_length_allowed,
@@ -361,7 +362,7 @@ sub get_options_from_array {
 	 "interactive|p" => \$::opt_p,
 	 "verbose|t" => \$::opt_verbose,
 	 "version|V" => \$::opt_version,
-	 "show-limits" => \$::opt_show_limits,
+	 "show-limits|showlimits" => \$::opt_show_limits,
 	 "exit|x" => \$::opt_x,
 	 # Semaphore
 	 "semaphore" => \$::opt_semaphore,
@@ -384,7 +385,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110324;
+    $Global::version = 20110408;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -396,6 +397,7 @@ sub parse_options {
     $Global::replace{'{.}'} = '{.}';
     $Global::replace{'{/}'} = '{/}';
     $Global::replace{'{/.}'} = '{/.}';
+    $Global::replace{'{#}'} = '{#}';
     $/="\n";
     $Global::ignore_empty = 0;
     $Global::interactive = 0;
@@ -432,6 +434,9 @@ sub parse_options {
     if(defined $::opt_basenamereplace) { $Global::replace{'{/}'} = $::opt_basenamereplace; }
     if(defined $::opt_basenameextensionreplace) {
         $Global::replace{'{/.}'} = $::opt_basenameextensionreplace;
+    }
+    if(defined $::opt_seqreplace) {
+        $Global::replace{'{#}'} = $::opt_seqreplace;
     }
     if(defined $::opt_E) { $Global::end_of_file_string = $::opt_E; }
     if(defined $::opt_n) { $Global::max_number_of_args = $::opt_n; }
@@ -556,7 +561,7 @@ sub parse_options {
     }
 
     if(not defined $::opt_P) {
-        $::opt_P = "+0";
+        $::opt_P = "100%";
     }
     if($::opt_joblog) {
         if(not open($Global::joblog,">$::opt_joblog")) {
@@ -565,7 +570,7 @@ sub parse_options {
         } else {
             print $Global::joblog
                 join("\t", "Seq", "Host", "Starttime", "Runtime",
-                     "Send", "Receive", "Status", "Command"
+                     "Send", "Receive", "Exitval", "Command"
                 ). "\n";
         }
     }
@@ -2375,7 +2380,7 @@ sub new {
         'unget' => \@unget,
         'commandlinequeue' => $commandlinequeue,
         'total_jobs' => undef,
-        'next_seq' => 1,
+#        'next_seq' => 1,
     }, ref($class) || $class;
 }
 
@@ -2389,8 +2394,6 @@ sub get {
         my $commandline = $self->{'commandlinequeue'}->get();
         if(defined $commandline) {
             my $job = Job->new($commandline);
-            $job->set_seq($self->{'next_seq'});
-            $self->{'next_seq'}++;
             return $job;
         } else {
             return undef;
@@ -2427,7 +2430,7 @@ sub total_jobs {
 sub next_seq {
     my $self = shift;
 
-    return $self->{'next_seq'};
+    return $self->{'commandlinequeue'}->seq();
 }
 
 sub quote_args {
@@ -2444,7 +2447,6 @@ sub new {
     return bless {
         'commandline' => $commandline, # The commandline with no args
         'workdir' => undef, # --workdir
-        'seq' => undef, # $PARALLEL_SEQ
         'stdin' => undef, # filehandle for stdin (used for --spreadstdin)
         'stdout' => undef, # filehandle for stdout (used for --group)
         'stdoutfilename' => undef, # filename for writing stdout to (used for --files)
@@ -2465,24 +2467,18 @@ sub new {
 
 sub replaced {
     my $self = shift;
+    $self->{'commandline'} or Carp::croak("cmdline empty");
     return $self->{'commandline'}->replaced();
-}
-
-sub set_seq {
-    my $self = shift;
-    my $seq = shift;
-    $self->{'seq'} = $seq;
 }
 
 sub seq {
     my $self = shift;
-    return $self->{'seq'};
+    return $self->{'commandline'}->seq();
 }
 
 sub set_stdout {
     my $self = shift;
-    my $stdout = shift;
-    $self->{'stdout'} = $stdout;
+    $self->{'stdout'} = shift;
 }
 
 sub stdout {
@@ -2492,8 +2488,7 @@ sub stdout {
 
 sub set_stdoutfilename {
     my $self = shift;
-    my $stdoutfilename = shift;
-    $self->{'stdoutfilename'} = $stdoutfilename;
+    $self->{'stdoutfilename'} = shift;
 }
 
 sub stdoutfilename {
@@ -2508,8 +2503,7 @@ sub stderr {
 
 sub set_stderr {
     my $self = shift;
-    my $stderr = shift;
-    $self->{'stderr'} = $stderr;
+    $self->{'stderr'} = shift;
 }
 
 sub stdin {
@@ -2573,8 +2567,7 @@ sub pid {
 
 sub set_pid {
     my $self = shift;
-    my $pid = shift;
-    $self->{'pid'} = $pid;
+    $self->{'pid'} = shift;
 }
 
 sub starttime {
@@ -2876,7 +2869,7 @@ sub workdir {
 		$workdir =~ s:/+$::; # Remove ending / if any
 		$workdir =~ s:^\./::g; # Remove starting ./ if any
 	    } else {
-		$workdir = ".parallel/tmp/".::hostname()."-".$$."-".$self->{'seq'};
+		$workdir = ".parallel/tmp/".::hostname()."-".$$."-".$self->seq();
 	    }
 	} else {
 	    $workdir = ".";
@@ -3098,6 +3091,7 @@ package CommandLine;
 
 sub new {
     my $class = shift;
+    my $seq = shift;
     my $command = ::undef_as_empty(shift);
     my $arg_queue = shift;
     my $context_replace = shift;
@@ -3135,6 +3129,7 @@ sub new {
 
     return bless {
 	'command' => $command,
+	'seq' => $seq,
 	'len' => $len,
 	'arg_list' => [],
 	'arg_queue' => $arg_queue,
@@ -3146,6 +3141,11 @@ sub new {
 	'multi_replace' => \%multi_replace,
 	'replaced' => undef,
     }, ref($class) || $class;
+}
+
+sub seq {
+    my $self = shift;
+    return $self->{'seq'};
 }
 
 sub populate {
@@ -3372,10 +3372,10 @@ sub number_of_replacements {
     }
     for my $k (keys %count) {
 	if(defined $Global::replace{$k}) {
-	    # {} {/} {.} {/.}
+	    # {} {/} {.} {/.} {#}
 	    $context -= (length $Global::replace{$k}) * $count{$k};
 	} else {
-	    # {#}
+	    # {n}
 	    $context -= (length $k) * $count{$k};
 	}
     }
@@ -3430,7 +3430,7 @@ sub replace_placeholders {
 		# we have a matching argument for {n}
 		$replace_single{$used} = $args[$positional-1]->replace($replacementfunction);
 	    }
-	} elsif($used =~ /^{\D*}$/) {
+	} elsif($used =~ /^(\{\}|\{\/\}|\{\.\}|\{\/\.\})$/) {
 	    # Add to the multireplacement
 	    my $replacementfunction = $used; # {} {/} {.} or {/.}
 	    CORE::push @used_multi, $replacementfunction;
@@ -3444,6 +3444,8 @@ sub replace_placeholders {
 			   map { $args[$_]->replace($replacementfunction) }
 			   0 .. $#args);
 	    }
+	} elsif($used eq '{#}') {
+	    $replace_single{$Global::replace{$used}} = $self->seq();
 	} else {
 	    ::die_bug('replace_placeholders20110309');
 	}
@@ -3540,7 +3542,18 @@ sub new {
 	'max_number_of_args' => $max_number_of_args,
 	'size' => undef,
 	'return_files' => $return_files,
+	'seq' => 1,
     }, ref($class) || $class;
+}
+
+sub seq {
+    my $self = shift;
+    return $self->{'seq'};
+}
+
+sub set_seq {
+    my $self = shift;
+    $self->{'seq'} = shift;
 }
 
 sub quote_args {
@@ -3556,13 +3569,15 @@ sub get {
 	return ($cmd_line);
     } else {
 	my $cmd_line;
-	$cmd_line = CommandLine->new($self->{'command'},
+	$cmd_line = CommandLine->new($self->seq(),
+				     $self->{'command'},
 				     $self->{'arg_queue'},
 				     $self->{'context_replace'},
 				     $self->{'max_number_of_args'},
 				     $self->{'return_files'},
 	    );
 	$cmd_line->populate();
+	$self->set_seq($self->seq()+1);
 	::debug("cmd_line->number_of_args ".$cmd_line->number_of_args()."\n");
 	if(not $::opt_pipe and $cmd_line->number_of_args() == 0) {
 	    # We did not get more args - maybe at EOF string?

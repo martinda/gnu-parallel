@@ -1,3 +1,30 @@
+Bug: parallel --colsep ')' echo {1}
+
+job->start():
+$jobslot = Global::jobslot->$sshlogin
+
+sub get_jobslot {
+    my $sshlogin = shift;
+    my $jobslot_id = pop @Global::jobslots{$sshlogin};
+    if not defined $jobslot_id {
+       $jobslot_id = ++$Global::max_jobslot_id;
+    }
+    return $jobslot_id;
+}
+
+sub release_jobslot {
+    my $sshlogin = shift;
+    my $jobslot_id = shift;
+    push @Global::jobslots{$sshlogin}, $jobslot_id;
+}
+
+Test sshlogins in parallel. Assume parallel is in path
+
+seq 1 10 | parallel -I {o} 'seq 1 255 | parallel echo ssh -oNoHostAuthenticationForLocalhost=true 127.0.{o}.{}' >/tmp/sshloginfile
+seq 1 1000 | parallel --sshloginfile /tmp/sshloginfile echo
+
+ssh -F /tmp/
+ 
 Example:
 Chop mbox into emails
 Parallel sort

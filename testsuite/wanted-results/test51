@@ -2,15 +2,12 @@
 ### Test -N with multiple jobslots and multiple args
 1
 a
-a
 1
 2
-bb
 bb
 1
 2
 3
-ccc
 ccc
 1
 2
@@ -42,7 +39,6 @@ ggggggg
 6
 ggggggg
 7
-ggggggg
 ggggggg
 1
 2
@@ -54,7 +50,6 @@ hhhhhhhh
 hhhhhhhh
 7
 8
-hhhhhhhh
 hhhhhhhh
 1
 2
@@ -67,7 +62,6 @@ iiiiiiiii
 7
 8
 9
-iiiiiiiii
 iiiiiiiii
 1
 2
@@ -92,7 +86,6 @@ a
 a
 5
 a
-a
 1
 2
 b
@@ -100,7 +93,6 @@ b
 4
 b
 5
-b
 b
 1
 2
@@ -110,7 +102,6 @@ c
 c
 5
 c
-c
 1
 2
 d
@@ -118,7 +109,6 @@ d
 4
 d
 5
-d
 d
 ### Test output is the same for different block size
 1>01a02a0a
@@ -147,6 +137,7 @@ d
 3>45
 4>6
 
+5>
 ### Test --rrs -N1 --recend single
 1>12a34
 2>45a6
