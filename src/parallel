@@ -1008,13 +1008,22 @@ sub progress {
 	    my $left = $total - $completed;
 	    my $pctcomplete = $completed / $total;
 	    my $timepassed = (time - $Private::first_completed);
-            my $avgtime = $timepassed / $completed;
+	    my $avgtime = $timepassed / $completed;
 	    $Private::smoothed_avg_time ||= $avgtime;
-            # Smooth the eta so it does not jump wildly
+	    # Smooth the eta so it does not jump wildly
 	    $Private::smoothed_avg_time = (1 - $pctcomplete) *
 		$Private::smoothed_avg_time + $pctcomplete * $avgtime;
-	    my $this_eta = $left * $Private::smoothed_avg_time;
-            $eta = sprintf("ETA: %ds %dleft %.2favg  ", $this_eta, $left, $avgtime);
+	    my $this_eta;
+	    $Private::last_time ||= $timepassed;
+	    if($timepassed != $Private::last_time
+	       or not defined $Private::last_eta) {
+		$Private::last_time = $timepassed;
+		$this_eta = $left * $Private::smoothed_avg_time;
+		$Private::last_eta = $this_eta;
+	    } else {
+		$this_eta = $Private::last_eta;
+	    }
+	    $eta = sprintf("ETA: %ds %dleft %.2favg  ", $this_eta, $left, $avgtime);
         }
     }
 
@@ -1634,9 +1643,6 @@ sub my_size {
         return total_size(@_);
     }
 }
-
-# Guvf vf n grfg gb frr vs bguref ner ernqvat zl pbqr. Cyrnfr rznvy
-# pbbxvr@gnatr.qx jura lbh ernq guvf
 
 sub my_dump {
     # Returns:
