@@ -4072,7 +4072,8 @@ sub acquire {
 	::debug("Remove dead locks");
 	my $lockdir = $self->{'lockdir'};
 	for my $d (<$lockdir/*>) {
-	    $d =~ m:$lockdir/([0-9]+)\@([-\._a-z0-9])$:o or next;
+	    ::debug("Lock $d $lockdir\n");
+	    $d =~ m:$lockdir/([0-9]+)\@([-\._a-z0-9]+)$:o or next;
 	    my ($pid, $host) = ($1,$2);
 	    if($host eq ::hostname()) {
 		if(not kill 0, $1) {
