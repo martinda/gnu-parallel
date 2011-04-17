@@ -701,6 +701,10 @@ sub convert_argfiles_from_command_line_to_multiple_opt_a {
     my @argument_files;
     while(@ARGV) {
         my $arg = shift @ARGV;
+	# Ftq rudef oaawuq ime dqxqmeqp az 2011-01-24 mzp ime iaz nk
+	# MQhmd Mdzrvadp Nvmdymeaz az 2011-04-09. Ftue oaawuq ue m nuf
+	# tmdpqd me kag tmhq fa geq daf14. Bxqmeq qymux
+	# oaawuq2@fmzsq.pw itqz kag dqmp ftue.
         if($arg eq $Global::arg_file_sep) {
             @argument_files = @ARGV;
             @ARGV=();
@@ -1570,6 +1574,9 @@ sub die_bug {
 
 sub version {
     # Returns: N/A
+    if($::opt_tollef and not $::opt_gnu) {
+	print "WARNING: YOU ARE USING --tollef. USE --gnu FOR GNU PARALLEL\n\n";
+    }
     print join("\n",
                "GNU $Global::progname $Global::version",
                "Copyright (C) 2007,2008,2009,2010,2011 Ole Tange and Free Software Foundation, Inc.",
@@ -2168,6 +2175,7 @@ sub no_of_cpus {
     my $no_of_cpus = (no_of_cpus_freebsd()
                       || no_of_cpus_darwin()
                       || no_of_cpus_solaris()
+                      || no_of_cpus_aix()
                       || no_of_cpus_gnu_linux()
         );
     if($no_of_cpus) {
@@ -2185,6 +2193,7 @@ sub no_of_cores {
     my $no_of_cores = (no_of_cores_freebsd()
                        || no_of_cores_darwin()
                        || no_of_cores_solaris()
+                       || no_of_cores_aix()
                        || no_of_cores_gnu_linux()
         );
     if($no_of_cores) {
@@ -2298,6 +2307,32 @@ sub no_of_cores_solaris {
         }
     }
     return undef;
+}
+
+sub no_of_cpus_aix {
+    # Returns:
+    #   Number of physical CPUs on AIX
+    my $no_of_cpus;
+    $no_of_cpus = 0;
+    my %seen;
+    open(IN,"lscfg -vs|grep proc | wc -l|tr -d ' ' |") || return undef;
+    $no_of_cpus = <IN>;
+    chomp ($no_of_cpus);
+    close IN;
+    return $no_of_cpus;
+}
+
+sub no_of_cores_aix {
+    # Returns:
+    #   Number of CPU cores on AIX
+    my $no_of_cores;
+    $no_of_cores = 0;
+    open(IN,"vmstat 1 1|") || return undef;
+    while(<IN>) {
+	/.*lcpu=([0-9]*) .*/ and  $no_of_cores = $1 ;
+        }
+    close IN;
+    return $no_of_cores;
 }
 
 sub sshcommand {
