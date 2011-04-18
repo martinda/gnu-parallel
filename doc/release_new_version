@@ -165,6 +165,8 @@ New in this release:
 ? Part of Debian?
 ? Part of Ubuntu?
 
+* CPU detection code for AIX thanks to Christian Netrwal.
+
 * Thanks to Ævar Arnfjörð Bjarmason for reading my code.
 
 * GNU Parallel was presented at:

@@ -2207,6 +2207,7 @@ sub no_of_cores {
 sub no_of_cpus_gnu_linux {
     # Returns:
     #   Number of physical CPUs on GNU/Linux
+    #   undef if not GNU/Linux
     my $no_of_cpus;
     if(-e "/proc/cpuinfo") {
         $no_of_cpus = 0;
@@ -2225,6 +2226,7 @@ sub no_of_cpus_gnu_linux {
 sub no_of_cores_gnu_linux {
     # Returns:
     #   Number of CPU cores on GNU/Linux
+    #   undef if not GNU/Linux
     my $no_of_cores;
     if(-e "/proc/cpuinfo") {
         $no_of_cores = 0;
@@ -2240,6 +2242,7 @@ sub no_of_cores_gnu_linux {
 sub no_of_cpus_darwin {
     # Returns:
     #   Number of physical CPUs on Mac Darwin
+    #   undef if not Mac Darwin
     my $no_of_cpus = `sysctl -a hw 2>/dev/null | grep -w physicalcpu | awk '{ print \$2 }'`;
     return $no_of_cpus;
 }
@@ -2247,6 +2250,7 @@ sub no_of_cpus_darwin {
 sub no_of_cores_darwin {
     # Returns:
     #   Number of CPU cores on Mac Darwin
+    #   undef if not Mac Darwin
     my $no_of_cores = `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`;
     return $no_of_cores;
 }
@@ -2254,6 +2258,7 @@ sub no_of_cores_darwin {
 sub no_of_cpus_freebsd {
     # Returns:
     #   Number of physical CPUs on FreeBSD
+    #   undef if not FreeBSD
     my $no_of_cpus =
 	(`sysctl -a dev.cpu | grep \%parent | awk '{ print \$2 }' | uniq | wc -l | awk '{ print \$1 }'`
 	 or
@@ -2265,6 +2270,7 @@ sub no_of_cpus_freebsd {
 sub no_of_cores_freebsd {
     # Returns:
     #   Number of CPU cores on FreeBSD
+    #   undef if not FreeBSD
     my $no_of_cores =
 	(`sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`
 	 or
@@ -2276,6 +2282,7 @@ sub no_of_cores_freebsd {
 sub no_of_cpus_solaris {
     # Returns:
     #   Number of physical CPUs on Solaris
+    #   undef if not Solaris
     if(-x "/usr/sbin/psrinfo") {
         my @psrinfo = `/usr/sbin/psrinfo`;
         if($#psrinfo >= 0) {
@@ -2294,6 +2301,7 @@ sub no_of_cpus_solaris {
 sub no_of_cores_solaris {
     # Returns:
     #   Number of CPU cores on Solaris
+    #   undef if not Solaris
     if(-x "/usr/sbin/psrinfo") {
         my @psrinfo = `/usr/sbin/psrinfo`;
         if($#psrinfo >= 0) {
@@ -2312,26 +2320,29 @@ sub no_of_cores_solaris {
 sub no_of_cpus_aix {
     # Returns:
     #   Number of physical CPUs on AIX
-    my $no_of_cpus;
-    $no_of_cpus = 0;
-    my %seen;
-    open(IN,"lscfg -vs|grep proc | wc -l|tr -d ' ' |") || return undef;
-    $no_of_cpus = <IN>;
-    chomp ($no_of_cpus);
-    close IN;
+    #   undef if not AIX
+    my $no_of_cpus = 0;
+    if(-x "/usr/sbin/lscfg") {
+	open(IN,"/usr/sbin/lscfg -vs |grep proc | wc -l|tr -d ' ' |") || return undef;
+	$no_of_cpus = <IN>;
+	chomp ($no_of_cpus);
+	close IN;
+    }
     return $no_of_cpus;
 }
 
 sub no_of_cores_aix {
     # Returns:
     #   Number of CPU cores on AIX
+    #   undef if not AIX
     my $no_of_cores;
-    $no_of_cores = 0;
-    open(IN,"vmstat 1 1|") || return undef;
-    while(<IN>) {
-	/.*lcpu=([0-9]*) .*/ and  $no_of_cores = $1 ;
-        }
-    close IN;
+    if(-x "/usr/bin/vmstat") {
+	open(IN,"/usr/bin/vmstat 1 1|") || return undef;
+	while(<IN>) {
+	    /lcpu=([0-9]*) / and $no_of_cores = $1;
+	}
+	close IN;
+    }
     return $no_of_cores;
 }
 

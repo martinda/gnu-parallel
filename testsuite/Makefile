@@ -1,4 +1,4 @@
-testsuite: ../src/parallel tests-to-run/* wanted-results/*
+testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb
 	echo | mop || (echo mop is required for testsuite; /bin/false)
 	seq 1 2 | mop || (echo seq is required for testsuite; /bin/false)
 	stdout echo || (echo stdout is required for testsuite; /bin/false)
@@ -15,6 +15,9 @@ testsuite: ../src/parallel tests-to-run/* wanted-results/*
 	which timeout || (echo timeout is required for testsuite; /bin/false)
 	time sh Start.sh
 	date
+
+startdb:
+	sudo parallel /etc/init.d/{} start ::: postgresql mysql oracle-xe
 
 clean:
 	rm -rf input-files/random_dirs_no_newline
