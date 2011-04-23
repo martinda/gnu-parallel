@@ -389,7 +389,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110408;
+    $Global::version = 20110422;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2155,6 +2155,7 @@ sub ncpus {
             } else {
                 $ncpu = qx(echo|$sshcmd $serverlogin parallel --number-of-cores);
             }
+	    chomp $ncpu;
             if($ncpu =~ /^\s*[0-9]+\s*$/s) {
                 $self->{'ncpus'} = $ncpu;
             } else {

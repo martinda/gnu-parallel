@@ -131,13 +131,17 @@ https://savannah.gnu.org/news/?group=parallel
 
 # Only 350 requests per hour: 1 tweet = 3 requests
 # 119 tweets/hour = sleep 30 per tweet (40 to be safe)
-cat twitters | parallel -j1 sleep 40\; echo @{} You have earlier shown interest in GNU Parallel. \
+cat twitters | grep -iv removed | 
+  parallel -j1 sleep 40\; echo @{} You have earlier shown interest in GNU Parallel. \
 A new version is out: http://nd.gd/2j '|' ttytter
 
 == Send announce ==
 
 http://groups.google.com/group/comp.unix.shell/post
 Newsgroups: comp.unix.shell,comp.unix.admin
+
+https://lists.gnu.org/mailman/admindb/bug-parallel
+https://lists.gnu.org/mailman/admindb/parallel
 
 <<<<<
 from:tange@gnu.org
@@ -161,11 +165,13 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-? Part of Fedora?
-? Part of Debian?
-? Part of Ubuntu?
+* {#} now works an alias for $PARALLEL_PID.
+
+* --eta now estimates way more accurately.
 
 * CPU detection code for AIX thanks to Christian Netrwal.
+
+* --joblog contains exitcode.
 
 * Thanks to Ævar Arnfjörð Bjarmason for reading my code.
 
@@ -173,11 +179,17 @@ New in this release:
   - LUGA, Augsburg, 2011-03-26, http://www.luga.de/Aktionen/LIT-2011/Programm
   - OSAA.dk, Aarhus, 2011-04-12
 
+* Blog entry in Japanese. Thanks to Riywo.
+  http://blog.riywo.com/2011/04/19/022802
+
 * Example of how to use GNU Parallel on PBS clusters. Thanks to Andrew
   J Dolgert: http://web0.tc.cornell.edu/wiki/index.php?title=Gnu_Parallel
 
 * First example of using GNU Parallel in Hebrew. Thanks to omry.
   http://nd.gd/jk
+
+* Intro video got past 10000 hits.
+  http://www.youtube.com/watch?v=OpaiGYxkSuQ
 
 * Bug fixes and man page updates.
 
