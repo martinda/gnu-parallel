@@ -158,38 +158,18 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 2011XXXX ('Libya') released
+Subject: GNU Parallel 2011XXXX ('?') released
 
-GNU Parallel 2011XXXX ('Libya') has been released. It is
+GNU Parallel 2011XXXX ('?') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* {#} now works an alias for $PARALLEL_PID.
+* Using GNU Parallel with EC2. Thanks to Kevin Wu.
+  http://blog.kevinformatics.com/post/4970574713/interested-in-your-experience-using-gnu-parallel-in
 
-* --eta now estimates way more accurately.
-
-* CPU detection code for AIX thanks to Christian Netrwal.
-
-* --joblog contains exitcode.
-
-* Thanks to Ævar Arnfjörð Bjarmason for reading my code.
-
-* GNU Parallel was presented at:
-  - LUGA, Augsburg, 2011-03-26, http://www.luga.de/Aktionen/LIT-2011/Programm
-  - OSAA.dk, Aarhus, 2011-04-12
-
-* Blog entry in Japanese. Thanks to Riywo.
-  http://blog.riywo.com/2011/04/19/022802
-
-* Example of how to use GNU Parallel on PBS clusters. Thanks to Andrew
-  J Dolgert: http://web0.tc.cornell.edu/wiki/index.php?title=Gnu_Parallel
-
-* First example of using GNU Parallel in Hebrew. Thanks to omry.
-  http://nd.gd/jk
-
-* Intro video got past 10000 hits.
-  http://www.youtube.com/watch?v=OpaiGYxkSuQ
+* Review with idea for {..} and {...} in Japanese. Thanks to ichii386.
+  http://d.hatena.ne.jp/ichii386/20110426
 
 * Bug fixes and man page updates.
 

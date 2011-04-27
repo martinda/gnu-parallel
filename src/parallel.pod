@@ -48,9 +48,10 @@ after the list of options. That will give you an idea of what GNU
 B<parallel> is capable of.
 
 You can also watch the intro video for a quick introduction:
-http://www.youtube.com/watch?v=OpaiGYxkSuQ or at
 http://tinyogg.com/watch/TORaR/ http://tinyogg.com/watch/hfxKj/ and
-http://tinyogg.com/watch/YQuXd/
+http://tinyogg.com/watch/YQuXd/ or
+http://www.youtube.com/watch?v=OpaiGYxkSuQ and
+http://www.youtube.com/watch?v=1ntxT-47VPA
 
 
 =head1 OPTIONS
@@ -98,6 +99,15 @@ with the directory part removed.
 
 B<{/}> can be used the same places as B<{}>. The replacement string
 B<{/}> can be changed with B<--basenamereplace>.
+
+
+=item B<{//}>
+
+Dirname of input line. This is a specialized replacement string
+containing the dir of the input. See B<dirname>(1).
+
+B<{//}> can be used the same places as B<{}>. The replacement string
+B<{//}> can be changed with B<--dirnamereplace>.
 
 
 =item B<{/.}>
@@ -325,6 +335,14 @@ delimiter may be a single character, a C-style character escape such
 as \n, or an octal or hexadecimal escape code.  Octal and
 hexadecimal escape codes are understood as for the printf command.
 Multibyte characters are not supported.
+
+=item B<--dirnamereplace> I<replace-str> (alpha testing)
+
+=item B<--dnr> I<replace-str> (alpha testing)
+
+Use the replacement string I<replace-str> instead of B<{//}> for
+dirname of input line.
+
 
 =item B<-E> I<eof-str>
 
@@ -1263,7 +1281,7 @@ solution is to quote the whole command:
 
 B<parallel "zcat {} >>B<{.}" ::: *.gz>
 
-Other special shell charaters (such as * ; $ > < | >> <<) also needs
+Other special shell charaters (such as * ; $ > < | >> <<) also need
 to be put in quotes, as they may otherwise be interpreted by the shell
 and not given to GNU B<parallel>.
 
@@ -2878,8 +2896,8 @@ it also uses rsync with ssh.
 
 =head1 SEE ALSO
 
-B<ssh>(1), B<rsync>(1), B<find>(1), B<xargs>(1), B<make>(1),
-B<pexec>(1), B<ppss>(1), B<xjobs>(1), B<prll>(1), B<dxargs>(1),
-B<mdm>(1),
+B<ssh>(1), B<rsync>(1), B<find>(1), B<xargs>(1), B<dirname>,
+B<make>(1), B<pexec>(1), B<ppss>(1), B<xjobs>(1), B<prll>(1),
+B<dxargs>(1), B<mdm>(1),
 
 =cut

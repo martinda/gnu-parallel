@@ -1,14 +1,17 @@
 #!/usr/bin/perl -w
 
+# open3 used in Job::start
 use IPC::Open3;
-use Fcntl;
-use Symbol qw(gensym);
-use IO::File;
+# &WNOHANG used in reaper
 use POSIX qw(:sys_wait_h setsid ceil :errno_h);
+# gensym used in Job::start
+use Symbol qw(gensym);
+# tempfile used in Job::start
 use File::Temp qw(tempfile tempdir);
+# GetOptions used in get_options_from_array
 use Getopt::Long;
+# Used to ensure code quality
 use strict;
-use Carp;
 
 $::oodebug=0;
 $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
@@ -309,6 +312,7 @@ sub get_options_from_array {
 	 "I=s" => \$::opt_I,
 	 "extensionreplace|U=s" => \$::opt_U,
 	 "basenamereplace|bnr=s" => \$::opt_basenamereplace,
+	 "dirnamereplace|dnr=s" => \$::opt_dirnamereplace,
 	 "basenameextensionreplace=s" => \$::opt_basenameextensionreplace,
 	 "seqreplace=s" => \$::opt_seqreplace,
 	 "jobs|j=s" => \$::opt_P,
@@ -400,6 +404,7 @@ sub parse_options {
     $Global::replace{'{}'} = '{}';
     $Global::replace{'{.}'} = '{.}';
     $Global::replace{'{/}'} = '{/}';
+    $Global::replace{'{//}'} = '{//}';
     $Global::replace{'{/.}'} = '{/.}';
     $Global::replace{'{#}'} = '{#}';
     $/="\n";
@@ -436,6 +441,7 @@ sub parse_options {
 	$Global::replace{'{}'} = $::opt_i eq "" ? "{}" : $::opt_i;
     }
     if(defined $::opt_basenamereplace) { $Global::replace{'{/}'} = $::opt_basenamereplace; }
+    if(defined $::opt_dirnamereplace) { $Global::replace{'{//}'} = $::opt_dirnamereplace; }
     if(defined $::opt_basenameextensionreplace) {
         $Global::replace{'{/.}'} = $::opt_basenameextensionreplace;
     }
@@ -2594,8 +2600,7 @@ sub complete_write {
     my $self = shift;
     my $in = $self->{'stdin'};
     my $len = syswrite($in,$self->{'remaining'});
-
-    if (!defined($len) && $! == ::EAGAIN) {
+    if (!defined($len) && $! == &::EAGAIN) {
 	# write would block;
     } else {
 	# Remove the part that was written
@@ -3358,7 +3363,7 @@ sub len {
 		    $self->{'replacecount'}{$replstring};
 	    }
 	    if($Global::replace{$replstring}) {
-		# This is a multi replacestring ({} {/} {.} {/.})
+		# This is a multi replacestring ({} {/} {.} {/.} {//})
 		# Add each space between two arguments
 		my $number_of_args = ($#{$self->{'arg_list'}[0]}+1)*$self->number_of_args();
 		$len += ($number_of_args-1) * $self->{'replacecount'}{$replstring};
@@ -3381,6 +3386,7 @@ sub multi_regexp {
 	     ($Global::replace{"{}"},
 	      $Global::replace{"{.}"},
 	      $Global::replace{"{/}"},
+	      $Global::replace{"{//}"},
 	      $Global::replace{"{/.}"})
 	).")";
     }
@@ -3431,7 +3437,7 @@ sub number_of_replacements {
     }
     for my $k (keys %count) {
 	if(defined $Global::replace{$k}) {
-	    # {} {/} {.} {/.} {#}
+	    # {} {/} {//} {.} {/.} {#}
 	    $context -= (length $Global::replace{$k}) * $count{$k};
 	} else {
 	    # {n}
@@ -3489,9 +3495,9 @@ sub replace_placeholders {
 		# we have a matching argument for {n}
 		$replace_single{$used} = $args[$positional-1]->replace($replacementfunction);
 	    }
-	} elsif($used =~ /^(\{\}|\{\/\}|\{\.\}|\{\/\.\})$/) {
+	} elsif($used =~ /^(\{\}|\{\/\}|\{\/\/\}|\{\.\}|\{\/\.\})$/) {
 	    # Add to the multireplacement
-	    my $replacementfunction = $used; # {} {/} {.} or {/.}
+	    my $replacementfunction = $used; # {} {/} {//} {.} or {/.}
 	    CORE::push @used_multi, $replacementfunction;
 	    if($self->{'context_replace'}) {
 		for my $n (0 .. $#args) {
@@ -3518,7 +3524,7 @@ sub replace_placeholders {
     my $orig_target = $target;
     if(@used_multi) {
 	my $multi_regexp = join('|', map {
-	    $a=$Global::replace{"$_"};
+	    $a=$Global::replace{$_};
 	    $a=~s/(\W)/\\$1/g; $a
 				} @used_multi);
 	my %wordargs;
@@ -3994,6 +4000,10 @@ sub replace {
 	    $s =~ s:\.[^/\.]*$::; # Remove .ext from argument
 	} elsif($replacement_string eq "{/}") {
 	    $s =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
+	} elsif($replacement_string eq "{//}") {
+	    # Only load File::Basename if actually needed
+	    $Global::use{"File::Basename"} ||= eval "use File::Basename;";
+	    $s = dirname($s); # Keep dir from argument.
 	} elsif($replacement_string eq "{/.}") {
 	    $s =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
 	    $s =~ s:\.[^/\.]*$::; # Remove .ext from argument
@@ -4048,8 +4058,6 @@ package Semaphore;
 # file in ~/.parallel/semaphores/id-<name>/ is the process ID of the
 # process holding the entry. If the process dies, the entry can be
 # taken by another process.
-
-use Fcntl qw(:DEFAULT :flock);
 
 sub new {
     my $class = shift;
@@ -4159,6 +4167,7 @@ sub lock {
     open $self->{'lockfh'}, ">", $self->{'lockfile'}
 	or ::die_bug("Can't open semaphore file $self->{'lockfile'}: $!");
     chmod 0666, $self->{'lockfile'}; # assuming you want it a+rw
+    $Global::use{"Fcntl"} ||= eval "use Fcntl qw(:DEFAULT :flock);";
     while(not flock $self->{'lockfh'}, LOCK_EX()|LOCK_NB()) {
 	::debug("Cannot lock $self->{'lockfile'}");
 	# TODO if timeout: last
@@ -4179,5 +4188,5 @@ sub unlock {
 # Keep perl -w happy
 
 $::opt_x = $::opt_workdir = $Semaphore::timeout = $Semaphore::wait =
-$::opt_skip_first_line = $::opt_shebang = 0 ;
+$::opt_skip_first_line = $::opt_shebang = $Global::use = 0 ;
 

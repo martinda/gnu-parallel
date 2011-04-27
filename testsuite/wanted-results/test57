@@ -1,0 +1,27 @@
+### Test {//}
+. a
+a a/b
+a/b a/b/c
+/ /a
+/a /a/b
+/a/b /a/b/c
+. ./a
+./a ./a/b
+./a/b ./a/b/c
+. a.jpg
+a a/b.jpg
+a/b a/b/c.jpg
+/ /a.jpg
+/a /a/b.jpg
+/a/b /a/b/c.jpg
+. ./a.jpg
+./a ./a/b.jpg
+./a/b ./a/b/c.jpg
+### Test --dnr
+. a
+a a/b
+a/b a/b/c
+### Test --dirnamereplace
+. a
+a a/b
+a/b a/b/c
