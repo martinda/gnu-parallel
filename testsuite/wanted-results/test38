@@ -2,3 +2,4 @@
 ### See if we get compile error
 perl
 ### See if we read modules outside perllib
+read(3, "#!/usr/bin/perl -w\n\n# open3 used"..., 4096) = 4096

@@ -165,6 +165,8 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* Implemented {//} for the input line with the basename removed (dirname).
+
 * Using GNU Parallel with EC2. Thanks to Kevin Wu.
   http://blog.kevinformatics.com/post/4970574713/interested-in-your-experience-using-gnu-parallel-in
 

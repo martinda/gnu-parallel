@@ -3164,6 +3164,7 @@ sub new {
     my $len = {
 	'{}' => 0, # Total length of all {} replaced with all args
 	'{/}' => 0, # Total length of all {/} replaced with all args
+	'{//}' => 0, # Total length of all {//} replaced with all args
 	'{.}' => 0, # Total length of all {.} replaced with all args
 	'{/.}' => 0, # Total length of all {/.} replaced with all args
 	'no_args' => undef, # Length of command with all replacement args removed
@@ -4186,7 +4187,6 @@ sub unlock {
 }
 
 # Keep perl -w happy
-
-$::opt_x = $::opt_workdir = $Semaphore::timeout = $Semaphore::wait =
-$::opt_skip_first_line = $::opt_shebang = $Global::use = 0 ;
+$::opt_x = $Semaphore::timeout = $Semaphore::wait = $::opt_shebang =
+0;
 
