@@ -108,12 +108,20 @@ sub spreadstdin {
 	$recerror = "parallel: Warning: --recend unmatched. Is --blocksize too small?";
     }
 
+    if($::opt_regexp) {
+	# If $recstart/$recend contains '|' this should only apply to the regexp
+	$recstart = "(?:".$recstart.")";
+	$recend = "(?:".$recend.")";
+    } else {
+	# $recstart/$recend = printf strings (\n)
+	$recstart =~ s/\\([rnt'"\\])/"qq|\\$1|"/gee;
+	$recend =~ s/\\([rnt'"\\])/"qq|\\$1|"/gee;
+    }
+    my $recendrecstart = $recend.$recstart;
+
     while(read(STDIN,substr($buf,length $buf,0),$::opt_blocksize)) {
 	# substr above = append to $buf
 	if($::opt_regexp) {
-	    # If $recstart/$recend contains '|' this should only apply to the regexp
-	    $recstart = "(?:".$recstart.")";
-	    $recend = "(?:".$recend.")";
 	    if($Global::max_number_of_args) {
 		# -N => (start..*?end){n}
 		while($buf =~ s/((?:$recstart.*?$recend){$Global::max_number_of_args})($recstart.*)$/$2/os) {
@@ -130,13 +138,10 @@ sub spreadstdin {
 		}
 	    }
 	} else {
-	    # $recstart/$recend = printf strings (\n)
-	    $recstart =~ s/\\([rnt'"\\])/"qq|\\$1|"/gee;
-	    $recend =~ s/\\([rnt'"\\])/"qq|\\$1|"/gee;
 	    if($Global::max_number_of_args) {
 		# -N => (start..*?end){n}
 		my $i = 0;
-		while(($i = nindex(\$buf,$recend.$recstart,$Global::max_number_of_args)) != -1) {
+		while(($i = nindex(\$buf,$recendrecstart,$Global::max_number_of_args)) != -1) {
 		    $i += length $recend; # find the actual splitting location
 		    my $record = substr($buf,0,$i);
 		    substr($buf,0,$i) = "";
@@ -145,7 +150,7 @@ sub spreadstdin {
 		}
 	    } else {
 		# Find the last recend-recstart in $buf
-		my $i = rindex($buf,$recend.$recstart);
+		my $i = rindex($buf,$recendrecstart);
 		if($i != -1) {
 		    $i += length $recend; # find the actual splitting location
 		    my $record = substr($buf,0,$i);

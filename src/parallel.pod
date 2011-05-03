@@ -1415,6 +1415,26 @@ can be written like this:
 B<cat list | parallel "do_something {} scale {.}.jpg ; do_step2 <{} {.}" | process_output>
 
 
+=head1 EXAMPLE: Rewriting nested for-loops
+
+Nested for-loops like this:
+
+  (for x in `cat xlist` ; do
+    for y in `cat ylist` ; do
+      do_something $x $y
+    done
+  done) | process_output
+
+can be written like this:
+
+B<cat xlist | parallel cat ylist \| parallel -I {o} do_something {} {o} | process_output>
+
+The above will run N*N jobs in parallel if parallel normally runs N jobs. To
+ensure the output order is the same as the input and only run N jobs do:
+
+B<cat xlist | parallel -k cat ylist \| parallel -j1 -kI {o} do_something {} {o} | process_output>
+
+
 =head1 EXAMPLE: Group output lines
 
 When running jobs that output data, you often do not want the output
@@ -1501,8 +1521,8 @@ B<cat bigfile | parallel --pipe --block 10M grep foo>
 =head1 EXAMPLE: Using remote computers
 
 To run commands on a remote computer SSH needs to be set up and you
-must be able to login without entering a password (B<ssh-agent> may be
-handy).
+must be able to login without entering a password (The commands
+B<ssh-copy-id> and B<ssh-agent> may help you do that).
 
 To run B<echo> on B<server.example.com>:
 
@@ -1643,6 +1663,8 @@ Print the number on the opposing sides of a six sided die:
 
 B<parallel -a <(seq 6) -a <(seq 6 -1 1) echo>
 
+B<parallel echo :::: <(seq 6) <(seq 6 -1 1)>
+
 Convert files from all subdirs to PNG-files with consecutive numbers
 (useful for making input PNG's for B<ffmpeg>):
 
@@ -1693,12 +1715,12 @@ job. wget is too - if the webpages are small.
 The content of the file jobs_to_run:
 
   ping -c 1 10.0.0.1
-  wget http://status-server/status.cgi?ip=10.0.0.1
+  wget http://example.com/status.cgi?ip=10.0.0.1
   ping -c 1 10.0.0.2
-  wget http://status-server/status.cgi?ip=10.0.0.2
+  wget http://example.com/status.cgi?ip=10.0.0.2
   ...
   ping -c 1 10.0.0.255
-  wget http://status-server/status.cgi?ip=10.0.0.255
+  wget http://example.com/status.cgi?ip=10.0.0.255
 
 To run 100 processes simultaneously do:
 

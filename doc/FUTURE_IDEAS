@@ -1,3 +1,17 @@
+Postkort:
+- Forside kun figur
+- Bagside:
+  - Logo med figur - evt gnu.org/s/parallel
+  - kort grå tekst, der forklarer hvad det er.
+  - Eet eksempel: parallel gzip ::: *
+  - Link til video. http://nd.gd/0s 
+
+GNU parallel is a UNIX-tool for running commands in parallel.
+To gzip all files running one job per CPU write:
+  parallel gzip ::: *
+Watch the intro video to learn more: http://nd.gd/0s
+Or read more about GNU parallel: www.gnu.org/s/parallel
+
 job->start():
 $jobslot = Global::jobslot->$sshlogin
 

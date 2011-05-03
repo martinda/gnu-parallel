@@ -158,9 +158,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 2011XXXX ('?') released
+Subject: GNU Parallel 2011XX22 ('Pakistan') released
 
-GNU Parallel 2011XXXX ('?') has been released. It is
+GNU Parallel 2011XX22 ('Pakistan') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
@@ -172,6 +172,12 @@ New in this release:
 
 * Review with idea for {..} and {...} in Japanese. Thanks to ichii386.
   http://d.hatena.ne.jp/ichii386/20110426
+
+* Upgrade GNU Parallel using Macports. Thanks to Phil Hollenback.
+  http://www.hollenback.net/index.php/MacportsParallel
+
+* Robert from Echo One discusses using processes instead of threads:
+  http://rrees.wordpress.com/2011/04/25/many-cores-many-threads/
 
 * Bug fixes and man page updates.
 
