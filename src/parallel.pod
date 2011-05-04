@@ -208,12 +208,18 @@ Read items from the file I<input-file> instead of stdin (standard input).  If
 you use this option, stdin is given to the first process run.
 Otherwise, stdin is redirected from /dev/null.
 
-If multiple B<-a> are given, one line will be read from each of the
-files. The arguments can be accessed in the command as B<{1}>
-.. B<{>I<n>B<}>, so B<{1}> will be a line from the first file, and
-B<{6}> will refer to the line with the same line number from the 6th
-file.
+(Below is unimplemented. Acts like --xapply now)
 
+If multiple B<-a> are given, all combinations of all lines will be
+generated. E.g. 1 2 and a b c will result in the combinations (1,a)
+(1,b) (1,c) (2,a) (2,b) (2,c). This is useful for replacing nested
+for-loops.
+
+The arguments can be accessed in the command as B<{1}>
+.. B<{>I<n>B<}>, so B<{1}> will be a line from the first file, and
+B<{6}> will refer to a line from the 6th file.
+
+See also B<--xapply>
 
 =item B<--arg-file-sep> I<sep-str>
 
@@ -1152,6 +1158,15 @@ See also B<-m>.
 =item B<-x>
 
 Exit if the size (see the B<-s> option) is exceeded.
+
+
+=item B<--xapply> (Unimplimented)
+
+Read multiple files like B<xapply>. If multiple B<-a> are given, one
+line will be read from each of the files. The arguments can be
+accessed in the command as B<{1}> .. B<{>I<n>B<}>, so B<{1}> will be a
+line from the first file, and B<{6}> will refer to the line with the
+same line number from the 6th file.
 
 
 =item B<--shebang>

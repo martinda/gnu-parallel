@@ -179,6 +179,12 @@ New in this release:
 * Robert from Echo One discusses using processes instead of threads:
   http://rrees.wordpress.com/2011/04/25/many-cores-many-threads/
 
+* How to run GNU Parallel on a SLURM cluster. Thanks to Kevin Stock.
+  http://www.kevinstock.org/2011/04/using-the-ri-cluster/
+
+* Short article about using GNU Parallel with lame:
+  http://loopkid.net/articles/2011/04/30/accelerate-lame-mp3-conversion
+
 * Bug fixes and man page updates.
 
 

@@ -357,6 +357,7 @@ sub get_options_from_array {
 	 "block|block-size|blocksize=s" => \$::opt_blocksize,
 	 "tollef" => \$::opt_tollef,
 	 "gnu" => \$::opt_gnu,
+	 "xapply" => \$::opt_xapply,
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$::opt_P,
 	 "delimiter|d=s" => \$::opt_d,
@@ -398,7 +399,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110422;
+    $Global::version = 20110503;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -733,6 +734,9 @@ sub open_or_exit {
     #   file handle to read-opened file
     #   exits if file cannot be opened otherwise
     my $file = shift;
+    if($file eq "-") {
+        return ($Global::original_stdin || *STDIN);
+    }
     my $fh = gensym;
     if(not open($fh,"<",$file)) {
         print STDERR "$Global::progname: ".
