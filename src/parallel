@@ -3989,7 +3989,7 @@ sub nest_get {
 	$self->unget([@first_arg_set]);
     }
     my @fh = @{$self->{'fhs'}};
-    for (my $fhno = 0; $fhno < $no_of_inputs; $fhno++) {
+    for (my $fhno = $no_of_inputs-1; $fhno >= 0; $fhno--) {
 	if(eof($fh[$fhno])) {
 	    next;
 	} else {
