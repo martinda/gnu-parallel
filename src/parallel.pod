@@ -119,7 +119,7 @@ B<{/.}> can be used the same places as B<{}>. The replacement string
 B<{/.}> can be changed with B<--basenameextensionreplace>.
 
 
-=item B<{#}> (alpha testing)
+=item B<{#}> (beta testing)
 
 Sequence number of the job to run. The same as $PARALLEL_SEQ.
 
@@ -159,8 +159,7 @@ B<{.}>.  See B<-a> and B<-N>.
 B<{>I<n>/.B<}> can be used the same places as B<{>I<n>B<}>.
 
 
-
-=item B<:::> I<arguments>
+=item B<:::> I<arguments> (alpha testing)
 
 Use arguments from the command line as input instead of from stdin
 (standard input). Unlike other options for GNU B<parallel> B<:::> is
@@ -194,7 +193,7 @@ B<:::> and B<::::> can be mixed. So these are equivalent:
   seq 6 7 | parallel -a - -a <(seq 4 5) echo {1} {2} {3} ::: 1 2 3
   seq 4 5 | parallel echo {1} {2} {3} :::: <(seq 6 7) - ::: 1 2 3
 
-=item B<::::> I<argfiles>
+=item B<::::> I<argfiles> (alpha testing)
 
 Another way to write B<-a> I<argfile1> B<-a> I<argfile2> ...
 
@@ -274,7 +273,7 @@ basename of input line.
 Use the replacement string I<replace-str> instead of B<{/.}> for basename of input line without extension.
 
 
-=item B<--bg> (beta testing)
+=item B<--bg>
 
 Run command in background thus GNU B<parallel> will not wait for
 completion of the command before exiting. This is the default if
@@ -285,9 +284,9 @@ See also: B<--fg>
 Implies B<--semaphore>.
 
 
-=item B<--block> I<size> (beta testing)
+=item B<--block> I<size>
 
-=item B<--block-size> I<size> (beta testing)
+=item B<--block-size> I<size>
 
 Size of block in bytes. The size can be postfixed with K, M, G, or T
 which would multiply the size with 1024, 1048576, 1073741824, or
@@ -384,7 +383,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--eta> (alpha testing)
+=item B<--eta> (beta testing)
 
 Show the estimated number of seconds before finishing. This forces GNU
 B<parallel> to read all jobs before starting to find the number of
@@ -392,7 +391,7 @@ jobs. GNU B<parallel> normally only reads the next job to run.
 Implies B<--progress>.
 
 
-=item B<--fg> (beta testing)
+=item B<--fg>
 
 Run command in foreground thus GNU B<parallel> will wait for
 completion of the command before exiting.
@@ -463,7 +462,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile> (beta testing)
+=item B<--joblog> I<logfile>
 
 Logfile for executed jobs. Saved a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -584,7 +583,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m> is set.
 
 
-=item B<--load> I<max-load> (experimental)
+=item B<--load> I<max-load> (alpha testing)
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
@@ -618,19 +617,19 @@ See also B<-X> for context replace. If in doubt use B<-X> as that will
 most likely do what is needed.
 
 
-=item B<--output-as-files> (beta testing)
+=item B<--output-as-files>
 
-=item B<--outputasfiles> (beta testing)
+=item B<--outputasfiles>
 
-=item B<--files> (beta testing)
+=item B<--files>
 
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe> (beta testing)
+=item B<--pipe>
 
-=item B<--spreadstdin> (beta testing)
+=item B<--spreadstdin>
 
 Spread input to jobs on stdin. Read a block of data from stdin
 (standard input) and give one block of data as input to one job.
@@ -773,9 +772,9 @@ default.
 If the stdin (standard input) only contains whitespace, do not run the command.
 
 
-=item B<--recstart> I<startstring> (beta testing)
+=item B<--recstart> I<startstring>
 
-=item B<--recend> I<endstring> (beta testing)
+=item B<--recend> I<endstring>
 
 If B<--recstart> is given I<startstring> will be used to split at record start.
 
@@ -795,17 +794,17 @@ Use B<--regexp> to interpret B<--recstart> and B<--recend> as regular
 expressions. This is slow, however.
 
 
-=item B<--regexp> (beta test)
+=item B<--regexp> (beta testing)
 
 Use B<--regexp> to interpret B<--recstart> and B<--recend> as regular
 expressions. This is slow, however.
 
 
-=item B<--remove-rec-sep> (beta testing)
+=item B<--remove-rec-sep>
 
-=item B<--removerecsep> (beta testing)
+=item B<--removerecsep>
 
-=item B<--rrs> (beta testing)
+=item B<--rrs>
 
 Remove the text matched by B<--recstart> and B<--recend> before piping
 it to the command.
@@ -813,7 +812,7 @@ it to the command.
 Only used with B<--pipe>.
 
 
-=item B<--retries> I<n> (beta testing)
+=item B<--retries> I<n>
 
 If a job fails, retry it on another computer. Do this I<n> times. If
 there are fewer than I<n> computers in B<--sshlogin> GNU parallel will
@@ -991,9 +990,9 @@ Silent.  The job to be run will not be printed. This is the default.
 Can be reversed with B<-v>.
 
 
-=item B<--tty> (beta testing)
+=item B<--tty>
 
-=item B<-T> (beta testing)
+=item B<-T>
 
 Open terminal tty. If GNU B<parallel> is used for starting an
 interactive program then this option may be needed. It will start only
@@ -1140,7 +1139,7 @@ B<~/.parallel/tmp/> on the remote computers and will be removed if
 using B<--cleanup>.
 
 
-=item B<--wait> (beta testing)
+=item B<--wait>
 
 Wait for all commands to complete.
 

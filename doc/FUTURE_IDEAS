@@ -1,3 +1,62 @@
+Video
+
+So far GNU Parallel has been focused on replacing a single
+for-loop. The Pakistan release introduces a way to replace nested
+loops.
+
+As example I will use the image manipulation program 'convert'. This
+will convert foo.png to jpg with a size of 800 and JPEG-quality of 95.
+
+convert -size 800 -quality 95 foo.png foo_800_q95.jpg
+
+With a for-loop it can be done on a list of files:
+
+time \
+for file in *.png ; do
+  convert -size 800 -quality 95 $file ${file##.JPG}_800_q95.jpg
+done
+
+Using GNU Parallel it looks like this:
+
+time parallel convert -size 800 -quality 95 {} {.}_800_q95.jpg ::: *.png
+
+
+To get the images in 3 different JPEG-qualities you can use a nested for-loop:
+
+time \
+for qual in 25 50 95 ; do
+  for file in *.png ; do
+    convert -size 800 -quality $qual $file ${file##.JPG}_800_q${qual}.jpg
+  done
+done
+
+With GNU Parallel 'Pakistan' you can do this:
+
+time parallel convert -size 800 -quality 95 {1} {1.}_800_q{2}.jpg ::: *.png ::: 25 50 95
+
+To get the 3 different JPEG-qualities in 2 different sizes you can use
+a nest the for-loop even further:
+
+time \
+for size in 800 30 ; do
+  for qual in 25 50 95 ; do
+    for file in *.png ; do
+      convert -size $size -quality $qual $file ${file##.JPG}_${size}_q${qual}.jpg
+    done
+  done
+done
+
+With GNU Parallel 'Pakistan' you can do this:
+
+time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg ::: *.png ::: 25 50 95 ::: 800 30
+
+You can also provide the arguments in a file:
+
+(echo 25; echo 50; echo 95) > qualities
+ls *.png > png-files
+time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files :::: qualities ::: 800 30
+
+
 Test with first argument == END_OF_FILE string
 
 unittest til xapply og uden.
