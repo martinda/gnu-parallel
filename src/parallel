@@ -720,6 +720,7 @@ sub open_or_exit {
     #   exits if file cannot be opened
     my $file = shift;
     if($file eq "-") {
+	$Global::stdin_in_opt_a = 1;
 	return ($Global::original_stdin || *STDIN);
     }
     if(ref $file eq "GLOB") {
@@ -3016,7 +3017,7 @@ sub start {
 	$pid = ::open3($in, ">&OUT", ">&ERR", $command) ||
 	    ::die_bug("open3-pipe");
 	$job->set_stdin($in);
-    } elsif(@::opt_a and $job->seq() == 1) {
+    } elsif(@::opt_a and not $Global::stdin_in_opt_a and $job->seq() == 1) {
 	# Give STDIN to the first job if using -a
 	*IN = *STDIN;
 	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $command) ||
