@@ -3905,7 +3905,15 @@ sub new {
 
 sub get {
     my $self = shift;
-return    $self->nest_get();
+    if($::opt_xapply) {
+	return $self->xapply_get();
+    } else {
+	return $self->nest_get();
+    }
+}
+
+sub xapply_get {
+    my $self = shift;
     if(@{$self->{'unget'}}) {
 	return shift @{$self->{'unget'}};
     }
@@ -3913,50 +3921,13 @@ return    $self->nest_get();
     my $prepend = undef;
     my $empty = 1;
     for my $fh (@{$self->{'fhs'}}) {
-	if(eof($fh)) {
-	    if(defined $prepend) {
-		push @record, Arg->new($prepend);
-		$empty = 0;
-	    } else {
-		push @record, Arg->new($prepend||"");
-	    }
-	    next;
+	my $arg = read_arg_from_fh($fh);
+	if(defined $arg) {
+	    push @record, $arg;
+	    $empty = 0;
+	} else {
+	    push @record, Arg->new("");
 	}
-	my $arg = <$fh>;
-	# Remove delimiter
-	$arg =~ s:$/$::;
-	if($Global::end_of_file_string and
-	   $arg eq $Global::end_of_file_string) {
-	    # Ignore the rest of input file
-	    while (<$fh>) {}
-	    ::debug("EOF-string $arg\n");
-	    if(defined $prepend) {
-		push @record, Arg->new($prepend);
-		$empty = 0;
-	    } else {
-		push @record, Arg->new($prepend);
-	    }
-	    ::debug("Is empty? $empty");
-	    next;
-	}
-	if(defined $prepend) {
-	    $arg = $prepend.$arg; # For line continuation
-	    $prepend = undef; #undef;
-	}
-	if($Global::ignore_empty) {
-	    if($arg =~ /^\s*$/) {
-		redo; # Try the next line
-	    }
-	}
-	if($Global::max_lines) {
-	    if($arg =~ /\s$/) {
-		# Trailing space => continued on next line
-		$prepend = $arg;
-		redo;
-	    }
-	}
-	push @record, Arg->new($arg);
-	$empty = 0;
     }
     if($empty) {
 	return undef;
@@ -3979,47 +3950,37 @@ sub nest_get {
 	# read one line from each file
 	my @first_arg_set;
 	for (my $fhno = 0; $fhno < $no_of_inputs ; $fhno++) {
-	    my $fh = $self->{'fhs'}[$fhno];
-	    my $arg = <$fh>;
-	    # Remove delimiter
-	    $arg =~ s:$/$::;
-	    $::arg_matrix[$fhno][0]=Arg->new($arg);
+	    $::arg_matrix[$fhno][0]=read_arg_from_fh($self->{'fhs'}[$fhno]);
 	    push @first_arg_set, $::arg_matrix[$fhno][0];
 	}
 	$self->unget([@first_arg_set]);
     }
-    my @fh = @{$self->{'fhs'}};
-    for (my $fhno = $no_of_inputs-1; $fhno >= 0; $fhno--) {
-	if(eof($fh[$fhno])) {
+    for (my $fhno = $no_of_inputs - 1; $fhno >= 0; $fhno--) {
+	if(eof($self->{'fhs'}[$fhno])) {
 	    next;
 	} else {
 	    # read one
-	    my $f = $fh[$fhno];
-	    my $arg = <$f>;
-	    # Remove delimiter
-	    $arg =~ s:$/$::;
-	    my $len = $#{$::arg_matrix[$fhno]}+1;
-	    $::arg_matrix[$fhno][$len]=Arg->new($arg);
+	    my $len = $#{$::arg_matrix[$fhno]} + 1;
+	    $::arg_matrix[$fhno][$len]=read_arg_from_fh($self->{'fhs'}[$fhno]);
 	    # make all new combinations
 	    my @combarg = ();
 	    for (my $fhn = 0; $fhn < $no_of_inputs; $fhn++) {
 		push @combarg, [0, $#{$::arg_matrix[$fhn]}];
 	    }
 	    $combarg[$fhno] = [$len,$len]; # Find only combinations with this new entry
-	    my @combinations = expand_combinations(@combarg);
 	    # map combinations
-	    # [ 1, 3, 7], [ 2, 4, 1 ]
+	    # [ 1, 3, 7 ], [ 2, 4, 1 ]
 	    # =>
-	    # [ m[0][1], m[1][3], m[3][7]], [ m[0][2], m[1][4], m[2][1] ]
+	    # [ m[0][1], m[1][3], m[3][7] ], [ m[0][2], m[1][4], m[2][1] ]
 	    my @mapped;
-	    for my $c (@combinations) {
+	    for my $c (expand_combinations(@combarg)) {
 		my @a;
 		for my $n (0 .. $no_of_inputs - 1 ) {
 		    push @a,  $::arg_matrix[$n][$$c[$n]];
 		}
 		push @mapped, [@a];
 	    }
-	    # unget the mapped
+	    # append the mapped to the ungotten arguments
 	    push @{$self->{'unget'}}, @mapped;
 	    # get the first
 	    return shift @{$self->{'unget'}};
@@ -4027,6 +3988,58 @@ sub nest_get {
     }
     # all are eof; return undef
     return undef;
+}
+
+sub read_arg_from_fh {
+    # Read one Arg from filehandle
+    # Returns:
+    #   Arg-object with one read line
+    #   undef if end of file
+    my $fh = shift;
+    my $prepend = undef;
+  loop:
+    if(eof($fh)) {
+	if(defined $prepend) {
+	    return Arg->new($prepend);
+	} else {
+	    return undef;
+	}
+    }
+    my $arg = <$fh>;
+    # Remove delimiter
+    $arg =~ s:$/$::;
+    if($Global::end_of_file_string and
+       $arg eq $Global::end_of_file_string) {
+	# Ignore the rest of input file
+	while (<$fh>) {}
+	::debug("EOF-string $arg\n");
+	if(defined $prepend) {
+	    return Arg->new($prepend);
+	} else {
+	    return undef;
+	}
+    }
+    if(defined $prepend) {
+	$arg = $prepend.$arg; # For line continuation
+	$prepend = undef; #undef;
+    }
+    if($Global::ignore_empty) {
+	if($arg =~ /^\s*$/) {
+	    redo; # Try the next line
+	}
+    }
+    if($Global::max_lines) {
+	if($arg =~ /\s$/) {
+	    # Trailing space => continued on next line
+	    $prepend = $arg;
+	    redo;
+	}
+    }
+    if(defined $arg) {
+	return Arg->new($arg);
+    } else {
+	::die_bug("multiread arg undefined");
+    }
 }
 
 sub expand_combinations {

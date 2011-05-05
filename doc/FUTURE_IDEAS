@@ -1,3 +1,5 @@
+unittest til xapply og uden.
+
 parallel echo {1} {2} {3} ::: a b c :::: myfile ::: X Y
 
 parallel oggenc -q {1} {2} {2.}_{1}.ogg ::: 1 5 10 :::: wavfiles
