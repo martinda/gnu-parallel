@@ -192,7 +192,7 @@ stdout ssh $SERVER1 ls '/tmp/parallel.file*' || echo OK
 stdout ssh parallel@$SERVER2 ls '/tmp/parallel.file*' || echo OK
 
 echo '### --transfer --cleanup - multiple argument files'
-parallel -kv --transfer --cleanup -Sparallel@$SERVER2 cat {2} {1} :::: /tmp/test17rel <(sort -r /tmp/test17abs)
+parallel -kv --xapply --transfer --cleanup -Sparallel@$SERVER2 cat {2} {1} :::: /tmp/test17rel <(sort -r /tmp/test17abs)
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls '/tmp/parallel.file*' || echo OK
 

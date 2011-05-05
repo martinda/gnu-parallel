@@ -1,3 +1,5 @@
+Test with first argument == END_OF_FILE string
+
 unittest til xapply og uden.
 
 parallel echo {1} {2} {3} ::: a b c :::: myfile ::: X Y

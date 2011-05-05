@@ -23,7 +23,7 @@ echo '### Test -N'
 seq 1 5 | parallel -kN3 echo {1} {2} {3}
 
 echo '### Test --arg-file-sep with files of different lengths'
-parallel  --arg-file-sep :::: -k echo {1} {2} :::: <(seq 1 1) <(seq 3 4)
+parallel --xapply --arg-file-sep :::: -k echo {1} {2} :::: <(seq 1 1) <(seq 3 4)
 
 echo '### Test respect -s'
 parallel -kvm -IARG -s15 echo ARG ::: 1 22 333 4444 55555 666666 7777777 88888888 999999999

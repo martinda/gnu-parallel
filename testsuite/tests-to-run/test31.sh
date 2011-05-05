@@ -32,7 +32,7 @@ chmod 755 /tmp/shebang
 
 echo '### Test of #! with 2 files as input'
 cat >/tmp/shebang <<EOF
-#!/usr/local/bin/parallel -Yrk -a /tmp/123 echo
+#!/usr/local/bin/parallel -Yrk --xapply -a /tmp/123 echo
 A
 B
 C
