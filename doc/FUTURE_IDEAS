@@ -50,11 +50,22 @@ With GNU Parallel 'Pakistan' you can do this:
 
 time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg ::: *.png ::: 25 50 95 ::: 800 30
 
-You can also provide the arguments in a file:
+You can also provide the arguments in a file. This will do the same as above:
 
 (echo 25; echo 50; echo 95) > qualities
 ls *.png > png-files
-time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files :::: qualities ::: 800 30
+(echo 800; echo 30) > sizes
+time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files qualities sizes
+
+It is also possible to mix triple and quad colon. These will do the same as above:
+
+time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files ::: 25 50 95 ::: 800 30
+
+time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files ::: 25 50 95 :::: sizes
+
+The special file '-' reads from standard input. This will do the same as above:
+
+ls *.png | time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: - ::: 25 50 95 :::: sizes
 
 
 Test with first argument == END_OF_FILE string

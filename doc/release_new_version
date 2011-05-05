@@ -163,7 +163,25 @@ Subject: GNU Parallel 2011XX22 ('Pakistan') released
 GNU Parallel 2011XX22 ('Pakistan') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
+This is a major release. So far GNU Parallel has been focused on
+replacing a single for-loop. The Pakistan release introduces ways to
+replace nested loops.
+
 New in this release:
+
+* Multiple ::: can be put on the command line and will be treated
+  similar to contents from multiple -a's.
+
+* ::: and :::: can now be mixed on the command line. Use {1} .. {n} to
+  refer to the arguments from the different arguments.
+
+* --xapply is now needed to get xapply's behaviour of reading one line
+  from arguments from each of multiple input files.
+
+* Multiple input source will cause all combinations of arguments from
+  the sources to be generated. E.g. ::: 1 2 ::: a b c will result in
+  the combinations (1,a) (1,b) (1,c) (2,a) (2,b) (2,c). This can often
+  replace nested loops.
 
 * Implemented {//} for the input line with the basename removed (dirname).
 
