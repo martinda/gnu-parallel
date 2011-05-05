@@ -87,7 +87,7 @@ if($::opt_halt_on_error) {
 
 sub spreadstdin {
     # read a record
-    # print it to the first jobs that is ready
+    # Spawn a job and print the record to it.
     my $record;
     my $buf = "";
     my ($recstart,$recend,$recerror);
@@ -171,6 +171,9 @@ sub spreadstdin {
 }
 
 sub nindex {
+    # See if string is in buffer N times
+    # Returns:
+    #   the position where the Nth copy is found
     my $buf_ref = shift;
     my $str = shift;
     my $n = shift;
@@ -183,6 +186,8 @@ sub nindex {
 }
 
 sub flush_and_close_pipes {
+    # Flush that that is cached to the open pipes
+    # and close them.
     my $flush_done;
     my $sleep = 0.05;
     do {
@@ -263,7 +268,7 @@ sub write_record_to_pipe {
 sub acquire_semaphore {
     # Acquires semaphore. If needed: spawns to the background
     # Returns:
-    #    The semaphore to be released when jobs is complete
+    #   The semaphore to be released when jobs is complete
     $Global::host{':'} = SSHLogin->new(":");
     my $sem = Semaphore->new($Semaphore::name,$Global::host{':'}->max_jobs_running());
     $sem->acquire();
@@ -530,14 +535,9 @@ sub parse_options {
     }
     %Global::replace_rev = reverse %Global::replace;
 
-    if(grep /^$Global::arg_sep$/o, @ARGV) {
-        # Deal with :::
+    if(grep /^$Global::arg_sep$|^$Global::arg_file_sep$/o, @ARGV) {
+        # Deal with ::: and ::::
         @ARGV=read_args_from_command_line();
-    }
-
-    if(grep /^$Global::arg_file_sep$/o, @ARGV) {
-        # Deal with ::::
-        @ARGV=convert_argfiles_from_command_line_to_multiple_opt_a();
     }
 
     # Semaphore defaults
@@ -655,87 +655,76 @@ sub read_options {
 }
 
 sub read_args_from_command_line {
-    # Arguments given on the command line after ::: ($Global::arg_sep)
-    # Removes the arguments from @ARGV and puts it into the argument queue
-    # Ignore STDIN by reading from /dev/null
-    # or another file if user has given --arg-file
+    # Arguments given on the command line after:
+    #   ::: ($Global::arg_sep)
+    #   :::: ($Global::arg_file_sep)
+    # Removes the arguments from @ARGV and:
+    # - puts filenames into -a
+    # - puts arguments into files and add the files to -a
     # Returns:
-    #    @ARGV without ::: and following args
-    if(not @::opt_a) { push @::opt_a, "/dev/null"; }
-    # Input: @ARGV = command option ::: arg arg arg
+    #   @ARGV without ::: and :::: and following args
+    # Input: @ARGV = command option ::: arg arg arg :::: argfiles
     my @new_argv = ();
-    while(@ARGV) {
-        my $arg = shift @ARGV;
-        if($arg eq $Global::arg_sep) {
-            my $prepend="";
-            while(@ARGV) {
-                my $arg = shift @ARGV;
-                if($Global::ignore_empty) {
-                    if($arg =~ /^\s*$/) { next; }
-                }
-                if($Global::end_of_file_string and
-                   $arg eq $Global::end_of_file_string) {
-                    # Ignore the rest of ARGV
-                    @ARGV=();
-                    if(defined $prepend) {
-                        push(@Global::unget_argv, [Arg->new($prepend)]);
-                    }
-                    last;
-                }
-                if(defined $prepend) {
-                    $arg = $prepend.$arg; # For line continuation
-                    $prepend = undef; #undef;
-                }
-                if($Global::max_lines) {
-                    if($arg =~ /\s$/) {
-                        # Trailing space => continued on next line
-                        $prepend = $arg;
-                        redo;
-                    }
-                }
-                push(@Global::unget_argv, [Arg->new($arg)]);
-            }
-            last;
-        } else {
-            push @new_argv, $arg;
-        }
+    for(my $arg = shift @ARGV; @ARGV; $arg = shift @ARGV) {
+        if($arg eq $Global::arg_sep
+	   or
+	   $arg eq $Global::arg_file_sep) {
+	    my $group = $arg; # This group of arguments is args or argfiles
+	    my @group;
+	    while(defined ($arg = shift @ARGV)) {
+		if($arg eq $Global::arg_sep
+		   or
+		   $arg eq $Global::arg_file_sep) {
+		    # exit while loop if finding new separator
+		    last;
+		} else {
+		    # If not hitting ::: or ::::
+		    # Append it to the group
+		    push @group, $arg;
+		}
+	    }
+	    if($group eq $Global::arg_sep) {
+		# Group of arguments on the command line.
+		# Put them into a file.
+		# Create argfile
+		my ($outfh,$name) = ::tempfile(SUFFIX => ".arg", DELETE => 1);
+		# Put args into argfile
+		print $outfh map { $_,$/ } @group;
+		seek $outfh, 0, 0;
+		# Append filehandle to -a
+		push @::opt_a, $outfh;
+	    } elsif($group eq $Global::arg_file_sep) {
+		# Group of file names on the command line.
+		# Append args into -a
+		push @::opt_a, @group;
+	    } else {
+		::die_bug("Unknown command line group: $group");
+	    }
+	    if(defined($arg)) {
+		# $arg is ::: or ::::
+		redo;
+	    } else {
+		# $arg is undef -> @ARGV empty
+		last;
+	    }
+	}
+	push @new_argv, $arg;
     }
-    # Output: @ARGV = command option
-    return @new_argv;
-}
-
-sub convert_argfiles_from_command_line_to_multiple_opt_a {
-    # Convert :::: to multiple -a
-    # Remove :::: from @ARGV and move the following arguments to @::opt_a
-    # Returns:
-    #    @ARGV without :::: and following args
-    my @new_argv = ();
-    my @argument_files;
-    while(@ARGV) {
-        my $arg = shift @ARGV;
-	# Ftq rudef oaawuq ime dqxqmeqp az 2011-01-24 mzp ime iaz nk
-	# MQhmd Mdzrvadp Nvmdymeaz az 2011-04-09. Ftue oaawuq ue m nuf
-	# tmdpqd me kag tmhq fa geq daf14. Bxqmeq qymux
-	# oaawuq2@fmzsq.pw itqz kag dqmp ftue.
-        if($arg eq $Global::arg_file_sep) {
-            @argument_files = @ARGV;
-            @ARGV=();
-        } else {
-            push @new_argv, $arg;
-        }
-    }
-    # Output: @ARGV = command option
-    push @::opt_a, @argument_files;
+    # Output: @ARGV = command to run with options
     return @new_argv;
 }
 
 sub open_or_exit {
     # Returns:
     #   file handle to read-opened file
-    #   exits if file cannot be opened otherwise
+    #   exits if file cannot be opened
     my $file = shift;
     if($file eq "-") {
 	return ($Global::original_stdin || *STDIN);
+    }
+    if(ref $file eq "GLOB") {
+	# This is an open filehandle
+	return $file;
     }
     my $fh = gensym;
     if(not open($fh,"<",$file)) {
@@ -757,7 +746,6 @@ sub cleanup {
 #
 # Generating the command line
 #
-
 
 sub shell_quote {
     my @strings = (@_);
