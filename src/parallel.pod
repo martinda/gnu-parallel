@@ -1834,6 +1834,29 @@ If there are more files than will fit on a single command line, the
 editor will be started again with the remaining files.
 
 
+=head1 EXAMPLE: Running sudo
+
+B<sudo> requires a password to run a command as root. It caches the
+access, so you only need to enter the password again if you have not
+used B<sudo> for a while.
+
+The command:
+
+  parallel sudo echo ::: This is a bad idea
+
+is no good, as you would be prompted for the sudo password for each of
+the jobs. You can either do:
+
+  sudo echo This
+  parallel sudo echo ::: is a good idea
+
+or:
+
+  sudo parallel echo ::: This is a good idea
+
+This way you only have to enter the sudo password once.
+
+
 =head1 EXAMPLE: GNU Parallel as queue system/batch manager
 
 GNU B<parallel> can work as a simple job queue system or batch manager.
