@@ -2801,16 +2801,16 @@ sub sshtransfer {
     my $sshlogin = $self->sshlogin();
     my $sshcmd = $sshlogin->sshcommand();
     my $serverlogin = $sshlogin->serverlogin();
-    my $rsync_opt = "-rlDzRE -e".::shell_quote_scalar($sshcmd);
+    my $rsync_opt = "-rlDzR -e".::shell_quote_scalar($sshcmd);
     my $pre = "";
     for my $file ($self->transfer()) {
 	$file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
 	$file =~ s:^\./::g; # Remove ./ if any
 	my $relpath = ($file !~ m:^/:); # Is the path relative?
 	# Use different subdirs depending on abs or rel path
-	# Abs path: rsync -rlDzRE /home/tange/dir/subdir/file.gz server:/
-	# Rel path: rsync -rlDzRE ./subdir/file.gz server:.parallel/tmp/tempid/
-	# Rel path: rsync -rlDzRE ./subdir/file.gz server:$workdir/
+	# Abs path: rsync -rlDzR /home/tange/dir/subdir/file.gz server:/
+	# Rel path: rsync -rlDzR ./subdir/file.gz server:.parallel/tmp/tempid/
+	# Rel path: rsync -rlDzR ./subdir/file.gz server:$workdir/
 	my $remote_workdir = $self->workdir($file);
 	my $rsync_destdir = ($relpath ? $remote_workdir : "/");
 	if($relpath) {
@@ -2855,7 +2855,7 @@ sub sshreturn {
     my $sshlogin = $self->sshlogin();
     my $sshcmd = $sshlogin->sshcommand();
     my $serverlogin = $sshlogin->serverlogin();
-    my $rsync_opt = "-rlDzRE -e".::shell_quote_scalar($sshcmd);
+    my $rsync_opt = "-rlDzR -e".::shell_quote_scalar($sshcmd);
     my $pre = "";
     for my $file ($self->return()) {
 	$file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
@@ -2872,8 +2872,8 @@ sub sshreturn {
 	# and to get the right relative return path
 	my $replaced = ($relpath ? $self->workdir()."/./" : "") . $file;
 	# --return
-	# Abs path: rsync -rlDzRE server:/home/tange/dir/subdir/file.gz /
-	# Rel path: rsync -rlDzRE server:./subsir/file.gz ./
+	# Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
+	# Rel path: rsync -rlDzR server:./subsir/file.gz ./
 	$pre .= "rsync $rsync_opt $remove $serverlogin:".
 	     ::shell_quote_scalar($replaced) . " ".$rsync_destdir.";";
     }
