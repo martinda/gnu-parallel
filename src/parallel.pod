@@ -100,7 +100,7 @@ B<{/}> can be used the same places as B<{}>. The replacement string
 B<{/}> can be changed with B<--basenamereplace>.
 
 
-=item B<{//}>
+=item B<{//}> (alpha testing)
 
 Dirname of input line. This is a specialized replacement string
 containing the dir of the input. See B<dirname>(1).
@@ -128,7 +128,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 
 =item B<{>I<n>B<}>
 
-Argument from argument file I<n> or the I<n>'th argument. See B<-a>
+Argument from input source I<n> or the I<n>'th argument. See B<-a>
 and B<-N>.
 
 B<{>I<n>B<}> can be used the same places as B<{}>.
@@ -136,7 +136,7 @@ B<{>I<n>B<}> can be used the same places as B<{}>.
 
 =item B<{>I<n>.B<}>
 
-Argument from argument file I<n> or the I<n>'th argument without
+Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
 
 B<{>I<n>.B<}> can be used the same places as B<{>I<n>B<}>.
@@ -144,7 +144,7 @@ B<{>I<n>.B<}> can be used the same places as B<{>I<n>B<}>.
 
 =item B<{>I<n>/B<}>
 
-Basename of argument from argument file I<n> or the I<n>'th argument.
+Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.  See B<-a> and B<-N>.
 
 B<{>I<n>/B<}> can be used the same places as B<{>I<n>B<}>.
@@ -152,7 +152,7 @@ B<{>I<n>/B<}> can be used the same places as B<{>I<n>B<}>.
 
 =item B<{>I<n>/.B<}>
 
-Basename of argument from argument file I<n> or the I<n>'th argument
+Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
 B<{.}>.  See B<-a> and B<-N>.
 
@@ -161,9 +161,9 @@ B<{>I<n>/.B<}> can be used the same places as B<{>I<n>B<}>.
 
 =item B<:::> I<arguments> (alpha testing)
 
-Use arguments from the command line as input instead of from stdin
-(standard input). Unlike other options for GNU B<parallel> B<:::> is
-placed after the I<command> and before the arguments.
+Use arguments from the command line as input source instead of from
+stdin (standard input). Unlike other options for GNU B<parallel>
+B<:::> is placed after the I<command> and before the arguments.
 
 The following are equivalent:
 
@@ -179,10 +179,11 @@ argument separator to something else. See also B<--arg-sep>.
 
 stdin (standard input) will be passed to the first process run.
 
-If multiple B<:::> are given, all combinations of group of arguments
-will be generated. E.g. ::: 1 2 ::: a b c will result in the
-combinations (1,a) (1,b) (1,c) (2,a) (2,b) (2,c). This is useful for
-replacing nested for-loops.
+If multiple B<:::> are given, each group will be treated as an input
+source, and all combinations of input sources will be
+generated. E.g. ::: 1 2 ::: a b c will result in the combinations
+(1,a) (1,b) (1,c) (2,a) (2,b) (2,c). This is useful for replacing
+nested for-loops.
 
 B<:::> and B<::::> can be mixed. So these are equivalent:
 
@@ -197,6 +198,8 @@ B<:::> and B<::::> can be mixed. So these are equivalent:
 =item B<::::> I<argfiles> (alpha testing)
 
 Another way to write B<-a> I<argfile1> B<-a> I<argfile2> ...
+
+B<:::> and B<::::> can be mixed.
 
 See B<-a>.
 
@@ -214,20 +217,19 @@ for processing arguments that may contain \n (newline).
 
 =item B<-a> I<input-file>
 
-Read items from the file I<input-file> instead of stdin (standard input).  If
-you use this option, stdin is given to the first process run.
-Otherwise, stdin is redirected from /dev/null.
+Use I<input-file> as input source. If you use this option, stdin is
+given to the first process run.  Otherwise, stdin is redirected from
+/dev/null.
 
-If multiple B<-a> are given, all combinations of all lines will be
-generated. E.g. 1 2 and a b c will result in the combinations (1,a)
-(1,b) (1,c) (2,a) (2,b) (2,c). This is useful for replacing nested
-for-loops.
-
-The arguments can be accessed in the command as B<{1}>
-.. B<{>I<n>B<}>, so B<{1}> will be a line from the first file, and
-B<{6}> will refer to a line from the 6th file.
+If multiple B<-a> are given, each I<input-file> will be treated as an
+input source, and all combinations of input sources will be
+generated. E.g. The file B<foo> contains B<1 2>, the file B<bar>
+contains B<a b c>.  B<-a foo> B<-a bar> will result in the combinations
+(1,a) (1,b) (1,c) (2,a) (2,b) (2,c). This is useful for replacing
+nested for-loops.
 
 See also B<--xapply>
+
 
 =item B<--arg-file-sep> I<sep-str>
 

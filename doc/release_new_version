@@ -167,23 +167,29 @@ This is a major release. So far GNU Parallel has been focused on
 replacing a single for-loop. The Pakistan release introduces ways to
 replace nested loops.
 
+If you are using the {1} {2} syntax for multiple input sources, then you
+need to read about --xapply as the function has changed.
+
 New in this release:
 
 * Multiple ::: can be put on the command line and will be treated
   similar to contents from multiple -a's.
 
 * ::: and :::: can now be mixed on the command line. Use {1} .. {n} to
-  refer to the arguments from the different arguments.
+  refer to inputs from the different input sources.
 
 * --xapply is now needed to get xapply's behaviour of reading one line
-  from arguments from each of multiple input files.
+  from each of the input sources.
 
-* Multiple input source will cause all combinations of arguments from
-  the sources to be generated. E.g. ::: 1 2 ::: a b c will result in
-  the combinations (1,a) (1,b) (1,c) (2,a) (2,b) (2,c). This can often
-  replace nested loops.
+* Multiple input sources will cause all combinations of arguments from
+  the sources to be generated. E.g. 'parallel echo {1}+{2} ::: 1 2 :::
+  a b c' will print 1+a 1+b 1+c 2+a 2+b 2+c. This can often replace
+  nested loops.
 
 * Implemented {//} for the input line with the basename removed (dirname).
+
+* Article about GNU SQL in USENIX Magazine ;login: (print)
+  http://www.usenix.org/publications/login/2011-04/
 
 * Using GNU Parallel with EC2. Thanks to Kevin Wu.
   http://blog.kevinformatics.com/post/4970574713/interested-in-your-experience-using-gnu-parallel-in
@@ -203,6 +209,15 @@ New in this release:
 * Short article about using GNU Parallel with lame:
   http://loopkid.net/articles/2011/04/30/accelerate-lame-mp3-conversion
 
+* BBC Research & Development uses GNU Parallel:
+  http://www.bbc.co.uk/blogs/researchanddevelopment/2010/11/prototyping-weeknotes-41-26112.shtml
+
+* Short article about using GNU Parallel on RHEL. Thanks to Rishi Deshpande.
+  http://nuclear-imaging.info/site_content/2011/05/11/gnu-parallel/
+
+* Using GNU Parallel for FLAC->MP3 conversion. Thanks to Derek Marcotte.
+  http://derek.chezmarcotte.ca/?p=286
+
 * Bug fixes and man page updates.
 
 
@@ -220,7 +235,7 @@ If you use xargs and tee today you will find GNU Parallel very easy to
 use as GNU Parallel is written to have the same options as xargs. If
 you write loops in shell, you will find GNU Parallel may be able to
 replace most of the loops and make them run faster by running several
-jobs in parallel.
+jobs in parallel. GNU Parallel can even replace nested loops.
 
 GNU Parallel makes sure output from the commands is the same output as
 you would get had you run the commands sequentially. This makes it
@@ -236,4 +251,22 @@ When using GNU Parallel for a publication please cite:
 
 O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
 The USENIX Magazine, February 2011:42-47.
+
+
+= About GNU SQL =
+
+GNU sql aims to give a simple, unified interface for accessing
+databases through all the different databases' command line
+clients. So far the focus has been on giving a common way to specify
+login information (protocol, username, password, hostname, and port
+number), size (database and table size), and running queries.
+
+The database is addressed using a DBURL. If commands are left out you
+will get that database's interactive shell.
+
+When using GNU SQL for a publication please cite:
+
+O. Tange (2011): GNU SQL - A Command Line Tool for Accessing Different
+Databases Using DBURLs, ;login: The USENIX Magazine, April
+2011.
 >>>>>
