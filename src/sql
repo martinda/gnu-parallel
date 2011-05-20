@@ -997,7 +997,10 @@ sub version {
 	       "This is free software: you are free to change and redistribute it.",
 	       "GNU $Global::progname comes with no warranty.",
 	       "",
-	       "Web site: http://www.gnu.org/software/${Global::progname}\n"
+	       "Web site: http://www.gnu.org/software/${Global::progname}\n",
+	       "When using GNU $Global::progname for a publication please cite:\n",
+	       "O. Tange (2011): GNU SQL - A Command Line Tool for Accessing Different",
+	       "Databases Using DBURLs, ;login: The USENIX Magazine, April 2011:29-32.\n"
 	);
 }
 

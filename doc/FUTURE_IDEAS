@@ -1,72 +1,106 @@
-Video
+Video 30. 36. 41. 48
+
+
+# GNU Parallel 20110522 - The Pakistan Release
+
+I am Ole Tange. I am the author of GNU Parallel.
 
 So far GNU Parallel has been focused on replacing a single
 for-loop. The Pakistan release introduces a way to replace nested
 loops.
 
-As example I will use the image manipulation program 'convert' from
-ImageMagick. This will convert foo.png to jpg with a size of 800 and
-JPEG-quality of 95.
+# NESTED FOR LOOPS
 
-convert -size 800 -quality 95 foo.png foo_800_q95.jpg
+As example I will use the image manipulation program 'convert' from
+ImageMagick. This command will convert foo.png to jpg with a size of
+800 and JPEG-quality of 95.
+
+convert -resize 800 -quality 95 foo.png foo_800_q95.jpg
 
 With a for-loop it can be done on a list of files:
 
-time \
 for file in *.png ; do
-  convert -size 800 -quality 95 $file ${file%.*}_800_q95.jpg
+  convert -resize 800 -quality 95 $file ${file%.*}_800_q95.jpg
 done
 
-Using GNU Parallel it looks like this:
+This is the kind of loops GNU Parallel is good at replacing:
 
-time parallel convert -size 800 -quality 95 {} {.}_800_q95.jpg ::: *.png
+parallel convert -resize 800 -quality 95 {} {.}_800_q95.jpg ::: *.png
 
 
 To get the images in 3 different JPEG-qualities you can use a nested for-loop:
 
-time \
 for qual in 25 50 95 ; do
   for file in *.png ; do
-    convert -size 800 -quality $qual $file ${file%.*}_800_q${qual}.jpg
+    convert -resize 800 -quality $qual $file ${file%.*}_800_q${qual}.jpg
   done
 done
 
 With GNU Parallel 'Pakistan' you can do this:
 
-time parallel convert -size 800 -quality 95 {1} {1.}_800_q{2}.jpg ::: *.png ::: 25 50 95
+parallel convert -resize 800 -quality {2} {1} {1.}_800_q{2}.jpg ::: *.png ::: 25 50 95
+
+The new is that you can use the ::: multiple times. GNU Parallel will
+then generate all the combinations and execute the command with these.
+The {1} and {2} will be replaced by the relevant input source.
 
 To get the 3 different JPEG-qualities in 2 different sizes you can
 nest the for-loop even further:
 
-time \
 for size in 800 30 ; do
   for qual in 25 50 95 ; do
     for file in *.png ; do
-      convert -size $size -quality $qual $file ${file%.*}_${size}_q${qual}.jpg
+      convert -resize $size -quality $qual $file ${file%.*}_${size}_q${qual}.jpg
     done
   done
 done
 
 With GNU Parallel 'Pakistan' you can do this:
 
-time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg ::: *.png ::: 25 50 95 ::: 800 30
+parallel convert -resize {3} -quality {2} {1} {1.}_{3}_q{2}.jpg ::: *.png ::: 25 50 95 ::: 800 30
+
+GNU Parallel will again generate all the combinations of the input
+sources and run the jobs in parallel.
 
 You can also provide the arguments in a file. This will do the same as above:
 
 (echo 25; echo 50; echo 95) > qualities
 ls *.png > png-files
 (echo 800; echo 30) > sizes
-time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files qualities sizes
+parallel convert -resize {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files qualities sizes
 
-It is also possible to mix triple and quad colon. These will do the same as above:
+But you can even mix triple and quad colon. These will do the same:
 
-time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files ::: 25 50 95 ::: 800 30
+parallel convert -resize {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files ::: 25 50 95 ::: 800 30
 
-time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files ::: 25 50 95 :::: sizes
+parallel convert -resize {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: png-files ::: 25 50 95 :::: sizes
 
 The special file '-' reads from standard input. This will do the same as above:
 
-ls *.png | time parallel convert -size {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: - ::: 25 50 95 :::: sizes
+ls *.png | parallel convert -resize {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: - ::: 25 50 95 :::: sizes
+
+This is probably one of the ways you will use this feature as that can easily be combined with find:
+
+find . -name '*.png' | \
+parallel convert -resize {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: - ::: 25 50 95 :::: sizes
+
+# Thank you for watching
+#
+# If you like GNU Parallel:
+# * Post this video on forums/blogs/Twitter/Facebook/Linkedin
+# * Join the mailing list http://lists.gnu.org/mailman/listinfo/parallel
+# * Request or write a review for your favourite blog or magazine
+# * Request or build a package for your favourite distribution
+# * Invite me for your next conference (Contact http://ole.tange.dk)
+#
+# If GNU Parallel saves you money:
+# * (Have your company) donate to FSF https://my.fsf.org/donate/
+#
+# If you use GNU Parallel for a publication please cite:
+# O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
+# The USENIX Magazine, February 2011:42-47.
+#
+# Find GNU Parallel at http://www.gnu.org/software/parallel/
 
 
 Postkort:

@@ -188,6 +188,9 @@ New in this release:
 
 * Implemented {//} for the input line with the basename removed (dirname).
 
+* GNU Parallel now has a logo.
+  http://www.gnu.org/software/parallel/logo.png
+
 * Article about GNU SQL in USENIX Magazine ;login: (print)
   http://www.usenix.org/publications/login/2011-04/
 
@@ -208,6 +211,9 @@ New in this release:
 
 * Short article about using GNU Parallel with lame:
   http://loopkid.net/articles/2011/04/30/accelerate-lame-mp3-conversion
+
+* Using GNU Parallel to run tail -f in Japanese. Thanks to Clouder.
+  http://blog.clouder.jp/archives/001140.html
 
 * BBC Research & Development uses GNU Parallel:
   http://www.bbc.co.uk/blogs/researchanddevelopment/2010/11/prototyping-weeknotes-41-26112.shtml
@@ -267,6 +273,5 @@ will get that database's interactive shell.
 When using GNU SQL for a publication please cite:
 
 O. Tange (2011): GNU SQL - A Command Line Tool for Accessing Different
-Databases Using DBURLs, ;login: The USENIX Magazine, April
-2011.
+Databases Using DBURLs, ;login: The USENIX Magazine, April 2011:29-32.
 >>>>>

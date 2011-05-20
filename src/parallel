@@ -687,7 +687,8 @@ sub read_args_from_command_line {
 		# Group of arguments on the command line.
 		# Put them into a file.
 		# Create argfile
-		my ($outfh,$name) = ::tempfile(SUFFIX => ".arg", DELETE => 1);
+		my ($outfh,$name) = ::tempfile(SUFFIX => ".arg");
+		unlink($name);
 		# Put args into argfile
 		print $outfh map { $_,$/ } @group;
 		seek $outfh, 0, 0;
