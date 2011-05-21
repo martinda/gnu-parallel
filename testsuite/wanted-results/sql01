@@ -51,8 +51,8 @@ mysql -C     --host=localhost --user=sqlunittest --port=3306 --password=CB5A1FFF
 Test if --debug works
 Yes it does
 ### Test --version -V
-      7      43     306
-      7      43     306
+     12      74     500
+     12      74     500
 ### Test -r
 dburl pg://nongood@127.0.0.3:2227/
 databasedriver pg user nongood password  host 127.0.0.3 port 2227 database  query 

@@ -121,6 +121,7 @@ sub spreadstdin {
 
     while(read(STDIN,substr($buf,length $buf,0),$::opt_blocksize)) {
 	# substr above = append to $buf
+	reap_if_needed(); # Re-enable reaping after read() (Bug#33352)
 	if($::opt_regexp) {
 	    if($Global::max_number_of_args) {
 		# -N => (start..*?end){n}
@@ -160,6 +161,7 @@ sub spreadstdin {
 		}
 	    }
 	}
+	do_not_reap(); # Disable reaping before read(STDIN) (Bug#33352)
     }
     # If there is anything left in the buffer write it
     write_record_to_pipe(\$buf,$recstart,$recend);
