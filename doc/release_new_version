@@ -158,9 +158,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 2011XX22 ('Pakistan') released
+Subject: GNU Parallel 20110522 ('Pakistan') released
 
-GNU Parallel 2011XX22 ('Pakistan') has been released. It is
+GNU Parallel 20115022 ('Pakistan') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 This is a major release. So far GNU Parallel has been focused on
@@ -187,6 +187,9 @@ New in this release:
   nested loops.
 
 * Implemented {//} for the input line with the basename removed (dirname).
+
+* New video showing the new ::: and :::: input sources.
+  http://tinyogg.com/watch/iOdhU/ http://www.youtube.com/watch?v=fOX1EyHkQwc
 
 * GNU Parallel now has a logo.
   http://www.gnu.org/software/parallel/logo.png

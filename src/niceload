@@ -236,7 +236,7 @@ B<parallel>(1), B<nice>(1)
 use strict;
 use Getopt::Long;
 $Global::progname="niceload";
-$Global::version = 20110505;
+$Global::version = 20110522;
 Getopt::Long::Configure("bundling","require_order");
 get_options_from_array(\@ARGV) || die_usage();
 if($::opt_version) {

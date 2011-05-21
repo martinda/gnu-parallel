@@ -1,3 +1,65 @@
+20110522
+
+New in this release:
+
+* Multiple ::: can be put on the command line and will be treated
+  similar to contents from multiple -a's.
+
+* ::: and :::: can now be mixed on the command line. Use {1} .. {n} to
+  refer to inputs from the different input sources.
+
+* --xapply is now needed to get xapply's behaviour of reading one line
+  from each of the input sources.
+
+* Multiple input sources will cause all combinations of arguments from
+  the sources to be generated. E.g. 'parallel echo {1}+{2} ::: 1 2 :::
+  a b c' will print 1+a 1+b 1+c 2+a 2+b 2+c. This can often replace
+  nested loops.
+
+* Implemented {//} for the input line with the basename removed (dirname).
+
+* New video showing the new ::: and :::: input sources.
+  http://tinyogg.com/watch/iOdhU/ http://www.youtube.com/watch?v=fOX1EyHkQwc
+
+* GNU Parallel now has a logo.
+  http://www.gnu.org/software/parallel/logo.png
+
+* Article about GNU SQL in USENIX Magazine ;login: (print)
+  http://www.usenix.org/publications/login/2011-04/
+
+* Using GNU Parallel with EC2. Thanks to Kevin Wu.
+  http://blog.kevinformatics.com/post/4970574713/interested-in-your-experience-using-gnu-parallel-in
+
+* Review with idea for {..} and {...} in Japanese. Thanks to ichii386.
+  http://d.hatena.ne.jp/ichii386/20110426
+
+* Upgrade GNU Parallel using Macports. Thanks to Phil Hollenback.
+  http://www.hollenback.net/index.php/MacportsParallel
+
+* Robert from Echo One discusses using processes instead of threads:
+  http://rrees.wordpress.com/2011/04/25/many-cores-many-threads/
+
+* How to run GNU Parallel on a SLURM cluster. Thanks to Kevin Stock.
+  http://www.kevinstock.org/2011/04/using-the-ri-cluster/
+
+* Short article about using GNU Parallel with lame:
+  http://loopkid.net/articles/2011/04/30/accelerate-lame-mp3-conversion
+
+* Using GNU Parallel to run tail -f in Japanese. Thanks to Clouder.
+  http://blog.clouder.jp/archives/001140.html
+
+* BBC Research & Development uses GNU Parallel:
+  http://www.bbc.co.uk/blogs/researchanddevelopment/2010/11/prototyping-weeknotes-41-26112.shtml
+
+* Short article about using GNU Parallel on RHEL. Thanks to Rishi Deshpande.
+  http://nuclear-imaging.info/site_content/2011/05/11/gnu-parallel/
+
+* Using GNU Parallel for FLAC->MP3 conversion. Thanks to Derek Marcotte.
+  http://derek.chezmarcotte.ca/?p=286
+
+* Bug fixes and man page updates.
+
+
 20110422
 
 * {#} now works an alias for $PARALLEL_PID.

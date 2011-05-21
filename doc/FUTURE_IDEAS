@@ -1,3 +1,8 @@
+Dont start new job if:
+
+* load is too high
+* memory free is too low
+
 Video 30. 36. 41. 48
 
 
@@ -231,12 +236,8 @@ for potentiel:
 colsep = [sepchars]{no_of_sepchars}
 
 
-# Hvordan udregnes system limits på remote systems hvis jeg ikke ved, hvormange
-# argumenter, der er? Lav system limits lokalt og lad det være max
-
 # TODO max_line_length on remote
 # TODO compute how many can be transferred within max_line_length
-# TODO Unittest with filename that is long and requires a lot of quoting. Will there be to many
 
 =head1 YouTube video --pipe
 
@@ -603,9 +604,6 @@ Kan vi lave flere ssh'er, hvis vi venter lidt?
 En ssh med 20% loss og 900 ms delay, så kan login nås på 15 sek.
 
 Test if -0 works on filenames ending in '\n'
-
-If there are nomore jobs (STDIN is eof) then make sure to
-distribute the arguments evenly if running -X.
 
 
 =head1 options
