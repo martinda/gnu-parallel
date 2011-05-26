@@ -987,6 +987,19 @@ The sshloginfile '..' is special, it read sshlogins from
 ~/.parallel/sshloginfile
 
 
+=item B<--noswap> (alpha testing)
+
+Do not start new jobs on a given computer if there is both swap-in and
+swap-out activity.
+
+The swap activity is only sampled every 10 seconds as the sampling
+takes 1 second to do.
+
+Swap activity is computed as (swap-in)*(swap-out) which in practice is
+a good value: swapping out is not a problem, swapping in is not a
+problem, but both swapping in and out usually indicates a problem.
+
+
 =item B<--silent>
 
 Silent.  The job to be run will not be printed. This is the default.

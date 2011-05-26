@@ -329,6 +329,7 @@ sub get_options_from_array {
 	 "seqreplace=s" => \$::opt_seqreplace,
 	 "jobs|j=s" => \$::opt_P,
 	 "load=f" => \$::opt_load,
+	 "noswap" => \$::opt_noswap,
 	 "max-line-length-allowed" => \$::opt_max_line_length_allowed,
 	 "number-of-cpus" => \$::opt_number_of_cpus,
 	 "number-of-cores" => \$::opt_number_of_cores,
@@ -1186,6 +1187,10 @@ sub start_more_jobs {
                 # The load is too high or unknown
                 next;
             }
+            if($::opt_noswap and $sshlogin->swapping()) {
+                # The server is swapping
+                next;
+            }
             while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
                 if($Global::JobQueue->empty() and not $::opt_pipe) {
                     last;
@@ -1708,10 +1713,20 @@ sub new {
         'serverlogin' => undef,
         'control_path_dir' => undef,
         'control_path' => undef,
-        'loadavg_file' => $ENV{'HOME'} . "/.parallel/tmp/" .
+        'loadavg_file' => $ENV{'HOME'} . "/.parallel/tmp/loadavg-" .
             $$."-".$string,
         'loadavg' => undef,
+        'swap_activity_file' => $ENV{'HOME'} . "/.parallel/tmp/swap_activity-" .
+            $$."-".$string,
+        'swap_activity' => undef,
     }, ref($class) || $class;
+}
+
+sub DESTROY {
+    my $self = shift;
+    # Remove temporary files if they are created.
+    unlink $self->{'loadavg_file'};
+    unlink $self->{'swap_activity_file'};
 }
 
 sub string {
@@ -1770,6 +1785,60 @@ sub set_max_jobs_running {
         # max_jobs_running could be resat if -j is a changed file
         $Global::max_jobs_running += $self->{'max_jobs_running'};
     }
+}
+
+sub swapping {
+    my $self = shift;
+    my $swapping = $self->swap_activity();
+    return (not defined $swapping or $swapping)
+}
+
+sub swap_activity {
+    # If the currently known swap activity is too old:
+    #   Recompute a new one in the background
+    # Returns:
+    #   last load average computed
+    my $self = shift;
+    # Should we update the swap_activity file?
+    my $update_swap_activity_file = 0;
+    if(-r $self->{'swap_activity_file'}) {
+        open(SWAP,"<".$self->{'swap_activity_file'}) || ::die_bug("swap_activity_file-r");
+        my $swap_out = <SWAP>;
+        close SWAP;
+        if($swap_out =~ /^(\d+)$/) {
+            $self->{'swap_activity'} = $1;
+            ::debug("New swap_activity: ".$self->{'swap_activity'});
+        }
+        ::debug("Last update: ".$self->{'last_swap_activity_update'});
+        if(time - $self->{'last_swap_activity_update'} > 10) {
+            # last loadavg was started 10 seconds ago
+            ::debug("Older than 10 sec: ".$self->{'swap_activity_file'});
+            $update_swap_activity_file = 1;
+        }
+    } else {
+        ::debug("No swap_activity file: ".$self->{'swap_activity_file'});
+        $self->{'swap_activity'} = undef;
+        $update_swap_activity_file = 1;
+    }
+    if($update_swap_activity_file) {
+        ::debug("Updating swap_activity file".$self->{'swap_activity_file'});
+        $self->{'last_swap_activity_update'} = time;
+        -e $ENV{'HOME'}."/.parallel" or mkdir $ENV{'HOME'}."/.parallel";
+        -e $ENV{'HOME'}."/.parallel/tmp" or mkdir $ENV{'HOME'}."/.parallel/tmp";
+        my $swap_activity;
+	$swap_activity = "vmstat 1 2 | tail -n1 | awk '{print \$7*\$8}'";
+        if($self->{'string'} ne ":") {
+            $swap_activity = $self->sshcommand() . " " . $self->serverlogin() . " " .
+		::shell_quote_scalar($swap_activity);
+        }
+        # Run swap_activity measuring.
+        # As the command can take long to run if run remote
+        # save it to a tmp file before moving it to the correct file
+        my $file = $self->{'swap_activity_file'};
+        my $tmpfile = $self->{'swap_activity_file'}.$$;
+        qx{ ($swap_activity > $tmpfile; mv $tmpfile $file) & };
+    }
+    return $self->{'swap_activity'};
 }
 
 sub loadavg_too_high {
