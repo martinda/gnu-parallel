@@ -50,6 +50,28 @@ if(@ARGV) {
     }
 }
 
+if($::opt_nonall or $::opt_onall) {
+    # Copy all @fhlist into tempfiles
+    my @argfiles = ();
+    for my $fh (@fhlist) {
+	my ($outfh,$name) = ::tempfile(SUFFIX => ".all");
+	print $outfh (<$fh>);
+	close $outfh;
+	push @argfiles, $name;
+    }
+    # for each sshlogin do:
+    # parallel -S $sshlogin $command :::: @argfiles
+    open(PARALLEL,"| parallel -j $::opt_P") || die;
+    for my $sshlogin (values %Global::host) {
+	print PARALLEL "parallel -j1 -S ".
+	    shell_quote_scalar($sshlogin->string())." ".
+	    shell_quote_scalar($command)." :::: @argfiles\n";
+    }
+    close PARALLEL;
+    unlink(@argfiles);
+    exit;
+}
+
 $Global::JobQueue = JobQueue->new(
     $command,\@fhlist,$Global::Xargs,$number_of_args,\@Global::ret_files);
 if($::opt_eta) {
@@ -335,6 +357,8 @@ sub get_options_from_array {
 	 "number-of-cores" => \$::opt_number_of_cores,
 	 "use-cpus-instead-of-cores" => \$::opt_use_cpus_instead_of_cores,
 	 "nice=i" => \$::opt_nice,
+	 "onall" => \$::opt_onall,
+	 "nonall" => \$::opt_nonall,
 	 "sshlogin|S=s" => \@::opt_sshlogin,
 	 "sshloginfile=s" => \$::opt_sshloginfile,
 	 "controlmaster|M" => \$::opt_controlmaster,
@@ -493,6 +517,10 @@ sub parse_options {
     if(defined $::opt_fg) { $Global::semaphore = 1; }
     if(defined $::opt_bg) { $Global::semaphore = 1; }
     if(defined $::opt_wait) { $Global::semaphore = 1; }
+    if(defined $::opt_nonall) {
+	# Append a dummy empty argument
+	push @ARGV, ":::", "";
+    }
     if(defined $::opt_tty) {
         # Defaults for --tty: -j1 -u
         # Can be overridden with -jXXX -g

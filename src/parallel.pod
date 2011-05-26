@@ -217,9 +217,9 @@ for processing arguments that may contain \n (newline).
 
 =item B<-a> I<input-file>
 
-Use I<input-file> as input source. If you use this option, stdin is
-given to the first process run.  Otherwise, stdin is redirected from
-/dev/null.
+Use I<input-file> as input source. If you use this option, stdin
+(standard input) is given to the first process run.  Otherwise, stdin
+(standard input) is redirected from /dev/null.
 
 If multiple B<-a> are given, each I<input-file> will be treated as an
 input source, and all combinations of input sources will be
@@ -369,11 +369,11 @@ neither B<-E> nor B<-e> is used, no end of file string is used.
 
 =item B<--dry-run>
 
-Print the job to run on standard output, but do not run the job. Use
-B<-v -v> to include the ssh/rsync wrapping if the job would be run on
-a remote computer. Do not count on this literaly, though, as the job
-may be scheduled on another computer or the local computer if : is in
-the list.
+Print the job to run on stdout (standard output), but do not run the
+job. Use B<-v -v> to include the ssh/rsync wrapping if the job would
+be run on a remote computer. Do not count on this literaly, though, as
+the job may be scheduled on another computer or the local computer if
+: is in the list.
 
 
 =item B<--eof>[=I<eof-str>]
@@ -415,8 +415,9 @@ B<--gnu> takes precedence.
 =item B<-g>
 
 Group output.  Output from each jobs is grouped together and is only
-printed when the command is finished. STDERR first followed by STDOUT.
-B<-g> is the default. Can be reversed with B<-u>.
+printed when the command is finished. stderr (standard error) first
+followed by stdout (standard output).  B<-g> is the default. Can be
+reversed with B<-u>.
 
 
 =item B<--help>
@@ -620,6 +621,14 @@ See also B<-X> for context replace. If in doubt use B<-X> as that will
 most likely do what is needed.
 
 
+=item B<--onall> (unimplemented)
+
+Run all the jobs on all computers given with B<--sshlogin>. GNU
+B<parallel> will log into B<--jobs> number of computers in parallel
+and run one job at a time on the computer. The order of the jobs will
+not be changed, but some computers may finish before others.
+
+
 =item B<--output-as-files>
 
 =item B<--outputasfiles>
@@ -634,8 +643,9 @@ of each job is saved in a file and the filename is then printed.
 
 =item B<--spreadstdin> (alpha testing)
 
-Spread input to jobs on stdin. Read a block of data from stdin
-(standard input) and give one block of data as input to one job.
+Spread input to jobs on stdin (standard input). Read a block of data
+from stdin (standard input) and give one block of data as input to one
+job.
 
 The block size is determined by B<--block>. The strings B<--recstart>
 and B<--recend> tell GNU B<parallel> how a record starts and/or
@@ -947,6 +957,9 @@ on the local computer.
 
 The sshlogin '..' is special, it read sshlogins from ~/.parallel/sshloginfile
 
+The sshlogin '-' is special, too, it read sshlogins stdin (standard input).
+
+
 To specify more sshlogins separate the sshlogins by comma or repeat
 the options multiple times.
 
@@ -1035,7 +1048,7 @@ override use B<--gnu>.
 
 =item B<-t>
 
-Print the job to be run on standard error.
+Print the job to be run on stderr (standard error).
 
 See also B<-v> and B<-p>.
 
@@ -1131,7 +1144,7 @@ not need this option.
 
 =item B<-v>
 
-Verbose.  Print the job to be run on standard output. Can be reversed
+Verbose.  Print the job to be run on stdout (standard output). Can be reversed
 with B<--silent>. See also B<-t>.
 
 Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
@@ -1403,6 +1416,9 @@ download images for the past 30 days:
 
 B<parallel wget http://www.example.com/path/to/'$(date -d "today -{1} days" +%Y%m%d)_{2}.jpg' ::: $(seq 30) ::: $(seq -w 10)>
 
+B<$(date -d "today -{1} days" +%Y%m%d)> with give the dates in
+YYYYMMDD with {1} days subtracted.
+
 
 =head1 EXAMPLE: Process files from a tar file while unpacking
 
@@ -1467,12 +1483,7 @@ Nested for-loops like this:
 
 can be written like this:
 
-B<cat xlist | parallel cat ylist \| parallel -I {o} do_something {} {o} | process_output>
-
-The above will run N*N jobs in parallel if parallel normally runs N jobs. To
-ensure the output order is the same as the input and only run N jobs do:
-
-B<cat xlist | parallel -k cat ylist \| parallel -j1 -kI {o} do_something {} {o} | process_output>
+B<parallel do_something {1} {2} :::: xlist ylist | process_output
 
 
 =head1 EXAMPLE: Group output lines
@@ -1688,6 +1699,18 @@ Convert *.mp3 to *.ogg running one process per CPU core on local computer and se
 
   parallel --trc {.}.ogg -S server2,: \
   'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg' ::: *.mp3
+
+
+=head1 EXAMPLE: Running the same command on remote computers (unimplemented)
+
+To run the command B<uptime> on remote computers you can do:
+
+B<parallel --nonall -S server1,server2 uptime>
+
+B<--nonall> reads no arguments. If you have a list of jobs you want
+run on each computer you can do:
+
+B<parallel --onall -S server1,server2 echo ::: 1 2 3>
 
 
 =head1 EXAMPLE: Use multiple inputs in one command
@@ -2062,7 +2085,8 @@ If you want a list of the jobs currently running you can run:
 
 B<killall -USR1 parallel>
 
-GNU B<parallel> will then print the currently running jobs on STDERR.
+GNU B<parallel> will then print the currently running jobs on stderr
+(standard error).
 
 
 =head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
@@ -2229,11 +2253,11 @@ Manipulation of input
 
 Outputs
  O1. Grouping output so output from different jobs do not mix
- O2. Send stderr to stderr
- O3. Send stdout to stdout
+ O2. Send stderr (standard error) to stderr (standard error)
+ O3. Send stdout (standard output) to stdout (standard output)
  O4. Order of output can be same as order of input
- O5. Stdout only contains stdout from the command
- O6. Stderr only contains stdout from the command
+ O5. Stdout only contains stdout (standard output) from the command
+ O6. Stderr only contains stderr (standard error) from the command
 
 Execution
  E1. Running jobs in parallel
@@ -2618,9 +2642,9 @@ functions (see why
 http://www.perlmonks.org/index.pl?node_id=484296). However, scripts or
 composed commands work just fine.
 
-B<prll> generates a lot of status information on STDERR which makes it
-harder to use the STDERR output of the job directly as input for
-another program.
+B<prll> generates a lot of status information on stderr (standard
+error) which makes it harder to use the stderr (standard error) output
+of the job directly as input for another program.
 
 Here is the example from B<prll>'s man page with the equivalent
 using GNU B<parallel>:
