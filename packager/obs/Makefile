@@ -1,5 +1,6 @@
 all:
 	cd ../debian/ && make
+	osc rm home\:tange/parallel/parallel_*.dsc
 	cp ../debian/parallel_*.dsc ../debian/parallel_*.tar.gz home\:tange/parallel/
 	cp `ls ../../parallel-*.tar.bz2|tail -n1` home\:tange/parallel/
 	cd home\:tange/parallel/ && osc up 

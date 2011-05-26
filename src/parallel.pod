@@ -630,9 +630,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe>
+=item B<--pipe> (alpha testing)
 
-=item B<--spreadstdin>
+=item B<--spreadstdin> (alpha testing)
 
 Spread input to jobs on stdin. Read a block of data from stdin
 (standard input) and give one block of data as input to one job.
@@ -1385,15 +1385,10 @@ Let us assume a website stores images like:
 
    http://www.example.com/path/to/YYYYMMDD_##.jpg
 
-where YYYYMMDD is the date and ## is the number 01-10.  This will
-generate the past 30 days as YYYYMMDD:
+where YYYYMMDD is the date and ## is the number 01-10. This will
+download images for the past 30 days:
 
-B<seq 30 | parallel date -d '"today -{} days"' +%Y%m%d>
-
-Based on this we can let GNU B<parallel> generate 10 B<wget>s per day:
-
-I<the above> B<| parallel -I {o} seq -w 10 "|" parallel wget
-http://www.example.com/path/to/{o}_{}.jpg>
+B<parallel wget http://www.example.com/path/to/'$(date -d "today -{1} days" +%Y%m%d)_{2}.jpg' ::: $(seq 30) ::: $(seq -w 10)>
 
 
 =head1 EXAMPLE: Process files from a tar file while unpacking
@@ -1691,20 +1686,24 @@ B<ls *.es.* | perl -pe 'print; s/\.es//' | parallel -N2 cp {1} {2}>
 The perl command spits out 2 lines for each input. GNU B<parallel>
 takes 2 inputs (using B<-N2>) and replaces {1} and {2} with the inputs.
 
+Count in binary:
+
+B<parallel -k echo ::: 0 1 ::: 0 1 ::: 0 1 ::: 0 1 ::: 0 1 ::: 0 1>
+
 Print the number on the opposing sides of a six sided die:
 
-B<parallel -a <(seq 6) -a <(seq 6 -1 1) echo>
+B<parallel --xapply -a <(seq 6) -a <(seq 6 -1 1) echo>
 
-B<parallel echo :::: <(seq 6) <(seq 6 -1 1)>
+B<parallel --xapply echo :::: <(seq 6) <(seq 6 -1 1)>
 
 Convert files from all subdirs to PNG-files with consecutive numbers
 (useful for making input PNG's for B<ffmpeg>):
 
-B<parallel -a <(find . -type f | sort) -a <(seq $(find . -type f|wc -l)) convert {1} {2}.png>
+B<parallel --xapply -a <(find . -type f | sort) -a <(seq $(find . -type f|wc -l)) convert {1} {2}.png>
 
 Alternative version:
 
-B<find . -type f | sort | parallel convert {} \$PARALLEL_SEQ.png>
+B<find . -type f | sort | parallel convert {} {#}.png>
 
 
 =head1 EXAMPLE: Use a table as input
@@ -2657,7 +2656,7 @@ B<2> parallel diff {} ../version5/{} < manifest | more
 
 B<3> xapply -p/dev/null -f 'diff %1 %2' manifest1 checklist1
 
-B<3> parallel diff {1} {2} :::: manifest1 checklist1
+B<3> parallel --xapply diff {1} {2} :::: manifest1 checklist1
 
 B<4> xapply 'indent' *.c
 

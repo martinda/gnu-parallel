@@ -129,10 +129,15 @@ http://nd.gd/2j Watch the intro video http://nd.gd/0s
 
 https://savannah.gnu.org/news/?group=parallel
 
+
 # Only 350 requests per hour: 1 tweet = 3 requests
 # 119 tweets/hour = sleep 30 per tweet (40 to be safe)
+# The above is not enough.
+# Went over the limit at number 132 (sleep 40)
+# https://support.twitter.com/entries/15364-about-twitter-limits-update-api-dm-and-following
+# says 250 direct msg per day = 86400/250 = sleep 345
 cat twitters | grep -iv removed | 
-  parallel -j1 sleep 40\; echo @{} You have earlier shown interest in GNU Parallel. \
+  parallel -j1 sleep 354\; echo @{} You have earlier shown interest in GNU Parallel. \
 A new version is out: http://nd.gd/2j '|' ttytter
 
 == Send announce ==
@@ -158,74 +163,18 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20110522 ('Pakistan') released
+Subject: GNU Parallel 20110622 ('XXX') released
 
-GNU Parallel 20115022 ('Pakistan') has been released. It is
+GNU Parallel 20116022 ('XXX') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
-
-This is a major release. So far GNU Parallel has been focused on
-replacing a single for-loop. The Pakistan release introduces ways to
-replace nested loops.
-
-If you are using the {1} {2} syntax for multiple input sources, then you
-need to read about --xapply as the function has changed.
 
 New in this release:
 
-* Multiple ::: can be put on the command line and will be treated
-  similar to contents from multiple -a's.
+* Parallel processing without Hadoop!
+  http://www.solutionhacker.com/parallel-processing-without-hadoop/
 
-* ::: and :::: can now be mixed on the command line. Use {1} .. {n} to
-  refer to inputs from the different input sources.
-
-* --xapply is now needed to get xapply's behaviour of reading one line
-  from each of the input sources.
-
-* Multiple input sources will cause all combinations of arguments from
-  the sources to be generated. E.g. 'parallel echo {1}+{2} ::: 1 2 :::
-  a b c' will print 1+a 1+b 1+c 2+a 2+b 2+c. This can often replace
-  nested loops.
-
-* Implemented {//} for the input line with the basename removed (dirname).
-
-* New video showing the new ::: and :::: input sources.
-  http://tinyogg.com/watch/iOdhU/ http://www.youtube.com/watch?v=fOX1EyHkQwc
-
-* GNU Parallel now has a logo.
-  http://www.gnu.org/software/parallel/logo.png
-
-* Article about GNU SQL in USENIX Magazine ;login: (print)
-  http://www.usenix.org/publications/login/2011-04/
-
-* Using GNU Parallel with EC2. Thanks to Kevin Wu.
-  http://blog.kevinformatics.com/post/4970574713/interested-in-your-experience-using-gnu-parallel-in
-
-* Review with idea for {..} and {...} in Japanese. Thanks to ichii386.
-  http://d.hatena.ne.jp/ichii386/20110426
-
-* Upgrade GNU Parallel using Macports. Thanks to Phil Hollenback.
-  http://www.hollenback.net/index.php/MacportsParallel
-
-* Robert from Echo One discusses using processes instead of threads:
-  http://rrees.wordpress.com/2011/04/25/many-cores-many-threads/
-
-* How to run GNU Parallel on a SLURM cluster. Thanks to Kevin Stock.
-  http://www.kevinstock.org/2011/04/using-the-ri-cluster/
-
-* Short article about using GNU Parallel with lame:
-  http://loopkid.net/articles/2011/04/30/accelerate-lame-mp3-conversion
-
-* Using GNU Parallel to run tail -f in Japanese. Thanks to Clouder.
-  http://blog.clouder.jp/archives/001140.html
-
-* BBC Research & Development uses GNU Parallel:
-  http://www.bbc.co.uk/blogs/researchanddevelopment/2010/11/prototyping-weeknotes-41-26112.shtml
-
-* Short article about using GNU Parallel on RHEL. Thanks to Rishi Deshpande.
-  http://nuclear-imaging.info/site_content/2011/05/11/gnu-parallel/
-
-* Using GNU Parallel for FLAC->MP3 conversion. Thanks to Derek Marcotte.
-  http://derek.chezmarcotte.ca/?p=286
+* Article in Linux Magazine (Spanish). Thanks to Ben Martin.
+  http://www.linux-magazine.es/issue/67/
 
 * Bug fixes and man page updates.
 
