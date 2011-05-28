@@ -61,15 +61,23 @@ if($::opt_nonall or $::opt_onall) {
     }
     # for each sshlogin do:
     # parallel -S $sshlogin $command :::: @argfiles
-    open(PARALLEL,"| parallel -j $::opt_P") || die;
+    #
+    # Pass some of the options to the sub-parallels, not all of them as
+    # -P should only go to the first, and -S should not be copied at all.
+    my $options =
+	((defined $::opt_u) ? "-u" : " ") .
+	((defined $::opt_g) ? "-g" : " ") .
+	"";
+    ::debug("| parallel $options");
+    open(PARALLEL,"| parallel $options -P $::opt_P") || die;
     for my $sshlogin (values %Global::host) {
-	print PARALLEL "parallel -j1 -S ".
+	print PARALLEL "parallel $options -j1 -S ".
 	    shell_quote_scalar($sshlogin->string())." ".
 	    shell_quote_scalar($command)." :::: @argfiles\n";
     }
     close PARALLEL;
     unlink(@argfiles);
-    exit;
+    wait_and_exit(min(undef_as_zero($Global::exitstatus),254));
 }
 
 $Global::JobQueue = JobQueue->new(
@@ -316,22 +324,9 @@ sub acquire_semaphore {
     return $sem;
 }
 
-sub get_options_from_array {
-    # Run GetOptions on @array
-    # Returns:
-    #   true if parsing worked
-    #   false if parsing failed
-    #   @array is changed
-    my $array_ref = shift;
-    # A bit of shuffling of @ARGV needed as GetOptionsFromArray is not
-    # supported everywhere
-    my @save_argv;
-    my $this_is_ARGV = (\@::ARGV == $array_ref);
-    if(not $this_is_ARGV) {
-	@save_argv = @::ARGV;
-	@::ARGV = @{$array_ref};
-    }
-    my @retval = GetOptions
+sub options_hash {
+    # Returns a hash of the GetOptions config
+    return
 	("debug|D" => \$::opt_D,
 	 "xargs|m" => \$::opt_m,
 	 "X" => \$::opt_X,
@@ -421,6 +416,24 @@ sub get_options_from_array {
 	 "Y|shebang|hashbang" => \$::opt_shebang,
 	 "skip-first-line" => \$::opt_skip_first_line,
 	);
+}
+
+sub get_options_from_array {
+    # Run GetOptions on @array
+    # Returns:
+    #   true if parsing worked
+    #   false if parsing failed
+    #   @array is changed
+    my $array_ref = shift;
+    # A bit of shuffling of @ARGV needed as GetOptionsFromArray is not
+    # supported everywhere
+    my @save_argv;
+    my $this_is_ARGV = (\@::ARGV == $array_ref);
+    if(not $this_is_ARGV) {
+	@save_argv = @::ARGV;
+	@::ARGV = @{$array_ref};
+    }
+    my @retval = GetOptions(options_hash());
     if(not $this_is_ARGV) {
 	@{$array_ref} = @::ARGV;
 	@::ARGV = @save_argv;

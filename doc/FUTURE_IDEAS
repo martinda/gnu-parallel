@@ -4,20 +4,7 @@
 
 One jobqueue per sshlogin.
 
-parallel '(echo {3} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2 3
-
-# Should work:
-parallel --onall -S eos,iris '(echo {3} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2 3
-
-parallel -S eos '(echo {3} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2 3
-parallel -S iris '(echo {3} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2 3
-
-parallel -a /tmp/abc -a /tmp/123 -S eos '(echo {3} {2}) | awk \{print\ \$2}'
-parallel -a /tmp/abc -a /tmp/123 -S iris '(echo {3} {2}) | awk \{print\ \$2}'
-
 cat | parallel --onall -S eos,iris '(echo {3} {2}) | awk \{print\ \$2}' :::: - ::: a b c ::: 1 2 3
-
-
 
 vmstat\ 1\ 2\ \|\ tail\ -n1\ \|\ awk\ \{print\\\ \\\$7*\\\$8\}
 

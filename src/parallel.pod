@@ -621,12 +621,15 @@ See also B<-X> for context replace. If in doubt use B<-X> as that will
 most likely do what is needed.
 
 
-=item B<--onall> (unimplemented)
+=item B<--onall> (alpha testing)
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
 and run one job at a time on the computer. The order of the jobs will
 not be changed, but some computers may finish before others.
+
+When using B<--group> the output will be grouped by each server, so
+all the output from one server will be grouped together.
 
 
 =item B<--output-as-files>
