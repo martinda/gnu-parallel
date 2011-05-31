@@ -8,4 +8,17 @@ stdout parallel --return {} -vv -S $SERVER1 echo '>'{} ::: 'aa<${#}" b'
 rm 'aa<${#}" b'
 
 echo '### Test {} multiple times in different commands'
-seq 1 10|  parallel -v -Xj1 echo {} \; echo {}
+seq 10 | parallel -v -Xj1 echo {} \; echo {}
+
+echo '### Test of -X {1}-{2} with multiple input sources'
+parallel -j1 -kX  echo {1}-{2} ::: a ::: b
+parallel -j2 -kX  echo {1}-{2} ::: a b ::: c d
+parallel -j2 -kX  echo {1}-{2} ::: a b c ::: d e f
+parallel -j0 -kX  echo {1}-{2} ::: a b c ::: d e f
+
+echo '### Test of -X {}-{.} with multiple input sources'
+parallel -j1 -kX  echo {}-{.} ::: a ::: b
+parallel -j2 -kX  echo {}-{.} ::: a b ::: c d
+parallel -j2 -kX  echo {}-{.} ::: a b c ::: d e f
+parallel -j0 -kX  echo {}-{.} ::: a b c ::: d e f
+

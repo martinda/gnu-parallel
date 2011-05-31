@@ -4,3 +4,33 @@ ssh parallel-server3 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_P
 echo 1 2 3 4 5 6 7 8 9 10 ; echo 1 2 3 4 5 6 7 8 9 10
 1 2 3 4 5 6 7 8 9 10
 1 2 3 4 5 6 7 8 9 10
+### Test of -X {1}-{2} with multiple input sources
+a-b
+a-c a-d
+b-c b-d
+a-d a-e a-f b-d b-e
+b-f c-d c-e c-f
+a-d
+a-e
+a-f
+b-d
+b-e
+b-f
+c-d
+c-e
+c-f
+### Test of -X {}-{.} with multiple input sources
+a-a b-b
+a-a c-c a-a d-d
+b-b c-c b-b d-d
+a-a d-d a-a e-e a-a f-f b-b d-d b-b e-e
+b-b f-f c-c d-d c-c e-e c-c f-f
+a-a d-d
+a-a e-e
+a-a f-f
+b-b d-d
+b-b e-e
+b-b f-f
+c-c d-d
+c-c e-e
+c-c f-f
