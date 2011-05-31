@@ -1,2 +1,6 @@
 ### Test --return of weirdly named file
 ssh parallel-server3 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; echo\ \>aa\\\<\\\${\\\#}\\\"\\\ b;_EXIT_status=$?; rsync -rlDzR -essh  parallel-server3:././aa\\\<\\\${\\\#}\\\"\\\ b ./; exit $_EXIT_status;
+### Test {} multiple times in different commands
+echo 1 2 3 4 5 6 7 8 9 10 ; echo 1 2 3 4 5 6 7 8 9 10
+1 2 3 4 5 6 7 8 9 10
+1 2 3 4 5 6 7 8 9 10
