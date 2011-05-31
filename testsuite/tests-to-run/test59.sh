@@ -29,13 +29,13 @@ nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 
 nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | \
   $PAR --recend '' cat | md5sum &
 nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | \
-  $PAR --recend '' --files cat | parallel -Xj1 cat {}';'rm {} | md5sum &
+  $PAR --recend '' --files cat | parallel -Xj1 cat {} ';' rm {} | md5sum &
 nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | \
-  $PAR --recend '' --files cat | parallel -Xj1 cat {}';'rm {} | md5sum &
+  $PAR --recend '' --files cat | parallel -Xj1 cat {} ';' rm {} | md5sum &
 nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | \
-  $PAR --recend '' --files --tmpdir /dev/shm cat | parallel -Xj1 cat {}';'rm {} | md5sum &
+  $PAR --recend '' --files --tmpdir /dev/shm cat | parallel -Xj1 cat {} ';' rm {} | md5sum &
 nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | \
-  $PAR --recend '' --files --halt-on-error 2 cat | parallel -Xj1 cat {}';'rm {} | md5sum &
+  $PAR --recend '' --files --halt-on-error 2 cat | parallel -Xj1 cat {} ';' rm {} | md5sum &
 wait
 
 
