@@ -1101,6 +1101,6 @@ foo bar
 echo baz ugh 
 baz ugh
 echo foo\ bar baz\ 
-echo ugh 
+echo ugh
 foo bar baz 
 ugh

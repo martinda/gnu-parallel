@@ -79,7 +79,7 @@ pushd
 == Update OpenSUSE build system ==
 
 https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
-cd ~/privat/parallel/packager/obs 
+cd ~/privat/parallel/packager/obs
 em home:tange/parallel/parallel.spec
 find home:tange/parallel/* -type f | grep -v parallel.spec | parallel osc rm {}';' rm {}
 make
@@ -136,7 +136,7 @@ https://savannah.gnu.org/news/?group=parallel
 # Went over the limit at number 132 (sleep 40)
 # https://support.twitter.com/entries/15364-about-twitter-limits-update-api-dm-and-following
 # says 250 direct msg per day = 86400/250 = sleep 345
-cat twitters | grep -iv removed | 
+cat twitters | grep -iv removed |
   parallel -j1 sleep 354\; echo @{} You have earlier shown interest in GNU Parallel. \
 A new version is out: http://nd.gd/2j '|' ttytter
 
@@ -168,13 +168,28 @@ Subject: GNU Parallel 20110622 ('XXX') released
 GNU Parallel 20116022 ('XXX') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
+For sysadmins this is a major release, as --onall makes it easy to run
+the same commands on a list of computers.
+
 New in this release:
 
-* Parallel processing without Hadoop!
+* --onall will run all the jobs on all the computers. This is useful
+  for systemadinistrators having multiple servers.
+
+* --nonall runs like --onall but reads no arguments from stdin
+  (standard input), so is possible to do:
+  parallel --nonall -S computer1,computer2 uptime
+
+* --noswap do not start a job on a server that is swapping.
+
+* Article: Parallel processing without Hadoop!
   http://www.solutionhacker.com/parallel-processing-without-hadoop/
 
 * Article in Linux Magazine (Spanish). Thanks to Ben Martin.
   http://www.linux-magazine.es/issue/67/
+
+* Blog post in English. Thanks to Dagon.
+  hekate.homeip.net/2011/05/29/
 
 * Bug fixes and man page updates.
 

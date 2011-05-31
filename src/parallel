@@ -3382,17 +3382,6 @@ sub populate {
 	    }
 	}
     }
-
-    if($self->number_of_args() > 0) {
-	# Fill up if we have a half completed line
-	if(defined $self->{'max_number_of_args'}) {
-	    # If you want a number of args and do not have it then fill out the rest with empties
-	    # so magic strings like '{2}' will be replaced with empty.
-	    while($self->number_of_args() < $self->{'max_number_of_args'}) {
-		$self->push([Arg->new("")]);
-	    }
-	}
-    }
 }
 
 sub push {
@@ -3408,7 +3397,7 @@ sub push {
 	if(defined $arg) {
 	    if($self->{'positional_replace'}{$arg_no}) {
 		for my $used (keys %{$self->{'replacecount'}}) {
-		    my $replacementfunction = $self->{'positional_replace'}{$arg_no}; # {} {/} {.} or {/.}
+		    my $replacementfunction = $self->{'positional_replace'}{$arg_no}; # {} {/} {//} {.} or {/.}
 		    # Find the single replacements
 		    $self->{'len'}{$used} += length $arg->replace($replacementfunction);
 		}
@@ -3427,7 +3416,7 @@ sub pop {
     my $record = pop @{$self->{'arg_list'}};
     for my $arg (@$record) {
 	if(defined $arg) {
-	    for my $replacement_string qw(keys %{$self->{'replacecount'}}) {
+	    for my $replacement_string (keys %{$self->{'replacecount'}}) {
 		$self->{'len'}{$replacement_string} -= length $arg->replace($replacement_string);
 	    }
 	}
@@ -3439,7 +3428,7 @@ sub pop_all {
     # Remove all arguments
     my $self = shift;
     my @popped = @{$self->{'arg_list'}};
-    for my $replacement_string qw(keys %{$self->{'replacecount'}}) {
+    for my $replacement_string (keys %{$self->{'replacecount'}}) {
 	$self->{'len'}{$replacement_string} = 0;
     }
     $self->{'arg_list'} = [];
@@ -3475,7 +3464,7 @@ sub len {
 		    $self->{'replacecount'}{$replstring};
 	    }
 	    if($Global::replace{$replstring}) {
-		# This is a multi replacestring ({} {/} {.} {/.} {//})
+		# This is a multi replacestring ({} {/} {//} {.} {/.})
 		# Add each space between two arguments
 		my $number_of_args = ($#{$self->{'arg_list'}[0]}+1)*$self->number_of_args();
 		$len += ($number_of_args-1) * $self->{'replacecount'}{$replstring};
@@ -3516,7 +3505,7 @@ sub number_of_replacements {
     my $multi_regexp = multi_regexp();
     my $replacement_regexp =
 	"(?:".
-	'\{\d+/?\.?\}'. # {n}, {n.} {n/.} {n/}
+	'\{\d+(?:|\.|/\.|/|//)?\}'. # {n} {n.} {n/.} {n/} {n//}
 	'|'.
 	join("|",map {$a=$_;$a=~s/(\W)/\\$1/g; $a} values %Global::replace).
 	")";
@@ -3579,125 +3568,176 @@ sub replaced {
 sub replace_placeholders {
     my $self = shift;
     my $target = shift;
-    my $quote_special_chars = shift;
+    my $quoteall = shift;
     my $context_replace = $self->{'context_replace'};
-    my $context_regexp = $context_replace ? '\S*' : ''; # Regexp to match surrounding context
+    my $replaced;
 
-    if($self->number_of_args() == 0) {
-	Carp::confess("0 args should never call replaced");
+    if($self->{'context_replace'}) {
+	$replaced = $self->context_replace_placeholders($target,$quoteall);
+    } else {
+	$replaced = $self->simple_replace_placeholders($target,$quoteall);
     }
+    return $replaced;
+}
 
-    my %replace;
-    my %replace_single;
-    my %replace_multi;
-    my @replace_context;
+sub context_replace_placeholders {
+    my $self = shift;
+    my $target = shift;
+    my $quoteall = shift;
+    # -X = context replace
+    # maybe multiple input sources
+    # maybe --xapply
+    # $self->{'arg_list'} = [ [Arg11, Arg12], [Arg21, Arg22], [Arg31, Arg32] ]
+
     my @args=();
     my @used_multi;
+    my %replace;
 
     for my $record (@{$self->{'arg_list'}}) {
-	# Merge arguments from records into args
+	# Merge arguments from records into args for easy access
 	CORE::push @args, @$record;
     }
+
+    # Replacement functions
+    my @rep = qw({} {/} {//} {.} {/.});
+    # Inner part of replacement functions
+    my @rep_inner = ('', '/', '//', '.', '/.');
+    # Regexp for replacement functions
+    my $rep_regexp = "(?:". join('|', map { $_=~s/(\W)/\\$1/g; $_} @rep) . ")";
+    # Regexp for inner replacement functions
+    my $rep_inner_regexp = "(?:". join('|', map { $_=~s/(\W)/\\$1/g; $_} @rep_inner) . ")";
+    # Seq replace string: {#}
+    my $rep_seq_regexp = '(?:\{\#\})';
+    # Normal replace strings
+    my $rep_str_regexp = multi_regexp();
+
+    # Fish out the words that have replacement strings in them
+    my $tt = $target;
+    my %word;
+    while($tt =~ s/(\S*(?:$rep_str_regexp|\{\d+$rep_inner_regexp\}|$rep_seq_regexp)\S*)/\0/o) {
+	$word{$1}++;
+    }
+    # For each word: Generate the replacement string for that word.
+    for my $origword (keys %word) {
+	my @pos_replacements=();
+	my @replacements=();
+	my $w;
+	my $word = $origword; # Make a local modifyable copy
+
+	# replace {#} if it exists
+	$word =~ s/\{\#\}/$self->seq()/geo;
+	if($word =~ m:\{\d+$rep_inner_regexp\}:o) {
+	    # There are positional replacement strings
+	    my @argset;
+	    if($#{$self->{'arg_list'}->[0]} == 0) {
+		# Only one input source: Treat it as a set
+		@argset = [ @args ];
+	    } else {
+		@argset = @{$self->{'arg_list'}};
+	    }
+	    # Match 1..n where n = max args in a argset
+	    my $pos_regexp = "(?:".join("|", 1 .. $#{$argset[0]}+1).")";
+	    for my $argset (@argset) {
+		# Replace all positional arguments - e.g. {7/.}
+		# with the replacement function - e.g. {/.}
+		# of that argument
+		if(defined $self->{'max_number_of_args'}) {
+		    # Fill up if we have a half completed line, so {n} will be empty
+		    while($#$argset < $self->{'max_number_of_args'}-1) {
+			CORE::push @$argset, Arg->new("");
+		    }
+		}
+		$w = $word;
+		$w =~ s/\{($pos_regexp)($rep_inner_regexp)\}/$argset->[$1-1]->replace('{'.$2.'}')/geo;
+		CORE::push @pos_replacements, $w;
+	    }
+	}
+	if(not @pos_replacements) {
+	    @pos_replacements = ($word);
+	}
+
+	if($word =~ m:$rep_str_regexp:) {
+	    # There are normal replacement strings
+	    for my $w (@pos_replacements) {
+		for my $arg (@args) {
+		    my $wmulti = $w;
+		    $wmulti =~ s/($rep_str_regexp)/$arg->replace($Global::replace_rev{$1})/geo;
+		    CORE::push @replacements, $wmulti;
+		}
+	    }
+	}
+	if(@replacements) {
+	    CORE::push @{$replace{$origword}}, @replacements;
+	} else {
+	    CORE::push @{$replace{$origword}}, @pos_replacements;
+	}
+    }
+    # Substitute the replace strings with the replacement values
+    # Must be sorted by length if a short word is a substring of a long word
+    my $regexp = join('|', map { $_=~s/(\W)/\\$1/g; $_}
+		      sort { length $b <=> length $a } keys %word);
+    $target =~ s/($regexp)/join(" ",@{$replace{$1}})/ge;
+    return $target;
+}
+
+sub simple_replace_placeholders {
+    # no context (no -X)
+    # maybe multiple input sources
+    # maybe --xapply
+    my $self = shift;
+    my $target = shift;
+    my $quoteall = shift;
+    my @args=();
+    my @used_multi;
+    my %replace;
+
+    for my $record (@{$self->{'arg_list'}}) {
+	# Merge arguments from records into args for easy access
+	CORE::push @args, @$record;
+    }
+    # Which replace strings are used?
+    # {#} {} {/} {//} {.} {/.} {n} {n/} {n//} {n.} {n/.}
     for my $used (keys %{$self->{'replacecount'}}) {
-	if($used =~ /^{(\d+)(\D*)}$/) {
+	# What are the replacement values for the replace strings?
+	if(grep { $used eq $_ } qw({} {/} {//} {.} {/.})) {
+	    # {} {/} {//} {.} {/.}
+	    $replace{$Global::replace{$used}} =
+		join(" ", map { $_->replace($used) } @args);
+	} elsif($used =~ /^\{(\d+)(|\/|\/\/|\.|\/\.)\}$/) {
+	    # {n} {n/} {n//} {n.} {n/.}
 	    my $positional = $1; # number if any
-	    my $replacementfunction = "{".::undef_as_empty($2)."}"; # {} {/} {.} or {/.}
-	    # Find the single replacements
+	    my $replacementfunction = "{".::undef_as_empty($2)."}"; # {} {/} {//} {.} or {/.}
 	    if(defined $args[$positional-1]) {
 		# we have a matching argument for {n}
-		$replace_single{$used} = $args[$positional-1]->replace($replacementfunction);
-	    }
-	} elsif($used =~ /^(\{\}|\{\/\}|\{\/\/\}|\{\.\}|\{\/\.\})$/) {
-	    # Add to the multireplacement
-	    my $replacementfunction = $used; # {} {/} {//} {.} or {/.}
-	    CORE::push @used_multi, $replacementfunction;
-	    if($self->{'context_replace'}) {
-		for my $n (0 .. $#args) {
-		    $replace_context[$n]{$replacementfunction} =
-			$args[$n]->replace($replacementfunction);
-		}
+		$replace{$used} = $args[$positional-1]->replace($replacementfunction);
 	    } else {
-		CORE::push(@{$replace_multi{$replacementfunction}},
-			   map { $args[$_]->replace($replacementfunction) }
-			   0 .. $#args);
+		if($positional <= $self->{'max_number_of_args'}) {
+		    # Fill up if we have a half completed line
+		    $replace{$used} = "";
+		}
 	    }
-	} elsif($used eq '{#}') {
-	    $replace_single{$Global::replace{$used}} = $self->seq();
+	} elsif($used eq "{#}") {
+	    # {#}
+	    $replace{$Global::replace{$used}} = $self->seq();
 	} else {
-	    ::die_bug('replace_placeholders20110309');
+	    ::die_bug('simple_replace_placeholders_20110530');
 	}
     }
 
-    my $replacements = 0;
-    if(%replace_single) {
-	my $single_regexp = join('|', map { $_=~s/(\W)/\\$1/g; $_} sort keys %replace_single);
-	$replacements += ($target =~ s/($single_regexp)/$replace_single{$1}/ge);
-    }
-    my $orig_target = $target;
-    if(@used_multi) {
-	my $multi_regexp = join('|', map {
-	    $a=$Global::replace{$_};
-	    $a=~s/(\W)/\\$1/g; $a
-				} @used_multi);
-	my %wordargs;
-	if($quote_special_chars) {
-	    while($target =~ s/(.*($multi_regexp).*)/\0/o) {
-		my $wordarg = $1;
-		my $pattern = $2;
-		if($self->{'context_replace'}) {
-		    my $substituted = $wordarg;
-		    my @all=();
-		    for my $argref (@replace_context) {
-			# for each argument convert a{}b to a1b a2b
-			my $substituted = $wordarg;
-			$substituted =~ s/($multi_regexp)/$argref->{$Global::replace_rev{$1}}/g;
-			CORE::push @all,$substituted;
-		    }
-		    $wordargs{$wordarg} = join" ",@all;
-		    return @all;
-		} else {
-		    my $substituted = $wordarg;
-		    $substituted =~ s/($multi_regexp)/join(" ",map {$_} @{$replace_multi{$Global::replace_rev{$1}}})/eg;
-		    $wordargs{$wordarg} = $substituted;
-		}
-	    }
+    # Substitute the replace strings with the replacement values
+    my $regexp = join('|', map { $_=~s/(\W)/\\$1/g; $_} keys %replace);
+    if($regexp) {
+	if($quoteall) {
+	    # This is for --return: The whole expression must be
+	    # quoted - not just the replacements
+	    %replace = map { $_ => ::shell_unquote($replace{$_}) } keys %replace;
+	    $target =~ s/($regexp)/$replace{$1}/g;
+	    $target = ::shell_quote_scalar($target);
 	} else {
-	    while($target =~ s/(\S*($multi_regexp)\S*)/\0/o) {
-		my $wordarg = $1;
-		my $pattern = $2;
-		if($self->{'context_replace'}) {
-		    my $substituted = $wordarg;
-		    my @all=();
-		    for my $argref (@replace_context) {
-			# for each argument convert a{}b to a1b a2b
-			my $substituted = $wordarg;
-			$substituted =~ s/($multi_regexp)/$argref->{$Global::replace_rev{$1}}/g;
-			CORE::push @all,$substituted;
-		    }
-		    $wordargs{$wordarg} = join" ",@all;
-		} else {
-		    my $substituted = $wordarg;
-		    $substituted =~ s/($multi_regexp)/join(" ",map {$_} @{$replace_multi{$Global::replace_rev{$1}}})/eg;
-		    $wordargs{$wordarg} = $substituted;
-		}
-	    }
-	}
-
-	my @k=keys %wordargs;
-	for(@k) {s/(\W)/\\$1/g};
-	my $regexp=join("|",@k);
-	if($quote_special_chars) {
-	    # When --return'ing a file with added special chars
-	    # they need to be quoted.
-	    # E.g. --trc 'a {}'
-	    # Not really pretty. Can this be done better?
-	    $orig_target =~s/($regexp)/::shell_unquote($wordargs{$1})/ge;
-	    $orig_target = ::shell_quote_scalar($orig_target);
-	} else {
-	    $orig_target =~s/($regexp)/$wordargs{$1}/g;
+	    $target =~ s/($regexp)/$replace{$1}/g;
 	}
     }
-    return $orig_target;
+    return $target;
 }
 
 
@@ -4162,7 +4202,7 @@ sub read_arg_from_fh {
 sub expand_combinations {
     # Input:
     #   ([xmin,xmax], [ymin,ymax], ...)
-    # Returns ([x,y,...],[x,y,...]) 
+    # Returns ([x,y,...],[x,y,...])
     # where xmin <= x <= xmax and ymin <= y <= ymax
     my $minmax_ref = shift;
     my $xmin = $$minmax_ref[0];
@@ -4177,7 +4217,7 @@ sub expand_combinations {
     } else {
 	for(my $x = $xmin; $x <= $xmax; $x++) {
 	    push @p, [$x];
-	}	    
+	}
     }
     return @p;
 }
@@ -4214,7 +4254,7 @@ sub new {
 
 sub replace {
     my $self = shift;
-    my $replacement_string = shift; # {} {/} {.} {/.}
+    my $replacement_string = shift; # {} {/} {//} {.} {/.}
     if(not defined $self->{$replacement_string}) {
 	my $s;
 	if($Global::trim eq "n") {
