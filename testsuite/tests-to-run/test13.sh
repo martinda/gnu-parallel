@@ -13,3 +13,6 @@ echo '### Test --keeporder'
 
 echo '### Test SIGTERM'
 (sleep 5; killall parallel -TERM) & seq 1 100 | stdout parallel -k -j9 sleep 3';' echo | sort
+
+echo '### Test bug: empty line for | sh with -k'
+(echo echo a ; echo ; echo echo b) | parallel -k

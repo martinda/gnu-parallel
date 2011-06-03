@@ -1,29 +1,7 @@
-parallel echo {} ::: 1 2 3
-src/parallel echo {} ::: 1 2 3
-parallel echo a{}b ::: 1 2 3
-src/parallel echo a{}b ::: 1 2 3
-parallel echo a{}b ::: 1/Q.e 2/W.t 3/E.f
-src/parallel echo a{}b ::: 1/Q.e 2/W.t 3/E.f
-parallel echo a{.}b ::: 1/Q.e 2/W.t 3/E.f
-src/parallel echo a{.}b ::: 1/Q.e 2/W.t 3/E.f
-parallel echo a{.}b {//} ::: 1/Q.e 2/W.t 3/E.f
-src/parallel echo a{.}b {//} ::: 1/Q.e 2/W.t 3/E.f
-parallel echo a{.}b {//}-{/.} ::: 1/Q.e 2/W.t 3/E.f
-src/parallel echo a{.}b {//}-{/.} ::: 1/Q.e 2/W.t 3/E.f
-parallel --xapply echo a{3.}b {//}-{/.} ::: 1/Q.e 2/W.t 3/E.f
-src/parallel --xapply echo a{3.}b {//}-{/.} ::: 1/Q.e 2/W.t 3/E.f
-parallel --xapply echo a{3.}b {//}-{/.} ::: 1/Q.e ::: 2/W.t ::: 3/E.f
-src/parallel --xapply echo a{3.}b {//}-{/.} ::: 1/Q.e ::: 2/W.t ::: 3/E.f
 
+BUG:
+(echo echo a ; echo ; echo echo b) | parallel -k
 
-
-Fixed bug in {n//}
-
--S - should read --sshloginfile from stdin
-
--X for multiple input sources:
-parallel -X echo mkdir -p dir-{1} dir-{1}/subdir-{2} :::: <(seq 1 5) <(seq 5 8)
-parallel -X echo mkdir -p dir-{1//} dir-{1.}/subdir-{2} ::: a/foo.d b/bar.d :::: <(seq 5 8)
 
 Dont start:
 

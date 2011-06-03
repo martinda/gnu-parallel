@@ -163,6 +163,7 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
+Libre.fm? Viva? VTEC? Yemen?
 Subject: GNU Parallel 20110622 ('XXX') released
 
 GNU Parallel 20116022 ('XXX') has been released. It is
@@ -180,6 +181,9 @@ New in this release:
   (standard input), so is possible to do:
   parallel --nonall -S computer1,computer2 uptime
 
+* Context replace now works with multiple input sources:
+  parallel -X echo {1}-{2} ::: 1 2 3 ::: a b c
+
 * --noswap do not start a job on a server that is swapping.
 
 * Article: Parallel processing without Hadoop!
@@ -188,8 +192,11 @@ New in this release:
 * Article in Linux Magazine (Spanish). Thanks to Ben Martin.
   http://www.linux-magazine.es/issue/67/
 
+* Blog post in Japanese. Thanks to Naoya Nakazawa.
+  http://www.sssg.org/blogs/naoya/archives/2003
+
 * Blog post in English. Thanks to Dagon.
-  hekate.homeip.net/2011/05/29/
+  http://hekate.homeip.net/2011/05/29/
 
 * Bug fixes and man page updates.
 

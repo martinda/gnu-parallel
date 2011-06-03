@@ -1349,12 +1349,18 @@ sub __REMOTE_SSH__ {}
 sub read_sshloginfile {
     # Returns: N/A
     my $file = shift;
+    my $close = 1;
     if($file eq "..") {
         $file = $ENV{'HOME'}."/.parallel/sshloginfile";
     }
-    if(not open(IN, $file)) {
-	print $Global::original_stderr "Cannot open $file\n";
-	exit(255);
+    if($file eq "-") {
+	*IN = *STDIN;
+	$close = 0;
+    } else {
+	if(not open(IN, $file)) {
+	    print $Global::original_stderr "Cannot open $file\n";
+	    exit(255);
+	}
     }
     while(<IN>) {
         chomp;
@@ -1362,7 +1368,9 @@ sub read_sshloginfile {
         /^\s*$/ and next;
         push @Global::sshlogin, $_;
     }
-    close IN;
+    if($close) {
+	close IN;
+    }
 }
 
 sub parse_sshlogin {
@@ -1372,7 +1380,7 @@ sub parse_sshlogin {
     for my $sshlogin (@Global::sshlogin) {
         # Split up -S sshlogin,sshlogin
         for my $s (split /,/, $sshlogin) {
-            if ($s eq "..") {
+            if ($s eq ".." or $s eq "-") {
                 read_sshloginfile($s);
             } else {
                 push (@login, $s);
@@ -3794,12 +3802,12 @@ sub get {
 				     $self->{'return_files'},
 	    );
 	$cmd_line->populate();
-	$self->set_seq($self->seq()+1);
 	::debug("cmd_line->number_of_args ".$cmd_line->number_of_args()."\n");
-	if(not $::opt_pipe and $cmd_line->number_of_args() == 0) {
+	if(not $::opt_pipe and ($cmd_line->number_of_args() == 0 or $cmd_line->replaced() eq "")) {
 	    # We did not get more args - maybe at EOF string?
 	    return undef;
 	} else {
+	    $self->set_seq($self->seq()+1);
 	    return ($cmd_line);
 	}
     }
@@ -4112,8 +4120,8 @@ sub nest_get {
 	    next;
 	} else {
 	    # read one
-	    my $arg = read_arg_from_fh($self->{'fhs'}[$fhno])
-		|| next; # If we just read an EOF string: Treat this as EOF
+	    my $arg = read_arg_from_fh($self->{'fhs'}[$fhno]);
+	    defined($arg) || next; # If we just read an EOF string: Treat this as EOF
 	    my $len = $#{$self->{'arg_matrix'}[$fhno]} + 1;
 	    $self->{'arg_matrix'}[$fhno][$len] = $arg;
 	    # make all new combinations

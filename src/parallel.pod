@@ -938,9 +938,9 @@ Do not use the first line of input (used by GNU B<parallel> itself
 when called with B<--shebang>).
 
 
-=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
+=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (alpha testing)
 
-=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
+=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (alpha testing)
 
 Distribute jobs to remote computers. The jobs will be run on a list of
 remote computers.  GNU B<parallel> will determine the number of CPU
@@ -960,8 +960,8 @@ on the local computer.
 
 The sshlogin '..' is special, it read sshlogins from ~/.parallel/sshloginfile
 
-The sshlogin '-' is special, too, it read sshlogins stdin (standard input).
-
+The sshlogin '-' is special, too, it read sshlogins from stdin
+(standard input).
 
 To specify more sshlogins separate the sshlogins by comma or repeat
 the options multiple times.
@@ -976,7 +976,7 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename>
+=item B<--sshloginfile> I<filename> (alpha testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1002,6 +1002,8 @@ When using a different ssh program the last argument must be the hostname.
 The sshloginfile '..' is special, it read sshlogins from
 ~/.parallel/sshloginfile
 
+The sshloginfile '-' is special, too, it read sshlogins from stdin
+(standard input).
 
 =item B<--noswap> (alpha testing)
 
