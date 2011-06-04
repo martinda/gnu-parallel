@@ -8,7 +8,7 @@ niceload - slow down a program when the load average is above a certain limit
 
 B<niceload> [-v] [-n nice] [-l load] [-t time] [-s time|-f factor] command
 
-B<niceload> [-v] [-n nice] [-l load] [-t time] [-s time|-f factor] -p=PID
+B<niceload> [-v] [-h] [-n nice] [-l load] [-t time] [-s time|-f factor] -p=PID
 
 =head1 DESCRIPTION
 
@@ -27,34 +27,94 @@ run 1 second, suspend (3.00-1.00) seconds, run 1 second, suspend
 
 =over 9
 
-=item B<-n> I<niceness>
+=item B<-f> I<FACTOR>
 
-Sets niceness. See B<nice>(1).
+=item B<--factor> I<FACTOR>
+
+Suspend time factor. Dynamically set B<-s> as max load average over
+limit * factor. Default is 1.
+
+
+=item B<-H>
+
+=item B<--hard>
+
+Hard limit. B<--hard> will suspend the process until the system is
+under the limits. The default is B<--soft>.
+
 
 =item B<-l> I<maxload>
+
+=item B<--load> I<maxload>
 
 Max load. The maximal load average before suspending command. Default
 is 1.00.
 
-=item B<-t> I<SEC>
 
-Recheck load time. Sleep SEC seconds before checking load
-again. Default is 1 second.
+=item B<-m> I<memory>
+
+=item B<--mem> I<memory>
+
+Required free mem. I<memory> is computed as free memory + cache.
+
+I<memory> can be postfixed with K, M, G, T, or P which would multiply the
+size with 1024, 1048576, 1073741824, or 1099511627776 respectively.
+
+
+=item B<-n> I<niceness>
+
+=item B<--nice> I<niceness>
+
+Sets niceness. See B<nice>(1).
+
+
+=item B<-N> I<niceness>
+
+=item B<--noswap> I<niceness>
+
+Do not start new jobs on a given computer if there is both swap-in and
+swap-out activity.
+
+Swap activity is computed as (swap-in)*(swap-out) which in practice is
+a good value: swapping out is not a problem, swapping in is not a
+problem, but both swapping in and out usually indicates a problem.
+
+
+=item B<-p> I<PID>
+
+=item B<--pid> I<PID>
+
+Process ID of process to suspend.
+
 
 =item B<-s> I<SEC>
+
+=item B<--suspend> I<SEC>
 
 Suspend time. Suspend the command this many seconds when the max load
 average is reached.
 
-=item B<-f> I<FACTOR>
 
-Suspend time factor. Dynamically set B<-s> as max load average over limit * factor. Default is 1.
+=item B<-S>
 
-=item B<-p> I<PID>
+=item B<--soft>
 
-Process ID of process to suspend.
+Soft limit. B<niceload> will suspend a process for a while and then
+let it run for a second thus only slowing down a process while the
+system is over one of the given limits. This is the default.
+
+
+=item B<-t> I<SEC>
+
+=item B<--recheck> I<SEC>
+
+Recheck load time. Sleep SEC seconds before checking load
+again. Default is 1 second.
+
 
 =item B<-v>
+
+=item B<--verbose>
 
 Verbose. Print some extra output on what is happening. Use B<-v> until
 you know what your are doing.
@@ -256,8 +316,11 @@ if($::opt_factor and $::opt_suspend) {
 my $nice       = $::opt_nice || 0; # -n=0 Nice level (Default: 0)
 my $max_load   = $::opt_load || 1; # -l=1 Max acceptable load average (Default: 1)
 my $check_time = $::opt_recheck || 1; # -t=1 Seconds between checking load average (Default: 1)
+my $min_mem    = $::opt_mem ? multiply_binary_prefix($::opt_mem) : undef;
+
+
 my $wait_factor;
-my $wait_time;
+my $wait_time = 1;
 if($::opt_suspend) {
     # --suspend=sec Seconds to suspend process when load average is too high
     $wait_time = $::opt_suspend; 
@@ -275,13 +338,13 @@ if($processid) {
     $::opt_verbose and print STDERR "Control $processid\n";
     init_signal_handling_attached_child();
     my $child_pgrp = getpgrp $Child::fork;
-    suspend_resume($max_load,$check_time,$wait_time,$wait_factor,$child_pgrp);
+    suspend_resume($min_mem,$max_load,$check_time,$wait_time,$wait_factor,$child_pgrp);
 } elsif(@ARGV) {
     if($Child::fork = fork) {
 	sleep 1; # Give child time to setpgrp(0,0);
 	init_signal_handling_my_child();
 	my $child_pgrp = getpgrp $Child::fork;
-	suspend_resume($max_load,$check_time,$wait_time,$wait_factor,$child_pgrp);
+	suspend_resume($min_mem,$max_load,$check_time,$wait_time,$wait_factor,$child_pgrp);
     } else {
 	setpgrp(0,0);
 	debug("Child pid: $$, pgrp: ",getpgrp $$,"\n");
@@ -315,13 +378,17 @@ sub get_options_from_array {
     }
     my @retval = GetOptions
 	("debug|D" => \$::opt_debug,
-	 "load|l=s" => \$::opt_load,
 	 "factor|f=s" => \$::opt_factor,
-	 "suspend|s=s" => \$::opt_suspend,
-	 "recheck|t=s" => \$::opt_recheck,
+	 "hard|H" => \$::opt_hard,
+	 "load|l=s" => \$::opt_load,
+	 "free|memory|mem|m=s" => \$::opt_mem,
 	 "nice|n=i" => \$::opt_nice,
-	 "help|h" => \$::opt_help,
+	 "noswap|N" => \$::opt_noswap,
 	 "process|pid|p=s" => \$::opt_pid,
+	 "suspend|s=s" => \$::opt_suspend,
+	 "soft|S" => \$::opt_soft,
+	 "recheck|t=s" => \$::opt_recheck,
+	 "help|h" => \$::opt_help,
 	 "verbose|v" => \$::opt_verbose,
 	 "version|V" => \$::opt_version,
 	);
@@ -340,12 +407,11 @@ sub die_usage {
 sub help {
     print q{
 Usage:
-   niceload [-v] [-n=niceness] [-l=loadavg] [-t=recheck_sec] [-s=suspend_sec|-f=factor] command
-   niceload [-v] [-n=niceness] [-l=loadavg] [-t=recheck_sec] [-s=suspend_sec|-f=factor] command
+   niceload [-v] [-n=niceness] [-l=loadavg] [-t=recheck_sec]
+            [-s=suspend_sec|-f=factor] [-H] [-S]
+            command or -p pid
 };
 }
-
-
 
 sub debug {
     if($::opt_debug) {
@@ -358,7 +424,7 @@ sub version {
     print join("\n",
 	       "GNU $Global::progname $Global::version",
 	       "Copyright (C) 2004,2005,2006,2007,2008,2009 Ole Tange",
-	       "Copyright (C) 2010 Ole Tange and Free Software Foundation, Inc.",
+	       "Copyright (C) 2010,2011 Ole Tange and Free Software Foundation, Inc.",
 	       "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
 	       "This is free software: you are free to change and redistribute it.",
 	       "GNU $Global::progname comes with no warranty.",
@@ -411,22 +477,40 @@ sub kill_child_INT {
 }
 
 sub suspend_resume {
-    my ($max_load,$check_time,$wait_time,$wait_factor,@pids) = @_;
+    my ($min_mem,$max_load,$check_time,$wait_time,$wait_factor,@pids) = @_;
     debug("suspend_resume these @pids\n");
     resume_pids(@pids);
     while (pids_exist(@pids)) {
-	if ( loadavg() > $max_load ) {
+	my ($loadavg, $mem_free, $swap, $resume);
+	if (defined $max_load and
+	    ($loadavg = loadavg()) > $max_load) {
 	    if($wait_factor) {
-		$wait_time = (loadavg()-$max_load) * $wait_factor;
+		$wait_time = ($loadavg - $max_load) * $wait_factor;
 	    }
-	    $::opt_verbose and print STDERR "suspending for $wait_time seconds\n";
+	    $::opt_verbose and print STDERR "niceload: load $loadavg. Suspending for $wait_time seconds\n";
 	    suspend_pids(@pids);
 	    sleep 1; # for some reason this statement is skipped
 	    sleep $wait_time;
-	    resume_pids(@pids);
+	} elsif (defined($min_mem) and 
+		 ($mem_free = mem_free()) < $min_mem) {
+	    $::opt_verbose and print STDERR "niceload: mem free $mem_free. Suspending for $wait_time seconds\n";
+	    suspend_pids(@pids);
+	    sleep 1; # for some reason this statement is skipped
+	    sleep $wait_time;
+	} elsif (defined($::opt_noswap) and
+		 (swap_activity()) != 0) {
+	    $::opt_verbose and print STDERR "niceload: swapping. Suspending for $wait_time seconds\n";
+	    suspend_pids(@pids);
+	    sleep 1; # for some reason this statement is skipped
+	    sleep $wait_time;
+	} else {
+	    $resume = 1;
 	}
-	$::opt_verbose and print STDERR "running for $check_time second(s)\n";
-	sleep($check_time);
+	if(not $::opt_hard or $resume) {
+	    resume_pids(@pids);
+	    $::opt_verbose and print STDERR "niceload: running for $check_time second(s)\n";
+	    sleep($check_time);
+	}
     }
 }
     
@@ -463,6 +547,23 @@ sub loadavg {
     return $loadavg;
 }
 
+sub mem_free {
+    #              total       used       free     shared    buffers     cached
+    # Mem:       3366496    2901664     464832          0     179228    1850692
+    # -/+ buffers/cache:     871744    2494752
+    # Swap:      6445476    1396860    5048616
+    my @free = `free`;
+    my $free = (split(/\s+/,$free[2]))[3];
+    return $free*1024;
+}
+
+sub swap_activity {
+    my $swap_activity;
+    $swap_activity = "vmstat 1 2 | tail -n1 | awk '{print \$7*\$8}'";
+    # Run swap_activity measuring.
+    return qx{ $swap_activity };
+}
+
 sub suspend_pids {
     my @pids = @_;
     signal_pids("STOP",@pids);
@@ -481,3 +582,19 @@ sub signal_pids {
 	kill $signal => -$pid; # stop PID group
     }
 }
+
+sub multiply_binary_prefix {
+    # Evalualte numbers with binary prefix
+    # 13G = 13*1073741824 = 13958643712
+    my $s = shift;
+    $s =~ s/Ki?/*1024/gi;
+    $s =~ s/Mi?/*1048576/gi;
+    $s =~ s/Gi?/*1073741824/gi;
+    $s =~ s/Ti?/*1099511627776/gi;
+    $s =~ s/Pi?/*1125899906842624/gi;
+    $s = eval $s;
+    return $s;
+}
+
+# Keep -w happy
+$::opt_soft = 1;

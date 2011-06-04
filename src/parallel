@@ -931,6 +931,7 @@ sub multiply_binary_prefix {
     $s =~ s/Mi?/*1048576/gi;
     $s =~ s/Gi?/*1073741824/gi;
     $s =~ s/Ti?/*1099511627776/gi;
+    $s =~ s/Pi?/*1125899906842624/gi;
     $s = eval $s;
     return $s;
 }
@@ -1846,7 +1847,7 @@ sub swap_activity {
     # If the currently known swap activity is too old:
     #   Recompute a new one in the background
     # Returns:
-    #   last load average computed
+    #   last swap activity computed
     my $self = shift;
     # Should we update the swap_activity file?
     my $update_swap_activity_file = 0;
@@ -1860,7 +1861,7 @@ sub swap_activity {
         }
         ::debug("Last update: ".$self->{'last_swap_activity_update'});
         if(time - $self->{'last_swap_activity_update'} > 10) {
-            # last loadavg was started 10 seconds ago
+            # last swap activity update was started 10 seconds ago
             ::debug("Older than 10 sec: ".$self->{'swap_activity_file'});
             $update_swap_activity_file = 1;
         }
@@ -2133,7 +2134,7 @@ sub processes_available_by_system_limit {
         print $Global::original_stderr
             ("parallel: Warning: Only enough filehandles to run ",
              $system_limit, " jobs in parallel. ",
-             "Raising ulimit -n may help\n");
+             "Raising ulimit -n may help.\n");
     }
     if($system_limit < $wanted_processes and $max_system_proc_reached) {
         print $Global::original_stderr

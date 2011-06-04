@@ -291,9 +291,9 @@ Implies B<--semaphore>.
 
 =item B<--block-size> I<size>
 
-Size of block in bytes. The size can be postfixed with K, M, G, or T
-which would multiply the size with 1024, 1048576, 1073741824, or
-1099511627776 respectively.
+Size of block in bytes. The size can be postfixed with K, M, G, T, or
+P which would multiply the size with 1024, 1048576, 1073741824,
+1099511627776 or 1125899906842624 respectively.
 
 GNU B<parallel> tries to meet the block size but can be off by the
 length of one record.
@@ -1488,7 +1488,7 @@ Nested for-loops like this:
 
 can be written like this:
 
-B<parallel do_something {1} {2} :::: xlist ylist | process_output
+B<parallel do_something {1} {2} :::: xlist ylist | process_output>
 
 
 =head1 EXAMPLE: Group output lines
