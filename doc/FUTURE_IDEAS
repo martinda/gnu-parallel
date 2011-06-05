@@ -1,11 +1,138 @@
+Til QUOTING:
+
+FN="two  spaces"
+echo 1 | parallel -q echo {} "$FN"
+# Prints 2 spaces between 'two' and 'spaces'
+
+-q will not work with composed commands as it will quote the ; as
+well. So composed commands have to be quoted by hand:
+
+# Using export:
+FN2="two  spaces"
+export FN2
+echo 1 | parallel echo {} \"\$FN2\" \; echo \"\$FN2\" {}
+# Prints 2 spaces between 'two' and 'spaces'
+
+# Without export:
+FN3="two  spaces"
+echo 1 | parallel echo {} \""$FN3"\" \; echo \'"$FN3"\' {}
+
+# By quoting the space in the variable
+FN4='two\ \ spaces'
+echo 1 | parallel echo {} $FN4 \; echo $FN4 {}
+
+
+
+= Bug? ==
+
+locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ... -S .. --trc {/}.bz2 'zcat {} | bzip2 > {/}.bz2'
+
+
+== Compare ==
+
+http://code.google.com/p/spawntool/
+http://code.google.com/p/push/
+
+== Bug? ==
+
+.parallel/config with --long-options
+
+
+== SQL ==
+
+Example with %0a as newline
+sql :my_postgres?'\dt %0a SELECT * FROM users'
+
+cat ~/.sql/aliases | parallel --colsep '\s' sql {1} '"select 0.14+3;" | grep -q 3.14 || (echo dead: {1}; exit 1)'
+
+== FEX ==
+
+fex syntax for splitting fields
+http://www.semicomplete.com/projects/fex/
+sql :foo 'select * from bar' | parallel --fex '|{1,2}' do_stuff {2} {1}
+
+
+--autocolsep: Læs alle linjer.
+Prøv fastlængde: Find tegn, som står i alle linjer på de samme pladser. Risiko for falske pos
+Prøv fieldsep: Find eet tegn, som optræder det samme antal gange i alle linjer (tab sep)
+Prøv klyngesep: Find den samme klynge tegn, som står samme antal gange i alle linjer (' | ' sep)
+Fjern whitespace før og efter colonne
+
+hvis der er n af tegn A og 2n af tegn B, så
+
+  a | b | c
+
+Simpleste: tab sep
+
+for hver linje
+  max,min count for hver char
+
+for hver char
+  if max == min :
+    potentiel
+    min_potentiel = min(min_potentiel,min)
+
+for potentiel:
+  if min % min_potentiel = 0: sepchars += potentiel,no of sepchars += min / min_potentiel
+
+colsep = [sepchars]{no_of_sepchars}
+
+
+# TODO max_line_length on remote
+# TODO compute how many can be transferred within max_line_length
+
+
+Postkort:
+- Forside kun figur
+- Bagside:
+  - Logo med figur - evt gnu.org/s/parallel
+  - kort grå tekst, der forklarer hvad det er.
+  - Eet eksempel: parallel gzip ::: *
+  - Link til video. http://nd.gd/0s 
+
+GNU parallel is a UNIX-tool for running commands in parallel.
+To gzip all files running one job per CPU write:
+  parallel gzip ::: *
+Watch the intro video to learn more: http://nd.gd/0s
+Or read more about GNU parallel: www.gnu.org/s/parallel
+
+job->start():
+$jobslot = Global::jobslot->$sshlogin
+
+sub get_jobslot {
+    my $sshlogin = shift;
+    my $jobslot_id = pop @Global::jobslots{$sshlogin};
+    if not defined $jobslot_id {
+       $jobslot_id = ++$Global::max_jobslot_id;
+    }
+    return $jobslot_id;
+}
+
+sub release_jobslot {
+    my $sshlogin = shift;
+    my $jobslot_id = shift;
+    push @Global::jobslots{$sshlogin}, $jobslot_id;
+}
+
+Test sshlogins in parallel. Assume parallel is in path
+
+seq 1 10 | parallel -I {o} 'seq 1 255 | parallel echo ssh -oNoHostAuthenticationForLocalhost=true 127.0.{o}.{}' >/tmp/sshloginfile
+seq 1 1000 | parallel --sshloginfile /tmp/sshloginfile echo
+
+ssh -F /tmp/
+ 
+Example:
+Chop mbox into emails
+Parallel sort
+
+codecoverage
+
+Testsuite: sem without ~/.parallel
+
 Dont start:
 
-* load
-* memory free | head -n 2 | awk \{print\ \$4+\$6+\$7\}
-* swap
 * seek
 
-vmstat\ 1\ 2\ \|\ tail\ -n1\ \|\ awk\ \{print\\\ \\\$7*\\\$8\}
 
 
 Video 30. 36. 41. 48
@@ -112,137 +239,6 @@ parallel convert -resize {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: - ::: 25 50
 #
 # Find GNU Parallel at http://www.gnu.org/software/parallel/
 
-
-Postkort:
-- Forside kun figur
-- Bagside:
-  - Logo med figur - evt gnu.org/s/parallel
-  - kort grå tekst, der forklarer hvad det er.
-  - Eet eksempel: parallel gzip ::: *
-  - Link til video. http://nd.gd/0s 
-
-GNU parallel is a UNIX-tool for running commands in parallel.
-To gzip all files running one job per CPU write:
-  parallel gzip ::: *
-Watch the intro video to learn more: http://nd.gd/0s
-Or read more about GNU parallel: www.gnu.org/s/parallel
-
-job->start():
-$jobslot = Global::jobslot->$sshlogin
-
-sub get_jobslot {
-    my $sshlogin = shift;
-    my $jobslot_id = pop @Global::jobslots{$sshlogin};
-    if not defined $jobslot_id {
-       $jobslot_id = ++$Global::max_jobslot_id;
-    }
-    return $jobslot_id;
-}
-
-sub release_jobslot {
-    my $sshlogin = shift;
-    my $jobslot_id = shift;
-    push @Global::jobslots{$sshlogin}, $jobslot_id;
-}
-
-Test sshlogins in parallel. Assume parallel is in path
-
-seq 1 10 | parallel -I {o} 'seq 1 255 | parallel echo ssh -oNoHostAuthenticationForLocalhost=true 127.0.{o}.{}' >/tmp/sshloginfile
-seq 1 1000 | parallel --sshloginfile /tmp/sshloginfile echo
-
-ssh -F /tmp/
- 
-Example:
-Chop mbox into emails
-Parallel sort
-
-codecoverage
-
-Testsuite: sem without ~/.parallel
-
-Til QUOTING:
-
-FN="two  spaces"
-echo 1 | parallel -q echo {} "$FN"
-# Prints 2 spaces between 'two' and 'spaces'
-
--q will not work with composed commands as it will quote the ; as
-well. So composed commands have to be quoted by hand:
-
-# Using export:
-FN2="two  spaces"
-export FN2
-echo 1 | parallel echo {} \"\$FN2\" \; echo \"\$FN2\" {}
-# Prints 2 spaces between 'two' and 'spaces'
-
-# Without export:
-FN3="two  spaces"
-echo 1 | parallel echo {} \""$FN3"\" \; echo \'"$FN3"\' {}
-
-# By quoting the space in the variable
-FN4='two\ \ spaces'
-echo 1 | parallel echo {} $FN4 \; echo $FN4 {}
-
-
-
-= Bug? ==
-
-locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ... -S .. --trc {/}.bz2 'zcat {} | bzip2 > {/}.bz2'
-
-
-== Compare ==
-
-http://code.google.com/p/spawntool/
-http://code.google.com/p/push/
-
-== Bug? ==
-
-.parallel/config with --long-options
-
-time find . -type f | parallel -j+0 --eta -S..,: --progress --trc {}.gz gzip  {}
-
-== SQL ==
-
-Example with %0a as newline
-sql :my_postgres?'\dt %0a SELECT * FROM users'
-
-cat ~/.sql/aliases | parallel --colsep '\s' sql {1} '"select 0.14+3;" | grep -q 3.14 || (echo dead: {1}; exit 1)'
-
-== FEX ==
-
-fex syntax for splitting fields
-http://www.semicomplete.com/projects/fex/
-sql :foo 'select * from bar' | parallel --fex '|{1,2}' do_stuff {2} {1}
-
-
---autocolsep: Læs alle linjer.
-Prøv fastlængde: Find tegn, som står i alle linjer på de samme pladser. Risiko for falske pos
-Prøv fieldsep: Find eet tegn, som optræder det samme antal gange i alle linjer (tab sep)
-Prøv klyngesep: Find den samme klynge tegn, som står samme antal gange i alle linjer (' | ' sep)
-Fjern whitespace før og efter colonne
-
-hvis der er n af tegn A og 2n af tegn B, så
-
-  a | b | c
-
-Simpleste: tab sep
-
-for hver linje
-  max,min count for hver char
-
-for hver char
-  if max == min :
-    potentiel
-    min_potentiel = min(min_potentiel,min)
-
-for potentiel:
-  if min % min_potentiel = 0: sepchars += potentiel,no of sepchars += min / min_potentiel
-
-colsep = [sepchars]{no_of_sepchars}
-
-
-# TODO max_line_length on remote
-# TODO compute how many can be transferred within max_line_length
 
 =head1 YouTube video --pipe
 
@@ -614,16 +610,6 @@ Test if -0 works on filenames ending in '\n'
 =head1 options
 
 One char options not used: A F G K O Q R Z c f
-
-=head1 sem
-
-Parallelize so this can be done:
-mdm.screen find dir -execdir mdm-run cmd {} \;
-Maybe:
-find dir -execdir par$ --communication-file /tmp/comfile cmd {} \;
-
-find dir -execdir mutex -j4 -b cmd {} \;
-
 
 =head1 Unlikely
 

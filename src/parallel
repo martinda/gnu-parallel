@@ -403,6 +403,7 @@ sub options_hash {
 	 "interactive|p" => \$::opt_p,
 	 "verbose|t" => \$::opt_verbose,
 	 "version|V" => \$::opt_version,
+	 "minversion|min-version=i" => \$::opt_minversion,
 	 "show-limits|showlimits" => \$::opt_show_limits,
 	 "exit|x" => \$::opt_x,
 	 # Semaphore
@@ -530,6 +531,14 @@ sub parse_options {
     if(defined $::opt_fg) { $Global::semaphore = 1; }
     if(defined $::opt_bg) { $Global::semaphore = 1; }
     if(defined $::opt_wait) { $Global::semaphore = 1; }
+    if(defined $::opt_minversion) {
+	version();
+	if($Global::version < $::opt_minversion) {
+	    wait_and_exit(255);
+	} else {
+	    wait_and_exit(0);
+	}
+    }
     if(defined $::opt_nonall) {
 	# Append a dummy empty argument
 	push @ARGV, ":::", "";

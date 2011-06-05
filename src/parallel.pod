@@ -621,6 +621,16 @@ See also B<-X> for context replace. If in doubt use B<-X> as that will
 most likely do what is needed.
 
 
+=item B<--minversion> I<version> (alpha testing)
+
+Print the version GNU B<parallel> and exit.  If the current version of
+GNU B<parallel> is less than I<version> the exit code is
+255. Otherwise it is 0.
+
+This is useful for scripts that depend on features only available from
+a certain version of GNU B<parallel>.
+
+
 =item B<--onall> (alpha testing)
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
