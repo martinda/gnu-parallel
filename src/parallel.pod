@@ -631,12 +631,24 @@ This is useful for scripts that depend on features only available from
 a certain version of GNU B<parallel>.
 
 
+=item B<--nonall> (alpha testing)
+
+B<--onall> with no arguments. Run the command on all computers given
+with B<--sshlogin> but take no arguments. GNU B<parallel> will log
+into B<--jobs> number of computers in parallel and run the job on the
+computer. B<-j> adjusts how many computers to log into in parallel.
+
+This is useful for running the same command (e.g. uptime) on a list of
+servers.
+
+
 =item B<--onall> (alpha testing)
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
 and run one job at a time on the computer. The order of the jobs will
-not be changed, but some computers may finish before others.
+not be changed, but some computers may finish before others. B<-j>
+adjusts how many computers to log into in parallel.
 
 When using B<--group> the output will be grouped by each server, so
 all the output from one server will be grouped together.
@@ -1716,7 +1728,7 @@ Convert *.mp3 to *.ogg running one process per CPU core on local computer and se
   'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg' ::: *.mp3
 
 
-=head1 EXAMPLE: Running the same command on remote computers (unimplemented)
+=head1 EXAMPLE: Running the same command on remote computers
 
 To run the command B<uptime> on remote computers you can do:
 
@@ -1726,6 +1738,8 @@ B<--nonall> reads no arguments. If you have a list of jobs you want
 run on each computer you can do:
 
 B<parallel --onall -S server1,server2 echo ::: 1 2 3>
+
+If you have a lot of hosts use '-j0' to access more hosts in parallel.
 
 
 =head1 EXAMPLE: Use multiple inputs in one command
