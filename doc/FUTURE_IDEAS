@@ -1,3 +1,10 @@
+niceload seeks last column:
+
+iostat -x 1 2
+
+niceload --start-condition
+
+
 Til QUOTING:
 
 FN="two  spaces"
@@ -89,6 +96,17 @@ Postkort:
   - kort grå tekst, der forklarer hvad det er.
   - Eet eksempel: parallel gzip ::: *
   - Link til video. http://nd.gd/0s 
+
+Til inspiration.
+
+Hvis du stadig er ved at lave post- eller visitkort ting, så kunne du evt tilføje en QR code. Med MECARD tagget kan flere tags gemmes i en og samme fil:
+
+qrencode -l L -o x.png "MECARD:N:GNU Parallel;EMAIL:parallel@gnu.org;URL:gnu.org/software/parallel;"
+
+Den ser OK ud i en Androide tlf.
+
+Husk at skrive indholdet under billedet, det er irreterende at skulle gætte.
+
 
 GNU parallel is a UNIX-tool for running commands in parallel.
 To gzip all files running one job per CPU write:

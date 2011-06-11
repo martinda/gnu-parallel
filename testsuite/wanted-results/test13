@@ -1,5 +1,5 @@
 ### Test -k
-parallel: Warning: Only enough filehandles to run 20 jobs in parallel. Raising ulimit -n may help
+parallel: Warning: Only enough filehandles to run 20 jobs in parallel. Raising ulimit -n may help.
 begin
 1
 2
@@ -72,3 +72,4 @@ parallel: sleep 3; echo 17
 parallel: sleep 3; echo 18
 ### Test bug: empty line for | sh with -k
 a
+b

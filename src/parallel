@@ -445,7 +445,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110526;
+    $Global::version = 20110607;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -639,7 +639,7 @@ sub parse_options {
         } else {
             print $Global::joblog
                 join("\t", "Seq", "Host", "Starttime", "Runtime",
-                     "Send", "Receive", "Exitval", "Command"
+                     "Send", "Receive", "Exitval", "Signal", "Command"
                 ). "\n";
         }
     }
@@ -1538,6 +1538,7 @@ sub reaper {
         my $job = $Global::running{$stiff};
         $job or next;
         $job->set_exitstatus($? >> 8);
+        $job->set_exitsignal($? & 127);
         debug("died (".$job->exitstatus()."): ".$job->seq());
         $job->set_endtime();
         if($stiff == $Global::tty_taken) {
@@ -2656,6 +2657,7 @@ sub new {
         # The commandline wrapped with rsync and ssh
         'sshlogin_wrap' => undef,
         'exitstatus' => undef,
+        'exitsignal' => undef,
     }, ref($class) || $class;
 }
 
@@ -3225,7 +3227,7 @@ sub print {
 	    join("\t", $self->seq(), $self->sshlogin()->string(),
 		 $self->starttime(), $self->runtime(),
 		 $self->transfersize(), $self->returnsize(),
-		 $self->exitstatus(), $cmd
+		 $self->exitstatus(), $self->exitsignal(), $cmd
 		 ). "\n";
 	flush $Global::joblog;
     }
@@ -3277,6 +3279,17 @@ sub set_exitstatus {
     my $self = shift;
     my $exitstatus = shift;
     $self->{'exitstatus'} = $exitstatus;
+}
+
+sub exitsignal {
+    my $self = shift;
+    return $self->{'exitsignal'};
+}
+
+sub set_exitsignal {
+    my $self = shift;
+    my $exitsignal = shift;
+    $self->{'exitsignal'} = $exitsignal;
 }
 
 

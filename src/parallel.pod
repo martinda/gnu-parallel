@@ -737,7 +737,7 @@ This will set the owner of the homedir to the user:
 
 B<tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}>
 
-Implies B<-X> unless B<-m> or <--pipe> is set.
+Implies B<-X> unless B<-m> or B<--pipe> is set.
 
 When used with B<--pipe> B<-N> is the number of records to read. This
 is much slower than B<--blocksize> so avoid it if performance is

@@ -68,9 +68,9 @@ size with 1024, 1048576, 1073741824, or 1099511627776 respectively.
 Sets niceness. See B<nice>(1).
 
 
-=item B<-N> I<niceness>
+=item B<-N>
 
-=item B<--noswap> I<niceness>
+=item B<--noswap>
 
 Do not start new jobs on a given computer if there is both swap-in and
 swap-out activity.
@@ -296,7 +296,7 @@ B<parallel>(1), B<nice>(1)
 use strict;
 use Getopt::Long;
 $Global::progname="niceload";
-$Global::version = 20110526;
+$Global::version = 20110607;
 Getopt::Long::Configure("bundling","require_order");
 get_options_from_array(\@ARGV) || die_usage();
 if($::opt_version) {
