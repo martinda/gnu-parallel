@@ -705,6 +705,8 @@ reading everything at startup.
 By sending GNU B<parallel> SIGUSR2 you can toggle turning on/off
 B<--progress> on a running GNU B<parallel> process.
 
+See also: B<--eta>
+
 
 =item B<--max-args>=I<max-args>
 
