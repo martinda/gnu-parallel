@@ -163,10 +163,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Libre.fm? Viva? VTEC? Yemen?
-Subject: GNU Parallel 20110622 ('XXX') released
+Subject: GNU Parallel 20110622 ('Bean sprout') released
 
-GNU Parallel 20116022 ('XXX') has been released. It is
+GNU Parallel 20116022 ('Bean sprout') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 For sysadmins this is a major release, as --onall makes it easy to run

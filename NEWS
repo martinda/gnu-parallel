@@ -1,6 +1,36 @@
-20110522
+20110622
 
-New in this release:
+* --onall will run all the jobs on all the computers. This is useful
+  for systemadinistrators having multiple servers.
+
+* --nonall runs like --onall but reads no arguments from stdin
+  (standard input), so is possible to do:
+  parallel --nonall -S computer1,computer2 uptime
+
+* Context replace now works with multiple input sources:
+  parallel -X echo {1}-{2} ::: 1 2 3 ::: a b c
+
+* --noswap do not start a job on a server that is swapping.
+
+* Article: Parallel processing without Hadoop!
+  http://www.solutionhacker.com/parallel-processing-without-hadoop/
+
+* Article in Linux Magazine (Spanish). Thanks to Ben Martin.
+  http://www.linux-magazine.es/issue/67/
+
+* First blog post in Korean. Thanks to 민병국.
+  http://blog.daum.net/_blog/BlogTypeView.do?blogid=02RQ3&articleno=13380895&admin=#
+
+* Blog post in Japanese. Thanks to Naoya Nakazawa.
+  http://www.sssg.org/blogs/naoya/archives/2003
+
+* Blog post in English. Thanks to Dagon.
+  http://hekate.homeip.net/2011/05/29/
+
+* Bug fixes and man page updates.
+
+
+20110522
 
 * Multiple ::: can be put on the command line and will be treated
   similar to contents from multiple -a's.
