@@ -11,8 +11,9 @@ seq 3 | parallel --onall -S parallel@$SERVER2,$SERVER1 '(echo {3} {2}) | awk \{p
 echo '### Test --onall -u'
 parallel --onall -S parallel@$SERVER2,$SERVER1 -u '(echo {3} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2 3 | sort
 echo '### Test --nonall'
-parallel --nonall -S parallel@$SERVER2,$SERVER1 'hostname'
-parallel --nonall -S parallel@$SERVER2,$SERVER1 -u 'hostname;sleep 2;hostname'
+parallel --nonall -k -S parallel@$SERVER2,$SERVER1 'hostname' | sort
+echo '### Test --nonall -u'
+parallel --nonall -S parallel@$SERVER2,$SERVER1 -vu 'sleep {#};hostname;sleep 3;hostname'
 echo '### Test read sshloginfile from STDIN'
 echo nlv.pi.dk | parallel -S - --nonall hostname
 echo nlv.pi.dk | parallel --sshloginfile - --nonall hostname

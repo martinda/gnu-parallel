@@ -58,10 +58,13 @@
 ### Test --nonall
 nlv.pi.dk
 vh2.pi.dk
-nlv.pi.dk
+### Test --nonall -u
+ssh parallel-server3 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; sleep\ 1\;hostname\;sleep\ 3\;hostname;
+ssh parallel@parallel-server2 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; sleep\ 1\;hostname\;sleep\ 3\;hostname;
 vh2.pi.dk
 nlv.pi.dk
 vh2.pi.dk
+nlv.pi.dk
 ### Test read sshloginfile from STDIN
 nlv.pi.dk
 nlv.pi.dk

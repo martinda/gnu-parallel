@@ -66,14 +66,20 @@ if($::opt_nonall or $::opt_onall) {
     # -P should only go to the first, and -S should not be copied at all.
     my $options =
 	join(" ",
+	     ((defined $::opt_P) ? "-P $::opt_P" : ""),
+	     ((defined $::opt_u) ? "-u" : ""),
+	     ((defined $::opt_g) ? "-g" : ""),
+	);
+    my $suboptions =
+	join(" ",
 	     ((defined $::opt_u) ? "-u" : ""),
 	     ((defined $::opt_g) ? "-g" : ""),
 	     ((defined @::opt_v) ? "-vv" : ""),
 	);
     ::debug("| parallel");
-    open(PARALLEL,"| parallel -P $::opt_P") || die;
+    open(PARALLEL,"| parallel $options") || die;
     for my $sshlogin (values %Global::host) {
-	print PARALLEL "parallel $options -j1 -S ".
+	print PARALLEL "parallel $suboptions -j1 -S ".
 	    shell_quote_scalar($sshlogin->string())." ".
 	    shell_quote_scalar($command)." :::: @argfiles\n";
     }
@@ -447,7 +453,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110607;
+    $Global::version = 20110622;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
