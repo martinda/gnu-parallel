@@ -38,3 +38,6 @@ parallel -u --bg --semaphore seq 11 20 '|' pv -qL 30
 parallel -u --fg --semaphore seq 21 30 '|' pv -qL 30
 parallel -u --bg --semaphore seq 31 40 '|' pv -qL 30
 sem --wait
+
+echo '### Test bug #33621: --bg -p should give an error message'
+stdout parallel -p --bg echo x{}

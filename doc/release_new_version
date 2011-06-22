@@ -163,42 +163,37 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20110622 ('Bean sprout') released
+Subject: GNU Parallel 20110722 ('XXX') released
 
-GNU Parallel 20116022 ('Bean sprout') has been released. It is
+GNU Parallel 20110722 ('XXX') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
-
-For sysadmins this is a major release, as --onall makes it easy to run
-the same commands on a list of computers.
 
 New in this release:
 
-* --onall will run all the jobs on all the computers. This is useful
-  for systemadinistrators having multiple servers.
+* niceload: --noswap will slow down a program if the computer is
+  swapping.
 
-* --nonall runs like --onall but reads no arguments from stdin
-  (standard input), so is possible to do:
-  parallel --nonall -S computer1,computer2 uptime
+* niceload: --mem will slow down a program if free memory goes below a
+  certain limit.
 
-* Context replace now works with multiple input sources:
-  parallel -X echo {1}-{2} ::: 1 2 3 ::: a b c
+* niceload: --hard will suspend a program if a limit is reached - as
+  opposed to just slowing the program down.
 
-* --noswap do not start a job on a server that is swapping.
+* niceload: --soft will slowing the program down - as opposed to
+  suspending the program completely.
 
-* Article: Parallel processing without Hadoop!
-  http://www.solutionhacker.com/parallel-processing-without-hadoop/
+(
+* niceload: --io will slow down a program if disk io goes above a
+  certain limit.
 
-* Article in Linux Magazine (Spanish). Thanks to Ben Martin.
-  http://www.linux-magazine.es/issue/67/
+* niceload: --start-load, --start-noswap, --start-mem, --start-io will
+  defer starting a program until the system is below the limit.
 
-* First blog post in Korean. Thanks to 민병국.
-  http://blog.daum.net/_blog/BlogTypeView.do?blogid=02RQ3&articleno=13380895&admin=#
+* niceload got a major rewrite and is now object oriented.
+)
 
-* Blog post in Japanese. Thanks to Naoya Nakazawa.
-  http://www.sssg.org/blogs/naoya/archives/2003
-
-* Blog post in English. Thanks to Dagon.
-  http://hekate.homeip.net/2011/05/29/
+* GNU Parallel was presented at Nordic Perl Workshop 2011.
+  http://conferences.yapceurope.org/npw2011/talk/3416
 
 * Bug fixes and man page updates.
 
