@@ -282,7 +282,7 @@ Run command in background thus GNU B<parallel> will not wait for
 completion of the command before exiting. This is the default if
 B<--semaphore> is set.
 
-See also: B<--fg>
+See also: B<--fg>, B<man sem>
 
 Implies B<--semaphore>.
 
@@ -399,7 +399,7 @@ Implies B<--progress>.
 Run command in foreground thus GNU B<parallel> will wait for
 completion of the command before exiting.
 
-See also: B<--bg>
+See also: B<--bg>, B<man sem>
 
 Implies B<--semaphore>.
 
@@ -932,15 +932,25 @@ Used with B<--fg>, B<--wait>, and B<--semaphorename>.
 
 The command B<sem> is an alias for B<parallel --semaphore>.
 
+See also: B<man sem>
+
 
 =item B<--semaphorename> I<name>
 
 =item B<--id> I<name>
 
-The name of the semaphore to use. The semaphore can be shared between
-multiple processes.
+Use B<name> as the name of the semaphore. Default is the name of the
+controlling tty (output from B<tty>).
+
+The default normally works as expected when used interactively, but
+when used in a script I<name> should be set. I<$$> or I<my_task_name>
+are often a good value.
+
+The semaphore is stored in ~/.parallel/semaphores/
 
 Implies B<--semaphore>.
+
+See also: B<man sem>
 
 
 =item B<--semaphoretimeout> I<secs> (not implemented)
@@ -948,6 +958,8 @@ Implies B<--semaphore>.
 If the semaphore is not released within secs seconds, take it anyway.
 
 Implies B<--semaphore>.
+
+See also: B<man sem>
 
 
 =item B<--seqreplace> I<replace-str>
@@ -1202,6 +1214,8 @@ using B<--cleanup>.
 Wait for all commands to complete.
 
 Implies B<--semaphore>.
+
+See also: B<man sem>
 
 
 =item B<-X>
