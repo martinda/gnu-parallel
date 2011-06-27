@@ -1641,12 +1641,30 @@ sub die_usage {
 
 sub usage {
     # Returns: N/A
-    print "Usage:\n";
-    print "$Global::progname [options] [command [arguments]] < list_of_arguments\n";
-    print "$Global::progname [options] [command [arguments]] ::: arguments\n";
-    print "$Global::progname [options] [command [arguments]] :::: argfile(s)\n";
-    print "\n";
-    print "See 'man $Global::progname' for the options\n";
+    print join
+	("\n",
+	 "Usage:",
+	 "$Global::progname [options] [command [arguments]] < list_of_arguments",
+	 "$Global::progname [options] [command [arguments]] (::: arguments|:::: argfile(s))...",
+	 "",
+	 "-j n       Run n jobs in parallel",
+	 "-k         Keep same order",
+	 "-X         Multiple arguments with context replace",
+	 "--colsep regexp  Split input on regexp for positional replacements",
+	 "{} {.} {/} {/.}  Replacement strings",
+	 "{3} {3.} {3/} {3/.}  Positional replacement strings",
+	 "",
+	 "-S         sshlogin - e.g. foo\@server.example.com",
+	 "--trc {}.bar  Shorthand for --transfer --return {}.bar --cleanup",
+	 "--onall    Run the given command with argument on all sshlogins",
+	 "--nonall   Run the given command with no arguments on all sshlogins",
+	 "",
+	 "--pipe     Split stdin (standard input) to multiple jobs.",
+	 "--recend   Record end separator for --pipe.",
+	 "--recstart Record start separator for --pipe.",
+	 "",
+	 "See 'man $Global::progname' for details",
+	 "");
 }
 
 sub die_bug {

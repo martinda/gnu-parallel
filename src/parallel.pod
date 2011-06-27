@@ -610,8 +610,11 @@ that specify their own ssh command.
 
 =item B<-m>
 
-Multiple. Insert as many arguments as the command line length
-permits. If B<{}> is not used the arguments will be appended to the
+Multiple arguments. Insert as many arguments as the command line
+length permits. If multiple jobs are being run in parallel: distribute
+the arguments evenly among the jobs. Use B<-j1> to avoid this.
+
+If B<{}> is not used the arguments will be appended to the
 line.  If B<{}> is used multiple times each B<{}> will be replaced
 with all the arguments.
 
@@ -1221,10 +1224,14 @@ See also: B<man sem>
 =item B<-X>
 
 Multiple arguments with context replace. Insert as many arguments as
-the command line length permits. If B<{}> is not used the arguments
-will be appended to the line.  If B<{}> is used as part of a word
-(like I<pic{}.jpg>) then the whole word will be repeated. If B<{}> is
-used multiple times each B<{}> will be replaced with the arguments.
+the command line length permits. If multiple jobs are being run in
+parallel: distribute the arguments evenly among the jobs. Use B<-j1>
+to avoid this.
+
+If B<{}> is not used the arguments will be appended to the line.  If
+B<{}> is used as part of a word (like I<pic{}.jpg>) then the whole
+word will be repeated. If B<{}> is used multiple times each B<{}> will
+be replaced with the arguments.
 
 Normally B<-X> will do the right thing, whereas B<-m> can give
 unexpected results if B<{}> is used as part of a word.
