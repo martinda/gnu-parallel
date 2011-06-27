@@ -1971,7 +1971,7 @@ sub loadavg {
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'loadavg_file'};
         my $tmpfile = $self->{'loadavg_file'}.$$;
-        qx{ ($uptime > $tmpfile; mv $tmpfile $file) & };
+        qx{ ($uptime > $tmpfile && mv $tmpfile $file) & };
     }
     return $self->{'loadavg'};
 }
