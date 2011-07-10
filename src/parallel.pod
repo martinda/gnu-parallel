@@ -72,66 +72,84 @@ http://www.perlmonks.org/index.pl?node_id=484296).
 
 =item B<{}> (still alpha testing)
 
-Input line. This is the default replacement string and will normally
-be used for putting the argument in the command line. It can be
-changed with B<-I>.
+Input line. This replacement string will be replaced by a full line
+read from the input source.
+
+The replacement string B<{}> can be changed with B<-I>.
+
+If the command line contains no replacement strings then B<{}> will be
+appended to the command line.
 
 
 =item B<{.}> (still alpha testing)
 
-Input line without extension. This is a specialized replacement string
-with the extension removed. If the input line contains B<.> after the
-last B</> the last B<.> till the end of the string will be removed and
-B<{.}> will be replaced with the remaining. E.g. I<foo.jpg> becomes
-I<foo>, I<subdir/foo.jpg> becomes I<subdir/foo>, I<sub.dir/foo.jpg>
-becomes I<sub.dir/foo>, I<sub.dir/bar> remains I<sub.dir/bar>. If the
-input line does not contain B<.> it will remain unchanged.
+Input line without extension. This replacement string will be replaced
+by the input with the extension removed. If the input line contains
+B<.> after the last B</> the last B<.> till the end of the string will
+be removed and B<{.}> will be replaced with the
+remaining. E.g. I<foo.jpg> becomes I<foo>, I<subdir/foo.jpg> becomes
+I<subdir/foo>, I<sub.dir/foo.jpg> becomes I<sub.dir/foo>,
+I<sub.dir/bar> remains I<sub.dir/bar>. If the input line does not
+contain B<.> it will remain unchanged.
 
-B<{.}> can be used the same places as B<{}>. The replacement string
-B<{.}> can be changed with B<-U>.
+The replacement string B<{.}> can be changed with B<-U>.
+
+To understand replacement strings see B<{}>.
 
 
 =item B<{/}> (still alpha testing)
 
-Basename of input line. This is a specialized replacement string
-with the directory part removed.
+Basename of input line. This replacement string will be replaced by
+the input with the directory part removed.
 
-B<{/}> can be used the same places as B<{}>. The replacement string
-B<{/}> can be changed with B<--basenamereplace>.
+The replacement string B<{/}> can be changed with
+B<--basenamereplace>.
+
+To understand replacement strings see B<{}>.
 
 
 =item B<{//}> (still alpha testing)
 
-Dirname of input line. This is a specialized replacement string
-containing the dir of the input. See B<dirname>(1).
+Dirname of input line. This replacement string will be replaced by the
+dir of the input line. See B<dirname>(1).
 
-B<{//}> can be used the same places as B<{}>. The replacement string
-B<{//}> can be changed with B<--dirnamereplace>.
+The replacement string B<{//}> can be changed with
+B<--dirnamereplace>.
+
+To understand replacement strings see B<{}>.
 
 
 =item B<{/.}> (still alpha testing)
 
-Basename of input line without extension. This is a specialized
-replacement string with the directory and extension part removed. It
-is a combination of B<{/}> and B<{.}>.
+Basename of input line without extension. This replacement string will
+be replaced by the input with the directory and extension part
+removed. It is a combination of B<{/}> and B<{.}>.
 
-B<{/.}> can be used the same places as B<{}>. The replacement string
-B<{/.}> can be changed with B<--basenameextensionreplace>.
+The replacement string B<{/.}> can be changed with
+B<--basenameextensionreplace>.
+
+To understand replacement strings see B<{}>.
 
 
 =item B<{#}> (still alpha testing)
 
-Sequence number of the job to run. The same as $PARALLEL_SEQ.
+Sequence number of the job to run. This replacement string will be
+replaced by the sequence number of the job being run. It contains the
+same number as $PARALLEL_SEQ.
 
 The replacement string B<{#}> can be changed with B<--seqreplace>.
+
+To understand replacement strings see B<{}>.
 
 
 =item B<{>I<n>B<}> (still alpha testing)
 
-Argument from input source I<n> or the I<n>'th argument. See B<-a>
-and B<-N>.
+Argument from input source I<n> or the I<n>'th argument. This
+positional replacement string will be replaced by the input from input
+source I<n> (when used with B<-a> or B<::::>) or with the I<n>'th
+argument (when used with B<-N>).
 
-B<{>I<n>B<}> can be used the same places as B<{}>.
+To understand replacement strings see B<{}>.
 
 
 =item B<{>I<n>.B<}> (still alpha testing)
@@ -139,24 +157,39 @@ B<{>I<n>B<}> can be used the same places as B<{}>.
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
 
-B<{>I<n>.B<}> can be used the same places as B<{>I<n>B<}>.
+This positional replacement string will be replaced by the input from
+input source I<n> (when used with B<-a> or B<::::>) or with the
+I<n>'th argument (when used with B<-N>). The input will have the
+extension removed.
+
+To understand positional replacement strings see B<{>I<n>B<}>.
 
 
 =item B<{>I<n>/B<}> (still alpha testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument.
-It is a combination of B<{>I<n>B<}> and B<{/}>.  See B<-a> and B<-N>.
+It is a combination of B<{>I<n>B<}> and B<{/}>.
 
-B<{>I<n>/B<}> can be used the same places as B<{>I<n>B<}>.
+This positional replacement string will be replaced by the input from
+input source I<n> (when used with B<-a> or B<::::>) or with the
+I<n>'th argument (when used with B<-N>). The input will have the
+directory (if any) removed.
+
+To understand positional replacement strings see B<{>I<n>B<}>.
 
 
 =item B<{>I<n>/.B<}> (still alpha testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
-B<{.}>.  See B<-a> and B<-N>.
+B<{.}>.
 
-B<{>I<n>/.B<}> can be used the same places as B<{>I<n>B<}>.
+This positional replacement string will be replaced by the input from
+input source I<n> (when used with B<-a> or B<::::>) or with the
+I<n>'th argument (when used with B<-N>). The input will have the
+directory (if any) and extension removed.
+
+To understand positional replacement strings see B<{>I<n>B<}>.
 
 
 =item B<:::> I<arguments> (alpha testing)
@@ -607,6 +640,19 @@ that specify their own ssh command.
 
 
 =item B<--xargs>
+
+Multiple arguments. Insert as many arguments as the command line
+length permits.
+
+If B<{}> is not used the arguments will be appended to the
+line.  If B<{}> is used multiple times each B<{}> will be replaced
+with all the arguments.
+
+Support for B<--xargs> with B<--sshlogin> is limited and may fail.
+
+See also B<-X> for context replace. If in doubt use B<-X> as that will
+most likely do what is needed.
+
 
 =item B<-m>
 

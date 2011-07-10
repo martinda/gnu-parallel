@@ -195,6 +195,13 @@ New in this release:
 * GNU Parallel was presented at Nordic Perl Workshop 2011.
   http://conferences.yapceurope.org/npw2011/talk/3416
 
+* Blog post about zcat and GNU Parallel. Thanks to Dr. John.
+  http://drjohnstechtalk.com/blog/2011/06/gnu-parallel-really-helps-with-zcat/
+
+* 2 blog posts in Japanese. Thanks to Negima.
+  http://d.hatena.ne.jp/negima1976/20110607/1307412660
+  http://d.hatena.ne.jp/negima1976/20110628/1309252494
+
 * Bug fixes and man page updates.
 
 
