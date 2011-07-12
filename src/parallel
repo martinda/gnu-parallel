@@ -1813,6 +1813,7 @@ sub new {
         'loadavg_file' => $ENV{'HOME'} . "/.parallel/tmp/loadavg-" .
             $$."-".$string,
         'loadavg' => undef,
+	'last_loadavg_update' => 0,
         'swap_activity_file' => $ENV{'HOME'} . "/.parallel/tmp/swap_activity-" .
             $$."-".$string,
         'swap_activity' => undef,
