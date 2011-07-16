@@ -4,9 +4,17 @@ echo "### Test --basenamereplace"
 parallel -j1 -k -X --basenamereplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
 parallel -k --basenamereplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
 
+echo "### Test --bnr"
+parallel -j1 -k -X --bnr FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
+parallel -k --bnr FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
+
 echo "### Test --basenameextensionreplace"
 parallel -j1 -k -X --basenameextensionreplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
 parallel -k --basenameextensionreplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
+
+echo "### Test --bner"
+parallel -j1 -k -X --bner FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
+parallel -k --bner FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
 
 echo "### Test {/}"
 parallel -j1 -k -X echo {/} ::: /a/b.c a/b.c b.c /a/b a/b b

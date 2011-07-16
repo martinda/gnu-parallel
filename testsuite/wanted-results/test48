@@ -46,3 +46,9 @@
 ### Test -N is not broken by distribution - two lines
 1 2 3 4 5 6 7 8 9 10
 11 12 13 14 15 16 17 18 19
+### Test -N context replace
+a1b a2b a3b a4b a5b a6b a7b a8b a9b a10b
+a11b a12b a13b a14b a15b a16b a17b a18b a19b
+### Test -L context replace
+a1b a2b a3b a4b a5b a6b a7b a8b a9b a10b
+a11b a12b a13b a14b a15b a16b a17b a18b a19b

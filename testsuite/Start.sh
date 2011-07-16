@@ -8,8 +8,15 @@ ls -t tests-to-run/*.sh \
 >$SHFILE
 
 mkdir -p actual-results
-sh -x $SHFILE
+stdout sh -x $SHFILE | tee testsuite.log
 rm $SHFILE
-
-
+# If testsuite.log contains @@ then there is a diff
+if grep -q '@@' testsuite.log ; then
+  false
+else
+  # No @@'s: So everything worked: Copy the source
+  rm -rf src-passing-testsuite
+  cp -a ../src src-passing-testsuite
+fi
+rm testsuite.log
 

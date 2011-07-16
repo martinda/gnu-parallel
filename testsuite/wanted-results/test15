@@ -82,14 +82,14 @@ a_b c
 d
 e
 ### test too long args
-Command line too long (1000005 >= 131071) at number 1: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Command line too long (1000005 >= 131071) at number 1: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 xargs: argument line too long
 1 2
 3 4
 5 6
 7 8
 9 10
-Command line too long (1000007 >= 10) at number 5: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Command line too long (1000007 >= 10) at number 5: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 1 2
 3 4
 5 6
@@ -101,20 +101,20 @@ xargs: argument line too long
 5 6
 7 8
 9 10
-Command line too long (1000007 >= 10) at number 5: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Command line too long (1000007 >= 10) at number 5: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 ### Test -x
 1 2
 3 4
 5 6
 7 8
 9 10
-Command line too long (10 >= 10) at number 5: 12345...
+parallel: Command line too long (10 >= 10) at number 5: 12345...
 1 2
 3 4
 5 6
 7 8
 9 10
-Command line too long (10 >= 10) at number 5: 12345...
+parallel: Command line too long (10 >= 10) at number 5: 12345...
 1 2
 3 4
 5 6
@@ -287,8 +287,8 @@ line 2
 ### Test --no-run-if-empty and -r: This should give no output
 ### Test --help and -h: Help output (just check we get the same amount of lines)
 Output from -h and --help
-6
-6
+22
+22
 ### Test --version: Version output (just check we get the same amount of lines)
 12
 ### Test --verbose and -t

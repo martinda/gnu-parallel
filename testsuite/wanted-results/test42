@@ -6,7 +6,23 @@ b.c
 b
 b
 b
+### Test --bnr
+b.c b.c b.c b b b
+b.c
+b.c
+b.c
+b
+b
+b
 ### Test --basenameextensionreplace
+b b b b b b
+b
+b
+b
+b
+b
+b
+### Test --bner
 b b b b b b
 b
 b

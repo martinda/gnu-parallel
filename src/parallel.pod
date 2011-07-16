@@ -73,7 +73,9 @@ http://www.perlmonks.org/index.pl?node_id=484296).
 =item B<{}> (still alpha testing)
 
 Input line. This replacement string will be replaced by a full line
-read from the input source.
+read from the input source. The input source is normally stdin
+(standard input), but can also be given with B<-a>, B<:::>, or
+B<::::>.
 
 The replacement string B<{}> can be changed with B<-I>.
 
@@ -194,9 +196,9 @@ To understand positional replacement strings see B<{>I<n>B<}>.
 
 =item B<:::> I<arguments> (alpha testing)
 
-Use arguments from the command line as input source instead of from
-stdin (standard input). Unlike other options for GNU B<parallel>
-B<:::> is placed after the I<command> and before the arguments.
+Use arguments from the command line as input source instead of stdin
+(standard input). Unlike other options for GNU B<parallel> B<:::> is
+placed after the I<command> and before the arguments.
 
 The following are equivalent:
 
@@ -234,7 +236,7 @@ Another way to write B<-a> I<argfile1> B<-a> I<argfile2> ...
 
 B<:::> and B<::::> can be mixed.
 
-See B<-a>.
+See B<-a> and B<:::>.
 
 
 =item B<--null>
@@ -261,7 +263,7 @@ contains B<a b c>.  B<-a foo> B<-a bar> will result in the combinations
 (1,a) (1,b) (1,c) (2,a) (2,b) (2,c). This is useful for replacing
 nested for-loops.
 
-See also B<--xapply>
+See also B<--xapply> and B<{>I<n>B<}>.
 
 
 =item B<--arg-file-sep> I<sep-str>
@@ -305,6 +307,8 @@ basename of input line.
 
 
 =item B<--basenameextensionreplace> I<replace-str>
+
+=item B<--bner> I<replace-str>
 
 Use the replacement string I<replace-str> instead of B<{/.}> for basename of input line without extension.
 
@@ -603,7 +607,7 @@ next input line.
 B<-L 0> means read one line, but insert 0 arguments on the command
 line.
 
-Implies B<-X> unless B<-m> is set.
+Implies B<-X> unless B<-m> or B<--xargs> is set.
 
 
 =item B<--max-lines>[=I<max-lines>]
