@@ -2941,8 +2941,10 @@ sub sshlogin_wrap {
 		# We need to save the exit status of the job
 		$post = '_EXIT_status=$?; '.$post.' exit $_EXIT_status;';
 	    }
-	    my $parallel_env = 'PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;'.
-		'PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\;';
+	    # If the remote login shell is (t)csh then use 'setenv'
+	    # otherwise use 'export'
+	    my $parallel_env =
+		q{'eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\; setenv PARALLEL_PID '$PARALLEL_PID' || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'};
 	    if($::opt_workdir) {
 		$self->{'sshlogin_wrap'} = ($pre . "$sshcmd $serverlogin $parallel_env "
 					    . ::shell_quote_scalar("cd ".$self->workdir()." && ")

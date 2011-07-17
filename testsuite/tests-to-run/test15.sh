@@ -83,12 +83,11 @@ echo '### Test -x'
 (seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -km -s 10 -x echo
 (seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -kX -s 10 -x echo
 (seq 1 10; echo 1234; seq 12 15) | stdout xargs -s 10 -x echo
-EOF
 
 echo '### Test -a and --arg-file: Read input from file instead of stdin'
-seq 1 10 >/tmp/$$
-parallel -k -a /tmp/$$ echo
-parallel -k --arg-file /tmp/$$ echo
+seq 1 10 >/tmp/$$-1; parallel -k -a /tmp/$$-1 echo
+seq 1 10 >/tmp/$$-2; parallel -k --arg-file /tmp/$$-2 echo
+EOF
 
 #echo '### Test bugfix if no command given'
 #(echo echo; seq 1 5; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -km -s 10
