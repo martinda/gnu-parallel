@@ -45,6 +45,8 @@ my $command;
 if(@ARGV) {
     if($Global::quoting) {
 	$command = shell_quote(@ARGV);
+	# {#} is a replacement string and should not be quoted
+	$command =~ s/{\\#}/{#}/g;
     } else {
 	$command = join(" ", @ARGV);
     }
@@ -1972,7 +1974,9 @@ sub loadavg {
         if($uptime_out =~ /load average: (\d+.\d+)/) {
             $self->{'loadavg'} = $1;
             ::debug("New loadavg: ".$self->{'loadavg'});
-        }
+        } else {
+	    ::die_bug("loadavg_invalid_content: $uptime_out");
+	}
         ::debug("Last update: ".$self->{'last_loadavg_update'});
         if(time - $self->{'last_loadavg_update'} > 10) {
             # last loadavg was started 10 seconds ago

@@ -31,6 +31,7 @@ send "y\n"
 expect "opt--interactive 3"
 _EOF
 
+cat <<'EOF' | parallel -j0 -k
 echo '### Test -L -l and --max-lines'
 (echo a_b;echo c) | parallel -km -L2 echo
 (echo a_b;echo c) | parallel -k -L2 echo
@@ -82,13 +83,15 @@ echo '### Test -x'
 (seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -km -s 10 -x echo
 (seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -kX -s 10 -x echo
 (seq 1 10; echo 1234; seq 12 15) | stdout xargs -s 10 -x echo
-#echo '### Test bugfix if no command given'
-#(echo echo; seq 1 5; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -km -s 10
+EOF
 
 echo '### Test -a and --arg-file: Read input from file instead of stdin'
 seq 1 10 >/tmp/$$
 parallel -k -a /tmp/$$ echo
 parallel -k --arg-file /tmp/$$ echo
+
+#echo '### Test bugfix if no command given'
+#(echo echo; seq 1 5; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -km -s 10
 
 cd input-files/test15
 
@@ -114,6 +117,15 @@ chmod 755 /tmp/parallel-script-for-script2
 echo via pseudotty | script -q -f -c /tmp/parallel-script-for-script2 /dev/null
 sleep 1
 
+echo '### Hans found a bug giving unitialized variable'
+echo >/tmp/parallel_f1
+echo >/tmp/parallel_f2'
+'
+echo /tmp/parallel_f1 /tmp/parallel_f2 | stdout parallel -kv --delimiter ' ' gzip
+rm /tmp/parallel_f*
+
+
+cat <<'EOF' | parallel -j0 -k
 echo '### Test -i and --replace: Replace with argument'
 (echo a; echo END; echo b) | parallel -k -i -eEND echo repl{}ce
 (echo a; echo END; echo b) | parallel -k --replace -eEND echo repl{}ce
@@ -160,13 +172,6 @@ echo line 1Nline 2Nline 3 | parallel -k --delimiter N echo This is
 printf "delimiter NUL line 1\0line 2\0line 3" | parallel -k -d '\0' echo
 printf "delimiter TAB line 1\tline 2\tline 3" | parallel -k --delimiter '\t' echo
 
-echo '### Hans found a bug giving unitialized variable'
-echo >/tmp/parallel_f1
-echo >/tmp/parallel_f2'
-'
-echo /tmp/parallel_f1 /tmp/parallel_f2 | stdout parallel -kv --delimiter ' ' gzip
-rm /tmp/parallel_f*
-
 echo '### Test --max-chars and -s: Max number of chars in a line'
 (echo line 1;echo line 1;echo line 2) | parallel -k --max-chars 25 -X echo
 (echo line 1;echo line 1;echo line 2) | parallel -k -s 25 -X echo
@@ -190,3 +195,4 @@ echo '### Test --verbose and -t'
 echo '### Test --show-limits'
 (echo b; echo c; echo f) | parallel -k --show-limits echo {}ar
 (echo b; echo c; echo f) | parallel -j1 -kX --show-limits -s 100 echo {}ar
+EOF

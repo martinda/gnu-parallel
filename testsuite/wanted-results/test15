@@ -189,6 +189,10 @@ parallel Expect: 1 3 2 via pseudotty
 3
 2
 via pseudotty
+### Hans found a bug giving unitialized variable
+gzip /tmp/parallel_f1
+gzip /tmp/parallel_f2'
+'
 ### Test -i and --replace: Replace with argument
 replace
 replace
@@ -275,10 +279,6 @@ line 3
 delimiter TAB line 1
 line 2
 line 3
-### Hans found a bug giving unitialized variable
-gzip /tmp/parallel_f1
-gzip /tmp/parallel_f2'
-'
 ### Test --max-chars and -s: Max number of chars in a line
 line 1 line 1
 line 2
