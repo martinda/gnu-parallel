@@ -60,7 +60,8 @@ http://www.youtube.com/watch?v=1ntxT-47VPA
 =item I<command>
 
 Command to execute.  If I<command> or the following arguments contain
-{} every instance will be substituted with the input line.
+replacement strings (such as B<{}>) every instance will be substituted
+with the input.
 
 If I<command> is given, GNU B<parallel> will behave similar to B<xargs>. If
 I<command> is not given GNU B<parallel> will behave similar to B<cat | sh>.

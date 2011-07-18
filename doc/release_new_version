@@ -1,5 +1,13 @@
 = Notes on how to release new version =
 
+== alpha/beta/production ==
+
+Update documentation:
+
+Modified => alpha
+Unmodified alpha since last version => beta
+Unmodified beta since last version => production
+
 == Update version ==
 
 === configure.ac ===
@@ -163,9 +171,9 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20110722 ('XXX') released
+Subject: GNU Parallel 20110722 ('Murdoch') released
 
-GNU Parallel 20110722 ('XXX') has been released. It is
+GNU Parallel 20110722 ('Murdoch') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
