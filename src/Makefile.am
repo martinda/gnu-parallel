@@ -16,7 +16,7 @@ sql.1: sql Makefile
 
 niceload.1: niceload Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 $(srcdir)/niceload > $(srcdir)/niceload.1
+		--section=1 $(srcdir)/niceload.pod > $(srcdir)/niceload.1
 
 parallel.html: parallel Makefile sem
 	./sem --fg --id pod2html pod2html $(srcdir)/parallel.pod > $(srcdir)/parallel.html

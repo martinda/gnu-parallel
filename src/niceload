@@ -1,302 +1,9 @@
 #!/usr/bin/perl -w
 
-=head1 NAME
-
-niceload - slow down a program when the load average is above a certain limit
-
-=head1 SYNOPSIS
-
-B<niceload> [-v] [-n nice] [-l load] [-t time] [-s time|-f factor] command
-
-B<niceload> [-v] [-h] [-n nice] [-l load] [-t time] [-s time|-f factor] -p=PID
-
-=head1 DESCRIPTION
-
-GNU B<niceload> will slow down a program when the load average is
-above a certain limit. When the limit is reached the program will be
-suspended for some time. Then resumed again for some time.  Then the
-load average is checked again and we start over.
-
-If the load is 3.00 then the default settings will run a program
-like this:
-
-run 1 second, suspend (3.00-1.00) seconds, run 1 second, suspend
-(3.00-1.00) seconds, run 1 second, ...
-
-=head1 OPTIONS
-
-=over 9
-
-=item B<-f> I<FACTOR>
-
-=item B<--factor> I<FACTOR>
-
-Suspend time factor. Dynamically set B<-s> as max load average over
-limit * factor. Default is 1.
-
-
-=item B<-H>
-
-=item B<--hard>
-
-Hard limit. B<--hard> will suspend the process until the system is
-under the limits. The default is B<--soft>.
-
-
-=item B<-l> I<maxload>
-
-=item B<--load> I<maxload>
-
-Max load. The maximal load average before suspending command. Default
-is 1.00.
-
-
-=item B<--rm> I<memory>
-
-=item B<--runmem> I<memory>
-
-Required free mem. I<memory> is computed as free memory + cache.
-
-I<memory> can be postfixed with K, M, G, T, or P which would multiply the
-size with 1024, 1048576, 1073741824, or 1099511627776 respectively.
-
-
-=item B<-n> I<niceness>
-
-=item B<--nice> I<niceness>
-
-Sets niceness. See B<nice>(1).
-
-
-=item B<-N>
-
-=item B<--noswap>
-
-Do not start new jobs on a given computer if there is both swap-in and
-swap-out activity.
-
-Swap activity is computed as (swap-in)*(swap-out) which in practice is
-a good value: swapping out is not a problem, swapping in is not a
-problem, but both swapping in and out usually indicates a problem.
-
-
-=item B<-p> I<PID>
-
-=item B<--pid> I<PID>
-
-Process ID of process to suspend.
-
-
-=item B<-s> I<SEC>
-
-=item B<--suspend> I<SEC>
-
-Suspend time. Suspend the command this many seconds when the max load
-average is reached.
-
-
-=item B<-S>
-
-=item B<--soft>
-
-Soft limit. B<niceload> will suspend a process for a while and then
-let it run for a second thus only slowing down a process while the
-system is over one of the given limits. This is the default.
-
-
-=item B<-t> I<SEC>
-
-=item B<--recheck> I<SEC>
-
-Recheck load time. Sleep SEC seconds before checking load
-again. Default is 1 second.
-
-
-=item B<-v>
-
-=item B<--verbose>
-
-Verbose. Print some extra output on what is happening. Use B<-v> until
-you know what your are doing.
-
-=back
-
-=head1 EXAMPLE: See niceload in action
-
-In terminal 1 run: top
-
-In terminal 2 run:
-
-B<niceload perl -e '$|=1;do{$l==$r or print "."; $l=$r}until(($r=time-$^T)>>B<50)'>
-
-This will print a '.' every second for 50 seconds and eat a lot of
-CPU. When the load rises to 1.0 the process is suspended.
-
-
-=head1 EXAMPLE: Run updatedb
-
-Running updatedb can often starve the system for disk I/O and thus result in a high load.
-
-Run updatedb but suspend updatedb if the load is above 2.00:
-
-B<niceload -l=2 updatedb>
-
-
-=head1 EXAMPLE: Run rsync
-
-rsync can just like updatedb starve the system for disk I/O and thus result in a high load.
-
-Run rsync but keep load below 3.4. If load reaches 7 sleep for
-(7-3.4)*12 seconds:
-
-B<niceload -l=3.4 -f=12 rsync -Ha /home/ /backup/home/>
-
-
-=head1 ENVIRONMENT VARIABLES
-
-None. In future versions $NICELOAD will be able to contain default settings.
-
-=head1 EXIT STATUS
-
-Exit status should be the same as the command being run (untested).
-
-=head1 REPORTING BUGS
-
-Report bugs to <bug-parallel@gnu.org>.
-
-=head1 AUTHOR
-
-Copyright (C) 2004-11-19 Ole Tange, http://ole.tange.dk
-
-Copyright (C) 2005,2006,2006,2008,2009,2010 Ole Tange, http://ole.tange.dk
-
-Copyright (C) 2010,2011 Ole Tange, http://ole.tange.dk and Free
-Software Foundation, Inc.
-
-=head1 LICENSE
-
-Copyright (C) 2010 Free Software Foundation, Inc.
-
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-at your option any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-=head2 Documentation license I
-
-Permission is granted to copy, distribute and/or modify this documentation
-under the terms of the GNU Free Documentation License, Version 1.3 or
-any later version published by the Free Software Foundation; with no
-Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
-Texts.  A copy of the license is included in the file fdl.txt.
-
-=head2 Documentation license II
-
-You are free:
-
-=over 9
-
-=item B<to Share>
-
-to copy, distribute and transmit the work
-
-=item B<to Remix>
-
-to adapt the work
-
-=back
-
-Under the following conditions:
-
-=over 9
-
-=item B<Attribution>
-
-You must attribute the work in the manner specified by the author or
-licensor (but not in any way that suggests that they endorse you or
-your use of the work).
-
-=item B<Share Alike>
-
-If you alter, transform, or build upon this work, you may distribute
-the resulting work only under the same, similar or a compatible
-license.
-
-=back
-
-With the understanding that:
-
-=over 9
-
-=item B<Waiver>
-
-Any of the above conditions can be waived if you get permission from
-the copyright holder.
-
-=item B<Public Domain>
-
-Where the work or any of its elements is in the public domain under
-applicable law, that status is in no way affected by the license.
-
-=item B<Other Rights>
-
-In no way are any of the following rights affected by the license:
-
-=over 2
-
-=item *
-
-Your fair dealing or fair use rights, or other applicable
-copyright exceptions and limitations;
-
-=item *
-
-The author's moral rights;
-
-=item *
-
-Rights other persons may have either in the work itself or in
-how the work is used, such as publicity or privacy rights.
-
-=back
-
-=back
-
-=over 9
-
-=item B<Notice>
-
-For any reuse or distribution, you must make clear to others the
-license terms of this work.
-
-=back
-
-A copy of the full license is included in the file as cc-by-sa.txt.
-
-=head1 DEPENDENCIES
-
-GNU B<niceload> uses Perl, and the Perl modules POSIX, and
-Getopt::Long.
-
-=head1 SEE ALSO
-
-B<parallel>(1), B<nice>(1)
-
-
-=cut
-
 use strict;
 use Getopt::Long;
 $Global::progname="niceload";
-$Global::version = 20110718;
+$Global::version = 20110719;
 Getopt::Long::Configure("bundling","require_order");
 get_options_from_array(\@ARGV) || die_usage();
 if($::opt_version) {
@@ -312,6 +19,22 @@ if($::opt_factor and $::opt_suspend) {
     help();
     exit;
 }
+if(not (defined $::opt_start_io or defined $::opt_run_io
+	or defined $::opt_start_load or defined $::opt_run_load
+	or defined $::opt_start_mem or defined $::opt_run_mem
+	or defined $::opt_start_noswap or defined $::opt_run_noswap)) {
+    # Default is --runload=1
+    $::opt_run_load = 1;
+}
+
+if(not defined $::opt_start_io) { $::opt_start_io = $::opt_io; }
+if(not defined $::opt_run_io) { $::opt_run_io = $::opt_io; }
+if(not defined $::opt_start_load) { $::opt_start_load = $::opt_load; }
+if(not defined $::opt_run_load) { $::opt_run_load = $::opt_load; }
+if(not defined $::opt_start_mem) { $::opt_start_mem = $::opt_mem; }
+if(not defined $::opt_run_mem) { $::opt_run_mem = $::opt_mem; }
+if(not defined $::opt_start_noswap) { $::opt_start_noswap = $::opt_noswap; }
+if(not defined $::opt_run_noswap) { $::opt_run_noswap = $::opt_noswap; }
 
 sub get_options_from_array {
     # Run GetOptions on @array
@@ -332,14 +55,27 @@ sub get_options_from_array {
 	("debug|D" => \$::opt_debug,
 	 "factor|f=s" => \$::opt_factor,
 	 "hard|H" => \$::opt_hard,
-	 "load|l=s" => \$::opt_load,
+	 "soft|S" => \$::opt_soft,
+
+	 "si|sio|startio|start-io=s" => \$::opt_start_io,
+	 "ri|rio|runio|run-io=s" => \$::opt_run_io,
+	 "io|I=s" => \$::opt_io,
+
+	 "sl|startload|start-load=s" => \$::opt_start_load,
+	 "rl|runload|run-load=s" => \$::opt_run_load,
+	 "load|L|l=s" => \$::opt_load,
+
 	 "sm|startmem|start-mem=s" => \$::opt_start_mem,
 	 "rm|runmem|run-mem=s" => \$::opt_run_mem,
-	 "nice|n=i" => \$::opt_nice,
+	 "mem|M=s" => \$::opt_mem,
+
+	 "sn|startnoswap|start-noswap|start-no-swap" => \$::opt_start_noswap,
+	 "rn|runnoswap|run-noswap|run-no-swap" => \$::opt_run_noswap,
 	 "noswap|N" => \$::opt_noswap,
+
+	 "nice|n=i" => \$::opt_nice,
 	 "process|pid|p=s" => \$::opt_pid,
 	 "suspend|s=s" => \$::opt_suspend,
-	 "soft|S" => \$::opt_soft,
 	 "recheck|t=s" => \$::opt_recheck,
 	 "help|h" => \$::opt_help,
 	 "verbose|v" => \$::opt_verbose,
@@ -360,8 +96,8 @@ sub die_usage {
 sub help {
     print q{
 Usage:
-   niceload [-v] [-n=niceness] [-l=loadavg] [-t=recheck_sec]
-            [-s=suspend_sec|-f=factor] [-H] [-S]
+   niceload [-v] [-n niceness] [-L loadavg] [-I io] [-N] [-M mem]
+            [-s suspend_sec|-f factor] [-H] [-S]
             command or -p pid
 };
 }
@@ -415,7 +151,7 @@ sub version {
 	       "Web site: http://www.gnu.org/software/parallel\n"
 	);
 }
-    
+
 sub multiply_binary_prefix {
     # Evalualte numbers with binary prefix
     # 13G = 13*1024*1024*1024 = 13958643712
@@ -450,7 +186,7 @@ my $limit = Limit->new();
 my $process = Process->new($::opt_nice,@ARGV);
 if(not $::opt_pid) {
     # Wait until limit is below start_limit and run_limit
-    while($limit->over_start_limit() 
+    while($limit->over_start_limit()
 	  or
 	  ($limit->hard() and $limit->over_run_limit())) {
 	$limit->sleep_for_recheck();
@@ -492,7 +228,7 @@ sub start {
     ::debug("Starting @{$self->{'command'}}\n");
     if($self->{'pid'} = fork) {
 	# set signal handler to kill children if parent is killed
-	push @{$self->{'pids'}}, $self->{'pid'}; 
+	push @{$self->{'pids'}}, $self->{'pid'};
 	$Global::process = $self;
 	$SIG{CHLD} = \&REAPER;
 	$SIG{INT}=\&kill_child_INT;
@@ -576,17 +312,27 @@ sub new {
     my $class = shift;
     my %limits = @_;
     my $hard = $::opt_soft ? 0 : $::opt_hard;
-    my $startmem = $::opt_start_mem ? ::multiply_binary_prefix($::opt_start_mem) : 0;
+    my $runio = $::opt_run_io ? ::multiply_binary_prefix($::opt_run_io) : 0;
+    my $startio = $::opt_start_io ? ::multiply_binary_prefix($::opt_start_io) : 0;
+    my $runload = $::opt_run_load ? ::multiply_binary_prefix($::opt_run_load) : 0;
+    my $startload = $::opt_start_load ? ::multiply_binary_prefix($::opt_start_load) : 0;
     my $runmem = $::opt_run_mem ? ::multiply_binary_prefix($::opt_run_mem) : 0;
+    my $startmem = $::opt_start_mem ? ::multiply_binary_prefix($::opt_start_mem) : 0;
+    my $runnoswap = $::opt_run_noswap ? ::multiply_binary_prefix($::opt_run_noswap) : 0;
+    my $startnoswap = $::opt_start_noswap ? ::multiply_binary_prefix($::opt_start_noswap) : 0;
 
     return bless {
 	'hard' => $hard,
 	'recheck' => 1, # Default
 	'runtime' => 1, # Default
-	'load' => $::opt_load,
-	'startmem' => $startmem,
+	'runio' => $runio,
+	'startio' => $startio,
+	'runload' => $runload,
+	'startload' => $startload,
 	'runmem' => $runmem,
-	'swap' => $::opt_noswap,
+	'startmem' => $startmem,
+	'runnoswap' => $runnoswap,
+	'startnoswap' => $startnoswap,
 	'factor' => $::opt_factor || 1,
 	'recheck' => $::opt_recheck || 1,
 	'runtime' => 1,
@@ -609,7 +355,23 @@ sub over_run_limit {
 	::debug("Run memory: $self->{'runmem'}/$mem\n");
 	$status += (::max(1,$self->{'runmem'}/$mem)-1);
     }
-    $status += $self->over_general_limit();
+    if($self->{'runload'}) {
+	# load should be between 0-10ish
+	# 0 load => 0
+	my $load = $self->load_status();
+	$status += ::max(0,$load - $self->{'runload'});
+    }
+    if($self->{'runnoswap'}) {
+	# swap should be between 0-10ish
+	# swap in or swap out or no swap = 0
+	# else log(swapin*swapout)
+	my $swap = $self->swap_status();
+	$status += log(::max(1, $swap - $self->{'runnoswap'}));
+    }
+    if($self->{'runio'}) {
+	my $io = $self->io_status();
+	$status += max(0,$io - $self->{'runio'});
+    }
     $self->{'over_run_limit'} = $status;
     if(not $::opt_recheck) {
 	$self->{'recheck'} = $self->{'factor'} * $self->{'over_run_limit'};
@@ -619,6 +381,44 @@ sub over_run_limit {
 }
 
 sub over_start_limit {
+    my $self = shift;
+    my $status = 0;
+    if($self->{'startmem'}) {
+	# mem should be between 0-10ish
+	# 100% available => 0 (1-1)
+	# 50% available => 1 (2-1)
+	# 10% available => 9 (10-1)
+	my $mem = $self->mem_status();
+#	$status += (::max(1,$self->{'startmem'}/$mem)-1)*10;
+	::debug("Start memory: $self->{'startmem'}/$mem\n");
+	$status += (::max(1,$self->{'startmem'}/$mem)-1);
+    }
+    if($self->{'startload'}) {
+	# load should be between 0-10ish
+	# 0 load => 0
+	my $load = $self->load_status();
+	$status += ::max(0,$load - $self->{'startload'});
+    }
+    if($self->{'startnoswap'}) {
+	# swap should be between 0-10ish
+	# swap in or swap out or no swap = 0
+	# else log(swapin*swapout)
+	my $swap = $self->swap_status();
+	$status += log(::max(1, $swap - $self->{'startnoswap'}));
+    }
+    if($self->{'startio'}) {
+	my $io = $self->io_status();
+	$status += ::max(0,$io - $self->{'startio'});
+    }
+    $self->{'over_start_limit'} = $status;
+    if(not $::opt_recheck) {
+	$self->{'recheck'} = $self->{'factor'} * $self->{'over_start_limit'};
+    }
+    ::debug("over_start_limit: $status\n");
+    return $self->{'over_start_limit'};
+}
+
+sub __over_start_limit {
     my $self = shift;
     my $status = 0;
     if($self->{'startmem'}) {
@@ -639,29 +439,12 @@ sub over_start_limit {
     return $self->{'over_start_limit'};
 }
 
-sub over_general_limit {
+sub __over_general_limit {
     # Return:
     #   0 if under all limits
     #   >0 if over limit
     my $self = shift;
     my $status = 0;
-    if($self->{'load'}) { 
-	# load should be between 0-10ish
-	# 0 load => 0
-	my $load = $self->load_status();
-	$status += ::max(0,$load - $self->{'load'});
-    }
-    if($self->{'swap'}) {
-	# swap should be between 0-10ish
-	# swap in or swap out or no swap = 0
-	# else log(swapin*swapout)
-	my $swap = $self->swap_status();
-	$status += log(::max(1, $swap - $self->{'swap'}));
-    }
-    if($self->{'io'}) {
-	my $io = $self->io_status();
-	$status += max(0,$io - $self->{'io'});
-    }
     return $status;
 }
 
@@ -745,7 +528,7 @@ sub swap_status {
     if(not defined $self->{'swap_status'} or
        $self->{'swap_status_cache_time'}+$self->{'recheck'} < time) {
 	my $status = swap_status_linux();
-	$self->{'swap_status'} = ::max($status-$self->{'swap'},0);
+	$self->{'swap_status'} = ::max($status,0);
 	$self->{'swap_status_cache_time'} = time;
     }
     ::debug("swap_status: $self->{'swap_status'}\n");
@@ -807,11 +590,14 @@ sub io_status_linux {
 # sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
     my @iostat_out = `LANG=C iostat -x 1 2`;
     # throw away all execpt the last Device:-section
-    my @iostat = grep (/1/../Device:/, reverse @iostat_out);
-    print @iostat;
-
-    my $io = (split(/\s+/,$iostat[2]))[3];
-    return $io*1024;
+#    print @iostat_out;
+    my @iostat;
+    for(reverse @iostat_out) {
+	/Device:/ and last;
+	push @iostat, (split(/\s+/,$_))[13];
+    }
+    my $io = ::max(@iostat);
+    return $io/10;
 }
 
 # Keep -w happy
