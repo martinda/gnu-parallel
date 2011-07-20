@@ -34,3 +34,9 @@ portable:
 	# Cache sudo password
 	sudo echo
 	time bash Portable.sh
+
+timings: tests-to-run/*
+	ls tests-to-run/*3.sh | xargs -n1 echo /usr/bin/time -f %e bash >/tmp/timing.script
+	stdout bash -x /tmp/timing.script >/tmp/timing.out
+	echo usr.bin.time_END >>/tmp/timing.out
+	perl -ne '/usr.bin.time/ and do { print $$last.$$h; $$h=$$_ }; chomp; $$last = $$_' /tmp/timing.out | sort -n >timings
