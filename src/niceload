@@ -36,6 +36,32 @@ if(not defined $::opt_run_mem) { $::opt_run_mem = $::opt_mem; }
 if(not defined $::opt_start_noswap) { $::opt_start_noswap = $::opt_noswap; }
 if(not defined $::opt_run_noswap) { $::opt_run_noswap = $::opt_noswap; }
 
+my $limit = Limit->new();
+my $process = Process->new($::opt_nice,@ARGV);
+if(not $::opt_pid) {
+    # Wait until limit is below start_limit and run_limit
+    while($limit->over_start_limit()
+	  or
+	  ($limit->hard() and $limit->over_run_limit())) {
+	$limit->sleep_for_recheck();
+    }
+}
+$process->start();
+while($process->is_running()) {
+    if($limit->over_run_limit()) {
+	$process->suspend();
+	$limit->sleep_for_recheck();
+	if(not $limit->hard()) {
+	    $process->resume();
+	    $limit->sleep_while_running();
+	}
+    } else {
+	$process->resume();
+	$limit->sleep_while_running();
+    }
+}
+
+
 sub get_options_from_array {
     # Run GetOptions on @array
     # Returns:
@@ -77,6 +103,7 @@ sub get_options_from_array {
 	 "process|pid|p=s" => \$::opt_pid,
 	 "suspend|s=s" => \$::opt_suspend,
 	 "recheck|t=s" => \$::opt_recheck,
+	 "quote|q" => \$::opt_quote,
 	 "help|h" => \$::opt_help,
 	 "verbose|v" => \$::opt_verbose,
 	 "version|V" => \$::opt_version,
@@ -88,10 +115,12 @@ sub get_options_from_array {
     return @retval;
 }
 
+
 sub die_usage {
     help();
     exit 1;
 }
+
 
 sub help {
     print q{
@@ -102,6 +131,22 @@ Usage:
 };
 }
 
+
+sub die_bug {
+    my $bugid = shift;
+    print STDERR
+	("$Global::progname: This should not happen. You have found a bug.\n",
+	 "Please contact <parallel\@gnu.org> and include:\n",
+	 "* The version number: $Global::version\n",
+	 "* The bugid: $bugid\n",
+	 "* The command line being run\n",
+	 "* The files being read (put the files on a webserver if they are big)\n",
+	 "\n",
+	 "If you get the error on smaller/fewer files, please include those instead.\n");
+    exit(255);
+}
+
+
 sub usleep {
     # Sleep this many milliseconds.
     my $secs = shift;
@@ -109,11 +154,13 @@ sub usleep {
     select(undef, undef, undef, $secs/1000);
 }
 
+
 sub debug {
     if($::opt_debug) {
 	print STDERR @_;
     }
 }
+
 
 sub my_dump {
     # Returns:
@@ -138,6 +185,7 @@ sub my_dump {
     }
 }
 
+
 sub version {
     # Returns: N/A
     print join("\n",
@@ -151,6 +199,7 @@ sub version {
 	       "Web site: http://www.gnu.org/software/parallel\n"
 	);
 }
+
 
 sub multiply_binary_prefix {
     # Evalualte numbers with binary prefix
@@ -169,6 +218,7 @@ sub multiply_binary_prefix {
     return $s;
 }
 
+
 sub max {
     # Returns:
     #   Maximum value of array
@@ -182,30 +232,6 @@ sub max {
     return $max;
 }
 
-my $limit = Limit->new();
-my $process = Process->new($::opt_nice,@ARGV);
-if(not $::opt_pid) {
-    # Wait until limit is below start_limit and run_limit
-    while($limit->over_start_limit()
-	  or
-	  ($limit->hard() and $limit->over_run_limit())) {
-	$limit->sleep_for_recheck();
-    }
-}
-$process->start();
-while($process->is_running()) {
-    if($limit->over_run_limit()) {
-	$process->suspend();
-	$limit->sleep_for_recheck();
-	if(not $limit->hard()) {
-	    $process->resume();
-	    $limit->sleep_while_running();
-	}
-    } else {
-	$process->resume();
-	$limit->sleep_while_running();
-    }
-}
 
 package Process;
 
@@ -221,6 +247,7 @@ sub new {
 	'command' => [@ARGV],
     }, ref($class) || $class;
 }
+
 
 sub start {
     # Start the program
@@ -240,11 +267,16 @@ sub start {
  	setpgrp(0,0);
  	::debug("Child pid: $$, pgrp: ",getpgrp $$,"\n");
  	::debug("@{$self->{'command'}}\n");
- 	system("@{$self->{'command'}}");
+	if($::opt_quote) {
+	    system(@{$self->{'command'}});
+	} else {
+	    system("@{$self->{'command'}}");
+	}
  	::debug("Child exit\n");
  	exit;
     }
 }
+
 
 use POSIX ":sys_wait_h";
 
@@ -256,11 +288,13 @@ sub REAPER {
     $SIG{CHLD} = \&REAPER;                  # install *after* calling waitpid
 }
 
+
 sub kill_child_CONT {
     my $self = $Global::process;
     ::debug("SIGCONT received. Killing $self->{'pid'}\n");
     kill CONT => -getpgrp($self->{'pid'});
 }
+
 
 sub kill_child_TSTP {
     my $self = $Global::process;
@@ -269,12 +303,14 @@ sub kill_child_TSTP {
     kill STOP => -$$;
 }
 
+
 sub kill_child_INT {
     my $self = $Global::process;
     ::debug("SIGINT received. Killing $self->{'pid'} Exit\n");
     kill INT => -getpgrp($self->{'pid'});
     exit;
 }
+
 
 sub resume {
     my $self = shift;
@@ -285,6 +321,7 @@ sub resume {
     }
 }
 
+
 sub suspend {
     my $self = shift;
     if($self->{'running'}) {
@@ -293,6 +330,7 @@ sub suspend {
 	$self->{'running'} = 0;
     }
 }
+
 
 sub is_running {
     # The process is dead if none of the pids exist
@@ -342,6 +380,7 @@ sub new {
     }, ref($class) || $class;
 }
 
+
 sub over_run_limit {
     my $self = shift;
     my $status = 0;
@@ -351,7 +390,6 @@ sub over_run_limit {
 	# 50% available => 1 (2-1)
 	# 10% available => 9 (10-1)
 	my $mem = $self->mem_status();
-#	$status += (::max(1,$self->{'runmem'}/$mem)-1)*10;
 	::debug("Run memory: $self->{'runmem'}/$mem\n");
 	$status += (::max(1,$self->{'runmem'}/$mem)-1);
     }
@@ -389,7 +427,6 @@ sub over_start_limit {
 	# 50% available => 1 (2-1)
 	# 10% available => 9 (10-1)
 	my $mem = $self->mem_status();
-#	$status += (::max(1,$self->{'startmem'}/$mem)-1)*10;
 	::debug("Start memory: $self->{'startmem'}/$mem\n");
 	$status += (::max(1,$self->{'startmem'}/$mem)-1);
     }
@@ -418,45 +455,18 @@ sub over_start_limit {
     return $self->{'over_start_limit'};
 }
 
-sub __over_start_limit {
-    my $self = shift;
-    my $status = 0;
-    if($self->{'startmem'}) {
-	# mem should be between 0-10ish
-	# 100% available => 0 (1-1)
-	# 50% available => 1 (2-1)
-	# 10% available => 9 (10-1)
-	my $mem = $self->mem_status();
-#	$status += (::max(1,$self->{'startmem'}/$mem)-1)*10;
-	$status += (::max(1,$self->{'startmem'}/$mem)-1);
-    }
-    $self->{'over_start_limit'} = $status;
-    if(not $::opt_recheck) {
-	# Wait at least 0.5s. Otherwise niceload might cause the load
-	$self->{'recheck'} = $self->{'factor'} * $self->{'over_start_limit'};
-    }
-    ::debug("over_start_limit: $status\n");
-    return $self->{'over_start_limit'};
-}
-
-sub __over_general_limit {
-    # Return:
-    #   0 if under all limits
-    #   >0 if over limit
-    my $self = shift;
-    my $status = 0;
-    return $status;
-}
 
 sub hard {
     my $self = shift;
     return $self->{'hard'};
 }
 
+
 sub verbose {
     my $self = shift;
     return $self->{'verbose'};
 }
+
 
 sub sleep_for_recheck {
     my $self = shift;
@@ -472,6 +482,7 @@ sub sleep_for_recheck {
     ::usleep(1000*$self->{'recheck'});
 }
 
+
 sub sleep_while_running {
     my $self = shift;
     ::debug("check in $self->{'runtime'}s\n");
@@ -482,6 +493,7 @@ sub sleep_while_running {
     ::usleep(1); # For some reason this gets interrupted
     ::usleep(1000*$self->{'runtime'});
 }
+
 
 sub load_status {
     # Returns:
@@ -497,6 +509,7 @@ sub load_status {
     return $self->{'load_status'};
 }
 
+
 sub load_status_linux {
     my ($loadavg);
     if(open(IN,"/proc/loadavg")) {
@@ -505,7 +518,7 @@ sub load_status_linux {
 	if($upString =~ m/^(\d+\.\d+)/) {
 	    $loadavg = $1;
 	} else {
-	    die;
+	    ::die_bug("proc_loadavg");
 	}
 	close IN;
     } elsif (open(IN,"uptime|")) {
@@ -513,12 +526,13 @@ sub load_status_linux {
 	if($upString =~ m/average.\s*(\d+\.\d+)/) {
 	    $loadavg = $1;
 	} else {
-	    die;
+	    ::die_bug("uptime");
 	}	
 	close IN;
     }
     return $loadavg;
 }
+
 
 sub swap_status {
     # Returns:
@@ -535,12 +549,14 @@ sub swap_status {
     return $self->{'swap_status'};
 }
 
+
 sub swap_status_linux {
     my $swap_activity;
     $swap_activity = "vmstat 1 2 | tail -n1 | awk '{print \$7*\$8}'";
     # Run swap_activity measuring.
     return qx{ $swap_activity };
 }
+
 
 sub mem_status {
     # Returns:
@@ -556,6 +572,7 @@ sub mem_status {
     return $self->{'mem_status'};
 }
 
+
 sub mem_status_linux {
     #              total       used       free     shared    buffers     cached
     # Mem:       3366496    2901664     464832          0     179228    1850692
@@ -565,6 +582,7 @@ sub mem_status_linux {
     my $free = (split(/\s+/,$free[2]))[3];
     return $free*1024;
 }
+
 
 sub io_status {
     # Returns:
@@ -576,21 +594,16 @@ sub io_status {
 	$self->{'io_status'} = io_status_linux();
 	$self->{'io_status_cache_time'} = time;
     }
+    ::debug("io_status: $self->{'io_status'}\n");
     return $self->{'io_status'};
 }
 
+
 sub io_status_linux {
-# Device:         rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
-# sda               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-# sdb               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-# sdd               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-# sde               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-# sdf               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-# dm-0              0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
-# sdg               0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
+    # Device: rrqm/s   wrqm/s     r/s     w/s    rkB/s    wkB/s avgrq-sz avgqu-sz   await r_await w_await  svctm  %util
+    # sda       0.00     0.00    0.00    0.00     0.00     0.00     0.00     0.00    0.00    0.00    0.00   0.00   0.00
     my @iostat_out = `LANG=C iostat -x 1 2`;
     # throw away all execpt the last Device:-section
-#    print @iostat_out;
     my @iostat;
     for(reverse @iostat_out) {
 	/Device:/ and last;
@@ -599,6 +612,3 @@ sub io_status_linux {
     my $io = ::max(@iostat);
     return $io/10;
 }
-
-# Keep -w happy
-# = 1;
