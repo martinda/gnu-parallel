@@ -49,7 +49,7 @@ if(not $::opt_pid) {
     }
 }
 $process->start();
-while($process->is_running()) {
+while($process->is_alive()) {
     if($limit->over_run_limit()) {
 	$process->suspend();
 	$limit->sleep_for_recheck();
@@ -255,6 +255,7 @@ sub start {
     # Start the program
     my $self = shift;
     ::debug("Starting @{$self->{'command'}}\n");
+    $self->{'running'} = 1;
     if($self->{'pid'} = fork) {
 	# set signal handler to kill children if parent is killed
 	push @{$self->{'pids'}}, $self->{'pid'};
@@ -317,6 +318,7 @@ sub kill_child_INT {
 
 sub resume {
     my $self = shift;
+    ::debug("Resume @{$self->{'pids'}}\n");
     if(not $self->{'running'}) {
 	# - = PID group
 	map { kill "CONT", -$_ } @{$self->{'pids'}};
@@ -327,6 +329,7 @@ sub resume {
 
 sub suspend {
     my $self = shift;
+    ::debug("Suspend @{$self->{'pids'}}\n");
     if($self->{'running'}) {
 	# - = PID group
 	map { kill "STOP", -$_ } @{$self->{'pids'}};
@@ -335,14 +338,14 @@ sub suspend {
 }
 
 
-sub is_running {
+sub is_alive {
     # The process is dead if none of the pids exist
     my $self = shift;
     my ($exists) = 0;
     for my $pid (@{$self->{'pids'}}) {
 	if(kill 0 => $pid) { $exists++ }
     }
-    ::debug("is_running: $exists\n");
+    ::debug("is_alive: $exists\n");
     return $exists;
 }
 
