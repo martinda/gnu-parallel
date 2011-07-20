@@ -22,7 +22,9 @@ if($::opt_factor and $::opt_suspend) {
 if(not (defined $::opt_start_io or defined $::opt_run_io
 	or defined $::opt_start_load or defined $::opt_run_load
 	or defined $::opt_start_mem or defined $::opt_run_mem
-	or defined $::opt_start_noswap or defined $::opt_run_noswap)) {
+	or defined $::opt_start_noswap or defined $::opt_run_noswap
+	or defined $::opt_io or defined $::opt_load
+	or defined $::opt_mem or defined $::opt_noswap)) {
     # Default is --runload=1
     $::opt_run_load = 1;
 }
@@ -408,7 +410,7 @@ sub over_run_limit {
     }
     if($self->{'runio'}) {
 	my $io = $self->io_status();
-	$status += max(0,$io - $self->{'runio'});
+	$status += ::max(0,$io - $self->{'runio'});
     }
     $self->{'over_run_limit'} = $status;
     if(not $::opt_recheck) {
