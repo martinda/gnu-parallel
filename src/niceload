@@ -300,9 +300,10 @@ sub kill_child_CONT {
 
 sub kill_child_TSTP {
     my $self = $Global::process;
-    ::debug("SIGTSTP received. Killing $self->{'pid'} and self\n");
+    ::debug("SIGTSTP received. Killing $self->{'pid'} and self ($$)\n");
     kill TSTP => -getpgrp($self->{'pid'});
     kill STOP => -$$;
+    kill STOP => $$;
 }
 
 
