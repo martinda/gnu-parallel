@@ -3621,14 +3621,15 @@ sub number_of_replacements {
 	'|'.
 	join("|",map {$a=$_;$a=~s/(\W)/\\$1/g; $a} values %Global::replace).
 	")";
-    while($cmd =~ s/($replacement_regexp)/\0/o) {
-	# substitute with \0 to avoid {{}} being interpreted as two {}'s
-	if(defined $Global::replace_rev{$1}) {
-	    $count{$Global::replace_rev{$1}}++;
+    my %c = ();
+    $cmd =~ s/($replacement_regexp)/$c{$1}++;""/ogex;
+    for my $k (keys %c) {
+	if(defined $Global::replace_rev{$k}) {
+	    $count{$Global::replace_rev{$k}} = $c{$k};
 	} else {
-	    $count{$1}++;
+	    $count{$k} = $c{$k};
 	}
-	$sum++;
+	$sum += $c{$k};
     }
 
     my $number_of_context_groups = 0;
