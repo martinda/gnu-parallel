@@ -1,2 +1,14 @@
 ### Test niceload
-.........
+..........
+### --rm and --runmem
+OK
+OK
+### -N and --noswap 
+0
+0
+### -H and --hard
+OK
+OK
+### -f and --factor
+f 0.1 first
+factor last

@@ -2,5 +2,5 @@
 nice -n1 bash -c PAR=a\ bash\ -c\ \"echo\ \ \\\$PAR\ b\"
 a b
 ### Test --nice remote
-ssh one-server PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; nice\ -n1\ bash\ -c\ PAR=a\\\ bash\\\ -c\\\ \\\"echo\\\ \\\ \\\\\\\$PAR\\\ b\\\";
+ssh one-server 'eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\; setenv PARALLEL_PID '$PARALLEL_PID' || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;' nice\ -n1\ bash\ -c\ PAR=a\\\ bash\\\ -c\\\ \\\"echo\\\ \\\ \\\\\\\$PAR\\\ b\\\";
 a b

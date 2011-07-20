@@ -29,6 +29,9 @@ ls | parallel -kv rm -- {.}/abc-{.}-{} 2>&1
 #test05.sh:find . -type d -print0 | perl -0 -pe 's:^./::' | parallel -0 -v touch -- {}/abc-{}-{} 2>&1 \
 #test05.sh:find . -type d -print0 |  perl -0 -pe 's:^./::' | parallel -0 -v rm -- {}/abc-{}-{} 2>&1 \
 #test05.sh:find . -type d -print0 |  perl -0 -pe 's:^./::' | parallel -0 -v rmdir -- {} 2>&1 \
+
+# -L1 will join lines ending in ' '
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | nice parallel -j0 -k -L1
 echo '### Test -m'
 (echo foo;echo bar;echo joe.gif) | parallel -j1 -km echo 1{}2{.}3 A{.}B{.}C
 (echo foo;echo bar;echo joe.gif) | parallel -j1 -kX echo 1{}2{.}3 A{.}B{.}C
@@ -59,8 +62,7 @@ seq 1 60000 | parallel -j1 -I '>' -X echo 'a>b>c>' | wc -l
 echo '### Test {.}'
 echo a | parallel -qX echo  "'"{.}"' "
 echo a | parallel -qX echo  "'{.}'"
-(echo "sleep 3; echo begin"; seq 1 30 | parallel -kq echo "sleep 1; echo {.}"; echo "echo end") \
-| parallel -k -j0
+(echo "sleep 3; echo begin"; seq 1 30 | parallel -kq echo "sleep 1; echo {.}"; echo "echo end") | parallel -k -j0
 echo '### Test -I with -X and -m'
 seq 1 10 | parallel -k 'seq 1 {.} | 'parallel' -k -I :: echo {.} ::'
 seq 1 10 | parallel -k 'seq 1 {.} | 'parallel' -j1 -X -k -I :: echo a{.} b::'
@@ -73,3 +75,4 @@ echo '### Test -t'
 (echo b; echo c; echo f) | parallel -k -t echo {.}ar 2>&1 >/dev/null
 echo '### Test --verbose'
 (echo b; echo c; echo f) | parallel -k --verbose echo {.}ar 2>&1 >/dev/null
+EOF

@@ -3,6 +3,7 @@
 2
 3
 ### Test --load locally
+# This will force the loadavg > 10
 OK
 ### Test --load remote
 OK

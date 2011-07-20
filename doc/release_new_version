@@ -181,7 +181,7 @@ New in this release:
 * niceload: --hard will suspend a program if a limit is reached - as
   opposed to just slowing the program down.
 
-* niceload: --soft will slowing the program down - as opposed to
+* niceload: --soft will slow the program down - as opposed to
   suspending the program completely.
 
 * niceload: --run-io will slow down a program if disk io goes above a

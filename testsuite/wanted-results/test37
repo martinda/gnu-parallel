@@ -28,48 +28,32 @@ perl -pe '$a=1; print$a' /dev/fd/63
 1a
 perl -pe '$a=1; print$a' /dev/fd/62
 1b
-perl -pe "\$a=1; print\$a" /bin/gunzip
-1#!/bin/bash
-1PATH=${GZIP_BINDIR-'/bin'}:$PATH
-1exec gzip -d "$@"
+perl -pe "\$a=1; print\$a" <(echo foo)
+1foo
 ### Test ugly quoting from profile file
 perl -pe '$a=1; print $a' /dev/fd/63
 1a
 perl -pe '$a=1; print $a' /dev/fd/62
 1b
-echo /bin/gunzip
-/bin/gunzip
-ssh parallel-server3 ssh parallel@parallel-server2 PARALLEL_SEQ=$PARALLEL_SEQ\;export PARALLEL_SEQ\;PARALLEL_PID=$PARALLEL_PID\;export PARALLEL_PID\; perl\ -pe\ \"\\\$a=1\;\ print\ \\\$a\"\ /bin/gunzip;
-1#!/bin/bash
-1PATH=${GZIP_BINDIR-'/bin'}:$PATH
-1exec gzip -d "$@"
+echo foo
+foo
+ssh parallel-server3 ssh parallel@parallel-server2 'eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\; setenv PARALLEL_PID '$PARALLEL_PID' || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;' perl\ -pe\ \"\\\$a=1\;\ print\ \\\$a\"\ \<\(echo\ foo\);
+1foo
 ### Test quoting of $ in command from profile file
-perl -pe '$a=1; print $a' /bin/gunzip
-1#!/bin/bash
-1PATH=${GZIP_BINDIR-'/bin'}:$PATH
-1exec gzip -d "$@"
+perl -pe '$a=1; print $a' <(echo foo)
+1foo
 ### Test quoting of $ in command from $PARALLEL
-perl -pe "\$a=1; print \$a" /bin/gunzip
-1#!/bin/bash
-1PATH=${GZIP_BINDIR-'/bin'}:$PATH
-1exec gzip -d "$@"
+perl -pe "\$a=1; print \$a" <(echo foo)
+1foo
 ### Test quoting of space in arguments (-S) from profile file
-perl -pe '$a=1; print $a' /bin/gunzip
-1#!/bin/bash
-1PATH=${GZIP_BINDIR-'/bin'}:$PATH
-1exec gzip -d "$@"
+perl -pe '$a=1; print $a' <(echo foo)
+1foo
 ### Test quoting of space in arguments (-S) from $PARALLEL
-perl -pe "\$a=1; print \$a" /bin/gunzip
-1#!/bin/bash
-1PATH=${GZIP_BINDIR-'/bin'}:$PATH
-1exec gzip -d "$@"
+perl -pe "\$a=1; print \$a" <(echo foo)
+1foo
 ### Test quoting of space in long arguments (--sshlogin) from profile file
-perl -pe '$a=1; print $a' /bin/gunzip
-1#!/bin/bash
-1PATH=${GZIP_BINDIR-'/bin'}:$PATH
-1exec gzip -d "$@"
+perl -pe '$a=1; print $a' <(echo foo)
+1foo
 ### Test quoting of space in arguments (-S) from $PARALLEL
-perl -pe "\$a=1; print \$a" /bin/gunzip
-1#!/bin/bash
-1PATH=${GZIP_BINDIR-'/bin'}:$PATH
-1exec gzip -d "$@"
+perl -pe "\$a=1; print \$a" <(echo foo)
+1foo

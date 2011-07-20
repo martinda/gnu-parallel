@@ -120,7 +120,7 @@ stdout ssh $SERVER1 ls 'tmp/parallel.file*' || echo OK
 # Should give: No such file or directory
 stdout ssh parallel@$SERVER2 ls 'tmp/parallel.file*' || echo OK
 echo 'Input for ssh'
-cat /tmp/myssh1-run /tmp/myssh2-run | perl -pe 's/PID=\d+/PID=00000/g'
+cat /tmp/myssh1-run /tmp/myssh2-run | perl -pe 's/(PID.)\d+/${1}00000/g'
 rm /tmp/myssh1-run /tmp/myssh2-run
 
 echo '### Test use special ssh with > 9 simultaneous'

@@ -8,7 +8,7 @@ echo '### Test --return of weirdly named file'
 stdout parallel --return {} -vv -S $SERVER1 echo '>'{} ::: 'aa<${#}" b'; rm 'aa<${#}" b'
 
 echo '### Test if remote login shell is csh'
-stdout parallel -vv -S csh@localhost 'echo $PARALLEL_PID $PARALLEL_SEQ {}| wc -w' ::: a b c
+stdout parallel -k -vv -S csh@localhost 'echo $PARALLEL_PID $PARALLEL_SEQ {}| wc -w' ::: a b c
 
 echo '### Test {} multiple times in different commands'
 seq 10 | parallel -v -Xj1 echo {} \; echo {}
