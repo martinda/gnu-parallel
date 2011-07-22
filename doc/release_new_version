@@ -71,6 +71,20 @@ YYYYMMDD=`yyyymmdd`
 echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
 #echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/alpha/
 
+== Update OpenSUSE build system ==
+
+cd ~/privat/parallel/packager/obs
+# Update version number
+em home:tange/parallel/parallel.spec
+find home:tange/parallel/* -type f | grep -v parallel.spec | parallel -Xj1 osc rm {}
+# This should not create new files
+osc up home:tange/parallel/
+make
+# Update versionsnummeret from 20110422-2 to YYYYMMDD-1
+# Reload build-status:
+https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
+# Check that one .deb (Debian 5.0) and one .rpm (CentOS) build
+
 == Download and test ==
 
 YYYYMMDD=`yyyymmdd`
@@ -83,15 +97,6 @@ cd parallel-$YYYYMMDD
 ./configure
 make -j && sudo make -j install
 pushd
-
-== Update OpenSUSE build system ==
-
-https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
-cd ~/privat/parallel/packager/obs
-em home:tange/parallel/parallel.spec
-find home:tange/parallel/* -type f | grep -v parallel.spec | parallel osc rm {}';' rm {}
-make
-Ret versionsnummeret fra 20100906-2 til YYYYMMDD-1
 
 == Update Savannah ==
 
@@ -115,11 +120,12 @@ http://www.gnu.org/software/parallel/niceload.html
 
 pod2html src/parallel.pod > ../parallel-web/parallel/man.html
 pod2html src/sql > ../parallel-web/parallel/sql.html
-pod2html src/niceload > ../parallel-web/parallel/niceload.html
+pod2html src/niceload.pod > ../parallel-web/parallel/niceload.html
 pod2html src/sem.pod > ../parallel-web/parallel/sem.html
-cd ../parallel-web/parallel
+pushd ../parallel-web/parallel
 cvs up
 cvs ci
+pushd
 
 == Commit released version ==
 

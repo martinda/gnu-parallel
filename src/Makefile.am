@@ -30,8 +30,8 @@ sql.html: sql Makefile sem
 	./sem --fg --id pod2html pod2html $(srcdir)/sql > $(srcdir)/sql.html
 	./sem --fg --id pod2html rm -f $(srcdir)/pod2htm*
 
-niceload.html: niceload Makefile sem
-	./sem --fg --id pod2html pod2html $(srcdir)/niceload > $(srcdir)/niceload.html
+niceload.html: niceload.pod Makefile sem
+	./sem --fg --id pod2html pod2html $(srcdir)/niceload.pod > $(srcdir)/niceload.html
 	./sem --fg --id pod2html rm -f $(srcdir)/pod2htm*
 
 sem: parallel

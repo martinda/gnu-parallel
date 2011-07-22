@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 =head1 NAME
 
 niceload - slow down a program when the load average is above a certain limit
@@ -346,7 +348,6 @@ Getopt::Long.
 
 =head1 SEE ALSO
 
-B<parallel>(1), B<nice>(1)
-
+B<parallel>(1), B<nice>(1), B<uptime>(1)
 
 =cut
