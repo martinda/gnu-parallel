@@ -379,7 +379,7 @@ sub new {
 	'startnoswap' => $startnoswap,
 	'factor' => $::opt_factor || 1,
 	'recheck' => $::opt_recheck || 1,
-	'runtime' => 1,
+	'runtime' => $::opt_recheck || 1,
 	'over_run_limit' => 1,
 	'over_start_limit' => 1,
 	'verbose' => $::opt_verbose,
@@ -485,6 +485,7 @@ sub sleep_for_recheck {
 	print "Sleeping $self->{'recheck'}s\n";
     }
     ::debug("recheck in $self->{'recheck'}s\n");
+    ::usleep(1); # For some reason this gets interrupted
     ::usleep(1000*$self->{'recheck'});
 }
 

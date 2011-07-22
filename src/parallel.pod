@@ -71,7 +71,7 @@ alias or a function will not work (see why
 http://www.perlmonks.org/index.pl?node_id=484296).
 
 
-=item B<{}> (still alpha testing)
+=item B<{}> (alpha testing)
 
 Input line. This replacement string will be replaced by a full line
 read from the input source. The input source is normally stdin
@@ -84,7 +84,7 @@ If the command line contains no replacement strings then B<{}> will be
 appended to the command line.
 
 
-=item B<{.}> (still alpha testing)
+=item B<{.}> (alpha testing)
 
 Input line without extension. This replacement string will be replaced
 by the input with the extension removed. If the input line contains
@@ -100,7 +100,7 @@ The replacement string B<{.}> can be changed with B<-U>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/}> (still alpha testing)
+=item B<{/}> (alpha testing)
 
 Basename of input line. This replacement string will be replaced by
 the input with the directory part removed.
@@ -111,7 +111,7 @@ B<--basenamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{//}> (still alpha testing)
+=item B<{//}> (alpha testing)
 
 Dirname of input line. This replacement string will be replaced by the
 dir of the input line. See B<dirname>(1).
@@ -122,7 +122,7 @@ B<--dirnamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/.}> (still alpha testing)
+=item B<{/.}> (alpha testing)
 
 Basename of input line without extension. This replacement string will
 be replaced by the input with the directory and extension part
@@ -134,7 +134,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}> (still alpha testing)
+=item B<{#}> (alpha testing)
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -145,7 +145,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>B<}> (still alpha testing)
+=item B<{>I<n>B<}> (alpha testing)
 
 Argument from input source I<n> or the I<n>'th argument. This
 positional replacement string will be replaced by the input from input
@@ -155,7 +155,7 @@ argument (when used with B<-N>).
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>.B<}> (still alpha testing)
+=item B<{>I<n>.B<}> (alpha testing)
 
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
@@ -168,7 +168,7 @@ extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}> (still alpha testing)
+=item B<{>I<n>/B<}> (alpha testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.
@@ -181,7 +181,7 @@ directory (if any) removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}> (still alpha testing)
+=item B<{>I<n>/.B<}> (alpha testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -195,7 +195,7 @@ directory (if any) and extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<:::> I<arguments> (alpha testing)
+=item B<:::> I<arguments> (beta testing)
 
 Use arguments from the command line as input source instead of stdin
 (standard input). Unlike other options for GNU B<parallel> B<:::> is
@@ -231,7 +231,7 @@ B<:::> and B<::::> can be mixed. So these are equivalent:
   seq 4 5 | parallel echo {1} {2} {3} :::: <(seq 6 7) - ::: 1 2 3
 
 
-=item B<::::> I<argfiles> (alpha testing)
+=item B<::::> I<argfiles> (beta testing)
 
 Another way to write B<-a> I<argfile1> B<-a> I<argfile2> ...
 
@@ -390,9 +390,9 @@ as \n, or an octal or hexadecimal escape code.  Octal and
 hexadecimal escape codes are understood as for the printf command.
 Multibyte characters are not supported.
 
-=item B<--dirnamereplace> I<replace-str> (alpha testing)
+=item B<--dirnamereplace> I<replace-str> (beta testing)
 
-=item B<--dnr> I<replace-str> (alpha testing)
+=item B<--dnr> I<replace-str> (beta testing)
 
 Use the replacement string I<replace-str> instead of B<{//}> for
 dirname of input line.
@@ -625,7 +625,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m> is set.
 
 
-=item B<--load> I<max-load> (alpha testing)
+=item B<--load> I<max-load> (beta testing)
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
@@ -675,7 +675,7 @@ See also B<-X> for context replace. If in doubt use B<-X> as that will
 most likely do what is needed.
 
 
-=item B<--minversion> I<version> (alpha testing)
+=item B<--minversion> I<version> (beta testing)
 
 Print the version GNU B<parallel> and exit.  If the current version of
 GNU B<parallel> is less than I<version> the exit code is
@@ -685,7 +685,7 @@ This is useful for scripts that depend on features only available from
 a certain version of GNU B<parallel>.
 
 
-=item B<--nonall> (alpha testing)
+=item B<--nonall> (beta testing)
 
 B<--onall> with no arguments. Run the command on all computers given
 with B<--sshlogin> but take no arguments. GNU B<parallel> will log
@@ -696,7 +696,7 @@ This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
 
-=item B<--onall> (alpha testing)
+=item B<--onall> (beta testing)
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
@@ -718,9 +718,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe> (alpha testing)
+=item B<--pipe> (beta testing)
 
-=item B<--spreadstdin> (alpha testing)
+=item B<--spreadstdin> (beta testing)
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1028,9 +1028,9 @@ Do not use the first line of input (used by GNU B<parallel> itself
 when called with B<--shebang>).
 
 
-=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (alpha testing)
+=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
 
-=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (alpha testing)
+=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
 
 Distribute jobs to remote computers. The jobs will be run on a list of
 remote computers.  GNU B<parallel> will determine the number of CPU
@@ -1066,7 +1066,7 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename> (alpha testing)
+=item B<--sshloginfile> I<filename> (beta testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1095,7 +1095,7 @@ The sshloginfile '..' is special, it read sshlogins from
 The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
 
-=item B<--noswap> (alpha testing)
+=item B<--noswap> (beta testing)
 
 Do not start new jobs on a given computer if there is both swap-in and
 swap-out activity.
@@ -1299,7 +1299,7 @@ See also B<-m>.
 Exit if the size (see the B<-s> option) is exceeded.
 
 
-=item B<--xapply> (alpha testing)
+=item B<--xapply> (beta testing)
 
 Read multiple files like B<xapply>. If multiple B<-a> are given, one
 line will be read from each of the files. The arguments can be

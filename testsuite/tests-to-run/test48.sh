@@ -16,7 +16,7 @@ echo '### Test -N is not broken by distribution - two lines'
 seq 19 | parallel -k -N 10  echo
 
 echo '### Test -N context replace'
-seq 19 | parallel  -N 10  echo a{}b
+seq 19 | parallel -k -N 10  echo a{}b
 
 echo '### Test -L context replace'
-seq 19 | parallel  -L 10  echo a{}b
+seq 19 | parallel -k -L 10  echo a{}b
