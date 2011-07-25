@@ -83,7 +83,7 @@ make
 # Update versionsnummeret from 20110422-2 to YYYYMMDD-1
 # Reload build-status:
 https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
-# Check that one .deb (Debian 5.0) and one .rpm (CentOS) build
+# Check that one .deb (Debian 5.0) and one .rpm (CentOS) end with 'succeeded'
 
 == Download and test ==
 
@@ -97,18 +97,6 @@ cd parallel-$YYYYMMDD
 ./configure
 make -j && sudo make -j install
 pushd
-
-== Update Savannah ==
-
-Content from release mail:
-
-cat doc/release_new_version | klipper-stdin
-https://savannah.gnu.org/news/submit.php?group=parallel
-https://savannah.gnu.org/news/approve.php?group=parallel
-
-# No longer updated. Too long and too buggy
-# doc/pod2savannah_publicinfo src/parallel | klipper-stdin
-# https://savannah.gnu.org/project/admin/editgroupinfo.php?group=parallel
 
 == Update website ==
 
@@ -131,6 +119,18 @@ pushd
 
 git diff
 git commit -a
+
+== Update Savannah ==
+
+Content from release mail:
+
+cat doc/release_new_version | klipper-stdin
+https://savannah.gnu.org/news/submit.php?group=parallel
+https://savannah.gnu.org/news/approve.php?group=parallel
+
+# No longer updated. Too long and too buggy
+# doc/pod2savannah_publicinfo src/parallel | klipper-stdin
+# https://savannah.gnu.org/project/admin/editgroupinfo.php?group=parallel
 
 == Update Freshmeat ==
 
@@ -272,4 +272,16 @@ When using GNU SQL for a publication please cite:
 
 O. Tange (2011): GNU SQL - A Command Line Tool for Accessing Different
 Databases Using DBURLs, ;login: The USENIX Magazine, April 2011:29-32.
+
+
+= About GNU Niceload =
+
+GNU niceload slows down a program when the computer load average (or
+other system activity) is above a certain limit. When the limit is
+reached the program will be suspended for some time. If the limit is a
+soft limit the program will be allowed to run for short amounts of
+time before being suspended again. If the limit is a hard limit the
+program will only be allowed to run when the system is below the
+limit.
+
 >>>>>

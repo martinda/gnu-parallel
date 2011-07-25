@@ -42,6 +42,8 @@ the line as arguments. If no I<command> is given, the line of input is
 executed. Several lines will be run in parallel. GNU B<parallel> can
 often be used as a substitute for B<xargs> or B<cat | bash>.
 
+=head2 Reader's guide
+
 Before looking at the options you may want to check out the B<EXAMPLE>s
 after the list of options. That will give you an idea of what GNU
 B<parallel> is capable of.
