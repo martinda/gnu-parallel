@@ -177,50 +177,15 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20110722 ('Murdoch') released
+Subject: GNU Parallel 20110822 ('Utøya') released
 
-GNU Parallel 20110722 ('Murdoch') has been released. It is
+GNU Parallel 20110822 ('Utøya') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* niceload: --hard will suspend a program if a limit is reached - as
-  opposed to just slowing the program down.
-
-* niceload: --soft will slow the program down - as opposed to
-  suspending the program completely.
-
-* niceload: --run-io will slow down a program if disk io goes above a
-  certain limit.
-
-* niceload: --run-load will slow down a program if loadaverage goes
-  above a certain limit.
-
-* niceload: --run-mem will slow down a program if free memory goes
-  below a certain limit.
-
-* niceload: --run-noswap will slow down a program if the computer is
-  swapping.
-
-* niceload: --start-io, --start-load, --start-mem, --start-noswap will
-  defer starting a program until the system is below the limit.
-
-* --io, --load, --mem, and --noswap sets both --run-* and --start-*.
-
-* niceload got a major rewrite and is now object oriented.
-
-* GNU Parallel was presented at Nordic Perl Workshop 2011.
-  http://conferences.yapceurope.org/npw2011/talk/3416
-
-* Blog post about zcat and GNU Parallel. Thanks to Dr. John.
-  http://drjohnstechtalk.com/blog/2011/06/gnu-parallel-really-helps-with-zcat/
-
-* 2 blog posts in Japanese. Thanks to Negima.
-  http://d.hatena.ne.jp/negima1976/20110607/1307412660
-  http://d.hatena.ne.jp/negima1976/20110628/1309252494
-
-* Blog post for bioinformatics. Thanks to Chris Miller.
-  http://chrisamiller.com/science/2010/05/26/use-parallel-for-easy-multi-processor-execution/
+* Blog post about optimizing JPEGs. Thanks to Thomas Jost.
+  http://schnouki.net/2011/07/22/optimizing-jpeg-pictures/
 
 * Bug fixes and man page updates.
 

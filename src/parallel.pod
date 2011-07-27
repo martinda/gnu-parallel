@@ -1523,6 +1523,37 @@ B<$(date -d "today -{1} days" +%Y%m%d)> with give the dates in
 YYYYMMDD with {1} days subtracted.
 
 
+=head1 EXAMPLE: Parallel spider
+
+This script below will spider a URL in parallel (breadth first). Run
+like this:
+
+B<PARALLEL=-j50 ./parallel-spider http://www.gnu.org/software/parallel>
+
+  #!/bin/bash
+
+  # E.g. http://www.gnu.org/software/parallel
+  URL=$1
+  URLLIST=$(mktemp urllist.XXXX)
+  URLLIST2=$(mktemp urllist.XXXX)
+  SEEN=$(mktemp seen.XXXX)
+
+  # Spider to get the URLs
+  echo $URL >$URLLIST
+  cp $URLLIST $SEEN
+
+  while [ -s $URLLIST ] ; do
+    cat $URLLIST |
+      parallel lynx -listonly -image_links -dump {} \; echo Spidered: {} \>\&2 |
+      perl -ne 's/#.*//; s/\s+\d+.\s(\S+)$/$1/ and do { $seen{$1}++ or print }' |
+      grep -F $URL |
+      grep -v -x -F -f $SEEN | tee -a $SEEN > $URLLIST2
+    mv $URLLIST2 $URLLIST
+  done
+
+  rm -f $URLLIST $URLLIST2 $SEEN
+
+
 =head1 EXAMPLE: Process files from a tar file while unpacking
 
 If the files to be processed are in a tar file then unpacking one file
