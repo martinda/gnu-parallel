@@ -631,7 +631,8 @@ Implies B<-X> unless B<-m> is set.
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
-for one per CPU is a valid setting.
+for one per CPU is a valid setting. Only difference is 0 which
+actually means 0.
 
 The load average is only sampled every 10 seconds to avoid stressing
 small computers.
@@ -1523,17 +1524,27 @@ B<$(date -d "today -{1} days" +%Y%m%d)> with give the dates in
 YYYYMMDD with {1} days subtracted.
 
 
-=head1 EXAMPLE: Parallel spider
+=head1 EXAMPLE: Parallel web crawler/mirrorer
 
-This script below will spider a URL in parallel (breadth first). Run
-like this:
+This script below will crawl and mirror a URL in parallel (breadth
+first). Run like this:
 
-B<PARALLEL=-j50 ./parallel-spider http://www.gnu.org/software/parallel>
+B<PARALLEL=-j100 ./parallel-crawl http://gatt.org.yeslab.org/>
+
+Remove the B<wget> part if you only want a web crawler.
+
+It works by fetching a page from a list of URLs and looking for links
+in that page that are within the same starting URL and that have not
+already been seen. These links are added to a new queue. When all the
+pages from the list is done, the new queue is moved to the list of
+URLs and the process is started over until no unseen links are found.
 
   #!/bin/bash
 
-  # E.g. http://www.gnu.org/software/parallel
+  # E.g. http://gatt.org.yeslab.org/
   URL=$1
+  # Stay inside the start dir
+  BASEURL=$(echo $URL | perl -pe 's:#.*::; s:(//.*/)[^/]*:$1:')
   URLLIST=$(mktemp urllist.XXXX)
   URLLIST2=$(mktemp urllist.XXXX)
   SEEN=$(mktemp seen.XXXX)
@@ -1544,9 +1555,9 @@ B<PARALLEL=-j50 ./parallel-spider http://www.gnu.org/software/parallel>
 
   while [ -s $URLLIST ] ; do
     cat $URLLIST |
-      parallel lynx -listonly -image_links -dump {} \; echo Spidered: {} \>\&2 |
+      parallel lynx -listonly -image_links -dump {} \; wget -qm -l1 -Q1 {} \; echo Spidered: {} \>\&2 |
       perl -ne 's/#.*//; s/\s+\d+.\s(\S+)$/$1/ and do { $seen{$1}++ or print }' |
-      grep -F $URL |
+      grep -F $BASEURL |
       grep -v -x -F -f $SEEN | tee -a $SEEN > $URLLIST2
     mv $URLLIST2 $URLLIST
   done
