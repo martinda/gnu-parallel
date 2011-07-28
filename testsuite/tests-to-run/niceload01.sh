@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo '### Test niceload'
-niceload -q -s 1 perl -e '$|=1;do{$l==$r or print "."; $l=$r}until(($r=time-$^T)>10)'
+echo '### Test niceload -q'
+niceload -q perl -e '$a = "works";$b="This $a\n"; print($b);'
 echo 
 
 # Force less than 1 GB buffer+cache
@@ -45,8 +45,8 @@ wait
 while uptime | grep -v age:.[1-9][0-9].[0-9][0-9] >/dev/null ; do (timeout 5 nice burnP6 2>/dev/null &) done
 
 echo '### -H and --hard'
-niceload  -H -l 9.9 uptime | grep '[1-9][0-9]\.[0-9][0-9],' || echo OK
-niceload  --hard -l 9 uptime | grep '[1-9][0-9]\.[0-9][0-9],' || echo OK
+niceload  -H -l 9.9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK
+niceload  --hard -l 9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK
 
 echo '### -f and --factor'
 niceload -H -f 0.1 -l6 echo f 0.1 first &

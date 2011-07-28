@@ -356,7 +356,7 @@ sub options_hash {
 	 "basenameextensionreplace|bner=s" => \$::opt_basenameextensionreplace,
 	 "seqreplace=s" => \$::opt_seqreplace,
 	 "jobs|j=s" => \$::opt_P,
-	 "load=f" => \$::opt_load,
+	 "load=s" => \$::opt_load,
 	 "noswap" => \$::opt_noswap,
 	 "max-line-length-allowed" => \$::opt_max_line_length_allowed,
 	 "number-of-cpus" => \$::opt_number_of_cpus,
@@ -1016,7 +1016,9 @@ sub drain_job_queue {
     my $sleep = 0.2;
     do {
         while($Global::total_running > 0) {
-            debug("jobs running: ",$Global::total_running," ",scalar keys %Global::running, " Memory usage:".my_memory_usage()."\n");
+            debug("jobs running: ", $Global::total_running, "==", scalar
+		  keys %Global::running," slots: ", $Global::max_jobs_running,
+		  " Memory usage:".my_memory_usage()." ");
 	    $sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
 	    usleep($sleep);
 	    do_not_reap();
@@ -1262,6 +1264,16 @@ sub start_more_jobs {
                 }
             }
         }
+        if($Global::max_load_file) {
+            my $mtime = (stat($Global::max_load_file))[9];
+            if($mtime > $Global::max_load_file_last_mod) {
+                $Global::max_load_file_last_mod = $mtime;
+                for my $sshlogin (values %Global::host) {
+                    $sshlogin->set_max_loadavg(undef);
+                }
+            }
+        }
+
         for my $sshlogin (values %Global::host) {
             debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
             if($::opt_load and $sshlogin->loadavg_too_high()) {
@@ -1276,10 +1288,12 @@ sub start_more_jobs {
                 if($Global::JobQueue->empty() and not $::opt_pipe) {
                     last;
                 }
-                debug("Try starting a job on ".$sshlogin->string()."\n");
+                debug($sshlogin->string()." has ".$sshlogin->jobs_running()
+		      . " out of " . $sshlogin->max_jobs_running()
+		      . " jobs running. Start another.\n");
                 if(start_another_job($sshlogin) == 0) {
                     # No more jobs to start on this $sshlogin
-                    debug("Empty after retry: ",$Global::JobQueue->empty(),"\n");
+                    debug("No jobs started on ".$sshlogin->string()."\n");
                     last;
                 }
                 debug("Job started on ".$sshlogin->string()."\n");
@@ -1304,11 +1318,13 @@ sub start_another_job {
     if(enough_file_handles()) {
         if($Global::JobQueue->empty() and not $::opt_pipe) {
             # No more commands to run
-            return 0;
+	    debug("Not starting: JobQueue empty\n");
+	    return 0;
         } else {
             my $job = get_job_with_sshlogin($sshlogin);
             if(not defined $job) {
                 # No command available for that sshlogin
+		debug("Not starting: no jobs available for ".$sshlogin->string()."\n");
                 return 0;
             }
             debug("Command to run on '".$job->sshlogin()."': '".$job->replaced()."'\n");
@@ -1323,6 +1339,7 @@ sub start_another_job {
         }
     } else {
         # No more file handles
+	debug("Not starting: no more file handles\n");
         return 0;
     }
 }
@@ -1342,6 +1359,7 @@ sub get_job_with_sshlogin {
     my $job = $Global::JobQueue->get();
     if(not defined $job) {
         # No more jobs
+	::debug("No more jobs: JobQueue empty\n");
         return undef;
     }
 
@@ -1557,7 +1575,7 @@ sub reaper {
     $Private::reaperlevel++;
     my $stiff;
     my $children_reaped = 0;
-    debug("Reaper called $Private::reaperlevel\n");
+    debug("Reaper called $Private::reaperlevel ");
     while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
 	$children_reaped++;
         if($Global::sshmaster{$stiff}) {
@@ -2019,6 +2037,11 @@ sub max_loadavg {
     return $self->{'max_loadavg'};
 }
 
+sub set_max_loadavg {
+    my $self = shift;
+    $self->{'max_loadavg'} = shift;
+}
+
 sub compute_max_loadavg {
     # Parse the max loadaverage that the user asked for using --load
     # Returns:
@@ -2043,19 +2066,13 @@ sub compute_max_loadavg {
                 $self->ncpus() * $j / 100;
         } elsif ($loadspec =~ /^(\d+(\.\d+)?)$/) {
             $load = $1;
-            if($load == 0) {
-                # --load 0 = infinity (or at least close)
-                $load = 2**31;
-            }
         } elsif (-f $loadspec) {
-            # TODO this needs to be done for $loadspec
-            ::die_bug("loadspec-unimplemented");
-            $Global::max_procs_file = $loadspec;
-            $Global::max_procs_file_last_mod = (stat($Global::max_procs_file))[9];
-            if(open(IN, $Global::max_procs_file)) {
-                my $opt_P_file = join("",<IN>);
+            $Global::max_load_file = $loadspec;
+            $Global::max_load_file_last_mod = (stat($Global::max_load_file))[9];
+            if(open(IN, $Global::max_load_file)) {
+                my $opt_load_file = join("",<IN>);
                 close IN;
-                $load = $self->compute_max_loadavg($opt_P_file);
+                $load = $self->compute_max_loadavg($opt_load_file);
             } else {
                 print $Global::original_stderr "Cannot open $loadspec\n";
                 exit(255);
@@ -3920,12 +3937,15 @@ sub get {
 	    );
 	$cmd_line->populate();
 	::debug("cmd_line->number_of_args ".$cmd_line->number_of_args()."\n");
-	if(not $::opt_pipe and ($cmd_line->number_of_args() == 0 or $cmd_line->replaced() eq "")) {
+	if(not $::opt_pipe and $cmd_line->number_of_args() == 0) {
 	    # We did not get more args - maybe at EOF string?
 	    return undef;
+	} elsif($cmd_line->replaced() eq "") {
+	    # Empty command - get the next instead
+	    return $self->get();
 	} else {
 	    $self->set_seq($self->seq()+1);
-	    return ($cmd_line);
+	    return $cmd_line;
 	}
     }
 }

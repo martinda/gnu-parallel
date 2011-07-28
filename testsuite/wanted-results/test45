@@ -1,9 +1,15 @@
-### Bug in --load
-1
-2
-3
 ### Test --load locally
 # This will force the loadavg > 10
 OK
 ### Test --load remote
 OK
+### Test --load read from a file - more than 3s
+# This will force the loadavg > 10
+OK
+### Test --load read from a file - less than 10s
+# This will force the loadavg > 10
+OK
+### Bug in --load
+1
+2
+3
