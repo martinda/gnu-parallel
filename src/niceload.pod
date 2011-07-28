@@ -212,6 +212,21 @@ Run rsync but keep load below 3.4. If load reaches 7 sleep for
 B<niceload -L 3.4 -f 12 rsync -Ha /home/ /backup/home/>
 
 
+=head1 EXAMPLE: Ensure enough disk cache
+
+Assume the program B<foo> uses 2 GB files intensively. B<foo> will run
+fast if the files are in disk cache and be slow as a crawl if they are
+not in the cache.
+
+To ensure 2 GB are reserved for disk cache run:
+
+B<niceload --hard --run-mem 2g foo>
+
+This will not guarantee that the 2 GB memory will be used for the
+files for B<foo>, but it will stop B<foo> if the memory for disk cache
+is too low.
+
+
 =head1 ENVIRONMENT VARIABLES
 
 None. In future versions $NICELOAD will be able to contain default settings.
