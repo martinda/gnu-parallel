@@ -2462,7 +2462,10 @@ sub no_of_cpus_darwin {
     # Returns:
     #   Number of physical CPUs on Mac Darwin
     #   undef if not Mac Darwin
-    my $no_of_cpus = `sysctl -a hw 2>/dev/null | grep -w physicalcpu | awk '{ print \$2 }'`;
+    my $no_of_cpus =
+	(`sysctl -n hw.physicalcpu`
+	 or
+	 `sysctl -a hw 2>/dev/null | grep -w physicalcpu | awk '{ print \$2 }'`);
     return $no_of_cpus;
 }
 
@@ -2470,7 +2473,10 @@ sub no_of_cores_darwin {
     # Returns:
     #   Number of CPU cores on Mac Darwin
     #   undef if not Mac Darwin
-    my $no_of_cores = `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`;
+    my $no_of_cores =
+	(`sysctl -n hw.logicalcpu`
+	 or
+	 `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`);
     return $no_of_cores;
 }
 
