@@ -6,6 +6,7 @@ echo '### Tests from xargs'
 rsync -Ha --delete input-files/xargs-inputs/ tmp/
 cd tmp
 
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
 echo '### -0 -n3 echo < files0.xi'
 stdout xargs -0 -n3 echo < files0.xi
 stdout parallel -k -0 -n3 echo < files0.xi
@@ -243,7 +244,7 @@ echo '###  -s30 -t echo < stairs.xi - xargs'
 stdout xargs -s30 -t echo < stairs.xi
 echo '###  -s30 -t echo < stairs.xi - parallel'
 echo 'Because of -t these lines can be flipped around therefore sort'
-stdout parallel -k -X -s30 -t echo < stairs.xi | sort 
+stdout parallel -k -X -s30 -t echo < stairs.xi | sort
 echo '###  -t echo this plus that < space.xi'
 stdout xargs -t echo this plus that < space.xi
 stdout parallel -k -t echo this plus that < space.xi
@@ -253,6 +254,8 @@ stdout parallel -k -n1 printf "@%s@\n" < empty.xi
 echo '###  -n2 -t echo < foobar.xi'
 stdout xargs -n2 -t echo < foobar.xi
 stdout parallel -k -n2 -t echo < foobar.xi
+
+EOF
 
 # 
 # xargs_start 123 {-n1 -IARG sh -c ARG} ftt.xi

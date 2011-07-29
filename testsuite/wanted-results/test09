@@ -1,3 +1,80 @@
+parallel: Warning: Only enough filehandles to run 507 jobs in parallel. Raising ulimit -n may help.
 ### Test Force outside the file handle limit, 2009-02-17 Gave fork error
 Start
 end
+### Test race condition on 8 CPU (my laptop)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+### Test exit val - true
+0
+### Test exit val - false
+1
+sh: non_exist: command not found
+### Test --halt-on-error 0
+1
+2
+parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
+sleep 2;false
+sh: non_exist: command not found
+parallel: Starting no more jobs. Waiting for 3 jobs to finish. This job failed:
+sleep 2;false
+parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
+sleep 4; non_exist
+### Test --halt-on-error 1
+1
+127
+parallel: This job failed:
+sleep 2;false
+parallel: This job failed:
+sleep 2;false
+### Test --halt-on-error 2
+1
+1
+0
+1
+2
+3
+4
+5
+6
+7
+8
+0
+9
+parallel: Starting no more jobs. Waiting for 9 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 1
+parallel: Starting no more jobs. Waiting for 8 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 2
+parallel: Starting no more jobs. Waiting for 7 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 3
+parallel: Starting no more jobs. Waiting for 6 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 4
+parallel: Starting no more jobs. Waiting for 5 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 5
+parallel: Starting no more jobs. Waiting for 4 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 6
+parallel: Starting no more jobs. Waiting for 3 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 7
+parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 8
+parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 9
+0
+1
+parallel: This job failed:
+perl -e sleep\ \$ARGV[0]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 1
+### Test last dying print --halt-on-error
+9
+1
+### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834
+1
+2
+3

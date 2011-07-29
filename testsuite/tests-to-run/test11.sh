@@ -1,6 +1,3 @@
 #!/bin/bash
 
-PAR=parallel
-
-# Test the empty line
-echo | $PAR echo foo
+# Moved to test15

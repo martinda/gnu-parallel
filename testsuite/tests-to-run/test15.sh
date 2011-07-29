@@ -124,7 +124,7 @@ echo /tmp/parallel_f1 /tmp/parallel_f2 | stdout parallel -kv --delimiter ' ' gzi
 rm /tmp/parallel_f*
 
 
-cat <<'EOF' | parallel -j0 -k
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j10 -k -L1
 echo '### Test -i and --replace: Replace with argument'
 (echo a; echo END; echo b) | parallel -k -i -eEND echo repl{}ce
 (echo a; echo END; echo b) | parallel -k --replace -eEND echo repl{}ce
@@ -194,4 +194,66 @@ echo '### Test --verbose and -t'
 echo '### Test --show-limits'
 (echo b; echo c; echo f) | parallel -k --show-limits echo {}ar
 (echo b; echo c; echo f) | parallel -j1 -kX --show-limits -s 100 echo {}ar
+
+echo '### Test empty line as input'
+echo | parallel echo empty input line
+
+echo '### Tests if (cat | sh) works'
+perl -e 'for(1..25) {print "echo a $_; echo b $_\n"}' | parallel 2>&1 | sort
+
+echo '### Test if xargs-mode works'
+perl -e 'for(1..25) {print "a $_\nb $_\n"}' | parallel echo 2>&1 | sort
+
+echo '### Test -q'
+parallel -kq perl -e '$ARGV[0]=~/^\S+\s+\S+$/ and print $ARGV[0],"\n"' ::: "a b" c "d e f" g "h i"
+
+echo '### Test -q {#}'
+parallel -kq echo {#} ::: a b
+parallel -kq echo {\#} ::: a b
+parallel -kq echo {\\#} ::: a b
+
+echo '### Test long commands do not take up all memory'
+seq 1 100 | parallel -j0 -qv perl -e '$r=rand(shift);for($f=0;$f<$r;$f++){$a="a"x100};print shift,"\n"' 10000 | sort
+
+echo '### Test 0-arguments'
+seq 1 2 | parallel -k -n0 echo n0
+seq 1 2 | parallel -k -L0 echo L0
+seq 1 2 | parallel -k -N0 echo N0
+
+echo '### Because of --tollef -l, then -l0 == -l1, sorry'
+seq 1 2 | parallel -k -l0 echo l0
+
+echo '### Test replace {}'
+seq 1 2 | parallel -k -N0 echo replace {} curlies
+
+echo '### Test arguments on commandline'
+parallel -k -N0 echo args on cmdline ::: 1 2
+
+echo '### Test --nice locally'
+parallel --nice 1 -vv 'PAR=a bash -c "echo  \$PAR {}"' ::: b
+
+echo '### Test --nice remote'
+stdout parallel --nice 1 -S .. -vv 'PAR=a bash -c "echo  \$PAR {}"' ::: b 
+  | perl -pe 's/\S*parallel-server\S*/one-server/'
+
+echo '### Test distribute arguments at EOF to 2 jobslots'
+seq 1 92 | parallel -j+0 -kX -s 100 echo
+
+echo '### Test distribute arguments at EOF to 5 jobslots'
+seq 1 92 | parallel -j+3 -kX -s 100 echo
+
+echo '### Test distribute arguments at EOF to infinity jobslots'
+seq 1 92 | parallel -j0 -kX -s 100 echo
+
+echo '### Test -N is not broken by distribution - single line'
+seq 9 | parallel  -N 10  echo
+
+echo '### Test -N is not broken by distribution - two lines'
+seq 19 | parallel -k -N 10  echo
+
+echo '### Test -N context replace'
+seq 19 | parallel -k -N 10  echo a{}b
+
+echo '### Test -L context replace'
+seq 19 | parallel -k -L 10  echo a{}b
 EOF
