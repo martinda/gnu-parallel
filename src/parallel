@@ -480,7 +480,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110722;
+    $Global::version = 20110802;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2463,7 +2463,7 @@ sub no_of_cpus_darwin {
     #   Number of physical CPUs on Mac Darwin
     #   undef if not Mac Darwin
     my $no_of_cpus =
-	(`sysctl -n hw.physicalcpu`
+	(`sysctl -n hw.physicalcpu 2>/dev/null`
 	 or
 	 `sysctl -a hw 2>/dev/null | grep -w physicalcpu | awk '{ print \$2 }'`);
     return $no_of_cpus;
@@ -2474,7 +2474,7 @@ sub no_of_cores_darwin {
     #   Number of CPU cores on Mac Darwin
     #   undef if not Mac Darwin
     my $no_of_cores =
-	(`sysctl -n hw.logicalcpu`
+	(`sysctl -n hw.logicalcpu 2>/dev/null`
 	 or
 	 `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`);
     return $no_of_cores;
@@ -2485,7 +2485,7 @@ sub no_of_cpus_freebsd {
     #   Number of physical CPUs on FreeBSD
     #   undef if not FreeBSD
     my $no_of_cpus =
-	(`sysctl -a dev.cpu | grep \%parent | awk '{ print \$2 }' | uniq | wc -l | awk '{ print \$1 }'`
+	(`sysctl -a dev.cpu 2>/dev/null | grep \%parent | awk '{ print \$2 }' | uniq | wc -l | awk '{ print \$1 }'`
 	 or
 	 `sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`);
     chomp $no_of_cpus;

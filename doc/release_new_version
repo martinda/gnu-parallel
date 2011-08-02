@@ -166,23 +166,40 @@ https://lists.gnu.org/mailman/admindb/parallel
 from:tange@gnu.org
 to:parallel@gnu.org, bug-parallel@gnu.org, info-gnu@gnu.org, bug-directory@gnu.org
 cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
-   Tim Cuthbertson <tim3d.junk@gmail.com>, Ludovic Courtès <ludo@gnu.org>,
-   Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin <pnzhdin@gmail.com>,
-   Phil Sung <psung@alum.mit.edu>, Michael Shigorin <mike@altlinux.org>,
-   Andrew McFague <amcfague@wgen.net>, Steven M. Christensen <sunfreeware@gmail.com>,
-   Chris Howey <howeyc@gmail.com>, Fethican Coşkuner <fethicanc@gmail.com>,
-   Rogério Brito <rbrito@ime.usp.br>,
-   Koen Vervloesem <koen@vervloesem.eu>, R. Tyler Croy <tyler@monkeypox.org>,
-   ryoichiro.suzuki@gmail.com,kerick@shiftedbit.net,
-   Christian Faulhammer <fauli@gentoo.org>, Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
-   Jesse Alama <jesse.alama@gmail.com>
+   Tim Cuthbertson <tim3d.junk@gmail.com>, Ludovic Courtès
+   <ludo@gnu.org>, Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin
+   <pnzhdin@gmail.com>, Phil Sung <psung@alum.mit.edu>, Michael
+   Shigorin <mike@altlinux.org>, Andrew McFague <amcfague@wgen.net>,
+   Steven M. Christensen <sunfreeware@gmail.com>, Chris Howey
+   <howeyc@gmail.com>, Fethican Coşkuner <fethicanc@gmail.com>,
+   Rogério Brito <rbrito@ime.usp.br>, Koen Vervloesem
+   <koen@vervloesem.eu>, R. Tyler Croy <tyler@monkeypox.org>,
+   kerick@shiftedbit.net, Christian Faulhammer <fauli@gentoo.org>,
+   Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>, Jesse Alama
+   <jesse.alama@gmail.com>
 
 Subject: GNU Parallel 20110822 ('Utøya') released
 
 GNU Parallel 20110822 ('Utøya') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
+Debian and Ubuntu people have complained GNU Parallel is not in their
+official distributions.
+
+Ubuntu people: Log into LaunchPad and on
+https://bugs.launchpad.net/ubuntu/+bug/740630 click 'This bug affect
+me too'.
+
+Debian people: This is the (2 years old) bug to push:
+http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=518696
+
+
 New in this release:
+
+* Neat example of a parallel webcrawler in the man page.
+
+* Blog post in Japanese.
+  http://dminor11th.blogspot.com/2011/08/gnu-parallel.html
 
 * Blog post about optimizing JPEGs. Thanks to Thomas Jost.
   http://schnouki.net/2011/07/22/optimizing-jpeg-pictures/

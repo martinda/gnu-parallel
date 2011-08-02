@@ -51,9 +51,9 @@ B<parallel> is capable of.
 You can also watch the intro video for a quick introduction:
 http://tinyogg.com/watch/TORaR/ http://tinyogg.com/watch/hfxKj/ and
 http://tinyogg.com/watch/YQuXd/ or
-http://www.youtube.com/watch?v=OpaiGYxkSuQ and
-http://www.youtube.com/watch?v=1ntxT-47VPA
-
+http://www.youtube.com/watch?v=OpaiGYxkSuQ
+http://www.youtube.com/watch?v=1ntxT-47VPA and
+http://www.youtube.com/watch?v=fOX1EyHkQwc
 
 =head1 OPTIONS
 
@@ -1368,19 +1368,19 @@ B<parallel lame {} -o {.}.mp3 ::: *.wav>
 
 =head1 EXAMPLE: Inserting multiple arguments
 
-When moving a lot of files like this: B<mv * destdir> you will
+When moving a lot of files like this: B<mv *.log destdir> you will
 sometimes get the error:
 
 B<bash: /bin/mv: Argument list too long>
 
 because there are too many files. You can instead do:
 
-B<ls | parallel mv {} destdir>
+B<ls | grep -E '\.log$' | parallel mv {} destdir>
 
 This will run B<mv> for each file. It can be done faster if B<mv> gets
 as many arguments that will fit on the line:
 
-B<ls | parallel -m mv {} destdir>
+B<ls | grep -E '\.log$' | parallel -m mv {} destdir>
 
 
 =head1 EXAMPLE: Context replace
@@ -1858,6 +1858,24 @@ run on each computer you can do:
 B<parallel --onall -S server1,server2 echo ::: 1 2 3>
 
 If you have a lot of hosts use '-j0' to access more hosts in parallel.
+
+
+=head1 EXAMPLE: Parallelizing rsync
+
+B<rsync> is a great tool, but sometimes it will not fill up the
+available bandwidth. This is often a problem when copying several big
+files over high speed connections.
+
+The following will start one B<rsync> per big file in I<src-dir> to
+I<dest-dir> on the server I<fooserver>:
+
+B<find src-dir -type f -size +100000 | parallel -v ssh fooserver
+mkdir -p /dest-dir/{//}\;rsync -Havessh {} fooserver:/dest-dir/{}>
+
+The dirs created may end up with wrong permissions and smaller files
+are not being transferred. To fix those run B<rsync> a final time:
+
+B<rsync -Havessh src-dir/ fooserver:/dest-dir/>
 
 
 =head1 EXAMPLE: Use multiple inputs in one command
