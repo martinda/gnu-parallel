@@ -331,9 +331,10 @@ Implies B<--semaphore>.
 
 =item B<--block-size> I<size>
 
-Size of block in bytes. The size can be postfixed with K, M, G, T, or
-P which would multiply the size with 1024, 1048576, 1073741824,
-1099511627776 or 1125899906842624 respectively.
+Size of block in bytes. The size can be postfixed with K, M, G, T, P,
+k, m, g, t, or p which would multiply the size with 1024, 1048576,
+1073741824, 1099511627776, 1125899906842624, 1000, 1000000,
+1000000000, 1000000000000, or 1000000000000000 respectively.
 
 GNU B<parallel> tries to meet the block size but can be off by the
 length of one record.
@@ -799,7 +800,7 @@ B<tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}>
 Implies B<-X> unless B<-m> or B<--pipe> is set.
 
 When used with B<--pipe> B<-N> is the number of records to read. This
-is much slower than B<--blocksize> so avoid it if performance is
+is much slower than B<--block> so avoid it if performance is
 important.
 
 
