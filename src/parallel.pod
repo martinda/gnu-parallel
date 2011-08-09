@@ -460,6 +460,16 @@ printed when the command is finished. stderr (standard error) first
 followed by stdout (standard output).  B<-g> is the default. Can be
 reversed with B<-u>.
 
+Group output. Output from each jobs is grouped together and is only
+printed when the command is finished. stderr (standard error) first
+followed by stdout (standard output). This takes some CPU time. In
+rare situations GNU Parallel takes up lots of CPU time and if it is
+acceptable that the output from different commands are mixed together,
+then disabling grouping with B<-u> can speedup GNU Parallel by a
+factor of 10.
+
+B<-g> is the default. Can be reversed with B<-u>.
+
 
 =item B<--help>
 
@@ -1630,6 +1640,18 @@ Nested for-loops like this:
 can be written like this:
 
 B<parallel do_something {1} {2} :::: xlist ylist | process_output>
+
+Nested for-loops like this:
+
+  (for gender in M F ; do
+    for size in S M L XL XXL ; do
+      echo $gender $size
+    done
+  done) | sort
+
+can be written like this:
+
+B<parallel echo {1} {2} ::: M F ::: S M L XL XXL | sort>
 
 
 =head1 EXAMPLE: Group output lines
@@ -3020,7 +3042,7 @@ alias or function to a script.
 Report bugs to <bug-parallel@gnu.org> or
 https://savannah.gnu.org/bugs/?func=additem&group=parallel
 
-Your bugreport should always include:
+Your bug report should always include:
 
 =over 2
 
@@ -3033,8 +3055,9 @@ fixed in that version.
 =item *
 
 A complete example that others can run that shows the problem. A
-combination of B<seq>, B<echo>, and B<sleep> can reproduce most
-errors.
+combination of B<seq>, B<cat>, B<echo>, and B<sleep> can reproduce
+most errors. If you example requires large files, see if you can use
+make them by something like B<seq 1000000>>B<file>.
 
 =back
 
