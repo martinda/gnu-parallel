@@ -193,10 +193,26 @@ me too'.
 Debian people: This is the (2 years old) bug to push:
 http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=518696
 
+Several have suggested splitting moreutils into moreutils and
+moreutils-parallel just like FreeBSD and RawHide have already done:
+http://www.freshports.org/sysutils/moreutils-parallel/
+http://rpm.pbone.net/index.php3/stat/4/idpl/15740186/dir/rawhide/com/moreutils-parallel-0.44-1.fc16.x86_64.rpm.html
+
+To me that sounds like a good solution: Most people will never have
+any problems and the few that install both GNU Parallel and packages
+that depend on moreutils-parallel will be aware of it.
+
 
 New in this release:
 
-* Neat example of a parallel webcrawler in the man page.
+(( timeout ))
+
+* CPU detection improved for Mac OSX. Thanks to Wayne E. Seguin.
+
+* Example of a parallel webcrawler in the man page.
+
+* Backup up PostgreSQL with GNU Parallel. Thanks to Stephane Wirtel.
+  http://wirtel.be/2011/07/15/rsync_parallel/
 
 * Blog post in Japanese.
   http://dminor11th.blogspot.com/2011/08/gnu-parallel.html

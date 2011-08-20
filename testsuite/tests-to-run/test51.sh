@@ -5,7 +5,21 @@ echo '### Test --pipe'
 seq 1 1000000 >/tmp/parallel-seq
 shuf --random-source=/tmp/parallel-seq /tmp/parallel-seq >/tmp/blocktest
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j0 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j2 -k -L1
+echo '### Test 200M records with too small block'; 
+  ( 
+   echo start; 
+   seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true; 
+   echo end; 
+   echo start; 
+   seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true; 
+   echo end; 
+   echo start; 
+   seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true; 
+   echo end; 
+  ) | stdout parallel -k --block 200M -j2 --pipe --recend 'end\n' wc -c | 
+  egrep -v '^0$'
+
 echo '### Test -N with multiple jobslots and multiple args'
 seq 1 1 | parallel -j2 -k -N 3 --pipe 'cat;echo a' | uniq
 seq 1 2 | parallel -j2 -k -N 3 --pipe 'cat;echo bb' | uniq
@@ -30,7 +44,7 @@ echo -n 01a02a0a0a12a34a45a6a |
 echo -n 01a02a0a0a12a34a45a6a | 
   parallel -k -j1 --blocksize 1 --pipe --recend a  -N 3  'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 
-echo '### Test 100M records with too big block'; 
+echo '### Test 10M records with too big block'; 
   ( 
    echo start; 
    seq 1 1 | parallel -uj1 cat /tmp/blocktest\;true; 
@@ -42,20 +56,6 @@ echo '### Test 100M records with too big block';
    seq 1 1 | parallel -uj1 cat /tmp/blocktest\;true; 
    echo end; 
   ) | stdout parallel -k --block 10M -j2 --pipe --recstart 'start\n' wc -c | 
-  egrep -v '^0$'
-
-echo '### Test 300M records with too small block'; 
-  ( 
-   echo start; 
-   seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true; 
-   echo end; 
-   echo start; 
-   seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true; 
-   echo end; 
-   echo start; 
-   seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true; 
-   echo end; 
-  ) | stdout parallel -k --block 200M -j2 --pipe --recend 'end\n' wc -c | 
   egrep -v '^0$'
 
 echo '### Test --rrs -N1 --recend single'; 

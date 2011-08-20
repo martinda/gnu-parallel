@@ -79,6 +79,7 @@ if($::opt_nonall or $::opt_onall) {
 	close $outfh;
 	push @argfiles, $name;
     }
+    if(@::opt_basefile) { setup_basefile(); }
     # for each sshlogin do:
     # parallel -S $sshlogin $command :::: @argfiles
     #
@@ -104,6 +105,7 @@ if($::opt_nonall or $::opt_onall) {
 	    shell_quote_scalar($command)." :::: @argfiles\n";
     }
     close PARALLEL;
+    if(@::opt_basefile) { cleanup_basefile(); }
     unlink(@argfiles);
     wait_and_exit(min(undef_as_zero($Global::exitstatus),254));
 }
@@ -480,7 +482,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110802;
+    $Global::version = 20110819;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -820,9 +822,7 @@ sub read_args_from_command_line {
 
 sub cleanup {
     # Returns: N/A
-    if(@::opt_basefile) {
-        cleanup_basefile();
-    }
+    if(@::opt_basefile) { cleanup_basefile(); }
 }
 
 sub __QUOTING_ARGUMENTS_FOR_SHELL__ {}
@@ -934,9 +934,7 @@ sub init_run_jobs {
     $Global::tty_taken = 0;
     $SIG{USR1} = \&list_running_jobs;
     $SIG{USR2} = \&toggle_progress;
-    if(@::opt_basefile) {
-        setup_basefile();
-    }
+    if(@::opt_basefile) { setup_basefile(); }
 }
 
 sub start_more_jobs {

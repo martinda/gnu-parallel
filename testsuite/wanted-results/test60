@@ -60,3 +60,9 @@ nlv.pi.dk
 ### Test read sshloginfile from STDIN
 nlv.pi.dk
 nlv.pi.dk
+### Test --nonall --basefile
+/tmp/nonall--basefile
+/tmp/nonall--basefile
+### Test --onall --basefile
+/tmp/onall--basefile
+/tmp/onall--basefile

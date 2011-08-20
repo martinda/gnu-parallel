@@ -1,4 +1,8 @@
 ### Test --pipe
+### Test 200M records with too small block
+303111434
+303111434
+303111434
 ### Test -N with multiple jobslots and multiple args
 1
 a
@@ -117,14 +121,10 @@ d
 1>01a02a0a
 2>0a12a34a
 3>45a6a
-### Test 100M records with too big block
+### Test 10M records with too big block
 6888906
 6888906
 6888906
-### Test 300M records with too small block
-303111434
-303111434
-303111434
 ### Test --rrs -N1 --recend single
 1>12
 2>34

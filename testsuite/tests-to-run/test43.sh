@@ -5,21 +5,21 @@ mkdir -p /dev/shm/parallel
 
 echo '### Test $TMPDIR'
 TMPDIR=/dev/shm/parallel stdout timeout -k 1 6 parallel head -c 2000m '<'{} >/dev/null ::: /dev/zero &
-seq 1 20 | parallel -j1 "df /dev/shm | parallel -k --colsep ' +' echo {4}|tail -n 1;sleep 1" \
+seq 1 20 | parallel -j1 "df /dev/shm | parallel -k --colsep ' +' echo {4}|tail -n 1;sleep 0.1" \
 | stdout timeout -k 1 10 perl -ne 'BEGIN{$a=<>} $b=<>; if ($a-1000 > $b) { die "More than 1 MB gone. Good!" }'
 wait
-sleep 1
+sleep 0.1
 
 echo '### Test --tmpdir'
 stdout timeout -k 1 6 parallel --tmpdir /dev/shm/parallel head -c 2000m '<'{} >/dev/null ::: /dev/zero &
-seq 1 20 | parallel -j1 "df /dev/shm | parallel -k --colsep ' +' echo {4}|tail -n 1;sleep 1" \
+seq 1 20 | parallel -j1 "df /dev/shm | parallel -k --colsep ' +' echo {4}|tail -n 1;sleep 0.1" \
 | stdout timeout -k 1 10 perl -ne 'BEGIN{$a=<>} $b=<>; if ($a-1000 > $b) { die "More than 1 MB gone. Good!" }'
 wait
-sleep 1
+sleep 0.1
 
 echo '### Test $TMPDIR and --tmpdir'
 TMPDIR=/tmp stdout timeout -k 1 6 parallel --tmpdir /dev/shm/parallel head -c 2000m '<'{} >/dev/null ::: /dev/zero &
-seq 1 20 | parallel -j1 "df /dev/shm | parallel -k --colsep ' +' echo {4}|tail -n 1;sleep 1" \
+seq 1 20 | parallel -j1 "df /dev/shm | parallel -k --colsep ' +' echo {4}|tail -n 1;sleep 0.1" \
 | stdout timeout -k 1 10 perl -ne 'BEGIN{$a=<>} $b=<>; if ($a-1000 > $b) { die "More than 1 MB gone. Good!" }'
 wait
-sleep 1
+sleep 0.1

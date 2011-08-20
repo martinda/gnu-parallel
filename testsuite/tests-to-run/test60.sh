@@ -23,4 +23,12 @@ echo '### Test --nonall -u';
 echo '### Test read sshloginfile from STDIN'; 
   echo nlv.pi.dk | parallel -S - --nonall hostname; 
   echo nlv.pi.dk | parallel --sshloginfile - --nonall hostname
+
+echo '### Test --nonall --basefile'; 
+  touch /tmp/nonall--basefile; 
+  parallel --nonall --basefile /tmp/nonall--basefile -S parallel@$SERVER2,$SERVER1 ls /tmp/nonall--basefile
+
+echo '### Test --onall --basefile'; 
+  touch /tmp/onall--basefile; 
+  parallel --onall --basefile /tmp/onall--basefile -S parallel@$SERVER2,$SERVER1 ls ::: /tmp/onall--basefile
 EOF

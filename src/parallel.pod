@@ -1531,7 +1531,7 @@ download images for the past 30 days:
 
 B<parallel wget http://www.example.com/path/to/'$(date -d "today -{1} days" +%Y%m%d)_{2}.jpg' ::: $(seq 30) ::: $(seq -w 10)>
 
-B<$(date -d "today -{1} days" +%Y%m%d)> with give the dates in
+B<$(date -d "today -{1} days" +%Y%m%d)> will give the dates in
 YYYYMMDD with {1} days subtracted.
 
 
