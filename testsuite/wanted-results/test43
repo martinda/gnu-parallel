@@ -1,6 +1,6 @@
 ### Test $TMPDIR
-More than 1 MB gone. Good! at -e line 1, <> line 3.
+More than 1 MB gone. Good!
 ### Test --tmpdir
-More than 1 MB gone. Good! at -e line 1, <> line 3.
+More than 1 MB gone. Good!
 ### Test $TMPDIR and --tmpdir
-More than 1 MB gone. Good! at -e line 1, <> line 3.
+More than 1 MB gone. Good!
