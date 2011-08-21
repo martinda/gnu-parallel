@@ -1,3 +1,23 @@
+20110822
+
+* --timeout implemented so that slow commands can be killed
+
+* CPU detection improved for Mac OSX. Thanks to Wayne E. Seguin.
+
+* Example of a parallel webcrawler in the man page.
+
+* Backup up PostgreSQL with GNU Parallel. Thanks to Stephane Wirtel.
+  http://wirtel.be/2011/07/15/rsync_parallel/
+
+* Blog post in Japanese.
+  http://dminor11th.blogspot.com/2011/08/gnu-parallel.html
+
+* Blog post about optimizing JPEGs. Thanks to Thomas Jost.
+  http://schnouki.net/2011/07/22/optimizing-jpeg-pictures/
+
+* Bug fixes and man page updates.
+
+
 20110722
 
 * niceload: --hard will suspend a program if a limit is reached - as

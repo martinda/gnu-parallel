@@ -4,9 +4,10 @@
 
 Update documentation:
 
-Modified => alpha
-Unmodified alpha since last version => beta
+git blame
 Unmodified beta since last version => production
+Unmodified alpha since last version => beta
+Modified => alpha
 
 == Update version ==
 
@@ -188,7 +189,7 @@ official distributions.
 
 Ubuntu people: Log into LaunchPad and on
 https://bugs.launchpad.net/ubuntu/+bug/740630 click 'This bug affect
-me too'.
+me too'. (The link will only appear when you are logged in)
 
 Debian people: This is the (2 years old) bug to push:
 http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=518696
@@ -205,7 +206,7 @@ that depend on moreutils-parallel will be aware of it.
 
 New in this release:
 
-(( timeout ))
+* --timeout implemented so that slow commands can be killed
 
 * CPU detection improved for Mac OSX. Thanks to Wayne E. Seguin.
 

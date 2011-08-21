@@ -389,6 +389,7 @@ sub options_hash {
 	 "number-of-cores" => \$::opt_number_of_cores,
 	 "use-cpus-instead-of-cores" => \$::opt_use_cpus_instead_of_cores,
 	 "nice=i" => \$::opt_nice,
+	 "timeout=i" => \$::opt_timeout,
 	 "onall" => \$::opt_onall,
 	 "nonall" => \$::opt_nonall,
 	 "sshlogin|S=s" => \@::opt_sshlogin,
@@ -482,7 +483,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20110819;
+    $Global::version = 20110822;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -538,6 +539,7 @@ sub parse_options {
     }
     if(defined $::opt_E) { $Global::end_of_file_string = $::opt_E; }
     if(defined $::opt_n) { $Global::max_number_of_args = $::opt_n; }
+    if(defined $::opt_timeout) { $Global::timeoutq = TimeoutQueue->new($::opt_timeout); }
     if(defined $::opt_tmpdir) { $ENV{'TMPDIR'} = $::opt_tmpdir; }
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_colsep) { $Global::trim = 'lr'; }
@@ -1579,6 +1581,20 @@ sub reaper {
     return $children_reaped;
 }
 
+sub timeout {
+    # SIGALRM was received. Check if there was a timeout
+    # @Global::timeout is sorted by timeout
+    while (@Global::timeouts) {
+	my $t = $Global::timeouts[0];
+	if($t->timed_out()) {
+	    $t->kill();
+	    shift @Global::timeouts;
+	} else {
+	    # Because they are sorted by timeout
+	    last;
+	}
+    }
+}
 sub __USAGE__ {}
 
 sub wait_and_exit {
@@ -1735,6 +1751,10 @@ sub usleep {
     my $secs = shift;
     ::debug("Sleeping ",$secs," millisecs\n");
     select(undef, undef, undef, $secs/1000);
+    if($::opt_timeout) {
+	::debug(my_dump($Global::timeoutq));
+	$Global::timeoutq->process_timeouts();
+    }
 }
 
 sub multiply_binary_prefix {
@@ -2758,6 +2778,8 @@ sub new {
         'sshlogin_wrap' => undef,
         'exitstatus' => undef,
         'exitsignal' => undef,
+	# Timestamp for timeout if any
+	'timeout' => undef,
     }, ref($class) || $class;
 }
 
@@ -2893,6 +2915,38 @@ sub set_endtime {
 }
 
 
+sub set_timeout {
+    my $self = shift;
+    my $delta_time = shift;
+    $self->{'timeout'} = time + $delta_time;
+}
+
+sub timeout {
+    my $self = shift;
+    return $self->{'timeout'};
+}
+
+sub timedout {
+    my $self = shift;
+    return time > $self->{'timeout'};
+}
+
+sub kill {
+    # kill the jobs
+    my $self = shift;
+    my $pid = $self->pid();
+    for my $signal ("TERM", "TERM", "KILL") {
+	# Send two TERMs to give time to clean up
+	if(kill 0, $pid) {
+	    # The job still running
+	    kill $signal, $pid;
+	    if($signal eq "TERM") { ::usleep(200); }
+	} else {
+	    # The job is already finished
+	    last;
+	}
+    }
+}
 sub failed {
     # return number of times failed for this $sshlogin
     my $self = shift;
@@ -3289,6 +3343,11 @@ sub start {
     }
     $job->set_pid($pid);
     $job->set_starttime();
+    if($::opt_timeout) {
+	# Timeout must be set before inserting into queue
+	$job->set_timeout($::opt_timeout);
+	$Global::timeoutq->insert($job);
+    }
     return $job;
 }
 
@@ -4213,7 +4272,8 @@ sub new {
     my $fhs = shift;
     for my $fh (@$fhs) {
 	if(-t $fh) {
-	    print STDERR "$Global::progname: Input is tty. ".
+	    print STDERR "$Global::progname: Input is read from the terminal. ".
+		"Only experts do this on purpose. ".
 		"Press CTRL-D to exit.\n";
 	}
     }
@@ -4495,6 +4555,60 @@ sub trim_of {
 }
 
 
+package TimeoutQueue;
+
+sub new {
+    my $class = shift;
+    my $delta_time = shift;
+
+    return bless {
+	'queue' => [],
+	'delta_time' => $delta_time,
+    }, ref($class) || $class;
+}
+
+sub process_timeouts {
+    # Check if there was a timeout
+    my $self = shift;
+    # @Global::timeout is sorted by timeout
+    while (@{$self->{'queue'}}) {
+	my $job = $self->{'queue'}[0];
+	if($job->timedout()) {
+	    # Need to shift off queue before kill
+	    # because kill calls usleep -> process_timeouts
+	    shift @{$self->{'queue'}};
+	    $job->kill();
+	} else {
+	    # Because they are sorted by timeout
+	    last;
+	}
+    }
+}
+
+sub insert {
+    my $self = shift;
+    my $in = shift;
+    my $lower = 0;
+    my $upper = $#{$self->{'queue'}};
+    my $looking = int(($lower + $upper)/2);
+    my $in_time = $in->timeout();
+
+    # Find the position between $lower and $upper
+    while($lower < $upper) {
+	if($self->{'queue'}[$looking]->timeout() < $in_time) {
+	    # Upper half
+	    $lower = $looking+1;
+	} else {
+	    # Lower half
+	    $upper = $looking;
+	}
+	$looking = int(($lower + $upper)/2);
+    }
+    # splice at position $looking
+    splice @{$self->{'queue'}}, $looking, 0, $in;
+}
+
+
 package Semaphore;
 
 # This package provides a counting semaphore
@@ -4535,6 +4649,7 @@ sub new {
 sub acquire {
     my $self = shift;
     my $sleep = 1; # 1 ms
+    my $start_time = time;
     while(1) {
 	$self->atomic_link_if_count_less_than() and last;
 	::debug("Remove dead locks");
@@ -4558,7 +4673,17 @@ sub acquire {
 	$sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
 	# Random to avoid every sleeping job waking up at the same time
 	::usleep(rand()*$sleep);
-	# TODO if timeout: last
+	if(defined($::opt_timeout) and
+	   $start_time + $::opt_timeout > time) {
+	    # Acquire the lock anyway
+	    if(not -e $self->{'idfile'}) {
+		open (A, ">", $self->{'idfile'}) or
+		    ::die_bug("write_idfile: $self->{'idfile'}");
+		close A;
+	    }
+	    link $self->{'idfile'}, $self->{'pidfile'};
+	    last;
+	}
     }
     ::debug("acquired $self->{'pid'}\n");
 }
