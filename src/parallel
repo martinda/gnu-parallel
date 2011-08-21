@@ -90,12 +90,14 @@ if($::opt_nonall or $::opt_onall) {
 	     ((defined $::opt_P) ? "-P $::opt_P" : ""),
 	     ((defined $::opt_u) ? "-u" : ""),
 	     ((defined $::opt_g) ? "-g" : ""),
+	     ((defined $::opt_D) ? "-D" : ""),
 	);
     my $suboptions =
 	join(" ",
 	     ((defined $::opt_u) ? "-u" : ""),
 	     ((defined $::opt_g) ? "-g" : ""),
 	     ((defined @::opt_v) ? "-vv" : ""),
+	     ((defined $::opt_D) ? "-D" : ""),
 	);
     ::debug("| parallel");
     open(PARALLEL,"| parallel $options") || die;
