@@ -186,6 +186,13 @@ sub spreadstdin {
     while(read(STDIN,substr($buf,length $buf,0),$::opt_blocksize)) {
 	# substr above = append to $buf
 	reap_if_needed(); # Re-enable reaping after read() (Bug#33352)
+	if($::opt_r) {
+	    # Remove empty lines
+	    $buf=~s/^\s*\n//gm;
+	    if(length $buf == 0) {
+		next;
+	    }
+	}
 	if($::opt_regexp) {
 	    if($Global::max_number_of_args) {
 		# -N => (start..*?end){n}

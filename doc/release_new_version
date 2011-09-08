@@ -90,7 +90,7 @@ https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 
 YYYYMMDD=`yyyymmdd`
 pushd /tmp
-rm parallel-$YYYYMMDD.tar.bz2
+rm -rf parallel-${YYYYMMDD}*
 wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
 #wget http://alpha.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
 tar xjvf parallel-$YYYYMMDD.tar.bz2

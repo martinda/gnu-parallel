@@ -41,3 +41,6 @@ b-b f-f
 c-c d-d
 c-c e-e
 c-c f-f
+### Test of -r with --pipe - the first should give an empty line. The second should not.
+1
+0

@@ -242,7 +242,7 @@ parallel convert -resize {3} -quality {2} {1} {1.}_{3}_q{2}.jpg :::: - ::: 25 50
 # Thank you for watching
 #
 # If you like GNU Parallel:
-# * Post this video on forums/blogs/Google+/Twitter/Facebook/Linkedin
+# * Post this video on forums/blogs/Identi.ca/Google+/Twitter/Facebook/Linkedin
 # * Join the mailing list http://lists.gnu.org/mailman/listinfo/parallel
 # * Request or write a review for your favourite blog or magazine
 # * Request or build a package for your favourite distribution

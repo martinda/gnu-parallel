@@ -24,4 +24,8 @@ parallel -j1 -kX  echo {}-{.} ::: a ::: b
 parallel -j2 -kX  echo {}-{.} ::: a b ::: c d
 parallel -j2 -kX  echo {}-{.} ::: a b c ::: d e f
 parallel -j0 -kX  echo {}-{.} ::: a b c ::: d e f
+
+echo '### Test of -r with --pipe - the first should give an empty line. The second should not.'
+echo | parallel  -j2 -N1 --pipe cat | wc -l
+echo | parallel -r -j2 -N1 --pipe cat | wc -l
 EOF
