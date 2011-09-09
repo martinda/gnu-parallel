@@ -397,6 +397,7 @@ sub options_hash {
 	 "number-of-cpus" => \$::opt_number_of_cpus,
 	 "number-of-cores" => \$::opt_number_of_cores,
 	 "use-cpus-instead-of-cores" => \$::opt_use_cpus_instead_of_cores,
+	 "shellquote|shell_quote|shell-quote" => \$::opt_shellquote,
 	 "nice=i" => \$::opt_nice,
 	 "timeout=i" => \$::opt_timeout,
 	 "onall" => \$::opt_onall,
@@ -841,7 +842,7 @@ sub __QUOTING_ARGUMENTS_FOR_SHELL__ {}
 sub shell_quote {
     my @strings = (@_);
     for my $a (@strings) {
-        $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
+        $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
         $a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
     }
     return wantarray ? @strings : "@strings";
@@ -852,7 +853,7 @@ sub shell_quote_scalar {
     # Returns:
     #   string quoted with \ as needed by the shell
     my $a = shift;
-    $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
+    $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
     $a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
     return $a;
 }
@@ -3701,6 +3702,11 @@ sub len {
 	# Worse than worst case: every char needs to be quoted with \
 	$len *= 2;
     }
+    if($::opt_nice) {
+	# Pessimistic length if --shellquote is set
+	# Worse than worst case: every char needs to be quoted with \ twice
+	$len *= 4;
+    }
     return $len;
 }
 
@@ -3794,6 +3800,12 @@ sub replaced {
 	    # and quote
 	    $self->{'replaced'} = "nice -n" . $::opt_nice
 		. " bash -c " . ::shell_quote_scalar($self->{'replaced'});
+	}
+	if($::opt_shellquote) {
+	    # Prepend echo
+	    # and quote twice
+	    $self->{'replaced'} = "echo " .
+		::shell_quote_scalar(::shell_quote_scalar($self->{'replaced'}));
 	}
     }
     if($::oodebug and length($self->{'replaced'}) != ($self->len())) {

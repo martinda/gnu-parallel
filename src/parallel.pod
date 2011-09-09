@@ -879,6 +879,8 @@ default.
 
 If the stdin (standard input) only contains whitespace, do not run the command.
 
+If used with B<--pipe> this is slow.
+
 
 =item B<--recstart> I<startstring>
 
@@ -1034,6 +1036,12 @@ See also: B<man sem>
 
 Use the replacement string I<replace-str> instead of B<{#}> for
 job sequence number.
+
+
+=item B<--shellquote>
+
+Quote input as would be needed by the shell. Useful for making quoting
+composed commands for GNU B<parallel>.
 
 
 =item B<--skip-first-line>
