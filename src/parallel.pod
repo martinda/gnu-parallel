@@ -1040,7 +1040,7 @@ job sequence number.
 
 =item B<--shellquote>
 
-Quote input as would be needed by the shell. Useful for making quoting
+Does not run the command but quotes it. Useful for making quoted
 composed commands for GNU B<parallel>.
 
 

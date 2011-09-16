@@ -179,47 +179,21 @@ cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>, Jesse Alama
    <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20110822 ('Utøya') released
+Subject: GNU Parallel 20110922 ('Thorning-Schmidt') released
 
-GNU Parallel 20110822 ('Utøya') has been released. It is
+GNU Parallel 20110922 ('Thorning-Schmidt') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
-
-Debian and Ubuntu people have complained GNU Parallel is not in their
-official distributions.
-
-Ubuntu people: Log into LaunchPad and on
-https://bugs.launchpad.net/ubuntu/+bug/740630 click 'This bug affect
-me too'. (The link will only appear when you are logged in)
-
-Debian people: This is the (2 years old) bug to push:
-http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=518696
-
-Several have suggested splitting moreutils into moreutils and
-moreutils-parallel just like FreeBSD and RawHide have already done:
-http://www.freshports.org/sysutils/moreutils-parallel/
-http://rpm.pbone.net/index.php3/stat/4/idpl/15740186/dir/rawhide/com/moreutils-parallel-0.44-1.fc16.x86_64.rpm.html
-
-To me that sounds like a good solution: Most people will never have
-any problems and the few that install both GNU Parallel and packages
-that depend on moreutils-parallel will be aware of it.
-
 
 New in this release:
 
-* --timeout implemented so that slow commands can be killed
+* --shellquote does not run the command but quotes it using \'s.
+  Useful for making quoted composed commands.
 
-* CPU detection improved for Mac OSX. Thanks to Wayne E. Seguin.
+* Blog post on recompression FLAC audio.
+  http://blog.oxplot.com/2011/08/reflac-flac-cleanser.html
 
-* Example of a parallel webcrawler in the man page.
-
-* Backup up PostgreSQL with GNU Parallel. Thanks to Stephane Wirtel.
-  http://wirtel.be/2011/07/15/rsync_parallel/
-
-* Blog post in Japanese.
-  http://dminor11th.blogspot.com/2011/08/gnu-parallel.html
-
-* Blog post about optimizing JPEGs. Thanks to Thomas Jost.
-  http://schnouki.net/2011/07/22/optimizing-jpeg-pictures/
+* The most complex use of ::: I a seen so far.
+  http://agentzlerich.blogspot.com/2011/09/following-up-on-previous-failures-ive.html
 
 * Bug fixes and man page updates.
 
@@ -245,7 +219,7 @@ you would get had you run the commands sequentially. This makes it
 possible to use output from GNU Parallel as input for other programs.
 
 You can find more about GNU Parallel at:
-http://www.gnu.org/software/parallel/
+http://www.gnu.org/s/parallel/
 
 Watch the intro video on http://www.youtube.com/watch?v=OpaiGYxkSuQ or
 at http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/

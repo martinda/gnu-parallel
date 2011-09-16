@@ -63,8 +63,6 @@ my $command;
 if(@ARGV) {
     if($Global::quoting) {
 	$command = shell_quote(@ARGV);
-	# {#} is a replacement string and should not be quoted
-	$command =~ s/{\\#}/{#}/g;
     } else {
 	$command = join(" ", @ARGV);
     }
@@ -644,6 +642,9 @@ sub parse_options {
 	$Global::ContextReplace = 1;
     }
 
+    for (keys %Global::replace) {
+	$Global::replace{$_} = ::maybe_quote($Global::replace{$_});
+    }
     %Global::replace_rev = reverse %Global::replace;
 
     if(grep /^$Global::arg_sep$|^$Global::arg_file_sep$/o, @ARGV) {
@@ -858,6 +859,32 @@ sub shell_quote_scalar {
     return $a;
 }
 
+sub maybe_quote {
+    # If $Global::quoting then quote the string so shell will not expand any special chars
+    # Else do not quote
+    # Returns:
+    #   if $Global::quoting string quoted with \ as needed by the shell
+    #   else string unaltered
+    if($Global::quoting) {
+	return shell_quote_scalar(@_);
+    } else {
+	return "@_";
+    }
+}
+
+sub maybe_unquote {
+    # If $Global::quoting then unquote the string as shell would
+    # Else do not unquote
+    # Returns:
+    #   if $Global::quoting string unquoted as done by the shell
+    #   else string unaltered
+    if($Global::quoting) {
+	return shell_unquote(@_);
+    } else {
+	return "@_";
+    }
+}
+
 sub shell_unquote {
     # Unquote strings from shell_quote
     # Returns:
@@ -870,7 +897,7 @@ sub shell_unquote {
         }
         $arg =~ s/'\n'/\n/g; # filenames with '\n' is quoted using \'
         $arg =~ s/\\([\002-\011\013-\032])/$1/g;
-        $arg =~ s/\\([\#\?\`\(\)\*\>\<\~\|\; \"\!\$\&\'])/$1/g;
+        $arg =~ s/\\([\#\?\`\(\)\{\}\*\>\<\~\|\; \"\!\$\&\'])/$1/g;
         $arg =~ s/\\\\/\\/g;
     }
     return wantarray ? @strings : "@strings";
@@ -3516,12 +3543,11 @@ sub new {
     my %multi_replace;
     for my $used (keys %replacecount) {
 	if($used =~ /^{(\d+)(\D*)}$/) {
-	    $positional_replace{$1} = '{'.$2.'}';
+	    $positional_replace{$1} = '\{'.$2.'\}';
 	} else {
 	    $multi_replace{$used} = $used;
 	}
     }
-
     return bless {
 	'command' => $command,
 	'seq' => $seq,
@@ -3615,6 +3641,7 @@ sub push {
 	$arg_no++;
 	if(defined $arg) {
 	    if($self->{'positional_replace'}{$arg_no}) {
+		# TODO probably bug here if both {1.} and {1} are used
 		for my $used (keys %{$self->{'replacecount'}}) {
 		    # {} {/} {//} {.} or {/.}
 		    my $replacementfunction =
@@ -3736,22 +3763,22 @@ sub number_of_replacements {
     my $cmd = $command;
     my $multi_regexp = multi_regexp();
     my $replacement_regexp =
-	"(?:".
-	'\{\d+(?:|\.|/\.|/|//)?\}'. # {n} {n.} {n/.} {n/} {n//}
+	"(?:". ::maybe_quote('\{') .
+	'\d+(?:|\.|/\.|/|//)?' . # {n} {n.} {n/.} {n/} {n//}
+	::maybe_quote('\}') .
 	'|'.
 	join("|",map {$a=$_;$a=~s/(\W)/\\$1/g; $a} values %Global::replace).
 	")";
     my %c = ();
-    $cmd =~ s/($replacement_regexp)/$c{$1}++;""/ogex;
+    $cmd =~ s/($replacement_regexp)/$c{$1}++;"\0"/ogex;
     for my $k (keys %c) {
 	if(defined $Global::replace_rev{$k}) {
 	    $count{$Global::replace_rev{$k}} = $c{$k};
 	} else {
-	    $count{$k} = $c{$k};
+	    $count{::maybe_unquote($k)} = $c{$k};
 	}
 	$sum += $c{$k};
     }
-
     my $number_of_context_groups = 0;
     my $no_args;
     my $context;
@@ -3858,14 +3885,16 @@ sub context_replace_placeholders {
     # Regexp for inner replacement functions
     my $rep_inner_regexp = "(?:". join('|', map { $_=~s/(\W)/\\$1/g; $_} @rep_inner) . ")";
     # Seq replace string: {#}
-    my $rep_seq_regexp = '(?:\{\#\})';
+    my $rep_seq_regexp = '(?:'.::maybe_quote('\{\#\}').")";
     # Normal replace strings
     my $rep_str_regexp = multi_regexp();
+    # Positional replace strings
+    my $rep_str_pos_regexp = ::maybe_quote('\{').'\d+'.$rep_inner_regexp.::maybe_quote('\}');
 
     # Fish out the words that have replacement strings in them
     my $tt = $target;
     my %word;
-    while($tt =~ s/(\S*(?:$rep_str_regexp|\{\d+$rep_inner_regexp\}|$rep_seq_regexp)\S*)/\0/o) {
+    while($tt =~ s/(\S*(?:$rep_str_regexp|$rep_str_pos_regexp|$rep_seq_regexp)\S*)/\0/o) {
 	$word{$1}++;
     }
     # For each word: Generate the replacement string for that word.
@@ -3876,8 +3905,8 @@ sub context_replace_placeholders {
 	my $word = $origword; # Make a local modifyable copy
 
 	# replace {#} if it exists
-	$word =~ s/\{\#\}/$self->seq()/geo;
-	if($word =~ m:\{\d+$rep_inner_regexp\}:o) {
+	$word =~ s/$rep_seq_regexp/$self->seq()/geo;
+	if($word =~ /$rep_str_pos_regexp/o) {
 	    # There are positional replacement strings
 	    my @argset;
 	    if($#{$self->{'arg_list'}->[0]} == 0) {
@@ -3888,18 +3917,21 @@ sub context_replace_placeholders {
 	    }
 	    # Match 1..n where n = max args in a argset
 	    my $pos_regexp = "(?:".join("|", 1 .. $#{$argset[0]}+1).")";
+	    my $pos_inner_regexp = ::maybe_quote('\{') .
+		"($pos_regexp)($rep_inner_regexp)" .
+		::maybe_quote('\}');
 	    for my $argset (@argset) {
 		# Replace all positional arguments - e.g. {7/.}
 		# with the replacement function - e.g. {/.}
 		# of that argument
 		if(defined $self->{'max_number_of_args'}) {
 		    # Fill up if we have a half completed line, so {n} will be empty
-		    while($#$argset < $self->{'max_number_of_args'}-1) {
+		    while($#$argset < $self->{'max_number_of_args'}) {
 			CORE::push @$argset, Arg->new("");
 		    }
 		}
 		$w = $word;
-		$w =~ s/\{($pos_regexp)($rep_inner_regexp)\}/$argset->[$1-1]->replace('{'.$2.'}')/geo;
+		$w =~ s/$pos_inner_regexp/$argset->[$1-1]->replace('{'.$2.'}')/geo;
 		CORE::push @pos_replacements, $w;
 	    }
 	}
@@ -3958,13 +3990,17 @@ sub simple_replace_placeholders {
 	    # {n} {n/} {n//} {n.} {n/.}
 	    my $positional = $1; # number if any
 	    my $replacementfunction = "{".::undef_as_empty($2)."}"; # {} {/} {//} {.} or {/.}
+	    # If -q then the replacementstrings will be quoted, too
+	    # {1.} -> \{1.\}
+	    $Global::replace{$used} ||= ::maybe_quote($used);
 	    if(defined $args[$positional-1]) {
 		# we have a matching argument for {n}
-		$replace{$used} = $args[$positional-1]->replace($replacementfunction);
+		$replace{$Global::replace{$used}} =
+		    $args[$positional-1]->replace($replacementfunction);
 	    } else {
 		if($positional <= $self->{'max_number_of_args'}) {
 		    # Fill up if we have a half completed line
-		    $replace{$used} = "";
+		    $replace{$Global::replace{$used}} = "";
 		}
 	    }
 	} elsif($used eq "{#}") {
@@ -3974,7 +4010,6 @@ sub simple_replace_placeholders {
 	    ::die_bug('simple_replace_placeholders_20110530');
 	}
     }
-
     # Substitute the replace strings with the replacement values
     my $regexp = join('|', map { $_=~s/(\W)/\\$1/g; $_} keys %replace);
     if($regexp) {

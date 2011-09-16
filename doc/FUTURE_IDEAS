@@ -1,3 +1,12 @@
+Fejler:
+
+parallel -qv echo {#} {1} {1.} {} {.} {/} {//} ::: a.b/c.d
+parallel -Xqv echo {#} a{1}{1.} {} ::: a.b/c.d
+parallel -Xqv echo {#}a{1}{1.} {} ::: a.b/c.d
+seq 2 | parallel -v  echo {2} ::: c :::: - 
+parallel echo {2} ::: a ::: b
+
+
 niceload seeks last column:
 
 iostat -x 1 2
