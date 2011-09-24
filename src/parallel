@@ -3361,13 +3361,13 @@ sub start {
 	    . $job->seq() . "): $command\n");
     if($::opt_pipe) {
 	my ($in);
-	$pid = ::open3($in, ">&OUT", ">&ERR", $command) ||
+	$pid = ::open3($in, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 	    ::die_bug("open3-pipe");
 	$job->set_stdin($in);
     } elsif(@::opt_a and not $Global::stdin_in_opt_a and $job->seq() == 1) {
 	# Give STDIN to the first job if using -a
 	*IN = *STDIN;
-	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $command) ||
+	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 	    ::die_bug("open3-a");
 	# Re-open to avoid complaining
 	open STDIN, "<&", $Global::original_stdin
@@ -3376,12 +3376,12 @@ sub start {
 	     open(DEVTTY, "/dev/tty")) {
 	# Give /dev/tty to the command if no one else is using it
 	*IN = *DEVTTY;
-	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $command) ||
+	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 	    ::die_bug("open3-/dev/tty");
 	$Global::tty_taken = $pid;
 	close DEVTTY;
     } else {
-	$pid = ::open3(::gensym, ">&OUT", ">&ERR", $command) ||
+	$pid = ::open3(::gensym, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 	    ::die_bug("open3-gensym");
     }
     $job->set_pid($pid);

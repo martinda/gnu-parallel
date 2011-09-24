@@ -20,3 +20,6 @@ stdout parallel -k --tag -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a b
 
 echo '### Test --tag -X ::: a b'
 stdout parallel -k --tag -X -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a b
+
+echo '### Test bash redirection <()'
+parallel 'cat <(echo {}); echo b' ::: a

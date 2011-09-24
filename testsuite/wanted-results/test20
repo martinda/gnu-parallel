@@ -17,3 +17,6 @@ b	stdout-b
 ### Test --tag -X ::: a b
 a b	stderr-a stderr-b
 a b	stdout-a stdout-b
+### Test bash redirection <()
+a
+b
