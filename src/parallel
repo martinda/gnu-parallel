@@ -398,6 +398,7 @@ sub options_hash {
 	 "shellquote|shell_quote|shell-quote" => \$::opt_shellquote,
 	 "nice=i" => \$::opt_nice,
 	 "timeout=i" => \$::opt_timeout,
+	 "tag" => \$::opt_tag,
 	 "onall" => \$::opt_onall,
 	 "nonall" => \$::opt_nonall,
 	 "sshlogin|S=s" => \@::opt_sshlogin,
@@ -1678,6 +1679,11 @@ sub usage {
 	 "--recstart str Record start separator for --pipe.",
 	 "",
 	 "See 'man $Global::progname' for details",
+	 "",
+	 "When using GNU Parallel for a publication please cite:",
+	 "",
+	 "O. Tange (2011): GNU Parallel - The Command-Line Power Tool,",
+	 ";login: The USENIX Magazine, February 2011:42-47.",
 	 "");
 }
 
@@ -3461,21 +3467,36 @@ sub print {
     if($Global::debug) {
 	print STDERR "ERR:\n";
     }
-    my $buf;
-    while(sysread($err,$buf,1000_000)) {
-	print STDERR $buf;
+    if($::opt_tag) {
+	my $tag = $self->{'commandline'}->args_as_string();
+	while(<$err>) {
+	    print STDERR $tag,"\t",$_;
+	}
+    } else {
+	my $buf;
+	while(sysread($err,$buf,1000_000)) {
+	    print STDERR $buf;
+	}
     }
     flush STDERR;
 
     if($::opt_files) {
 	print STDOUT $self->{'stdoutfilename'},"\n";
     } else {
+	my $buf;
 	seek $out, 0, 0;
 	if($Global::debug) {
 	    print STDOUT "OUT:\n";
 	}
-	while(sysread($out,$buf,1000_000)) {
-	    print STDOUT $buf;
+	if($::opt_tag) {
+	    my $tag = $self->{'commandline'}->args_as_string();
+	    while(<$out>) {
+		print STDOUT $tag,"\t",$_;
+	    }
+	} else {
+	    while(sysread($out,$buf,1000_000)) {
+		print STDOUT $buf;
+	    }
 	}
 	flush STDOUT;
 	::debug("<<joboutput $command\n");
@@ -3689,6 +3710,14 @@ sub number_of_args {
     my $self = shift;
     # This is really number of records
     return $#{$self->{'arg_list'}}+1;
+}
+
+sub args_as_string {
+    # Returns:
+    #  all unmodified arguments joined with ' ' (similar to {})
+    my $self = shift;
+    return (join " ", map { $_->orig() }
+	    map { @$_ } @{$self->{'arg_list'}});
 }
 
 sub len {

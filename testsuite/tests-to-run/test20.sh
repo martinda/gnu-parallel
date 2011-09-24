@@ -12,4 +12,11 @@ echo '### Test --use-cpus-instead-of-cores'
 echo 'Cores should complete first on machines with less than 4 physical CPUs'
 wait
 
+echo '### Test --tag ::: a ::: b'
+stdout parallel -k --tag -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a ::: b
 
+echo '### Test --tag ::: a b'
+stdout parallel -k --tag -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a b
+
+echo '### Test --tag -X ::: a b'
+stdout parallel -k --tag -X -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a b

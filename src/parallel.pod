@@ -1148,6 +1148,12 @@ and it will open a tty for the job. When the job is done, the next job
 will get the tty.
 
 
+=item B<--tag>
+
+Tag lines with arguments. Each output line will be prepended with the
+arguments and TAB (\t).
+
+
 =item B<--tmpdir> I<dirname>
 
 Directory for temporary files. GNU B<parallel> normally buffers output
