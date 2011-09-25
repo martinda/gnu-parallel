@@ -98,9 +98,10 @@ if($::opt_nonall or $::opt_onall) {
 	     ((defined $::opt_D) ? "-D" : ""),
 	);
     ::debug("| parallel");
-    open(PARALLEL,"| parallel $options") || die;
+    open(PARALLEL,"| $0 $options") ||
+	::die_bug("This does not run GNU Parallel: $0 $options");
     for my $sshlogin (values %Global::host) {
-	print PARALLEL "parallel $suboptions -j1 -S ".
+	print PARALLEL "$0 $suboptions -j1 -S ".
 	    shell_quote_scalar($sshlogin->string())." ".
 	    shell_quote_scalar($command)." :::: @argfiles\n";
     }
