@@ -101,8 +101,10 @@ if($::opt_nonall or $::opt_onall) {
     open(PARALLEL,"| $0 $options") ||
 	::die_bug("This does not run GNU Parallel: $0 $options");
     for my $sshlogin (values %Global::host) {
-	print PARALLEL "$0 $suboptions -j1 -S ".
-	    shell_quote_scalar($sshlogin->string())." ".
+	print PARALLEL "$0 $suboptions -j1 ".
+	    ((defined $::opt_tag) ?
+	      "--tagstring ".shell_quote_scalar($sshlogin->string()) : "").
+	    " -S ". shell_quote_scalar($sshlogin->string())." ".
 	    shell_quote_scalar($command)." :::: @argfiles\n";
     }
     close PARALLEL;
@@ -384,7 +386,7 @@ sub options_hash {
 	 "null|0" => \$::opt_0,
 	 "quote|q" => \$::opt_q,
 	 "I=s" => \$::opt_I,
-	 "extensionreplace|U=s" => \$::opt_U,
+	 "extensionreplace|er|U=s" => \$::opt_U,
 	 "basenamereplace|bnr=s" => \$::opt_basenamereplace,
 	 "dirnamereplace|dnr=s" => \$::opt_dirnamereplace,
 	 "basenameextensionreplace|bner=s" => \$::opt_basenameextensionreplace,
@@ -400,6 +402,7 @@ sub options_hash {
 	 "nice=i" => \$::opt_nice,
 	 "timeout=i" => \$::opt_timeout,
 	 "tag" => \$::opt_tag,
+	 "tagstring=s" => \$::opt_tagstring,
 	 "onall" => \$::opt_onall,
 	 "nonall" => \$::opt_nonall,
 	 "sshlogin|S=s" => \@::opt_sshlogin,
@@ -409,12 +412,12 @@ sub options_hash {
 	 "trc=s" => \@::opt_trc,
 	 "transfer" => \$::opt_transfer,
 	 "cleanup" => \$::opt_cleanup,
-	 "basefile|B=s" => \@::opt_basefile,
-	 "workdir|W=s" => \$::opt_workdir,
+	 "basefile|bf|B=s" => \@::opt_basefile,
+	 "workdir|wd|W=s" => \$::opt_workdir,
 	 "tmpdir=s" => \$::opt_tmpdir,
 	 "tempdir=s" => \$::opt_tmpdir,
 	 "tty|T" => \$::opt_tty,
-	 "halt-on-error|H=i" => \$::opt_halt_on_error,
+	 "halt-on-error|halt|H=i" => \$::opt_halt_on_error,
 	 "retries=i" => \$::opt_retries,
 	 "dry-run|dryrun" => \$::opt_dryrun,
 	 "progress" => \$::opt_progress,
@@ -3468,10 +3471,10 @@ sub print {
     if($Global::debug) {
 	print STDERR "ERR:\n";
     }
-    if($::opt_tag) {
-	my $tag = $self->{'commandline'}->args_as_string();
+    if($::opt_tag or defined $::opt_tagstring) {
+	my $tag = $self->tag();
 	while(<$err>) {
-	    print STDERR $tag,"\t",$_;
+	    print STDERR $tag,$_;
 	}
     } else {
 	my $buf;
@@ -3489,12 +3492,13 @@ sub print {
 	if($Global::debug) {
 	    print STDOUT "OUT:\n";
 	}
-	if($::opt_tag) {
-	    my $tag = $self->{'commandline'}->args_as_string();
+	if($::opt_tag or defined $::opt_tagstring) {
+	    my $tag = $self->tag();
 	    while(<$out>) {
-		print STDOUT $tag,"\t",$_;
+		print STDOUT $tag,$_;
 	    }
 	} else {
+	    my $buf;
 	    while(sysread($out,$buf,1000_000)) {
 		print STDOUT $buf;
 	    }
@@ -3504,6 +3508,20 @@ sub print {
     }
     close $out;
     close $err;
+}
+
+sub tag {
+    my $self = shift;
+    if(not defined $self->{'tag'}) {
+	$self->{'tag'} = "";
+	if(defined $::opt_tagstring) {
+	    $self->{'tag'} .= $::opt_tagstring."\t";
+	}
+	if(defined $::opt_tag) {
+	    $self->{'tag'} .= $self->{'commandline'}->args_as_string()."\t";
+	}
+    }
+    return $self->{'tag'};
 }
 
 sub exitstatus {
@@ -3634,7 +3652,7 @@ sub populate {
 	}
     }
     if(($::opt_m or $::opt_X) and not $CommandLine::already_spread
-       and $self->{'arg_queue'}->empty()) {
+       and $self->{'arg_queue'}->empty() and $Global::max_jobs_running) {
 	# -m or -X and EOF => Spread the arguments over all jobslots
 	# (unless they are already spread)
 	$CommandLine::already_spread++;
