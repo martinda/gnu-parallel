@@ -59,7 +59,7 @@ if($::opt_skip_first_line) {
     <$fh>;
 }
 
-my $command;
+my $command = "";
 if(@ARGV) {
     if($Global::quoting) {
 	$command = shell_quote(@ARGV);
@@ -496,7 +496,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20111002;
+    $Global::version = 20111003;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
