@@ -29,6 +29,7 @@ xargs or cat | sh.</description>
 	<needs-terminal/>
 
 	<group main="src/parallel">
+		<command name="run" path="src/parallel"/>
 		<environment insert="src" mode="prepend" name="PATH"/>
 		<implementation id="sha1new=3bd5646ca0c38217df8278433803b44e33272954" released="2010-06-24" version="20100620">
 			<archive extract="parallel-20100620" href="http://ftp.gnu.org/gnu/parallel/parallel-20100620.tar.bz2" size="88834" type="application/x-bzip-compressed-tar"/>
@@ -92,7 +93,7 @@ xargs or cat | sh.</description>
 	</group>
 </interface>
 <!-- Base64 Signature
-iEYEABECAAYFAk5U358ACgkQ/lhgK1iJTtKwDwCfbPiZgluKIVdileVp0ezmcmcA04kAn0UGry4H
-tsK51Av5kgNYW1ddTaDx
+iEYEABECAAYFAk6Fm5QACgkQ/lhgK1iJTtI+XgCgwmnGpW4iHr80kVLkC9ddjfWUxjcAoKYc3XoI
+vCnmIquoCVhXR3leZmxh
 
 -->
