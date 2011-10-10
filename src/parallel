@@ -582,7 +582,7 @@ sub parse_options {
     if(defined $::opt_bg) { $Global::semaphore = 1; }
     if(defined $::opt_wait) { $Global::semaphore = 1; }
     if(defined $::opt_minversion) {
-	version();
+	print $Global::version,"\n";
 	if($Global::version < $::opt_minversion) {
 	    wait_and_exit(255);
 	} else {
