@@ -195,14 +195,29 @@ do {
    $target = (time - $start_time)*int($per_second);
    $this_round = $target - my_memory_usage();
    if($this_round > 0) {
-       my $a = "x"x(rand($this_round*3));
+       my $this_size = min(rand($this_round*3), $target_max-$memusage);
+       my $a = "x"x$this_size;
        push @a,$a;
    } else {
        pop @a;
    }
-   debug("memusage $memusage target $target this_round $this_round target_max $target_max\n");
+   debug("$#a memusage $memusage target $target this_round $this_round target_max $target_max\n");
    usleep(500);
 } while($memusage < $target_max);
+
+
+sub min {
+    # Returns:
+    #   Minimum value of array
+    my $min;
+    for (@_) {
+        # Skip undefs
+        defined $_ or next;
+        defined $min or do { $min = $_; next; }; # Set $_ to the first non-undef
+        $min = ($min < $_) ? $min : $_;
+    }
+    return $min;
+}
 
 
 sub debug {

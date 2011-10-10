@@ -1716,6 +1716,10 @@ that more visible:
 
 B<parallel --tag traceroute ::: foss.org.my debian.org freenetproject.org>
 
+Check the uptime of the servers in I<~/.parallel/sshloginfile>:
+
+B<parallel --tag -S .. --nonall uptime>
+
 
 =head1 EXAMPLE: Keep order of output same as order of input
 
