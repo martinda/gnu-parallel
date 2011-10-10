@@ -97,7 +97,7 @@ I<subdir/foo>, I<sub.dir/foo.jpg> becomes I<sub.dir/foo>,
 I<sub.dir/bar> remains I<sub.dir/bar>. If the input line does not
 contain B<.> it will remain unchanged.
 
-The replacement string B<{.}> can be changed with B<-U>.
+The replacement string B<{.}> can be changed with B<--er>.
 
 To understand replacement strings see B<{}>.
 
@@ -292,7 +292,9 @@ See also: B<:::>.
 
 =item B<--basefile> I<file>
 
-=item B<-B> I<file>
+=item B<--bf> I<file>
+
+=item B<-B> I<file> (-B will be retired 20120122)
 
 I<file> will be transferred to each sshlogin before a jobs is
 started. It will be removed if B<--cleanup> is active. The file may be
@@ -453,11 +455,11 @@ B<--gnu> takes precedence.
 
 =item B<--group>
 
-=item B<-g>
+=item B<-g> (-g will be retired 20120122)
 
 Group output.  Output from each jobs is grouped together and is only
 printed when the command is finished. stderr (standard error) first
-followed by stdout (standard output).  B<-g> is the default. Can be
+followed by stdout (standard output).  B<--group> is the default. Can be
 reversed with B<-u>.
 
 Group output. Output from each jobs is grouped together and is only
@@ -468,7 +470,7 @@ acceptable that the output from different commands are mixed together,
 then disabling grouping with B<-u> can speedup GNU Parallel by a
 factor of 10.
 
-B<-g> is the default. Can be reversed with B<-u>.
+B<--group> is the default. Can be reversed with B<-u>.
 
 
 =item B<--help>
@@ -480,7 +482,9 @@ Print a summary of the options to GNU B<parallel> and exit.
 
 =item B<--halt-on-error> <0|1|2>
 
-=item B<-H> <0|1|2>
+=item B<--halt> <0|1|2>
+
+=item B<-H> <0|1|2> (-H will be retired 20120122)
 
 =over 3
 
@@ -1139,7 +1143,7 @@ Can be reversed with B<-v>.
 
 =item B<--tty>
 
-=item B<-T>
+=item B<-T> (-T will be retired 20120122)
 
 Open terminal tty. If GNU B<parallel> is used for starting an
 interactive program then this option may be needed. It will start only
@@ -1148,10 +1152,13 @@ and it will open a tty for the job. When the job is done, the next job
 will get the tty.
 
 
-=item B<--tag>
+=item B<--tag> (alpha testing)
 
 Tag lines with arguments. Each output line will be prepended with the
-arguments and TAB (\t).
+arguments and TAB (\t). When combined with B<--onall> or B<--nonall>
+the lines will be prepended with the sshlogin instead.
+
+B<--tag> is ignored when using B<-u>.
 
 
 =item B<--tmpdir> I<dirname>
@@ -1251,12 +1258,14 @@ a bc " -> "a bc". This is the default if B<--colsep> is used.
 
 Ungroup output.  Output is printed as soon as possible. This may cause
 output from different commands to be mixed. GNU B<parallel> runs
-faster with B<-u>. Can be reversed with B<-g>.
+faster with B<-u>. Can be reversed with B<--group>.
 
 
 =item B<--extensionreplace> I<replace-str>
 
-=item B<-U> I<replace-str>
+=item B<--er> I<replace-str>
+
+=item B<-U> I<replace-str> (-U will be retired 20120122)
 
 Use the replacement string I<replace-str> instead of {.} for input line without extension.
 
@@ -1290,7 +1299,9 @@ Print the version GNU B<parallel> and exit.
 
 =item B<--workdir> I<mydir>
 
-=item B<-W> I<mydir>
+=item B<--wd> I<mydir>
+
+=item B<-W> I<mydir> (-W will be retired 20120122)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in
@@ -1353,17 +1364,17 @@ Compare these two:
 
 =item B<--hashbang>
 
-=item B<-Y>
+=item B<-Y> (-Y will be retired 20120122)
 
 GNU B<Parallel> can be called as a shebang (#!) command as the first line of a script. Like this:
 
-  #!/usr/bin/parallel -Yr traceroute
+  #!/usr/bin/parallel --shebang -r traceroute
 
   foss.org.my
   debian.org
   freenetproject.org
 
-For this to work B<--shebang> or B<-Y> must be set as the first option.
+For this to work B<--shebang> must be set as the first option.
 
 
 =back
@@ -1539,7 +1550,7 @@ If you have directory with tar.gz files and want these extracted in
 the corresponding dir (e.g foo.tar.gz will be extracted in the dir
 foo) you can do:
 
-B<ls *.tar.gz| parallel -U {tar} 'echo {tar}|parallel "mkdir -p {.} ; tar -C {.} -xf {.}.tar.gz"'>
+B<ls *.tar.gz| parallel --er {tar} 'echo {tar}|parallel "mkdir -p {.} ; tar -C {.} -xf {.}.tar.gz"'>
 
 
 =head1 EXAMPLE: Download 10 images for each of the past 30 days
@@ -1557,10 +1568,14 @@ B<$(date -d "today -{1} days" +%Y%m%d)> will give the dates in
 YYYYMMDD with {1} days subtracted.
 
 
-=head1 EXAMPLE: Parallel web crawler/mirrorer
+=head1 EXAMPLE: Breadth first parallel web crawler/mirrorer
 
-This script below will crawl and mirror a URL in parallel (breadth
-first). Run like this:
+This script below will crawl and mirror a URL in parallel.  It
+downloads first pages that are 1 click down, then 2 clicks down, then
+3; instead of the normal depth first, where the first link link on
+each page is fetched first.
+
+Run like this:
 
 B<PARALLEL=-j100 ./parallel-crawl http://gatt.org.yeslab.org/>
 
@@ -1691,6 +1706,15 @@ B<parallel traceroute ::: foss.org.my debian.org freenetproject.org>
 to the output of:
 
 B<parallel -u traceroute ::: foss.org.my debian.org freenetproject.org>
+
+
+=head1 EXAMPLE: Tag output lines
+
+GNU B<parallel> groups the output lines, but it can be hard to see
+where the different jobs begin. B<--tag> prepends the argument to make
+that more visible:
+
+B<parallel --tag traceroute ::: foss.org.my debian.org freenetproject.org>
 
 
 =head1 EXAMPLE: Keep order of output same as order of input
