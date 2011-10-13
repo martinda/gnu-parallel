@@ -14,7 +14,7 @@ build:
 	cd parallel-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]; dpkg-buildpackage -us -uc
 	@echo 
 	@echo "To install the GNU Parallel Debian package, run:"
-	@echo -e \\t sudo dpkg -i `ls -rt parallel_*_all.deb | tail -n 1`
+	@echo "    sudo dpkg -i "`ls -rt parallel_*_all.deb | tail -n 1`
 
 clean:
 	rm -f parallel_*

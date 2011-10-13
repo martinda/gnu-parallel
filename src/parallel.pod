@@ -809,7 +809,7 @@ line.
 
 This will set the owner of the homedir to the user:
 
-B<tr ':' '\012' < /etc/passwd | parallel -N7 chown {1} {6}>
+B<tr ':' '\n' < /etc/passwd | parallel -N7 chown {1} {6}>
 
 Implies B<-X> unless B<-m> or B<--pipe> is set.
 
@@ -865,7 +865,11 @@ on remote computers. See the section PROFILE FILES for examples.
 
 I<profilename> corresponds to the file ~/.parallel/I<profilename>.
 
+You can give multiple profiles by repeating B<--profile>. If parts of
+the profiles conflict, the later ones will be used.
+
 Default: config
+
 
 =item B<--quote>
 
@@ -1923,12 +1927,15 @@ Convert *.mp3 to *.ogg running one process per CPU core on local computer and se
 
 To run the command B<uptime> on remote computers you can do:
 
-B<parallel --nonall -S server1,server2 uptime>
+B<parallel --tag --nonall -S server1,server2 uptime>
 
 B<--nonall> reads no arguments. If you have a list of jobs you want
 run on each computer you can do:
 
-B<parallel --onall -S server1,server2 echo ::: 1 2 3>
+B<parallel --tag --onall -S server1,server2 echo ::: 1 2 3>
+
+Remove B<--tag> if you do not want the sshlogin added before the
+output.
 
 If you have a lot of hosts use '-j0' to access more hosts in parallel.
 
@@ -2414,7 +2421,13 @@ variable $PARALLEL which takes precedence over the file
 =head1 PROFILE FILES
 
 If B<--profile> set, GNU B<parallel> will read the profile from that file instead of
-~/.parallel/config.
+~/.parallel/config. You can have multiple B<--profiles>.
+
+Example: Profile for running a command on every sshlogin in
+~/.ssh/sshlogins and prepend the output with the sshlogin:
+
+  echo --tag -S .. --nonall > ~/.parallel/n
+  parallel -Jn uptime
 
 Example: Profile for running every command with B<-j-1> and B<nice>
 

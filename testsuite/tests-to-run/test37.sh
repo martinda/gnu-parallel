@@ -66,3 +66,8 @@ parallel -v -J test_profile '<(echo {})' ::: foo
 
 echo '### Test quoting of space in arguments (-S) from $PARALLEL'
 PARALLEL='-k --jobs 1 --sshlogin ssh\ '$SERVER1'\ ssh\ parallel@'$SERVER2' perl -pe "\\$a=1; print \\$a" ' parallel -v '<(echo {})' ::: foo
+
+echo '### Test merging of profiles - sort needed because -k only works on the single machine'
+echo --tag > ~/.parallel/test_tag
+echo -S .. > ~/.parallel/test_S..
+parallel -Jtest_tag -Jtest_S.. --nonall echo a | sort

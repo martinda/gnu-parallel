@@ -57,3 +57,6 @@ perl -pe '$a=1; print $a' <(echo foo)
 ### Test quoting of space in arguments (-S) from $PARALLEL
 perl -pe "\$a=1; print \$a" <(echo foo)
 1foo
+### Test merging of profiles - sort needed because -k only works on the single machine
+parallel-server3	a
+parallel@parallel-server2	a

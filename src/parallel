@@ -425,7 +425,7 @@ sub options_hash {
 	 "arg-sep|argsep=s" => \$::opt_arg_sep,
 	 "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
 	 "trim=s" => \$::opt_trim,
-	 "profile|J=s" => \$::opt_profile,
+	 "profile|J=s" => \@::opt_profile,
 	 "pipe|spreadstdin" => \$::opt_pipe,
 	 "recstart=s" => \$::opt_recstart,
 	 "recend=s" => \$::opt_recend,
@@ -733,8 +733,8 @@ sub read_options {
     }
 
     Getopt::Long::Configure("bundling","pass_through");
-    # Check if there is a --profile to set $::opt_profile
-    GetOptions("profile|J=s" => \$::opt_profile) || die_usage();
+    # Check if there is a --profile to set @::opt_profile
+    GetOptions("profile|J=s" => \@::opt_profile) || die_usage();
     # Add options from .parallel/config and other profiles
     my @ARGV_profile = ();
     my @ARGV_env = ();
@@ -743,9 +743,12 @@ sub read_options {
 	$ENV{'HOME'}."/.parallel/config",
 	$ENV{'HOME'}."/.parallelrc");
     my @profiles = @config_profiles;
-    if($::opt_profile) {
+    if(@::opt_profile) {
         # --profile overrides default profiles
-        @profiles = ($ENV{'HOME'}."/.parallel/".$::opt_profile);
+	@profiles = ();
+	for my $profile (@::opt_profile) {
+	    push @profiles, $ENV{'HOME'}."/.parallel/".$profile;
+	}
     }
     for my $profile (@profiles) {
         if(-r $profile) {
