@@ -436,6 +436,7 @@ sub options_hash {
 	 "tollef" => \$::opt_tollef,
 	 "gnu" => \$::opt_gnu,
 	 "xapply" => \$::opt_xapply,
+	 "bibtex" => \$::opt_bibtex,
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$::opt_P,
 	 "delimiter|d=s" => \$::opt_d,
@@ -567,6 +568,7 @@ sub parse_options {
         print Limits::Command::real_max_length(),"\n"; wait_and_exit(0);
     }
     if(defined $::opt_version) { version(); wait_and_exit(0); }
+    if(defined $::opt_bibtex) { bibtex(); wait_and_exit(0); }
     if(defined $::opt_show_limits) { show_limits(); }
     if(defined @::opt_sshlogin) { @Global::sshlogin = @::opt_sshlogin; }
     if(defined $::opt_sshloginfile) { read_sshloginfile($::opt_sshloginfile); }
@@ -1724,6 +1726,28 @@ sub version {
 	       "When using GNU Parallel for a publication please cite:\n",
 	       "O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ",
 	       ";login: The USENIX Magazine, February 2011:42-47.\n",
+        );
+}
+
+sub bibtex {
+    # Returns: N/A
+    if($::opt_tollef and not $::opt_gnu) {
+	print "WARNING: YOU ARE USING --tollef. USE --gnu FOR GNU PARALLEL\n\n";
+    }
+    print join("\n",
+               "\@article{Tange2011,",
+	       " title = {GNU Parallel - The Command-Line Power Tool},",
+	       " author = {O. Tange},",
+	       " address = {Frederiksberg, Denmark},",
+	       " journal = {;login: The USENIX Magazine},",
+	       " month = {Feb},",
+	       " number = {1},",
+	       " volume = {36},",
+	       " url = {http://www.gnu.org/s/parallel},",
+	       " year = {2011},",
+	       " pages = {42-47}",
+	       "}",
+	       "",
         );
 }
 
