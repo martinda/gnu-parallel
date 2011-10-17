@@ -6,3 +6,5 @@
 4.4
 ### Test --shellquote
 awk\ -v\ FS=\"\\\",\\\"\"\ \'\{print\ \$1,\ \$3,\ \$4,\ \$5,\ \$9,\ \$14\}\'\ \|\ grep\ -v\ \"\#\"\ \|\ sed\ -e\ \'1d\'\ -e\ \'s/\\\"//g\'\ -e\ \'s/\\/\\/\\//\\t/g\'\ \|\ cut\ -f1-6,11\ \|\ sed\ -e\ \'s/\\/\\//\\t/g\'\ -e\ \'s/\ /\\t/g
+### Test make .deb package
+To install the GNU Parallel Debian package, run:

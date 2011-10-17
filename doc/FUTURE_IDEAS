@@ -167,7 +167,17 @@ Dont start:
 
 
 
-Video 30. 36. 41. 48
+# GNU Parallel 20111022 - The Steve Ritchie release
+
+--tag
+-Jt (e.g. --tag --nonall)
+-Jr (--sshloginfile myremoteservers)
+-Jl (--sshloginfile mylocalservers)
+
+-Jt -Jr -Jl
+
+./src/parallel --sshloginfile ~/.parallel/remote --slf ~/.parallel/local --nonall hostname
+
 
 
 # GNU Parallel 20110522 - The Pakistan Release

@@ -406,7 +406,7 @@ sub options_hash {
 	 "onall" => \$::opt_onall,
 	 "nonall" => \$::opt_nonall,
 	 "sshlogin|S=s" => \@::opt_sshlogin,
-	 "sshloginfile=s" => \$::opt_sshloginfile,
+	 "sshloginfile|slf=s" => \@::opt_sshloginfile,
 	 "controlmaster|M" => \$::opt_controlmaster,
 	 "return=s" => \@::opt_return,
 	 "trc=s" => \@::opt_trc,
@@ -571,7 +571,7 @@ sub parse_options {
     if(defined $::opt_bibtex) { bibtex(); wait_and_exit(0); }
     if(defined $::opt_show_limits) { show_limits(); }
     if(defined @::opt_sshlogin) { @Global::sshlogin = @::opt_sshlogin; }
-    if(defined $::opt_sshloginfile) { read_sshloginfile($::opt_sshloginfile); }
+    if(defined @::opt_sshloginfile) { read_sshloginfiles(@::opt_sshloginfile); }
     if(defined @::opt_return) { push @Global::ret_files, @::opt_return; }
     if(not defined $::opt_recstart and
        not defined $::opt_recend) { $::opt_recend = "\n"; }
@@ -1384,6 +1384,13 @@ sub get_job_with_sshlogin {
 
 sub __REMOTE_SSH__ {}
 
+sub read_sshloginfiles {
+    # Returns: N/A
+    for (@_) {
+	read_sshloginfile($_);
+    }
+}
+
 sub read_sshloginfile {
     # Returns: N/A
     my $file = shift;
@@ -1735,7 +1742,7 @@ sub bibtex {
 	print "WARNING: YOU ARE USING --tollef. USE --gnu FOR GNU PARALLEL\n\n";
     }
     print join("\n",
-               "\@article{Tange2011,",
+               "\@article{Tange2011a,",
 	       " title = {GNU Parallel - The Command-Line Power Tool},",
 	       " author = {O. Tange},",
 	       " address = {Frederiksberg, Denmark},",

@@ -610,8 +610,9 @@ jobs while GNU B<parallel> is running.
 
 =item B<-k>
 
-Keep sequence of output same as the order of input. Try this to see
-the difference:
+Keep sequence of output same as the order of input. Normally the
+output of a job will be printed as soon as the job completes. Try this
+to see the difference:
 
   parallel -j4 sleep {}\; echo {} ::: 2 1 4 3
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
@@ -1098,6 +1099,8 @@ B<--cleanup>, and B<--trc>.
 
 =item B<--sshloginfile> I<filename>
 
+=item B<--slf> I<filename>
+
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
 
@@ -1118,6 +1121,8 @@ lines. Empty lines and lines starting with '#' are ignored. Example:
   16/:
 
 When using a different ssh program the last argument must be the hostname.
+
+Multiple B<--sshloginfile> are allowed.
 
 The sshloginfile '..' is special, it read sshlogins from
 ~/.parallel/sshloginfile

@@ -186,8 +186,21 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* --tag prepends lines with the argument(s). If used with --(n)onall
+  the line will be prepended with the sshlogin instead.
+
 * --shellquote does not run the command but quotes it using \'s.
   Useful for making quoted composed commands.
+
+* --profile can now be repeated merging multiple profiles.
+
+* --bibtex now gives the BibTeX entry.
+  Thanks to Aleksandr Levchuk for testing.
+
+* Makefile for simple .deb package.
+  cd packager/debian; make
+
+* sql: --list-databases lists the databases.
 
 * GNU Parallel officially in Fedora 16
   http://www.spinics.net/lists/fedora-package-announce/msg67130.html

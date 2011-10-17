@@ -21,6 +21,11 @@ cat ... | parallel --pipe [options] [command [arguments]]
 --recstart str Record start separator for --pipe.
 
 See 'man parallel' for details
+
+When using GNU Parallel for a publication please cite:
+
+O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
+;login: The USENIX Magazine, February 2011:42-47.
 Parsing of --jobs/-j/--max-procs/-P failed
 ### Test of -j filename
 sleep 0.7

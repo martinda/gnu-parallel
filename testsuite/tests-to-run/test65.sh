@@ -10,3 +10,7 @@ echo '### Test --shellquote'
 cat <<'_EOF' | parallel --shellquote  
 awk -v FS="\",\"" '{print $1, $3, $4, $5, $9, $14}' | grep -v "#" | sed -e '1d' -e 's/\"//g' -e 's/\/\/\//\t/g' | cut -f1-6,11 | sed -e 's/\/\//\t/g' -e 's/ /\t/g
 _EOF
+
+echo '### Test make .deb package'
+cd ~/privat/parallel/packager/debian
+stdout make | grep 'To install the GNU Parallel Debian package, run:'

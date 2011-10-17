@@ -17,13 +17,13 @@ end
 0
 ### Test exit val - false
 1
-sh: non_exist: command not found
+/bin/bash: non_exist: command not found
 ### Test --halt-on-error 0
 1
 2
 parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
 sleep 2;false
-sh: non_exist: command not found
+/bin/bash: non_exist: command not found
 parallel: Starting no more jobs. Waiting for 3 jobs to finish. This job failed:
 sleep 2;false
 parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:

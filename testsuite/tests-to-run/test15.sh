@@ -30,7 +30,7 @@ expect "echo opt--interactive 3"
 send "y\n"
 expect "opt--interactive 3"
 _EOF
-
+echo
 cat <<'EOF' | parallel -j0 -k
 echo '### Test -L -l and --max-lines'
 (echo a_b;echo c) | parallel -km -L2 echo

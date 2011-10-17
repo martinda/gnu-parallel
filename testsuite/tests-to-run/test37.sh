@@ -70,4 +70,6 @@ PARALLEL='-k --jobs 1 --sshlogin ssh\ '$SERVER1'\ ssh\ parallel@'$SERVER2' perl 
 echo '### Test merging of profiles - sort needed because -k only works on the single machine'
 echo --tag > ~/.parallel/test_tag
 echo -S .. > ~/.parallel/test_S..
+echo parallel@parallel-server1 > ~/.parallel/sshloginfile
+echo parallel@parallel-server2 >> ~/.parallel/sshloginfile
 parallel -Jtest_tag -Jtest_S.. --nonall echo a | sort
