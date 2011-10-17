@@ -2236,6 +2236,7 @@ sub compute_number_of_processes {
     ::debug("Wanted procs: $wanted_processes\n");
     my $system_limit =
         $self->processes_available_by_system_limit($wanted_processes);
+    $system_limit < 1 and ::die_bug('$system_limit < 1');
     ::debug("Limited to procs: $system_limit\n");
     return $system_limit;
 }
@@ -2278,6 +2279,7 @@ sub processes_available_by_system_limit {
         $max_system_proc_reached and last;
 	my $before_getting_arg = time;
         if($Global::semaphore) {
+	    # Skip
         } elsif(defined $::opt_retries and $count_jobs_already_read) {
             # For retries we may need to run all jobs on this sshlogin
             # so include the already read jobs for this sshlogin
@@ -2287,9 +2289,17 @@ sub processes_available_by_system_limit {
                 # The arguments may have to be re-spread over several jobslots
                 # So pessimistically only read one arg per jobslot
                 # instead of a full commandline
-                $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->empty() and last;
-                ($arg) = $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->get();
-                push(@args, $arg);
+                if($Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->empty()) {
+		    if($Global::JobQueue->empty()) {
+			last;
+		    } else {
+			($job) = $Global::JobQueue->get();
+			push(@jobs, $job);
+		    }
+		} else {
+		    ($arg) = $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->get();
+		    push(@args, $arg);
+		}
             } else {
                 # If there are no more command lines, then we have a process
                 # per command line, so no need to go further
@@ -2346,6 +2356,9 @@ sub processes_available_by_system_limit {
         print $Global::original_stderr
             ("parallel: Warning: Only enough available processes to run ",
              $system_limit, " jobs in parallel.\n");
+    }
+    if($Global::JobQueue->empty()) {
+	$system_limit ||= 1;
     }
     # Cleanup: Close the files
     for (values %fh) { close $_ }
