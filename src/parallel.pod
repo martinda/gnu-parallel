@@ -73,7 +73,7 @@ alias or a function will not work (see why
 http://www.perlmonks.org/index.pl?node_id=484296).
 
 
-=item B<{}> (beta testing)
+=item B<{}>
 
 Input line. This replacement string will be replaced by a full line
 read from the input source. The input source is normally stdin
@@ -86,7 +86,7 @@ If the command line contains no replacement strings then B<{}> will be
 appended to the command line.
 
 
-=item B<{.}> (beta testing)
+=item B<{.}>
 
 Input line without extension. This replacement string will be replaced
 by the input with the extension removed. If the input line contains
@@ -102,7 +102,7 @@ The replacement string B<{.}> can be changed with B<--er>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/}> (beta testing)
+=item B<{/}>
 
 Basename of input line. This replacement string will be replaced by
 the input with the directory part removed.
@@ -113,7 +113,7 @@ B<--basenamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{//}> (beta testing)
+=item B<{//}>
 
 Dirname of input line. This replacement string will be replaced by the
 dir of the input line. See B<dirname>(1).
@@ -124,7 +124,7 @@ B<--dirnamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/.}> (beta testing)
+=item B<{/.}>
 
 Basename of input line without extension. This replacement string will
 be replaced by the input with the directory and extension part
@@ -136,7 +136,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}> (beta testing)
+=item B<{#}>
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -147,7 +147,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>B<}> (beta testing)
+=item B<{>I<n>B<}>
 
 Argument from input source I<n> or the I<n>'th argument. This
 positional replacement string will be replaced by the input from input
@@ -157,7 +157,7 @@ argument (when used with B<-N>).
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>.B<}> (beta testing)
+=item B<{>I<n>.B<}>
 
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
@@ -170,7 +170,7 @@ extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}> (beta testing)
+=item B<{>I<n>/B<}>
 
 Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.
@@ -183,7 +183,7 @@ directory (if any) removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}> (beta testing)
+=item B<{>I<n>/.B<}>
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -329,6 +329,11 @@ See also: B<--fg>, B<man sem>
 Implies B<--semaphore>.
 
 
+=item B<--bibtex>
+
+Print the BibTeX entry for GNU B<parallel>.
+
+
 =item B<--block> I<size>
 
 =item B<--block-size> I<size>
@@ -429,7 +434,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--eta>
+=item B<--eta> (alpha testing)
 
 Show the estimated number of seconds before finishing. This forces GNU
 B<parallel> to read all jobs before starting to find the number of
@@ -643,7 +648,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m> is set.
 
 
-=item B<--load> I<max-load> (alpha testing)
+=item B<--load> I<max-load> (beta testing)
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
@@ -704,7 +709,7 @@ This is useful for scripts that depend on features only available from
 a certain version of GNU B<parallel>.
 
 
-=item B<--nonall> (alpha testing)
+=item B<--nonall> (beta testing)
 
 B<--onall> with no arguments. Run the command on all computers given
 with B<--sshlogin> but take no arguments. GNU B<parallel> will log
@@ -715,7 +720,7 @@ This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
 
-=item B<--onall> (alpha testing)
+=item B<--onall> (beta testing)
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
@@ -855,9 +860,9 @@ from the terminal.  Only run the command line if the response starts
 with 'y' or 'Y'.  Implies B<-t>.
 
 
-=item B<--profile> I<profilename>
+=item B<--profile> I<profilename> (alpha testing)
 
-=item B<-J> I<profilename>
+=item B<-J> I<profilename> (alpha testing)
 
 Use profile I<profilename> for options. This is useful if you want to
 have multiple profiles. You could have one profile for running jobs in
@@ -1097,9 +1102,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename>
+=item B<--sshloginfile> I<filename> (alpha testing)
 
-=item B<--slf> I<filename>
+=item B<--slf> I<filename> (alpha testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1178,7 +1183,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<sec> (alpha testing)
+=item B<--timeout> I<sec> (beta testing)
 
 Time out for command. If the command runs for longer than I<sec>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
