@@ -3,12 +3,18 @@
 ### Test of --eta with no jobs
 
 Computers / CPU cores / Max jobs to run
-1:local / 2 / 0
+1:local / 2 / 1
 
 ### Test of --progress
 16
 ### Test of --progress with no jobs
 
 Computers / CPU cores / Max jobs to run
-1:local / 2 / 0
+1:local / 2 / 1
+
+### bug #34422: parallel -X --eta crashes with div by zero
+1 2
+
+Computers / CPU cores / Max jobs to run
+1:local / 2 / 1
 

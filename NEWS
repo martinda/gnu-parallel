@@ -1,3 +1,45 @@
+20111022
+
+* --tag prepends lines with the argument(s). If used with --(n)onall
+  the line will be prepended with the sshlogin instead.
+
+* --shellquote does not run the command but quotes it using \'s.
+  Useful for making quoted composed commands.
+
+* --profile can now be repeated merging multiple profiles.
+
+* --bibtex now gives the BibTeX entry.
+  Thanks to Aleksandr Levchuk for testing.
+
+* Makefile for simple .deb package.
+  cd packager/debian; make
+
+* sql: --list-databases lists the databases.
+
+* GNU Parallel officially in Fedora 16
+  http://www.spinics.net/lists/fedora-package-announce/msg67130.html
+
+* Blog post on recompression FLAC audio.
+  http://blog.oxplot.com/2011/08/reflac-flac-cleanser.html
+
+* The most complex use of ::: I a seen so far.
+  http://agentzlerich.blogspot.com/2011/09/following-up-on-previous-failures-ive.html
+
+* Example of using GNU Parallel with sudo.
+  http://loopkid.net/articles/2011/10/07/recursive-chmod-and-chown-on-files
+
+* Use wget and gnu parallel to download mp3s at rocket speed.
+  http://sdbrain.posterous.com/use-wget-and-gnu-parallel-to-download-mp3s-at
+
+* First CV referring to GNU Parallel.
+  http://www.peopleperhour.com/freelancers/stephen_/internet_researcher_and_protocol_develop/140602
+
+* Cartwright labs usage of GNU Parallel.
+  http://cartwrightlab.wikispaces.com/The+Most+Bang+for+Your+Buck
+
+* Bug fixes and man page updates.
+
+
 20110822
 
 * --timeout implemented so that slow commands can be killed
