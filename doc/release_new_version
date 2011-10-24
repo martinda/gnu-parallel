@@ -152,8 +152,11 @@ https://savannah.gnu.org/news/?group=parallel
 # https://support.twitter.com/entries/15364-about-twitter-limits-update-api-dm-and-following
 # says 250 direct msg per day = 86400/250 = sleep 345
 cat twitters | grep -iv removed |
-  parallel -j1 sleep 354\; echo @{} You have earlier shown interest in GNU Parallel. \
-A new version is out: http://nd.gd/2j '|' ttytter
+  parallel -j1 sleep 354\; echo @{} You have shown interest in GNU Parallel. \
+  New version: http://nd.gd/2j This is the last message: Follow @GnuParallel \
+ '|' ttytter
+
+
 
 == Send announce ==
 
@@ -166,7 +169,7 @@ https://lists.gnu.org/mailman/admindb/parallel
 <<<<<
 from:tange@gnu.org
 to:parallel@gnu.org, bug-parallel@gnu.org, info-gnu@gnu.org, bug-directory@gnu.org
-cc:Peter Simons <simons@cryp.to>, Sandro Cazzaniga <kharec@mandriva.org>,
+cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Tim Cuthbertson <tim3d.junk@gmail.com>, Ludovic Courtès
    <ludo@gnu.org>, Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin
    <pnzhdin@gmail.com>, Phil Sung <psung@alum.mit.edu>, Michael
