@@ -33,6 +33,11 @@ use strict;
 
 $::oodebug=0;
 $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
+if(not $ENV{SHELL}) {
+    # $ENV{SHELL} is sometimes not set on Mac OS X
+    print STDERR ("parallel: Warning: \$SHELL not set. Using /bin/sh\n");
+    $ENV{SHELL} = "/bin/sh";
+}
 %Global::original_sig = %SIG;
 $SIG{TERM} = sub {}; # Dummy until jobs really start
 open $Global::original_stderr, ">&STDERR" or ::die_bug("Can't dup STDERR: $!");
