@@ -4914,6 +4914,14 @@ sub lock {
     chmod 0666, $self->{'lockfile'}; # assuming you want it a+rw
     $Global::use{"Fcntl"} ||= eval "use Fcntl qw(:DEFAULT :flock);";
     while(not flock $self->{'lockfh'}, LOCK_EX()|LOCK_NB()) {
+	if ($! =~ m/Function not implemented/) {
+            print $Global::original_stderr
+		("parallel: Warning: flock: $!");
+	    print "parallel: Will wait for a random while\n";
+	    ::usleep(rand(5000));
+	    last;
+	}
+
 	::debug("Cannot lock $self->{'lockfile'}");
 	# TODO if timeout: last
 	$sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
