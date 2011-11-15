@@ -18,21 +18,22 @@ niceload.1: niceload.pod Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
 		--section=1 $(srcdir)/niceload.pod > $(srcdir)/niceload.1
 
-parallel.html: parallel Makefile sem
-	./sem --fg --id pod2html pod2html $(srcdir)/parallel.pod > $(srcdir)/parallel.html
-	./sem --fg --id pod2html rm -f $(srcdir)/pod2htm*
+parallel.html: parallel.pod Makefile
+	pod2html $(srcdir)/parallel.pod > $(srcdir)/parallel.html
+	rm -f $(srcdir)/pod2htm*
 
-sem.html: sem.pod Makefile sem
-	./sem --fg --id pod2html pod2html $(srcdir)/sem.pod > $(srcdir)/sem.html
-	./sem --fg --id pod2html rm -f $(srcdir)/pod2htm*
+# Depending on parallel.html to avoid pod2html race condition
+sem.html: sem.pod Makefile parallel.html
+	pod2html $(srcdir)/sem.pod > $(srcdir)/sem.html
+	rm -f $(srcdir)/pod2htm*
 
-sql.html: sql Makefile sem
-	./sem --fg --id pod2html pod2html $(srcdir)/sql > $(srcdir)/sql.html
-	./sem --fg --id pod2html rm -f $(srcdir)/pod2htm*
+sql.html: sql Makefile sem.html
+	pod2html $(srcdir)/sql > $(srcdir)/sql.html
+	rm -f $(srcdir)/pod2htm*
 
-niceload.html: niceload.pod Makefile sem
-	./sem --fg --id pod2html pod2html $(srcdir)/niceload.pod > $(srcdir)/niceload.html
-	./sem --fg --id pod2html rm -f $(srcdir)/pod2htm*
+niceload.html: niceload.pod Makefile sql.html
+	pod2html $(srcdir)/niceload.pod > $(srcdir)/niceload.html
+	rm -f $(srcdir)/pod2htm*
 
 sem: parallel
 	ln -fs parallel sem
