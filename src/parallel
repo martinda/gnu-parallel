@@ -502,7 +502,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20111022;
+    $Global::version = 20111115;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3829,7 +3829,7 @@ sub len {
 	# Worse than worst case: every char needs to be quoted with \
 	$len *= 2;
     }
-    if($::opt_nice) {
+    if($::opt_shellquote) {
 	# Pessimistic length if --shellquote is set
 	# Worse than worst case: every char needs to be quoted with \ twice
 	$len *= 4;
@@ -3923,10 +3923,11 @@ sub replaced {
 	    }
 	}
 	if($::opt_nice) {
-	    # Prepend nice -n19 bash -c
+	    # Prepend nice -n19 $SHELL -c
 	    # and quote
-	    $self->{'replaced'} = "nice -n" . $::opt_nice
-		. " bash -c " . ::shell_quote_scalar($self->{'replaced'});
+	    $self->{'replaced'} = nice() ." -n" . $::opt_nice . " "
+		. $ENV{SHELL}." -c "
+		. ::shell_quote_scalar($self->{'replaced'});
 	}
 	if($::opt_shellquote) {
 	    # Prepend echo
@@ -3941,6 +3942,22 @@ sub replaced {
 		    . " computed=" . ($self->len()));
     }
     return $self->{'replaced'};
+}
+
+sub nice {
+    # Returns:
+    #   path to nice
+    # Needed because tcsh's built-in nice does not support 'nice -n19'
+    if(not $Global::path_to_nice) {
+	$Global::path_to_nice = "nice";
+	for my $n ((split/:/, $ENV{'PATH'}), "/bin", "/usr/bin") {
+	    if(-x $n."/nice") {
+		$Global::path_to_nice = $n."/nice";
+		last;
+	    }
+	}
+    }
+    return $Global::path_to_nice;
 }
 
 sub replace_placeholders {

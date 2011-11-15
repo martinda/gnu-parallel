@@ -13,3 +13,6 @@ Chars per line: 116300
 ### Bug before 2009-08-26 causing regexp compile error or infinite loop
 'a' 
 'a'
+### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL
+tcsh 1
+tcsh 2

@@ -144,17 +144,17 @@ http://nd.gd/2j Watch the intro video http://nd.gd/0s
 
 https://savannah.gnu.org/news/?group=parallel
 
-
-# Only 350 requests per hour: 1 tweet = 3 requests
-# 119 tweets/hour = sleep 30 per tweet (40 to be safe)
-# The above is not enough.
-# Went over the limit at number 132 (sleep 40)
-# https://support.twitter.com/entries/15364-about-twitter-limits-update-api-dm-and-following
-# says 250 direct msg per day = 86400/250 = sleep 345
-cat twitters | grep -iv removed |
-  parallel -j1 sleep 354\; echo @{} You have shown interest in GNU Parallel. \
-  New version: http://nd.gd/2j This is the last message: Follow @GnuParallel \
- '|' ttytter
+# Obsolete: Now use @GnuParallel
+# # Only 350 requests per hour: 1 tweet = 3 requests
+# # 119 tweets/hour = sleep 30 per tweet (40 to be safe)
+# # The above is not enough.
+# # Went over the limit at number 132 (sleep 40)
+# # https://support.twitter.com/entries/15364-about-twitter-limits-update-api-dm-and-following
+# # says 250 direct msg per day = 86400/250 = sleep 345
+# cat twitters | grep -iv removed |
+#   parallel -j1 sleep 354\; echo @{} You have shown interest in GNU Parallel. \
+#   New version: http://nd.gd/2j This is the last message: Follow @GnuParallel \
+#  '|' ttytter
 
 
 
@@ -182,49 +182,33 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>, Jesse Alama
    <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20111022 ('Steve Ritchie') released
+Subject: GNU Parallel 20111122 ('Silvio') released
 
-GNU Parallel 20111022 ('Steve Ritchie') has been released. It is
+GNU Parallel 20111122 ('Silvio') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* --tag prepends lines with the argument(s). If used with --(n)onall
-  the line will be prepended with the sshlogin instead.
+* GNU Parallel package for Fedora.
+  https://admin.fedoraproject.org/pkgdb/acls/name/parallel
 
-* --shellquote does not run the command but quotes it using \'s.
-  Useful for making quoted composed commands.
+* GNU Parallel is now part of ppbs.
+  http://physiology.med.cornell.edu/faculty/mason/lab/ppbs/introduction/introduction.html
 
-* --profile can now be repeated merging multiple profiles.
+* Blog post in Polish.
+  http://blog.tiger.com.pl/2011/01/05/gnu-parallel/
 
-* --bibtex now gives the BibTeX entry.
-  Thanks to Aleksandr Levchuk for testing.
+* Blog post on using GNU Parallel of Mac OS X.
+  http://www.0xcb0.com/2011/10/19/running-parallel-bash-tasks-on-os-x/
 
-* Makefile for simple .deb package.
-  cd packager/debian; make
+* Blog post in English about using zip with GNU Parallel.
+  http://nuclear-imaging.info/site_content/2011/05/11/gnu-parallel/
 
-* sql: --list-databases lists the databases.
+* Blog post in English by researcher.
+  http://zandyware.wordpress.com/2011/10/15/gnu-parallell-make-best-use-of-your-multicore-computer/
 
-* GNU Parallel officially in Fedora 16
-  http://www.spinics.net/lists/fedora-package-announce/msg67130.html
-
-* Blog post on recompression FLAC audio.
-  http://blog.oxplot.com/2011/08/reflac-flac-cleanser.html
-
-* The most complex use of ::: I a seen so far.
-  http://agentzlerich.blogspot.com/2011/09/following-up-on-previous-failures-ive.html
-
-* Example of using GNU Parallel with sudo.
-  http://loopkid.net/articles/2011/10/07/recursive-chmod-and-chown-on-files
-
-* Use wget and gnu parallel to download mp3s at rocket speed.
-  http://sdbrain.posterous.com/use-wget-and-gnu-parallel-to-download-mp3s-at
-
-* First CV referring to GNU Parallel.
-  http://www.peopleperhour.com/freelancers/stephen_/internet_researcher_and_protocol_develop/140602
-
-* Cartwright labs usage of GNU Parallel.
-  http://cartwrightlab.wikispaces.com/The+Most+Bang+for+Your+Buck
+* Blog entry in Chinese.
+  http://blog.csdn.net/tossense/article/details/6889026
 
 * Bug fixes and man page updates.
 
