@@ -1,17 +1,14 @@
-Fejler:
-
-parallel -qv echo {#} {1} {1.} {} {.} {/} {//} ::: a.b/c.d
-parallel -Xqv echo {#} a{1}{1.} {} ::: a.b/c.d
-parallel -Xqv echo {#}a{1}{1.} {} ::: a.b/c.d
-seq 2 | parallel -v  echo {2} ::: c :::: - 
-parallel echo {2} ::: a ::: b
-
+--timeout auto: If a jobs takes > 3*average runtime then kill it. Only after job 3.
 
 niceload seeks last column:
 
 iostat -x 1 2
 
 niceload --start-condition
+
+niceload should prioritize jobs and only unsuspend the highest
+priority job. If the running job with lowest pri has run for 1 sec:
+Consider unsuspending next pri job.
 
 
 Til QUOTING:
@@ -166,8 +163,11 @@ Dont start:
 * seek
 
 
+= Videos =
 
-# GNU Parallel 20111022 - The Steve Ritchie release
+== Ideas ==
+
+# GNU Parallel 20111122 - The Silvio release
 
 --tag
 -Jt (e.g. --tag --nonall)
@@ -178,7 +178,12 @@ Dont start:
 
 ./src/parallel --sshloginfile ~/.parallel/remote --slf ~/.parallel/local --nonall hostname
 
+sem
 
+single file installation
+
+
+== Video: GNU Parallel 20110522 - The Pakistan Release ==
 
 # GNU Parallel 20110522 - The Pakistan Release
 

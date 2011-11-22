@@ -187,13 +187,25 @@ Subject: GNU Parallel 20111122 ('Silvio') released
 GNU Parallel 20111122 ('Silvio') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
+This is a bugfix release with no new features. Probably a good release
+for stable long-term use.
+
 New in this release:
 
 * GNU Parallel package for Fedora.
   https://admin.fedoraproject.org/pkgdb/acls/name/parallel
 
-* GNU Parallel is now part of ppbs.
-  http://physiology.med.cornell.edu/faculty/mason/lab/ppbs/introduction/introduction.html
+* Using GNU Parallel with Mozilla cross referencing.
+  https://blog.mozilla.com/it/2011/11/15/mxr-improvements/
+
+* Neat flash presentation of GNU Parallel.
+  http://prezi.com/0nq74b2elgtx/about-gnu-parallel/
+
+* How to create tar files of dirs in parallel.
+  https://joneslee85.wordpress.com/2011/11/22/shell-tips-how-to-recursively-archive-many-folders/
+
+* Article in Admin Network&Security by Ben Martin.
+  http://www.admin-magazine.com/HPC/Articles/GNU-Parallel
 
 * Blog post in Polish.
   http://blog.tiger.com.pl/2011/01/05/gnu-parallel/
@@ -209,6 +221,15 @@ New in this release:
 
 * Blog entry in Chinese.
   http://blog.csdn.net/tossense/article/details/6889026
+
+* Blog entry in Japanese on managing many servers.
+  http://hiroakis.com/blog/2011/11/13/gnu-parallel/
+
+* GNU Parallel is now part of ppbs.
+  http://physiology.med.cornell.edu/faculty/mason/lab/ppbs/introduction/introduction.html
+
+* How to use GNU Parallel with MCX.
+  http://mcx.sourceforge.net/cgi-bin/index.cgi?MMC/Doc/MMCCluster
 
 * Bug fixes and man page updates.
 

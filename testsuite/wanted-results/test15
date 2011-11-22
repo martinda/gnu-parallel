@@ -10,6 +10,7 @@ sleep 0.1; echo opt--interactive 2 ?...n
 sleep 0.1; echo opt--interactive 3 ?...y
 opt--interactive 1
 opt--interactive 3
+
 ### Test -L -l and --max-lines
 a_b
 c
