@@ -10,7 +10,6 @@ sleep 0.1; echo opt--interactive 2 ?...n
 sleep 0.1; echo opt--interactive 3 ?...y
 opt--interactive 1
 opt--interactive 3
-
 ### Test -L -l and --max-lines
 a_b
 c
@@ -648,10 +647,10 @@ replace curlies
 args on cmdline
 args on cmdline
 ### Test --nice locally
-nice -n1 bash -c PAR=a\ bash\ -c\ \"echo\ \ \\\$PAR\ b\"
+/usr/bin/nice -n1 /bin/bash -c PAR=a\ bash\ -c\ \"echo\ \ \\\$PAR\ b\"
 a b
 ### Test --nice remote
-ssh one-server 'eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\; setenv PARALLEL_PID '$PARALLEL_PID' || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;' nice\ -n1\ bash\ -c\ PAR=a\\\ bash\\\ -c\\\ \\\"echo\\\ \\\ \\\\\\\$PAR\\\ b\\\";
+ssh one-server 'eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\; setenv PARALLEL_PID '$PARALLEL_PID' || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;' /usr/bin/nice\ -n1\ /bin/bash\ -c\ PAR=a\\\ bash\\\ -c\\\ \\\"echo\\\ \\\ \\\\\\\$PAR\\\ b\\\";
 a b
 ### Test distribute arguments at EOF to 2 jobslots
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
