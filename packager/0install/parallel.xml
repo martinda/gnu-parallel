@@ -34,10 +34,6 @@ xargs or cat | sh.</description>
 		<implementation id="sha1new=3bd5646ca0c38217df8278433803b44e33272954" released="2010-06-24" version="20100620">
 			<archive extract="parallel-20100620" href="http://ftp.gnu.org/gnu/parallel/parallel-20100620.tar.bz2" size="88834" type="application/x-bzip-compressed-tar"/>
 		</implementation>
-		<implementation id="sha1new=f18734657df7d7543cc6d31db47f486e00936a36" released="2010-08-22" version="20100822">
-    <manifest-digest sha256="0edcd1297fdb57880b3771f4a058b499adb90f8b1d3e4c78439b74eba2156ef8"/>
-    <archive extract="parallel-20100822" href="http://ftp.gnu.org/gnu/parallel/parallel-20100822.tar.bz2" size="112809"/>
-  </implementation>
 		<implementation id="sha1new=417da2a305e52408477fd477859dacea97f229c8" released="2010-09-06" version="20100906">
     <manifest-digest sha256="792280779fbba10bac90744e118789d98213f953a3752b111597e343e317b485"/>
     <archive extract="parallel-20100906" href="http://ftp.gnu.org/gnu/parallel/parallel-20100906.tar.bz2" size="122492"/>
@@ -94,10 +90,14 @@ xargs or cat | sh.</description>
     <manifest-digest sha256="a93dd93a10b0ca089730063273e8042d5a211072b31038ba1d69261fdb3e1586"/>
     <archive extract="parallel-20111022" href="http://ftp.gnu.org/gnu/parallel/parallel-20111022.tar.bz2" size="182664"/>
   </implementation>
+		<implementation id="sha1new=c6b576580bba13b701d6dc8e61d19d08006845c6" released="2011-11-23" version="20111122">
+    <manifest-digest sha256="7dfb909955ab1edd9674e712002383db09bf1623a9501370b08983d221bb3d02"/>
+    <archive extract="parallel-20111122" href="http://ftp.gnu.org/gnu/parallel/parallel-20111122.tar.bz2" size="183684"/>
+  </implementation>
 	</group>
 </interface>
 <!-- Base64 Signature
-iEYEABECAAYFAk6n71EACgkQ/lhgK1iJTtKFPgCfZTNwTohJNeHzHbScRMC8/JUl3KMAoJRi/ddU
-QSN+pkA4IXtEvaZt5Gf9
+iEYEABECAAYFAk7MsSYACgkQ/lhgK1iJTtIZrwCaA4JYtNuCHEUcwXbWx8NiHs4bM0QAnRiGwEJ7
+DpZtez96UK0x/o13vHUb
 
 -->
