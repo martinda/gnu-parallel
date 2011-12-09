@@ -502,7 +502,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20111122;
+    $Global::version = 20111209;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1691,6 +1691,7 @@ sub usage {
 	 "{3} {3.} {3/} {3/.}  Positional replacement strings",
 	 "",
 	 "-S sshlogin    Example: foo\@server.example.com",
+	 "--slf ..       Use ~/.parallel/sshloginfile as the list of sshlogins",
 	 "--trc {}.bar   Shorthand for --transfer --return {}.bar --cleanup",
 	 "--onall        Run the given command with argument on all sshlogins",
 	 "--nonall       Run the given command with no arguments on all sshlogins",
@@ -3033,19 +3034,44 @@ sub timedout {
 sub kill {
     # kill the jobs
     my $self = shift;
-    my $pid = $self->pid();
+    my @family_pids = $self->family_pids();
+    # Record this jobs as failed
+    $self->set_exitstatus(1);
+    # Send two TERMs to give time to clean up
     for my $signal ("TERM", "TERM", "KILL") {
-	# Send two TERMs to give time to clean up
-	if(kill 0, $pid) {
-	    # The job still running
-	    kill $signal, $pid;
-	    if($signal eq "TERM") { ::usleep(200); }
-	} else {
-	    # The job is already finished
-	    last;
+	my $alive = 0;
+	for my $pid (@family_pids) {
+	    if(kill 0, $pid) {
+		# The job still running
+		kill $signal, $pid;
+		$alive = 1;
+	    }
 	}
+	# Wait 200 ms between TERMs - but only if any pids are alive
+	if($signal eq "TERM" and $alive) { ::usleep(200); }
     }
 }
+
+sub family_pids {
+    # Find the pids with this->pid as (grand)*parent
+    # TODO test this on different OS as 'ps' is known to be different
+    my $self = shift;
+    my $pid = $self->pid();
+    my $script = q{
+	family_pids() {
+	    for CHILDPID in `ps --ppid "$@" -o pid --no-headers`; do
+                family_pids $CHILDPID &
+            done
+	    echo "$@"
+	}
+    } .
+    "family_pids $pid; wait";
+    my @pids = qx{$script};
+    chomp(@pids);
+    return ($pid,@pids);
+}
+
+
 sub failed {
     # return number of times failed for this $sshlogin
     my $self = shift;
@@ -3584,7 +3610,14 @@ sub exitstatus {
 sub set_exitstatus {
     my $self = shift;
     my $exitstatus = shift;
-    $self->{'exitstatus'} = $exitstatus;
+    if($exitstatus) {
+	# Overwrite status if non-zero
+	$self->{'exitstatus'} = $exitstatus;
+    } else {
+	# Set status but do not overwrite
+	# Status may have been set by --timeout
+	$self->{'exitstatus'} ||= $exitstatus;
+    }
 }
 
 sub exitsignal {

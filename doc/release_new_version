@@ -140,7 +140,7 @@ http://freshmeat.net/projects/parallel/releases/new
 == Update Twitter ==
 
 New version of #GNU Parallel released. See what is new in this release
-http://nd.gd/2j Watch the intro video http://nd.gd/0s
+http://nd.gd/2j Watch the intro video http://nd.gd/039
 
 https://savannah.gnu.org/news/?group=parallel
 
@@ -182,9 +182,9 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>, Jesse Alama
    <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20111122 ('Silvio') released
+Subject: GNU Parallel 20111222 ('?') released
 
-GNU Parallel 20111122 ('Silvio') has been released. It is
+GNU Parallel 20111122 ('?') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 This is a bugfix release with no new features. Probably a good release
@@ -192,44 +192,8 @@ for stable long-term use.
 
 New in this release:
 
-* GNU Parallel package for Fedora.
-  https://admin.fedoraproject.org/pkgdb/acls/name/parallel
-
-* Using GNU Parallel with Mozilla cross referencing.
-  https://blog.mozilla.com/it/2011/11/15/mxr-improvements/
-
-* Neat flash presentation of GNU Parallel.
-  http://prezi.com/0nq74b2elgtx/about-gnu-parallel/
-
-* How to create tar files of dirs in parallel.
-  https://joneslee85.wordpress.com/2011/11/22/shell-tips-how-to-recursively-archive-many-folders/
-
-* Article in Admin Network&Security by Ben Martin.
-  http://www.admin-magazine.com/HPC/Articles/GNU-Parallel
-
-* Blog post in Polish.
-  http://blog.tiger.com.pl/2011/01/05/gnu-parallel/
-
-* Blog post on using GNU Parallel of Mac OS X.
-  http://www.0xcb0.com/2011/10/19/running-parallel-bash-tasks-on-os-x/
-
-* Blog post in English about using zip with GNU Parallel.
-  http://nuclear-imaging.info/site_content/2011/05/11/gnu-parallel/
-
-* Blog post in English by researcher.
-  http://zandyware.wordpress.com/2011/10/15/gnu-parallell-make-best-use-of-your-multicore-computer/
-
-* Blog entry in Chinese.
-  http://blog.csdn.net/tossense/article/details/6889026
-
-* Blog entry in Japanese on managing many servers.
-  http://hiroakis.com/blog/2011/11/13/gnu-parallel/
-
-* GNU Parallel is now part of ppbs.
-  http://physiology.med.cornell.edu/faculty/mason/lab/ppbs/introduction/introduction.html
-
-* How to use GNU Parallel with MCX.
-  http://mcx.sourceforge.net/cgi-bin/index.cgi?MMC/Doc/MMCCluster
+* Interview in Hacker Public Radio.
+  http://hackerpublicradio.org/eps.php?id=0860
 
 * Bug fixes and man page updates.
 

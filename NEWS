@@ -241,7 +241,7 @@
 
 20110422
 
-* {#} now works an alias for $PARALLEL_PID.
+* {#} now works as an alias for $PARALLEL_PID.
 
 * --eta now estimates way more accurately.
 

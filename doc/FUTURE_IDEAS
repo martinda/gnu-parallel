@@ -1,3 +1,12 @@
+Luk filen ved EOF - lad være med bare at læse videre.
+
+> /tmp/ged; tail -f /tmp/ged| xargs -n1 -E eof & sleep 1; echo echo a >>/tmp/ged; echo eof >>/tmp/ged; seq 10 >>/tmp/ged; wait
+
+> /tmp/ged; tail -f /tmp/ged| parallel -n1 -E eof & sleep 1; echo echo a >>/tmp/ged; echo eof >>/tmp/ged; seq 10 >>/tmp/ged; wait
+
+
+Fhqwhgads som 20120122 pga 10 års jubliæum.
+
 --timeout auto: If a jobs takes > 3*average runtime then kill it. Only after job 3.
 
 niceload seeks last column:
@@ -181,6 +190,16 @@ Dont start:
 sem
 
 single file installation
+
+  ./configure --prefix=$HOME && make && make install
+
+Or if your system lacks 'make' you can simply copy src/parallel
+src/sem src/niceload src/sql to a dir in your path.
+
+wget http://git.savannah.gnu.org/cgit/parallel.git/plain/src/parallel
+
+
+
 
 
 == Video: GNU Parallel 20110522 - The Pakistan Release ==

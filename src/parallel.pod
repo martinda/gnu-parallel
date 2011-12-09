@@ -460,18 +460,13 @@ B<--gnu> takes precedence.
 
 =item B<-g> (-g will be retired 20120122)
 
-Group output.  Output from each jobs is grouped together and is only
-printed when the command is finished. stderr (standard error) first
-followed by stdout (standard output).  B<--group> is the default. Can be
-reversed with B<-u>.
-
 Group output. Output from each jobs is grouped together and is only
 printed when the command is finished. stderr (standard error) first
 followed by stdout (standard output). This takes some CPU time. In
 rare situations GNU B<parallel> takes up lots of CPU time and if it is
-acceptable that the output from different commands are mixed together,
-then disabling grouping with B<-u> can speedup GNU B<parallel> by a
-factor of 10.
+acceptable that the outputs from different commands are mixed
+together, then disabling grouping with B<-u> can speedup GNU
+B<parallel> by a factor of 10.
 
 B<--group> is the default. Can be reversed with B<-u>.
 
@@ -902,8 +897,8 @@ If B<--recstart> is given I<startstring> will be used to split at record start.
 
 If B<--recend> is given I<endstring> will be used to split at record end.
 
-If both B<--recstart> and B<--recend> are given the string
-I<startstring>I<endstring> will have to match to find a split
+If both B<--recstart> and B<--recend> are given the combined string
+I<endstring>I<startstring> will have to match to find a split
 position. This is useful if either I<startstring> or I<endstring>
 match in the middle of a record.
 
