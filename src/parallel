@@ -101,6 +101,7 @@ if($::opt_nonall or $::opt_onall) {
 	     ((defined $::opt_g) ? "-g" : ""),
 	     ((defined @::opt_v) ? "-vv" : ""),
 	     ((defined $::opt_D) ? "-D" : ""),
+	     ((defined $::opt_timeout) ? "--timeout ".$::opt_timeout : ""),
 	);
     ::debug("| parallel");
     open(PARALLEL,"| $0 $options") ||
@@ -113,6 +114,8 @@ if($::opt_nonall or $::opt_onall) {
 	    shell_quote_scalar($command)." :::: @argfiles\n";
     }
     close PARALLEL;
+    $Global::exitstatus = $? >> 8;
+    debug("--onall exitvalue ",$?);
     if(@::opt_basefile) { cleanup_basefile(); }
     unlink(@argfiles);
     wait_and_exit(min(undef_as_zero($Global::exitstatus),254));
