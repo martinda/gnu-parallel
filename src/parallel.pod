@@ -1526,6 +1526,9 @@ symlinks are empty files.
 
 B<cp -rs /the/source/dir mirror_dir; find mirror_dir -type l | parallel -m rm {} '&&' touch {}>
 
+Find the files in a list that do no exist.
+
+B<cat file_list | parallel 'if [ ! -e {} ] ; then echo {}; fi'>
 
 =head1 EXAMPLE: Removing file extension when processing files
 

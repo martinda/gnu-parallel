@@ -505,7 +505,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20111209;
+    $Global::version = 20111218;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1945,6 +1945,9 @@ sub my_dump {
             return Dumper(@dump_this);
         }
     } else {
+	# Create a dummy Data::Dump:dump as Hans Schou sometimes has
+	# it undefined
+	eval "sub Data::Dump:dump {}";
         eval "use Data::Dump qw(dump);";
         return (Data::Dump::dump(@dump_this));
     }
