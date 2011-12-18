@@ -131,7 +131,6 @@ for my $sshlogin (values %Global::host) {
     $sshlogin->max_jobs_running();
 }
 
-
 init_run_jobs();
 my $sem;
 if($Global::semaphore) {
@@ -2318,7 +2317,7 @@ sub processes_available_by_system_limit {
                 $Global::JobQueue->empty() and last;
                 ($job) = $Global::JobQueue->get();
                 push(@jobs, $job);
-            }
+	    }
         }
 	$wait_time_for_getting_args += time - $before_getting_arg;
         $system_limit++;
@@ -3292,7 +3291,7 @@ sub sshreturn {
 	$file =~ s:^\./::g; # Remove ./ if any
 	my $relpath = ($file !~ m:^/:); # Is the path relative?
 	# Use different subdirs depending on abs or rel path
-	
+
 	# Return or cleanup
 	my @cmd = ();
 	my $rsync_destdir = ($relpath ? "./" : "/");
@@ -3735,7 +3734,7 @@ sub populate {
 		::wait_and_exit(255);
 	    }
 	}
-	
+
 	if(defined $self->{'max_number_of_args'}) {
 	    if($self->number_of_args() >= $self->{'max_number_of_args'}) {
 		last;
@@ -4221,16 +4220,24 @@ sub get {
 	    );
 	$cmd_line->populate();
 	::debug("cmd_line->number_of_args ".$cmd_line->number_of_args()."\n");
-	if(not $::opt_pipe and $cmd_line->number_of_args() == 0) {
-	    # We did not get more args - maybe at EOF string?
-	    return undef;
-	} elsif($cmd_line->replaced() eq "") {
-	    # Empty command - get the next instead
-	    return $self->get();
+	if($::opt_pipe) {
+	    if($cmd_line->replaced() eq "") {
+		# Empty command - pipe requires a command
+		print STDERR "$Global::progname: --pipe must have a ".
+		    "command to pipe into (e.g. 'cat')\n";
+		::wait_and_exit(255);
+	    }
 	} else {
-	    $self->set_seq($self->seq()+1);
-	    return $cmd_line;
+	    if($cmd_line->number_of_args() == 0) {
+		# We did not get more args - maybe at EOF string?
+		return undef;
+	    } elsif($cmd_line->replaced() eq "") {
+		# Empty command - get the next instead
+		return $self->get();
+	    }
 	}
+	$self->set_seq($self->seq()+1);
+	return $cmd_line;
     }
 }
 

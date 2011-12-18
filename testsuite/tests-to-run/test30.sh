@@ -19,4 +19,7 @@ seq 2 | stdout parallel -X --eta echo
 
 echo '### --timeout on remote machines'
 parallel -j0 --timeout 3 --onall -S .. 'sleep {}; echo {}' ::: 1 6 7 ; echo $?
+
+echo '### --pipe without command'
+seq -w 10 | stdout parallel --pipe
 EOF

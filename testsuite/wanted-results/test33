@@ -12,6 +12,7 @@ cat ... | parallel --pipe [options] [command [arguments]]
 {3} {3.} {3/} {3/.}  Positional replacement strings
 
 -S sshlogin    Example: foo@server.example.com
+--slf ..       Use ~/.parallel/sshloginfile as the list of sshlogins
 --trc {}.bar   Shorthand for --transfer --return {}.bar --cleanup
 --onall        Run the given command with argument on all sshlogins
 --nonall       Run the given command with no arguments on all sshlogins
