@@ -18,7 +18,7 @@ echo '### bug #34422: parallel -X --eta crashes with div by zero'
 seq 2 | stdout parallel -X --eta echo
 
 echo '### --timeout on remote machines'
-parallel -j0 --timeout 3 --onall -S .. 'sleep {}; echo {}' ::: 1 6 7 ; echo $?
+parallel -j0 --timeout 3 --onall -S .. 'sleep {}; echo slept {}' ::: 1 8 9 ; echo jobs failed: $?
 
 echo '### --pipe without command'
 seq -w 10 | stdout parallel --pipe

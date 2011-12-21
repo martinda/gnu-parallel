@@ -19,13 +19,13 @@ B<#!/usr/bin/parallel> --shebang [options] [I<command> [arguments]]
 
 =head1 DESCRIPTION
 
-GNU B<parallel> is a shell tool for executing jobs in parallel using one
-or more computers. A job is can be a single command or a small script
-that has to be run for each of the lines in the input. The typical
-input is a list of files, a list of hosts, a list of users, a list of
-URLs, or a list of tables. A job can also be a command that reads from
-a pipe. GNU B<parallel> can then split the input and pipe it into
-commands in parallel.
+GNU B<parallel> is a shell tool for executing jobs in parallel using
+one or more computers. A job is can be a single command or a small
+script that has to be run for each of the lines in the input. The
+typical input is a list of files, a list of hosts, a list of users, a
+list of URLs, or a list of tables. A job can also be a command that
+reads from a pipe. GNU B<parallel> can then split the input into
+blocks and pipe a block into each command in parallel.
 
 If you use xargs and tee today you will find GNU B<parallel> very easy to
 use as GNU B<parallel> is written to have the same options as xargs. If
@@ -432,7 +432,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--eta> (beta testing)
+=item B<--eta>
 
 Show the estimated number of seconds before finishing. This forces GNU
 B<parallel> to read all jobs before starting to find the number of
@@ -735,9 +735,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe>
+=item B<--pipe> (alpha testing)
 
-=item B<--spreadstdin>
+=item B<--spreadstdin> (alpha testing)
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -853,9 +853,9 @@ from the terminal.  Only run the command line if the response starts
 with 'y' or 'Y'.  Implies B<-t>.
 
 
-=item B<--profile> I<profilename> (beta testing)
+=item B<--profile> I<profilename>
 
-=item B<-J> I<profilename> (beta testing)
+=item B<-J> I<profilename>
 
 Use profile I<profilename> for options. This is useful if you want to
 have multiple profiles. You could have one profile for running jobs in
@@ -1095,9 +1095,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename> (beta testing)
+=item B<--sshloginfile> I<filename>
 
-=item B<--slf> I<filename> (beta testing)
+=item B<--slf> I<filename>
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1159,7 +1159,7 @@ and it will open a tty for the job. When the job is done, the next job
 will get the tty.
 
 
-=item B<--tag> (beta testing)
+=item B<--tag>
 
 Tag lines with arguments. Each output line will be prepended with the
 arguments and TAB (\t). When combined with B<--onall> or B<--nonall>
@@ -1176,7 +1176,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<sec>
+=item B<--timeout> I<sec> (alpha testing)
 
 Time out for command. If the command runs for longer than I<sec>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms

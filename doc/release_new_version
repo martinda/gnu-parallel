@@ -4,7 +4,7 @@
 
 Update documentation:
 
-git blame
+git diff last-release-commit
 Unmodified beta since last version => production
 Unmodified alpha since last version => beta
 Modified => alpha
@@ -192,8 +192,13 @@ for stable long-term use.
 
 New in this release:
 
+* --timeout will now kill grandchildren.
+
 * Interview in Hacker Public Radio.
   http://hackerpublicradio.org/eps.php?id=0860
+
+* Blog post in Chinese.
+  http://blog.sina.com.cn/s/blog_3f7652740100y0ju.html
 
 * Bug fixes and man page updates.
 

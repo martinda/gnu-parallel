@@ -1,3 +1,16 @@
+20111222
+
+* --timeout will now kill grandchildren.
+
+* Interview in Hacker Public Radio.
+  http://hackerpublicradio.org/eps.php?id=0860
+
+* Blog post in Chinese.
+  http://blog.sina.com.cn/s/blog_3f7652740100y0ju.html
+
+* Bug fixes and man page updates.
+
+
 20111122
 
 * GNU Parallel package for Fedora.
