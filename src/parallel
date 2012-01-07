@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Copyright (C) 2007,2008,2009,2010,2011 Ole Tange and Free Software
+# Copyright (C) 2007,2008,2009,2010,2011,2012 Ole Tange and Free Software
 # Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -53,6 +53,15 @@ if($Global::max_number_of_args) {
     $number_of_args = 1;
 }
 
+my $command = "";
+if(@ARGV) {
+    if($Global::quoting) {
+	$command = shell_quote(@ARGV);
+    } else {
+	$command = join(" ", @ARGV);
+    }
+}
+
 my @fhlist;
 @fhlist = map { open_or_exit($_) } @::opt_a;
 if(not @fhlist) {
@@ -63,13 +72,19 @@ if($::opt_skip_first_line) {
     my $fh = $fhlist[0];
     <$fh>;
 }
-
-my $command = "";
-if(@ARGV) {
-    if($Global::quoting) {
-	$command = shell_quote(@ARGV);
-    } else {
-	$command = join(" ", @ARGV);
+if($::opt_header) {
+    my $fh = $fhlist[0];
+    my $line = <$fh>;
+    chomp($line);
+    # split with colsep or \t
+    # TODO should $header force $colsep = \t if undef?
+    my $delimiter = $::opt_colsep;
+    my $id = 1;
+    ::debug("Delimiter: '$delimiter'");
+    for my $s (split /$delimiter/o, $line) {
+	::debug("Colname: '$s'");
+	$command =~ s/\{$s\}/\{$id\}/g;
+	$id++;
     }
 }
 
@@ -483,6 +498,7 @@ sub options_hash {
 	 "shebang|hashbang" => \$::opt_shebang,
 	 "Y" => \$::opt_retired,
 	 "skip-first-line" => \$::opt_skip_first_line,
+	 "header" => \$::opt_header,
 	);
 }
 
@@ -512,7 +528,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20111222;
+    $Global::version = 20120107;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -583,6 +599,7 @@ sub parse_options {
     if(defined $::opt_tmpdir) { $ENV{'TMPDIR'} = $::opt_tmpdir; }
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_colsep) { $Global::trim = 'lr'; }
+    if(defined $::opt_header) { $::opt_colsep = defined $::opt_colsep ? $::opt_colsep : "\t"; }
     if(defined $::opt_trim) { $Global::trim = $::opt_trim; }
     if(defined $::opt_arg_sep) { $Global::arg_sep = $::opt_arg_sep; }
     if(defined $::opt_arg_file_sep) { $Global::arg_file_sep = $::opt_arg_file_sep; }
@@ -1788,7 +1805,7 @@ sub version {
     }
     print join("\n",
                "GNU $Global::progname $Global::version",
-               "Copyright (C) 2007,2008,2009,2010,2011 Ole Tange and Free Software Foundation, Inc.",
+               "Copyright (C) 2007,2008,2009,2010,2011,2012 Ole Tange and Free Software Foundation, Inc.",
                "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
                "This is free software: you are free to change and redistribute it.",
                "GNU $Global::progname comes with no warranty.",

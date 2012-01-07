@@ -24,6 +24,8 @@ echo '### Test --resume --joblog followed by --resume --joblog';
   parallel -j2 --resume --joblog /tmp/joblog2 sleep {} ::: 1.1 2.2 3.3 4.4; 
   cat /tmp/joblog2 | wc; 
   rm -f /tmp/joblog2;
+echo '### Test --header'; 
+  printf "a\tb\n1\t2" | parallel --header echo {b} {a}
 EOF
 
 echo '### Test --shellquote'
