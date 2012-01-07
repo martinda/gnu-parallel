@@ -5,13 +5,25 @@ cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j1
 echo '### Test --timeout'; 
   parallel -j0 -k --timeout 1 echo {}\; sleep {}\; echo {} ::: 1.1 2.2 3.3 4.4
 echo '### Test retired'; 
-  stdout parallel -B;
-  stdout parallel -g;
-  stdout parallel -H;
-  stdout parallel -T;
-  stdout parallel -U;
-  stdout parallel -W;
+  stdout parallel -B; 
+  stdout parallel -g; 
+  stdout parallel -H; 
+  stdout parallel -T; 
+  stdout parallel -U; 
+  stdout parallel -W; 
   stdout parallel -Y;
+echo '### Test --joblog followed by --resume --joblog'; 
+  rm -f /tmp/joblog; 
+  timeout -k 1 1 parallel -j2 --joblog /tmp/joblog sleep {} ::: 1.1 2.2 3.3 4.4 2>/dev/null; 
+  parallel -j2 --resume --joblog /tmp/joblog sleep {} ::: 1.1 2.2 3.3 4.4; 
+  cat /tmp/joblog | wc; 
+  rm -f /tmp/joblog;
+echo '### Test --resume --joblog followed by --resume --joblog'; 
+  rm -f /tmp/joblog2; 
+  timeout -k 1 1 parallel -j2 --resume --joblog /tmp/joblog2 sleep {} ::: 1.1 2.2 3.3 4.4 2>/dev/null; 
+  parallel -j2 --resume --joblog /tmp/joblog2 sleep {} ::: 1.1 2.2 3.3 4.4; 
+  cat /tmp/joblog2 | wc; 
+  rm -f /tmp/joblog2;
 EOF
 
 echo '### Test --shellquote'

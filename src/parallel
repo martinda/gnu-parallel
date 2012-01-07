@@ -386,6 +386,7 @@ sub options_hash {
 	 "X" => \$::opt_X,
 	 "v" => \@::opt_v,
 	 "joblog=s" => \$::opt_joblog,
+	 "resume" => \$::opt_resume,
 	 "silent" => \$::opt_silent,
 	 "keep-order|keeporder|k" => \$::opt_k,
 	 "group" => \$::opt_group,
@@ -536,6 +537,7 @@ sub parse_options {
     $Global::arg_file_sep = "::::";
     $Global::trim = 'n';
     $Global::max_jobs_running = 0;
+    $Global::job_already_run = '';
 
     @ARGV=read_options();
 
@@ -727,19 +729,55 @@ sub parse_options {
     if(not defined $::opt_P) {
         $::opt_P = "100%";
     }
+    open_joblog();
+}
+
+sub open_joblog {
+    my $append = 0;
+    if($::opt_resume and not $::opt_joblog) {
+        print STDERR ("$Global::progname: --resume requires --joblog\n");
+	::wait_and_exit(255);
+    }
     if($::opt_joblog) {
-        if(not open($Global::joblog,">$::opt_joblog")) {
-            print STDERR ("$Global::progname: Cannot write to ",
-			  "--joblog $::opt_joblog\n");
-            ::wait_and_exit(255);
-        } else {
-            print $Global::joblog
-                join("\t", "Seq", "Host", "Starttime", "Runtime",
-                     "Send", "Receive", "Exitval", "Signal", "Command"
-                ). "\n";
-        }
+	if($::opt_resume) {
+	    if(open(JOBLOG, $::opt_joblog)) {
+		# Read the joblog
+		$append = <JOBLOG>; # If there is a header: Open as append later
+		while(<JOBLOG>) {
+		    if(/^(\d+)/) {
+			# This is 30% faster than set_job_already_run($1);
+			vec($Global::job_already_run,$1,1) = 1;
+		    } else {
+			print STDERR ("$Global::progname: Format of '$::opt_joblog' is wrong\n");
+			::wait_and_exit(255);
+		    }
+		}
+		close JOBLOG;
+	    }
+	}
+	if($append) {
+	    # Append to joblog
+	    if(not open($Global::joblog,">>$::opt_joblog")) {
+		print STDERR ("$Global::progname: Cannot append to ",
+			      "--joblog $::opt_joblog\n");
+		::wait_and_exit(255);
+	    }
+	} else {
+	    # Overwrite the joblog
+	    if(not open($Global::joblog,">$::opt_joblog")) {
+		print STDERR ("$Global::progname: Cannot write to ",
+			      "--joblog $::opt_joblog\n");
+		::wait_and_exit(255);
+	    } else {
+		print $Global::joblog
+		    join("\t", "Seq", "Host", "Starttime", "Runtime",
+			 "Send", "Receive", "Exitval", "Signal", "Command"
+		    ). "\n";
+	    }
+	}
     }
 }
+
 
 sub read_options {
     # Read options from command line, profile and $PARALLEL
@@ -1079,13 +1117,16 @@ sub start_another_job {
 	    debug("Not starting: JobQueue empty\n");
 	    return 0;
         } else {
-            my $job = get_job_with_sshlogin($sshlogin);
-            if(not defined $job) {
-                # No command available for that sshlogin
-		debug("Not starting: no jobs available for ".$sshlogin->string()."\n");
-                return 0;
-            }
-            debug("Command to run on '".$job->sshlogin()."': '".$job->replaced()."'\n");
+            my $job;
+            do {
+		$job = get_job_with_sshlogin($sshlogin);
+		if(not defined $job) {
+		    # No command available for that sshlogin
+		    debug("Not starting: no jobs available for ".$sshlogin->string()."\n");
+		    return 0;
+		}
+	    } while ($job->is_already_in_joblog());
+	    debug("Command to run on '".$job->sshlogin()."': '".$job->replaced()."'\n");
             if($job->start()) {
                 $Global::running{$job->pid()} = $job;
                 debug("Started as seq ".$job->seq(),"\n");
@@ -3496,6 +3537,16 @@ sub start {
     return $job;
 }
 
+sub is_already_in_joblog {
+    my $job = shift;
+    return vec($Global::job_already_run,$job->seq(),1);
+}
+
+sub set_job_in_joblog {
+    my $job = shift;
+    vec($Global::job_already_run,$job->seq(),1) = 1;
+}
+
 sub should_be_retried {
     # Should this job be retried?
     # Returns
@@ -3551,6 +3602,7 @@ sub print {
 		 $self->exitstatus(), $self->exitsignal(), $cmd
 		 ). "\n";
 	flush $Global::joblog;
+	$self->set_job_in_joblog();
     }
 
     if(($::opt_dryrun or $Global::verbose) and $Global::grouped) {

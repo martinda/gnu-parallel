@@ -19,8 +19,8 @@ Computers / CPU cores / Max jobs to run
 1:local / 2 / 1
 
 ### --timeout on remote machines
-1
-1
-2
+slept 1
+slept 1
+jobs failed: 2
 ### --pipe without command
 parallel: --pipe must have a command to pipe into (e.g. 'cat')

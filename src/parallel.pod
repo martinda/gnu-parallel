@@ -525,6 +525,8 @@ To convert the times into ISO-8601 strict do:
 
 B<perl -a -F"\t" -ne 'chomp($F[2]=`date -d \@$F[2] +%FT%T`); print join("\t",@F)'>
 
+See also B<--resume>.
+
 
 =item B<--jobs> I<N>
 
@@ -921,6 +923,17 @@ Remove the text matched by B<--recstart> and B<--recend> before piping
 it to the command.
 
 Only used with B<--pipe>.
+
+
+=item B<--resume>
+
+Resumes from the last unfinished job. By reading B<--joblog> GNU
+B<parallel> will figure out the last unfinished job and continue from
+there. As GNU B<parallel> only looks at the sequence numbers in
+B<--joblog> then the input, the command, and B<--joblog> all have to
+remain unchanged; otherwise GNU B<parallel> may run wrong commands.
+
+See also: B<--joblog>.
 
 
 =item B<--retries> I<n>
