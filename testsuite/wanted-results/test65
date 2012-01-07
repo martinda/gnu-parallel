@@ -4,6 +4,28 @@
 2.2
 3.3
 4.4
+### Test retired
+parallel: -g has been retired. Use --group.
+parallel: -B has been retired. Use --bf.
+parallel: -T has been retired. Use --tty.
+parallel: -U has been retired. Use --er.
+parallel: -W has been retired. Use --wd.
+parallel: -Y has been retired. Use --shebang.
+parallel: -H has been retired. Use --halt.
+parallel: -g has been retired. Use --group.
+parallel: -B has been retired. Use --bf.
+parallel: -T has been retired. Use --tty.
+parallel: -U has been retired. Use --er.
+parallel: -W has been retired. Use --wd.
+parallel: -Y has been retired. Use --shebang.
+parallel: -H has been retired. Use --halt.
+parallel: -g has been retired. Use --group.
+parallel: -B has been retired. Use --bf.
+parallel: -T has been retired. Use --tty.
+parallel: -U has been retired. Use --er.
+parallel: -W has been retired. Use --wd.
+parallel: -Y has been retired. Use --shebang.
+parallel: -H has been retired. Use --halt.
 ### Test --shellquote
 awk\ -v\ FS=\"\\\",\\\"\"\ \'\{print\ \$1,\ \$3,\ \$4,\ \$5,\ \$9,\ \$14\}\'\ \|\ grep\ -v\ \"\#\"\ \|\ sed\ -e\ \'1d\'\ -e\ \'s/\\\"//g\'\ -e\ \'s/\\/\\/\\//\\t/g\'\ \|\ cut\ -f1-6,11\ \|\ sed\ -e\ \'s/\\/\\//\\t/g\'\ -e\ \'s/\ /\\t/g
 ### Test make .deb package

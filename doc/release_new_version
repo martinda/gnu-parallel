@@ -137,10 +137,10 @@ https://savannah.gnu.org/news/approve.php?group=parallel
 
 http://freshmeat.net/projects/parallel/releases/new
 
-== Update Twitter ==
+== Update Diaspora Twitter ==
 
 New version of #GNU Parallel released. See what is new in this release
-http://nd.gd/2j Watch the intro video http://nd.gd/039
+http://nd.gd/2j Watch the intro videos http://nd.gd/039
 
 https://savannah.gnu.org/news/?group=parallel
 
@@ -168,37 +168,46 @@ https://lists.gnu.org/mailman/admindb/parallel
 
 <<<<<
 from:tange@gnu.org
-to:parallel@gnu.org, bug-parallel@gnu.org, info-gnu@gnu.org, bug-directory@gnu.org
+to:parallel@gnu.org, bug-parallel@gnu.org
 cc:Sandro Cazzaniga <kharec@mandriva.org>,
-   Tim Cuthbertson <tim3d.junk@gmail.com>, Ludovic Courtès
-   <ludo@gnu.org>, Markus Ammer <mkmm@gmx-topmail.de>, Pavel Nuzhdin
-   <pnzhdin@gmail.com>, Phil Sung <psung@alum.mit.edu>, Michael
-   Shigorin <mike@altlinux.org>, Andrew McFague <amcfague@wgen.net>,
-   Steven M. Christensen <sunfreeware@gmail.com>, Chris Howey
-   <howeyc@gmail.com>, Fethican Coşkuner <fethicanc@gmail.com>,
-   Rogério Brito <rbrito@ime.usp.br>, Koen Vervloesem
-   <koen@vervloesem.eu>, R. Tyler Croy <tyler@monkeypox.org>,
+   Tim Cuthbertson <tim3d.junk@gmail.com>,
+   Steven M. Christensen <sunfreeware@gmail.com>,
+   Ludovic Courtès <ludo@gnu.org>, Markus Ammer <mkmm@gmx-topmail.de>,
+   Pavel Nuzhdin <pnzhdin@gmail.com>, Phil Sung <psung@alum.mit.edu>,
+   Michael Shigorin <mike@altlinux.org>,
+   Andrew McFague <amcfague@wgen.net>,
+   Chris Howey <howeyc@gmail.com>,
+   Fethican Coşkuner <fethicanc@gmail.com>,
+   Rogério Brito <rbrito@ime.usp.br>,
+   Koen Vervloesem <koen@vervloesem.eu>,
+   R. Tyler Croy <tyler@monkeypox.org>,
    kerick@shiftedbit.net, Christian Faulhammer <fauli@gentoo.org>,
-   Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>, Jesse Alama
-   <jesse.alama@gmail.com>
+   Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
+   Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20111222 ('Hitchens') released
+Subject: GNU Parallel 20120122 ('Fhqwhgads') released
 
-GNU Parallel 20111122 ('Hitchens') has been released. It is
+GNU Parallel 20120122 ('Fhqwhgads') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
-
-This is a bugfix release with no new features. Probably a good release
-for stable long-term use.
 
 New in this release:
 
-* --timeout will now kill grandchildren.
+* Blog post on using GNU Parallel to speed up BLAST queries:
+  http://blog.mckuhn.de/2012/01/embarrassingly-parallel-blast-search.html
 
-* Interview in Hacker Public Radio.
-  http://hackerpublicradio.org/eps.php?id=0860
+* Show your support for GNU Parallel. For 20 EUR incl world wide
+  shipping get a GNU Parallel T-shirt+mug+pen+100 postcards. Email
+  your shirt size and address for details to
+  parallel-support@tange.dk.
 
-* Blog post in Chinese.
-  http://blog.sina.com.cn/s/blog_3f7652740100y0ju.html
+* Video showing Wake-on-LAN with GNU Parallel.
+  https://www.youtube.com/watch?v=0mB-yIyKFLQ
+
+* Using GNU Parallel with Solr.
+  http://sujitpal.blogspot.com/2011/12/solr-report-generation-with-python.html
+
+* First job ad including GNU Parallel:
+  http://seeker.dice.com/jobsearch/servlet/JobSearch?op=101&dockey=xml/7/6/76f858de083a094f74b1a5d3ba53ffc5@endecaindex
 
 * Bug fixes and man page updates.
 

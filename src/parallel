@@ -92,13 +92,13 @@ if($::opt_nonall or $::opt_onall) {
 	join(" ",
 	     ((defined $::opt_P) ? "-P $::opt_P" : ""),
 	     ((defined $::opt_u) ? "-u" : ""),
-	     ((defined $::opt_g) ? "-g" : ""),
+	     ((defined $::opt_group) ? "-g" : ""),
 	     ((defined $::opt_D) ? "-D" : ""),
 	);
     my $suboptions =
 	join(" ",
 	     ((defined $::opt_u) ? "-u" : ""),
-	     ((defined $::opt_g) ? "-g" : ""),
+	     ((defined $::opt_group) ? "-g" : ""),
 	     ((defined @::opt_v) ? "-vv" : ""),
 	     ((defined $::opt_D) ? "-D" : ""),
 	     ((defined $::opt_timeout) ? "--timeout ".$::opt_timeout : ""),
@@ -388,12 +388,14 @@ sub options_hash {
 	 "joblog=s" => \$::opt_joblog,
 	 "silent" => \$::opt_silent,
 	 "keep-order|keeporder|k" => \$::opt_k,
-	 "group|g" => \$::opt_g,
+	 "group" => \$::opt_group,
+	 "g" => \$::opt_retired,
 	 "ungroup|u" => \$::opt_u,
 	 "null|0" => \$::opt_0,
 	 "quote|q" => \$::opt_q,
 	 "I=s" => \$::opt_I,
-	 "extensionreplace|er|U=s" => \$::opt_U,
+	 "extensionreplace|er" => \$::opt_U,
+	 "U=s" => \$::opt_retired,
 	 "basenamereplace|bnr=s" => \$::opt_basenamereplace,
 	 "dirnamereplace|dnr=s" => \$::opt_dirnamereplace,
 	 "basenameextensionreplace|bner=s" => \$::opt_basenameextensionreplace,
@@ -419,12 +421,16 @@ sub options_hash {
 	 "trc=s" => \@::opt_trc,
 	 "transfer" => \$::opt_transfer,
 	 "cleanup" => \$::opt_cleanup,
-	 "basefile|bf|B=s" => \@::opt_basefile,
-	 "workdir|wd|W=s" => \$::opt_workdir,
+	 "basefile|bf" => \@::opt_basefile,
+	 "B=s" => \$::opt_retired,
+	 "workdir|wd=s" => \$::opt_workdir,
+	 "W=s" => \$::opt_retired,
 	 "tmpdir=s" => \$::opt_tmpdir,
 	 "tempdir=s" => \$::opt_tmpdir,
-	 "tty|T" => \$::opt_tty,
-	 "halt-on-error|halt|H=i" => \$::opt_halt_on_error,
+	 "tty" => \$::opt_tty,
+	 "T" => \$::opt_retired,
+	 "halt-on-error|halt=i" => \$::opt_halt_on_error,
+	 "H=i" => \$::opt_retired,
 	 "retries=i" => \$::opt_retries,
 	 "dry-run|dryrun" => \$::opt_dryrun,
 	 "progress" => \$::opt_progress,
@@ -472,8 +478,9 @@ sub options_hash {
 	 "fg" => \$::opt_fg,
 	 "bg" => \$::opt_bg,
 	 "wait" => \$::opt_wait,
-	 # Shebang #!/usr/bin/parallel -Yotheroptions
-	 "Y|shebang|hashbang" => \$::opt_shebang,
+	 # Shebang #!/usr/bin/parallel --shebang
+	 "shebang|hashbang" => \$::opt_shebang,
+	 "Y" => \$::opt_retired,
 	 "skip-first-line" => \$::opt_skip_first_line,
 	);
 }
@@ -532,12 +539,22 @@ sub parse_options {
 
     @ARGV=read_options();
 
+    if(defined $::opt_retired) {
+	    print STDERR "$Global::progname: -g has been retired. Use --group.\n";
+	    print STDERR "$Global::progname: -B has been retired. Use --bf.\n";
+	    print STDERR "$Global::progname: -T has been retired. Use --tty.\n";
+	    print STDERR "$Global::progname: -U has been retired. Use --er.\n";
+	    print STDERR "$Global::progname: -W has been retired. Use --wd.\n";
+	    print STDERR "$Global::progname: -Y has been retired. Use --shebang.\n";
+	    print STDERR "$Global::progname: -H has been retired. Use --halt.\n";
+            ::wait_and_exit(255);
+    }
     if(defined @::opt_v) { $Global::verbose = $#::opt_v+1; } # Convert -v -v to v=2
     $Global::debug = (defined $::opt_D);
     if(defined $::opt_X) { $Global::ContextReplace = 1; }
     if(defined $::opt_silent) { $Global::verbose = 0; }
     if(defined $::opt_k) { $Global::keeporder = 1; }
-    if(defined $::opt_g) { $Global::grouped = 1; }
+    if(defined $::opt_group) { $Global::grouped = 1; }
     if(defined $::opt_u) { $Global::grouped = 0; }
     if(defined $::opt_0) { $/ = "\0"; }
     if(defined $::opt_d) { my $e="sprintf \"$::opt_d\""; $/ = eval $e; }
@@ -608,7 +625,7 @@ sub parse_options {
         if(not defined $::opt_P) {
             $::opt_P = 1;
         }
-        if(not defined $::opt_g) {
+        if(not defined $::opt_group) {
             $Global::grouped = 0;
         }
     }
@@ -729,11 +746,9 @@ sub read_options {
     # Returns:
     #   @ARGV without --options
     # This must be done first as this may exec myself
-    if(defined $ARGV[0] and ($ARGV[0]=~/^-Y/ or $ARGV[0]=~/^--shebang / or
+    if(defined $ARGV[0] and ($ARGV[0]=~/^--shebang / or
                              $ARGV[0]=~/^--hashbang /)) {
         # Program is called from #! line in script
-        $ARGV[0]=~s/^-Y( |$)//; # remove -Y if on its own
-        $ARGV[0]=~s/^-Y/-/; # remove -Y if bundled with other options
         $ARGV[0]=~s/^--shebang *//; # remove --shebang if it is set
         $ARGV[0]=~s/^--hashbang *//; # remove --hashbang if it is set
         my $argfile = pop @ARGV;

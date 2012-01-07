@@ -292,12 +292,10 @@ See also: B<:::>.
 
 =item B<--bf> I<file>
 
-=item B<-B> I<file> (-B will be retired 20120122)
-
 I<file> will be transferred to each sshlogin before a jobs is
 started. It will be removed if B<--cleanup> is active. The file may be
 a script to run or some common base data needed for the jobs.
-Multiple B<-B> can be specified to transfer more basefiles. The
+Multiple B<--bf> can be specified to transfer more basefiles. The
 I<file> will be transferred the same way as B<--transfer>.
 
 
@@ -458,8 +456,6 @@ B<--gnu> takes precedence.
 
 =item B<--group>
 
-=item B<-g> (-g will be retired 20120122)
-
 Group output. Output from each jobs is grouped together and is only
 printed when the command is finished. stderr (standard error) first
 followed by stdout (standard output). This takes some CPU time. In
@@ -481,8 +477,6 @@ Print a summary of the options to GNU B<parallel> and exit.
 =item B<--halt-on-error> <0|1|2>
 
 =item B<--halt> <0|1|2>
-
-=item B<-H> <0|1|2> (-H will be retired 20120122)
 
 =over 3
 
@@ -1150,8 +1144,6 @@ Can be reversed with B<-v>.
 
 =item B<--tty>
 
-=item B<-T> (-T will be retired 20120122)
-
 Open terminal tty. If GNU B<parallel> is used for starting an
 interactive program then this option may be needed. It will start only
 one job at a time (i.e. B<-j1>), not buffer the output (i.e. B<-u>),
@@ -1272,8 +1264,6 @@ faster with B<-u>. Can be reversed with B<--group>.
 
 =item B<--er> I<replace-str>
 
-=item B<-U> I<replace-str> (-U will be retired 20120122)
-
 Use the replacement string I<replace-str> instead of {.} for input line without extension.
 
 
@@ -1307,8 +1297,6 @@ Print the version GNU B<parallel> and exit.
 =item B<--workdir> I<mydir>
 
 =item B<--wd> I<mydir>
-
-=item B<-W> I<mydir> (-W will be retired 20120122)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in
@@ -1370,8 +1358,6 @@ Compare these two:
 =item B<--shebang>
 
 =item B<--hashbang>
-
-=item B<-Y> (-Y will be retired 20120122)
 
 GNU B<Parallel> can be called as a shebang (#!) command as the first line of a script. Like this:
 
@@ -2112,9 +2098,9 @@ same time:
 
 You can use GNU B<parallel> to start interactive programs like emacs or vi:
 
-B<cat filelist | parallel -T -X emacs>
+B<cat filelist | parallel --tty -X emacs>
 
-B<cat filelist | parallel -T -X vi>
+B<cat filelist | parallel --tty -X vi>
 
 If there are more files than will fit on a single command line, the
 editor will be started again with the remaining files.
