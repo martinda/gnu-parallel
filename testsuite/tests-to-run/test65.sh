@@ -25,7 +25,7 @@ echo '### Test --resume --joblog followed by --resume --joblog';
   cat /tmp/joblog2 | wc; 
   rm -f /tmp/joblog2;
 echo '### Test --header'; 
-  printf "a\tb\n1\t2" | parallel --header echo {b} {a}
+  printf "a\tb\n1.2\t3/4.5" | parallel --header echo {b} {a} {b.} {b/} {b//} {b/.}; 
 EOF
 
 echo '### Test --shellquote'

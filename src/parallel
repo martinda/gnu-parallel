@@ -83,7 +83,7 @@ if($::opt_header) {
     ::debug("Delimiter: '$delimiter'");
     for my $s (split /$delimiter/o, $line) {
 	::debug("Colname: '$s'");
-	$command =~ s/\{$s\}/\{$id\}/g;
+	$command =~ s:\{$s(|/|//|\.|/\.)\}:\{$id$1\}:g;
 	$id++;
     }
 }
