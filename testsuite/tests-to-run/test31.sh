@@ -1,15 +1,5 @@
 #!/bin/bash
 
-echo '### Test of #! with file as input'
-cat >/tmp/shebang <<EOF
-#!/usr/local/bin/parallel -Yrk echo
-A
-B
-C
-EOF
-chmod 755 /tmp/shebang
-/tmp/shebang
-
 echo '### Test of #! --shebang'
 cat >/tmp/shebang <<EOF
 #!/usr/local/bin/parallel --shebang -rk echo
@@ -32,7 +22,7 @@ chmod 755 /tmp/shebang
 
 echo '### Test of #! with 2 files as input'
 cat >/tmp/shebang <<EOF
-#!/usr/local/bin/parallel -Yrk --xapply -a /tmp/123 echo
+#!/usr/local/bin/parallel --shebang -rk --xapply -a /tmp/123 echo
 A
 B
 C

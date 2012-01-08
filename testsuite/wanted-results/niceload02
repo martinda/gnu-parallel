@@ -1,0 +1,3 @@
+### Test niceload exit code
+3 eq 3
+0 eq 0

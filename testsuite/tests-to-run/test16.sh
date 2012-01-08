@@ -20,9 +20,9 @@ rm -rf /tmp/test-of-{.}-parallel/subdir
 
 
 find -type f | parallel -k diff {} a/foo ">"{.}.diff
-ls | parallel -kvg "ls {}|wc;echo {}"
+ls | parallel -kv --group "ls {}|wc;echo {}"
 ls | parallel -kj500 'sleep 1; ls {} | perl -ne "END{print $..\" {}\n\"}"'
-ls | parallel -kgj500 'sleep 1; ls {} | perl -ne "END{print $..\" {}\n\"}"'
+ls | parallel -kj500 --group 'sleep 1; ls {} | perl -ne "END{print $..\" {}\n\"}"'
 mkdir 1-col 2-col
 ls | parallel -kv touch -- {.}/abc-{.}-{} 2>&1
 ls | parallel -kv rm -- {.}/abc-{.}-{} 2>&1

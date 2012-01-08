@@ -437,7 +437,7 @@ sub options_hash {
 	 "trc=s" => \@::opt_trc,
 	 "transfer" => \$::opt_transfer,
 	 "cleanup" => \$::opt_cleanup,
-	 "basefile|bf" => \@::opt_basefile,
+	 "basefile|bf=s" => \@::opt_basefile,
 	 "B=s" => \$::opt_retired,
 	 "workdir|wd=s" => \$::opt_workdir,
 	 "W=s" => \$::opt_retired,
@@ -518,7 +518,7 @@ sub get_options_from_array {
 	@::ARGV = @{$array_ref};
     }
     my @retval = GetOptions(options_hash());
-    if(not $this_is_ARGV) {
+   if(not $this_is_ARGV) {
 	@{$array_ref} = @::ARGV;
 	@::ARGV = @save_argv;
     }

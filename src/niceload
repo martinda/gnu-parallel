@@ -84,6 +84,7 @@ while($process->is_alive()) {
     }
 }
 
+exit($::exitstatus);
 
 sub get_options_from_array {
     # Run GetOptions on @array
@@ -296,11 +297,12 @@ sub start {
 	} else {
 	    system("@{$self->{'command'}}");
 	}
- 	::debug("Child exit\n");
- 	exit;
+	$::exitstatus = $? >> 8;
+	$::exitsignal = $? & 127;
+	::debug("Child exit $::exitstatus\n");
+	exit($::exitstatus);
     }
 }
-
 
 use POSIX ":sys_wait_h";
 
@@ -308,6 +310,8 @@ sub REAPER {
     my $stiff;
     while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
         # do something with $stiff if you want
+        $::exitstatus = $? >> 8;
+        $::exitsignal = $? & 127;
     }
     $SIG{CHLD} = \&REAPER;                  # install *after* calling waitpid
 }
@@ -640,3 +644,5 @@ sub io_status_linux {
     my $io = ::max(@iostat);
     return $io/10;
 }
+
+$::exitsignal = $::exitstatus = 0; # Dummy

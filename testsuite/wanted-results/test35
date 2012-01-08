@@ -1,4 +1,4 @@
-### Test -W newtempdir/newdir/tmp/ with space dirs
+### Test --wd newtempdir/newdir/tmp/ with space dirs
 echo >./\ ab/c\"d/ef\ g.6
 echo >\ ab/c\"d/efg.6
 echo >./b/bar.6
@@ -13,7 +13,7 @@ echo >./a\ b/cd\ /\ ef/efg.6
 ./ ab /c' d/ ef"g.6
 ./a b/cd / ef/efg.6
 ./2-col.txt.6
-### Test -W /tmp/newtempdir/newdir/tmp/ with space dirs
+### Test --wd /tmp/newtempdir/newdir/tmp/ with space dirs
 echo >./\ ab/c\"d/ef\ g.7
 echo >\ ab/c\"d/efg.7
 echo >./b/bar.7
@@ -30,10 +30,10 @@ echo >./a\ b/cd\ /\ ef/efg.7
 ./a b/cd / ef/efg.7
 ### Test --workdir ...
 ./2-col.txt.1
-### Test -W ...
+### Test --wd ...
 echo >2-col.txt.2
 ./2-col.txt.2
-### Test -W ... with space dirs
+### Test --wd ... with space dirs
 echo >./\ ab/c\"d/ef\ g.3
 echo >\ ab/c\"d/efg.3
 echo >./b/bar.3
@@ -48,10 +48,10 @@ echo >./a\ b/cd\ /\ ef/efg.3
 ./ ab /c' d/ ef"g.3
 ./2-col.txt.3
 ./a b/cd / ef/efg.3
-### Test -W tmpdir
+### Test --wd tmpdir
 echo >2-col.txt.4
 ./2-col.txt.4
-### Test -W /tmp/ with space dirs
+### Test --wd /tmp/ with space dirs
 echo >./\ ab/c\"d/ef\ g.5
 echo >\ ab/c\"d/efg.5
 echo >./b/bar.5

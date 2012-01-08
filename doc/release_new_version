@@ -192,13 +192,22 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* Blog post on using GNU Parallel to speed up BLAST queries:
-  http://blog.mckuhn.de/2012/01/embarrassingly-parallel-blast-search.html
+* niceload now propagates exit status correctly. Passes testsuite.
 
 * Show your support for GNU Parallel. For 20 EUR incl world wide
   shipping get a GNU Parallel T-shirt+mug+pen+100 postcards. Email
   your shirt size and address for details to
   parallel-support@tange.dk.
+
+* --header uses the first input line as column names and you can then
+  use {colname} as a replacement string in the command.
+
+* --resume resumes from the last unfinished job.
+
+* Options -g -B -T -U -W -Y are retired as warned 6 months ago.
+
+* Blog post on using GNU Parallel to speed up BLAST queries:
+  http://blog.mckuhn.de/2012/01/embarrassingly-parallel-blast-search.html
 
 * Video showing Wake-on-LAN with GNU Parallel.
   https://www.youtube.com/watch?v=0mB-yIyKFLQ
