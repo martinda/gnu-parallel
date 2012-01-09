@@ -13,3 +13,120 @@ OK
 1
 2
 3
+### Test --timeout
+1.1
+1.1
+3.3
+3.3
+4.4
+5.5
+### Test retired
+parallel: -g has been retired. Use --group.
+parallel: -B has been retired. Use --bf.
+parallel: -T has been retired. Use --tty.
+parallel: -U has been retired. Use --er.
+parallel: -W has been retired. Use --wd.
+parallel: -Y has been retired. Use --shebang.
+parallel: -H has been retired. Use --halt.
+parallel: -g has been retired. Use --group.
+parallel: -B has been retired. Use --bf.
+parallel: -T has been retired. Use --tty.
+parallel: -U has been retired. Use --er.
+parallel: -W has been retired. Use --wd.
+parallel: -Y has been retired. Use --shebang.
+parallel: -H has been retired. Use --halt.
+parallel: -g has been retired. Use --group.
+parallel: -B has been retired. Use --bf.
+parallel: -T has been retired. Use --tty.
+parallel: -U has been retired. Use --er.
+parallel: -W has been retired. Use --wd.
+parallel: -Y has been retired. Use --shebang.
+parallel: -H has been retired. Use --halt.
+### Test --joblog followed by --resume --joblog
+      5      49     203
+### Test --resume --joblog followed by --resume --joblog
+      5      49     203
+### Test --header
+3/4.5 1.2 3/4 4.5 3 4
+### 64-bit wierdness - this did not complete on a 64-bit machine
+### BUG-fix: bash -c 'parallel -a <(seq 1 3) echo'
+1
+2
+3
+### BUG: The length for -X is not close to max (131072)
+      1   12821  131060
+      1   10948  131060
+      1   23695  131064
+      1   15810  131064
+      1   11790  131058
+      1   25545  131055
+### bug #35268: shell_quote doesn't treats [] brackets correctly
+/tmp/foo[123]
+### Test make .deb package
+To install the GNU Parallel Debian package, run:
+### Test of segfaulting issue
+This gave /home/tange/bin/stdout: line 3: 20374 Segmentation fault      "$@" 2>&1
+before adding wait() before exit
+### Test basic --arg-sep
+a
+b
+### Run commands using --arg-sep
+echo a
+a
+echo b
+b
+### Change --arg-sep
+echo a
+a
+echo b
+b
+echo a
+a
+echo b
+b
+echo a
+a
+echo b
+b
+echo a
+a
+echo b
+b
+### Test stdin goes to first command only
+cat
+via cat
+echo b
+b
+cat
+via cat
+echo b
+b
+### Bug made 4 5 go before 1 2 3
+1
+2
+3
+4
+5
+### Bug made 3 go before 1 2
+1
+2
+3
+### Bug did not quote
+echo \>
+>
+echo \>
+>
+echo \> 2
+> 2
+> 2
+### Must not quote
+echo | wc -l
+1
+echo | wc -l
+1
+echo a b c | wc -w
+3
+echo a b c | wc -w
+3
+echo a b | wc -w
+2

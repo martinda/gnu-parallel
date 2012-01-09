@@ -1,28 +1,3 @@
-### Test basic --arg-sep
-a
-b
-### Run commands using --arg-sep
-echo a
-a
-echo b
-b
-### Change --arg-sep
-echo a
-a
-echo b
-b
-echo a
-a
-echo b
-b
-echo a
-a
-echo b
-b
-echo a
-a
-echo b
-b
 ### Test stdin goes to first command only ("-" as argument)
 cat -
 via first cat
@@ -33,41 +8,3 @@ echo a
 a
 cat
 via pseudotty
-### Test stdin goes to first command only
-cat
-via cat
-echo b
-b
-cat
-via cat
-echo b
-b
-### Bug made 4 5 go before 1 2 3
-1
-2
-3
-4
-5
-### Bug made 3 go before 1 2
-1
-2
-3
-### Bug did not quote
-echo \>
->
-echo \>
->
-echo \> 2
-> 2
-> 2
-### Must not quote
-echo | wc -l
-1
-echo | wc -l
-1
-echo a b c | wc -w
-3
-echo a b c | wc -w
-3
-echo a b | wc -w
-2
