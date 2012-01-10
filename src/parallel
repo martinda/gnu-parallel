@@ -4645,13 +4645,13 @@ sub nest_get {
     my @record = ();
     my $prepend = undef;
     my $empty = 1;
-    my $no_of_inputs = $#{$self->{'fhs'}} + 1;
+    my $no_of_inputsources = $#{$self->{'fhs'}} + 1;
     if(not $self->{'arg_matrix'}) {
 	# Initialize @arg_matrix with one arg from each file
 	# read one line from each file
 	my @first_arg_set;
 	my $all_empty = 1;
-	for (my $fhno = 0; $fhno < $no_of_inputs ; $fhno++) {
+	for (my $fhno = 0; $fhno < $no_of_inputsources ; $fhno++) {
 	    my $arg = read_arg_from_fh($self->{'fhs'}[$fhno]);
 	    if(defined $arg) {
 		$all_empty = 0;
@@ -4665,7 +4665,16 @@ sub nest_get {
 	}
 	return [@first_arg_set];
     }
-    for (my $fhno = $no_of_inputs - 1; $fhno >= 0; $fhno--) {
+
+    # Treat the case with one input source special.  For multiple
+    # input sources we need to remember all previously read values to
+    # generate all combinations. But for one input source we can
+    # forget the value after first use.
+    if($no_of_inputsources == 1) {
+	my $arg = read_arg_from_fh($self->{'fhs'}[0]);
+	return [$arg];
+    }
+    for (my $fhno = $no_of_inputsources - 1; $fhno >= 0; $fhno--) {
 	if(eof($self->{'fhs'}[$fhno])) {
 	    next;
 	} else {
@@ -4676,7 +4685,7 @@ sub nest_get {
 	    $self->{'arg_matrix'}[$fhno][$len] = $arg;
 	    # make all new combinations
 	    my @combarg = ();
-	    for (my $fhn = 0; $fhn < $no_of_inputs; $fhn++) {
+	    for (my $fhn = 0; $fhn < $no_of_inputsources; $fhn++) {
 		push @combarg, [0, $#{$self->{'arg_matrix'}[$fhn]}];
 	    }
 	    $combarg[$fhno] = [$len,$len]; # Find only combinations with this new entry
@@ -4687,10 +4696,10 @@ sub nest_get {
 	    my @mapped;
 	    for my $c (expand_combinations(@combarg)) {
 		my @a;
-		for my $n (0 .. $no_of_inputs - 1 ) {
+		for my $n (0 .. $no_of_inputsources - 1 ) {
 		    push @a,  $self->{'arg_matrix'}[$n][$$c[$n]];
 		}
-		push @mapped, [@a];
+		push @mapped, \@a;
 	    }
 	    # append the mapped to the ungotten arguments
 	    push @{$self->{'unget'}}, @mapped;
