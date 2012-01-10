@@ -72,7 +72,7 @@ if($::opt_skip_first_line) {
     my $fh = $fhlist[0];
     <$fh>;
 }
-if($::opt_header) {
+if($::opt_header and not $::opt_pipe) {
     my $fh = $fhlist[0];
     my $line = <$fh>;
     chomp($line);
@@ -177,6 +177,17 @@ sub spreadstdin {
     # Spawn a job and print the record to it.
     my $record;
     my $buf = "";
+    my $header = "";
+    if($::opt_header) {
+	my $non_greedy_regexp = $::opt_header;
+	# ? , * , + , {} => ?? , *? , +? , {}?
+	$non_greedy_regexp =~ s/(\?|\*|\+|\})/$1\?/g;
+	while(read(STDIN,substr($buf,length $buf,0),$::opt_blocksize)) {
+	    if($buf=~s/^(.*?$non_greedy_regexp)//) {
+		$header = $1; last;
+	    }
+	}
+    }
     my ($recstart,$recend,$recerror);
     if(defined($::opt_recstart) and defined($::opt_recend)) {
 	# If both --recstart and --recend is given then both must match
@@ -205,8 +216,9 @@ sub spreadstdin {
 	$recend =~ s/\\([rnt'"\\])/"qq|\\$1|"/gee;
     }
     my $recendrecstart = $recend.$recstart;
-
-    while(read(STDIN,substr($buf,length $buf,0),$::opt_blocksize)) {
+    # Force the while-loop once if everything was read by header reading
+    my $force_one_time_through = 0;
+    while(!$force_one_time_through++ or read(STDIN,substr($buf,length $buf,0),$::opt_blocksize)) {
 	# substr above = append to $buf
 	reap_if_needed(); # Re-enable reaping after read() (Bug#33352)
 	if($::opt_r) {
@@ -220,14 +232,14 @@ sub spreadstdin {
 	    if($Global::max_number_of_args) {
 		# -N => (start..*?end){n}
 		while($buf =~ s/((?:$recstart.*?$recend){$Global::max_number_of_args})($recstart.*)$/$2/os) {
-		    $record = $1;
+		    $record = $header.$1;
 		    ::debug("Read record -N: ".length($record)."\n");
 		    write_record_to_pipe(\$record,$recstart,$recend);
 		}
 	    } else {
 		# Find the last recend-recstart in $buf
 		if($buf =~ s/(.*$recend)($recstart.*?)$/$2/os) {
-		    $record = $1;
+		    $record = $header.$1;
 		    ::debug("Matched record: ".length($record)."/".length($buf)."\n");
 		    write_record_to_pipe(\$record,$recstart,$recend);
 		}
@@ -238,7 +250,7 @@ sub spreadstdin {
 		my $i = 0;
 		while(($i = nindex(\$buf,$recendrecstart,$Global::max_number_of_args)) != -1) {
 		    $i += length $recend; # find the actual splitting location
-		    my $record = substr($buf,0,$i);
+		    my $record = $header.substr($buf,0,$i);
 		    substr($buf,0,$i) = "";
 		    ::debug("Read record: ".length($record)."\n");
 		    write_record_to_pipe(\$record,$recstart,$recend);
@@ -248,7 +260,7 @@ sub spreadstdin {
 		my $i = rindex($buf,$recendrecstart);
 		if($i != -1) {
 		    $i += length $recend; # find the actual splitting location
-		    my $record = substr($buf,0,$i);
+		    my $record = $header.substr($buf,0,$i);
 		    substr($buf,0,$i) = "";
 		    ::debug("Read record: ".length($record)."\n");
 		    write_record_to_pipe(\$record,$recstart,$recend);
@@ -258,6 +270,7 @@ sub spreadstdin {
 	do_not_reap(); # Disable reaping before read(STDIN) (Bug#33352)
     }
     # If there is anything left in the buffer write it
+    substr($buf,0,0) = $header;
     write_record_to_pipe(\$buf,$recstart,$recend);
 
     ::debug("Done reading STDIN\n");
@@ -498,7 +511,7 @@ sub options_hash {
 	 "shebang|hashbang" => \$::opt_shebang,
 	 "Y" => \$::opt_retired,
 	 "skip-first-line" => \$::opt_skip_first_line,
-	 "header" => \$::opt_header,
+	 "header=s" => \$::opt_header,
 	);
 }
 
@@ -794,7 +807,6 @@ sub open_joblog {
 	}
     }
 }
-
 
 sub read_options {
     # Read options from command line, profile and $PARALLEL

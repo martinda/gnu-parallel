@@ -59,7 +59,7 @@ echo '### Test --resume --joblog followed by --resume --joblog';
   rm -f /tmp/joblog2;
 
 echo '### Test --header'; 
-  printf "a\tb\n1.2\t3/4.5" | parallel --header echo {b} {a} {b.} {b/} {b//} {b/.}; 
+  printf "a\tb\n1.2\t3/4.5" | parallel --header "\n" echo {b} {a} {b.} {b/} {b//} {b/.}; 
 
 echo '### 64-bit wierdness - this did not complete on a 64-bit machine'; 
   seq 1 2 | parallel -j1 'seq 1 1 | parallel true'
