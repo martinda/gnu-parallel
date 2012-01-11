@@ -33,7 +33,7 @@ echo '### Bug in --load';
   parallel -k --load 30 sleep 0.1\;echo ::: 1 2 3
 
 echo '### Test --timeout'; 
-  parallel -j0 -k --timeout 1 echo {}\; sleep {}\; echo {} ::: 1.1 3.3 4.4 5.5
+  parallel -j0 -k --timeout 1 echo {}\; sleep {}\; echo {} ::: 1.1 6.6 7.7 8.8
 
 echo '### Test retired'; 
   stdout parallel -B; 

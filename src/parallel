@@ -541,7 +541,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120107;
+    $Global::version = 20120111;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4684,7 +4684,10 @@ sub nest_get {
     # forget the value after first use.
     if($no_of_inputsources == 1) {
 	my $arg = read_arg_from_fh($self->{'fhs'}[0]);
-	return [$arg];
+	if(defined($arg)) {
+	    return [$arg];
+	}
+	return undef;
     }
     for (my $fhno = $no_of_inputsources - 1; $fhno >= 0; $fhno--) {
 	if(eof($self->{'fhs'}[$fhno])) {
