@@ -1490,6 +1490,9 @@ sub read_sshloginfile {
     if($file eq "..") {
         $file = $ENV{'HOME'}."/.parallel/sshloginfile";
     }
+    if($file eq ".") {
+        $file = "/etc/parallel/sshloginfile";
+    }
     if($file eq "-") {
 	*IN = *STDIN;
 	$close = 0;

@@ -1113,9 +1113,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename>
+=item B<--sshloginfile> I<filename> (alpha testing)
 
-=item B<--slf> I<filename>
+=item B<--slf> I<filename> (alpha testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1142,6 +1142,9 @@ Multiple B<--sshloginfile> are allowed.
 
 The sshloginfile '..' is special, it read sshlogins from
 ~/.parallel/sshloginfile
+
+The sshloginfile '.' is special, it read sshlogins from
+/etc/parallel/sshloginfile
 
 The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
