@@ -1,3 +1,49 @@
+20120122
+
+* --header : uses the first input line as column names and you can
+  then use {colname} as a replacement string in the command. This also
+  works with multiple :::'s.
+
+* --header <regexp> matches a header as a regular expression and
+  repeats the header for each block with --pipe.
+
+* --resume resumes from the last unfinished job. Useful if you stop
+  GNU Parallel and restart it later with the same arguments.
+
+* niceload now propagates exit status correctly.
+
+* Show your support for GNU Parallel. For a limited time you can get a
+  GNU Parallel T-shirt+mug+pen+100 postcards at 20 EUR. See
+  https://www.gnu.org/software/parallel/merchandise.html
+
+* Options -g -B -T -U -W -Y are retired as warned 6 months ago.
+
+* GNU Parallel referenced in article on Holographic Grid Cloud. Thanks
+  to Stefano Gallozzi. http://arxiv.org/pdf/1112.6128
+
+* Article in IEEE Software on GNU Parallel. Thanks to Diomidis
+  Spinellis.  http://www.spinellis.gr/blog/20110911/
+
+* An article on Narwhal which uses GNU Parallel. They forgot to add
+  the reference. Please remember --bibtex if you use GNU Parallel in
+  an article. 
+  http://bioinformatics.oxfordjournals.org/content/early/2011/11/08/bioinformatics.btr613.full.pdf
+
+* Blog post on using GNU Parallel to speed up BLAST queries:
+  http://blog.mckuhn.de/2012/01/embarrassingly-parallel-blast-search.html
+
+* Video showing Wake-on-LAN with GNU Parallel.
+  https://www.youtube.com/watch?v=0mB-yIyKFLQ
+
+* Using GNU Parallel with Solr.
+  http://sujitpal.blogspot.com/2011/12/solr-report-generation-with-python.html
+
+* First job ad including GNU Parallel:
+  http://seeker.dice.com/jobsearch/servlet/JobSearch?op=101&dockey=xml/7/6/76f858de083a094f74b1a5d3ba53ffc5@endecaindex
+
+* Bug fixes and man page updates.
+
+
 20111222
 
 * --timeout will now kill grandchildren.
