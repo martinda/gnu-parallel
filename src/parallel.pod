@@ -1382,6 +1382,8 @@ Compare these two:
   parallel echo {1} {2} ::: 1 2 3 ::: a b c
   parallel --xapply echo {1} {2} ::: 1 2 3 ::: a b c
 
+See also B<--header>.
+
 
 =item B<--shebang>
 
@@ -1688,30 +1690,6 @@ can be written like this:
 B<cat list | parallel "do_something {} scale {.}.jpg ; do_step2 <{} {.}" | process_output>
 
 
-=head1 EXAMPLE: Using shell variables
-
-When using shell variables you need to quote them correctly as they
-may otherwise be split on spaces.
-
-Notice the difference between:
-
- V=("My brother's 12\" records are worth <\$\$\$>"'!' Foo Bar)
- parallel echo ::: ${V[@]} # This is probably not what you want
-
-and:
-
- V=("My brother's 12\" records are worth <\$\$\$>"'!' Foo Bar)
- parallel echo ::: "${V[@]}"
-
-When using variables in the actual command that contains special
-characters (e.g. space) you can quote them using B<'"$VAR"'> or using
-"'s and B<-q>:
-
- V="Here  are  two "
- parallel echo "'$V'" ::: spaces
- parallel -q echo "$V" ::: spaces
-
-
 =head1 EXAMPLE: Rewriting nested for-loops
 
 Nested for-loops like this:
@@ -1737,6 +1715,44 @@ Nested for-loops like this:
 can be written like this:
 
 B<parallel echo {1} {2} ::: M F ::: S M L XL XXL | sort>
+
+
+=head1 EXAMPLE: for-loops with column names
+
+When doing multiple nested for-loops it can be easier to keep track of
+the loop variable if is is named instead of just having a number. Use
+B<--header :> to let the first argument be an named alias for the
+positional replacement string:
+
+  parallel --header : echo {gender} {size} ::: gender M F ::: size S M L XL XXL
+
+This also works if the input file is a file with columns:
+
+  cat addressbook.tsv | parallel --colsep '\t' --header : echo {Name} {E-mail address}
+
+
+=head1 EXAMPLE: Using shell variables
+
+When using shell variables you need to quote them correctly as they
+may otherwise be split on spaces.
+
+Notice the difference between:
+
+ V=("My brother's 12\" records are worth <\$\$\$>"'!' Foo Bar)
+ parallel echo ::: ${V[@]} # This is probably not what you want
+
+and:
+
+ V=("My brother's 12\" records are worth <\$\$\$>"'!' Foo Bar)
+ parallel echo ::: "${V[@]}"
+
+When using variables in the actual command that contains special
+characters (e.g. space) you can quote them using B<'"$VAR"'> or using
+"'s and B<-q>:
+
+ V="Here  are  two "
+ parallel echo "'$V'" ::: spaces
+ parallel -q echo "$V" ::: spaces
 
 
 =head1 EXAMPLE: Group output lines

@@ -74,17 +74,19 @@ if($::opt_skip_first_line) {
 }
 if($::opt_header and not $::opt_pipe) {
     my $fh = $fhlist[0];
-    my $line = <$fh>;
-    chomp($line);
     # split with colsep or \t
     # TODO should $header force $colsep = \t if undef?
     my $delimiter = $::opt_colsep;
     my $id = 1;
-    ::debug("Delimiter: '$delimiter'");
-    for my $s (split /$delimiter/o, $line) {
-	::debug("Colname: '$s'");
-	$command =~ s:\{$s(|/|//|\.|/\.)\}:\{$id$1\}:g;
-	$id++;
+    for my $fh (@fhlist) {
+	my $line = <$fh>;
+	chomp($line);
+	::debug("Delimiter: '$delimiter'");
+	for my $s (split /$delimiter/o, $line) {
+	    ::debug("Colname: '$s'");
+	    $command =~ s:\{$s(|/|//|\.|/\.)\}:\{$id$1\}:g;
+	    $id++;
+	}
     }
 }
 
@@ -541,7 +543,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120113;
+    $Global::version = 20120122;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;

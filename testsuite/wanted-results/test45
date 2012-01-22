@@ -16,9 +16,9 @@ OK
 ### Test --timeout
 1.1
 1.1
-5.5
 6.6
 7.7
+8.8
 ### Test retired
 parallel: -g has been retired. Use --group.
 parallel: -B has been retired. Use --bf.

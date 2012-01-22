@@ -25,7 +25,7 @@ http://nd.gd/0s http://www.youtube.com/watch?v=OpaiGYxkSuQ
 http://nd.gd/0t http://en.wikipedia.org/wiki/Xargs#The_separator_problem
 http://nd.gd/3k http://www.gnu.org/software/parallel/man.html#differences_between_xargs_and_gnu_parallel
 http://nd.gd/po http://www.gnu.org/software/parallel/man.html#example__distributing_work_to_local_and_remote_computers
-http://nd.gd/039 http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
+http://ur1.ca/7h7yx http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
 
 If you like xargs you may love GNU Parallel: http://nd.gd/0s
 
@@ -64,7 +64,8 @@ You can install GNU Parallel simply by:
     chmod 755 parallel
     cp parallel sem
 
-Watch the intro videos for GNU Parallel to learn more: http://nd.gd/039
+Watch the intro videos for GNU Parallel to learn more:
+https://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
 
 
 GNU Parallel also makes it possible to run small scripts. Try this:
