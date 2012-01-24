@@ -131,7 +131,7 @@ Husk at skrive indholdet under billedet, det er irreterende at skulle gætte.
 GNU parallel is a UNIX-tool for running commands in parallel.
 To gzip all files running one job per CPU write:
   parallel gzip ::: *
-Watch the intro video to learn more: http://nd.gd/0s
+Watch the intro video to learn more: www.pi.dk/1
 Or read more about GNU parallel: www.gnu.org/s/parallel
 
 job->start():

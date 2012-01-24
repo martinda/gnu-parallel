@@ -1,0 +1,339 @@
+\input texinfo
+@setfilename sem.info
+
+@documentencoding utf-8
+
+@settitle sem - semaphore for executing shell command lines in parallel
+
+@node Top
+@top sem
+
+@chapter NAME
+@anchor{NAME}
+
+sem - semaphore for executing shell command lines in parallel
+
+@chapter SYNOPSIS
+@anchor{SYNOPSIS}
+
+@strong{sem} [--fg] [--id <id>] [--timeout <secs>] [-j <num>] [--wait] command
+
+@chapter DESCRIPTION
+@anchor{DESCRIPTION}
+
+GNU @strong{sem} is an alias for GNU @strong{parallel --semaphore}.
+
+It works as a tool for executing shell commands in parallel. GNU
+@strong{sem} acts as a counting semaphore. When GNU @strong{sem} is called with
+command it will start the command in the background. When @emph{num}
+number of commands are running in the background, GNU @strong{sem} will wait
+for one of these to complete before starting another command.
+
+Before looking at the options you may want to check out the examples
+after the list of options. That will give you an idea of what GNU
+@strong{sem} is capable of.
+
+@chapter OPTIONS
+@anchor{OPTIONS}
+
+@table @asis
+@item @emph{command}
+@anchor{@emph{command}}
+
+Command to execute. The command may be followed by arguments for the command.
+
+@item @strong{--bg}
+@anchor{@strong{--bg}}
+
+Run command in background thus GNU @strong{parallel} will not wait for
+completion of the command before exiting. This is the default.
+
+See also: @strong{--fg}
+
+@item @strong{-j} @emph{N}
+@anchor{@strong{-j} @emph{N}}
+
+Run up to N commands in parallel. Default is 1 thus acting like a
+mutex.
+
+@item @strong{--jobs} @emph{N}
+@anchor{@strong{--jobs} @emph{N}}
+
+@item @strong{-j} @emph{N}
+@anchor{@strong{-j} @emph{N} 1}
+
+@item @strong{--max-procs} @emph{N}
+@anchor{@strong{--max-procs} @emph{N}}
+
+@item @strong{-P} @emph{N}
+@anchor{@strong{-P} @emph{N}}
+
+Run up to N commands in parallel. Default is 1 thus acting like a
+mutex.
+
+@item @strong{--jobs} @emph{+N}
+@anchor{@strong{--jobs} @emph{+N}}
+
+@item @strong{-j} @emph{+N}
+@anchor{@strong{-j} @emph{+N}}
+
+@item @strong{--max-procs} @emph{+N}
+@anchor{@strong{--max-procs} @emph{+N}}
+
+@item @strong{-P} @emph{+N}
+@anchor{@strong{-P} @emph{+N}}
+
+Add N to the number of CPU cores.  Run up to this many jobs in
+parallel. For compute intensive jobs @strong{-j} +0 is useful as it will run
+number-of-cpu-cores jobs simultaneously.
+
+@item @strong{--jobs} @emph{-N}
+@anchor{@strong{--jobs} @emph{-N}}
+
+@item @strong{-j} @emph{-N}
+@anchor{@strong{-j} @emph{-N}}
+
+@item @strong{--max-procs} @emph{-N}
+@anchor{@strong{--max-procs} @emph{-N}}
+
+@item @strong{-P} @emph{-N}
+@anchor{@strong{-P} @emph{-N}}
+
+Subtract N from the number of CPU cores.  Run up to this many jobs in
+parallel.  If the evaluated number is less than 1 then 1 will be used.
+See also @strong{--use-cpus-instead-of-cores}.
+
+@item @strong{--jobs} @emph{N}%
+@anchor{@strong{--jobs} @emph{N}%}
+
+@item @strong{-j} @emph{N}%
+@anchor{@strong{-j} @emph{N}%}
+
+@item @strong{--max-procs} @emph{N}%
+@anchor{@strong{--max-procs} @emph{N}%}
+
+@item @strong{-P} @emph{N}%
+@anchor{@strong{-P} @emph{N}%}
+
+Multiply N% with the number of CPU cores.  Run up to this many jobs in
+parallel.  If the evaluated number is less than 1 then 1 will be used.
+See also @strong{--use-cpus-instead-of-cores}.
+
+@item @strong{--jobs} @emph{procfile}
+@anchor{@strong{--jobs} @emph{procfile}}
+
+@item @strong{-j} @emph{procfile}
+@anchor{@strong{-j} @emph{procfile}}
+
+@item @strong{--max-procs} @emph{procfile}
+@anchor{@strong{--max-procs} @emph{procfile}}
+
+@item @strong{-P} @emph{procfile}
+@anchor{@strong{-P} @emph{procfile}}
+
+Read parameter from file. Use the content of @emph{procfile} as parameter
+for @emph{-j}. E.g. @emph{procfile} could contain the string 100% or +2 or
+10.
+
+@item @strong{--semaphorename} @emph{name}
+@anchor{@strong{--semaphorename} @emph{name}}
+
+@item @strong{--id} @emph{name}
+@anchor{@strong{--id} @emph{name}}
+
+Use @strong{name} as the name of the semaphore. Default is the name of the
+controlling tty (output from @strong{tty}).
+
+The default normally works as expected when used interactively, but
+when used in a script @emph{name} should be set. @emph{$$} or @emph{my_task_name}
+are often a good value.
+
+The semaphore is stored in ~/.parallel/semaphores/
+
+@item @strong{--fg}
+@anchor{@strong{--fg}}
+
+Do not put command in background.
+
+@item @strong{--timeout} @emph{secs} (not implemented)
+@anchor{@strong{--timeout} @emph{secs} (not implemented)}
+
+@item @strong{-t} @emph{secs} (not implemented)
+@anchor{@strong{-t} @emph{secs} (not implemented)}
+
+If the semaphore is not released within @emph{secs} seconds, take it anyway.
+
+@item @strong{--wait}
+@anchor{@strong{--wait}}
+
+@item @strong{-w}
+@anchor{@strong{-w}}
+
+Wait for all commands to complete.
+
+@end table
+
+@chapter EXAMPLE: Gzipping *.log
+@anchor{EXAMPLE: Gzipping *.log}
+
+Run one gzip process per CPU core. Block until a CPU core becomes
+available.
+
+@verbatim
+  for i in `ls *.log` ; do
+    echo $i
+    sem -j+0 gzip $i ";" echo done
+  done
+  sem --wait
+@end verbatim
+
+@chapter EXAMPLE: Protecting pod2html from itself
+@anchor{EXAMPLE: Protecting pod2html from itself}
+
+pod2html creates two files: pod2htmd.tmp and pod2htmi.tmp which it
+does not clean up. It uses these two files for a short time. But if
+you run multiple pod2html in parallel (e.g. in a Makefile with make
+-j) you need to protect pod2html from running twice at the same
+time. @strong{sem} running as a mutex will do just that:
+
+@verbatim
+  sem --fg --id pod2html pod2html foo.pod > foo.html
+  sem --fg --id pod2html rm -f pod2htmd.tmp pod2htmi.tmp
+@end verbatim
+
+@chapter BUGS
+@anchor{BUGS}
+
+None known.
+
+@chapter REPORTING BUGS
+@anchor{REPORTING BUGS}
+
+Report bugs to <bug-parallel@@gnu.org>.
+
+@chapter AUTHOR
+@anchor{AUTHOR}
+
+Copyright (C) 2010,2011 Ole Tange, http://ole.tange.dk and Free
+Software Foundation, Inc.
+
+@chapter LICENSE
+@anchor{LICENSE}
+
+Copyright (C) 2010,2011 Free Software Foundation, Inc.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+at your option any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+@section Documentation license I
+@anchor{Documentation license I}
+
+Permission is granted to copy, distribute and/or modify this documentation
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts.  A copy of the license is included in the file fdl.txt.
+
+@section Documentation license II
+@anchor{Documentation license II}
+
+You are free:
+
+@table @asis
+@item @strong{to Share}
+@anchor{@strong{to Share}}
+
+to copy, distribute and transmit the work
+
+@item @strong{to Remix}
+@anchor{@strong{to Remix}}
+
+to adapt the work
+
+@end table
+
+Under the following conditions:
+
+@table @asis
+@item @strong{Attribution}
+@anchor{@strong{Attribution}}
+
+You must attribute the work in the manner specified by the author or
+licensor (but not in any way that suggests that they endorse you or
+your use of the work).
+
+@item @strong{Share Alike}
+@anchor{@strong{Share Alike}}
+
+If you alter, transform, or build upon this work, you may distribute
+the resulting work only under the same, similar or a compatible
+license.
+
+@end table
+
+With the understanding that:
+
+@table @asis
+@item @strong{Waiver}
+@anchor{@strong{Waiver}}
+
+Any of the above conditions can be waived if you get permission from
+the copyright holder.
+
+@item @strong{Public Domain}
+@anchor{@strong{Public Domain}}
+
+Where the work or any of its elements is in the public domain under
+applicable law, that status is in no way affected by the license.
+
+@item @strong{Other Rights}
+@anchor{@strong{Other Rights}}
+
+In no way are any of the following rights affected by the license:
+
+@itemize
+@item Your fair dealing or fair use rights, or other applicable
+copyright exceptions and limitations;
+
+@item The author's moral rights;
+
+@item Rights other persons may have either in the work itself or in
+how the work is used, such as publicity or privacy rights.
+
+@end itemize
+
+@end table
+
+@table @asis
+@item @strong{Notice}
+@anchor{@strong{Notice}}
+
+For any reuse or distribution, you must make clear to others the
+license terms of this work.
+
+@end table
+
+A copy of the full license is included in the file as cc-by-sa.txt.
+
+@chapter DEPENDENCIES
+@anchor{DEPENDENCIES}
+
+GNU @strong{sem} uses Perl, and the Perl modules Getopt::Long,
+Symbol, Fcntl.
+
+@chapter SEE ALSO
+@anchor{SEE ALSO}
+
+@strong{parallel}(1)
+
+@bye
