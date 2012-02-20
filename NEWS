@@ -1,3 +1,37 @@
+20120222
+
+* --workdir . will use the current working dir. If the current working
+  dir is beneath your home dir, the value . is treated as the relative
+  path to your home dir. This means that if your home dir is different
+  on remote computers (e.g. if your login is different) the relative
+  path will still be relative to your home dir.
+
+* A texinfo file is now generated from the POD file using pod2texi.
+
+* The bioinformatics article "Fast large-scale clustering of protein
+  structures using Gauss integrals" mentions GNU Parallel. They forgot
+  to add the reference. Please remember --bibtex if you use GNU
+  Parallel in an article.
+  http://bioinformatics.oxfordjournals.org/content/28/4/510.short
+
+* The first supporter received his merchandise. Did you order yours?
+  https://www.gnu.org/software/parallel/merchandise.html
+
+* How to use GNU Parallel with samtools.
+  http://zvfak.blogspot.com/2012/02/samtools-in-parallel.html
+
+* How to use GNU Parallel for vacuuming PostgreSQL tables.
+  http://blog.timmattison.com/archives/2012/01/24/mini-hack-parallel-vacuuming-in-postgresql/
+
+* Converting e-books with Calibre and GNU Parallel.
+  http://www.linkhal.de/blog/2012/01/converting-massive-e-book-collections-with-calibre-and-gnu-parrallel/
+
+* Using GNU Parallel for tailing logfiles from multiple servers.
+  http://silviud.blogspot.com/2012/02/shell-parallel-processing.html
+
+* Bug fixes and man page updates.
+
+
 20120122
 
 * --header : uses the first input line as column names and you can

@@ -193,11 +193,20 @@ New in this release:
   Parallel in an article.
   http://bioinformatics.oxfordjournals.org/content/28/4/510.short
 
-* First supporter received his merchandise. Did you order yours?
+* The first supporter received his merchandise. Did you order yours?
   https://www.gnu.org/software/parallel/merchandise.html
+
+* How to use GNU Parallel with samtools.
+  http://zvfak.blogspot.com/2012/02/samtools-in-parallel.html
 
 * How to use GNU Parallel for vacuuming PostgreSQL tables.
   http://blog.timmattison.com/archives/2012/01/24/mini-hack-parallel-vacuuming-in-postgresql/
+
+* Converting e-books with Calibre and GNU Parallel.
+  http://www.linkhal.de/blog/2012/01/converting-massive-e-book-collections-with-calibre-and-gnu-parrallel/
+
+* Using GNU Parallel for tailing logfiles from multiple servers.
+  http://silviud.blogspot.com/2012/02/shell-parallel-processing.html
 
 * Bug fixes and man page updates.
 

@@ -500,7 +500,7 @@ status will be the exit status from the failing job.
 =back
 
 
-=item B<--header> I<regexp> (alpha  testing)
+=item B<--header> I<regexp> (beta  testing)
 
 Use upto regexp as header. For normal usage the matched header
 (typically the first line: B<--header '\n'>) will be split using
@@ -743,9 +743,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe> (beta testing)
+=item B<--pipe>
 
-=item B<--spreadstdin> (beta testing)
+=item B<--spreadstdin>
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -937,7 +937,7 @@ it to the command.
 Only used with B<--pipe>.
 
 
-=item B<--resume> (alpha testing)
+=item B<--resume> (beta testing)
 
 Resumes from the last unfinished job. By reading B<--joblog> GNU
 B<parallel> will figure out the last unfinished job and continue from
@@ -1114,9 +1114,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename> (alpha testing)
+=item B<--sshloginfile> I<filename> (beta testing)
 
-=item B<--slf> I<filename> (alpha testing)
+=item B<--slf> I<filename> (beta testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1196,7 +1196,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<sec> (beta testing)
+=item B<--timeout> I<sec>
 
 Time out for command. If the command runs for longer than I<sec>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1322,9 +1322,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir>
+=item B<--workdir> I<mydir> (alpha testing)
 
-=item B<--wd> I<mydir>
+=item B<--wd> I<mydir> (alpha testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in

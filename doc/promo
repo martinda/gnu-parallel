@@ -41,8 +41,6 @@ surprising file names containing space, ', or " in the filename.
 xargs can give nasty surprises due to the separator problem
 http://pi.dk/5
 
-GNU Parallel http://nd.gd/0s may be better.
-
 @jaylyerly @stevenf xargs will bite you if file names contain
 space http://pi.dk/5. Use GNU Parallel instead: http://pi.dk/0
 

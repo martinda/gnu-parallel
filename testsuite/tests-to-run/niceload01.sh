@@ -49,7 +49,7 @@ niceload  -H -l 9.9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK
 niceload  --hard -l 9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK
 
 echo '### -f and --factor'
-niceload -H -f 0.1 -l6 echo f 0.1 first &
+niceload -H -f 0.01 -l6 echo f 0.1 first &
 niceload -H --factor 10 -l6 echo factor 10 last &
 wait
 

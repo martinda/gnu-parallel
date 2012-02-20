@@ -85,7 +85,7 @@ echo '### Test -N odd';
   seq 1 11 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.\$PARALLEL_SEQ"
 
 echo '### Test -N even+2'; 
-  seq 1 12 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.\$PARALLEL_SEQ"
+  seq 1 12 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 1.\$PARALLEL_SEQ"
 
 echo '### Test --recstart + --recend'; 
   cat /tmp/blocktest | parallel --block 1m -k --recstart 44 --recend "44" -j10 --pipe sort -n |md5sum

@@ -483,16 +483,20 @@ niceload.html: niceload.pod Makefile sql.html
 	rm -f $(srcdir)/pod2htm*
 
 parallel.texi: parallel.pod
-	pod2texi --output=$(srcdir)/parallel.texi $(srcdir)/parallel.pod
+# If pod2texi is not installed: Forget about it
+	pod2texi --output=$(srcdir)/parallel.texi $(srcdir)/parallel.pod || true
 
 sem.texi: sem.pod
-	pod2texi --output=$(srcdir)/sem.texi $(srcdir)/sem.pod
+# If pod2texi is not installed: Forget about it
+	pod2texi --output=$(srcdir)/sem.texi $(srcdir)/sem.pod || true
 
 sql.texi: sql
-	pod2texi --output=$(srcdir)/sql.texi $(srcdir)/sql
+# If pod2texi is not installed: Forget about it
+	pod2texi --output=$(srcdir)/sql.texi $(srcdir)/sql || true
 
 niceload.texi: niceload.pod
-	pod2texi --output=$(srcdir)/niceload.texi $(srcdir)/niceload.pod
+# If pod2texi is not installed: Forget about it
+	pod2texi --output=$(srcdir)/niceload.texi $(srcdir)/niceload.pod || true
 
 sem: parallel
 	ln -fs parallel sem

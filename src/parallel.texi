@@ -531,8 +531,8 @@ status will be the exit status from the failing job.
 
 @end table
 
-@item @strong{--header} @emph{regexp} (alpha  testing)
-@anchor{@strong{--header} @emph{regexp} (alpha  testing)}
+@item @strong{--header} @emph{regexp} (beta  testing)
+@anchor{@strong{--header} @emph{regexp} (beta  testing)}
 
 Use upto regexp as header. For normal usage the matched header
 (typically the first line: @strong{--header '\n'}) will be split using
@@ -798,11 +798,11 @@ all the output from one server will be grouped together.
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
-@item @strong{--pipe} (beta testing)
-@anchor{@strong{--pipe} (beta testing)}
+@item @strong{--pipe}
+@anchor{@strong{--pipe}}
 
-@item @strong{--spreadstdin} (beta testing)
-@anchor{@strong{--spreadstdin} (beta testing)}
+@item @strong{--spreadstdin}
+@anchor{@strong{--spreadstdin}}
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1002,8 +1002,8 @@ it to the command.
 
 Only used with @strong{--pipe}.
 
-@item @strong{--resume} (alpha testing)
-@anchor{@strong{--resume} (alpha testing)}
+@item @strong{--resume} (beta testing)
+@anchor{@strong{--resume} (beta testing)}
 
 Resumes from the last unfinished job. By reading @strong{--joblog} GNU
 @strong{parallel} will figure out the last unfinished job and continue from
@@ -1190,11 +1190,11 @@ The remote host must have GNU @strong{parallel} installed.
 @strong{--sshlogin} is often used with @strong{--transfer}, @strong{--return},
 @strong{--cleanup}, and @strong{--trc}.
 
-@item @strong{--sshloginfile} @emph{filename} (alpha testing)
-@anchor{@strong{--sshloginfile} @emph{filename} (alpha testing)}
+@item @strong{--sshloginfile} @emph{filename} (beta testing)
+@anchor{@strong{--sshloginfile} @emph{filename} (beta testing)}
 
-@item @strong{--slf} @emph{filename} (alpha testing)
-@anchor{@strong{--slf} @emph{filename} (alpha testing)}
+@item @strong{--slf} @emph{filename} (beta testing)
+@anchor{@strong{--slf} @emph{filename} (beta testing)}
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1275,8 +1275,8 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{sec} (beta testing)
-@anchor{@strong{--timeout} @emph{sec} (beta testing)}
+@item @strong{--timeout} @emph{sec}
+@anchor{@strong{--timeout} @emph{sec}}
 
 Time out for command. If the command runs for longer than @emph{sec}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1413,11 +1413,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir}
-@anchor{@strong{--workdir} @emph{mydir}}
+@item @strong{--workdir} @emph{mydir} (alpha testing)
+@anchor{@strong{--workdir} @emph{mydir} (alpha testing)}
 
-@item @strong{--wd} @emph{mydir}
-@anchor{@strong{--wd} @emph{mydir}}
+@item @strong{--wd} @emph{mydir} (alpha testing)
+@anchor{@strong{--wd} @emph{mydir} (alpha testing)}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in
