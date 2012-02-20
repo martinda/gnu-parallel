@@ -50,16 +50,16 @@
 3
 3
 ### Test --nonall
-vh1
-vh2.pi.dk
+vm1
+vm10
 ### Test --nonall -u
-vh2.pi.dk
-vh1
-vh2.pi.dk
-vh1
+vm10
+vm1
+vm10
+vm1
 ### Test read sshloginfile from STDIN
-vh1
-vh1
+vm1
+vm1
 ### Test --nonall --basefile
 /tmp/nonall--basefile
 /tmp/nonall--basefile

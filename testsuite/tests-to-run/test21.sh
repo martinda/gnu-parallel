@@ -5,19 +5,19 @@ SERVER2=parallel-server2
 
 echo '### Test $PARALLEL - single line'
 echo | PARALLEL=--number-of-cpus parallel
-seq 1 2 | PARALLEL="-S$SERVER1 -Sssh\ -l\ parallel\ $SERVER2 -j1" parallel -kvv echo
+seq 1 2 | PARALLEL="-Sparallel\@$SERVER1 -Sssh\ -l\ parallel\ $SERVER2 -j1" parallel -kvv echo
 
 echo '### Test $PARALLEL - multi line'
-seq 1 2 | PARALLEL="-S$SERVER1
+seq 1 2 | PARALLEL="-Sparallel\@$SERVER1
 -Sssh\ -l\ parallel\ $SERVER2
 -j1" parallel -kvv echo
 
 echo '### Test ~/.parallel/config - single line'
-echo "-S$SERVER1 -Sssh\ -l\ parallel\ $SERVER2 -j1" > ~/.parallel/config
+echo "-Sparallel\@$SERVER1 -Sssh\ -l\ parallel\ $SERVER2 -j1" > ~/.parallel/config
 seq 1 2 | parallel -kvv echo
 
 echo '### Test ~/.parallel/config - multi line'
-echo "-S$SERVER1
+echo "-Sparallel\@$SERVER1
 -Sssh\ -l\ parallel\ $SERVER2
 -j1" > ~/.parallel/config 
 seq 1 2 | parallel -kvv echo

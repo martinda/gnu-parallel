@@ -2,17 +2,17 @@
 
 #cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | nice timeout -k 1 40 parallel -j0 -k -L1
 echo '### Test of --retries - it should run 13 jobs in total'; 
-  seq 0 12 | stdout parallel --progress -kj100% --retries 1 -S 12/localhost,1/:,parallel@server2 -vq \
+  seq 0 12 | stdout parallel --progress -kj100% --retries 1 -S 12/localhost,1/:,parallel@parallel-server1 -vq \
   perl -e 'sleep 1;print "job{}\n";exit({})' | 
   perl -ne 'BEGIN{$/="\r";} @a=(split /\//,$_); END{print $a[1]+$a[4]+$a[7],"\n"}'
 
 echo '### Test of --retries - it should run 25 jobs in total'; 
-  seq 0 12 | stdout parallel --progress -kj100% --retries 2 -S 12/localhost,1/:,parallel@server2 -vq \
+  seq 0 12 | stdout parallel --progress -kj100% --retries 2 -S 12/localhost,1/:,parallel@parallel-server1 -vq \
   perl -e 'sleep 1;print "job{}\n";exit({})' | 
   perl -ne 'BEGIN{$/="\r";} @a=(split /\//,$_); END{print $a[1]+$a[4]+$a[7],"\n"}'
 
 echo '### Test of --retries - it should run 49 jobs in total'; 
-  seq 0 12 | stdout parallel --progress -kj100% --retries 4 -S 12/localhost,1/:,parallel@server2 -vq \
+  seq 0 12 | stdout parallel --progress -kj100% --retries 4 -S 12/localhost,1/:,parallel@parallel-server1 -vq \
   perl -e 'sleep 1;print "job{}\n";exit({})' | 
   perl -ne 'BEGIN{$/="\r";} @a=(split /\//,$_); END{print $a[1]+$a[4]+$a[7],"\n"}'
 #EOF

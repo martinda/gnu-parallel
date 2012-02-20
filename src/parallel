@@ -543,7 +543,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120124;
+    $Global::version = 20120215;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3446,15 +3446,41 @@ sub workdir {
     if(not defined $self->{'workdir'}) {
 	my $workdir;
 	if(defined $::opt_workdir) {
-	    if($::opt_workdir ne "...") {
+	    if($::opt_workdir eq ".") {
+		# . means current dir
+		my $home = $ENV{'HOME'};
+		eval 'use Cwd';
+		my $cwd = cwd();
+		$::opt_workdir = $cwd;
+		if($home) {
+		    # If homedir exists: remove the homedir from
+		    # workdir if cwd starts with homedir
+		    # E.g. /home/foo/my/dir => my/dir
+		    # E.g. /tmp/my/dir => /tmp/my/dir
+		    my ($home_dev, $home_ino) = (stat($home))[0,1];
+		    my $parent = "";
+		    my @dir_parts = split(m:/:,$cwd);
+		    my $part;
+		    while(defined ($part = shift @dir_parts)) {
+			$part eq "" and next;
+			$parent .= "/".$part;
+			my ($parent_dev, $parent_ino) = (stat($parent))[0,1];
+			if($parent_dev == $home_dev and $parent_ino == $home_ino) {
+			    # dev and ino is the same: We found the homedir.
+			    $::opt_workdir = join("/",@dir_parts);
+			    last;
+			}
+		    }
+		}
+	    } elsif($::opt_workdir eq "...") {
+		$workdir = ".parallel/tmp/" . ::hostname() . "-" . $$
+		    . "-" . $self->seq();
+	    } else {
 		$workdir = $::opt_workdir;
 		# Rsync treats /./ special. We dont want that
 		$workdir =~ s:/\./:/:g; # Remove /./
 		$workdir =~ s:/+$::; # Remove ending / if any
 		$workdir =~ s:^\./::g; # Remove starting ./ if any
-	    } else {
-		$workdir = ".parallel/tmp/" . ::hostname() . "-" . $$
-		    . "-" . $self->seq();
 	    }
 	} else {
 	    $workdir = ".";

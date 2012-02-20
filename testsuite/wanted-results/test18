@@ -79,15 +79,15 @@ parallel: Warning: --cleanup ignored as there are no remote --sshlogin
 10
 ### Check forced number of CPUs being respected
 alpha
-vh1
-vh1
-vh1
-vh1
-vh1
-vh1
-vh1
-vh1
-vh1
+vm1
+vm1
+vm1
+vm1
+vm1
+vm1
+vm1
+vm1
+vm1
 alpha
 alpha
 alpha

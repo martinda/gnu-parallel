@@ -77,8 +77,9 @@ with the input.
 If @emph{command} is given, GNU @strong{parallel} will behave similar to @strong{xargs}. If
 @emph{command} is not given GNU @strong{parallel} will behave similar to @strong{cat | sh}.
 
-The @emph{command} must be an executable, a script or a composed command: an
-alias or a function will not work (see why
+The @emph{command} must be an executable, a script, a composed command, or
+a function. If it is a function you need to @strong{export -f} the function
+first. An alias will, however, not work (see why
 http://www.perlmonks.org/index.pl?node_id=484296).
 
 @item @strong{@{@}}
@@ -530,8 +531,8 @@ status will be the exit status from the failing job.
 
 @end table
 
-@item @strong{--header} @emph{regexp} (alpha testing)
-@anchor{@strong{--header} @emph{regexp} (alpha testing)}
+@item @strong{--header} @emph{regexp} (alpha  testing)
+@anchor{@strong{--header} @emph{regexp} (alpha  testing)}
 
 Use upto regexp as header. For normal usage the matched header
 (typically the first line: @strong{--header '\n'}) will be split using
@@ -1420,9 +1421,17 @@ Print the version GNU @strong{parallel} and exit.
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in
-that dir. The special workdir @strong{...} will create a workdir in
-@strong{~/.parallel/tmp/} on the remote computers and will be removed if
-using @strong{--cleanup}.
+the dir @emph{mydir}.
+
+The special @emph{mydir} value @strong{...} will create working dirs under
+@strong{~/.parallel/tmp/} on the remote computers. If @strong{--cleanup} is given
+these dirs will be removed.
+
+The special @emph{mydir} value @strong{.} uses the current working dir.  If the
+current working dir is beneath your home dir, the value @strong{.} is
+treated as the relative path to your home dir. This means that if your
+home dir is different on remote computers (e.g. if your login is
+different) the relative path will still be relative to your home dir.
 
 @item @strong{--wait}
 @anchor{@strong{--wait}}

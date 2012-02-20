@@ -108,18 +108,9 @@ colsep = [sepchars]{no_of_sepchars}
 # TODO max_line_length on remote
 # TODO compute how many can be transferred within max_line_length
 
-
-Postkort:
-- Forside kun figur
-- Bagside:
-  - Logo med figur - evt gnu.org/s/parallel
-  - kort grå tekst, der forklarer hvad det er.
-  - Eet eksempel: parallel gzip ::: *
-  - Link til video. http://nd.gd/0s 
-
 Til inspiration.
 
-Hvis du stadig er ved at lave post- eller visitkort ting, så kunne du evt tilføje en QR code. Med MECARD tagget kan flere tags gemmes i en og samme fil:
+Hvis du stadig er ved at lave post- eller visitkort ting, så kunne du evt tilføje en QR code under frimærket. Med MECARD tagget kan flere tags gemmes i en og samme fil:
 
 qrencode -l L -o x.png "MECARD:N:GNU Parallel;EMAIL:parallel@gnu.org;URL:gnu.org/software/parallel;"
 
@@ -131,8 +122,8 @@ Husk at skrive indholdet under billedet, det er irreterende at skulle gætte.
 GNU parallel is a UNIX-tool for running commands in parallel.
 To gzip all files running one job per CPU write:
   parallel gzip ::: *
-Watch the intro video to learn more: www.pi.dk/1
-Or read more about GNU parallel: www.gnu.org/s/parallel
+Watch the intro video to learn more: http://pi.dk/1
+Or read more about GNU parallel: http://gnu.org/s/parallel
 
 job->start():
 $jobslot = Global::jobslot->$sshlogin
@@ -197,6 +188,31 @@ Or if your system lacks 'make' you can simply copy src/parallel
 src/sem src/niceload src/sql to a dir in your path.
 
 wget http://git.savannah.gnu.org/cgit/parallel.git/plain/src/parallel
+
+--record measured in lines (useful for fastq)
+
+parallel --tag traceroute ::: pi.dk debian.org
+
+# Thank you for watching
+#
+# If you like GNU Parallel:
+# * Post this video on Reddit/Diaspora*/forums/blogs/
+#   Identi.ca/Google+/Twitter/Facebook/Linkedin/mailing lists
+# * Join the mailing list https://lists.gnu.org/mailman/listinfo/parallel
+# * Get the merchandise https://www.gnu.org/s/parallel/merchandise.html
+# * Give a demo at your local user group
+# * Request or write a review for your favourite blog or magazine
+# * Request or build a package for your favourite distribution
+# * Invite me for your next conference (Contact http://ole.tange.dk)
+#
+# If GNU Parallel saves you money:
+# * (Have your company) donate to FSF https://my.fsf.org/donate/
+#
+# If you use GNU Parallel for a publication please cite:
+# O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
+# The USENIX Magazine, February 2011:42-47.
+#
+# Find GNU Parallel at https://www.gnu.org/s/parallel/
 
 
 
