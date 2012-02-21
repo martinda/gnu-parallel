@@ -66,3 +66,7 @@ vm1
 ### Test --onall --basefile
 /tmp/onall--basefile
 /tmp/onall--basefile
+### Test --workdir .
+/home/parallel/mydir
+### Test --wd .
+/home/parallel/mydir

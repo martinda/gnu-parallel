@@ -33,4 +33,14 @@ echo '### Test --nonall --basefile';
 echo '### Test --onall --basefile'; 
   touch /tmp/onall--basefile; 
   parallel --onall --basefile /tmp/onall--basefile -S $SSHLOGIN1,$SSHLOGIN2 ls ::: /tmp/onall--basefile
+
+echo '### Test --workdir .'; 
+  ssh $SSHLOGIN1 mkdir -p mydir; 
+  mkdir -p $HOME/mydir; cd $HOME/mydir; 
+  parallel --workdir . -S $SSHLOGIN1 ::: pwd
+
+echo '### Test --wd .'; 
+  ssh $SSHLOGIN2 mkdir -p mydir; 
+  mkdir -p $HOME/mydir; cd $HOME/mydir; 
+  parallel --workdir . -S $SSHLOGIN2 ::: pwd
 EOF

@@ -60,4 +60,5 @@ DISTCLEANFILES = parallel.html sem.html sql.html niceload.html
 EXTRA_DIST = parallel sem sql niceload \
 	parallel.1 sem.1 sql.1 niceload.1 \
 	parallel.html sem.html sql.html niceload.html \
-	sem.pod parallel.pod niceload.pod
+	sem.pod parallel.pod niceload.pod \
+	parallel.texi sem.texi sql.texi niceload.texi
