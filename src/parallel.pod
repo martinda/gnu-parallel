@@ -3133,23 +3133,59 @@ echo 1,2,3 | parallel -vkd, "echo 'a'{}'b'"
 echo 1,2,3 | parallel -vkd, "echo 'a'"{}"'b'"
 
 
-=head2 Startup speed
+=head2 Speed
 
-GNU B<parallel> is slow at starting up. Half of the startup time on
-the local computer is spent finding the maximal length of a command
-line. Setting B<-s> will remove this part of the startup time.
+=head3 Startup
+
+GNU B<parallel> is slow at starting up - around 250 ms. Half of the
+startup time on the local computer is spent finding the maximal length
+of a command line. Setting B<-s> will remove this part of the startup
+time.
+
+=head3 Job startup
+
+Starting a job takes around 3 ms. This can be a big overhead if the
+job takes very few ms to run. Often you can group small jobs together
+using B<-X> which will make the overhead less significant.
+
+Using B<--ungroup> the 3 ms can be lowered to around 2 ms.
+
+=head3 SSH
 
 When using multiple computers GNU B<parallel> opens B<ssh> connections
 to them to figure out how many connections can be used reliably
 simultaneously (Namely SSHD's MaxStartup). This test is done for each
-host in serial, so if your --sshloginfile contains many hosts it may
+host in serial, so if your B<--sshloginfile> contains many hosts it may
 be slow.
+
+=head3 Disk access
+
+A single disk can normally read data faster if it reads one file at a
+time instead of reading a lot of files in parallel, as this will avoid
+disk seeks. However, newer disk systems with multiple drives can read
+faster if reading from multiple files in parallel.
+
+If the jobs are of the form read-all-compute-all-write-all, so
+everything is read before anything is written, it may be faster to
+force only one disk access at the time:
+
+  sem --id diskio cat file | compute | sem --id diskio cat > file
+
+If the jobs are of the form read-compute-write, so writing starts
+before all reading is done, it may be faster to force only one reader
+and writer at the time:
+
+  sem --id read cat file | compute | sem --id write cat > file
+
+If the jobs are of the form read-compute-read-compute, it may be
+faster to run more jobs in parallel than the system has CPUs, as some
+of the jobs will be stuck waiting for disk access.
 
 =head2 --nice limits command length
 
 The current implementation of B<--nice> is too pessimistic in the max
 allowed command length. It only uses a little more than half of what
-it could. This affects -X and -m. If this becomes a real problem for
+it could. This affects B<-X> and B<-m>. If this becomes a real problem for
 you file a bug-report.
 
 =head2 Aliases and functions do not work
