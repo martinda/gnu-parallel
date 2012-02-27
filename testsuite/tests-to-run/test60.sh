@@ -43,4 +43,8 @@ echo '### Test --wd .';
   ssh $SSHLOGIN2 mkdir -p mydir; 
   mkdir -p $HOME/mydir; cd $HOME/mydir; 
   parallel --workdir . -S $SSHLOGIN2 ::: pwd
+
+echo '### bug #35544: --pipe would read from :::: (-a)'; 
+  parallel -j1 --pipe echo foo\;cat ::: a b c :::: <(seq 3) <(seq 4 6)
+
 EOF

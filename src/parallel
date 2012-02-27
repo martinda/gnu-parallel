@@ -156,7 +156,7 @@ if($Global::semaphore) {
 $SIG{TERM} = \&start_no_new_jobs;
 start_more_jobs();
 if($::opt_pipe) {
-    spreadstdin();
+    spreadstdin(@fhlist);
 }
 reap_if_needed();
 ::debug("Start draining\n");
@@ -177,6 +177,7 @@ sub __PIPE_MODE__ {}
 sub spreadstdin {
     # read a record
     # Spawn a job and print the record to it.
+    my @fhlist = @_; # Filehandles to read from (Defaults to STDIN)
     my $record;
     my $buf = "";
     my $header = "";
@@ -220,7 +221,8 @@ sub spreadstdin {
     my $recendrecstart = $recend.$recstart;
     # Force the while-loop once if everything was read by header reading
     my $force_one_time_through = 0;
-    while(!$force_one_time_through++ or read(STDIN,substr($buf,length $buf,0),$::opt_blocksize)) {
+    for my $in (@fhlist) {
+    while(!$force_one_time_through++ or read($in,substr($buf,length $buf,0),$::opt_blocksize)) {
 	# substr above = append to $buf
 	reap_if_needed(); # Re-enable reaping after read() (Bug#33352)
 	if($::opt_r) {
@@ -269,13 +271,15 @@ sub spreadstdin {
 		}
 	    }
 	}
-	do_not_reap(); # Disable reaping before read(STDIN) (Bug#33352)
+	do_not_reap(); # Disable reaping before read($in) (Bug#33352)
     }
+}
+
     # If there is anything left in the buffer write it
     substr($buf,0,0) = $header;
     write_record_to_pipe(\$buf,$recstart,$recend);
 
-    ::debug("Done reading STDIN\n");
+    ::debug("Done reading input\n");
     flush_and_close_pipes();
     ::debug("Done flushing to children\n");
     $Global::start_no_new_jobs = 1;

@@ -70,3 +70,16 @@ vm1
 /home/parallel/mydir
 ### Test --wd .
 /home/parallel/mydir
+### bug #35544: --pipe would read from :::: (-a)
+foo
+a
+b
+c
+foo
+1
+2
+3
+foo
+4
+5
+6
