@@ -61,15 +61,18 @@ if(not defined $::opt_run_noswap) { $::opt_run_noswap = $::opt_noswap; }
 
 my $limit = Limit->new();
 my $process = Process->new($::opt_nice,@ARGV);
-if(not $::opt_pid) {
+if($::opt_pid) {
+    $process->set_pid($::opt_pid);
+} elsif (@ARGV) {
     # Wait until limit is below start_limit and run_limit
     while($limit->over_start_limit()
 	  or
 	  ($limit->hard() and $limit->over_run_limit())) {
 	$limit->sleep_for_recheck();
     }
+    $process->start();
 }
-$process->start();
+
 while($process->is_alive()) {
     if($limit->over_run_limit()) {
 	$process->suspend();
@@ -272,6 +275,13 @@ sub new {
     }, ref($class) || $class;
 }
 
+sub set_pid {
+    my $self = shift;
+    $self->{'pid'} = shift;
+    push(@{$self->{'pids'}},$self->{'pid'});
+    $self->{'running'} = 1;
+    $::exitstatus = 0;
+}
 
 sub start {
     # Start the program
@@ -347,6 +357,8 @@ sub resume {
     if(not $self->{'running'}) {
 	# - = PID group
 	map { kill "CONT", -$_ } @{$self->{'pids'}};
+	# If using -p it is not in a group
+	map { kill "CONT", $_ } @{$self->{'pids'}};
 	$self->{'running'} = 1;
     }
 }
@@ -358,6 +370,8 @@ sub suspend {
     if($self->{'running'}) {
 	# - = PID group
 	map { kill "STOP", -$_ } @{$self->{'pids'}};
+	# If using -p it is not in a group
+	map { kill "STOP", $_ } @{$self->{'pids'}};
 	$self->{'running'} = 0;
     }
 }
