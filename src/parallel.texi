@@ -29,7 +29,7 @@ parallel - build and execute shell command lines from standard input in parallel
 @anchor{DESCRIPTION}
 
 GNU @strong{parallel} is a shell tool for executing jobs in parallel using
-one or more computers. A job is can be a single command or a small
+one or more computers. A job can be a single command or a small
 script that has to be run for each of the lines in the input. The
 typical input is a list of files, a list of hosts, a list of users, a
 list of URLs, or a list of tables. A job can also be a command that
@@ -560,7 +560,7 @@ use @strong{-I} instead.
 @item @strong{--joblog} @emph{logfile}
 @anchor{@strong{--joblog} @emph{logfile}}
 
-Logfile for executed jobs. Saved a list of the executed jobs to
+Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
 sshlogin, start time as seconds since epoch, run time in seconds,
 bytes in files transfered, bytes in files returned, exit status,
@@ -886,7 +886,7 @@ important.
 @item @strong{--max-line-length-allowed}
 @anchor{@strong{--max-line-length-allowed}}
 
-Print the maximal number characters allowed on the command line and
+Print the maximal number of characters allowed on the command line and
 exit (used by GNU @strong{parallel} itself to determine the line length
 on remote computers).
 
@@ -3344,16 +3344,16 @@ echo 1,2,3 | parallel -vkd, "echo 'a'"@{@}"'b'"
 @anchor{Startup}
 
 GNU @strong{parallel} is slow at starting up - around 250 ms. Half of the
-startup time on the local computer is spent finding the maximal length
-of a command line. Setting @strong{-s} will remove this part of the startup
-time.
+startup time is spent finding the maximal length of a command
+line. Setting @strong{-s} will remove this part of the startup time.
 
 @subsection Job startup
 @anchor{Job startup}
 
-Starting a job takes around 3 ms. This can be a big overhead if the
-job takes very few ms to run. Often you can group small jobs together
-using @strong{-X} which will make the overhead less significant.
+Starting a job on the local machine takes around 3 ms. This can be a
+big overhead if the job takes very few ms to run. Often you can group
+small jobs together using @strong{-X} which will make the overhead less
+significant.
 
 Using @strong{--ungroup} the 3 ms can be lowered to around 2 ms.
 
@@ -3365,6 +3365,10 @@ to them to figure out how many connections can be used reliably
 simultaneously (Namely SSHD's MaxStartup). This test is done for each
 host in serial, so if your @strong{--sshloginfile} contains many hosts it may
 be slow.
+
+If your jobs are short you may see that there are fewer jobs running
+on the remove systems than expected. This is due to time spent logging
+in and out. @strong{-M} may help here.
 
 @subsection Disk access
 @anchor{Disk access}
@@ -3414,10 +3418,10 @@ or:
 @strong{open3: exec of by @emph{command} failed}
 
 it may be because @emph{command} is not known, but it could also be
-because @emph{command} is an alias or a function. GNU @strong{parallel} will
-never support running aliases and functions (see why
-http://www.perlmonks.org/index.pl?node_id=484296), so change your
-alias or function to a script.
+because @emph{command} is an alias or a function. If it is a function you
+need to @strong{export -f} the function first. An alias will, however, not
+work (see why http://www.perlmonks.org/index.pl?node_id=484296), so
+change your alias to a script.
 
 @chapter REPORTING BUGS
 @anchor{REPORTING BUGS}
@@ -3434,14 +3438,16 @@ fixed in that version.
 
 @item A complete example that others can run that shows the problem. A
 combination of @strong{seq}, @strong{cat}, @strong{echo}, and @strong{sleep} can reproduce
-most errors. If you example requires large files, see if you can use
-make them by something like @strong{seq 1000000}>@strong{file}.
+most errors. If your example requires large files, see if you can make
+them by something like @strong{seq 1000000}>@strong{file}.
 
 @end itemize
 
 If you suspect the error is dependent on your distribution, please see
-if you can reproduce the error on one of these distibutions:
-http://sourceforge.net/projects/virtualboximage/files/
+if you can reproduce the error on one of these VirtualBox images:
+http://sourceforge.net/projects/virtualboximage/files/ Specifying the
+name of your distribution is not enough as you may have installed
+software that is not the the VirtualBox images.
 
 @chapter AUTHOR
 @anchor{AUTHOR}

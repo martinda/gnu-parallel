@@ -19,3 +19,6 @@ echo '### Test --return with fixed string (Gave undef warnings)'
 touch a
 echo a | stdout parallel --return b -S .. echo ">b" && echo OK
 rm a b
+
+echo '### bug #35427: quoting of {2} broken for --onall'
+echo foo: /bin/ls | parallel --colsep ' ' -S localhost --onall ls {2}

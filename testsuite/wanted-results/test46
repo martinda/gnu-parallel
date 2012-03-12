@@ -4,3 +4,5 @@ original
 original
 ### Test --return with fixed string (Gave undef warnings)
 OK
+### bug #35427: quoting of {2} broken for --onall
+/bin/ls

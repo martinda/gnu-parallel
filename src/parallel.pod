@@ -20,7 +20,7 @@ B<#!/usr/bin/parallel> --shebang [options] [I<command> [arguments]]
 =head1 DESCRIPTION
 
 GNU B<parallel> is a shell tool for executing jobs in parallel using
-one or more computers. A job is can be a single command or a small
+one or more computers. A job can be a single command or a small
 script that has to be run for each of the lines in the input. The
 typical input is a list of files, a list of hosts, a list of users, a
 list of URLs, or a list of tables. A job can also be a command that
@@ -527,7 +527,7 @@ use B<-I> instead.
 
 =item B<--joblog> I<logfile>
 
-Logfile for executed jobs. Saved a list of the executed jobs to
+Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
 sshlogin, start time as seconds since epoch, run time in seconds,
 bytes in files transfered, bytes in files returned, exit status,
@@ -827,7 +827,7 @@ important.
 
 =item B<--max-line-length-allowed>
 
-Print the maximal number characters allowed on the command line and
+Print the maximal number of characters allowed on the command line and
 exit (used by GNU B<parallel> itself to determine the line length
 on remote computers).
 
@@ -3138,15 +3138,15 @@ echo 1,2,3 | parallel -vkd, "echo 'a'"{}"'b'"
 =head3 Startup
 
 GNU B<parallel> is slow at starting up - around 250 ms. Half of the
-startup time on the local computer is spent finding the maximal length
-of a command line. Setting B<-s> will remove this part of the startup
-time.
+startup time is spent finding the maximal length of a command
+line. Setting B<-s> will remove this part of the startup time.
 
 =head3 Job startup
 
-Starting a job takes around 3 ms. This can be a big overhead if the
-job takes very few ms to run. Often you can group small jobs together
-using B<-X> which will make the overhead less significant.
+Starting a job on the local machine takes around 3 ms. This can be a
+big overhead if the job takes very few ms to run. Often you can group
+small jobs together using B<-X> which will make the overhead less
+significant.
 
 Using B<--ungroup> the 3 ms can be lowered to around 2 ms.
 
@@ -3157,6 +3157,10 @@ to them to figure out how many connections can be used reliably
 simultaneously (Namely SSHD's MaxStartup). This test is done for each
 host in serial, so if your B<--sshloginfile> contains many hosts it may
 be slow.
+
+If your jobs are short you may see that there are fewer jobs running
+on the remove systems than expected. This is due to time spent logging
+in and out. B<-M> may help here.
 
 =head3 Disk access
 
@@ -3199,10 +3203,10 @@ or:
 B<open3: exec of by I<command> failed>
 
 it may be because I<command> is not known, but it could also be
-because I<command> is an alias or a function. GNU B<parallel> will
-never support running aliases and functions (see why
-http://www.perlmonks.org/index.pl?node_id=484296), so change your
-alias or function to a script.
+because I<command> is an alias or a function. If it is a function you
+need to B<export -f> the function first. An alias will, however, not
+work (see why http://www.perlmonks.org/index.pl?node_id=484296), so
+change your alias to a script.
 
 
 =head1 REPORTING BUGS
@@ -3224,14 +3228,16 @@ fixed in that version.
 
 A complete example that others can run that shows the problem. A
 combination of B<seq>, B<cat>, B<echo>, and B<sleep> can reproduce
-most errors. If you example requires large files, see if you can use
-make them by something like B<seq 1000000>>B<file>.
+most errors. If your example requires large files, see if you can make
+them by something like B<seq 1000000>>B<file>.
 
 =back
 
 If you suspect the error is dependent on your distribution, please see
-if you can reproduce the error on one of these distibutions:
-http://sourceforge.net/projects/virtualboximage/files/
+if you can reproduce the error on one of these VirtualBox images:
+http://sourceforge.net/projects/virtualboximage/files/ Specifying the
+name of your distribution is not enough as you may have installed
+software that is not the the VirtualBox images.
 
 
 =head1 AUTHOR

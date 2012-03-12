@@ -53,5 +53,3 @@ seq 1 11 | parallel -k -j10000% -S "ssh $SSHLOGIN1" echo
 
 echo '### Check -S syntax'
 seq 1 11 | parallel -k -j100% -S "/:" echo
-
-
