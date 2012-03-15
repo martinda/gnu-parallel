@@ -63,8 +63,9 @@ Command to execute.  If I<command> or the following arguments contain
 replacement strings (such as B<{}>) every instance will be substituted
 with the input.
 
-If I<command> is given, GNU B<parallel> will behave similar to B<xargs>. If
-I<command> is not given GNU B<parallel> will behave similar to B<cat | sh>.
+If I<command> is given, GNU B<parallel> solve the same tasks as
+B<xargs>. If I<command> is not given GNU B<parallel> will behave
+similar to B<cat | sh>.
 
 The I<command> must be an executable, a script, a composed command, or
 a function. If it is a function you need to B<export -f> the function
@@ -178,6 +179,18 @@ This positional replacement string will be replaced by the input from
 input source I<n> (when used with B<-a> or B<::::>) or with the
 I<n>'th argument (when used with B<-N>). The input will have the
 directory (if any) removed.
+
+To understand positional replacement strings see B<{>I<n>B<}>.
+
+
+=item B<{>I<n>//B<}>
+
+Dirname of argument from input source I<n> or the I<n>'th argument.
+It is a combination of B<{>I<n>B<}> and B<{//}>.
+
+This positional replacement string will be replaced by the dir of the
+input from input source I<n> (when used with B<-a> or B<::::>) or with
+the I<n>'th argument (when used with B<-N>). See B<dirname>(1).
 
 To understand positional replacement strings see B<{>I<n>B<}>.
 
@@ -562,10 +575,8 @@ If B<--semaphore> is set default is 1 thus making a mutex.
 
 =item B<-P> I<+N>
 
-Add N to the number of CPU cores.  Run this many jobs in parallel. For
-compute intensive jobs B<-j> +0 is useful as it will run
-number-of-cpu-cores jobs simultaneously. See also
-B<--use-cpus-instead-of-cores>.
+Add N to the number of CPU cores.  Run this many jobs in parallel.
+See also B<--use-cpus-instead-of-cores>.
 
 
 =item B<--jobs> I<-N>
@@ -3230,15 +3241,16 @@ fixed in that version.
 A complete example that others can run that shows the problem. A
 combination of B<seq>, B<cat>, B<echo>, and B<sleep> can reproduce
 most errors. If your example requires large files, see if you can make
-them by something like B<seq 1000000>>B<file>.
+them by something like B<seq 1000000> > B<file>.
 
 =back
 
 If you suspect the error is dependent on your distribution, please see
 if you can reproduce the error on one of these VirtualBox images:
-http://sourceforge.net/projects/virtualboximage/files/ Specifying the
-name of your distribution is not enough as you may have installed
-software that is not the the VirtualBox images.
+http://sourceforge.net/projects/virtualboximage/files/
+
+Specifying the name of your distribution is not enough as you may have
+installed software that is not in the VirtualBox images.
 
 
 =head1 AUTHOR

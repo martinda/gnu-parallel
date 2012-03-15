@@ -74,8 +74,9 @@ Command to execute.  If @emph{command} or the following arguments contain
 replacement strings (such as @strong{@{@}}) every instance will be substituted
 with the input.
 
-If @emph{command} is given, GNU @strong{parallel} will behave similar to @strong{xargs}. If
-@emph{command} is not given GNU @strong{parallel} will behave similar to @strong{cat | sh}.
+If @emph{command} is given, GNU @strong{parallel} solve the same tasks as
+@strong{xargs}. If @emph{command} is not given GNU @strong{parallel} will behave
+similar to @strong{cat | sh}.
 
 The @emph{command} must be an executable, a script, a composed command, or
 a function. If it is a function you need to @strong{export -f} the function
@@ -189,6 +190,18 @@ This positional replacement string will be replaced by the input from
 input source @emph{n} (when used with @strong{-a} or @strong{::::}) or with the
 @emph{n}'th argument (when used with @strong{-N}). The input will have the
 directory (if any) removed.
+
+To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
+
+@item @strong{@{}@emph{n}//@strong{@}}
+@anchor{@strong{@{}@emph{n}//@strong{@}}}
+
+Dirname of argument from input source @emph{n} or the @emph{n}'th argument.
+It is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{//@}}.
+
+This positional replacement string will be replaced by the dir of the
+input from input source @emph{n} (when used with @strong{-a} or @strong{::::}) or with
+the @emph{n}'th argument (when used with @strong{-N}). See @strong{dirname}(1).
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
 
@@ -601,10 +614,8 @@ If @strong{--semaphore} is set default is 1 thus making a mutex.
 @item @strong{-P} @emph{+N}
 @anchor{@strong{-P} @emph{+N}}
 
-Add N to the number of CPU cores.  Run this many jobs in parallel. For
-compute intensive jobs @strong{-j} +0 is useful as it will run
-number-of-cpu-cores jobs simultaneously. See also
-@strong{--use-cpus-instead-of-cores}.
+Add N to the number of CPU cores.  Run this many jobs in parallel.
+See also @strong{--use-cpus-instead-of-cores}.
 
 @item @strong{--jobs} @emph{-N}
 @anchor{@strong{--jobs} @emph{-N}}
@@ -706,11 +717,12 @@ Implies @strong{-X} unless @strong{-m} is set.
 
 Do not start new jobs on a given computer unless the load is less than
 @emph{max-load}. @emph{max-load} uses the same syntax as @strong{--jobs}, so @emph{100%}
-for one per CPU is a valid setting. Only difference is 0 which
-actually means 0.
+for one per CPU is a valid setting. Only difference is 0 which is
+interpreted as 0.01.
 
-The load average is only sampled every 10 seconds to avoid stressing
-small computers.
+The load average is only sampled every 10 seconds using @strong{uptime} to
+avoid stressing small computers. Only the first (1 minute) load is
+used.
 
 @item @strong{--controlmaster} (experimental)
 @anchor{@strong{--controlmaster} (experimental)}
@@ -3439,15 +3451,16 @@ fixed in that version.
 @item A complete example that others can run that shows the problem. A
 combination of @strong{seq}, @strong{cat}, @strong{echo}, and @strong{sleep} can reproduce
 most errors. If your example requires large files, see if you can make
-them by something like @strong{seq 1000000}>@strong{file}.
+them by something like @strong{seq 1000000} > @strong{file}.
 
 @end itemize
 
 If you suspect the error is dependent on your distribution, please see
 if you can reproduce the error on one of these VirtualBox images:
-http://sourceforge.net/projects/virtualboximage/files/ Specifying the
-name of your distribution is not enough as you may have installed
-software that is not the the VirtualBox images.
+http://sourceforge.net/projects/virtualboximage/files/
+
+Specifying the name of your distribution is not enough as you may have
+installed software that is not in the VirtualBox images.
 
 @chapter AUTHOR
 @anchor{AUTHOR}
