@@ -653,11 +653,12 @@ Implies B<-X> unless B<-m> is set.
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
-for one per CPU is a valid setting. Only difference is 0 which
-actually means 0.
+for one per CPU is a valid setting. Only difference is 0 which is
+interpreted as 0.01.
 
-The load average is only sampled every 10 seconds to avoid stressing
-small computers.
+The load average is only sampled every 10 seconds using B<uptime> to
+avoid stressing small computers. Only the first (1 minute) load is
+used.
 
 
 =item B<--controlmaster> (experimental)
