@@ -3160,10 +3160,10 @@ echo tar cf /backup/myhome.tar /home/me >> /var/run/my_named_pipe
 support running jobs on remote computers.
 
 @strong{prll} encourages using BASH aliases and BASH functions instead of
-scripts. GNU @strong{parallel} will never support running aliases and
-functions (see why
-http://www.perlmonks.org/index.pl?node_id=484296). However, scripts or
-composed commands work just fine.
+scripts. GNU @strong{parallel} will never support running aliases (see why
+http://www.perlmonks.org/index.pl?node_id=484296). However, scripts,
+composed commands, or functions exported with @strong{export -f} work just
+fine.
 
 @strong{prll} generates a lot of status information on stderr (standard
 error) which makes it harder to use the stderr (standard error) output
@@ -3317,9 +3317,10 @@ using GNU @strong{parallel}:
 
 ClusterSSH solves a different problem than GNU @strong{parallel}.
 
-ClusterSSH runs the same command with the same arguments on a list of
-computers - one per computer. This is typically used for administrating
-several computers that are almost identical.
+ClusterSSH opens a terminal window for each computer and using a
+master window you can run the same command on all the computers. This
+is typically used for administrating several computers that are almost
+identical.
 
 GNU @strong{parallel} runs the same (or different) commands with different
 arguments in parallel possibly using remote computers to help
@@ -3329,7 +3330,7 @@ computer has 8 cores).
 
 GNU @strong{parallel} can be used as a poor-man's version of ClusterSSH:
 
-@strong{cat hostlist | parallel ssh @{@} do_stuff}
+@strong{parallel --nonall -S server-a,server-b do_stuff foo bar}
 
 @chapter BUGS
 @anchor{BUGS}
