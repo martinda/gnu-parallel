@@ -89,7 +89,7 @@ seq 1 10 >/tmp/$$-1; parallel -k -a /tmp/$$-1 echo
 seq 1 10 >/tmp/$$-2; parallel -k --arg-file /tmp/$$-2 echo
 
 echo '### Test killing children with --timeout and exit value (failed if timed out)'
-pstree |grep sleep | wc; parallel --timeout 3 'true {} ; for i in `seq 100 120`; do bash -c "(sleep $i)" & sleep $i & done; wait; echo No good' ::: 1000000000 1000000001 ; echo $?; pstree |grep sleep | wc
+pstree | grep sleep | grep -v anacron | wc; parallel --timeout 3 'true {} ; for i in `seq 100 120`; do bash -c "(sleep $i)" & sleep $i & done; wait; echo No good' ::: 1000000000 1000000001 ; echo $?; pstree | grep sleep | grep -v anacron | wc
 EOF
 
 #echo '### Test bugfix if no command given'

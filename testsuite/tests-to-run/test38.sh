@@ -5,7 +5,8 @@ echo '### Test with old perl libs'
 PERL5LIB=input-files/perllib:../input-files/perllib; export PERL5LIB
 
 echo '### See if we get compile error'
-echo perl | stdout parallel echo
+PATH=input-files/perllib:../input-files/perllib:$PATH
+perl32 `which parallel` ::: 'echo perl'
 echo '### See if we read modules outside perllib'
 echo perl | stdout strace -ff parallel echo | grep open | grep perl | grep -v input-files/perllib
 
