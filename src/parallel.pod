@@ -513,7 +513,7 @@ status will be the exit status from the failing job.
 =back
 
 
-=item B<--header> I<regexp> (beta  testing)
+=item B<--header> I<regexp>
 
 Use upto regexp as header. For normal usage the matched header
 (typically the first line: B<--header '\n'>) will be split using
@@ -949,7 +949,7 @@ it to the command.
 Only used with B<--pipe>.
 
 
-=item B<--resume> (beta testing)
+=item B<--resume>
 
 Resumes from the last unfinished job. By reading B<--joblog> GNU
 B<parallel> will figure out the last unfinished job and continue from
@@ -1126,9 +1126,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename> (beta testing)
+=item B<--sshloginfile> I<filename>
 
-=item B<--slf> I<filename> (beta testing)
+=item B<--slf> I<filename>
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1334,9 +1334,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (alpha testing)
+=item B<--workdir> I<mydir> (beta testing)
 
-=item B<--wd> I<mydir> (alpha testing)
+=item B<--wd> I<mydir> (beta testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in

@@ -181,8 +181,14 @@ for stable long-term use.
 
 New in this release:
 
-* Using GNU Parallel to process images from Mars:
+* Parallel Process Database Dumps.
+  http://blog.mattoates.co.uk/2012/02/parallel-process-database-dumps.html
+
+* Using GNU Parallel to process images from Mars.
   http://lunokhod.org/?p=468
+
+* Using GNU Parallel with bzgrep.
+  http://filip.rembialkowski.net/did-you-know-gnu-parallel/
 
 * Bug fixes and man page updates.
 

@@ -1,3 +1,17 @@
+20120322
+
+* Parallel Process Database Dumps.
+  http://blog.mattoates.co.uk/2012/02/parallel-process-database-dumps.html
+
+* Using GNU Parallel to process images from Mars.
+  http://lunokhod.org/?p=468
+
+* Using GNU Parallel with bzgrep.
+  http://filip.rembialkowski.net/did-you-know-gnu-parallel/
+
+* Bug fixes and man page updates.
+
+
 20120222
 
 * --workdir . will use the current working dir. If the current working

@@ -544,8 +544,8 @@ status will be the exit status from the failing job.
 
 @end table
 
-@item @strong{--header} @emph{regexp} (beta  testing)
-@anchor{@strong{--header} @emph{regexp} (beta  testing)}
+@item @strong{--header} @emph{regexp}
+@anchor{@strong{--header} @emph{regexp}}
 
 Use upto regexp as header. For normal usage the matched header
 (typically the first line: @strong{--header '\n'}) will be split using
@@ -1014,8 +1014,8 @@ it to the command.
 
 Only used with @strong{--pipe}.
 
-@item @strong{--resume} (beta testing)
-@anchor{@strong{--resume} (beta testing)}
+@item @strong{--resume}
+@anchor{@strong{--resume}}
 
 Resumes from the last unfinished job. By reading @strong{--joblog} GNU
 @strong{parallel} will figure out the last unfinished job and continue from
@@ -1202,11 +1202,11 @@ The remote host must have GNU @strong{parallel} installed.
 @strong{--sshlogin} is often used with @strong{--transfer}, @strong{--return},
 @strong{--cleanup}, and @strong{--trc}.
 
-@item @strong{--sshloginfile} @emph{filename} (beta testing)
-@anchor{@strong{--sshloginfile} @emph{filename} (beta testing)}
+@item @strong{--sshloginfile} @emph{filename}
+@anchor{@strong{--sshloginfile} @emph{filename}}
 
-@item @strong{--slf} @emph{filename} (beta testing)
-@anchor{@strong{--slf} @emph{filename} (beta testing)}
+@item @strong{--slf} @emph{filename}
+@anchor{@strong{--slf} @emph{filename}}
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1425,11 +1425,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir} (alpha testing)
-@anchor{@strong{--workdir} @emph{mydir} (alpha testing)}
+@item @strong{--workdir} @emph{mydir} (beta testing)
+@anchor{@strong{--workdir} @emph{mydir} (beta testing)}
 
-@item @strong{--wd} @emph{mydir} (alpha testing)
-@anchor{@strong{--wd} @emph{mydir} (alpha testing)}
+@item @strong{--wd} @emph{mydir} (beta testing)
+@anchor{@strong{--wd} @emph{mydir} (beta testing)}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in

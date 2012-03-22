@@ -548,7 +548,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120224;
+    $Global::version = 20120322;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1022,8 +1022,9 @@ sub enough_file_handles {
         my %fh;
         my $enough_filehandles = 1;
         # We need a filehandle for STDOUT and STDERR
+	# perl uses 7 filehandles for something?
         # open3 uses 2 extra filehandles temporarily
-        for my $i (1..6) {
+        for my $i (1..8) {
             $enough_filehandles &&= open($fh{$i},"</dev/null");
         }
         for (values %fh) { close $_; }
