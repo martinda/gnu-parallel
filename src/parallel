@@ -2222,6 +2222,7 @@ sub loadavg {
     my $update_loadavg_file = 0;
     if(-r $self->{'loadavg_file'}) {
         open(UPTIME,"<".$self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
+	local $/ = undef;
         my $uptime_out = <UPTIME>;
         close UPTIME;
         # load average: 0.76, 1.53, 1.45
@@ -2249,9 +2250,9 @@ sub loadavg {
         -e $ENV{'HOME'}."/.parallel/tmp" or mkdir $ENV{'HOME'}."/.parallel/tmp";
         my $uptime;
         if($self->{'string'} eq ":") {
-            $uptime = "uptime";
+            $uptime = "LANG=C uptime";
         } else {
-            $uptime = $self->sshcommand() . " " . $self->serverlogin() . " uptime";
+            $uptime = $self->sshcommand() . " " . $self->serverlogin() . " LANG=C uptime";
         }
         # Run uptime.
         # As the command can take long to run if run remote

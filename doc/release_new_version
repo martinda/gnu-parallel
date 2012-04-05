@@ -171,9 +171,9 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20120322 ('#518696') released
+Subject: GNU Parallel 20120422 ('') released
 
-GNU Parallel 20120322 ('#518696') has been released. It is
+GNU Parallel 20120422 ('') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 This is a bugfix release with no new features. Probably a good release
@@ -181,14 +181,8 @@ for stable long-term use.
 
 New in this release:
 
-* Parallel Process Database Dumps.
-  http://blog.mattoates.co.uk/2012/02/parallel-process-database-dumps.html
-
-* Using GNU Parallel to process images from Mars.
-  http://lunokhod.org/?p=468
-
-* Using GNU Parallel with bzgrep.
-  http://filip.rembialkowski.net/did-you-know-gnu-parallel/
+* Blog post: GNU parallel - the best thing since sliced bread.
+  https://arrayal.wordpress.com/2012/03/27/gnu-parallel-the-best-thing-since-sliced-bread/
 
 * Bug fixes and man page updates.
 
