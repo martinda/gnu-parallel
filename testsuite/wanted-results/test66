@@ -1,0 +1,28 @@
+### Test : as delimiter. This can be confusing for uptime ie. --load
+a
+b
+c
+PARALLEL=--load 100%
+      4       4       8
+1c0f34fee7176dc367bead8f96cba6bc  -
+      9       9      18
+fa364205fcf6665c6f3e6cb868f65fd6  -
+     16      16      39
+6f5db0373227d2281dc26b1bf63b4027  -
+     25      25      66
+17e914b4a407dccd370c13173865deb1  -
+     36      36      99
+5ee21398ecde0f3ea9b6093fbaf5a3c2  -
+     49      49     138
+2af8be7306df18164a68e30e427217e0  -
+     64      64     183
+f78c5b3d13146c60c9b586f51d05a4ae  -
+     81      81     234
+c88e1757ddc619efd9ee507a7702b53c  -
+    100     100     292
+8a7095c1c23bfadc311fe6b16d950582  -
+### Test if --load blocks. Bug.
+53d025127ae99ab79e8502aae2d9bea6  -
+53d025127ae99ab79e8502aae2d9bea6  -
+8a7095c1c23bfadc311fe6b16d950582  -
+8a7095c1c23bfadc311fe6b16d950582  -

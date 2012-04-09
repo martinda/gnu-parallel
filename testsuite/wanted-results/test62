@@ -1,4 +1,3 @@
-### Test --joblog with exitval
-OK
-### Test --joblog with signal
-OK
+### Test --joblog with exitval and Test --joblog with signal
+exitval OK
+signal OK

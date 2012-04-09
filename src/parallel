@@ -42,7 +42,6 @@ if(not $ENV{SHELL}) {
 $SIG{TERM} = sub {}; # Dummy until jobs really start
 open $Global::original_stderr, ">&STDERR" or ::die_bug("Can't dup STDERR: $!");
 
-do_not_reap();
 parse_options();
 my $number_of_args;
 if($Global::max_number_of_args) {
@@ -159,10 +158,10 @@ start_more_jobs();
 if($::opt_pipe) {
     spreadstdin(@fhlist);
 }
-reap_if_needed();
 ::debug("Start draining\n");
 drain_job_queue();
 ::debug("Done draining\n");
+reaper();
 cleanup();
 if($Global::semaphore) {
     $sem->release();
@@ -225,7 +224,6 @@ sub spreadstdin {
     for my $in (@fhlist) {
     while(!$force_one_time_through++ or read($in,substr($buf,length $buf,0),$::opt_blocksize)) {
 	# substr above = append to $buf
-	reap_if_needed(); # Re-enable reaping after read() (Bug#33352)
 	if($::opt_r) {
 	    # Remove empty lines
 	    $buf=~s/^\s*\n//gm;
@@ -267,12 +265,11 @@ sub spreadstdin {
 		    $i += length $recend; # find the actual splitting location
 		    my $record = $header.substr($buf,0,$i);
 		    substr($buf,0,$i) = "";
-		    ::debug("Read record: ".length($record)."\n");
+		    # ::debug("Read record: ".length($record)."\n");
 		    write_record_to_pipe(\$record,$recstart,$recend);
 		}
 	    }
 	}
-	do_not_reap(); # Disable reaping before read($in) (Bug#33352)
     }
 }
 
@@ -309,7 +306,6 @@ sub flush_and_close_pipes {
     do {
 	$flush_done = 1;
 	# Make sure everything is written to the jobs
-	do_not_reap();
 	for my $job (values %Global::running) {
 	    if($job->remaining()) {
 		if($job->complete_write()) {
@@ -319,16 +315,12 @@ sub flush_and_close_pipes {
 		$flush_done = 0;
 	    }
 	}
-	reap_if_needed();
-	usleep($sleep);
-	$sleep *= 1.1; # exponential back off
+	$sleep = ::reap_usleep($sleep);
     } while (not $flush_done);
-    do_not_reap();
     for my $job (values %Global::running) {
 	my $fh = $job->stdin();
 	close $fh;
     }
-    reap_if_needed();
 }
 
 sub write_record_to_pipe {
@@ -346,7 +338,6 @@ sub write_record_to_pipe {
     my $sleep = 0.00001; # 0.00001 ms - better performance on highend
   write_record: while(1) {
 	  # Sorting according to sequence is necessary for -k to work
-	  do_not_reap(); # If Global::running is changed the for loop has a race condition
 	  for my $job (sort { $a->seq() <=> $b->seq() } values %Global::running) {
 	      ::debug("Looking at ",$job->seq(),"-",$job->remaining(),"-",$job->datawritten(),"\n");
 	      if($job->remaining()) {
@@ -371,13 +362,10 @@ sub write_record_to_pipe {
 		  }
 	      }
 	  }
-	  # Force reaping as sigchild is sometimes forgotten;
-	  if(not reaper()) {
-	      usleep($sleep);
-	      $sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep); # exponential back off
-	  }
-      }
-    reap_if_needed();
+	  # Maybe this should be in an if statement: if sleep > 0.001: start more
+	  start_more_jobs(); # These jobs may not be started because of loadavg
+	  $sleep = ::reap_usleep($sleep);
+  }
     return;
 }
 
@@ -1166,7 +1154,7 @@ sub start_another_job {
 	    debug("Command to run on '".$job->sshlogin()."': '".$job->replaced()."'\n");
             if($job->start()) {
                 $Global::running{$job->pid()} = $job;
-                debug("Started as seq ".$job->seq(),"\n");
+                debug("Started as seq ",$job->seq()," pid:",$job->pid(),"\n");
                 return 1;
             } else {
                 # If interactive says: Dont run the job, then skip it and run the next
@@ -1184,9 +1172,7 @@ sub drain_job_queue {
     # Returns: N/A
     $Private::first_completed ||= time;
     if($::opt_progress) {
-        do_not_reap();
         print $Global::original_stderr init_progress();
-        reap_if_needed();
     }
     my $last_header="";
     my $sleep = 0.2;
@@ -1195,9 +1181,6 @@ sub drain_job_queue {
             debug("jobs running: ", $Global::total_running, "==", scalar
 		  keys %Global::running," slots: ", $Global::max_jobs_running,
 		  " Memory usage:".my_memory_usage()." ");
-	    $sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
-	    usleep($sleep);
-	    do_not_reap();
 	    if($::opt_pipe) {
 		# When using --pipe sometimes file handles are not closed properly
 		for my $job (values %Global::running) {
@@ -1214,16 +1197,11 @@ sub drain_job_queue {
                 print $Global::original_stderr "\r",$progress{'status'};
             }
             # Sometimes SIGCHLD is not registered, so force reaper
-	    if(reaper()) {
-		# Child finished this time around: Reset sleep time
-		$sleep = 0.2;
-	    }
-	    reap_if_needed();
+	    $sleep = ::reap_usleep($sleep);
         }
         if(not $Global::JobQueue->empty()) {
             start_more_jobs(); # These jobs may not be started because of loadavg
-	    $sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
-            usleep($sleep);
+	    $sleep = ::reap_usleep($sleep);
         }
     } while ($Global::total_running > 0
 	     or
@@ -1633,47 +1611,22 @@ sub start_no_new_jobs {
     $Global::start_no_new_jobs++;
 }
 
-sub count_sig_child {
-    # Returns: N/A
-    $Global::sig_child_caught++;
-}
-
-sub do_not_reap {
-    # This will postpone SIGCHILD for sections that cannot be distracted by a dying child
-    # (Racecondition)
-    # Returns: N/A
-    $SIG{CHLD} = \&count_sig_child;
-}
-
-sub reap_if_needed {
-    # Do the postponed SIGCHILDs if any and re-install normal reaper for SIGCHILD
-    # (Racecondition)
-    # Returns: N/A
-    if($Global::sig_child_caught) {
-        $Global::sig_child_caught = 0;
-        reaper();
-    }
-    $SIG{CHLD} = \&reaper;
-}
-
 sub reaper {
     # A job finished.
     # Print the output.
     # Start another job
     # Returns: N/A
-    do_not_reap();
-    $Private::reaperlevel++;
     my $stiff;
     my $children_reaped = 0;
-    debug("Reaper called $Private::reaperlevel ");
+    debug("Reaper called ");
     while (($stiff = waitpid(-1, &WNOHANG)) > 0) {
 	$children_reaped++;
         if($Global::sshmaster{$stiff}) {
             # This is one of the ssh -M: ignore
             next;
         }
-        # Ignore processes that we did not start
         my $job = $Global::running{$stiff};
+	# '-a <(seq 10)' will give us a pid not in %Global::running
         $job or next;
         $job->set_exitstatus($? >> 8);
         $job->set_exitsignal($? & 127);
@@ -1732,9 +1685,7 @@ sub reaper {
         delete $Global::running{$stiff};
         start_more_jobs();
     }
-    reap_if_needed();
-    debug("Reaper exit $Private::reaperlevel\n");
-    $Private::reaperlevel--;
+    debug("Reaper exit\n");
     return $children_reaped;
 }
 
@@ -1929,6 +1880,21 @@ sub hostname {
         $Private::hostname = $hostname || "nohostname";
     }
     return $Private::hostname;
+}
+
+sub reap_usleep {
+    # Reap dead children.
+    # If no children: Sleep specified amount with exponential backoff
+    # Returns:
+    #   0.00001 if children reaped (0.00001 ms works best on highend)
+    #   $ms*1.1 if no children reaped
+    my $ms = shift;
+    if(reaper()) {
+	return 0.00001;
+    } else {
+	usleep($ms);
+	return (($ms < 1000) ? ($ms * 1.1) : ($ms)); # exponential back off
+    }
 }
 
 sub usleep {
@@ -2244,7 +2210,7 @@ sub loadavg {
         $update_loadavg_file = 1;
     }
     if($update_loadavg_file) {
-        ::debug("Updating loadavg file".$self->{'loadavg_file'});
+        ::debug("Updating loadavg file".$self->{'loadavg_file'}."\n");
         $self->{'last_loadavg_update'} = time;
         -e $ENV{'HOME'}."/.parallel" or mkdir $ENV{'HOME'}."/.parallel";
         -e $ENV{'HOME'}."/.parallel/tmp" or mkdir $ENV{'HOME'}."/.parallel/tmp";
@@ -2372,7 +2338,6 @@ sub processes_available_by_system_limit {
     my $time = time;
     my %fh;
     my @children;
-    ::do_not_reap();
 
     # Reserve filehandles
     # perl uses 7 filehandles for something?

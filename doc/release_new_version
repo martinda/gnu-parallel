@@ -181,8 +181,21 @@ for stable long-term use.
 
 New in this release:
 
+* Article: Computational and experimental analyses of
+  retrotransposon-associated minisatellite DNAs in the soybean genome.
+  http://www.biomedcentral.com/content/supplementary/1471-2105-13-s2-s13-s1.pdf
+
 * Blog post: GNU parallel - the best thing since sliced bread.
   https://arrayal.wordpress.com/2012/03/27/gnu-parallel-the-best-thing-since-sliced-bread/
+
+* Blog post: GNU Parallel makes everything faster.
+  http://compbiously.blogspot.com/2012/03/gnu-parallel-makes-everything-faster.html
+
+* Blog post (German): Howto: GNU parallel.
+  http://d24m.de/2012/04/05/howto-gnu-parallel/
+
+* Blog post: Running in Parallel
+  http://interactivity.ifactory.com/2012/04/running-in-parallel/
 
 * Bug fixes and man page updates.
 
