@@ -411,7 +411,7 @@ sub options_hash {
 	 "joblog=s" => \$::opt_joblog,
 	 "resume" => \$::opt_resume,
 	 "silent" => \$::opt_silent,
-	 "silent-error|silenterror" => \$::opt_silent_error,
+	 #"silent-error|silenterror" => \$::opt_silent_error,
 	 "keep-order|keeporder|k" => \$::opt_k,
 	 "group" => \$::opt_group,
 	 "g" => \$::opt_retired,
@@ -537,7 +537,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120410;
+    $Global::version = 20120420;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4585,7 +4585,7 @@ sub get {
 	    my $line = $arg->orig();
 	    ::debug("line='$line'\n");
 	    if($line ne "") {
-		for my $s (split /$::opt_colsep/o, $line) {
+		for my $s (split /$::opt_colsep/o, $line, -1) {
 		    push @out_record, Arg->new($s);
 		}
 	    } else {

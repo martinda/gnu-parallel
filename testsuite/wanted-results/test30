@@ -18,9 +18,13 @@ Computers / CPU cores / Max jobs to run
 Computers / CPU cores / Max jobs to run
 1:local / 2 / 1
 
+Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
+local:1/0/100%/0.0s 
 ### --timeout on remote machines
 slept 1
 slept 1
 jobs failed: 2
 ### --pipe without command
 parallel: --pipe must have a command to pipe into (e.g. 'cat')
+### bug #36260: {n} expansion in --colsep files fails for empty fields if all following fields are also empty
+AB

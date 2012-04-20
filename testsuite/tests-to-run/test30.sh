@@ -22,4 +22,7 @@ parallel -j0 --timeout 4 --onall -S localhost,parallel@parallel-server1 'sleep {
 
 echo '### --pipe without command'
 seq -w 10 | stdout parallel --pipe
+
+echo '### bug #36260: {n} expansion in --colsep files fails for empty fields if all following fields are also empty'
+echo A,B,, | parallel --colsep , echo {1}{3}{2}
 EOF
