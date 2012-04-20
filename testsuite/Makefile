@@ -13,6 +13,7 @@ testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb
 	niceload true || (echo niceload is required for testsuite; /bin/false)
 	which burnP6 || (echo burnP6 is required for testsuite; /bin/false)
 	which timeout || (echo timeout is required for testsuite; /bin/false)
+	parallel ssh parallel@parallel-server{} parallel --minversion 20100101 ::: 1 2 3 || (echo parallel on remote required for testsuite; /bin/false)
 	time sh Start.sh
 	date
 

@@ -537,7 +537,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120420;
+    $Global::version = 20120421;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2155,9 +2155,11 @@ sub swap_activity {
         -e $ENV{'HOME'}."/.parallel" or mkdir $ENV{'HOME'}."/.parallel";
         -e $ENV{'HOME'}."/.parallel/tmp" or mkdir $ENV{'HOME'}."/.parallel/tmp";
         my $swap_activity;
-	$swap_activity = ("vmstat 1 2 2>/dev/null | tail -n1 | awk '{print \$7*\$8}' || ".
-			  # If the (remote) machine is Mac and the above fails, try this:
-			  "vm_stat 1 | head -n 3 | tail -n1 | awk '{print \$9*\$10}'");
+	# If the (remote) machine is Mac we should use vm_stat
+	# swap_in and swap_out on GNU/Linux is $7 and $8
+	# swap_in and swap_out on Mac is $10 and $11
+	$swap_activity = q[ { vmstat 1 2> /dev/null || vm_stat 1; } | ].
+	    q[ awk 'NR!=4{next} NF==16{print $7*$8} NF==11{print $10*$11} {exit}' ];
         if($self->{'string'} ne ":") {
             $swap_activity = $self->sshcommand() . " " . $self->serverlogin() . " " .
 		::shell_quote_scalar($swap_activity);

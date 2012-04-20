@@ -51,11 +51,11 @@
 3
 ### Test --nonall
 vm1
-vm10
+vm11
 ### Test --nonall -u
-vm10
+vm11
 vm1
-vm10
+vm11
 vm1
 ### Test read sshloginfile from STDIN
 vm1

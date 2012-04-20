@@ -1,9 +1,9 @@
 ### Test of --retries - it should run 13 jobs in total
-13
+12
 ### Test of --retries - it should run 25 jobs in total
-25
+24
 ### Test of --retries - it should run 49 jobs in total
-49
+48
 ### Bug with --retries
 8
 8
