@@ -1334,9 +1334,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (beta testing)
+=item B<--workdir> I<mydir>
 
-=item B<--wd> I<mydir> (beta testing)
+=item B<--wd> I<mydir>
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in

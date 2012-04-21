@@ -815,22 +815,45 @@ sub dblist {
 sub dbsize {
     my $dbdriver = shift;
     my %dburl = @_;
-    my %statement =
-	("mysql" => (
-	     'SELECT '.
-	     '    table_schema "Data Base Name", '.
-             '    SUM(data_length+index_length)/1024/1024 "Data Base Size in MB" '.
-	     'FROM information_schema.TABLES '.
-	     'GROUP BY table_schema;'),
-	 "postgresql" => (
-	     "SELECT ".
-	     "    pg_database_size('".$dburl{'database'}."') AS bytes,".
-	     "    pg_size_pretty(pg_database_size('".$dburl{'database'}."')) AS human_readable;"),
-	 "sqlite" => (
-	     "SELECT ".(undef_as_zero(-s $dburl{'database'}))." AS bytes;"),
-	 "sqlite3" => (
-	     "SELECT ".(undef_as_zero(-s $dburl{'database'}))." AS bytes;"),
-	);
+    my %statement;
+    if(defined $dburl{'database'}) {
+	%statement =
+	    ("mysql" => (
+		 'SELECT '.
+		 '    table_schema "database", '.
+		 '    SUM(data_length+index_length) "bytes", '.
+		 '    SUM(data_length+index_length)/1024/1024 "megabytes" '.
+		 'FROM information_schema.TABLES '.
+		 "WHERE table_schema = '$dburl{'database'}'".
+		 'GROUP BY table_schema;'),
+	     "postgresql" => (
+		 "SELECT '$dburl{'database'}' AS database, ".
+		 "pg_database_size('$dburl{'database'}') AS bytes, ".
+		 "pg_size_pretty(pg_database_size('$dburl{'database'}')) AS human_readabable "),
+	     "sqlite" => (
+		 "SELECT ".(undef_as_zero(-s $dburl{'database'}))." AS bytes;"),
+	     "sqlite3" => (
+		 "SELECT ".(undef_as_zero(-s $dburl{'database'}))." AS bytes;"),
+	    );
+    } else {
+	%statement =
+	    ("mysql" => (
+		 'SELECT '.
+		 '    table_schema "database", '.
+		 '    SUM(data_length+index_length) "bytes", '.
+		 '    SUM(data_length+index_length)/1024/1024 "megabytes" '.
+		 'FROM information_schema.TABLES '.
+		 'GROUP BY table_schema;'),
+	     "postgresql" => (
+		 'SELECT datname AS database, pg_database_size(datname) AS bytes, '.
+		 'pg_size_pretty(pg_database_size(datname)) AS human_readabable '.
+		 'FROM (SELECT datname FROM pg_database) a;'),
+	     "sqlite" => (
+		 "SELECT 0 AS bytes;"),
+	     "sqlite3" => (
+		 "SELECT 0 AS bytes;"),
+	    );
+    }
     if($statement{$dbdriver}) {
 	return $statement{$dbdriver};
     } else {
@@ -840,7 +863,7 @@ sub dbsize {
 }
 
 
-# Return the code for 'show database size' in the chosen database dialect
+# Return the code for 'show table size' in the chosen database dialect
 sub tablesize {
     my $dbdriver = shift;
     my $database = shift;
@@ -1070,5 +1093,4 @@ sub debug {
     print @_;
 }
 
-# TODO --list-databases: psql -l eller '\l'. mysql show databases. Oracle ?
 $::opt_skip_first_line = $::opt_shebang = 0;

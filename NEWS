@@ -1,3 +1,37 @@
+20120422
+
+* A race condition bug caused restructuring of a central piece of the
+  code. Thus this release of GNU Parallel should be considered beta
+  quality.
+
+* sql --dbsize will now list sizes of all databases if given no
+  database.
+
+* Article: Computational and experimental analyses of
+  retrotransposon-associated minisatellite DNAs in the soybean genome.
+  http://www.biomedcentral.com/content/supplementary/1471-2105-13-s2-s13-s1.pdf
+
+* Blog post: GNU parallel - the best thing since sliced bread.
+  https://arrayal.wordpress.com/2012/03/27/gnu-parallel-the-best-thing-since-sliced-bread/
+
+* Blog post: GNU Parallel makes everything faster.
+  http://compbiously.blogspot.com/2012/03/gnu-parallel-makes-everything-faster.html
+
+* Blog post (German): Howto: GNU parallel.
+  http://d24m.de/2012/04/05/howto-gnu-parallel/
+
+* Blog post: Running in Parallel
+  http://interactivity.ifactory.com/2012/04/running-in-parallel/
+
+* 20000 watched the first intro video.
+  http://pi.dk/1
+
+* The first 5 have received their GNU Parallel merchandise
+  https://www.gnu.org/software/parallel/merchandise.html
+
+* Bug fixes and man page updates.
+
+
 20120322
 
 * Parallel Process Database Dumps.
