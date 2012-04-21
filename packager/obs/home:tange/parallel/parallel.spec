@@ -1,6 +1,6 @@
 Summary:	Shell tool for executing jobs in parallel
 Name: 		parallel
-Version: 	20120322
+Version: 	20120422
 Release: 	1
 License: 	GPL
 Group: 		Productivity/File utilities
@@ -80,3 +80,4 @@ rm -rf $RPM_BUILD_ROOT
 - Untested upgrade to current git-version of source.
 * Sat Aug 08 2010 Markus Ammer
 - Initial package setup.
+

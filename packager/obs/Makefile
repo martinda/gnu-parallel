@@ -5,4 +5,4 @@ all:
 	cp `ls ../../parallel-*.tar.bz2|tail -n1` home\:tange/parallel/
 	cd home\:tange/parallel/ && osc up 
 	cd home\:tange/parallel/ && parallel osc add ::: *.spec *.dsc *.tar.gz *.tar.bz2 && echo Src added OK || true
-	cd home\:tange/parallel/ && osc ci
+	cd home\:tange/parallel/ && osc ci -m "New release"

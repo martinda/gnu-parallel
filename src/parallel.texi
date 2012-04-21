@@ -1425,11 +1425,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir} (beta testing)
-@anchor{@strong{--workdir} @emph{mydir} (beta testing)}
+@item @strong{--workdir} @emph{mydir}
+@anchor{@strong{--workdir} @emph{mydir}}
 
-@item @strong{--wd} @emph{mydir} (beta testing)
-@anchor{@strong{--wd} @emph{mydir} (beta testing)}
+@item @strong{--wd} @emph{mydir}
+@anchor{@strong{--wd} @emph{mydir}}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in
