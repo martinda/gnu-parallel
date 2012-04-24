@@ -7,6 +7,9 @@
 * sql --dbsize will now list sizes of all databases if given no
   database.
 
+* GNU Parallel is now in Debian Unstable.
+  apt-get install parallel
+
 * Article: Computational and experimental analyses of
   retrotransposon-associated minisatellite DNAs in the soybean genome.
   http://www.biomedcentral.com/content/supplementary/1471-2105-13-s2-s13-s1.pdf

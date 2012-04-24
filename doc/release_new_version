@@ -113,7 +113,7 @@ pod2html src/niceload.pod > ../parallel-web/parallel/niceload.html
 pod2html src/sem.pod > ../parallel-web/parallel/sem.html
 pushd ../parallel-web/parallel
 cvs up
-cvs ci
+cvs ci -m "New release"
 pushd
 
 == Commit released version ==
@@ -171,41 +171,15 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20120422 ('Mærsk') released
+Subject: GNU Parallel 20120522 ('') released
 
-GNU Parallel 20120422 ('Mærsk') has been released. It is
+GNU Parallel 20120522 ('') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* A race condition bug caused restructuring of a central piece of the
-  code. Thus this release of GNU Parallel should be considered beta
-  quality.
-
-* sql --dbsize will now list sizes of all databases if given no
-  database.
-
-* Article: Computational and experimental analyses of
-  retrotransposon-associated minisatellite DNAs in the soybean genome.
-  http://www.biomedcentral.com/content/supplementary/1471-2105-13-s2-s13-s1.pdf
-
-* Blog post: GNU parallel - the best thing since sliced bread.
-  https://arrayal.wordpress.com/2012/03/27/gnu-parallel-the-best-thing-since-sliced-bread/
-
-* Blog post: GNU Parallel makes everything faster.
-  http://compbiously.blogspot.com/2012/03/gnu-parallel-makes-everything-faster.html
-
-* Blog post (German): Howto: GNU parallel.
-  http://d24m.de/2012/04/05/howto-gnu-parallel/
-
-* Blog post: Running in Parallel
-  http://interactivity.ifactory.com/2012/04/running-in-parallel/
-
-* 20000 watched the first intro video.
-  http://pi.dk/1
-
-* The first 5 have received their GNU Parallel merchandise
-  https://www.gnu.org/software/parallel/merchandise.html
+* Blog post: Running commands in parallel using bash.
+  http://blog.michaelboman.org/2012/04/running-commands-in-parallel-using-bash.html  
 
 * Bug fixes and man page updates.
 

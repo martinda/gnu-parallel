@@ -14,6 +14,22 @@ b.c
 b
 b
 b
+### Test --extensionreplace
+/a/b a/b b /a/b a/b b
+/a/b
+a/b
+b
+/a/b
+a/b
+b
+### Test --er
+/a/b a/b b /a/b a/b b
+/a/b
+a/b
+b
+/a/b
+a/b
+b
 ### Test --basenameextensionreplace
 b b b b b b
 b

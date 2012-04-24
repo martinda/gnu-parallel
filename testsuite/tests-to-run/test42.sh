@@ -12,6 +12,14 @@ echo "### Test --bnr"
 parallel -j1 -k -X --bnr FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
 parallel -k --bnr FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
 
+echo "### Test --extensionreplace"
+parallel -j1 -k -X --extensionreplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
+parallel -k --extensionreplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
+
+echo "### Test --er"
+parallel -j1 -k -X --er FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
+parallel -k --er FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
+
 echo "### Test --basenameextensionreplace"
 parallel -j1 -k -X --basenameextensionreplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
 parallel -k --basenameextensionreplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b

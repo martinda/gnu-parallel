@@ -419,7 +419,7 @@ sub options_hash {
 	 "null|0" => \$::opt_0,
 	 "quote|q" => \$::opt_q,
 	 "I=s" => \$::opt_I,
-	 "extensionreplace|er" => \$::opt_U,
+	 "extensionreplace|er=s" => \$::opt_U,
 	 "U=s" => \$::opt_retired,
 	 "basenamereplace|bnr=s" => \$::opt_basenamereplace,
 	 "dirnamereplace|dnr=s" => \$::opt_dirnamereplace,
