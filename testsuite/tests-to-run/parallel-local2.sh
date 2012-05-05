@@ -2,7 +2,6 @@
 
 echo '### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834'
 seq 1 3 | parallel -j1 "sleep 2; echo {}" | parallel -kj2 echo
-#seq 1000000000 1000000010 | pv -L 10 -q | stdout parallel -j 10 echo
 
 echo '### Test too slow spawning'
 killall -9 burnP6 2>/dev/null

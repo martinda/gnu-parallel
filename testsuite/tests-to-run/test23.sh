@@ -30,3 +30,13 @@ ls parallel_*.test | parallel -j+0 --trc {.}.out --bf my_script \
 -S $SSHLOGIN1,$SSHLOGIN2,: "./my_script {} > {.}.out"
 cat parallel_*.test parallel_*.out
 
+rm -rf tmp
+echo "### Test combined -X --return {/}_{/.}_{#/.}_{#/}_{#.} with files containing space"
+stdout parallel -j1 -k -Xv --cleanup --return tmp/{/}_{/.}_{2/.}_{2/}_{2.}/file -S $SSHLOGIN2 \
+mkdir -p tmp/{/}_{/.}_{2/.}_{2/}_{2.} \;touch tmp/{/}_{/.}_{2/.}_{2/}_{2.}/file \
+::: /a/number1.c a/number2.c number3.c /a/number4 a/number5 number6 'number 7' 'number <8|8>'
+find tmp
+rm -rf tmp
+
+echo "### Here we ought to test -m --return {/}_{/.}_{#/.}_{#/}_{#.} with files containing space"
+echo "### But we will wait for a real world scenario"

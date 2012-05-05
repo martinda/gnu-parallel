@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j0 -vk
+cat <<'EOF' | parallel -j0 -vk
 echo '### Test if we can deal with output > 4 GB'
 echo | niceload --io 9 -H parallel -q perl -e '"\$a=\"x\"x1000000;for(0..4300){print \$a}"' | md5sum
 

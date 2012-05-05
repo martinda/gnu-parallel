@@ -1,0 +1,59 @@
+### Test --basenamereplace
+b.c b.c b.c b b b
+b.c
+b.c
+b.c
+b
+b
+b
+### Test --bnr
+b.c b.c b.c b b b
+b.c
+b.c
+b.c
+b
+b
+b
+### Test --extensionreplace
+/a/b a/b b /a/b a/b b
+/a/b
+a/b
+b
+/a/b
+a/b
+b
+### Test --er
+/a/b a/b b /a/b a/b b
+/a/b
+a/b
+b
+/a/b
+a/b
+b
+### Test --basenameextensionreplace
+b b b b b b
+b
+b
+b
+b
+b
+b
+### Test --bner
+b b b b b b
+b
+b
+b
+b
+b
+b
+### Test {/}
+b.c b.c b.c b b b
+### Test {/.}
+b b b b b b
+### Test {#/.}
+number2
+### Test {#/}
+number2.c
+### Test {#.}
+a/number2
+### bug #34241: --pipe should not spawn unneeded processes
