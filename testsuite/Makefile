@@ -1,4 +1,12 @@
-testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb
+testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb prereq
+	time sh Start.sh
+	date
+
+local: ../src/parallel tests-to-run/*local* wanted-results/*local* startdb prereq
+	time sh Start.sh local
+	date
+
+prereq: installparallel
 	echo | mop || (echo mop is required for testsuite; /bin/false)
 	seq 1 2 | mop || (echo seq is required for testsuite; /bin/false)
 	stdout echo || (echo stdout is required for testsuite; /bin/false)
@@ -14,8 +22,9 @@ testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb
 	which burnP6 || (echo burnP6 is required for testsuite; /bin/false)
 	which timeout || (echo timeout is required for testsuite; /bin/false)
 	parallel ssh parallel@parallel-server{} parallel --minversion 20100101 ::: 1 2 3 || (echo parallel on remote required for testsuite; /bin/true)
-	time sh Start.sh
-	date
+
+installparallel: ../src/parallel
+	cd .. && make -j && sudo make -j install
 
 startdb:
 	sudo parallel /etc/init.d/{} start ::: postgresql mysql oracle-xe
