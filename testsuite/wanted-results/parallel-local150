@@ -1,1 +1,16 @@
 ### Test fix #32191
+### Test --tagstring
+echo 3 4
+a3b a4b	3 4
+echo 3
+a3b	3
+echo 4
+a4b	4
+echo job1
+a3b	job1
+echo job2
+a4b	job2
+echo job1
+ajob1b	job1
+echo job2
+ajob2b	job2

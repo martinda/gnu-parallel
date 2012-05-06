@@ -1279,6 +1279,15 @@ the lines will be prepended with the sshlogin instead.
 
 @strong{--tag} is ignored when using @strong{-u}.
 
+@item @strong{--tagstring} @emph{str}
+@anchor{@strong{--tagstring} @emph{str}}
+
+Tag lines with a string. Each output line will be prepended with
+@emph{str} and TAB (\t). @emph{str} can contain replacement strings such as
+@{@}.
+
+@strong{--tagstring} is ignored when using @strong{-u}, @strong{--onall}, and @strong{--nonall}.
+
 @item @strong{--tmpdir} @emph{dirname}
 @anchor{@strong{--tmpdir} @emph{dirname}}
 
@@ -1385,9 +1394,16 @@ a bc " -> "a bc". This is the default if @strong{--colsep} is used.
 @item @strong{-u}
 @anchor{@strong{-u}}
 
-Ungroup output.  Output is printed as soon as possible. This may cause
-output from different commands to be mixed. GNU @strong{parallel} runs
-faster with @strong{-u}. Can be reversed with @strong{--group}.
+Ungroup output.  Output is printed as soon as possible and by passes
+GNU @strong{parallel} internal processing. This may cause
+output from different commands to be mixed. Compare these:
+
+@strong{parallel -j0 'sleep @{@};echo -n start@{@};sleep @{@};echo @{@}end' ::: 1 2 3 4}
+
+@strong{parallel -u -j0 'sleep @{@};echo -n start@{@};sleep @{@};echo @{@}end' ::: 1 2 3 4}
+
+It also disables @strong{--tag}. GNU @strong{parallel} runs faster with @strong{-u}. Can
+be reversed with @strong{--group}.
 
 @item @strong{--extensionreplace} @emph{replace-str}
 @anchor{@strong{--extensionreplace} @emph{replace-str}}

@@ -1200,6 +1200,15 @@ the lines will be prepended with the sshlogin instead.
 B<--tag> is ignored when using B<-u>.
 
 
+=item B<--tagstring> I<str>
+
+Tag lines with a string. Each output line will be prepended with
+I<str> and TAB (\t). I<str> can contain replacement strings such as
+{}.
+
+B<--tagstring> is ignored when using B<-u>, B<--onall>, and B<--nonall>.
+
+
 =item B<--tmpdir> I<dirname>
 
 Directory for temporary files. GNU B<parallel> normally buffers output
@@ -1295,9 +1304,16 @@ a bc " -> "a bc". This is the default if B<--colsep> is used.
 
 =item B<-u>
 
-Ungroup output.  Output is printed as soon as possible. This may cause
-output from different commands to be mixed. GNU B<parallel> runs
-faster with B<-u>. Can be reversed with B<--group>.
+Ungroup output.  Output is printed as soon as possible and by passes
+GNU B<parallel> internal processing. This may cause
+output from different commands to be mixed. Compare these:
+
+B<parallel -j0 'sleep {};echo -n start{};sleep {};echo {}end' ::: 1 2 3 4>
+
+B<parallel -u -j0 'sleep {};echo -n start{};sleep {};echo {}end' ::: 1 2 3 4>
+
+It also disables B<--tag>. GNU B<parallel> runs faster with B<-u>. Can
+be reversed with B<--group>.
 
 
 =item B<--extensionreplace> I<replace-str>

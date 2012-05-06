@@ -705,6 +705,9 @@ sub parse_options {
 	$Global::replace{$_} = ::maybe_quote($Global::replace{$_});
     }
     %Global::replace_rev = reverse %Global::replace;
+    if(defined $::opt_tag and not defined $::opt_tagstring) {
+	$::opt_tagstring = $Global::replace{'{}'};
+    }
 
     if(grep /^$Global::arg_sep$|^$Global::arg_file_sep$/o, @ARGV) {
         # Deal with ::: and ::::
@@ -3728,13 +3731,8 @@ sub print {
 sub tag {
     my $self = shift;
     if(not defined $self->{'tag'}) {
-	$self->{'tag'} = "";
-	if(defined $::opt_tagstring) {
-	    $self->{'tag'} .= $::opt_tagstring."\t";
-	}
-	if(defined $::opt_tag) {
-	    $self->{'tag'} .= $self->{'commandline'}->args_as_string()."\t";
-	}
+	$self->{'tag'} = $self->{'commandline'}->
+	    replace_placeholders($::opt_tagstring,0)."\t";
     }
     return $self->{'tag'};
 }
@@ -3798,9 +3796,20 @@ sub new {
 	    # Add {} to the command if there are no {...}'s
 	    $command .=" ".$Global::replace{'{}'};
         }
+	($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},
+	 %replacecount) = number_of_replacements($command,$context_replace);
     }
-    ($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},
-     %replacecount) = number_of_replacements($command,$context_replace);
+    if(defined $::opt_tagstring) {
+	my ($dummy1,$dummy2,$dummy3,$dummy4,%repcount) =
+	    number_of_replacements($::opt_tagstring,$context_replace);
+	# Merge %repcount with %replacecount to get the keys
+	# for replacing replacement strings in $::opt_tagstring
+	# The number, however, does not matter.
+	for (keys %repcount) {
+	    $replacecount{$_} ||= 0;
+	}
+    }
+
     my %positional_replace;
     my %multi_replace;
     for my $used (keys %replacecount) {
