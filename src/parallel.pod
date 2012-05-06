@@ -1305,8 +1305,9 @@ a bc " -> "a bc". This is the default if B<--colsep> is used.
 =item B<-u>
 
 Ungroup output.  Output is printed as soon as possible and by passes
-GNU B<parallel> internal processing. This may cause
-output from different commands to be mixed. Compare these:
+GNU B<parallel> internal processing. This may cause output from
+different commands to be mixed thus should only be used if you do not
+care about the output. Compare these:
 
 B<parallel -j0 'sleep {};echo -n start{};sleep {};echo {}end' ::: 1 2 3 4>
 
