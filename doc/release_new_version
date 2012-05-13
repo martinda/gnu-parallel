@@ -171,12 +171,21 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20120522 ('') released
+Subject: GNU Parallel 20120522 ('Holande/40year') released
 
 GNU Parallel 20120522 ('') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
+
+* Package for AIX.
+  http://www.perzl.org/aix/index.php?n=Main.Parallel
+
+* GNU Parallel was presented at MUUG.
+  http://muug.mb.ca/blog/meetings/2012/05/09/may-8th-2012-rtfm-gnu-parallel1/
+
+* Blog post: Manipulating many or large files with GNU parallel.
+  http://compbiously.blogspot.com/2012/05/manipulating-many-or-large-files-with.html
 
 * Blog post: Running commands in parallel using bash.
   http://blog.michaelboman.org/2012/04/running-commands-in-parallel-using-bash.html  

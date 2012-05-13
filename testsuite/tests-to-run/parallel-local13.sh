@@ -1,7 +1,6 @@
 #!/bin/bash -x
 
 echo '### Tests from xargs'
-# Largely untested
 
 rsync -Ha --delete input-files/xargs-inputs/ tmp/
 cd tmp
