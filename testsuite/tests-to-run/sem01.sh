@@ -13,20 +13,20 @@ parallel --semaphorename `tty` --semaphore --wait
 echo done
 
 echo '### Test semaphore 2 jobs running simultaneously'
-parallel -u -j2 --semaphore 'echo job1a; sleep 1; echo job1b'
-sleep 0.1
-parallel -u -j2 --semaphore 'echo job2a; sleep 1; echo job2b'
-sleep 0.1
-parallel -u -j2 --semaphore 'echo job3a; sleep 1; echo job3b'
+parallel -u -j2 --semaphore 'echo job1a 1; sleep 1; echo job1b 3'
+sleep 0.2
+parallel -u -j2 --semaphore 'echo job2a 2; sleep 1; echo job2b 5'
+sleep 0.2
+parallel -u -j2 --semaphore 'echo job3a 4; sleep 1; echo job3b 6'
 parallel --semaphore --wait
 echo done
 
 echo '### Test if parallel invoked as sem will run parallel --semaphore'
-sem -u -j2 'echo job1a; sleep 1; echo job1b'
-sleep 0.1
-sem -u -j2  'echo job2a; sleep 1; echo job2b'
-sleep 0.1
-sem -u -j2  'echo job3a; sleep 1; echo job3b'
+sem -u -j2 'echo job1a 1; sleep 1; echo job1b 3'
+sleep 0.2
+sem -u -j2 'echo job2a 2; sleep 1; echo job2b 5'
+sleep 0.2
+sem -u -j2 'echo job3a 4; sleep 1; echo job3b 6'
 sem --wait
 echo done
 

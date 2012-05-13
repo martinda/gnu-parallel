@@ -43,20 +43,20 @@ done
 20
 done
 ### Test semaphore 2 jobs running simultaneously
-job1a
-job2a
-job1b
-job3a
-job2b
-job3b
+job1a 1
+job2a 2
+job1b 3
+job3a 4
+job2b 5
+job3b 6
 done
 ### Test if parallel invoked as sem will run parallel --semaphore
-job1a
-job2a
-job1b
-job2b
-job3a
-job3b
+job1a 1
+job2a 2
+job1b 3
+job3a 4
+job2b 5
+job3b 6
 done
 ### Test similar example as from man page - run 2 jobs simultaneously
 Expect done: 1 2 5 3 4
