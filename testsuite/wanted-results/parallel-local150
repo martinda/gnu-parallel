@@ -14,3 +14,7 @@ echo job1
 ajob1b	job1
 echo job2
 ajob2b	job2
+### Test bug #35820: sem breaks if $HOME is not writable
+Workaround: use another writable dir
+OK
+parallel: Cannot write to /usr/this/should/fail/.parallel: No such file or directory

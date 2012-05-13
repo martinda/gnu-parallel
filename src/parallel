@@ -5000,9 +5000,9 @@ sub new {
     $id=~s/([^-_a-z0-9])/unpack("H*",$1)/ige; # Convert non-word chars to hex
     $id="id-".$id; # To distinguish it from a process id
     my $parallel_dir = $ENV{'HOME'}."/.parallel";
-    -d $parallel_dir or mkdir $parallel_dir;
+    -d $parallel_dir or mkdir_or_die($parallel_dir);
     my $parallel_locks = $parallel_dir."/semaphores";
-    -d $parallel_locks or mkdir $parallel_locks;
+    -d $parallel_locks or mkdir_or_die($parallel_locks);
     my $lockdir = "$parallel_locks/$id";
     my $lockfile = $lockdir.".lock";
     if($count < 1) { ::die_bug("semaphore-count: $count"); }
@@ -5082,7 +5082,7 @@ sub atomic_link_if_count_less_than {
     $self->lock();
     ::debug($self->nlinks()."<".$self->{'count'});
     if($self->nlinks() < $self->{'count'}) {
-	-d $self->{'lockdir'} || mkdir $self->{'lockdir'};
+	-d $self->{'lockdir'} or mkdir_or_die($self->{'lockdir'});
 	if(not -e $self->{'idfile'}) {
 	    open (A, ">", $self->{'idfile'}) or
 		::die_bug("write_idfile: $self->{'idfile'}");
@@ -5135,6 +5135,23 @@ sub unlock {
     unlink $self->{'lockfile'};
     close $self->{'lockfh'};
     ::debug("unlocked\n");
+}
+
+sub mkdir_or_die {
+    # If dir is not writable: die
+    my $dir = shift;
+    my @dir_parts = split(m:/:,$dir);
+    my ($ddir,$part);
+    while(defined ($part = shift @dir_parts)) {
+	$part eq "" and next;
+	$ddir .= "/".$part;
+	-d $ddir and next;
+	mkdir $ddir;
+    }
+    if(not -w $dir) {
+	print STDERR "$Global::progname: Cannot write to $dir: $!\n";
+	exit(255);
+    }
 }
 
 # Keep perl -w happy
