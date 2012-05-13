@@ -1912,6 +1912,21 @@ sub usleep {
     }
 }
 
+sub hires_time {
+    # Returns time since epoch as float
+
+    if(not $Global::use{"Time::HiRes"}) {
+	if(eval "use Time::HiRes qw ( time );") {
+	    eval "sub TimeHiRestime { return Time::HiRes::time };";
+	} else {
+	    eval "sub TimeHiRestime { return time() };";
+	}
+	$Global::use{"Time::HiRes"} = 1;
+    }
+
+    return TimeHiRestime();
+}
+
 sub multiply_binary_prefix {
     # Evalualte numbers with binary prefix
     # k=10^3, m=10^6, g=10^9, t=10^12, p=10^15, e=10^18, z=10^21, y=10^24
@@ -3092,18 +3107,18 @@ sub set_pid {
 
 sub starttime {
     my $self = shift;
-    return $self->{'starttime'};
+    return ((int(($self->{'starttime'})*1000))/1000);
 }
 
 sub set_starttime {
     my $self = shift;
-    my $starttime = shift || time;
+    my $starttime = shift || ::hires_time();
     $self->{'starttime'} = $starttime;
 }
 
 sub runtime {
     my $self = shift;
-    return $self->{'endtime'}-$self->{'starttime'};
+    return ((int(($self->{'endtime'}-$self->{'starttime'})*1000))/1000);
 }
 
 sub endtime {
@@ -3113,7 +3128,7 @@ sub endtime {
 
 sub set_endtime {
     my $self = shift;
-    my $endtime = shift || time;
+    my $endtime = shift || ::hires_time();
     $self->{'endtime'} = $endtime;
 }
 
@@ -4881,7 +4896,7 @@ sub replace {
 	    $s =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
 	} elsif($replacement_string eq "{//}") {
 	    # Only load File::Basename if actually needed
-	    $Global::use{"File::Basename"} ||= eval "use File::Basename;";
+	    $Global::use{"File::Basename"} ||= eval "use File::Basename; 1;";
 	    $s = dirname($s); # Keep dir from argument.
 	} elsif($replacement_string eq "{/.}") {
 	    $s =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
@@ -5111,7 +5126,7 @@ sub lock {
     open $self->{'lockfh'}, ">", $self->{'lockfile'}
 	or ::die_bug("Can't open semaphore file $self->{'lockfile'}: $!");
     chmod 0666, $self->{'lockfile'}; # assuming you want it a+rw
-    $Global::use{"Fcntl"} ||= eval "use Fcntl qw(:DEFAULT :flock);";
+    $Global::use{"Fcntl"} ||= eval "use Fcntl qw(:DEFAULT :flock); 1;";
     while(not flock $self->{'lockfh'}, LOCK_EX()|LOCK_NB()) {
 	if ($! =~ m/Function not implemented/) {
             print $Global::original_stderr
