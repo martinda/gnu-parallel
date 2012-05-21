@@ -115,6 +115,7 @@ if($::opt_nonall or $::opt_onall) {
 	join(" ",
 	     ((defined $::opt_u) ? "-u" : ""),
 	     ((defined $::opt_group) ? "-g" : ""),
+	     ((defined $::opt_joblog) ? "--joblog $::opt_joblog" : ""),
 	     ((defined $::opt_colsep) ? "--colsep ".shell_quote($::opt_colsep) : ""),
 	     ((defined @::opt_v) ? "-vv" : ""),
 	     ((defined $::opt_D) ? "-D" : ""),

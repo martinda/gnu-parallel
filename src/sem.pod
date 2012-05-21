@@ -148,7 +148,7 @@ Wait for all commands to complete.
 Run one gzip process per CPU core. Block until a CPU core becomes
 available.
 
-  for i in `ls *.log` ; do
+  for i in *.log ; do
     echo $i
     sem -j+0 gzip $i ";" echo done
   done
