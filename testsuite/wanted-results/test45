@@ -42,9 +42,9 @@ parallel: -W has been retired. Use --wd.
 parallel: -Y has been retired. Use --shebang.
 parallel: -H has been retired. Use --halt.
 ### Test --joblog followed by --resume --joblog
-      5      49     203
+      5      49
 ### Test --resume --joblog followed by --resume --joblog
-      5      49     203
+      5      49
 ### Test --header
 3/4.5 1.2 3/4 4.5 3 4
 ### 64-bit wierdness - this did not complete on a 64-bit machine

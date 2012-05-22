@@ -48,14 +48,14 @@ echo '### Test --joblog followed by --resume --joblog';
   rm -f /tmp/joblog; 
   timeout -k 1 1 parallel -j2 --joblog /tmp/joblog sleep {} ::: 1.1 2.2 3.3 4.4 2>/dev/null; 
   parallel -j2 --resume --joblog /tmp/joblog sleep {} ::: 1.1 2.2 3.3 4.4; 
-  cat /tmp/joblog | wc; 
+  cat /tmp/joblog | wc -lw; 
   rm -f /tmp/joblog;
 
 echo '### Test --resume --joblog followed by --resume --joblog'; 
   rm -f /tmp/joblog2; 
   timeout -k 1 1 parallel -j2 --resume --joblog /tmp/joblog2 sleep {} ::: 1.1 2.2 3.3 4.4 2>/dev/null; 
   parallel -j2 --resume --joblog /tmp/joblog2 sleep {} ::: 1.1 2.2 3.3 4.4; 
-  cat /tmp/joblog2 | wc; 
+  cat /tmp/joblog2 | wc -lw; 
   rm -f /tmp/joblog2;
 
 echo '### Test --header'; 

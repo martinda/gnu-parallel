@@ -180,7 +180,7 @@ Run one gzip process per CPU core. Block until a CPU core becomes
 available.
 
 @verbatim
-  for i in `ls *.log` ; do
+  for i in *.log ; do
     echo $i
     sem -j+0 gzip $i ";" echo done
   done

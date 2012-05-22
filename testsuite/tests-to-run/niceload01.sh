@@ -15,7 +15,7 @@ done
 
 echo '### --rm and --runmem'
 niceload  -H --rm 1g free -g | perl -ane '/buffers.cache:/ and print $F[3],"\n"' | grep '[1-9]' >/dev/null && echo OK &
-niceload  -H --runmem 1.2g free -g | perl -ane '/buffers.cache:/ and print $F[3],"\n"' | grep '[1-9]' >/dev/null && echo OK &
+niceload  -H --runmem 1g free -g | perl -ane '/buffers.cache:/ and print $F[3],"\n"' | grep '[1-9]' >/dev/null && echo OK &
 wait
 
 
