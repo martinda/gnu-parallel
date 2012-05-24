@@ -165,7 +165,7 @@ echo "echo a" | parallel
 parallel -j1 -I :: -X echo 'a::b::^c::[.}c' ::: 1
 
 echo "### BUG: The length for -X is not close to max (131072)"
-seq 1 4000 | parallel -X echo {.} aa {}{.} {}{}d{} {}dd{}d{.} |head -n 1 |wc
+seq 1 4000 | parallel -k -X echo {.} aa {}{.} {}{}d{} {}dd{}d{.} |head -n 1 |wc
 
 echo "### BUG: empty lines with --show-limit"
 echo | parallel  --show-limits

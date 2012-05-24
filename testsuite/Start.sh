@@ -3,8 +3,9 @@
 export LANG=C
 SHFILE=/tmp/unittest-parallel.sh
 
+# Try a failing test twice.
 ls -t tests-to-run/*${1}*.sh \
-| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2:' \
+| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2:' \
 >$SHFILE
 
 mkdir -p actual-results

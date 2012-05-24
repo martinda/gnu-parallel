@@ -538,7 +538,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile>
+=item B<--joblog> I<logfile> (alpha testing)
 
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -660,7 +660,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m> is set.
 
 
-=item B<--load> I<max-load>
+=item B<--load> I<max-load> (alpha testing)
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
@@ -755,9 +755,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe>
+=item B<--pipe> (alpha testing)
 
-=item B<--spreadstdin>
+=item B<--spreadstdin> (alpha testing)
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one

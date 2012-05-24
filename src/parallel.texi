@@ -570,8 +570,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile}
-@anchor{@strong{--joblog} @emph{logfile}}
+@item @strong{--joblog} @emph{logfile} (alpha testing)
+@anchor{@strong{--joblog} @emph{logfile} (alpha testing)}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -712,8 +712,8 @@ The @strong{-l} option is deprecated since the POSIX standard specifies
 
 Implies @strong{-X} unless @strong{-m} is set.
 
-@item @strong{--load} @emph{max-load}
-@anchor{@strong{--load} @emph{max-load}}
+@item @strong{--load} @emph{max-load} (alpha testing)
+@anchor{@strong{--load} @emph{max-load} (alpha testing)}
 
 Do not start new jobs on a given computer unless the load is less than
 @emph{max-load}. @emph{max-load} uses the same syntax as @strong{--jobs}, so @emph{100%}
@@ -810,11 +810,11 @@ all the output from one server will be grouped together.
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
-@item @strong{--pipe}
-@anchor{@strong{--pipe}}
+@item @strong{--pipe} (alpha testing)
+@anchor{@strong{--pipe} (alpha testing)}
 
-@item @strong{--spreadstdin}
-@anchor{@strong{--spreadstdin}}
+@item @strong{--spreadstdin} (alpha testing)
+@anchor{@strong{--spreadstdin} (alpha testing)}
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
