@@ -543,7 +543,7 @@ use B<-I> instead.
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
 sshlogin, start time as seconds since epoch, run time in seconds,
-bytes in files transfered, bytes in files returned, exit status,
+bytes in files transferred, bytes in files returned, exit status,
 and command run.
 
 To convert the times into ISO-8601 strict do:
@@ -1555,7 +1555,7 @@ solution is to quote the whole command:
 
 B<parallel "zcat {} >>B<{.}" ::: *.gz>
 
-Other special shell charaters (such as * ; $ > < | >> <<) also need
+Other special shell characters (such as * ; $ > < | >> <<) also need
 to be put in quotes, as they may otherwise be interpreted by the shell
 and not given to GNU B<parallel>.
 
@@ -1587,7 +1587,7 @@ symlinks are empty files.
 
 B<cp -rs /the/source/dir mirror_dir; find mirror_dir -type l | parallel -m rm {} '&&' touch {}>
 
-Find the files in a list that do no exist.
+Find the files in a list that do not exist
 
 B<cat file_list | parallel 'if [ ! -e {} ] ; then echo {}; fi'>
 
@@ -2442,7 +2442,7 @@ GNU B<parallel> will then print the currently running jobs on stderr
 =head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
 
 If you regret starting a lot of jobs you can simply break GNU B<parallel>,
-but if you want to make sure you do not have halfcompleted jobs you
+but if you want to make sure you do not have half-completed jobs you
 should send the signal B<SIGTERM> to GNU B<parallel>:
 
 B<killall -TERM parallel>
@@ -2584,7 +2584,7 @@ If B<--halt-on-error> 1 or 2: Exit status of the failing job.
 
 There are a lot programs with some of the functionality of GNU
 B<parallel>. GNU B<parallel> strives to include the best of the
-functionality without sacrifying ease of use.
+functionality without sacrificing ease of use.
 
 =head2 SUMMARY TABLE
 
@@ -2632,7 +2632,7 @@ Remote execution
  R6. No config files needed
  R7. Do not run more than SSHD's MaxStartup can handle
  R8. Configurable SSH command
- R9. Retry if connection breaks occationally
+ R9. Retry if connection breaks occasionally
 
 Semaphore
  S1. Possibility to work as a mutex
@@ -2719,7 +2719,7 @@ supports (See REPORTING BUGS).
 
 =head2 DIFFERENCES BETWEEN xargs AND GNU Parallel
 
-B<xargs> offer some of the same possibilites as GNU B<parallel>.
+B<xargs> offer some of the same possibilities as GNU B<parallel>.
 
 B<xargs> deals badly with special characters (such as space, ' and
 "). To see the problem try this:
@@ -2791,7 +2791,7 @@ B<ls | xargs -d "\n" -P8 -I {} bash -c "echo {}; ls {}|wc">
 
 =head2 DIFFERENCES BETWEEN find -exec AND GNU Parallel
 
-B<find -exec> offer some of the same possibilites as GNU B<parallel>.
+B<find -exec> offer some of the same possibilities as GNU B<parallel>.
 
 B<find -exec> only works on files. So processing other input (such as
 hosts or URLs) will require creating these inputs as files. B<find
