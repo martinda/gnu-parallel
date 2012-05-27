@@ -1306,8 +1306,15 @@ later, followed by SIGKILL 200 ms later.
 @item @strong{--tollef}
 @anchor{@strong{--tollef}}
 
-Make GNU @strong{parallel} behave like Tollef's parallel command. To
-override use @strong{--gnu}.
+Make GNU @strong{parallel} behave more like Tollef's parallel command. It
+activates @strong{-u}, @strong{-q}, and @strong{--arg-sep --}. It also causes @strong{-l} to
+change meaning to @strong{--load}.
+
+Not giving '--' is unsupported.
+
+@strong{Do not use --tollef unless you know what you are doing}.
+
+To override use @strong{--gnu}.
 
 @item @strong{--verbose}
 @anchor{@strong{--verbose}}

@@ -45,7 +45,7 @@ portable:
 	sudo echo
 	time bash Portable.sh
 
-timings: tests-to-run/*
+timings: tests-to-run/* ../src/parallel
 	ls tests-to-run/*.sh | xargs -n1 echo /usr/bin/time -f %e bash >/tmp/timing.script
 	stdout bash -x /tmp/timing.script >/tmp/timing.out
 	echo usr.bin.time_END >>/tmp/timing.out

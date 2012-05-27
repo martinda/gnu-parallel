@@ -489,7 +489,7 @@ sub get_options_from_array {
 	@::ARGV = @{$array_ref};
     }
     my @retval = GetOptions(options_hash());
-   if(not $this_is_ARGV) {
+    if(not $this_is_ARGV) {
 	@{$array_ref} = @::ARGV;
 	@::ARGV = @save_argv;
     }
@@ -499,7 +499,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120523;
+    $Global::version = 20120527;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -605,9 +605,27 @@ sub parse_options {
 	    wait_and_exit(0);
 	}
     }
+    if($::opt_tollef and not $::opt_gnu) {
+	# Behave like tollef parallel (from moreutils)
+	$::opt_u = 1;
+	$Global::grouped = 0;
+	$Global::quoting = 1;
+	$::opt_q = 1;
+	if(defined $::opt_l) {
+	    $::opt_load = $::opt_l;
+	    $::opt_l = undef;
+	}
+	if(not defined $::opt_arg_sep) {
+	    $Global::arg_sep = "--";
+	}
+	if(not grep(/$Global::arg_sep/, @ARGV)) {
+	    unshift(@ARGV, $ENV{SHELL}, "-c", "--");
+	}
+    }
+
     if(defined $::opt_nonall) {
 	# Append a dummy empty argument
-	push @ARGV, ":::", "";
+	push @ARGV, $Global::arg_sep, "";
     }
     if(defined $::opt_tty) {
         # Defaults for --tty: -j1 -u
@@ -623,16 +641,6 @@ sub parse_options {
         push @Global::ret_files, @::opt_trc;
         $::opt_transfer = 1;
         $::opt_cleanup = 1;
-    }
-    if($::opt_tollef and not $::opt_gnu) {
-	# Behave like tollef parallel (from moreutils)
-	if(defined $::opt_l) {
-	    $::opt_load = $::opt_l;
-	    $::opt_l = undef;
-	}
-	if(not defined $::opt_arg_sep) {
-	    $Global::arg_sep = "--";
-	}
     }
     if(defined $::opt_l) {
 	if($::opt_l eq "-0") {
@@ -781,7 +789,7 @@ sub read_options {
         $ARGV[0]=~s/^--hashbang *//; # remove --hashbang if it is set
         my $argfile = pop @ARGV;
         # exec myself to split $ARGV[0] into separate fields
-        exec "$0 --skip-first-line -a $argfile @ARGV";
+        exec "tail -n +1 $argfile | $0 @ARGV";
     }
 
     Getopt::Long::Configure("bundling","pass_through");

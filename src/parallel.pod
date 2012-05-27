@@ -1226,8 +1226,15 @@ later, followed by SIGKILL 200 ms later.
 
 =item B<--tollef>
 
-Make GNU B<parallel> behave like Tollef's parallel command. To
-override use B<--gnu>.
+Make GNU B<parallel> behave more like Tollef's parallel command. It
+activates B<-u>, B<-q>, and B<--arg-sep -->. It also causes B<-l> to
+change meaning to B<--load>.
+
+Not giving '--' is unsupported.
+
+B<Do not use --tollef unless you know what you are doing>.
+
+To override use B<--gnu>.
 
 
 =item B<--verbose>
