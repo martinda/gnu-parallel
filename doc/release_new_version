@@ -171,44 +171,15 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20120522 ('Hollande') released
+Subject: GNU Parallel 20120622 ('Thailand') released
 
-GNU Parallel 20120522 ('Hollande') has been released. It is
+GNU Parallel 20120622 ('Thailand') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* Timings in --joblog now with milliseconds.
-
-* Thesis using GNU Parallel (correctly cited; hooray!).
-  http://scholarworks.sjsu.edu/etd_projects/222/
-
-* Package for AIX.
-  http://www.perzl.org/aix/index.php?n=Main.Parallel
-
-* Prokka uses GNU Parallel.
-  http://bioinformatics.net.au/prokka-manual.html
-
-* GNU Parallel was presented at MUUG.
-  http://muug.mb.ca/blog/meetings/2012/05/09/may-8th-2012-rtfm-gnu-parallel1/
-
-* Blog post: Manipulating many or large files with GNU parallel.
-  http://compbiously.blogspot.com/2012/05/manipulating-many-or-large-files-with.html
-
-* Blog post: Running commands in parallel using bash.
-  http://blog.michaelboman.org/2012/04/running-commands-in-parallel-using-bash.html  
-
-* Blog post: Efficient log processing.
-  http://www.francoismaillet.com/blog/?p=399
-
-* Blog post about GNU Parallel and Amazon EC2.
-  http://blog.kevinformatics.com/post/4970574713/interested-in-your-experience-using-gnu-parallel-in
-
-* Blog post in Hungarian.
-  http://commandline.blog.hu/2012/05/03/gnu_parallel
-
-* Popularity of GNU Parallel in Debian explodes.
-  http://qa.debian.org/popcon-graph.php?packages=parallel
+* biotoolbox uses GNU Parallel.
+  https://code.google.com/p/biotoolbox/wiki/Pod_novo_wrapper
 
 * Bug fixes and man page updates.
 

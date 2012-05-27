@@ -2588,7 +2588,7 @@ sub no_of_cpus {
     local $/="\n"; # If delimiter is set, then $/ will be wrong
     my $no_of_cpus;
     if ($^O eq 'linux') {
-        $no_of_cpus = no_of_cpus_gnu_linux();
+        $no_of_cpus = no_of_cpus_gnu_linux() || no_of_cores_gnu_linux();
     } elsif ($^O eq 'freebsd') {
         $no_of_cpus = no_of_cpus_freebsd();
     } elsif ($^O eq 'solaris') {
