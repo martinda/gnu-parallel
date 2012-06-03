@@ -576,7 +576,7 @@ use @strong{-I} instead.
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
 sshlogin, start time as seconds since epoch, run time in seconds,
-bytes in files transfered, bytes in files returned, exit status,
+bytes in files transferred, bytes in files returned, exit status,
 and command run.
 
 To convert the times into ISO-8601 strict do:
@@ -1653,7 +1653,7 @@ solution is to quote the whole command:
 
 @strong{parallel "zcat @{@} }>@strong{@{.@}" ::: *.gz}
 
-Other special shell charaters (such as * ; $ > < | >> <<) also need
+Other special shell characters (such as * ; $ > < | >> <<) also need
 to be put in quotes, as they may otherwise be interpreted by the shell
 and not given to GNU @strong{parallel}.
 
@@ -1685,7 +1685,7 @@ symlinks are empty files.
 
 @strong{cp -rs /the/source/dir mirror_dir; find mirror_dir -type l | parallel -m rm @{@} '&&' touch @{@}}
 
-Find the files in a list that do no exist.
+Find the files in a list that do not exist
 
 @strong{cat file_list | parallel 'if [ ! -e @{@} ] ; then echo @{@}; fi'}
 
@@ -2351,7 +2351,7 @@ complete.
 Run 10 jobs concurrently in the background:
 
 @verbatim
-  for i in `ls *.log` ; do
+  for i in *.log ; do
     echo $i
     sem -j10 gzip $i ";" echo done
   done
@@ -2459,7 +2459,7 @@ If you have a dir in which users drop files that needs to be processed
 you can do this on GNU/Linux (If you know what @strong{inotifywait} is
 called on other platforms file a bug report):
 
-@strong{inotifywait -q -m -r -e CLOSE_WRITE --format %w%f my_dir | parallel
+@strong{inotifywait -q -m -r -e MOVED_TO -e CLOSE_WRITE --format %w%f my_dir | parallel
 -u echo}
 
 This will run the command @strong{echo} on each file put into @strong{my_dir} or
@@ -2471,8 +2471,8 @@ proves to be a problem, file a bug report.
 You can of course use @strong{-S} to distribute the jobs to remote
 computers:
 
-@strong{inotifywait -q -m -r -e CLOSE_WRITE --format %w%f my_dir | parallel -S ..
--u echo}
+@strong{inotifywait -q -m -r -e MOVED_TO -e CLOSE_WRITE --format %w%f my_dir
+| parallel -S ..  -u echo}
 
 If the files to be processed are in a tar file then unpacking one file
 and processing it immediately may be faster than first unpacking all
@@ -2615,7 +2615,7 @@ GNU @strong{parallel} will then print the currently running jobs on stderr
 @anchor{COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS}
 
 If you regret starting a lot of jobs you can simply break GNU @strong{parallel},
-but if you want to make sure you do not have halfcompleted jobs you
+but if you want to make sure you do not have half-completed jobs you
 should send the signal @strong{SIGTERM} to GNU @strong{parallel}:
 
 @strong{killall -TERM parallel}
@@ -2768,7 +2768,7 @@ If @strong{--halt-on-error} 1 or 2: Exit status of the failing job.
 
 There are a lot programs with some of the functionality of GNU
 @strong{parallel}. GNU @strong{parallel} strives to include the best of the
-functionality without sacrifying ease of use.
+functionality without sacrificing ease of use.
 
 @section SUMMARY TABLE
 @anchor{SUMMARY TABLE}
@@ -2817,7 +2817,7 @@ Remote execution
  R6. No config files needed
  R7. Do not run more than SSHD's MaxStartup can handle
  R8. Configurable SSH command
- R9. Retry if connection breaks occationally
+ R9. Retry if connection breaks occasionally
 
 Semaphore
  S1. Possibility to work as a mutex
@@ -2904,7 +2904,7 @@ supports (See REPORTING BUGS).
 @section DIFFERENCES BETWEEN xargs AND GNU Parallel
 @anchor{DIFFERENCES BETWEEN xargs AND GNU Parallel}
 
-@strong{xargs} offer some of the same possibilites as GNU @strong{parallel}.
+@strong{xargs} offer some of the same possibilities as GNU @strong{parallel}.
 
 @strong{xargs} deals badly with special characters (such as space, ' and
 "). To see the problem try this:
@@ -2980,7 +2980,7 @@ becomes (assuming you have 8 cores)
 @section DIFFERENCES BETWEEN find -exec AND GNU Parallel
 @anchor{DIFFERENCES BETWEEN find -exec AND GNU Parallel}
 
-@strong{find -exec} offer some of the same possibilites as GNU @strong{parallel}.
+@strong{find -exec} offer some of the same possibilities as GNU @strong{parallel}.
 
 @strong{find -exec} only works on files. So processing other input (such as
 hosts or URLs) will require creating these inputs as files. @strong{find

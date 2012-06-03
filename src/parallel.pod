@@ -2186,7 +2186,7 @@ complete.
 
 Run 10 jobs concurrently in the background:
 
-  for i in `ls *.log` ; do
+  for i in *.log ; do
     echo $i
     sem -j10 gzip $i ";" echo done
   done
@@ -2288,7 +2288,7 @@ If you have a dir in which users drop files that needs to be processed
 you can do this on GNU/Linux (If you know what B<inotifywait> is
 called on other platforms file a bug report):
 
-B<inotifywait -q -m -r -e CLOSE_WRITE --format %w%f my_dir | parallel
+B<inotifywait -q -m -r -e MOVED_TO -e CLOSE_WRITE --format %w%f my_dir | parallel
 -u echo>
 
 This will run the command B<echo> on each file put into B<my_dir> or
@@ -2300,8 +2300,8 @@ proves to be a problem, file a bug report.
 You can of course use B<-S> to distribute the jobs to remote
 computers:
 
-B<inotifywait -q -m -r -e CLOSE_WRITE --format %w%f my_dir | parallel -S ..
--u echo>
+B<inotifywait -q -m -r -e MOVED_TO -e CLOSE_WRITE --format %w%f my_dir
+| parallel -S ..  -u echo>
 
 If the files to be processed are in a tar file then unpacking one file
 and processing it immediately may be faster than first unpacking all
