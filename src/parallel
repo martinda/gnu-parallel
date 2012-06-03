@@ -3198,20 +3198,44 @@ sub family_pids {
     # TODO test this on different OS as 'ps' is known to be different
     my $self = shift;
     my $pid = $self->pid();
-    my $script = q{
-	family_pids() {
-	    for CHILDPID in `ps --ppid "$@" -o pid --no-headers`; do
+    my $script;
+    if ($^O eq 'linux') {
+	$script = q{
+        family_pids() {
+            for CHILDPID in `ps --ppid "$@" -o pid --no-headers`; do
                 family_pids $CHILDPID &
             done
-	    echo "$@"
-	}
-    } .
-    "family_pids $pid; wait";
+            echo "$@"
+        }
+        } .
+	    "family_pids $pid; wait";
+    } elsif ($^O eq 'solaris') {
+	$script = q{
+        family_pids() {
+            if [ -z "$1" ] ; then return ; fi
+            family_pids `pgrep -P "$*"` &
+            for CHILDPID in "$@"; do
+                echo $CHILDPID
+            done
+        }
+        } .
+	    "family_pids $pid; wait";
+    } else {
+	# This should cover all System V-derived flavors of 'ps'
+	$script = q{
+        family_pids() {
+            for CHILDPID in `ps -f | awk '$3 == '"$@"' {print $2}'`; do
+                family_pids $CHILDPID &
+            done
+            echo "$@"
+        }
+        } .
+	    "family_pids $pid; wait";
+    }
     my @pids = qx{$script};
     chomp(@pids);
-    return ($pid,@pids);
+    return (@pids);
 }
-
 
 sub failed {
     # return number of times failed for this $sshlogin
