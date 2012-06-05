@@ -40,7 +40,6 @@ if(not $ENV{SHELL}) {
 }
 %Global::original_sig = %SIG;
 $SIG{TERM} = sub {}; # Dummy until jobs really start
-$SIG{INT} = \&sigint;
 open $Global::original_stderr, ">&STDERR" or ::die_bug("Can't dup STDERR: $!");
 
 parse_options();
@@ -1750,10 +1749,6 @@ sub timeout {
     }
 }
 
-sub sigint {
-    $Global::start_no_new_jobs = 1;
-}
-
 
 sub __USAGE__ {}
 
@@ -2931,7 +2926,7 @@ sub sshcommand_of_sshlogin {
                 }
             }
         } else {
-            $sshcmd = "ssh -t -t -o LogLevel=quiet"; $serverlogin = $self->{'string'};
+            $sshcmd = "ssh"; $serverlogin = $self->{'string'};
         }
     }
     $self->{'sshcommand'} = $sshcmd;
