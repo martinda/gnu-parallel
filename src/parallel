@@ -66,6 +66,11 @@ my @fhlist;
 if(not @fhlist) {
     @fhlist = (*STDIN);
 }
+if($::opt_skip_first_line) {
+    # Skip the first line for the first file handle
+    my $fh = $fhlist[0];
+    <$fh>;
+}
 if($::opt_header and not $::opt_pipe) {
     my $fh = $fhlist[0];
     # split with colsep or \t
@@ -536,6 +541,7 @@ sub options_hash {
 	 # Shebang #!/usr/bin/parallel --shebang
 	 "shebang|hashbang" => \$::opt_shebang,
 	 "Y" => \$::opt_retired,
+         "skip-first-line" => \$::opt_skip_first_line,
 	 "header=s" => \$::opt_header,
 	);
 }
@@ -856,7 +862,8 @@ sub read_options {
         $ARGV[0]=~s/^--hashbang *//; # remove --hashbang if it is set
         my $argfile = pop @ARGV;
         # exec myself to split $ARGV[0] into separate fields
-        exec "tail -n +1 $argfile | $0 @ARGV";
+	exec "$0 --skip-first-line -a $argfile @ARGV";
+        #exec "tail -n +1 $argfile | $0 @ARGV";
     }
 
     Getopt::Long::Configure("bundling","pass_through");
@@ -2565,7 +2572,7 @@ sub simultaneous_sshlogin {
     my $wanted_processes = shift;
     my $sshcmd = $self->sshcommand();
     my $serverlogin = $self->serverlogin();
-    my $cmd = "$sshcmd $serverlogin echo simultaneouslogin 2>&1 &"x$wanted_processes;
+    my $cmd = "$sshcmd $serverlogin echo simultaneouslogin </dev/null 2>&1 &"x$wanted_processes;
     ::debug("Trying $wanted_processes logins at $serverlogin");
     open (SIMUL, "($cmd)|grep simultaneouslogin | wc -l|") or
 	::die_bug("simultaneouslogin");

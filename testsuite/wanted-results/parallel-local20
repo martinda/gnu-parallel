@@ -6,7 +6,9 @@ C
 A
 B
 C
-### Test of #! with 2 files as input
+### Test of #! with 2 files as input (2 columns)
 A 1
 B 2
 C 3
+### bug #36595: silent loss of input with --pipe and --sshlogin
+      1   10000   48894
