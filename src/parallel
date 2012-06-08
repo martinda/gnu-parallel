@@ -860,10 +860,9 @@ sub read_options {
         # Program is called from #! line in script
         $ARGV[0]=~s/^--shebang *//; # remove --shebang if it is set
         $ARGV[0]=~s/^--hashbang *//; # remove --hashbang if it is set
-        my $argfile = pop @ARGV;
+        my $argfile = shell_quote_scalar(pop @ARGV);
         # exec myself to split $ARGV[0] into separate fields
 	exec "$0 --skip-first-line -a $argfile @ARGV";
-        #exec "tail -n +1 $argfile | $0 @ARGV";
     }
 
     Getopt::Long::Configure("bundling","pass_through");
