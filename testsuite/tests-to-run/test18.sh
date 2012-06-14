@@ -46,10 +46,10 @@ echo '### Check forced number of CPUs being respected'
 stdout seq 1 20 | parallel -k -j+0  -S 1/:,9/$SSHLOGIN1  "hostname; echo {} >/dev/null"
 
 echo '### Check more than 9 simultaneous sshlogins'
-seq 1 11 | parallel -k -j0 -S "/ssh $SSHLOGIN1" echo
+seq 1 11 | parallel -k -j0 -S "ssh $SSHLOGIN1" echo
 
 echo '### Check more than 9(relative) simultaneous sshlogins'
 seq 1 11 | parallel -k -j10000% -S "ssh $SSHLOGIN1" echo
 
 echo '### Check -S syntax'
-seq 1 11 | parallel -k -j100% -S "/:" echo
+seq 1 11 | parallel -k -j100% -S : echo

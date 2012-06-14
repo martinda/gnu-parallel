@@ -661,7 +661,7 @@ standard specifies B<-L> instead.
 
 B<-l 0> is an alias for B<-l 1>.
 
-Implies B<-X> unless B<-m> is set.
+Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
 =item B<--load> I<max-load> (alpha testing)
