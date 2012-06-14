@@ -84,3 +84,5 @@ Chars per line (697800/6): 116300
 Chars per line (817788/7): 116826
 ### bug #36659: --sshlogin strips leading slash from ssh command
 OK
+### bug #36660: --workdir mkdir does not use --sshlogin custom ssh
+OK

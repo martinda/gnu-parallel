@@ -3405,7 +3405,7 @@ sub sshtransfer {
 	if(-r $file) {
 	    my $mkremote_workdir =
 		$remote_workdir eq "." ? "true" :
-		"ssh $serverlogin mkdir -p $rsync_destdir";
+		"$sshcmd $serverlogin mkdir -p $rsync_destdir";
 	    $pre .= "$mkremote_workdir; rsync $rsync_opt "
 		. ::shell_quote_scalar($file)." $serverlogin:$rsync_destdir;";
 	} else {
