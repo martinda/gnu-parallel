@@ -86,3 +86,5 @@ Chars per line (817788/7): 116826
 OK
 ### bug #36660: --workdir mkdir does not use --sshlogin custom ssh
 OK
+bug #36657: --load does not work with custom ssh
+OK

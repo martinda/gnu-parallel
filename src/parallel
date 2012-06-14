@@ -2096,6 +2096,8 @@ sub new {
     }
     my $string = $sshlogin_string;
     my @unget = ();
+    my $no_slash_string = $string;
+    $no_slash_string =~ s/[^-a-z0-9:]/_/gi;
     return bless {
         'string' => $string,
         'jobs_running' => 0,
@@ -2109,11 +2111,11 @@ sub new {
         'control_path' => undef,
 	'time_to_login' => undef,
         'loadavg_file' => $ENV{'HOME'} . "/.parallel/tmp/loadavg-" .
-            $$."-".$string,
+            $$."-".$no_slash_string,
         'loadavg' => undef,
 	'last_loadavg_update' => 0,
         'swap_activity_file' => $ENV{'HOME'} . "/.parallel/tmp/swap_activity-" .
-            $$."-".$string,
+            $$."-".$no_slash_string,
         'swap_activity' => undef,
     }, ref($class) || $class;
 }
