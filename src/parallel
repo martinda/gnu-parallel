@@ -295,49 +295,61 @@ sub spreadstdin {
     # Force the while-loop once if everything was read by header reading
     my $force_one_time_through = 0;
     for my $in (@fhlist) {
-    while(!$force_one_time_through++ or read($in,substr($buf,length $buf,0),$::opt_blocksize)) {
-	# substr above = append to $buf
-	if($::opt_r) {
-	    # Remove empty lines
-	    $buf=~s/^\s*\n//gm;
-	    if(length $buf == 0) {
-		next;
+	piperead: while(1) {
+	    if(!$force_one_time_through) {
+		$force_one_time_through++;
+	    } elsif($Global::max_lines) {
+		# Read $Global::max_lines lines
+		eof($in) and last piperead;
+		for(my $t = 0; !eof($in) and 
+		    substr($buf,length $buf,0) = <$in> and $t < $Global::max_lines;
+		    $t++) {}
+	    } else {
+		# Read a block
+		read($in,substr($buf,length $buf,0),$::opt_blocksize) or last;
+		# substr above = append to $buf
 	    }
-	}
-	if($::opt_regexp) {
-	    if($Global::max_number_of_args) {
-		# -N => (start..*?end){n}
-		while($buf =~ s/((?:$recstart.*?$recend){$Global::max_number_of_args})($recstart.*)$/$2/os) {
-		    write_record_to_pipe(\$header,\$1,$recstart,$recend,length $1);
+	    if($::opt_r) {
+		# Remove empty lines
+		$buf=~s/^\s*\n//gm;
+		if(length $buf == 0) {
+		    next;
+		}
+	    }
+	    if($::opt_regexp) {
+		if($Global::max_number_of_args) {
+		    # -N => (start..*?end){n}
+		    while($buf =~ s/((?:$recstart.*?$recend){$Global::max_number_of_args})($recstart.*)$/$2/os) {
+			write_record_to_pipe(\$header,\$1,$recstart,$recend,length $1);
+		    }
+		} else {
+		    # Find the last recend-recstart in $buf
+		    if($buf =~ s/(.*$recend)($recstart.*?)$/$2/os) {
+			write_record_to_pipe(\$header,\$1,$recstart,$recend,length $1);
+		    }
 		}
 	    } else {
-		# Find the last recend-recstart in $buf
-		if($buf =~ s/(.*$recend)($recstart.*?)$/$2/os) {
-		    write_record_to_pipe(\$header,\$1,$recstart,$recend,length $1);
-		}
-	    }
-	} else {
-	    if($Global::max_number_of_args) {
-		# -N => (start..*?end){n}
-		my $i = 0;
-		while(($i = nindex(\$buf,$recendrecstart,$Global::max_number_of_args)) != -1) {
-		    $i += length $recend; # find the actual splitting location
-		    write_record_to_pipe(\$header,\$buf,$recstart,$recend,$i);
-		    substr($buf,0,$i) = "";
-		}
-	    } else {
-		# Find the last recend-recstart in $buf
-		my $i = rindex($buf,$recendrecstart);
-		if($i != -1) {
-		    $i += length $recend; # find the actual splitting location
-		    write_record_to_pipe(\$header,\$buf,$recstart,$recend,$i);
-		    substr($buf,0,$i) = "";
+		if($Global::max_number_of_args) {
+		    # -N => (start..*?end){n}
+		    my $i = 0;
+		    while(($i = nindex(\$buf,$recendrecstart,$Global::max_number_of_args)) != -1) {
+			$i += length $recend; # find the actual splitting location
+			write_record_to_pipe(\$header,\$buf,$recstart,$recend,$i);
+			substr($buf,0,$i) = "";
+		    }
+		} else {
+		    # Find the last recend-recstart in $buf
+		    my $i = rindex($buf,$recendrecstart);
+		    if($i != -1) {
+			$i += length $recend; # find the actual splitting location
+			write_record_to_pipe(\$header,\$buf,$recstart,$recend,$i);
+			substr($buf,0,$i) = "";
+		    }
 		}
 	    }
 	}
     }
-}
-
+    
     # If there is anything left in the buffer write it
     substr($buf,0,0) = "";
     write_record_to_pipe(\$header,\$buf,$recstart,$recend,length $buf);

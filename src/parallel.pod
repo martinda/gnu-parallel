@@ -636,24 +636,28 @@ to see the difference:
 
 =item B<-L> I<max-lines>
 
-Use at most I<max-lines> nonblank input lines per command line.
-Trailing blanks cause an input line to be logically continued on the
-next input line.
+When used with B<--pipe>: Read records of I<max-lines>.
+
+When used otherwise: Use at most I<max-lines> nonblank input lines per
+command line.  Trailing blanks cause an input line to be logically
+continued on the next input line.
 
 B<-L 0> means read one line, but insert 0 arguments on the command
 line.
 
-Implies B<-X> unless B<-m> or B<--xargs> is set.
+Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
 =item B<--max-lines>[=I<max-lines>]
 
 =item B<-l>[I<max-lines>]
 
-Synonym for the B<-L> option.  Unlike B<-L>, the I<max-lines> argument
-is optional.  If I<max-lines> is not specified, it defaults to one.
-The B<-l> option is deprecated since the POSIX standard specifies
-B<-L> instead.
+When used with B<--pipe>: Read records of I<max-lines>.
+
+When used otherwise: Synonym for the B<-L> option.  Unlike B<-L>, the
+I<max-lines> argument is optional.  If I<max-lines> is not specified,
+it defaults to one.  The B<-l> option is deprecated since the POSIX
+standard specifies B<-L> instead.
 
 B<-l 0> is an alias for B<-l 1>.
 

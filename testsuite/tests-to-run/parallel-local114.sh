@@ -41,4 +41,10 @@ echo "bug #36657: --load does not work with custom ssh"
   export -f ssh; 
   parallel --load=1000% -S "/usr/bin/ssh localhost" echo ::: OK
 
+echo "bug #34958: --pipe with record size measured in lines"
+  seq 10 | parallel --pipe -L 4 cat\;echo FOO
+
+echo "bug #34958: --pipe with record size measured in lines"
+  seq 10 | parallel --pipe -l 4 cat\;echo FOO
+
 EOF
