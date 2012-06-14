@@ -572,7 +572,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120602;
+    $Global::version = 20120614;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1569,7 +1569,7 @@ sub parse_sshlogin {
         $sshlogin->set_maxlength(Limits::Command::max_length());
         $Global::host{$sshlogin->string()} = $sshlogin;
     }
-    #debug("sshlogin: ", my_dump(%Global::host),"\n");
+    debug("sshlogin: ", my_dump(%Global::host),"\n");
     if($::opt_transfer or @::opt_return or $::opt_cleanup or @::opt_basefile) {
         if(not remote_hosts()) {
             # There are no remote hosts
@@ -2090,7 +2090,7 @@ sub new {
     my $class = shift;
     my $sshlogin_string = shift;
     my $ncpus;
-    if($sshlogin_string =~ s:^(\d*)/:: and $1) {
+    if($sshlogin_string =~ s:^(\d+)/:: and $1) {
         # Override default autodetected ncpus unless zero or missing
         $ncpus = $1;
     }

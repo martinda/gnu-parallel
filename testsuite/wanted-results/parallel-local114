@@ -1,3 +1,4 @@
+### Test -I
 1 1
 2 1
 2 2
@@ -53,6 +54,7 @@
 10 8
 10 9
 10 10
+### Test -X -I
 a1 b1
 a2 b1 b2
 a3 b1 b2 b3
@@ -63,6 +65,7 @@ a7 b1 b2 b3 b4 b5 b6 b7
 a8 b1 b2 b3 b4 b5 b6 b7 b8
 a9 b1 b2 b3 b4 b5 b6 b7 b8 b9
 a10 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10
+### Test -m -I
 a1 b1
 a2 b1 2
 a3 b1 2 3
@@ -73,7 +76,11 @@ a7 b1 2 3 4 5 6 7
 a8 b1 2 3 4 5 6 7 8
 a9 b1 2 3 4 5 6 7 8 9
 a10 b1 2 3 4 5 6 7 8 9 10
+### Test max line length -m -I
 31d9274be5fdc2de59487cb05ba57776  -
 Chars per line (697800/6): 116300
+### Test max line length -X -I
 22074f9acada52462defb18ba912d744  -
 Chars per line (817788/7): 116826
+### bug #36659: --sshlogin strips leading slash from ssh command
+OK
