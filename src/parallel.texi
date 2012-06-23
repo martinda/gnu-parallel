@@ -489,6 +489,17 @@ See also: @strong{--bg}, @strong{man sem}
 
 Implies @strong{--semaphore}.
 
+@item @strong{--filter-hosts} (alpha testing)
+@anchor{@strong{--filter-hosts} (alpha testing)}
+
+Remove down hosts. For each remote host: check that login through ssh
+works. If not: do not use this host.
+
+Currently you can <i>not</i> put @strong{--filter-hosts} in a profile,
+$PARALLEL, /etc/parallel/config or similar. This is because GNU
+@strong{parallel} uses GNU @strong{parallel} to compute this, so you will get an
+infinite loop. This will likely be fixed in a later release.
+
 @item @strong{--gnu}
 @anchor{@strong{--gnu}}
 
@@ -685,8 +696,8 @@ to see the difference:
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 @end verbatim
 
-@item @strong{-L} @emph{max-lines}
-@anchor{@strong{-L} @emph{max-lines}}
+@item @strong{-L} @emph{max-lines} (alpha testing)
+@anchor{@strong{-L} @emph{max-lines} (alpha testing)}
 
 When used with @strong{--pipe}: Read records of @emph{max-lines}.
 
@@ -1300,15 +1311,15 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{sec}
-@anchor{@strong{--timeout} @emph{sec}}
+@item @strong{--timeout} @emph{sec} (alpha testing)
+@anchor{@strong{--timeout} @emph{sec} (alpha testing)}
 
 Time out for command. If the command runs for longer than @emph{sec}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
-@item @strong{--tollef}
-@anchor{@strong{--tollef}}
+@item @strong{--tollef} (alpha testing)
+@anchor{@strong{--tollef} (alpha testing)}
 
 Make GNU @strong{parallel} behave more like Tollef's parallel command. It
 activates @strong{-u}, @strong{-q}, and @strong{--arg-sep --}. It also causes @strong{-l} to
@@ -1529,11 +1540,11 @@ Compare these two:
 
 See also @strong{--header}.
 
-@item @strong{--shebang}
-@anchor{@strong{--shebang}}
+@item @strong{--shebang} (alpha testing)
+@anchor{@strong{--shebang} (alpha testing)}
 
-@item @strong{--hashbang}
-@anchor{@strong{--hashbang}}
+@item @strong{--hashbang} (alpha testing)
+@anchor{@strong{--hashbang} (alpha testing)}
 
 GNU @strong{Parallel} can be called as a shebang (#!) command as the first line of a script. Like this:
 

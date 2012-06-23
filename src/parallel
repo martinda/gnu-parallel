@@ -301,7 +301,7 @@ sub spreadstdin {
 	    } elsif($Global::max_lines) {
 		# Read $Global::max_lines lines
 		eof($in) and last piperead;
-		for(my $t = 0; !eof($in) and 
+		for(my $t = 0; !eof($in) and
 		    substr($buf,length $buf,0) = <$in> and $t < $Global::max_lines;
 		    $t++) {}
 	    } else {
@@ -485,7 +485,7 @@ sub options_hash {
 	 "tagstring=s" => \$::opt_tagstring,
 	 "onall" => \$::opt_onall,
 	 "nonall" => \$::opt_nonall,
-	 "filter-hosts" => \$::opt_filter_hosts,
+	 "filter-hosts|filterhosts|filter-host" => \$::opt_filter_hosts,
 	 "sshlogin|S=s" => \@::opt_sshlogin,
 	 "sshloginfile|slf=s" => \@::opt_sshloginfile,
 	 "controlmaster|M" => \$::opt_controlmaster,
@@ -584,7 +584,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120614;
+    $Global::version = 20120622;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;

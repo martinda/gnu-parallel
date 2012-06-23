@@ -462,6 +462,17 @@ See also: B<--bg>, B<man sem>
 Implies B<--semaphore>.
 
 
+=item B<--filter-hosts> (alpha testing)
+
+Remove down hosts. For each remote host: check that login through ssh
+works. If not: do not use this host.
+
+Currently you can <i>not</i> put B<--filter-hosts> in a profile,
+$PARALLEL, /etc/parallel/config or similar. This is because GNU
+B<parallel> uses GNU B<parallel> to compute this, so you will get an
+infinite loop. This will likely be fixed in a later release.
+
+
 =item B<--gnu>
 
 Behave like GNU B<parallel>. If B<--tollef> and B<--gnu> are both set,
@@ -634,7 +645,7 @@ to see the difference:
   parallel -j4 sleep {}\; echo {} ::: 2 1 4 3
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 
-=item B<-L> I<max-lines>
+=item B<-L> I<max-lines> (alpha testing)
 
 When used with B<--pipe>: Read records of I<max-lines>.
 
@@ -1221,14 +1232,14 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<sec>
+=item B<--timeout> I<sec> (alpha testing)
 
 Time out for command. If the command runs for longer than I<sec>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
 
-=item B<--tollef>
+=item B<--tollef> (alpha testing)
 
 Make GNU B<parallel> behave more like Tollef's parallel command. It
 activates B<-u>, B<-q>, and B<--arg-sep -->. It also causes B<-l> to
@@ -1434,9 +1445,9 @@ Compare these two:
 See also B<--header>.
 
 
-=item B<--shebang>
+=item B<--shebang> (alpha testing)
 
-=item B<--hashbang>
+=item B<--hashbang> (alpha testing)
 
 GNU B<Parallel> can be called as a shebang (#!) command as the first line of a script. Like this:
 
