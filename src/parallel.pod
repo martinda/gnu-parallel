@@ -3272,6 +3272,11 @@ combination of B<seq>, B<cat>, B<echo>, and B<sleep> can reproduce
 most errors. If your example requires large files, see if you can make
 them by something like B<seq 1000000> > B<file>.
 
+=item *
+
+The output of your example. If your problem is not easily reproduced
+by others, the output might help them figure out the problem.
+
 =back
 
 If you suspect the error is dependent on your distribution, please see
@@ -3280,6 +3285,11 @@ http://sourceforge.net/projects/virtualboximage/files/
 
 Specifying the name of your distribution is not enough as you may have
 installed software that is not in the VirtualBox images.
+
+If you cannot reproduce the error on any of the VirtualBox images
+above, you should assume the debugging will be done through you. That
+will put more burden on you and it is extra important you give any
+information that help.
 
 
 =head1 AUTHOR
