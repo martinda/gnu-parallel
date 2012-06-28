@@ -2941,7 +2941,7 @@ sub sshcommand_of_sshlogin {
                     $Global::sshmaster{$pid}++;
                 } else {
                     ::debug($master,"\n");
-                    `$master`;
+                    `$master </dev/null`;
                     ::wait_and_exit(0);
                 }
             }
