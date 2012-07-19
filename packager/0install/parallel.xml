@@ -118,10 +118,14 @@ xargs or cat | sh.</description>
     <manifest-digest sha256="346becd7f4a3214720b894b4d637872f33a349e362d43a048d8d4ba1d9693420"/>
     <archive extract="parallel-20120522" href="http://ftp.gnu.org/gnu/parallel/parallel-20120522.tar.bz2" size="226625"/>
   </implementation>
+		<implementation id="sha1new=006f918cda3a7cbe620f6e2b66123379c1948089" released="2012-06-23" version="20120622">
+    <manifest-digest sha256="b1182ecf93c1b93e0cf3f22784c27c01f7aa64801f038b652624c3e210e03dea"/>
+    <archive extract="parallel-20120622" href="http://ftp.gnu.org/gnu/parallel/parallel-20120622.tar.bz2" size="228881"/>
+  </implementation>
 	</group>
 </interface>
 <!-- Base64 Signature
-iEYEABECAAYFAk+8zokACgkQ/lhgK1iJTtIRswCgoZl/b2sTzF8fK0fiwGBo8h1o7s4An1gyIopr
-1H3rSv+xtItwMkgbR2HN
+iEYEABECAAYFAk/lnIgACgkQ/lhgK1iJTtKfrgCeIjYITindJa50NjPqxCes8e7kF1MAn0qMTpwx
+cvnKdRDwC1px3+HQg435
 
 -->
