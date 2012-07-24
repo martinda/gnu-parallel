@@ -1,3 +1,17 @@
+20120722
+
+* GNU Parallel was presented at Chiang Mai Bar Camp
+  http://barcampchiangmai.org/
+  See write up here:
+  http://www.cnx-software.com/2012/07/02/use-gnu-parallel-to-speed-up-script-execution-on-multiple-cores-andor-machines/
+
+* I don't always max out all my CPUs, but when I do, I do it with GNU
+  Parallel.
+  http://memegenerator.net/instance/22638454
+
+* Bug fixes and man page updates.
+
+
 20120622
 
 * '-L n --pipe' will use records of n lines. This is useful when
@@ -15,11 +29,11 @@
   be better on computers with >10 cores while remaining the same on
   computers with few cores.
 
-* GNU Parallel will be represented at Chiang Mai Bar Camp
+* GNU Parallel will be represented at Chiang Mai Bar Camp.
   http://barcampchiangmai.org/
 
 * Indexing Big Data on Amazon AWS: The Screencast
-  (Check out his T-shirt at 18:40-21:00)
+  (Check out his T-shirt at 18:40-21:00).
   http://www.opensourceconnections.com/2012/06/06/indexing-big-data-on-amazon-aws-screencast/
 
 * biotoolbox uses GNU Parallel.
@@ -28,10 +42,10 @@
 * Spiceweasel uses GNU Parallel.
   https://github.com/mattray/spiceweasel
 
-* GNU Parallel part of The Administrators Challenge
+* GNU Parallel part of The Administrators Challenge.
   http://challenge.twistedrack.com/questions/qs3.php
 
-* Finding Oldest Firefox Code using GNU Parallel
+* Finding Oldest Firefox Code using GNU Parallel.
   http://gregoryszorc.com/blog/2012/06/18/finding-oldest-firefox-code/
 
 * Bug fixes (quite a few for remote job running) and man page updates.

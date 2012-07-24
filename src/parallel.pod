@@ -462,7 +462,7 @@ See also: B<--bg>, B<man sem>
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (alpha testing)
+=item B<--filter-hosts> (beta testing)
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -549,7 +549,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile> (alpha testing)
+=item B<--joblog> I<logfile> (beta testing)
 
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -645,7 +645,7 @@ to see the difference:
   parallel -j4 sleep {}\; echo {} ::: 2 1 4 3
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 
-=item B<-L> I<max-lines> (alpha testing)
+=item B<-L> I<max-lines> (beta testing)
 
 When used with B<--pipe>: Read records of I<max-lines>.
 
@@ -675,7 +675,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--load> I<max-load> (alpha testing)
+=item B<--load> I<max-load> (beta testing)
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
@@ -770,9 +770,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe> (alpha testing)
+=item B<--pipe> (beta testing)
 
-=item B<--spreadstdin> (alpha testing)
+=item B<--spreadstdin> (beta testing)
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1232,14 +1232,14 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<sec> (alpha testing)
+=item B<--timeout> I<sec> (beta testing)
 
 Time out for command. If the command runs for longer than I<sec>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
 
-=item B<--tollef> (alpha testing)
+=item B<--tollef> (beta testing)
 
 Make GNU B<parallel> behave more like Tollef's parallel command. It
 activates B<-u>, B<-q>, and B<--arg-sep -->. It also causes B<-l> to
@@ -1445,9 +1445,9 @@ Compare these two:
 See also B<--header>.
 
 
-=item B<--shebang> (alpha testing)
+=item B<--shebang> (beta testing)
 
-=item B<--hashbang> (alpha testing)
+=item B<--hashbang> (beta testing)
 
 GNU B<Parallel> can be called as a shebang (#!) command as the first line of a script. Like this:
 

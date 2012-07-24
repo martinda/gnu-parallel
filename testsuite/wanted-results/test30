@@ -22,7 +22,6 @@ Computer:jobs running/jobs completed/%of started jobs/Average seconds to complet
 local:1/0/100%/0.0s 
 ### --timeout on remote machines
 slept 1
-slept 1
 jobs failed: 2
 ### --pipe without command
 parallel: --pipe must have a command to pipe into (e.g. 'cat')

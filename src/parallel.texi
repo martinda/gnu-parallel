@@ -489,8 +489,8 @@ See also: @strong{--bg}, @strong{man sem}
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (alpha testing)
-@anchor{@strong{--filter-hosts} (alpha testing)}
+@item @strong{--filter-hosts} (beta testing)
+@anchor{@strong{--filter-hosts} (beta testing)}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -581,8 +581,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile} (alpha testing)
-@anchor{@strong{--joblog} @emph{logfile} (alpha testing)}
+@item @strong{--joblog} @emph{logfile} (beta testing)
+@anchor{@strong{--joblog} @emph{logfile} (beta testing)}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -696,8 +696,8 @@ to see the difference:
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 @end verbatim
 
-@item @strong{-L} @emph{max-lines} (alpha testing)
-@anchor{@strong{-L} @emph{max-lines} (alpha testing)}
+@item @strong{-L} @emph{max-lines} (beta testing)
+@anchor{@strong{-L} @emph{max-lines} (beta testing)}
 
 When used with @strong{--pipe}: Read records of @emph{max-lines}.
 
@@ -727,8 +727,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--load} @emph{max-load} (alpha testing)
-@anchor{@strong{--load} @emph{max-load} (alpha testing)}
+@item @strong{--load} @emph{max-load} (beta testing)
+@anchor{@strong{--load} @emph{max-load} (beta testing)}
 
 Do not start new jobs on a given computer unless the load is less than
 @emph{max-load}. @emph{max-load} uses the same syntax as @strong{--jobs}, so @emph{100%}
@@ -825,11 +825,11 @@ all the output from one server will be grouped together.
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
-@item @strong{--pipe} (alpha testing)
-@anchor{@strong{--pipe} (alpha testing)}
+@item @strong{--pipe} (beta testing)
+@anchor{@strong{--pipe} (beta testing)}
 
-@item @strong{--spreadstdin} (alpha testing)
-@anchor{@strong{--spreadstdin} (alpha testing)}
+@item @strong{--spreadstdin} (beta testing)
+@anchor{@strong{--spreadstdin} (beta testing)}
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1311,15 +1311,15 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{sec} (alpha testing)
-@anchor{@strong{--timeout} @emph{sec} (alpha testing)}
+@item @strong{--timeout} @emph{sec} (beta testing)
+@anchor{@strong{--timeout} @emph{sec} (beta testing)}
 
 Time out for command. If the command runs for longer than @emph{sec}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
-@item @strong{--tollef} (alpha testing)
-@anchor{@strong{--tollef} (alpha testing)}
+@item @strong{--tollef} (beta testing)
+@anchor{@strong{--tollef} (beta testing)}
 
 Make GNU @strong{parallel} behave more like Tollef's parallel command. It
 activates @strong{-u}, @strong{-q}, and @strong{--arg-sep --}. It also causes @strong{-l} to
@@ -1540,11 +1540,11 @@ Compare these two:
 
 See also @strong{--header}.
 
-@item @strong{--shebang} (alpha testing)
-@anchor{@strong{--shebang} (alpha testing)}
+@item @strong{--shebang} (beta testing)
+@anchor{@strong{--shebang} (beta testing)}
 
-@item @strong{--hashbang} (alpha testing)
-@anchor{@strong{--hashbang} (alpha testing)}
+@item @strong{--hashbang} (beta testing)
+@anchor{@strong{--hashbang} (beta testing)}
 
 GNU @strong{Parallel} can be called as a shebang (#!) command as the first line of a script. Like this:
 
@@ -3493,6 +3493,9 @@ combination of @strong{seq}, @strong{cat}, @strong{echo}, and @strong{sleep} can
 most errors. If your example requires large files, see if you can make
 them by something like @strong{seq 1000000} > @strong{file}.
 
+@item The output of your example. If your problem is not easily reproduced
+by others, the output might help them figure out the problem.
+
 @end itemize
 
 If you suspect the error is dependent on your distribution, please see
@@ -3501,6 +3504,11 @@ http://sourceforge.net/projects/virtualboximage/files/
 
 Specifying the name of your distribution is not enough as you may have
 installed software that is not in the VirtualBox images.
+
+If you cannot reproduce the error on any of the VirtualBox images
+above, you should assume the debugging will be done through you. That
+will put more burden on you and it is extra important you give any
+information that help.
 
 @chapter AUTHOR
 @anchor{AUTHOR}

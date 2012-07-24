@@ -12,3 +12,6 @@ B 2
 C 3
 ### bug #36595: silent loss of input with --pipe and --sshlogin
       1   10000   48894
+bug #36707: --controlmaster eats jobs
+OK1
+OK2
