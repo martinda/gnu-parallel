@@ -223,7 +223,7 @@ In terminal 1 run: top
 
 In terminal 2 run:
 
-@strong{niceload perl -e '$|=1;do@{$l==$r or print "."; $l=$r@}until(($r=time-$^T)}>@strong{50)'}
+@strong{niceload -q perl -e '$|=1;do@{$l==$r or print "."; $l=$r@}until(($r=time-$^T)}>@strong{50)'}
 
 This will print a '.' every second for 50 seconds and eat a lot of
 CPU. When the load rises to 1.0 the process is suspended.
