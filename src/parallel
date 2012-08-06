@@ -2388,7 +2388,8 @@ sub set_time_to_login {
 sub max_jobs_running {
     my $self = shift;
     if(not defined $self->{'max_jobs_running'}) {
-        $self->set_max_jobs_running($self->compute_number_of_processes($::opt_P));
+        my $nproc = $self->compute_number_of_processes($::opt_P);
+        $self->set_max_jobs_running($nproc);
     }
     return $self->{'max_jobs_running'};
 }
@@ -2406,7 +2407,11 @@ sub compute_number_of_processes {
     ::debug("Wanted procs: $wanted_processes\n");
     my $system_limit =
         $self->processes_available_by_system_limit($wanted_processes);
-    $system_limit < 1 and ::die_bug('$system_limit < 1');
+    if($system_limit < 1) {
+	print STDERR "$Global::progname: Cannot spawn more jobs. ",
+	"Raising ulimit -u may help.\n";
+	exit(255);
+    }
     ::debug("Limited to procs: $system_limit\n");
     return $system_limit;
 }
@@ -2438,6 +2443,23 @@ sub processes_available_by_system_limit {
     # parallel uses 1 for memory_usage
     for my $i (1..8) {
         open($fh{"init-$i"},"</dev/null");
+    }
+
+    for(1..2) {
+        # System process limit
+        my $child;
+        if($child = fork()) {
+            push (@children,$child);
+            $Global::unkilled_children{$child} = 1;
+        } elsif(defined $child) {
+            # The child takes one process slot
+            # It will be killed later
+            $SIG{TERM} = $Global::original_sig{TERM};
+            sleep 10000000;
+            exit(0);
+        } else {
+            $max_system_proc_reached = 1;
+        }
     }
     my $count_jobs_already_read = $Global::JobQueue->next_seq();
     my $wait_time_for_getting_args = 0;
