@@ -17,7 +17,7 @@ stdout parallel --progress "sleep 1; echo {}" < /dev/null
 echo '### bug #34422: parallel -X --eta crashes with div by zero'
 seq 2 | stdout parallel -X --eta echo
 
-echo '### --timeout on remote machines'
+echo '### --timeout --onall on remote machines: 2*slept 1, 2 jobs failed'
 parallel -j0 --timeout 6 --onall -S localhost,parallel@parallel-server1 'sleep {}; echo slept {}' ::: 1 8 9 ; echo jobs failed: $?
 
 echo '### --pipe without command'

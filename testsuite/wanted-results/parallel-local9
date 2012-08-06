@@ -57,7 +57,7 @@ b
 350eda13a37912d755c9d733d149bdaf  -
 350eda13a37912d755c9d733d149bdaf  -
 350eda13a37912d755c9d733d149bdaf  -
-### Test of -j filename
+### Test of -j filename - non-existent file
 Usage:
 parallel [options] [command [arguments]] < list_of_arguments
 parallel [options] [command [arguments]] (::: arguments|:::: argfile(s))...
@@ -88,11 +88,11 @@ O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
 ;login: The USENIX Magazine, February 2011:42-47.
 Parsing of --jobs/-j/--max-procs/-P failed
 ### Test of -j filename
+sleep 0.5
 sleep 0.7
-sleep 0.8
 sleep 0.9
-sleep 0.4
-sleep 0.6
+sleep 0.1
+sleep 0.3
 ### Test ::::
 ### Change --arg-file-sep
 1 5

@@ -408,7 +408,7 @@ sub write_record_to_pipe {
 	$job->write(\$record);
 	my $fh = $job->stdin();
 	close $fh;
-	exit;
+	exit(0);
     }
     my $fh = $job->stdin();
     close $fh;
@@ -584,7 +584,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120722;
+    $Global::version = 20120806;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1220,8 +1220,20 @@ sub start_another_job {
                 debug("Started as seq ",$job->seq()," pid:",$job->pid(),"\n");
                 return 1;
             } else {
-                # If interactive says: Dont run the job, then skip it and run the next
-                return start_another_job($sshlogin);
+                # Not enough processes to run the job.
+		# Put it back on the queue.
+		$Global::JobQueue->unget($job);
+		# Count down the number of jobs to run for this SSHLogin.
+		my $max = $sshlogin->max_jobs_running();
+		if($max > 1) { $max--; }
+		$sshlogin->set_max_jobs_running($max);
+		# Sleep up to 300 ms to give other processes time to die
+		::usleep(rand()*300);
+		print $Global::original_stderr
+		    ("parallel: Warning: No more processes: ".
+		     "Decreasing number of running jobs to $max. ".
+		     "Raising ulimit -u may help.\n");
+		return 0;
             }
         }
     } else {
@@ -1548,7 +1560,7 @@ sub read_sshloginfile {
     } else {
 	if(not open(IN, $file)) {
 	    print $Global::original_stderr "Cannot open $file\n";
-	    exit(255);
+	    ::wait_and_exit(255);
 	}
     }
     while(<IN>) {
@@ -2362,7 +2374,7 @@ sub compute_max_loadavg {
                 $load = $self->compute_max_loadavg($opt_load_file);
             } else {
                 print $Global::original_stderr "Cannot open $loadspec\n";
-                exit(255);
+                ::wait_and_exit(255);
             }
         } else {
             print $Global::original_stderr "Parsing of --load failed\n";
@@ -2407,11 +2419,6 @@ sub compute_number_of_processes {
     ::debug("Wanted procs: $wanted_processes\n");
     my $system_limit =
         $self->processes_available_by_system_limit($wanted_processes);
-    if($system_limit < 1) {
-	print STDERR "$Global::progname: Cannot spawn more jobs. ",
-	"Raising ulimit -u may help.\n";
-	exit(255);
-    }
     ::debug("Limited to procs: $system_limit\n");
     return $system_limit;
 }
@@ -2537,20 +2544,6 @@ sub processes_available_by_system_limit {
             $slow_spawining_warning_printed = 1;
         }
     }
-    if($system_limit < $wanted_processes and not $more_filehandles) {
-        print $Global::original_stderr
-            ("parallel: Warning: Only enough filehandles to run ",
-             $system_limit, " jobs in parallel. ",
-             "Raising ulimit -n may help.\n");
-    }
-    if($system_limit < $wanted_processes and $max_system_proc_reached) {
-        print $Global::original_stderr
-            ("parallel: Warning: Only enough available processes to run ",
-             $system_limit, " jobs in parallel.\n");
-    }
-    if($Global::JobQueue->empty()) {
-	$system_limit ||= 1;
-    }
     # Cleanup: Close the files
     for (values %fh) { close $_ }
     # Cleanup: Kill the children
@@ -2559,10 +2552,31 @@ sub processes_available_by_system_limit {
         waitpid($pid,0);
         delete $Global::unkilled_children{$pid};
     }
-    #wait();
     # Cleanup: Unget the command_lines or the @args
     $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->unget(@args);
     $Global::JobQueue->unget(@jobs);
+    if($system_limit < $wanted_processes) {
+	# The system_limit is less than the wanted_processes
+	if($system_limit < 1 and not $Global::JobQueue->empty()) {
+	    print $Global::original_stderr "$Global::progname: Cannot spawn any jobs. ",
+	    "Raising ulimit -u may help.\n";
+	    ::wait_and_exit(255);
+	}
+	if(not $more_filehandles) {
+	    print $Global::original_stderr
+		("parallel: Warning: Only enough filehandles to run ",
+		 $system_limit, " jobs in parallel. ",
+		 "Raising ulimit -n may help.\n");
+	}
+	if($max_system_proc_reached) {
+	    print $Global::original_stderr
+		("parallel: Warning: Only enough available processes to run ",
+		 $system_limit, " jobs in parallel. Raising ulimit -u may help.\n");
+	}
+    }
+    if($Global::JobQueue->empty()) {
+	$system_limit ||= 1;
+    }
     if($self->string() ne ":" and
        $system_limit > $Global::default_simultaneous_sshlogins) {
         $system_limit =
@@ -2659,7 +2673,7 @@ sub user_requested_processes {
                 $processes = $self->user_requested_processes($opt_P_file);
             } else {
                 print $Global::original_stderr "Cannot open $opt_P\n";
-                exit(255);
+                ::wait_and_exit(255);
             }
         } else {
             print $Global::original_stderr "Parsing of --jobs/-j/--max-procs/-P failed\n";
@@ -3663,24 +3677,30 @@ sub start {
     if($::opt_dryrun) {
 	$command = "true";
     }
-    $Global::total_running++;
-    $Global::total_started++;
     $ENV{'PARALLEL_SEQ'} = $job->seq();
     $ENV{'PARALLEL_PID'} = $$;
     ::debug("$Global::total_running processes. Starting ("
 	    . $job->seq() . "): $command\n");
     if($::opt_pipe) {
 	my ($in);
-	$pid = ::open3($in, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
-	    ::die_bug("open3-pipe");
+	# The eval is needed to catch exception from open3
+	eval {
+	    $pid = ::open3($in, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+		::die_bug("open3-pipe");
+	    1;
+	};
 	$job->set_stdin($in);
     } elsif(@::opt_a and not $Global::stdin_in_opt_a and $job->seq() == 1
 	    and $job->sshlogin()->string() eq ":") {
 	# Give STDIN to the first job if using -a (but only if running
 	# locally - otherwise CTRL-C does not work for other jobs Bug#36585)
 	*IN = *STDIN;
-	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
-	    ::die_bug("open3-a");
+	# The eval is needed to catch exception from open3
+	eval {
+	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+		::die_bug("open3-a");
+	    1;
+	};
 	# Re-open to avoid complaining
 	open STDIN, "<&", $Global::original_stdin
 	    or ::die_bug("dup-\$Global::original_stdin: $!");
@@ -3688,22 +3708,38 @@ sub start {
 	     open(DEVTTY, "/dev/tty")) {
 	# Give /dev/tty to the command if no one else is using it
 	*IN = *DEVTTY;
-	$pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
-	    ::die_bug("open3-/dev/tty");
-	$Global::tty_taken = $pid;
-	close DEVTTY;
+	# The eval is needed to catch exception from open3
+	eval {
+	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+		::die_bug("open3-/dev/tty");
+	    $Global::tty_taken = $pid;
+	    close DEVTTY;
+	    1;
+	};
     } else {
-	$pid = ::open3(::gensym, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
-	    ::die_bug("open3-gensym");
+	eval {
+	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+		::die_bug("open3-gensym");
+	    1;
+	};
     }
-    $job->set_pid($pid);
-    $job->set_starttime();
-    if($::opt_timeout) {
-	# Timeout must be set before inserting into queue
-	$job->set_timeout($::opt_timeout);
-	$Global::timeoutq->insert($job);
+    if($pid) {
+	# A job was started
+	$Global::total_running++;
+	$Global::total_started++;
+	$job->set_pid($pid);
+	$job->set_starttime();
+	if($::opt_timeout) {
+	    # Timeout must be set before inserting into queue
+	    $job->set_timeout($::opt_timeout);
+	    $Global::timeoutq->insert($job);
+	}
+	return $job;
+    } else {
+	# No more processes
+	::debug("Cannot spawn more jobs.\n");
+	return undef;
     }
-    return $job;
 }
 
 sub is_already_in_joblog {
@@ -5251,7 +5287,7 @@ sub mkdir_or_die {
     }
     if(not -w $dir) {
 	print STDERR "$Global::progname: Cannot write to $dir: $!\n";
-	exit(255);
+	::wait_and_exit(255);
     }
 }
 

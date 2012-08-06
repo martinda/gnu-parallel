@@ -97,13 +97,13 @@ nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 
 nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
   $PAR --recend '' --files --halt-on-error 2 cat | parallel -Xj1 cat {} ';' rm {} | md5sum
 
-echo '### Test of -j filename'; 
+echo '### Test of -j filename - non-existent file'; 
   nice stdout parallel -j no_such_file echo ::: 1
 
 echo '### Test of -j filename'; 
   echo 3 >/tmp/jobs_to_run1; 
-  parallel -j /tmp/jobs_to_run1 -v sleep 0.{} ::: 9 8 7 6 4; 
-  # Should give 7 8 9 4 6
+  parallel -j /tmp/jobs_to_run1 -v sleep 0.{} ::: 9 7 5 3 1; 
+  # Should give 0.5 0.7 0.9 0.1 0.3
 
 echo '### Test ::::'
 echo '### Change --arg-file-sep'
