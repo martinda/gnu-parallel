@@ -37,10 +37,19 @@ echo '### Test -m'
 (echo foo;echo bar;echo joe.gif) | parallel -j1 -kX echo 1{}2{.}3 A{.}B{.}C
 seq 1 6 | parallel -k printf '{}.gif\\n' | parallel -j1 -km echo a{}b{.}c{.}
 seq 1 6 | parallel -k printf '{}.gif\\n' | parallel -j1 -kX echo a{}b{.}c{.}
-echo '### Test -m with 60000 args'
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -km echo a{}b{.}c{.} | mop -d 4 "|md5sum" "| wc"
-echo '### Test -X with 60000 args'
-seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b{.}c{.} | mop -d 4 "|md5sum" "| wc"
+
+echo '### Test -m with 60000 args'; 
+  seq 1 60000 | perl -pe 's/$/.gif\n/' | 
+  parallel -j1 -km echo a{}b{.}c{.} | 
+  tee >(wc) >(md5sum) >/dev/null; 
+  wait
+
+echo '### Test -X with 60000 args'; 
+  seq 1 60000 | perl -pe 's/$/.gif\n/' | 
+  parallel -j1 -kX echo a{}b{.}c{.} | 
+  tee >(wc) >(md5sum) >/dev/null; 
+  wait
+
 echo '### Test -X with 60000 args and 5 expansions'
 seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b{.}c{.}{.}{} | wc -l
 seq 1 60000 | perl -pe 's/$/.gif\n/' | parallel -j1 -kX echo a{}b{.}c{.}{.} | wc -l

@@ -7,14 +7,12 @@ local: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal
 	date
 
 prereqlocal: installparallel
-	echo | mop || (echo mop is required for testsuite; /bin/false)
-	seq 1 2 | mop || (echo seq is required for testsuite; /bin/false)
+	seq 1 2 >/dev/null || (echo seq is required for testsuite; /bin/false)
 	stdout echo || (echo stdout is required for testsuite; /bin/false)
-	convert | mop || (echo convert is required for testsuite; /bin/false)
-	ren 2>&1 | mop || (echo ren is required for testsuite; /bin/false)
-	echo | buffer | mop || (echo buffer is required for testsuite; /bin/false)
-	echo 1+2 | bc | mop || (echo bc is required for testsuite; /bin/false)
-	stdout gawk | mop || (echo gawk is required for testsuite; /bin/false)
+	convert >/dev/null || (echo convert is required for testsuite; /bin/false)
+	ren '$$_' a || (echo ren is required for testsuite; /bin/false)
+	echo 1+2 | bc >/dev/null || (echo bc is required for testsuite; /bin/false)
+	echo | gawk '{print "gawk is installed"}' || (echo gawk is required for testsuite; /bin/false)
 	expect -c 'spawn cat; puts "expect is installed"' || (echo expect is required for testsuite; /bin/false)
 	echo | pv -qL 10 || (echo pv is required for testsuite; /bin/false)
 	echo | script -c echo -q /dev/null || (echo script is required for testsuite; /bin/false)
