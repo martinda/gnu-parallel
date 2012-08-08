@@ -509,6 +509,7 @@ sub options_hash {
 	 "arg-sep|argsep=s" => \$::opt_arg_sep,
 	 "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
 	 "trim=s" => \$::opt_trim,
+	 "plain" => \$::opt_plain,
 	 "profile|J=s" => \@::opt_profile,
 	 "pipe|spreadstdin" => \$::opt_pipe,
 	 "recstart=s" => \$::opt_recstart,
@@ -689,7 +690,7 @@ sub parse_options {
 	    wait_and_exit(0);
 	}
     }
-    if($::opt_tollef and not $::opt_gnu) {
+    if($::opt_tollef and not $::opt_gnu and not $::opt_plain) {
 	# Behave like tollef parallel (from moreutils)
 	$::opt_u = 1;
 	$Global::grouped = 0;
@@ -875,44 +876,49 @@ sub read_options {
 
     Getopt::Long::Configure("bundling","pass_through");
     # Check if there is a --profile to set @::opt_profile
-    GetOptions("profile|J=s" => \@::opt_profile) || die_usage();
-    # Add options from .parallel/config and other profiles
+    GetOptions("profile|J=s" => \@::opt_profile,
+	       "plain" => \$::opt_plain) || die_usage();
     my @ARGV_profile = ();
     my @ARGV_env = ();
-    my @config_profiles = (
-	"/etc/parallel/config",
-	$ENV{'HOME'}."/.parallel/config",
-	$ENV{'HOME'}."/.parallelrc");
-    my @profiles = @config_profiles;
-    if(@::opt_profile) {
-        # --profile overrides default profiles
-	@profiles = ();
-	for my $profile (@::opt_profile) {
-	    push @profiles, $ENV{'HOME'}."/.parallel/".$profile;
+    if(not $::opt_plain) {
+	# Add options from .parallel/config and other profiles
+	my @config_profiles = (
+	    "/etc/parallel/config",
+	    $ENV{'HOME'}."/.parallel/config",
+	    $ENV{'HOME'}."/.parallelrc");
+	my @profiles = @config_profiles;
+	if(@::opt_profile) {
+	    # --profile overrides default profiles
+	    @profiles = ();
+	    for my $profile (@::opt_profile) {
+		push @profiles, $ENV{'HOME'}."/.parallel/".$profile;
+	    }
 	}
-    }
-    for my $profile (@profiles) {
-        if(-r $profile) {
-            open (IN, "<", $profile) || ::die_bug("read-profile: $profile");
-            while(<IN>) {
-                /^\s*\#/ and next;
-                chomp;
-                push @ARGV_profile, shell_unquote(split/(?<![\\])\s/, $_);
-            }
-            close IN;
-        } else {
-            if(grep /^$profile$/, @config_profiles) {
-                # config file is not required to exist
-            } else {
-                ::error("$profile not readable.\n");
-                wait_and_exit(255);
-            }
-        }
+	for my $profile (@profiles) {
+	    if(-r $profile) {
+		open (IN, "<", $profile) || ::die_bug("read-profile: $profile");
+		while(<IN>) {
+		    /^\s*\#/ and next;
+		    chomp;
+		    push @ARGV_profile, shell_unquote(split/(?<![\\])\s/, $_);
+		}
+		close IN;
+	    } else {
+		if(grep /^$profile$/, @config_profiles) {
+		    # config file is not required to exist
+		} else {
+		    ::error("$profile not readable.\n");
+		    wait_and_exit(255);
+		}
+	    }
+	}
+	# Add options from shell variable $PARALLEL
+	if($ENV{'PARALLEL'}) {
+	    @ARGV_env = shell_unquote(split/(?<![\\])\s/, $ENV{'PARALLEL'});
+	}
     }
     Getopt::Long::Configure("bundling","require_order");
     get_options_from_array(\@ARGV_profile) || die_usage();
-    # Add options from shell variable $PARALLEL
-    $ENV{'PARALLEL'} and @ARGV_env = shell_unquote(split/(?<![\\])\s/, $ENV{'PARALLEL'});
     get_options_from_array(\@ARGV_env) || die_usage();
     get_options_from_array(\@ARGV) || die_usage();
 

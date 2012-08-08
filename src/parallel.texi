@@ -489,8 +489,8 @@ See also: @strong{--bg}, @strong{man sem}
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (beta testing)
-@anchor{@strong{--filter-hosts} (beta testing)}
+@item @strong{--filter-hosts}
+@anchor{@strong{--filter-hosts}}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -581,8 +581,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile} (beta testing)
-@anchor{@strong{--joblog} @emph{logfile} (beta testing)}
+@item @strong{--joblog} @emph{logfile}
+@anchor{@strong{--joblog} @emph{logfile}}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -696,8 +696,8 @@ to see the difference:
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 @end verbatim
 
-@item @strong{-L} @emph{max-lines} (beta testing)
-@anchor{@strong{-L} @emph{max-lines} (beta testing)}
+@item @strong{-L} @emph{max-lines}
+@anchor{@strong{-L} @emph{max-lines}}
 
 When used with @strong{--pipe}: Read records of @emph{max-lines}.
 
@@ -727,8 +727,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--load} @emph{max-load} (beta testing)
-@anchor{@strong{--load} @emph{max-load} (beta testing)}
+@item @strong{--load} @emph{max-load}
+@anchor{@strong{--load} @emph{max-load}}
 
 Do not start new jobs on a given computer unless the load is less than
 @emph{max-load}. @emph{max-load} uses the same syntax as @strong{--jobs}, so @emph{100%}
@@ -825,11 +825,11 @@ all the output from one server will be grouped together.
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
-@item @strong{--pipe} (beta testing)
-@anchor{@strong{--pipe} (beta testing)}
+@item @strong{--pipe}
+@anchor{@strong{--pipe}}
 
-@item @strong{--spreadstdin} (beta testing)
-@anchor{@strong{--spreadstdin} (beta testing)}
+@item @strong{--spreadstdin}
+@anchor{@strong{--spreadstdin}}
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -853,12 +853,12 @@ defaults to '\n'. To have no record separator use @strong{--recend ""}.
 
 @strong{--files} is often used with @strong{--pipe}.
 
-@item @strong{--plain} (not implemented)
-@anchor{@strong{--plain} (not implemented)}
+@item @strong{--plain} (alpha testing)
+@anchor{@strong{--plain} (alpha testing)}
 
-Ignore any @strong{--profile}, $PARALLEL, ~/.parallel/config, @strong{--tollef} to
-get full control on the command line (used by GNU @strong{parallel} itself
-when called with @strong{--sshlogin}).
+Ignore any @strong{--profile}, $PARALLEL, ~/.parallel/config, and
+@strong{--tollef} to get full control on the command line (used by GNU
+@strong{parallel} internally when called with @strong{--sshlogin}).
 
 @item @strong{--progress}
 @anchor{@strong{--progress}}
@@ -1318,15 +1318,15 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{sec} (beta testing)
-@anchor{@strong{--timeout} @emph{sec} (beta testing)}
+@item @strong{--timeout} @emph{sec}
+@anchor{@strong{--timeout} @emph{sec}}
 
 Time out for command. If the command runs for longer than @emph{sec}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
-@item @strong{--tollef} (beta testing)
-@anchor{@strong{--tollef} (beta testing)}
+@item @strong{--tollef}
+@anchor{@strong{--tollef}}
 
 Make GNU @strong{parallel} behave more like Tollef's parallel command. It
 activates @strong{-u}, @strong{-q}, and @strong{--arg-sep --}. It also causes @strong{-l} to
@@ -1547,11 +1547,11 @@ Compare these two:
 
 See also @strong{--header}.
 
-@item @strong{--shebang} (beta testing)
-@anchor{@strong{--shebang} (beta testing)}
+@item @strong{--shebang}
+@anchor{@strong{--shebang}}
 
-@item @strong{--hashbang} (beta testing)
-@anchor{@strong{--hashbang} (beta testing)}
+@item @strong{--hashbang}
+@anchor{@strong{--hashbang}}
 
 GNU @strong{Parallel} can be called as a shebang (#!) command as the first line of a script. Like this:
 

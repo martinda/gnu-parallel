@@ -1,12 +1,12 @@
-testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb prereq
+testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
 	time sh Start.sh
 	date
 
-local: ../src/parallel tests-to-run/*local* wanted-results/*local* startdb prereq
+local: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal
 	time sh Start.sh local
 	date
 
-prereq: installparallel
+prereqlocal: installparallel
 	echo | mop || (echo mop is required for testsuite; /bin/false)
 	seq 1 2 | mop || (echo seq is required for testsuite; /bin/false)
 	stdout echo || (echo stdout is required for testsuite; /bin/false)
@@ -21,6 +21,8 @@ prereq: installparallel
 	niceload true || (echo niceload is required for testsuite; /bin/false)
 	which burnP6 || (echo burnP6 is required for testsuite; /bin/false)
 	which timeout || (echo timeout is required for testsuite; /bin/false)
+
+prereqremote: installparallel
 	parallel ssh parallel@parallel-server{} parallel --minversion 20100101 ::: 1 2 3 || (echo parallel on remote required for testsuite; /bin/true)
 
 installparallel: ../src/parallel
