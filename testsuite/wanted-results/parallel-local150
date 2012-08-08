@@ -17,4 +17,4 @@ ajob2b	job2
 ### Test bug #35820: sem breaks if $HOME is not writable
 Workaround: use another writable dir
 OK
-parallel: Cannot write to /usr/this/should/fail/.parallel: No such file or directory
+parallel: Error: Cannot write to /usr/this/should/fail/.parallel: No such file or directory

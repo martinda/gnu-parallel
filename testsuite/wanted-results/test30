@@ -25,6 +25,6 @@ slept 1
 slept 1
 jobs failed: 2
 ### --pipe without command
-parallel: --pipe must have a command to pipe into (e.g. 'cat')
+parallel: Error: --pipe must have a command to pipe into (e.g. 'cat').
 ### bug #36260: {n} expansion in --colsep files fails for empty fields if all following fields are also empty
 AB

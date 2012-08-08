@@ -31,7 +31,7 @@ echo '### Test of --retries on unreachable host'
 ### Test of --retries on unreachable host
 seq 2 | stdout parallel -k --retries 2 -v -S 4.3.2.1,: echo
 ssh: connect to host 4.3.2.1 port 22: Connection timed out
-parallel: Warning: Could not figure out number of cpus on 4.3.2.1 (). Using 1
+parallel: Warning: Could not figure out number of cpus on 4.3.2.1 (). Using 1.
 echo 1
 1
 echo 2

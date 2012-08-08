@@ -797,6 +797,12 @@ defaults to '\n'. To have no record separator use B<--recend "">.
 B<--files> is often used with B<--pipe>.
 
 
+=item B<--plain> (not implemented)
+
+Ignore any B<--profile>, $PARALLEL, ~/.parallel/config, B<--tollef> to
+get full control on the command line (used by GNU B<parallel> itself
+when called with B<--sshlogin>).
+
 =item B<--progress>
 
 Show progress of computations. List the computers involved in the task

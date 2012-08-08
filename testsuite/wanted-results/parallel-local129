@@ -3,7 +3,7 @@
 ### Test of quoting of > bug if line continuation
 > > >
 ### Test of --trim illegal
-parallel: --trim must be one of: r l rl lr
+parallel: Error: --trim must be one of: r l rl lr.
 ### Test of eof string on :::
 foo
 ### Test of ignore-empty string on :::

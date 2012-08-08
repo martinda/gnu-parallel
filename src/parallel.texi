@@ -853,6 +853,13 @@ defaults to '\n'. To have no record separator use @strong{--recend ""}.
 
 @strong{--files} is often used with @strong{--pipe}.
 
+@item @strong{--plain} (not implemented)
+@anchor{@strong{--plain} (not implemented)}
+
+Ignore any @strong{--profile}, $PARALLEL, ~/.parallel/config, @strong{--tollef} to
+get full control on the command line (used by GNU @strong{parallel} itself
+when called with @strong{--sshlogin}).
+
 @item @strong{--progress}
 @anchor{@strong{--progress}}
 
