@@ -2,7 +2,11 @@ testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal p
 	time sh Start.sh
 	date
 
-local: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal
+testdb: ../src/parallel tests-to-run/*sql* wanted-results/*sql* prereqdb
+	time sh Start.sh sql
+	date
+
+testlocal: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal
 	time sh Start.sh local
 	date
 
@@ -10,7 +14,6 @@ prereqlocal: installparallel
 	seq 1 2 >/dev/null || (echo seq is required for testsuite; /bin/false)
 	stdout echo || (echo stdout is required for testsuite; /bin/false)
 	convert >/dev/null || (echo convert is required for testsuite; /bin/false)
-	ren '$$_' a || (echo ren is required for testsuite; /bin/false)
 	echo 1+2 | bc >/dev/null || (echo bc is required for testsuite; /bin/false)
 	echo | gawk '{print "gawk is installed"}' || (echo gawk is required for testsuite; /bin/false)
 	expect -c 'spawn cat; puts "expect is installed"' || (echo expect is required for testsuite; /bin/false)
