@@ -171,27 +171,18 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20120722 ('Nai Soi') released
+Subject: GNU Parallel 20120822 ('Boson') released
 
-GNU Parallel 20127022 ('Nai Soi') has been released. It is
+GNU Parallel 20120822 ('Boson') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
-
-This is a bugfix release with no new features. Probably a good release
-for stable long-term use.
 
 New in this release:
 
+* Due to a bugfix the main flow has changed. Making this release beta
+  quality.
+
 * Parallel Proxy Scraper & Checker Tool 
   https://www.youtube.com/watch?v=iXCeR_XsP6o
-
-* GNU Parallel was presented at Chiang Mai Bar Camp
-  http://barcampchiangmai.org/
-  See write up here:
-  http://www.cnx-software.com/2012/07/02/use-gnu-parallel-to-speed-up-script-execution-on-multiple-cores-andor-machines/
-
-* I don't always max out all my CPUs, but when I do, I do it with GNU
-  Parallel.
-  http://memegenerator.net/instance/22638454
 
 * Bug fixes and man page updates.
 
