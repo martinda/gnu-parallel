@@ -2791,18 +2791,21 @@ sub no_of_cpus_gnu_linux {
     #   Number of physical CPUs on GNU/Linux
     #   undef if not GNU/Linux
     my $no_of_cpus;
+    my $no_of_cores;
     if(-e "/proc/cpuinfo") {
         $no_of_cpus = 0;
+        $no_of_cores = 0;
         my %seen;
         open(IN,"cat /proc/cpuinfo|") || return undef;
         while(<IN>) {
             if(/^physical id.*[:](.*)/ and not $seen{$1}++) {
                 $no_of_cpus++;
             }
+            /^processor.*[:]/ and $no_of_cores++;
         }
         close IN;
     }
-    return $no_of_cpus;
+    return ($no_of_cpus||$no_of_cores);
 }
 
 sub no_of_cores_gnu_linux {

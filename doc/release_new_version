@@ -171,18 +171,15 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20120822 ('Boson') released
+Subject: GNU Parallel 20120922 ('X') released
 
-GNU Parallel 20120822 ('Boson') has been released. It is
+GNU Parallel 20120922 ('X') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* Due to a bugfix the main flow has changed. Making this release beta
-  quality.
-
-* Parallel Proxy Scraper & Checker Tool 
-  https://www.youtube.com/watch?v=iXCeR_XsP6o
+* When bash just isn’t quick enough.
+  https://soimasysadmin.wordpress.com/2012/08/15/gnu-parallel-when-bash-just-isnt-quick-enough/
 
 * Bug fixes and man page updates.
 

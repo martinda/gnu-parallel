@@ -2447,7 +2447,7 @@ The idea is to put the jobs into a file and have GNU @strong{parallel} read
 from that continuously. As GNU @strong{parallel} will stop at end of file we
 use @strong{tail} to continue reading:
 
-@strong{echo }>@strong{jobqueue}; @strong{tail -f jobqueue | parallel}
+@strong{true }>@strong{jobqueue}; @strong{tail -f jobqueue | parallel}
 
 To submit your jobs to the queue:
 
