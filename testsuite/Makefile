@@ -1,26 +1,29 @@
-testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb prereq
+testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
 	time sh Start.sh
 	date
 
-local: ../src/parallel tests-to-run/*local* wanted-results/*local* startdb prereq
+testdb: ../src/parallel tests-to-run/*sql* wanted-results/*sql* prereqdb
+	time sh Start.sh sql
+	date
+
+testlocal: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal
 	time sh Start.sh local
 	date
 
-prereq: installparallel
-	echo | mop || (echo mop is required for testsuite; /bin/false)
-	seq 1 2 | mop || (echo seq is required for testsuite; /bin/false)
+prereqlocal: installparallel
+	seq 1 2 >/dev/null || (echo seq is required for testsuite; /bin/false)
 	stdout echo || (echo stdout is required for testsuite; /bin/false)
-	convert | mop || (echo convert is required for testsuite; /bin/false)
-	ren 2>&1 | mop || (echo ren is required for testsuite; /bin/false)
-	echo | buffer | mop || (echo buffer is required for testsuite; /bin/false)
-	echo 1+2 | bc | mop || (echo bc is required for testsuite; /bin/false)
-	stdout gawk | mop || (echo gawk is required for testsuite; /bin/false)
+	convert >/dev/null || (echo convert is required for testsuite; /bin/false)
+	echo 1+2 | bc >/dev/null || (echo bc is required for testsuite; /bin/false)
+	echo | gawk '{print "gawk is installed"}' || (echo gawk is required for testsuite; /bin/false)
 	expect -c 'spawn cat; puts "expect is installed"' || (echo expect is required for testsuite; /bin/false)
 	echo | pv -qL 10 || (echo pv is required for testsuite; /bin/false)
 	echo | script -c echo -q /dev/null || (echo script is required for testsuite; /bin/false)
 	niceload true || (echo niceload is required for testsuite; /bin/false)
 	which burnP6 || (echo burnP6 is required for testsuite; /bin/false)
 	which timeout || (echo timeout is required for testsuite; /bin/false)
+
+prereqremote: installparallel
 	parallel ssh parallel@parallel-server{} parallel --minversion 20100101 ::: 1 2 3 || (echo parallel on remote required for testsuite; /bin/true)
 
 installparallel: ../src/parallel

@@ -24,9 +24,9 @@ you would get had you run the commands sequentially. This makes it
 possible to use output from GNU Parallel as input for other programs.
 
 
-= Installation =
+= Full installation =
 
-Installation of GNU Parallel is as simple as:
+Full installation of GNU Parallel is as simple as:
 
   ./configure && make && make install
 
@@ -38,10 +38,19 @@ If you are not root you can add ~/bin to your path and install in
 Or if your system lacks 'make' you can simply copy src/parallel
 src/sem src/niceload src/sql to a dir in your path.
 
-If you just need parallel in a pinch:
+
+= Minimal installation =
+
+If you just need parallel and do not have 'make' installed (maybe the
+system is old or Microsoft Windows):
 
   wget http://git.savannah.gnu.org/cgit/parallel.git/plain/src/parallel
   chmod 755 parallel
+  cp parallel sem
+  mv parallel sem dir-in-your-$PATH/bin/
+
+
+= Test the installation =
 
 After this you should be able to do:
 

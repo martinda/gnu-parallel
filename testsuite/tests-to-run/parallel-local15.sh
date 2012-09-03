@@ -4,8 +4,7 @@ rsync -Ha --delete input-files/testdir/ tmp/
 cd tmp
 
 echo echo test of cat pipe sh | parallel -j 50 2>&1
-find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {}_thumb.jpg
-find . -name '*_thumb.jpg' | ren 's:/([^/]+)_thumb.jpg$:/thumb_$1:' 
+find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}
 
 ls | parallel ls | sort
 ls | parallel echo ls | sort

@@ -1,3 +1,14 @@
+20120822
+
+* Due to a bugfix the main flow has changed. Making this release beta
+  quality.
+
+* Parallel Proxy Scraper & Checker Tool 
+  https://www.youtube.com/watch?v=iXCeR_XsP6o
+
+* Bug fixes and man page updates.
+
+
 20120722
 
 * GNU Parallel was presented at Chiang Mai Bar Camp

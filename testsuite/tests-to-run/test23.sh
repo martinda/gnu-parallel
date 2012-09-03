@@ -1,6 +1,5 @@
 #!/bin/bash
 
-PAR=parallel
 SERVER1=parallel-server1
 SERVER2=parallel-server2
 SSHLOGIN1=parallel@$SERVER1
@@ -35,7 +34,7 @@ echo "### Test combined -X --return {/}_{/.}_{#/.}_{#/}_{#.} with files containi
 stdout parallel -j1 -k -Xv --cleanup --return tmp/{/}_{/.}_{2/.}_{2/}_{2.}/file -S $SSHLOGIN2 \
 mkdir -p tmp/{/}_{/.}_{2/.}_{2/}_{2.} \;touch tmp/{/}_{/.}_{2/.}_{2/}_{2.}/file \
 ::: /a/number1.c a/number2.c number3.c /a/number4 a/number5 number6 'number 7' 'number <8|8>'
-find tmp
+find tmp | sort
 rm -rf tmp
 
 echo "### Here we ought to test -m --return {/}_{/.}_{#/.}_{#/}_{#.} with files containing space"

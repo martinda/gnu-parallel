@@ -462,7 +462,7 @@ See also: B<--bg>, B<man sem>
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (beta testing)
+=item B<--filter-hosts>
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -549,7 +549,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile> (beta testing)
+=item B<--joblog> I<logfile>
 
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -645,7 +645,7 @@ to see the difference:
   parallel -j4 sleep {}\; echo {} ::: 2 1 4 3
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 
-=item B<-L> I<max-lines> (beta testing)
+=item B<-L> I<max-lines>
 
 When used with B<--pipe>: Read records of I<max-lines>.
 
@@ -675,7 +675,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--load> I<max-load> (beta testing)
+=item B<--load> I<max-load>
 
 Do not start new jobs on a given computer unless the load is less than
 I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
@@ -770,9 +770,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe> (beta testing)
+=item B<--pipe>
 
-=item B<--spreadstdin> (beta testing)
+=item B<--spreadstdin>
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -795,6 +795,13 @@ If neither B<--recstart> nor B<--recend> are given B<--recend>
 defaults to '\n'. To have no record separator use B<--recend "">.
 
 B<--files> is often used with B<--pipe>.
+
+
+=item B<--plain> (alpha testing)
+
+Ignore any B<--profile>, $PARALLEL, ~/.parallel/config, and
+B<--tollef> to get full control on the command line (used by GNU
+B<parallel> internally when called with B<--sshlogin>).
 
 
 =item B<--progress>
@@ -1232,14 +1239,14 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<sec> (beta testing)
+=item B<--timeout> I<sec>
 
 Time out for command. If the command runs for longer than I<sec>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
 
-=item B<--tollef> (beta testing)
+=item B<--tollef>
 
 Make GNU B<parallel> behave more like Tollef's parallel command. It
 activates B<-u>, B<-q>, and B<--arg-sep -->. It also causes B<-l> to
@@ -1445,9 +1452,9 @@ Compare these two:
 See also B<--header>.
 
 
-=item B<--shebang> (beta testing)
+=item B<--shebang>
 
-=item B<--hashbang> (beta testing)
+=item B<--hashbang>
 
 GNU B<Parallel> can be called as a shebang (#!) command as the first line of a script. Like this:
 
