@@ -171,18 +171,18 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20120822 ('Boson') released
+Subject: GNU Parallel 20120922 ('X') released
 
-GNU Parallel 20120822 ('Boson') has been released. It is
+GNU Parallel 20120922 ('X') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* Due to a bugfix the main flow has changed. Making this release beta
-  quality.
+* Using GNU Parallel to Package Multiple Jobs in a Single PBS Job.
+  http://www.nas.nasa.gov/hecc/support/kb/Using-GNU-Parallel-to-Package-Multiple-Jobs-in-a-Single-PBS-Job_303.html
 
-* Parallel Proxy Scraper & Checker Tool 
-  https://www.youtube.com/watch?v=iXCeR_XsP6o
+* GNU Parallel Notes.
+  http://xed.ch/help/parallel.html
 
 * Bug fixes and man page updates.
 
