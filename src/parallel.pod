@@ -2271,7 +2271,7 @@ The idea is to put the jobs into a file and have GNU B<parallel> read
 from that continuously. As GNU B<parallel> will stop at end of file we
 use B<tail> to continue reading:
 
-B<echo >>B<jobqueue>; B<tail -f jobqueue | parallel>
+B<true >>B<jobqueue>; B<tail -f jobqueue | parallel>
 
 To submit your jobs to the queue:
 
