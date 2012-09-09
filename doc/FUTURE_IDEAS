@@ -1,3 +1,9 @@
+Aliases for bash -c:
+
+bash -c 'shopt -s expand_aliases; alias llll="ls -l"; alias bbb=ls;
+bbb; llll'
+
+
 Luk filen ved EOF - lad være med bare at læse videre.
 
 > /tmp/ged; tail -f /tmp/ged| xargs -n1 -E eof & sleep 1; echo echo a >>/tmp/ged; echo eof >>/tmp/ged; seq 4 >>/tmp/ged; wait
