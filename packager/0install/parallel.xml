@@ -29,7 +29,9 @@ xargs or cat | sh.</description>
 	<needs-terminal/>
 
 	<group main="src/parallel">
-		<command name="run" path="src/parallel"/>
+		<command name="run" path="src/parallel">
+			<runner interface="http://gfxmonk.net/dist/0install/perl.xml"/>
+		</command>
 		<environment insert="src" mode="prepend" name="PATH"/>
 		<implementation id="sha1new=3bd5646ca0c38217df8278433803b44e33272954" released="2010-06-24" version="20100620">
 			<archive extract="parallel-20100620" href="http://ftp.gnu.org/gnu/parallel/parallel-20100620.tar.bz2" size="88834" type="application/x-bzip-compressed-tar"/>
@@ -133,7 +135,7 @@ xargs or cat | sh.</description>
 	</group>
 </interface>
 <!-- Base64 Signature
-iEYEABECAAYFAlA1WzcACgkQ/lhgK1iJTtKhkACgxcdVkWLq2uqYma1g+qHKO9vfNJwAni1y3U2u
-AKT0/BQ6dfyxD1y2zqru
+iEYEABECAAYFAlBJscUACgkQ/lhgK1iJTtIllwCfUzLETjj1uAhhnACtzfx7zO58XTIAoJ4w4Q1i
+UwqAavHsNrAVB2F3M3jA
 
 -->

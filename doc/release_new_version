@@ -178,8 +178,23 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* GNU Parallel is accepted for Ubuntu Quantal.
+  http://packages.ubuntu.com/quantal/parallel
+
+* GNU Parallel, where have you been all my life?
+  http://ssdigit.nothingisreal.com/2012/09/gnu-parallel-where-have-you-been-all-my.html
+
+* Reference-free ddRADseq analysis tools uses GNU Parallel.
+  https://github.com/brantp/rtd#readme
+
 * When bash just isn’t quick enough.
   https://soimasysadmin.wordpress.com/2012/08/15/gnu-parallel-when-bash-just-isnt-quick-enough/
+
+* Using GNU Parallel to Package Multiple Jobs in a Single PBS Job.
+  http://www.nas.nasa.gov/hecc/support/kb/Using-GNU-Parallel-to-Package-Multiple-Jobs-in-a-Single-PBS-Job_303.html
+
+* GNU Parallel Notes.
+  http://xed.ch/help/parallel.html
 
 * Bug fixes and man page updates.
 
