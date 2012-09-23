@@ -520,6 +520,7 @@ sub options_hash {
 	 "arg-sep|argsep=s" => \$::opt_arg_sep,
 	 "arg-file-sep|argfilesep=s" => \$::opt_arg_file_sep,
 	 "trim=s" => \$::opt_trim,
+	 "env=s" => \@::opt_env,
 	 "plain" => \$::opt_plain,
 	 "profile|J=s" => \@::opt_profile,
 	 "pipe|spreadstdin" => \$::opt_pipe,
@@ -595,7 +596,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120822;
+    $Global::version = 20120903;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -812,6 +813,7 @@ sub parse_options {
     }
 
     parse_sshlogin();
+    parse_env_var();
 
     if(remote_hosts() and ($::opt_X or $::opt_m or $::opt_xargs)) {
         # As we do not know the max line length on the remote machine
@@ -824,6 +826,27 @@ sub parse_options {
         $::opt_P = "100%";
     }
     open_joblog();
+}
+
+sub parse_env_var {
+    # Parse --env and set $Global::envvar
+    # Returns: N/A
+    $Global::envvar = "";
+    my @vars = ();
+    for my $varstring (@::opt_env) {
+        # Split up --env VAR1,VAR2
+	push @vars, split /,/, $varstring;
+    }
+    $Global::envvar = 
+	(q{eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null}
+	 . q{ && echo }
+	 . join("", map { "setenv $_ "
+			      . ::shell_quote_scalar(::shell_quote_scalar($ENV{$_})).'\;' } @vars)
+	 . q{ || echo }
+	 . join("", map { "export $_="
+			      . ::shell_quote_scalar(::shell_quote_scalar($ENV{$_})).'\;' } @vars)
+	 .q{`;});
+    $Global::envvarlen = length $Global::envvar;
 }
 
 sub open_joblog {
@@ -3423,7 +3446,7 @@ sub sshlogin_wrap {
 	my $sshlogin = $self->sshlogin();
 	my $sshcmd = $sshlogin->sshcommand();
 	my $serverlogin = $sshlogin->serverlogin();
-	my $next_command_line = $self->replaced();
+	my $next_command_line = $Global::envvar.$self->replaced();
 	my ($pre,$post,$cleanup)=("","","");
 	if($serverlogin eq ":") {
 	    $self->{'sshlogin_wrap'} = $next_command_line;
@@ -3440,12 +3463,14 @@ sub sshlogin_wrap {
 	    }
 	    # If the remote login shell is (t)csh then use 'setenv'
 	    # otherwise use 'export'
+	    # We cannot use parse_env_var(), as PARALLEL_SEQ changes
+	    # for each command
 	    my $parallel_env =
-		q{'eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null}
-	    . q{ && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;}
-	    . q{ setenv PARALLEL_PID '$PARALLEL_PID'}
-	    . q{ || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;}
-	    . q{PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'};
+		(q{ 'eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null }
+		 . q{ && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\; }
+		 . q{ setenv PARALLEL_PID '$PARALLEL_PID' }
+		 . q{ || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\; }
+		 . q{ PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;' });
 	    if($::opt_workdir) {
 		$self->{'sshlogin_wrap'} =
 		    ($pre . "$sshcmd $serverlogin $parallel_env "
@@ -4202,6 +4227,8 @@ sub len {
 	# Worse than worst case: every char needs to be quoted with \ twice
 	$len *= 4;
     }
+    # If we are using --env, add the prefix for that, too.
+    $len += $Global::envvarlen;
     return $len;
 }
 

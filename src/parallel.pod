@@ -354,7 +354,8 @@ k, m, g, t, or p which would multiply the size with 1024, 1048576,
 1000000000, 1000000000000, or 1000000000000000 respectively.
 
 GNU B<parallel> tries to meet the block size but can be off by the
-length of one record.
+length of one record. For performance reasons I<size> should be bigger
+than a single record.
 
 I<size> defaults to 1M.
 
