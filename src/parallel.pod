@@ -1799,6 +1799,28 @@ This also works if the input file is a file with columns:
   cat addressbook.tsv | parallel --colsep '\t' --header : echo {Name} {E-mail address}
 
 
+=head1 EXAMPLE: Speeding up fast jobs
+
+Starting a job on the local machine takes around 3 ms. This can be a
+big overhead if the job takes very few ms to run. Often you can group
+small jobs together using B<-X> which will make the overhead less
+significant. Compare the speed of these:
+
+    B<seq -w 0 9999 | parallel touch pict{}.jpg>
+
+    B<seq -w 0 9999 | parallel -X touch pict{}.jpg>
+
+If your program cannot take multiple arguments, then you can use GNU
+B<parallel> to spawn multiple GNU B<parallel>s:
+
+    B<seq -w 0 999999 | parallel -j10 --pipe parallel -j0 touch pict{}.jpg>
+
+If B<-j0> normally spawns 506 jobs, then the above will try to spawn
+5060 jobs. It is likely that you this way will hit the limit of number
+of processes and/or filehandles. Look at 'ulimit -n' and 'ulimit -u'
+to raise these limits.
+
+
 =head1 EXAMPLE: Using shell variables
 
 When using shell variables you need to quote them correctly as they
@@ -2344,6 +2366,14 @@ and depending on context these needs to be quoted, too:
 
 Therefore most people will never need more quoting than putting '\'
 in front of the special characters.
+
+Often you can simply put \' around every ':
+
+  B<perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file>
+
+can be quoted:
+
+  B<parallel perl -ne \''/^\S+\s+\S+$/ and print $ARGV,"\n"'\' ::: file>
 
 However, when you want to use a shell variable you need to quote the
 $-sign. Here is an example using $PARALLEL_SEQ. This variable is set
