@@ -465,6 +465,7 @@ sub options_hash {
 	 "X" => \$::opt_X,
 	 "v" => \@::opt_v,
 	 "joblog=s" => \$::opt_joblog,
+	 "results=s" => \$::opt_results,
 	 "resume" => \$::opt_resume,
 	 "silent" => \$::opt_silent,
 	 #"silent-error|silenterror" => \$::opt_silent_error,
@@ -3198,6 +3199,21 @@ sub seq {
     return $self->{'commandline'}->seq();
 }
 
+sub openresultsfile {
+    my $self = shift;
+    my $args_as_filename = $self->{'commandline'}->args_as_filename();
+    my ($outfh,$errfh,$name);
+    $name = $::opt_results."stdout_".$args_as_filename;
+    open($outfh,"+>",$name) or ::error("Cannot write to `$name'.\n");
+    $self->set_stdoutfilename($name);
+    $name = $::opt_results."stderr_".$args_as_filename;
+    open($errfh,"+>",$name) or ::error("Cannot write to `$name'.\n");
+    open OUT, '>&', $outfh or ::die_bug("Can't redirect STDOUT: $!");
+    open ERR, '>&', $errfh or ::die_bug("Can't dup STDOUT: $!");
+    $self->set_stdout($outfh);
+    $self->set_stderr($errfh);
+}
+
 sub set_stdout {
     my $self = shift;
     $self->{'stdout'} = shift;
@@ -3725,7 +3741,9 @@ sub start {
 
     local (*IN,*OUT,*ERR);
     my $pid;
-    if($Global::grouped) {
+    if($::opt_results) {
+	$job->openresultsfile();
+    } elsif($Global::grouped) {
 	my ($outfh,$errfh,$name);
 	# To group we create temporary files for STDOUT and STDERR
 	# To avoid the cleanup unlink the files immediately (but keep them open)
@@ -4182,6 +4200,19 @@ sub args_as_string {
     my $self = shift;
     return (join " ", map { $_->orig() }
 	    map { @$_ } @{$self->{'arg_list'}});
+}
+
+sub args_as_filename {
+    # Returns:
+    #  all unmodified arguments joined with '\t' (similar to {})
+    #  \t \0 \\ and / are quoted
+    my $self = shift;
+    return (join "\t",
+	    map { s/\\/\\\\/g;
+		  s/\t/\\\t/g;
+		  s/\0/\\0/g;
+		s:/:\\_:g; $_ }
+	    map { $_->orig() } map { @$_ } @{$self->{'arg_list'}});
 }
 
 sub len {
