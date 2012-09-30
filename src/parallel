@@ -84,8 +84,15 @@ if($::opt_header and not $::opt_pipe) {
 	for my $s (split /$delimiter/o, $line) {
 	    ::debug("Colname: '$s'");
 	    $command =~ s:\{$s(|/|//|\.|/\.)\}:\{$id$1\}:g;
+	    $Global::input_source_header{$id} = $s;
 	    $id++;
 	}
+    }
+} else {
+    my $id = 1;
+    for my $fh (@fhlist) {
+	$Global::input_source_header{$id} = $id;
+	$id++;
     }
 }
 
@@ -465,7 +472,7 @@ sub options_hash {
 	 "X" => \$::opt_X,
 	 "v" => \@::opt_v,
 	 "joblog=s" => \$::opt_joblog,
-	 "results=s" => \$::opt_results,
+	 "results|result|res=s" => \$::opt_results,
 	 "resume" => \$::opt_resume,
 	 "silent" => \$::opt_silent,
 	 #"silent-error|silenterror" => \$::opt_silent_error,
@@ -597,7 +604,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120928;
+    $Global::version = 20120930;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1908,7 +1915,7 @@ sub die_bug {
 sub version {
     # Returns: N/A
     if($::opt_tollef and not $::opt_gnu) {
-	print "WARNING: YOU ARE USING --tollef. USE --gnu FOR GNU PARALLEL\n\n";
+	print "WARNING: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n";
     }
     print join("\n",
                "GNU $Global::progname $Global::version",
@@ -1927,7 +1934,7 @@ sub version {
 sub bibtex {
     # Returns: N/A
     if($::opt_tollef and not $::opt_gnu) {
-	print "WARNING: YOU ARE USING --tollef. USE --gnu FOR GNU PARALLEL\n\n";
+	print "WARNING: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n";
     }
     print join("\n",
                "\@article{Tange2011a,",
@@ -3204,10 +3211,16 @@ sub openresultsfile {
     my $args_as_filename = $self->{'commandline'}->args_as_filename();
     my ($outfh,$errfh,$name);
     $name = $::opt_results."stdout_".$args_as_filename;
-    open($outfh,"+>",$name) or ::error("Cannot write to `$name'.\n");
+    if(not open($outfh,"+>",$name)) {
+	::error("Cannot write to `$name'.\n");
+	::wait_and_exit(255);
+    }
     $self->set_stdoutfilename($name);
     $name = $::opt_results."stderr_".$args_as_filename;
-    open($errfh,"+>",$name) or ::error("Cannot write to `$name'.\n");
+    if(not open($errfh,"+>",$name)) {
+	::error("Cannot write to `$name'.\n");
+	::wait_and_exit(255);
+    }
     open OUT, '>&', $outfh or ::die_bug("Can't redirect STDOUT: $!");
     open ERR, '>&', $errfh or ::die_bug("Can't dup STDOUT: $!");
     $self->set_stdout($outfh);
@@ -4207,12 +4220,20 @@ sub args_as_filename {
     #  all unmodified arguments joined with '\t' (similar to {})
     #  \t \0 \\ and / are quoted
     my $self = shift;
-    return (join "\t",
-	    map { s/\\/\\\\/g;
-		  s/\t/\\\t/g;
-		  s/\0/\\0/g;
-		s:/:\\_:g; $_ }
-	    map { $_->orig() } map { @$_ } @{$self->{'arg_list'}});
+    my @res = ();
+
+    for my $rec_ref (@{$self->{'arg_list'}}) {
+	for my $n (0 .. $#$rec_ref) {
+	    CORE::push(@res,
+		 $Global::input_source_header{$n+1},
+		 map { s/\\/\\\\/g;
+		       s/\t/\\\t/g;
+		       s/\0/\\0/g;
+		     s:/:\\_:g; $_ }
+		 $rec_ref->[$n]->orig());
+	}
+    }
+    return join "\t", @res;
 }
 
 sub len {
@@ -4876,6 +4897,10 @@ sub new {
     my $fhs = shift;
     for my $fh (@$fhs) {
 	if(-t $fh) {
+	    if($::opt_tollef and not $::opt_gnu) {
+		::warning("YOU ARE USING --tollef. "
+			  . "IF THINGS ARE ACTING WEIRD USE --gnu.");
+	    }
 	    ::warning("Input is read from the terminal. ".
 		      "Only experts do this on purpose. ".
 		      "Press CTRL-D to exit.\n");

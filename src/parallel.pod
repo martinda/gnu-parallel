@@ -972,6 +972,57 @@ it to the command.
 Only used with B<--pipe>.
 
 
+=item B<--results> I<prefix> (alpha testing)
+
+=item B<--res> I<prefix> (alpha testing)
+
+Results in files named by tab separated arguments. Save the output
+into files. The file names will be prefixed with I<prefix> which can
+contain a path with a prefix string. The file with output from stdout
+(standard output) will prefixed with 'I<prefix>stdout_'.  The file
+with output from stderr (standard error) will prefixed with
+'I<prefix>stderr_'.
+
+The postfix is the header of the input source (if using B<--header :>)
+or the number of the input source followed by the value of the input
+source. This is repeated for every input source and is separated by
+TAB (\t).
+
+E.g:
+
+  parallel --header : --results foo/bar echo {a} {b} ::: a I II ::: b III IIII
+
+will generate:
+
+  foo/barstderr_a	I	b	III
+  foo/barstderr_a	I	b	IIII
+  foo/barstderr_a	II	b	III
+  foo/barstderr_a	II	b	IIII
+  foo/barstdout_a	I	b	III
+  foo/barstdout_a	I	b	IIII
+  foo/barstdout_a	II	b	III
+  foo/barstdout_a	II	b	IIII
+
+and
+
+  parallel --results foo/bar echo {1} {2} ::: 1 2 ::: 3 4
+
+will generate:
+
+  foo/barstderr_1	I	2	III
+  foo/barstderr_1	I	2	IIII
+  foo/barstderr_1	II	2	III
+  foo/barstderr_1	II	2	IIII
+  foo/barstdout_1	I	2	III
+  foo/barstdout_1	I	2	IIII
+  foo/barstdout_1	II	2	III
+  foo/barstdout_1	II	2	IIII
+
+where all spaces are TABs (\t);.
+
+See also B<--files>, B<--header>, B<--joblog>.
+
+
 =item B<--resume>
 
 Resumes from the last unfinished job. By reading B<--joblog> GNU

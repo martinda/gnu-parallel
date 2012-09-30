@@ -77,10 +77,10 @@ a8 b1 2 3 4 5 6 7 8
 a9 b1 2 3 4 5 6 7 8 9
 a10 b1 2 3 4 5 6 7 8 9 10
 ### Test max line length -m -I
-31d9274be5fdc2de59487cb05ba57776  -
+623249e8b509099d71745dbddc3fe5ce  -
 Chars per line (697800/6): 116300
 ### Test max line length -X -I
-22074f9acada52462defb18ba912d744  -
+ae59907d4a33798608843da7ffcb29ed  -
 Chars per line (817788/7): 116826
 ### bug #36659: --sshlogin strips leading slash from ssh command
 OK
@@ -102,7 +102,6 @@ FOO
 9
 10
 FOO
-FOO
 bug #34958: --pipe with record size measured in lines
 1
 2
@@ -117,4 +116,68 @@ FOO
 9
 10
 FOO
-FOO
+### Test --results
+I III
+I IIII
+II III
+II IIII
+/tmp/parallel_results_test/testAstderr_1	I	2	III
+/tmp/parallel_results_test/testAstderr_1	I	2	IIII
+/tmp/parallel_results_test/testAstderr_1	II	2	III
+/tmp/parallel_results_test/testAstderr_1	II	2	IIII
+/tmp/parallel_results_test/testAstdout_1	I	2	III
+/tmp/parallel_results_test/testAstdout_1	I	2	IIII
+/tmp/parallel_results_test/testAstdout_1	II	2	III
+/tmp/parallel_results_test/testAstdout_1	II	2	IIII
+### Test --res
+I III
+I IIII
+II III
+II IIII
+/tmp/parallel_results_test/testDstderr_1	I	2	III
+/tmp/parallel_results_test/testDstderr_1	I	2	IIII
+/tmp/parallel_results_test/testDstderr_1	II	2	III
+/tmp/parallel_results_test/testDstderr_1	II	2	IIII
+/tmp/parallel_results_test/testDstdout_1	I	2	III
+/tmp/parallel_results_test/testDstdout_1	I	2	IIII
+/tmp/parallel_results_test/testDstdout_1	II	2	III
+/tmp/parallel_results_test/testDstdout_1	II	2	IIII
+### Test --result
+I III
+I IIII
+II III
+II IIII
+/tmp/parallel_results_test/testEstderr_1	I	2	III
+/tmp/parallel_results_test/testEstderr_1	I	2	IIII
+/tmp/parallel_results_test/testEstderr_1	II	2	III
+/tmp/parallel_results_test/testEstderr_1	II	2	IIII
+/tmp/parallel_results_test/testEstdout_1	I	2	III
+/tmp/parallel_results_test/testEstdout_1	I	2	IIII
+/tmp/parallel_results_test/testEstdout_1	II	2	III
+/tmp/parallel_results_test/testEstdout_1	II	2	IIII
+### Test --results --header :
+I III
+I IIII
+II III
+II IIII
+/tmp/parallel_results_test/testBstderr_a	I	b	III
+/tmp/parallel_results_test/testBstderr_a	I	b	IIII
+/tmp/parallel_results_test/testBstderr_a	II	b	III
+/tmp/parallel_results_test/testBstderr_a	II	b	IIII
+/tmp/parallel_results_test/testBstdout_a	I	b	III
+/tmp/parallel_results_test/testBstdout_a	I	b	IIII
+/tmp/parallel_results_test/testBstdout_a	II	b	III
+/tmp/parallel_results_test/testBstdout_a	II	b	IIII
+### Test --results --header :
+I III
+I IIII
+II III
+II IIII
+/tmp/parallel_results_test/testCstderr_a	I	b	III
+/tmp/parallel_results_test/testCstderr_a	I	b	IIII
+/tmp/parallel_results_test/testCstderr_a	II	b	III
+/tmp/parallel_results_test/testCstderr_a	II	b	IIII
+/tmp/parallel_results_test/testCstdout_a	I	b	III
+/tmp/parallel_results_test/testCstdout_a	I	b	IIII
+/tmp/parallel_results_test/testCstdout_a	II	b	III
+/tmp/parallel_results_test/testCstdout_a	II	b	IIII

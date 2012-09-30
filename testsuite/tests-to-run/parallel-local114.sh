@@ -47,4 +47,29 @@ echo "bug #34958: --pipe with record size measured in lines";
 echo "bug #34958: --pipe with record size measured in lines"; 
   seq 10 | parallel --pipe -l 4 cat\;echo FOO
 
+echo "### Test --results"; 
+  mkdir -p /tmp/parallel_results_test; 
+  parallel -k --results /tmp/parallel_results_test/testA echo {1} {2} ::: I II ::: III IIII;
+  ls /tmp/parallel_results_test/testA*; rm /tmp/parallel_results_test/testA*
+
+echo "### Test --res"; 
+  mkdir -p /tmp/parallel_results_test; 
+  parallel -k --results /tmp/parallel_results_test/testD echo {1} {2} ::: I II ::: III IIII;
+  ls /tmp/parallel_results_test/testD*; rm /tmp/parallel_results_test/testD*
+
+echo "### Test --result"; 
+  mkdir -p /tmp/parallel_results_test; 
+  parallel -k --result /tmp/parallel_results_test/testE echo {1} {2} ::: I II ::: III IIII;
+  ls /tmp/parallel_results_test/testE*; rm /tmp/parallel_results_test/testE*
+
+echo "### Test --results --header :"; 
+  mkdir -p /tmp/parallel_results_test; 
+  parallel -k --header : --results /tmp/parallel_results_test/testB echo {1} {2} ::: a I II ::: b III IIII
+  ls /tmp/parallel_results_test/testB*; rm /tmp/parallel_results_test/testB*
+
+echo "### Test --results --header :"; 
+  mkdir -p /tmp/parallel_results_test; 
+  parallel -k --header : --results /tmp/parallel_results_test/testC echo {a} {b} ::: a I II ::: b III IIII
+  ls /tmp/parallel_results_test/testC*; rm /tmp/parallel_results_test/testC*
+
 EOF
