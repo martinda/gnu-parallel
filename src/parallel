@@ -4232,10 +4232,11 @@ sub args_as_filename {
 	for my $n (0 .. $#$rec_ref) {
 	    CORE::push(@res,
 		 $Global::input_source_header{$n+1},
-		 map { s/\\/\\\\/g;
-		       s/\t/\\t/g;
-		       s/\0/\\0/g;
-		     s:/:\\_:g; $_ }
+		 map { my $s = $_;
+		       $s =~ s/\\/\\\\/g;
+		       $s =~ s/\t/\\t/g;
+		       $s =~ s/\0/\\0/g;
+		       $s =~ s:/:\\_:g; $s; }
 		 $rec_ref->[$n]->orig());
 	}
     }
@@ -4294,7 +4295,7 @@ sub multi_regexp {
     if(not $CommandLine::multi_regexp) {
 	$CommandLine::multi_regexp =
 	"(?:".
-	join("|",map {my $a=$_; $a =~ s/(\W)/\\$1/g; $a}
+	join("|",map {my ($a = $_) =~ s/(\W)/\\$1/g; $a }
 	     ($Global::replace{"{}"},
 	      $Global::replace{"{.}"},
 	      $Global::replace{"{/}"},
@@ -4320,7 +4321,7 @@ sub number_of_replacements {
 	'\d+(?:|\.|/\.|/|//)?' . # {n} {n.} {n/.} {n/} {n//}
 	::maybe_quote('\}') .
 	'|'.
-	join("|",map {$a=$_;$a=~s/(\W)/\\$1/g; $a} values %Global::replace).
+	join("|",map { my ($a = $_) =~ s/(\W)/\\$1/g; $a } values %Global::replace).
 	")";
     my %c = ();
     $cmd =~ s/($replacement_regexp)/$c{$1}++;"\0"/ogex;
@@ -4449,9 +4450,9 @@ sub context_replace_placeholders {
     # Inner part of replacement functions
     my @rep_inner = ('', '/', '//', '.', '/.');
     # Regexp for replacement functions
-    my $rep_regexp = "(?:". join('|', map { $_=~s/(\W)/\\$1/g; $_} @rep) . ")";
+    my $rep_regexp = "(?:". join('|', map { my ($s = $_) =~ s/(\W)/\\$1/g; $s } @rep) . ")";
     # Regexp for inner replacement functions
-    my $rep_inner_regexp = "(?:". join('|', map { $_=~s/(\W)/\\$1/g; $_} @rep_inner) . ")";
+    my $rep_inner_regexp = "(?:". join('|', map { my ($s = $_) =~ s/(\W)/\\$1/g; $s } @rep_inner) . ")";
     # Seq replace string: {#}
     my $rep_seq_regexp = '(?:'.::maybe_quote('\{\#\}').")";
     # Normal replace strings
@@ -4525,7 +4526,7 @@ sub context_replace_placeholders {
     }
     # Substitute the replace strings with the replacement values
     # Must be sorted by length if a short word is a substring of a long word
-    my $regexp = join('|', map { $_=~s/(\W)/\\$1/g; $_}
+    my $regexp = join('|', map { my ($s = $_) =~ s/(\W)/\\$1/g; $s }
 		      sort { length $b <=> length $a } keys %word);
     $target =~ s/($regexp)/join(" ",@{$replace{$1}})/ge;
     return $target;
@@ -4579,7 +4580,7 @@ sub simple_replace_placeholders {
 	}
     }
     # Substitute the replace strings with the replacement values
-    my $regexp = join('|', map { $_=~s/(\W)/\\$1/g; $_} keys %replace);
+    my $regexp = join('|', map { my ($s = $_) =~ s/(\W)/\\$1/g; $s } keys %replace);
     if($regexp) {
 	if($quoteall) {
 	    # This is for --return: The whole expression must be
