@@ -109,7 +109,7 @@ if($::opt_filter_hosts and (@::opt_sshlogin or @::opt_sshloginfile)) {
 	"'parallel --max-line-length-allowed' ".
 	"'true' ";
     ::debug($cmd."\n");
-    open(HOST, "$cmd |") || ::die_bug("parallel host check: $cmd");
+    open(HOST, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
     my (%ncores, %ncpus, %time_to_login, %maxlen);
     while(<HOST>) {
 	my @col = split /\t/, $_;
@@ -210,7 +210,7 @@ if($::opt_nonall or $::opt_onall) {
 	     ((defined $::opt_plain) ? "--plain" : ""),
 	);
     ::debug("| $0 $options\n");
-    open(PARALLEL,"| $0 -j0 $options") ||
+    open(PARALLEL, "|-", "$0 -j0 $options") ||
 	::die_bug("This does not run GNU Parallel: $0 $options");
     for my $sshlogin (values %Global::host) {
 	print PARALLEL "$0 $suboptions -j1 ".
@@ -866,7 +866,7 @@ sub open_joblog {
     }
     if($::opt_joblog) {
 	if($::opt_resume) {
-	    if(open(JOBLOG, $::opt_joblog)) {
+	    if(open(JOBLOG, "<", $::opt_joblog)) {
 		# Read the joblog
 		$append = <JOBLOG>; # If there is a header: Open as append later
 		while(<JOBLOG>) {
@@ -883,13 +883,13 @@ sub open_joblog {
 	}
 	if($append) {
 	    # Append to joblog
-	    if(not open($Global::joblog,">>$::opt_joblog")) {
+	    if(not open($Global::joblog, ">>", $::opt_joblog)) {
 		::error("Cannot append to --joblog $::opt_joblog.\n");
 		::wait_and_exit(255);
 	    }
 	} else {
 	    # Overwrite the joblog
-	    if(not open($Global::joblog,">$::opt_joblog")) {
+	    if(not open($Global::joblog, ">", $::opt_joblog)) {
 		::error("Cannot write to --joblog $::opt_joblog.\n");
 		::wait_and_exit(255);
 	    } else {
@@ -1117,7 +1117,7 @@ sub enough_file_handles {
 	# perl uses 7 filehandles for something?
         # open3 uses 2 extra filehandles temporarily
         for my $i (1..8) {
-            $enough_filehandles &&= open($fh{$i},"</dev/null");
+            $enough_filehandles &&= open($fh{$i}, "<", "/dev/null");
         }
         for (values %fh) { close $_; }
         return $enough_filehandles;
@@ -1140,7 +1140,7 @@ sub open_or_exit {
 	return $file;
     }
     my $fh = gensym;
-    if(not open($fh,"<",$file)) {
+    if(not open($fh, "<", $file)) {
         ::error("Cannot open input file `$file': No such file or directory.\n");
         wait_and_exit(255);
     }
@@ -1160,11 +1160,11 @@ sub __RUNNING_THE_JOBS_AND_PRINTING_PROGRESS__ {}
 sub init_run_jobs {
     # Remember the original STDOUT and STDERR
     # Returns: N/A
-    open $Global::original_stdout, ">&STDOUT" or
+    open $Global::original_stdout, ">&", "STDOUT" or
 	::die_bug("Can't dup STDOUT: $!");
-    open $Global::original_stderr, ">&STDERR" or
+    open $Global::original_stderr, ">&", "STDERR" or
 	::die_bug("Can't dup STDERR: $!");
-    open $Global::original_stdin, "<&STDIN" or
+    open $Global::original_stdin, "<&", "STDIN" or
 	::die_bug("Can't dup STDIN: $!");
     $Global::total_running = 0;
     $Global::total_started = 0;
@@ -1611,7 +1611,7 @@ sub read_sshloginfile {
 	*IN = *STDIN;
 	$close = 0;
     } else {
-	if(not open(IN, $file)) {
+	if(not open(IN, "<", $file)) {
 	    ::error("Cannot open $file.\n");
 	    ::wait_and_exit(255);
 	}
@@ -2289,7 +2289,7 @@ sub swap_activity {
     # Should we update the swap_activity file?
     my $update_swap_activity_file = 0;
     if(-r $self->{'swap_activity_file'}) {
-        open(SWAP,"<".$self->{'swap_activity_file'}) || ::die_bug("swap_activity_file-r");
+        open(SWAP, "<", $self->{'swap_activity_file'}) || ::die_bug("swap_activity_file-r");
         my $swap_out = <SWAP>;
         close SWAP;
         if($swap_out =~ /^(\d+)$/) {
@@ -2372,7 +2372,7 @@ sub loadavg {
     # Should we update the loadavg file?
     my $update_loadavg_file = 0;
     if(-r $self->{'loadavg_file'}) {
-        open(UPTIME,"<".$self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
+        open(UPTIME, "<", $self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
 	local $/ = undef;
         my $uptime_out = <UPTIME>;
         close UPTIME;
@@ -2457,7 +2457,7 @@ sub compute_max_loadavg {
         } elsif (-f $loadspec) {
             $Global::max_load_file = $loadspec;
             $Global::max_load_file_last_mod = (stat($Global::max_load_file))[9];
-            if(open(IN, $Global::max_load_file)) {
+            if(open(IN, "<", $Global::max_load_file)) {
                 my $opt_load_file = join("",<IN>);
                 close IN;
                 $load = $self->compute_max_loadavg($opt_load_file);
@@ -2538,7 +2538,7 @@ sub processes_available_by_system_limit {
     # perl uses 7 filehandles for something?
     # parallel uses 1 for memory_usage
     for my $i (1..8) {
-        open($fh{"init-$i"},"</dev/null");
+        open($fh{"init-$i"}, "<", "/dev/null");
     }
 
     for(1..2) {
@@ -2599,8 +2599,8 @@ sub processes_available_by_system_limit {
         $system_limit++;
 
         # Every simultaneous process uses 2 filehandles when grouping
-        $more_filehandles = open($fh{$system_limit*10},"</dev/null")
-            && open($fh{$system_limit*10+2},"</dev/null");
+        $more_filehandles = open($fh{$system_limit*10}, "<", "/dev/null")
+            && open($fh{$system_limit*10+2}, "<", "/dev/null");
 
         # System process limit
         my $child;
@@ -2711,7 +2711,7 @@ sub simultaneous_sshlogin {
     my $serverlogin = $self->serverlogin();
     my $cmd = "$sshcmd $serverlogin echo simultaneouslogin </dev/null 2>&1 &"x$wanted_processes;
     ::debug("Trying $wanted_processes logins at $serverlogin");
-    open (SIMUL, "($cmd)|grep simultaneouslogin | wc -l|") or
+    open (SIMUL, "-|", "($cmd)|grep simultaneouslogin | wc -l") or
 	::die_bug("simultaneouslogin");
     my $ssh_limit = <SIMUL>;
     close SIMUL;
@@ -2755,7 +2755,7 @@ sub user_requested_processes {
         } elsif (-f $opt_P) {
             $Global::max_procs_file = $opt_P;
             $Global::max_procs_file_last_mod = (stat($Global::max_procs_file))[9];
-            if(open(IN, $Global::max_procs_file)) {
+            if(open(IN, "<", $Global::max_procs_file)) {
                 my $opt_P_file = join("",<IN>);
                 close IN;
                 $processes = $self->user_requested_processes($opt_P_file);
@@ -2879,7 +2879,7 @@ sub no_of_cpus_gnu_linux {
         $no_of_cpus = 0;
         $no_of_cores = 0;
         my %seen;
-        open(IN,"cat /proc/cpuinfo|") || return undef;
+        open(IN, "-|", "cat /proc/cpuinfo") || return undef;
         while(<IN>) {
             if(/^physical id.*[:](.*)/ and not $seen{$1}++) {
                 $no_of_cpus++;
@@ -2898,7 +2898,7 @@ sub no_of_cores_gnu_linux {
     my $no_of_cores;
     if(-e "/proc/cpuinfo") {
         $no_of_cores = 0;
-        open(IN,"cat /proc/cpuinfo|") || return undef;
+        open(IN, "-|", "cat /proc/cpuinfo") || return undef;
         while(<IN>) {
             /^processor.*[:]/ and $no_of_cores++;
         }
@@ -2997,7 +2997,7 @@ sub no_of_cpus_aix {
     #   undef if not AIX
     my $no_of_cpus = 0;
     if(-x "/usr/sbin/lscfg") {
-	open(IN,"/usr/sbin/lscfg -vs |grep proc | wc -l|tr -d ' ' |")
+	open(IN, "-|", "/usr/sbin/lscfg -vs |grep proc | wc -l|tr -d ' '")
 	    || return undef;
 	$no_of_cpus = <IN>;
 	chomp ($no_of_cpus);
@@ -3012,7 +3012,7 @@ sub no_of_cores_aix {
     #   undef if not AIX
     my $no_of_cores;
     if(-x "/usr/bin/vmstat") {
-	open(IN,"/usr/bin/vmstat 1 1|") || return undef;
+	open(IN, "-|", "/usr/bin/vmstat 1 1") || return undef;
 	while(<IN>) {
 	    /lcpu=([0-9]*) / and $no_of_cores = $1;
 	}
@@ -3745,7 +3745,7 @@ sub start {
     if($Global::interactive or $Global::stderr_verbose) {
 	if($Global::interactive) {
 	    print $Global::original_stderr "$command ?...";
-	    open(TTY,"/dev/tty") || ::die_bug("interactive-tty");
+	    open(TTY, "<", "/dev/tty") || ::die_bug("interactive-tty");
 	    my $answer = <TTY>;
 	    close TTY;
 	    my $run_yes = ($answer =~ /^\s*y/i);
@@ -3818,7 +3818,7 @@ sub start {
 	open STDIN, "<&", $Global::original_stdin
 	    or ::die_bug("dup-\$Global::original_stdin: $!");
     } elsif ($::opt_tty and not $Global::tty_taken and -c "/dev/tty" and
-	     open(DEVTTY, "/dev/tty")) {
+	     open(DEVTTY, "<", "/dev/tty")) {
 	# Give /dev/tty to the command if no one else is using it
 	*IN = *DEVTTY;
 	# The eval is needed to catch exception from open3
@@ -4765,7 +4765,7 @@ sub is_acceptable_command_line_length {
     $CommandMaxLength::is_acceptable_command_line_length++;
     ::debug("$CommandMaxLength::is_acceptable_command_line_length $len\n");
     local *STDERR;
-    open (STDERR,">/dev/null");
+    open (STDERR, ">", "/dev/null");
     system "true "."x"x$len;
     close STDERR;
     ::debug("$len $?\n");
