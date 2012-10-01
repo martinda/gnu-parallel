@@ -74,8 +74,9 @@ if($::opt_skip_first_line) {
 if($::opt_header and not $::opt_pipe) {
     my $fh = $fhlist[0];
     # split with colsep or \t
-    # TODO should $header force $colsep = \t if undef?
+    # $header force $colsep = \t if undef?
     my $delimiter = $::opt_colsep;
+    $delimiter ||= '$';
     my $id = 1;
     for my $fh (@fhlist) {
 	my $line = <$fh>;
@@ -675,7 +676,7 @@ sub parse_options {
     if(defined $::opt_tmpdir) { $ENV{'TMPDIR'} = $::opt_tmpdir; }
     if(defined $::opt_help) { die_usage(); }
     if(defined $::opt_colsep) { $Global::trim = 'lr'; }
-    if(defined $::opt_header) { $::opt_colsep = defined $::opt_colsep ? $::opt_colsep : "\t"; }
+#    if(defined $::opt_header) { $::opt_colsep = defined $::opt_colsep ? $::opt_colsep : "\t"; }
     if(defined $::opt_trim) { $Global::trim = $::opt_trim; }
     if(defined $::opt_arg_sep) { $Global::arg_sep = $::opt_arg_sep; }
     if(defined $::opt_arg_file_sep) { $Global::arg_file_sep = $::opt_arg_file_sep; }
@@ -4227,7 +4228,7 @@ sub args_as_filename {
 	    CORE::push(@res,
 		 $Global::input_source_header{$n+1},
 		 map { s/\\/\\\\/g;
-		       s/\t/\\\t/g;
+		       s/\t/\\t/g;
 		       s/\0/\\0/g;
 		     s:/:\\_:g; $_ }
 		 $rec_ref->[$n]->orig());

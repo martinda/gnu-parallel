@@ -181,3 +181,6 @@ II IIII
 /tmp/parallel_results_test/testCstdout_a	I	b	IIII
 /tmp/parallel_results_test/testCstdout_a	II	b	III
 /tmp/parallel_results_test/testCstdout_a	II	b	IIII
+### Test --results --header : piped
+/tmp/parallel_results_test/testF_stderr_Col	backslash\\tab\tslash\_null\0eof
+/tmp/parallel_results_test/testF_stdout_Col	backslash\\tab\tslash\_null\0eof

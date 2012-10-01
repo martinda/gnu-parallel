@@ -42,10 +42,10 @@ echo "bug #36657: --load does not work with custom ssh";
   parallel --load=1000% -S "/usr/bin/ssh localhost" echo ::: OK
 
 echo "bug #34958: --pipe with record size measured in lines"; 
-  seq 10 | parallel --pipe -L 4 cat\;echo FOO
+  seq 10 | parallel -k --pipe -L 4 cat\;echo FOO | uniq
 
 echo "bug #34958: --pipe with record size measured in lines"; 
-  seq 10 | parallel --pipe -l 4 cat\;echo FOO
+  seq 10 | parallel -k --pipe -l 4 cat\;echo FOO | uniq
 
 echo "### Test --results"; 
   mkdir -p /tmp/parallel_results_test; 
@@ -72,4 +72,9 @@ echo "### Test --results --header :";
   parallel -k --header : --results /tmp/parallel_results_test/testC echo {a} {b} ::: a I II ::: b III IIII
   ls /tmp/parallel_results_test/testC*; rm /tmp/parallel_results_test/testC*
 
+echo "### Test --results --header : piped"; 
+  mkdir -p /tmp/parallel_results_test; 
+  (echo Col; perl -e 'print "backslash\\tab\tslash/null\0eof\n"') | parallel  --header : --result /tmp/parallel_results_test/testF_ true;
+  ls /tmp/parallel_results_test/testF*; rm /tmp/parallel_results_test/testF*
+ 
 EOF
