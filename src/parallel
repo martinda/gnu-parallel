@@ -1089,7 +1089,7 @@ sub shell_unquote {
     #   string with shell quoting removed
     my @strings = (@_);
     my $arg;
-    for $arg (@strings) {
+    for my $arg (@strings) {
         if(not defined $arg) {
             $arg = "";
         }
@@ -5189,11 +5189,11 @@ sub trim_of {
     if($Global::trim eq "n") {
 	# skip
     } elsif($Global::trim eq "l") {
-	for $arg (@strings) { $arg =~ s/^\s+//; }
+	for my $arg (@strings) { $arg =~ s/^\s+//; }
     } elsif($Global::trim eq "r") {
-	for $arg (@strings) { $arg =~ s/\s+$//; }
+	for my $arg (@strings) { $arg =~ s/\s+$//; }
     } elsif($Global::trim eq "rl" or $Global::trim eq "lr") {
-	for $arg (@strings) { $arg =~ s/^\s+//; $arg =~ s/\s+$//; }
+	for my $arg (@strings) { $arg =~ s/^\s+//; $arg =~ s/\s+$//; }
     } else {
 	::error("--trim must be one of: r l rl lr.\n");
 	::wait_and_exit(255);
@@ -5301,10 +5301,10 @@ sub acquire {
 	$self->atomic_link_if_count_less_than() and last;
 	::debug("Remove dead locks");
 	my $lockdir = $self->{'lockdir'};
-	for my $d (<$lockdir/*>) {
+	for my $d (glob "$lockdir/*") {
 	    ::debug("Lock $d $lockdir\n");
 	    $d =~ m:$lockdir/([0-9]+)\@([-\._a-z0-9]+)$:o or next;
-	    my ($pid, $host) = ($1,$2);
+	    my ($pid, $host) = ($1, $2);
 	    if($host eq ::hostname()) {
 		if(not kill 0, $1) {
 		    ::debug("Dead: $d");
