@@ -1311,7 +1311,7 @@ sub drain_job_queue {
             if($::opt_progress) {
                 my %progress = progress();
                 if($last_header ne $progress{'header'}) {
-                    print $Global::original_stderr "\n",$progress{'header'},"\n";
+                    print $Global::original_stderr "\n", $progress{'header'}, "\n";
                     $last_header = $progress{'header'};
                 }
                 print $Global::original_stderr "\r",$progress{'status'};
@@ -1334,9 +1334,9 @@ sub drain_job_queue {
     } while ($Global::total_running > 0
 	     or
 	     not $Global::start_no_new_jobs and not $Global::JobQueue->empty());
-
     if($::opt_progress) {
-        print $Global::original_stderr "\n";
+	my %progress = progress();
+	print $Global::original_stderr "\r", $progress{'status'}, "\n";
     }
 }
 
