@@ -2659,6 +2659,10 @@ sub processes_available_by_system_limit {
 		      " jobs in parallel. Raising ulimit -u may help.\n");
 	}
     }
+    if($] == 5.008008 and $system_limit > 1000) {
+	# https://savannah.gnu.org/bugs/?36942
+	$system_limit = 1000;
+    }
     if($Global::JobQueue->empty()) {
 	$system_limit ||= 1;
     }
