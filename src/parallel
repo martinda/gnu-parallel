@@ -109,9 +109,9 @@ if($::opt_filter_hosts and (@::opt_sshlogin or @::opt_sshloginfile)) {
 	"'parallel --max-line-length-allowed' ".
 	"'true' ";
     ::debug($cmd."\n");
-    open(HOST, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
+    open(my $host_fh, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
     my (%ncores, %ncpus, %time_to_login, %maxlen);
-    while(<HOST>) {
+    while(<$host_fh>) {
 	my @col = split /\t/, $_;
 	if(defined $col[6]) {
 	    # This is a line from --joblog
@@ -157,7 +157,7 @@ if($::opt_filter_hosts and (@::opt_sshlogin or @::opt_sshloginfile)) {
 	    ::die_bug("host check unmatched short jobline: $_");
 	}
     }
-    close HOST;
+    close $host_fh;
     while (my ($sshlogin, $obj) = each %Global::host) {
 	$ncpus{$sshlogin} or ::die_bug("ncpus missing: ".$obj->serverlogin());
 	$ncores{$sshlogin} or ::die_bug("ncores missing: ".$obj->serverlogin());
@@ -210,16 +210,16 @@ if($::opt_nonall or $::opt_onall) {
 	     ((defined $::opt_plain) ? "--plain" : ""),
 	);
     ::debug("| $0 $options\n");
-    open(PARALLEL, "|-", "$0 -j0 $options") ||
+    open(my $parallel_fh, "|-", "$0 -j0 $options") ||
 	::die_bug("This does not run GNU Parallel: $0 $options");
     for my $sshlogin (values %Global::host) {
-	print PARALLEL "$0 $suboptions -j1 ".
+	print $parallel_fh "$0 $suboptions -j1 ".
 	    ((defined $::opt_tag) ?
 	     "--tagstring ".shell_quote_scalar($sshlogin->string()) : "").
 	     " -S ". shell_quote_scalar($sshlogin->string())." ".
 	     shell_quote_scalar($command)." :::: @argfiles\n";
     }
-    close PARALLEL;
+    close $parallel_fh;
     $Global::exitstatus = $? >> 8;
     debug("--onall exitvalue ",$?);
     if(@::opt_basefile) { cleanup_basefile(); }
@@ -866,10 +866,10 @@ sub open_joblog {
     }
     if($::opt_joblog) {
 	if($::opt_resume) {
-	    if(open(JOBLOG, "<", $::opt_joblog)) {
+	    if(open(my $joblog_fh, "<", $::opt_joblog)) {
 		# Read the joblog
-		$append = <JOBLOG>; # If there is a header: Open as append later
-		while(<JOBLOG>) {
+		$append = <$joblog_fh>; # If there is a header: Open as append later
+		while(<$joblog_fh>) {
 		    if(/^(\d+)/) {
 			# This is 30% faster than set_job_already_run($1);
 			vec($Global::job_already_run,$1,1) = 1;
@@ -878,7 +878,7 @@ sub open_joblog {
 			::wait_and_exit(255);
 		    }
 		}
-		close JOBLOG;
+		close $joblog_fh;
 	    }
 	}
 	if($append) {
@@ -939,13 +939,13 @@ sub read_options {
 	}
 	for my $profile (@profiles) {
 	    if(-r $profile) {
-		open (IN, "<", $profile) || ::die_bug("read-profile: $profile");
-		while(<IN>) {
+		open (my $in_fh, "<", $profile) || ::die_bug("read-profile: $profile");
+		while(<$in_fh>) {
 		    /^\s*\#/ and next;
 		    chomp;
 		    push @ARGV_profile, shell_unquote(split/(?<![\\])\s/, $_);
 		}
-		close IN;
+		close $in_fh;
 	    } else {
 		if(grep /^$profile$/, @config_profiles) {
 		    # config file is not required to exist
@@ -1601,6 +1601,7 @@ sub read_sshloginfile {
     # Returns: N/A
     my $file = shift;
     my $close = 1;
+    my $in_fh;
     if($file eq "..") {
         $file = $ENV{'HOME'}."/.parallel/sshloginfile";
     }
@@ -1608,22 +1609,22 @@ sub read_sshloginfile {
         $file = "/etc/parallel/sshloginfile";
     }
     if($file eq "-") {
-	*IN = *STDIN;
+	$in_fh = *STDIN;
 	$close = 0;
     } else {
-	if(not open(IN, "<", $file)) {
+	if(not open($in_fh, "<", $file)) {
 	    ::error("Cannot open $file.\n");
 	    ::wait_and_exit(255);
 	}
     }
-    while(<IN>) {
+    while(<$in_fh>) {
         chomp;
         /^\s*#/ and next;
         /^\s*$/ and next;
         push @Global::sshlogin, $_;
     }
     if($close) {
-	close IN;
+	close $in_fh;
     }
 }
 
@@ -2289,9 +2290,9 @@ sub swap_activity {
     # Should we update the swap_activity file?
     my $update_swap_activity_file = 0;
     if(-r $self->{'swap_activity_file'}) {
-        open(SWAP, "<", $self->{'swap_activity_file'}) || ::die_bug("swap_activity_file-r");
-        my $swap_out = <SWAP>;
-        close SWAP;
+        open(my $swap_fh, "<", $self->{'swap_activity_file'}) || ::die_bug("swap_activity_file-r");
+        my $swap_out = <$swap_fh>;
+        close $swap_fh;
         if($swap_out =~ /^(\d+)$/) {
             $self->{'swap_activity'} = $1;
             ::debug("New swap_activity: ".$self->{'swap_activity'});
@@ -2372,10 +2373,10 @@ sub loadavg {
     # Should we update the loadavg file?
     my $update_loadavg_file = 0;
     if(-r $self->{'loadavg_file'}) {
-        open(UPTIME, "<", $self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
+        open(my $uptime_fh, "<", $self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
 	local $/ = undef;
-        my $uptime_out = <UPTIME>;
-        close UPTIME;
+        my $uptime_out = <$uptime_fh>;
+        close $uptime_fh;
         # load average: 0.76, 1.53, 1.45
         if($uptime_out =~ /load average: (\d+.\d+)/) {
             $self->{'loadavg'} = $1;
@@ -2457,9 +2458,9 @@ sub compute_max_loadavg {
         } elsif (-f $loadspec) {
             $Global::max_load_file = $loadspec;
             $Global::max_load_file_last_mod = (stat($Global::max_load_file))[9];
-            if(open(IN, "<", $Global::max_load_file)) {
-                my $opt_load_file = join("",<IN>);
-                close IN;
+            if(open(my $in_fh, "<", $Global::max_load_file)) {
+                my $opt_load_file = join("",<$in_fh>);
+                close $in_fh;
                 $load = $self->compute_max_loadavg($opt_load_file);
             } else {
                 print $Global::original_stderr "Cannot open $loadspec\n";
@@ -2711,10 +2712,10 @@ sub simultaneous_sshlogin {
     my $serverlogin = $self->serverlogin();
     my $cmd = "$sshcmd $serverlogin echo simultaneouslogin </dev/null 2>&1 &"x$wanted_processes;
     ::debug("Trying $wanted_processes logins at $serverlogin");
-    open (SIMUL, "-|", "($cmd)|grep simultaneouslogin | wc -l") or
+    open (my $simul_fh, "-|", "($cmd)|grep simultaneouslogin | wc -l") or
 	::die_bug("simultaneouslogin");
-    my $ssh_limit = <SIMUL>;
-    close SIMUL;
+    my $ssh_limit = <$simul_fh>;
+    close $simul_fh;
     chomp $ssh_limit;
     return $ssh_limit;
 }
@@ -2755,9 +2756,9 @@ sub user_requested_processes {
         } elsif (-f $opt_P) {
             $Global::max_procs_file = $opt_P;
             $Global::max_procs_file_last_mod = (stat($Global::max_procs_file))[9];
-            if(open(IN, "<", $Global::max_procs_file)) {
-                my $opt_P_file = join("",<IN>);
-                close IN;
+            if(open(my $in_fh, "<", $Global::max_procs_file)) {
+                my $opt_P_file = join("",<$in_fh>);
+                close $in_fh;
                 $processes = $self->user_requested_processes($opt_P_file);
             } else {
                 ::error("Cannot open $opt_P.\n");
@@ -2879,14 +2880,14 @@ sub no_of_cpus_gnu_linux {
         $no_of_cpus = 0;
         $no_of_cores = 0;
         my %seen;
-        open(IN, "-|", "cat /proc/cpuinfo") || return undef;
-        while(<IN>) {
+        open(my $in_fh, "-|", "cat /proc/cpuinfo") || return undef;
+        while(<$in_fh>) {
             if(/^physical id.*[:](.*)/ and not $seen{$1}++) {
                 $no_of_cpus++;
             }
             /^processor.*[:]/ and $no_of_cores++;
         }
-        close IN;
+        close $in_fh;
     }
     return ($no_of_cpus||$no_of_cores);
 }
@@ -2898,11 +2899,11 @@ sub no_of_cores_gnu_linux {
     my $no_of_cores;
     if(-e "/proc/cpuinfo") {
         $no_of_cores = 0;
-        open(IN, "-|", "cat /proc/cpuinfo") || return undef;
-        while(<IN>) {
+        open(my $in_fh, "-|", "cat /proc/cpuinfo") || return undef;
+        while(<$in_fh>) {
             /^processor.*[:]/ and $no_of_cores++;
         }
-        close IN;
+        close $in_fh;
     }
     return $no_of_cores;
 }
@@ -2997,11 +2998,11 @@ sub no_of_cpus_aix {
     #   undef if not AIX
     my $no_of_cpus = 0;
     if(-x "/usr/sbin/lscfg") {
-	open(IN, "-|", "/usr/sbin/lscfg -vs |grep proc | wc -l|tr -d ' '")
+	open(my $in_fh, "-|", "/usr/sbin/lscfg -vs |grep proc | wc -l|tr -d ' '")
 	    || return undef;
-	$no_of_cpus = <IN>;
+	$no_of_cpus = <$in_fh>;
 	chomp ($no_of_cpus);
-	close IN;
+	close $in_fh;
     }
     return $no_of_cpus;
 }
@@ -3012,11 +3013,11 @@ sub no_of_cores_aix {
     #   undef if not AIX
     my $no_of_cores;
     if(-x "/usr/bin/vmstat") {
-	open(IN, "-|", "/usr/bin/vmstat 1 1") || return undef;
-	while(<IN>) {
+	open(my $in_fh, "-|", "/usr/bin/vmstat 1 1") || return undef;
+	while(<$in_fh>) {
 	    /lcpu=([0-9]*) / and $no_of_cores = $1;
 	}
-	close IN;
+	close $in_fh;
     }
     return $no_of_cores;
 }
@@ -3745,9 +3746,9 @@ sub start {
     if($Global::interactive or $Global::stderr_verbose) {
 	if($Global::interactive) {
 	    print $Global::original_stderr "$command ?...";
-	    open(TTY, "<", "/dev/tty") || ::die_bug("interactive-tty");
-	    my $answer = <TTY>;
-	    close TTY;
+	    open(my $tty_fh, "<", "/dev/tty") || ::die_bug("interactive-tty");
+	    my $answer = <$tty_fh>;
+	    close $tty_fh;
 	    my $run_yes = ($answer =~ /^\s*y/i);
 	    if (not $run_yes) {
 		$command = "true"; # Run the command 'true'
@@ -3818,15 +3819,15 @@ sub start {
 	open STDIN, "<&", $Global::original_stdin
 	    or ::die_bug("dup-\$Global::original_stdin: $!");
     } elsif ($::opt_tty and not $Global::tty_taken and -c "/dev/tty" and
-	     open(DEVTTY, "<", "/dev/tty")) {
+	     open(my $devtty_fh, "<", "/dev/tty")) {
 	# Give /dev/tty to the command if no one else is using it
-	*IN = *DEVTTY;
+	*IN = $devtty_fh;
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 		::die_bug("open3-/dev/tty");
 	    $Global::tty_taken = $pid;
-	    close DEVTTY;
+	    close $devtty_fh;
 	    1;
 	};
     } else {
@@ -5322,9 +5323,9 @@ sub acquire {
 	   $start_time + $::opt_timeout > time) {
 	    # Acquire the lock anyway
 	    if(not -e $self->{'idfile'}) {
-		open (A, ">", $self->{'idfile'}) or
+		open (my $fh, ">", $self->{'idfile'}) or
 		    ::die_bug("write_idfile: $self->{'idfile'}");
-		close A;
+		close $fh;
 	    }
 	    link $self->{'idfile'}, $self->{'pidfile'};
 	    last;
@@ -5357,9 +5358,9 @@ sub atomic_link_if_count_less_than {
     if($self->nlinks() < $self->{'count'}) {
 	-d $self->{'lockdir'} or mkdir_or_die($self->{'lockdir'});
 	if(not -e $self->{'idfile'}) {
-	    open (A, ">", $self->{'idfile'}) or
+	    open (my $fh, ">", $self->{'idfile'}) or
 		::die_bug("write_idfile: $self->{'idfile'}");
-	    close A;
+	    close $fh;
 	}
 	$retval = link $self->{'idfile'}, $self->{'pidfile'};
     }
