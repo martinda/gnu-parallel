@@ -3215,13 +3215,13 @@ sub openresultsfile {
     my $self = shift;
     my $args_as_filename = $self->{'commandline'}->args_as_filename();
     my ($outfh,$errfh,$name);
-    $name = $::opt_results."stdout_".$args_as_filename;
+    $name = $::opt_results."stdout\t".$args_as_filename;
     if(not open($outfh,"+>",$name)) {
 	::error("Cannot write to `$name'.\n");
 	::wait_and_exit(255);
     }
     $self->set_stdoutfilename($name);
-    $name = $::opt_results."stderr_".$args_as_filename;
+    $name = $::opt_results."stderr\t".$args_as_filename;
     if(not open($errfh,"+>",$name)) {
 	::error("Cannot write to `$name'.\n");
 	::wait_and_exit(255);
