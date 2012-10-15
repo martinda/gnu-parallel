@@ -6,4 +6,24 @@ DataFrame object. See `help(gnuparallel.load)` for details.
 
 Installation:
 
-`python setup.py install`
+    # python setup.py install
+
+Sample usage:
+
+1. Generate some results files by running parallel from the command line:
+
+    # mkdir outdir
+    # parallel --results outdir/ echo {arg1} {arg2} ::: arg1 1 2 ::: arg2 three four
+
+2. Load the results using the gnuparallel Python package:
+
+    # python
+    Python 2.7.3 (default, Apr 24 2012, 00:00:54) 
+    [GCC 4.7.0 20120414 (prerelease)] on linux2
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import gnuparallel
+    >>> help(gnuparallel.load)
+    >>> myresults = gnuparallel.load('outdir')
+
+See documentation for the pandas project (http://pandas.pydata.org/) for
+instructions on how to access and manipulate the loaded results.
