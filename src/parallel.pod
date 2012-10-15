@@ -445,6 +445,15 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
+=item B<--env> I<var>
+
+Copy environment variable I<var>. This will copy I<var> to the
+environment that the command is run in. This is especially useful for
+remote environments.
+
+Caveat: If I<var> contains newline ('\n') the value is messed up.
+
+
 =item B<--eta>
 
 Show the estimated number of seconds before finishing. This forces GNU
