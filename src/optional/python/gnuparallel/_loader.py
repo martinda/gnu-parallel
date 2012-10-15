@@ -101,15 +101,19 @@ def load(_dir, _process=None, _format=None, _stream='stdout',
 
     # Create a DataFrame from the matches.
     df = pd.DataFrame(matches)
-    if _process and not df.empty:
-        df['res'] = df.resfile.apply(_process)
-        df = df.drop('resfile', axis=1)
 
     # Optionally try to convert string argument values to numeric types.
     if _infer_types:
         buf = StringIO()
         df.to_csv(buf)
         df = pd.read_csv(StringIO(buf.getvalue()), index_col=0)
+
+    # Open and process the results. This needs to happen after the type
+    # infererence phase since the processed results can be arbitrary
+    # Python objects and might not survive the round-trip.
+    if _process and not df.empty:
+        df['res'] = df.resfile.apply(_process)
+        df = df.drop('resfile', axis=1)
 
     return df
 
