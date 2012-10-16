@@ -24,6 +24,17 @@ Sample usage:
     >>> import gnuparallel
     >>> help(gnuparallel.load)
     >>> myresults = gnuparallel.load('outdir')
+    >>> myresults
+          1      2  _prefix _stream                              resfile
+    0     2   four      NaN  stdout     outdir/stdout\t1\t2\t2\tfour
+    1     2  three      NaN  stdout     outdir/stdout\t1\t2\t2\tthree
+    2     2   arg2      NaN  stdout     outdir/stdout\t1\t2\t2\targ2
+    3     1   four      NaN  stdout     outdir/stdout\t1\t1\t2\tfour
+    4     1  three      NaN  stdout     outdir/stdout\t1\t1\t2\tthree
+    5     1   arg2      NaN  stdout     outdir/stdout\t1\t1\t2\targ2
+    6  arg1   four      NaN  stdout     outdir/stdout\t1\targ1\t2\tfour
+    7  arg1  three      NaN  stdout     outdir/stdout\t1\targ1\t2\tthree
+    8  arg1   arg2      NaN  stdout     outdir/stdout\t1\targ1\t2\targ2
 
 See documentation for the pandas project (http://pandas.pydata.org/) for
 instructions on how to access and manipulate the loaded results.
