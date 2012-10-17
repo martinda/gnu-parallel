@@ -46,3 +46,12 @@ a'   * ? >o  <i*? ][\!#¤%=( ) | }b 5
 ### Test --env for \160  - which kills csh - single and double --onall - no output is good
 ### Test too slow spawning
 OK
+### Test --env  - https://savannah.gnu.org/bugs/?37351
+a  2  spaces  b 1
+a  2  spaces  b a >  My brother's 12" records  < b 2
+a  2  spaces  b a >  My brother's 12" records  < b 2a
+a  2  spaces  b 1
+a  2  spaces  b a >  My brother's 12" records  < b 2
+a  2  spaces  b a >  My brother's 12" records  < b 2a
+### Test --env all chars except \n - single and double - no output is good
+### Test --env all chars except \n - single and double --onall - no output is good

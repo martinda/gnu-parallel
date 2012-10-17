@@ -445,6 +445,15 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
+=item B<--env> I<var>
+
+Copy environment variable I<var>. This will copy I<var> to the
+environment that the command is run in. This is especially useful for
+remote environments.
+
+Caveat: If I<var> contains newline ('\n') the value is messed up.
+
+
 =item B<--eta>
 
 Show the estimated number of seconds before finishing. This forces GNU
@@ -979,9 +988,9 @@ Only used with B<--pipe>.
 Results in files named by tab separated arguments. Save the output
 into files. The file names will be prefixed with I<prefix> which can
 contain a path with a prefix string. The file with output from stdout
-(standard output) will prefixed with 'I<prefix>stdout_'.  The file
+(standard output) will prefixed with 'I<prefix>stdout'.  The file
 with output from stderr (standard error) will prefixed with
-'I<prefix>stderr_'.
+'I<prefix>stderr'.
 
 The postfix is the header of the input source (if using B<--header :>)
 or the number of the input source followed by the value of the input
@@ -994,14 +1003,14 @@ E.g:
 
 will generate the files:
 
-  foo/barstderr_a	I	b	III
-  foo/barstderr_a	I	b	IIII
-  foo/barstderr_a	II	b	III
-  foo/barstderr_a	II	b	IIII
-  foo/barstdout_a	I	b	III
-  foo/barstdout_a	I	b	IIII
-  foo/barstdout_a	II	b	III
-  foo/barstdout_a	II	b	IIII
+  foo/barstderr	a	I	b	III
+  foo/barstderr	a	I	b	IIII
+  foo/barstderr	a	II	b	III
+  foo/barstderr	a	II	b	IIII
+  foo/barstdout	a	I	b	III
+  foo/barstdout	a	I	b	IIII
+  foo/barstdout	a	II	b	III
+  foo/barstdout	a	II	b	IIII
 
 and
 
@@ -1009,14 +1018,14 @@ and
 
 will generate the files:
 
-  foo/barstderr_1	I	2	III
-  foo/barstderr_1	I	2	IIII
-  foo/barstderr_1	II	2	III
-  foo/barstderr_1	II	2	IIII
-  foo/barstdout_1	I	2	III
-  foo/barstdout_1	I	2	IIII
-  foo/barstdout_1	II	2	III
-  foo/barstdout_1	II	2	IIII
+  foo/barstderr	1	I	2	III
+  foo/barstderr	1	I	2	IIII
+  foo/barstderr	1	II	2	III
+  foo/barstderr	1	II	2	IIII
+  foo/barstdout	1	I	2	III
+  foo/barstdout	1	I	2	IIII
+  foo/barstdout	1	II	2	III
+  foo/barstdout	1	II	2	IIII
 
 where all spaces are TABs (\t);.
 
@@ -1848,6 +1857,16 @@ positional replacement string:
 This also works if the input file is a file with columns:
 
   cat addressbook.tsv | parallel --colsep '\t' --header : echo {Name} {E-mail address}
+
+
+=head1 EXAMPLE: Count the differences between all files in a dir
+
+Using B<--results> the results are saved in /tmp/diffcount*.
+
+  parallel --results /tmp/diffcount "diff -U 0 {1} {2} |tail -n +3 |grep -v '^@'|wc -l" ::: * ::: *
+
+To see the difference between file A and file B look at the file
+'/tmp/diffcount 1 A 2 B' where spaces are TABs (\t).
 
 
 =head1 EXAMPLE: Speeding up fast jobs
