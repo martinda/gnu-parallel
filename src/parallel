@@ -208,6 +208,7 @@ if($::opt_nonall or $::opt_onall) {
 	     ((defined $::opt_D) ? "-D" : ""),
 	     ((defined $::opt_timeout) ? "--timeout ".$::opt_timeout : ""),
 	     ((defined $::opt_plain) ? "--plain" : ""),
+	     ((defined @::opt_env) ? map { "--env ".::shell_quote_scalar($_) } @::opt_env : ""),
 	);
     ::debug("| $0 $options\n");
     open(my $parallel_fh, "|-", "$0 -j0 $options") ||
@@ -605,7 +606,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20120930;
+    $Global::version = 20121015;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -837,6 +838,13 @@ sub parse_options {
     open_joblog();
 }
 
+sub env_quote {
+    my $v = shift;
+    $v =~ s/([\\])/\\$1/g;
+    $v =~ s/([\[\] \#\'\n\&\<\>\(\)\;\{\}\t\"\$\`\*\174\!\?\~])/\\$1/g;
+    return $v;
+}
+
 sub parse_env_var {
     # Parse --env and set $Global::envvar
     # Returns: N/A
@@ -846,15 +854,22 @@ sub parse_env_var {
         # Split up --env VAR1,VAR2
 	push @vars, split /,/, $varstring;
     }
-    $Global::envvar = 
-	(q{eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null}
-	 . q{ && echo }
-	 . join("", map { "setenv $_ "
-			      . ::shell_quote_scalar(::shell_quote_scalar($ENV{$_})).'\;' } @vars)
-	 . q{ || echo }
-	 . join("", map { "export $_="
-			      . ::shell_quote_scalar(::shell_quote_scalar($ENV{$_})).'\;' } @vars)
-	 .q{`;});
+    # Keep only defined variables
+    @vars = grep { defined($ENV{$_}) } @vars;
+    my @qcsh = map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  } @vars;
+    my @qbash = map { my $a=$_; "export $a=" . env_quote($ENV{$a}) } @vars;
+
+    # Create lines like:
+    # echo $SHELL | grep -E "/t?csh" >/dev/null && setenv V1 val1 && setenv V2 val2 || export V1=val1 && export V2=val2 ; echo "$V1$V2"
+    if(@vars) {
+	$Global::envvar = 
+	    join"", 
+	    (q{echo $SHELL | grep -E "/t?csh" > /dev/null && }
+	     . join(" && ", @qcsh)
+	     . q{ || }
+	     . join(" && ", @qbash)
+	     .q{;});
+    }
     $Global::envvarlen = length $Global::envvar;
 }
 
@@ -1041,7 +1056,7 @@ sub __QUOTING_ARGUMENTS_FOR_SHELL__ {}
 sub shell_quote {
     my @strings = (@_);
     for my $a (@strings) {
-        $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
+        $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
         $a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
     }
     return wantarray ? @strings : "@strings";
@@ -1052,8 +1067,10 @@ sub shell_quote_scalar {
     # Returns:
     #   string quoted with \ as needed by the shell
     my $a = shift;
-    $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'])/\\$1/g;
-    $a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
+    if(defined $a) {
+	$a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
+	$a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
+    }
     return $a;
 }
 
@@ -3216,13 +3233,13 @@ sub openresultsfile {
     my $self = shift;
     my $args_as_filename = $self->{'commandline'}->args_as_filename();
     my ($outfh,$errfh,$name);
-    $name = $::opt_results."stdout_".$args_as_filename;
+    $name = $::opt_results."stdout\t".$args_as_filename;
     if(not open($outfh,"+>",$name)) {
 	::error("Cannot write to `$name'.\n");
 	::wait_and_exit(255);
     }
     $self->set_stdoutfilename($name);
-    $name = $::opt_results."stderr_".$args_as_filename;
+    $name = $::opt_results."stderr\t".$args_as_filename;
     if(not open($errfh,"+>",$name)) {
 	::error("Cannot write to `$name'.\n");
 	::wait_and_exit(255);
@@ -4295,7 +4312,7 @@ sub multi_regexp {
     if(not $CommandLine::multi_regexp) {
 	$CommandLine::multi_regexp =
 	"(?:".
-	join("|",map {my ($a = $_) =~ s/(\W)/\\$1/g; $a }
+	join("|",map {my $a=$_; $a =~ s/(\W)/\\$1/g; $a}
 	     ($Global::replace{"{}"},
 	      $Global::replace{"{.}"},
 	      $Global::replace{"{/}"},
@@ -4321,7 +4338,7 @@ sub number_of_replacements {
 	'\d+(?:|\.|/\.|/|//)?' . # {n} {n.} {n/.} {n/} {n//}
 	::maybe_quote('\}') .
 	'|'.
-	join("|",map { my ($a = $_) =~ s/(\W)/\\$1/g; $a } values %Global::replace).
+	join("|",map {$a=$_;$a=~s/(\W)/\\$1/g; $a} values %Global::replace).
 	")";
     my %c = ();
     $cmd =~ s/($replacement_regexp)/$c{$1}++;"\0"/ogex;
@@ -4370,7 +4387,7 @@ sub replaced {
 	    # Is this really a command in $PATH starting with '-'?
 	    my $cmd = $1;
 	    if(not grep { -e $_."/".$cmd } split(":",$ENV{'PATH'})) {
-		::error("Command ($cmd) starts with '-'. Is this a wrong option?.\n");
+		::error("Command ($cmd) starts with '-'. Is this a wrong option?\n");
 		::wait_and_exit(255);
 	    }
 	}
@@ -4450,9 +4467,9 @@ sub context_replace_placeholders {
     # Inner part of replacement functions
     my @rep_inner = ('', '/', '//', '.', '/.');
     # Regexp for replacement functions
-    my $rep_regexp = "(?:". join('|', map { my ($s = $_) =~ s/(\W)/\\$1/g; $s } @rep) . ")";
+    my $rep_regexp = "(?:". join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } @rep) . ")";
     # Regexp for inner replacement functions
-    my $rep_inner_regexp = "(?:". join('|', map { my ($s = $_) =~ s/(\W)/\\$1/g; $s } @rep_inner) . ")";
+    my $rep_inner_regexp = "(?:". join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } @rep_inner) . ")";
     # Seq replace string: {#}
     my $rep_seq_regexp = '(?:'.::maybe_quote('\{\#\}').")";
     # Normal replace strings
@@ -4526,7 +4543,7 @@ sub context_replace_placeholders {
     }
     # Substitute the replace strings with the replacement values
     # Must be sorted by length if a short word is a substring of a long word
-    my $regexp = join('|', map { my ($s = $_) =~ s/(\W)/\\$1/g; $s }
+    my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s }
 		      sort { length $b <=> length $a } keys %word);
     $target =~ s/($regexp)/join(" ",@{$replace{$1}})/ge;
     return $target;
@@ -4580,7 +4597,7 @@ sub simple_replace_placeholders {
 	}
     }
     # Substitute the replace strings with the replacement values
-    my $regexp = join('|', map { my ($s = $_) =~ s/(\W)/\\$1/g; $s } keys %replace);
+    my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } keys %replace);
     if($regexp) {
 	if($quoteall) {
 	    # This is for --return: The whole expression must be

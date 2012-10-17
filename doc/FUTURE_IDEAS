@@ -10,8 +10,6 @@ Luk filen ved EOF - lad være med bare at læse videre.
 
 > /tmp/ged; tail -f /tmp/ged| parallel -n1 -E eof & sleep 1; echo echo a >>/tmp/ged; echo eof >>/tmp/ged; seq 4 >>/tmp/ged; wait
 
-Fhqwhgads som 20120122 pga 10 års jubliæum.
-
 --timeout auto: If a jobs takes > 3*moving average runtime then kill it. Only after job 3.
 
 niceload seeks last column:
@@ -30,9 +28,6 @@ Til QUOTING:
 cat <<'_EOF' | parallel -v echo
 awk -v FS="\",\"" '{print $1, $3, $4, $5, $9, $14}' | grep -v "#" | sed -e '1d' -e 's/\"//g' -e 's/\/\/\//\t/g' | cut -f1-6,11 | sed -e 's/\/\//\t/g' -e 's/ /\t/g
 _EOF
-
-\'-tricket
-ls *bed | parallel -j 10 intersectBed -a good-genes.gff -b {} -c \| awk \''BEGIN{OFS="\t\";} {print $1,$9,$4,$5,$7,$10}'\' > test.txt
 
 FN="two  spaces"
 echo 1 | parallel -q echo {} "$FN"
