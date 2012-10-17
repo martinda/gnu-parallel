@@ -1306,6 +1306,15 @@ sub start_another_job {
     }
 }
 
+sub init_progress {
+    # Returns:
+    #   list of computers for progress output
+    $|=1;
+    my %progress = progress();
+    return ("\nComputers / CPU cores / Max jobs to run\n",
+            $progress{'workerlist'});
+}
+
 sub drain_job_queue {
     # Returns: N/A
     $Private::first_completed ||= time;
@@ -1364,15 +1373,6 @@ sub toggle_progress {
     if($::opt_progress) {
         print $Global::original_stderr init_progress();
     }
-}
-
-sub init_progress {
-    # Returns:
-    #   list of computers for progress output
-    $|=1;
-    my %progress = progress();
-    return ("\nComputers / CPU cores / Max jobs to run\n",
-            $progress{'workerlist'});
 }
 
 sub progress {
