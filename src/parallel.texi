@@ -375,7 +375,8 @@ k, m, g, t, or p which would multiply the size with 1024, 1048576,
 1000000000, 1000000000000, or 1000000000000000 respectively.
 
 GNU @strong{parallel} tries to meet the block size but can be off by the
-length of one record.
+length of one record. For performance reasons @emph{size} should be bigger
+than a single record.
 
 @emph{size} defaults to 1M.
 
@@ -471,6 +472,15 @@ because it is POSIX compliant for @strong{xargs} while this option is not.
 If @emph{eof-str} is omitted, there is no end of file string.  If neither
 @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
+@item @strong{--env} @emph{var} (alpha testing)
+@anchor{@strong{--env} @emph{var} (alpha testing)}
+
+Copy environment variable @emph{var}. This will copy @emph{var} to the
+environment that the command is run in. This is especially useful for
+remote environments.
+
+Caveat: If @emph{var} contains newline ('\n') the value is messed up.
+
 @item @strong{--eta}
 @anchor{@strong{--eta}}
 
@@ -489,8 +499,8 @@ See also: @strong{--bg}, @strong{man sem}
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts}
-@anchor{@strong{--filter-hosts}}
+@item @strong{--filter-hosts} (alpha testing)
+@anchor{@strong{--filter-hosts} (alpha testing)}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -699,7 +709,7 @@ to see the difference:
 @item @strong{-L} @emph{max-lines}
 @anchor{@strong{-L} @emph{max-lines}}
 
-When used with @strong{--pipe}: Read records of @emph{max-lines}.
+When used with @strong{--pipe}: Read records of @emph{max-lines} (alpha testing).
 
 When used otherwise: Use at most @emph{max-lines} nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -716,7 +726,7 @@ Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is 
 @item @strong{-l}[@emph{max-lines}]
 @anchor{@strong{-l}[@emph{max-lines}]}
 
-When used with @strong{--pipe}: Read records of @emph{max-lines}.
+When used with @strong{--pipe}: Read records of @emph{max-lines} (alpha testing).
 
 When used otherwise: Synonym for the @strong{-L} option.  Unlike @strong{-L}, the
 @emph{max-lines} argument is optional.  If @emph{max-lines} is not specified,
@@ -1035,6 +1045,66 @@ Remove the text matched by @strong{--recstart} and @strong{--recend} before pipi
 it to the command.
 
 Only used with @strong{--pipe}.
+
+@item @strong{--results} @emph{prefix} (alpha testing)
+@anchor{@strong{--results} @emph{prefix} (alpha testing)}
+
+@item @strong{--res} @emph{prefix} (alpha testing)
+@anchor{@strong{--res} @emph{prefix} (alpha testing)}
+
+Results in files named by tab separated arguments. Save the output
+into files. The file names will be prefixed with @emph{prefix} which can
+contain a path with a prefix string. The file with output from stdout
+(standard output) will prefixed with '@emph{prefix}stdout'.  The file
+with output from stderr (standard error) will prefixed with
+'@emph{prefix}stderr'.
+
+The postfix is the header of the input source (if using @strong{--header :})
+or the number of the input source followed by the value of the input
+source. This is repeated for every input source and is separated by
+TAB (\t).
+
+E.g:
+
+@verbatim
+  parallel --header : --results foo/bar echo {a} {b} ::: a I II ::: b III IIII
+@end verbatim
+
+will generate the files:
+
+@verbatim
+  foo/barstderr a       I       b       III
+  foo/barstderr a       I       b       IIII
+  foo/barstderr a       II      b       III
+  foo/barstderr a       II      b       IIII
+  foo/barstdout a       I       b       III
+  foo/barstdout a       I       b       IIII
+  foo/barstdout a       II      b       III
+  foo/barstdout a       II      b       IIII
+@end verbatim
+
+and
+
+@verbatim
+  parallel --results foo/bar echo {1} {2} ::: 1 2 ::: 3 4
+@end verbatim
+
+will generate the files:
+
+@verbatim
+  foo/barstderr 1       I       2       III
+  foo/barstderr 1       I       2       IIII
+  foo/barstderr 1       II      2       III
+  foo/barstderr 1       II      2       IIII
+  foo/barstdout 1       I       2       III
+  foo/barstdout 1       I       2       IIII
+  foo/barstdout 1       II      2       III
+  foo/barstdout 1       II      2       IIII
+@end verbatim
+
+where all spaces are TABs (\t);.
+
+See also @strong{--files}, @strong{--header}, @strong{--joblog}.
 
 @item @strong{--resume}
 @anchor{@strong{--resume}}
@@ -1915,6 +1985,44 @@ This also works if the input file is a file with columns:
   cat addressbook.tsv | parallel --colsep '\t' --header : echo {Name} {E-mail address}
 @end verbatim
 
+@chapter EXAMPLE: Count the differences between all files in a dir
+@anchor{EXAMPLE: Count the differences between all files in a dir}
+
+Using @strong{--results} the results are saved in /tmp/diffcount*.
+
+@verbatim
+  parallel --results /tmp/diffcount "diff -U 0 {1} {2} |tail -n +3 |grep -v '^@'|wc -l" ::: * ::: *
+@end verbatim
+
+To see the difference between file A and file B look at the file
+'/tmp/diffcount 1 A 2 B' where spaces are TABs (\t).
+
+@chapter EXAMPLE: Speeding up fast jobs
+@anchor{EXAMPLE: Speeding up fast jobs}
+
+Starting a job on the local machine takes around 3 ms. This can be a
+big overhead if the job takes very few ms to run. Often you can group
+small jobs together using @strong{-X} which will make the overhead less
+significant. Compare the speed of these:
+
+@verbatim
+    seq -w 0 9999 | parallel touch pict{}.jpg
+
+    seq -w 0 9999 | parallel -X touch pict{}.jpg
+@end verbatim
+
+If your program cannot take multiple arguments, then you can use GNU
+@strong{parallel} to spawn multiple GNU @strong{parallel}s:
+
+@verbatim
+    seq -w 0 999999 | parallel -j10 --pipe parallel -j0 touch pict{}.jpg
+@end verbatim
+
+If @strong{-j0} normally spawns 506 jobs, then the above will try to spawn
+5060 jobs. It is likely that you this way will hit the limit of number
+of processes and/or filehandles. Look at 'ulimit -n' and 'ulimit -u'
+to raise these limits.
+
 @chapter EXAMPLE: Using shell variables
 @anchor{EXAMPLE: Using shell variables}
 
@@ -2510,10 +2618,22 @@ characters that have special meaning in shell:
 
 and depending on context these needs to be quoted, too:
 
-* ~ & # ! ? space * @{
+~ & # ! ? space * @{
 
 Therefore most people will never need more quoting than putting '\'
 in front of the special characters.
+
+Often you can simply put \' around every ':
+
+@verbatim
+  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file
+@end verbatim
+
+can be quoted:
+
+@verbatim
+  parallel perl -ne \''/^\S+\s+\S+$/ and print $ARGV,"\n"'\' ::: file
+@end verbatim
 
 However, when you want to use a shell variable you need to quote the
 $-sign. Here is an example using $PARALLEL_SEQ. This variable is set
