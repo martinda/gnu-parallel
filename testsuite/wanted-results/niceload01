@@ -2,19 +2,19 @@
 This works
 
 ### --rm and --runmem
-OK
-OK
-### -N and --noswap 
-0
-0
+OK--rm
+OK--runmem
+### -N and --noswap. Must give 0
+-N 0
+--noswap 0
 ### --soft -f and test if child is actually suspended and thus takes longer
 1000000 1000000 6888896
 This should finish first
 1000000 1000000 6888896
 This should finish last
 ### -H and --hard
-OK
-OK
+OK-l9.9
+OK-l9
 ### -f and --factor
-f 0.1 first
-factor 10 last
+f 0.1 finish first
+factor 10 finish last

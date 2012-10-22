@@ -178,7 +178,8 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* When using GNU Parallel for simulations --results makes it easy to
+* --results structures output files so they can be imported using
+  Pandas (http://pandas.pydata.org/). Useful when doing simulations to
   select output from some arguments.
 
 * Use --env to transfer environment variables through ssh to remote

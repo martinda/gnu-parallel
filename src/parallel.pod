@@ -445,7 +445,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var>
+=item B<--env> I<var> (alpha testing)
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -472,7 +472,7 @@ See also: B<--bg>, B<man sem>
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts>
+=item B<--filter-hosts> (alpha testing)
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -657,7 +657,7 @@ to see the difference:
 
 =item B<-L> I<max-lines>
 
-When used with B<--pipe>: Read records of I<max-lines>.
+When used with B<--pipe>: Read records of I<max-lines> (alpha testing).
 
 When used otherwise: Use at most I<max-lines> nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -673,7 +673,7 @@ Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 =item B<-l>[I<max-lines>]
 
-When used with B<--pipe>: Read records of I<max-lines>.
+When used with B<--pipe>: Read records of I<max-lines> (alpha testing).
 
 When used otherwise: Synonym for the B<-L> option.  Unlike B<-L>, the
 I<max-lines> argument is optional.  If I<max-lines> is not specified,
