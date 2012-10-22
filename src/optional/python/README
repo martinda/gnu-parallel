@@ -7,13 +7,14 @@ DataFrame object. See `help(gnuparallel.load)` for details.
 Installation:
 
     # python setup.py install
+    # aptitude install python-pandas
 
 Sample usage:
 
 1. Generate some results files by running parallel from the command line:
 
-    # mkdir outdir
-    # parallel --results outdir/ echo {arg1} {arg2} ::: arg1 1 2 ::: arg2 three four
+    # mkdir out
+    # parallel --header : --results out/pfx echo {arg1} {arg2} ::: arg1 1 2 ::: arg2 three four
 
 2. Load the results using the gnuparallel Python package:
 
@@ -23,18 +24,15 @@ Sample usage:
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import gnuparallel
     >>> help(gnuparallel.load)
-    >>> myresults = gnuparallel.load('outdir')
-    >>> myresults
-          1      2  _prefix _stream                              resfile
-    0     2   four      NaN  stdout     outdir/stdout\t1\t2\t2\tfour
-    1     2  three      NaN  stdout     outdir/stdout\t1\t2\t2\tthree
-    2     2   arg2      NaN  stdout     outdir/stdout\t1\t2\t2\targ2
-    3     1   four      NaN  stdout     outdir/stdout\t1\t1\t2\tfour
-    4     1  three      NaN  stdout     outdir/stdout\t1\t1\t2\tthree
-    5     1   arg2      NaN  stdout     outdir/stdout\t1\t1\t2\targ2
-    6  arg1   four      NaN  stdout     outdir/stdout\t1\targ1\t2\tfour
-    7  arg1  three      NaN  stdout     outdir/stdout\t1\targ1\t2\tthree
-    8  arg1   arg2      NaN  stdout     outdir/stdout\t1\targ1\t2\targ2
+    >>> my_df = gnuparallel.load('out')
+    >>> my_df
+      _prefix _stream  arg1   arg2                          resfile
+    0     pfx  stdout     1  three   out/pfxstdout	arg1	1	arg2	three
+    1     pfx  stdout     1   four   out/pfxstdout	arg1	1	arg2	four
+    2     pfx  stdout     2  three   out/pfxstdout	arg1	2	arg2	three
+    3     pfx  stdout     2   four   out/pfxstdout	arg1	2	arg2	four
+    >>> my_df.tail(1)
+    3     pfx  stdout     2   four   out/pfxstdout	arg1	2	arg2	four
 
 See documentation for the pandas project (http://pandas.pydata.org/) for
 instructions on how to access and manipulate the loaded results.

@@ -1,15 +1,19 @@
 #!/bin/bash
 
+MYSQL_ADMIN_DBURL=mysql://tange:tange@
+
 # Setup
-sql mysql://root@ "drop user 'sqlunittest'@'localhost'"
-sql mysql://root@ DROP DATABASE sqlunittest;
-sql mysql://root@ CREATE DATABASE sqlunittest;
-sql mysql://root@ "CREATE USER 'sqlunittest'@'localhost' IDENTIFIED BY 'CB5A1FFFA5A';"
-sql mysql://root@ "GRANT ALL PRIVILEGES ON sqlunittest.* TO 'sqlunittest'@'localhost';"
+sql $MYSQL_ADMIN_DBURL "drop user 'sqlunittest'@'localhost'"
+sql $MYSQL_ADMIN_DBURL DROP DATABASE sqlunittest;
+sql $MYSQL_ADMIN_DBURL CREATE DATABASE sqlunittest;
+sql $MYSQL_ADMIN_DBURL "CREATE USER 'sqlunittest'@'localhost' IDENTIFIED BY 'CB5A1FFFA5A';"
+sql $MYSQL_ADMIN_DBURL "GRANT ALL PRIVILEGES ON sqlunittest.* TO 'sqlunittest'@'localhost';"
+
+MYSQL_TEST_DBURL=mysql://sqlunittest:CB5A1FFFA5A@
 
 echo '### Test of #! -Y with file as input'
 cat >/tmp/shebang <<EOF
-#!/usr/local/bin/sql -Y mysql:///tange
+#!/usr/local/bin/sql -Y $MYSQL_TEST_DBURL
 
 SELECT 'Yes it does' AS 'Testing if -Y works';
 EOF
@@ -18,7 +22,7 @@ chmod 755 /tmp/shebang
 
 echo '### Test of #! --shebang with file as input'
 cat >/tmp/shebang <<EOF
-#!/usr/local/bin/sql --shebang mysql:///tange
+#!/usr/local/bin/sql --shebang $MYSQL_TEST_DBURL
 
 SELECT 'Yes it does' AS 'Testing if --shebang works';
 EOF
@@ -26,7 +30,7 @@ chmod 755 /tmp/shebang
 /tmp/shebang
 
 echo '### Test reading sql on command line'
-sql mysql:///tange "SELECT 'Yes it does' as 'Test reading SQL from command line';"
+sql $MYSQL_TEST_DBURL "SELECT 'Yes it does' as 'Test reading SQL from command line';"
 
 echo '### Test reading sql from file'
 cat >/tmp/unittest.sql <<EOF
@@ -39,12 +43,13 @@ INSERT INTO unittest VALUES (1,'abc');
 INSERT INTO unittest VALUES (3,'def');
 SELECT 'Yes it does' as 'Test reading SQL from file works';
 EOF
-sql mysql:///tange </tmp/unittest.sql
+sql $MYSQL_TEST_DBURL/sqlunittest </tmp/unittest.sql
 
 echo '### Test dburl with username password host port'
 sql mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest </tmp/unittest.sql
 
 echo "### Test .sql/aliases"
+mkdir -p ~/.sql
 echo :sqlunittest mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest >> ~/.sql/aliases
 perl -i -ne '$seen{$_}++ || print' ~/.sql/aliases
 sql :sqlunittest "SELECT 'Yes it does' as 'Test if .sql/aliases works';"
@@ -71,7 +76,7 @@ sql --passthrough -H :sqlunittest 'select * from unittest'
 echo
 
 echo "### Test --html";
-sql --html mysql:///tange 'select * from unittest'
+sql --html $MYSQL_TEST_DBURL/sqlunittest 'select * from unittest'
 echo
 
 echo "### Test --show-processlist|proclist|listproc";

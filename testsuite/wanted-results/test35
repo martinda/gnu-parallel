@@ -6,13 +6,13 @@ echo >./b/foo.6
 echo >./\ ab\ /c\'\ d/\ ef\"g.6
 echo >./2-col.txt.6
 echo >./a\ b/cd\ /\ ef/efg.6
+./ ab /c' d/ ef"g.6
 ./ ab/c"d/ef g.6
 ./ ab/c"d/efg.6
-./b/foo.6
-./b/bar.6
-./ ab /c' d/ ef"g.6
-./a b/cd / ef/efg.6
 ./2-col.txt.6
+./a b/cd / ef/efg.6
+./b/bar.6
+./b/foo.6
 ### Test --wd /tmp/newtempdir/newdir/tmp/ with space dirs
 echo >./\ ab/c\"d/ef\ g.7
 echo >\ ab/c\"d/efg.7
@@ -21,13 +21,13 @@ echo >./b/foo.7
 echo >./\ ab\ /c\'\ d/\ ef\"g.7
 echo >./2-col.txt.7
 echo >./a\ b/cd\ /\ ef/efg.7
-./ ab/c"d/efg.7
+./ ab /c' d/ ef"g.7
 ./ ab/c"d/ef g.7
+./ ab/c"d/efg.7
 ./2-col.txt.7
+./a b/cd / ef/efg.7
 ./b/bar.7
 ./b/foo.7
-./ ab /c' d/ ef"g.7
-./a b/cd / ef/efg.7
 ### Test --workdir ...
 ./2-col.txt.1
 ### Test --wd ...
@@ -41,13 +41,13 @@ echo >./b/foo.3
 echo >./\ ab\ /c\'\ d/\ ef\"g.3
 echo >./2-col.txt.3
 echo >./a\ b/cd\ /\ ef/efg.3
+./ ab /c' d/ ef"g.3
 ./ ab/c"d/ef g.3
 ./ ab/c"d/efg.3
-./b/bar.3
-./b/foo.3
-./ ab /c' d/ ef"g.3
 ./2-col.txt.3
 ./a b/cd / ef/efg.3
+./b/bar.3
+./b/foo.3
 ### Test --wd tmpdir
 echo >2-col.txt.4
 ./2-col.txt.4
@@ -59,10 +59,10 @@ echo >./b/foo.5
 echo >./\ ab\ /c\'\ d/\ ef\"g.5
 echo >./2-col.txt.5
 echo >./a\ b/cd\ /\ ef/efg.5
-./2-col.txt.5
+./ ab /c' d/ ef"g.5
 ./ ab/c"d/ef g.5
 ./ ab/c"d/efg.5
-./b/foo.5
-./b/bar.5
-./ ab /c' d/ ef"g.5
+./2-col.txt.5
 ./a b/cd / ef/efg.5
+./b/bar.5
+./b/foo.5

@@ -1,17 +1,21 @@
 #!/bin/bash
 
+MYSQL_ADMIN_DBURL=mysql://tange:tange@
+
 # Setup
-sql mysql://root@ "drop user 'sqlunittest'@'localhost'"
-sql mysql://root@ DROP DATABASE sqlunittest;
-sql mysql://root@ CREATE DATABASE sqlunittest;
-sql mysql://root@ "CREATE USER 'sqlunittest'@'localhost' IDENTIFIED BY 'CB5A1FFFA5A';"
-sql mysql://root@ "GRANT ALL PRIVILEGES ON sqlunittest.* TO 'sqlunittest'@'localhost';"
+sql $MYSQL_ADMIN_DBURL "drop user 'sqlunittest'@'localhost'"
+sql $MYSQL_ADMIN_DBURL DROP DATABASE sqlunittest;
+sql $MYSQL_ADMIN_DBURL CREATE DATABASE sqlunittest;
+sql $MYSQL_ADMIN_DBURL "CREATE USER 'sqlunittest'@'localhost' IDENTIFIED BY 'CB5A1FFFA5A';"
+sql $MYSQL_ADMIN_DBURL "GRANT ALL PRIVILEGES ON sqlunittest.* TO 'sqlunittest'@'localhost';"
+
+MYSQL_TEST_DBURL=mysql://sqlunittest:CB5A1FFFA5A@
 
 echo '### Test reading sql from url command line'
-echo | sql "mysql:///tange?SELECT 'Yes it works' as 'Test reading SQL from command line';"
+echo | sql "$MYSQL_TEST_DBURL/?SELECT 'Yes it works' as 'Test reading SQL from command line';"
 
 echo '### Test reading sql from url command line %-quoting'
-echo | sql "mysql:///tange?SELECT 'Yes it%20works' as 'Test%20%-quoting%20SQL from command line';"
+echo | sql "$MYSQL_TEST_DBURL/?SELECT 'Yes it%20works' as 'Test%20%-quoting%20SQL from command line';"
 
 echo "### Test .sql/aliases with url on commandline"
 echo :sqlunittest mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest >> ~/.sql/aliases

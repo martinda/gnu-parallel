@@ -51,13 +51,13 @@ Error:
 sql [-hnr] [--table-size] [--db-size] [-p pass-through] [-s string] dburl [command]
 ### Test oracle with multiple arguments on the command line
 
-'ARG2'
-------------
+'ARG
+----
 arg2
 
 
-'ARG3'
-------------
+'ARG
+----
 arg3
 
 ### Test oracle with \n arguments on the command line

@@ -78,7 +78,7 @@ parallel: Warning: --cleanup ignored as there are no remote --sshlogin.
 9
 10
 ### Check forced number of CPUs being respected
-alpha
+hk
 vm1
 vm1
 vm1
@@ -88,16 +88,16 @@ vm1
 vm1
 vm1
 vm1
-alpha
-alpha
-alpha
-alpha
-alpha
-alpha
-alpha
-alpha
-alpha
-alpha
+hk
+hk
+hk
+hk
+hk
+hk
+hk
+hk
+hk
+hk
 ### Check more than 9 simultaneous sshlogins
 1
 2
