@@ -606,7 +606,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20121022;
+    $Global::version = 20121023;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2335,7 +2335,7 @@ sub swap_activity {
 	# swap_in and swap_out on GNU/Linux is $7 and $8
 	# swap_in and swap_out on Mac is $10 and $11
 	$swap_activity = q[ { vmstat 1 2 2> /dev/null || vm_stat 1; } | ].
-	    q[ awk 'NR!=4{next} NF==16{print $7*$8} NF==11{print $10*$11} {exit}' ];
+	    q[ awk 'NR!=4{next} NF==17||NF==16{print $7*$8} NF==11{print $10*$11} {exit}' ];
         if($self->{'string'} ne ":") {
             $swap_activity = $self->sshcommand() . " " . $self->serverlogin() . " " .
 		::shell_quote_scalar($swap_activity);
