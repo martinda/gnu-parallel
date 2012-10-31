@@ -569,7 +569,7 @@ sub load_status_linux {
 	close IN;
     } elsif (open(IN,"uptime|")) {
 	my $upString = <IN>;
-	if($upString =~ m/average.\s*(\d+\.\d+)/) {
+	if($upString =~ m/averages?.\s*(\d+\.\d+)/) {
 	    $loadavg = $1;
 	} else {
 	    ::die_bug("uptime");
