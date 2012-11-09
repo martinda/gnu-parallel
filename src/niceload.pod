@@ -7,7 +7,8 @@ niceload - slow down a program when the load average is above a certain limit
 =head1 SYNOPSIS
 
 B<niceload> [-v] [-h] [-n nice] [-I io] [-L load] [-M mem] [-N]
-[-t time] [-s time|-f factor] ( command | -p PID )
+[--sensor program] [-t time] [-s time|-f factor] ( command | -p PID )
+
 
 =head1 DESCRIPTION
 
@@ -129,6 +130,19 @@ $, >, and " that should not be interpreted by the shell.
 
 Run limit. The running program will be slowed down if the system is
 above the limit. See: B<--io>, B<--load>, B<--mem>, B<--noswap>.
+
+
+=item B<--sensor> I<sensor program> (alpha testing)
+
+Read sensor. Use I<sensor program> to read a sensor.
+
+This will keep the CPU temperature below 80 deg C on GNU/Linux:
+
+  niceload -l 80000 -f 0.001 --sensor 'sort -n /sys/devices/platform/coretemp*/temp*_input' gzip *
+
+This will stop if the disk space < 100000.
+
+  niceload -H -l -100000 --sensor "df . | awk '{ print \$4 }'" echo
 
 
 =item B<--start-io> I<iolimit>
