@@ -2,7 +2,9 @@
 tange@redhat9
 tange@centos3
 tange@centos5
+tange@freebsd7
 ### bug #37589: Red Hat 9 (Shrike) perl v5.8.0 built for i386-linux-thread-multi error
 centos3.tange.dk	OK_if_no_perl_warnings
 centos5.tange.dk	OK_if_no_perl_warnings
+freebsd7.tange.dk	OK_if_no_perl_warnings
 redhat9.tange.dk	OK_if_no_perl_warnings
