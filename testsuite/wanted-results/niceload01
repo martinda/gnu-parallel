@@ -7,11 +7,6 @@ OK--runmem
 ### -N and --noswap. Must give 0
 -N 0
 --noswap 0
-### --soft -f and test if child is actually suspended and thus takes longer
-1000000 1000000 6888896
-This should finish first
-1000000 1000000 6888896
-This should finish last
 ### -H and --hard
 OK-l9.9
 OK-l9
