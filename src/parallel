@@ -208,7 +208,7 @@ if($::opt_nonall or $::opt_onall) {
 	     ((defined $::opt_D) ? "-D" : ""),
 	     ((defined $::opt_timeout) ? "--timeout ".$::opt_timeout : ""),
 	     ((defined $::opt_plain) ? "--plain" : ""),
-	     ((defined @::opt_env) ? map { "--env ".::shell_quote_scalar($_) } @::opt_env : ""),
+	     (@::opt_env ? map { "--env ".::shell_quote_scalar($_) } @::opt_env : ""),
 	);
     ::debug("| $0 $options\n");
     open(my $parallel_fh, "|-", "$0 -j0 $options") ||
