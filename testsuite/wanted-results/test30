@@ -19,7 +19,6 @@ Computers / CPU cores / Max jobs to run
 1:local / 2 / 1
 
 Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
-local:1/0/100%/0.0s ETA: 0s 0left 0.00avg  local:0/1/100%/1.0s 
 ### --timeout --onall on remote machines: 2*slept 1, 2 jobs failed
 slept 1
 slept 1
