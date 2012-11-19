@@ -216,7 +216,7 @@ parallel -kq echo {\#} ::: a b
 parallel -kq echo {\\#} ::: a b
 
 echo '### Test long commands do not take up all memory'
-seq 1 100 | parallel -j0 -qv perl -e '$r=rand(shift);for($f=0;$f<$r;$f++){$a="a"x100};print shift,"\n"' 10000 | sort
+seq 1 100 | parallel -j0 -qv perl -e '$r=rand(shift);for($f=0;$f<$r;$f++){$a="a"x100};print shift,"\n"' 10000 2>/dev/null | sort
 
 echo '### Test 0-arguments'
 seq 1 2 | parallel -k -n0 echo n0
@@ -246,7 +246,7 @@ echo '### Test distribute arguments at EOF to 5 jobslots'
 seq 1 92 | parallel -j+3 -kX -s 100 echo
 
 echo '### Test distribute arguments at EOF to infinity jobslots'
-seq 1 92 | parallel -j0 -kX -s 100 echo
+seq 1 92 | parallel -j0 -kX -s 100 echo 2>/dev/null
 
 echo '### Test -N is not broken by distribution - single line'
 seq 9 | parallel  -N 10  echo
