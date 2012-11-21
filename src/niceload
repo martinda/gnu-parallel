@@ -59,6 +59,8 @@ if(not defined $::opt_run_mem) { $::opt_run_mem = $::opt_mem; }
 if(not defined $::opt_start_noswap) { $::opt_start_noswap = $::opt_noswap; }
 if(not defined $::opt_run_noswap) { $::opt_run_noswap = $::opt_noswap; }
 
+if(defined $::opt_load) { multiply_binary_prefix($::opt_load); }
+
 my $limit = Limit->new();
 my $process = Process->new($::opt_nice,@ARGV);
 if($::opt_pid) {
@@ -88,6 +90,37 @@ while($process->is_alive()) {
 }
 
 exit($::exitstatus);
+
+sub multiply_binary_prefix {
+    # Evalualte numbers with binary prefix
+    # k=10^3, m=10^6, g=10^9, t=10^12, p=10^15, e=10^18, z=10^21, y=10^24
+    # K=2^10, M=2^20, G=2^30, T=2^40, P=2^50, E=2^70, Z=2^80, Y=2^80
+    # Ki=2^10, Mi=2^20, Gi=2^30, Ti=2^40, Pi=2^50, Ei=2^70, Zi=2^80, Yi=2^80
+    # ki=2^10, mi=2^20, gi=2^30, ti=2^40, pi=2^50, ei=2^70, zi=2^80, yi=2^80
+    # 13G = 13*1024*1024*1024 = 13958643712
+    my $s = shift;
+    $s =~ s/k/*1000/g;
+    $s =~ s/M/*1000*1000/g;
+    $s =~ s/G/*1000*1000*1000/g;
+    $s =~ s/T/*1000*1000*1000*1000/g;
+    $s =~ s/P/*1000*1000*1000*1000*1000/g;
+    $s =~ s/E/*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/Z/*1000*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/Y/*1000*1000*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/X/*1000*1000*1000*1000*1000*1000*1000*1000*1000/g;
+
+    $s =~ s/Ki?/*1024/gi;
+    $s =~ s/Mi?/*1024*1024/gi;
+    $s =~ s/Gi?/*1024*1024*1024/gi;
+    $s =~ s/Ti?/*1024*1024*1024*1024/gi;
+    $s =~ s/Pi?/*1024*1024*1024*1024*1024/gi;
+    $s =~ s/Ei?/*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/Zi?/*1024*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/Yi?/*1024*1024*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/Xi?/*1024*1024*1024*1024*1024*1024*1024*1024*1024/gi;
+    $s = eval $s;
+    return $s;
+}
 
 sub get_options_from_array {
     # Run GetOptions on @array
@@ -226,24 +259,6 @@ sub version {
 	       "",
 	       "Web site: http://www.gnu.org/software/parallel\n"
 	);
-}
-
-
-sub multiply_binary_prefix {
-    # Evalualte numbers with binary prefix
-    # 13G = 13*1024*1024*1024 = 13958643712
-    my $s = shift;
-    $s =~ s/Ki?/*1024/gi;
-    $s =~ s/Mi?/*1024*1024/gi;
-    $s =~ s/Gi?/*1024*1024*1024/gi;
-    $s =~ s/Ti?/*1024*1024*1024*1024/gi;
-    $s =~ s/Pi?/*1024*1024*1024*1024*1024/gi;
-    $s =~ s/Ei?/*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/Zi?/*1024*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/Yi?/*1024*1024*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/Xi?/*1024*1024*1024*1024*1024*1024*1024*1024*1024/gi;
-    $s = eval $s;
-    return $s;
 }
 
 
@@ -545,7 +560,7 @@ sub sleep_while_running {
 sub nonblockGetLines {
     # An non-blocking filehandle read that returns an array of lines read
     # Returns:  ($eof,@lines)
-
+    # Example: --sensor 'vmstat 1 | perl -ane '\''$|=1; 4..0 and print $F[8],"\n"'\'
     my ($fh,$timeout) = @_;
 
     $timeout = 0 unless defined $timeout;
@@ -559,54 +574,66 @@ sub nonblockGetLines {
     return unless vec($rfd,fileno($fh),1);
     my $buf = '';
     my $n = sysread($fh,$buf,1024*1024);
+
+    my $eof = eof($fh);
     # If we're done, make sure to send the last unfinished line
-    return (1,$::nonblockGetLines_last{$fh}) unless $n;
+    return ($eof,$::nonblockGetLines_last{$fh}) unless $n;
     # Prepend the last unfinished line
     $buf = $::nonblockGetLines_last{$fh}.$buf;
     # And save any newly unfinished lines
     $::nonblockGetLines_last{$fh} =
         (substr($buf,-1) !~ /[\r\n]/ && $buf =~ s/([^\r\n]*)$//)
 	? $1 : '';
-    $buf ? (0,split(/\n/,$buf)) : (0);
+    $buf ? ($eof,split(/\n/,$buf)) : ($eof);
 }
 
-# --sensor 'vmstat 1 | perl -ane '\''$|=1; 4..0 and print $F[8],"\n"'\'
+sub read_sensor {
+    my $self = shift;
+    my $fh = $self->{'sensor_fh'};
+    if(not $fh) {
+	# Start the sensor
+	open($fh, "-|", $::opt_sensor) || ::die_bug("Cannot open: $::opt_sensor");
+	$self->{'sensor_fh'} = $fh;
+    }
+    # Read as much as we can (non_block)
+    my ($eof,@lines) = nonblockGetLines($fh);
+    
+    # new load = last full line
+    foreach my $line ( @lines ) {
+	if(defined $line) {
+	    print "Pipe saw: $eof [$line]\n";
+	    $Global::last_sensor_reading = $line;
+	}
+    }
+    if($eof) { undef($self->{'sensor_fh'}); }
+
+    return $Global::last_sensor_reading;
+}
 
 sub load_status {
     # Returns:
     #   loadavg or sensor measurement
     my $self = shift;
     if($::opt_sensor) {
-	my $fh = $self->{'sensor_fh'};
-	if(not defined $fh) {
-	    # Start the sensor
-	    ::debug("start: $::opt_sensor\n");
-	    open($fh, "-|", $::opt_sensor) || ::die_bug("Cannot open: $::opt_sensor");
-	    $self->{'sensor_fh'} = $fh;
-	}
-	::debug("sensor: $::opt_sensor");
-	# Read as much as we can (block for up to 0.02 seconds)
-	my ($eof,@lines) = nonblockGetLines($fh,0.2);
-	my $newval = pop @lines;
-	::debug(" = $newval\n");
-	if(defined $newval) {
-	    $newval =~ s/\D*([0-9.]*)(\D.*)?$/$1/;
-	    $self->{'load_status'} = undef_as_zero($newval);
-	}
-	if($eof) { 
-	    close($fh);
-	    undef $self->{'sensor_fh'};
+	if(not defined $self->{'load_status'} or
+	   $self->{'load_status_cache_time'} + $self->{'recheck'} < time) {
+	    $self->{'load_status'} = $self->read_sensor();
+	    while (not defined $self->{'load_status'}) {
+		sleep 1;
+		$self->{'load_status'} = $self->read_sensor();
+	    } 
+	    $self->{'load_status_cache_time'} = time;
 	}
     } else {
 	# Normal load avg
 	# Cache for some seconds
 	if(not defined $self->{'load_status'} or
-	   $self->{'load_status_cache_time'}+$self->{'recheck'} < time) {
+	   $self->{'load_status_cache_time'} + $self->{'recheck'} < time) {
 	    $self->{'load_status'} = load_status_linux();
 	    $self->{'load_status_cache_time'} = time;
 	}
     }
-    ::debug("load_status: $self->{'load_status'}\n");
+    ::debug("load_status: ".$self->{'load_status'}."\n");
     return $self->{'load_status'};
 }
 
@@ -629,7 +656,7 @@ sub load_status_linux {
 	close IN;
     } elsif (open(IN,"uptime|")) {
 	my $upString = <IN>;
-	if($upString =~ m/average.\s*(\d+\.\d+)/) {
+	if($upString =~ m/averages?.\s*(\d+\.\d+)/) {
 	    $loadavg = $1;
 	} else {
 	    ::die_bug("uptime");

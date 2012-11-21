@@ -2395,7 +2395,7 @@ sub loadavg {
         my $uptime_out = <$uptime_fh>;
         close $uptime_fh;
         # load average: 0.76, 1.53, 1.45
-        if($uptime_out =~ /load average: (\d+.\d+)/) {
+        if($uptime_out =~ /load averages?: (\d+.\d+)/) {
             $self->{'loadavg'} = $1;
             ::debug("New loadavg: ".$self->{'loadavg'});
         } else {
