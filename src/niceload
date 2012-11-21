@@ -24,7 +24,7 @@
 use strict;
 use Getopt::Long;
 $Global::progname="niceload";
-$Global::version = 20121022;
+$Global::version = 20121122;
 Getopt::Long::Configure("bundling","require_order");
 get_options_from_array(\@ARGV) || die_usage();
 if($::opt_version) {
@@ -109,6 +109,7 @@ sub get_options_from_array {
 	 "factor|f=s" => \$::opt_factor,
 	 "hard|H" => \$::opt_hard,
 	 "soft|S" => \$::opt_soft,
+	 "sensor=s" => \$::opt_sensor,
 
 	 "si|sio|startio|start-io=s" => \$::opt_start_io,
 	 "ri|rio|runio|run-io=s" => \$::opt_run_io,
@@ -541,18 +542,77 @@ sub sleep_while_running {
 }
 
 
+sub nonblockGetLines {
+    # An non-blocking filehandle read that returns an array of lines read
+    # Returns:  ($eof,@lines)
+
+    my ($fh,$timeout) = @_;
+
+    $timeout = 0 unless defined $timeout;
+    my $rfd = '';
+    $::nonblockGetLines_last{$fh} = ''
+        unless defined $::nonblockGetLines_last{$fh};
+
+    vec($rfd,fileno($fh),1) = 1;
+    return unless select($rfd, undef, undef, $timeout)>=0;
+    # I'm not sure the following is necessary?
+    return unless vec($rfd,fileno($fh),1);
+    my $buf = '';
+    my $n = sysread($fh,$buf,1024*1024);
+    # If we're done, make sure to send the last unfinished line
+    return (1,$::nonblockGetLines_last{$fh}) unless $n;
+    # Prepend the last unfinished line
+    $buf = $::nonblockGetLines_last{$fh}.$buf;
+    # And save any newly unfinished lines
+    $::nonblockGetLines_last{$fh} =
+        (substr($buf,-1) !~ /[\r\n]/ && $buf =~ s/([^\r\n]*)$//)
+	? $1 : '';
+    $buf ? (0,split(/\n/,$buf)) : (0);
+}
+
+# --sensor 'vmstat 1 | perl -ane '\''$|=1; 4..0 and print $F[8],"\n"'\'
+
 sub load_status {
     # Returns:
-    #   loadavg
+    #   loadavg or sensor measurement
     my $self = shift;
-    # Cache for some seconds
-    if(not defined $self->{'load_status'} or
-       $self->{'load_status_cache_time'}+$self->{'recheck'} < time) {
-	$self->{'load_status'} = load_status_linux();
-	$self->{'load_status_cache_time'} = time;
+    if($::opt_sensor) {
+	my $fh = $self->{'sensor_fh'};
+	if(not defined $fh) {
+	    # Start the sensor
+	    ::debug("start: $::opt_sensor\n");
+	    open($fh, "-|", $::opt_sensor) || ::die_bug("Cannot open: $::opt_sensor");
+	    $self->{'sensor_fh'} = $fh;
+	}
+	::debug("sensor: $::opt_sensor");
+	# Read as much as we can (block for up to 0.02 seconds)
+	my ($eof,@lines) = nonblockGetLines($fh,0.2);
+	my $newval = pop @lines;
+	::debug(" = $newval\n");
+	if(defined $newval) {
+	    $newval =~ s/\D*([0-9.]*)(\D.*)?$/$1/;
+	    $self->{'load_status'} = undef_as_zero($newval);
+	}
+	if($eof) { 
+	    close($fh);
+	    undef $self->{'sensor_fh'};
+	}
+    } else {
+	# Normal load avg
+	# Cache for some seconds
+	if(not defined $self->{'load_status'} or
+	   $self->{'load_status_cache_time'}+$self->{'recheck'} < time) {
+	    $self->{'load_status'} = load_status_linux();
+	    $self->{'load_status_cache_time'} = time;
+	}
     }
     ::debug("load_status: $self->{'load_status'}\n");
     return $self->{'load_status'};
+}
+
+sub undef_as_zero {
+    my $a = shift;
+    return $a ? $a : 0;
 }
 
 
