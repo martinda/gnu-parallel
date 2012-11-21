@@ -445,7 +445,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var> (alpha testing)
+=item B<--env> I<var> (beta testing)
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -807,7 +807,7 @@ defaults to '\n'. To have no record separator use B<--recend "">.
 B<--files> is often used with B<--pipe>.
 
 
-=item B<--plain> (alpha testing)
+=item B<--plain> (beta testing)
 
 Ignore any B<--profile>, $PARALLEL, ~/.parallel/config, and
 B<--tollef> to get full control on the command line (used by GNU
@@ -981,9 +981,9 @@ it to the command.
 Only used with B<--pipe>.
 
 
-=item B<--results> I<prefix> (alpha testing)
+=item B<--results> I<prefix> (beta testing)
 
-=item B<--res> I<prefix> (alpha testing)
+=item B<--res> I<prefix> (beta testing)
 
 Results in files named by tab separated arguments. Save the output
 into files. The file names will be prefixed with I<prefix> which can

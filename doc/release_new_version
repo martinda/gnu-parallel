@@ -178,6 +178,9 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* niceload --sensor makes it possible to use a program to control if a
+  program should be suspended.
+
 * GNU Parallel was part of the justification for Nordic Free Software
   Award 2012
   https://fsfe.org/news/2012/news-20121112-01.html

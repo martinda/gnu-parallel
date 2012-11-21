@@ -472,8 +472,8 @@ because it is POSIX compliant for @strong{xargs} while this option is not.
 If @emph{eof-str} is omitted, there is no end of file string.  If neither
 @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
-@item @strong{--env} @emph{var} (alpha testing)
-@anchor{@strong{--env} @emph{var} (alpha testing)}
+@item @strong{--env} @emph{var} (beta testing)
+@anchor{@strong{--env} @emph{var} (beta testing)}
 
 Copy environment variable @emph{var}. This will copy @emph{var} to the
 environment that the command is run in. This is especially useful for
@@ -863,8 +863,8 @@ defaults to '\n'. To have no record separator use @strong{--recend ""}.
 
 @strong{--files} is often used with @strong{--pipe}.
 
-@item @strong{--plain} (alpha testing)
-@anchor{@strong{--plain} (alpha testing)}
+@item @strong{--plain} (beta testing)
+@anchor{@strong{--plain} (beta testing)}
 
 Ignore any @strong{--profile}, $PARALLEL, ~/.parallel/config, and
 @strong{--tollef} to get full control on the command line (used by GNU
@@ -1046,11 +1046,11 @@ it to the command.
 
 Only used with @strong{--pipe}.
 
-@item @strong{--results} @emph{prefix} (alpha testing)
-@anchor{@strong{--results} @emph{prefix} (alpha testing)}
+@item @strong{--results} @emph{prefix} (beta testing)
+@anchor{@strong{--results} @emph{prefix} (beta testing)}
 
-@item @strong{--res} @emph{prefix} (alpha testing)
-@anchor{@strong{--res} @emph{prefix} (alpha testing)}
+@item @strong{--res} @emph{prefix} (beta testing)
+@anchor{@strong{--res} @emph{prefix} (beta testing)}
 
 Results in files named by tab separated arguments. Save the output
 into files. The file names will be prefixed with @emph{prefix} which can
