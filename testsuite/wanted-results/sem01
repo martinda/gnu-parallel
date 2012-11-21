@@ -20,28 +20,6 @@
 19
 20
 done
-### Test default id = --id `tty` and --semaphorename
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-done
 ### Test semaphore 2 jobs running simultaneously
 job1a 1
 job2a 2
@@ -61,16 +39,16 @@ done
 ### Test similar example as from man page - run 2 jobs simultaneously
 Expect done: 1 2 5 3 4
 Scheduling 5
-Scheduling 1
 starting 5
-Scheduling 2
+Scheduling 1
 starting 1
+Scheduling 2
 done 1
-Scheduling 3
 starting 2
+Scheduling 3
 done 2
-Scheduling 4
 starting 3
+Scheduling 4
 done 5
 starting 4
 done 3

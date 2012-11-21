@@ -1,12 +1,20 @@
 #!/bin/bash
 
+# Argument can be substring of tests (such as 'local')
+
 export LANG=C
 SHFILE=/tmp/unittest-parallel.sh
 
-# Try a failing test twice.
+# Run a failing test once
 ls -t tests-to-run/*${1}*.sh \
-| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2:' \
+| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2: ' \
 >$SHFILE
+
+#  # Try a failing test thrice
+#  ls -t tests-to-run/*${1}*.sh \
+#  | perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2: ' \
+#  >$SHFILE
+
 
 mkdir -p actual-results
 stdout sh -x $SHFILE | tee testsuite.log

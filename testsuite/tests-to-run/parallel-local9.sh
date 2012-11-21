@@ -12,7 +12,7 @@ echo '### Test --spreadstdin - more procs than args';
   cat /tmp/parallel.ss.*;
 
 echo '### Test --spreadstdin - more args than procs'; 
-  rm /tmp/parallel.ss2.*; 
+  rm -f /tmp/parallel.ss2.*; 
   seq 1 10 | stdout parallel -j 5 --spreadstdin 'cat >/tmp/parallel.ss2.$PARALLEL_SEQ' >/dev/null; 
   cat /tmp/parallel.ss2.*
 

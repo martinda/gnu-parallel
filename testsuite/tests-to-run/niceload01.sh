@@ -8,7 +8,7 @@ echo
 MEMAVAIL=$(free | perl -ane '/buffers.cache:/ and print $F[3]')
 while [ $MEMAVAIL -gt 1000000 ] ; do
   BS=$(echo $MEMAVAIL/10 | bc)
-  (seq 1 10 | parallel -j0 -N0 timeout 10 nice dd if=/dev/zero bs=${BS}k '|' wc -c >/dev/null &)
+  (seq 1 10 | parallel -j0 -N0 timeout 15 nice dd if=/dev/zero bs=${BS}k '|' wc -c >/dev/null &)
   sleep 2
   MEMAVAIL=$(free | perl -ane '/buffers.cache:/ and print $F[3]')
 done

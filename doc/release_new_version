@@ -171,48 +171,40 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20121022 ('Hanne Vilmann') released
+Subject: GNU Parallel 20121122 ('Barack') released
 
-GNU Parallel 20121022 ('Hanne Vilmann') has been released. It is
+GNU Parallel 20121122 ('Barack') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* --results structures output files so they can be imported using
-  Pandas (http://pandas.pydata.org/). Useful when doing simulations to
-  select output from some arguments.
+* GNU Parallel was part of the justification for Nordic Free Software
+  Award 2012
+  https://fsfe.org/news/2012/news-20121112-01.html
 
-* Use --env to transfer environment variables through ssh to remote
-  machines.
+* Dateien schneller packen und konvertieren mit GNU parallel
+  http://www.linux-community.de/Archiv/Tipp-der-Woche/Dateien-schneller-packen-und-konvertieren-mit-GNU-parallel
 
-* GNU Parallel is accepted for Ubuntu Quantal.
-  http://packages.ubuntu.com/quantal/parallel
+* Processing images from Lunar Reconnaissance Orbiter Narrow Angle
+  Camera http://lunokhod.org/?p=774
 
-* GNU Parallel was requested for OpenSUSE (go vote!)
-  https://features.opensuse.org/314461
+* GNU Parallel is used in types2: Type and Hapax Accumulation Curves
+  http://www.cs.helsinki.fi/u/josuomel/types2/
 
-* Kneth's Korner: Map/Reduce and GNU Parallel
-  http://kenneth.geisshirt.dk/2012/10/mapreduce-and-gnu-parallel.html
+* GNU Parallel used in: A Hybrid Factor Analysis and Probabilistic
+  PCA-based system for Dictionary Learning and Encoding for Robust
+  Speaker Recognition
+  http://www.superlectures.com/odyssey2012/lecture.php?id=8&lang=en
+  http://www.cse.iitm.ac.in/~mrsri/ppca.pdf
 
-* Blog post in Japanese by Siguniang.
-  https://siguniang.wordpress.com/2012/09/09/notes-on-gnu-parallel-the-command-line-power-tool/
-  (Siguniang mentions the logo is called 'The Cafe Wall Illusion')
-  http://www.michaelbach.de/ot/ang_cafewall/index.html
+* Mapreduce avec parallel, cat et une redirection
+  http://datacratic.com/site/blog/mapreduce-avec-parallel-cat-et-une-redirection
 
-* GNU Parallel, where have you been all my life?
-  http://ssdigit.nothingisreal.com/2012/09/gnu-parallel-where-have-you-been-all-my.html
+* GNU Parallel for Large Batches of Small Jobs
+  https://support.scinet.utoronto.ca/wiki/images/7/7b/Tech-talk-gnu-parallel.pdf
 
-* Reference-free ddRADseq analysis tools uses GNU Parallel.
-  https://github.com/brantp/rtd#readme
-
-* When bash just isn’t quick enough.
-  https://soimasysadmin.wordpress.com/2012/08/15/gnu-parallel-when-bash-just-isnt-quick-enough/
-
-* Using GNU Parallel to Package Multiple Jobs in a Single PBS Job.
-  http://www.nas.nasa.gov/hecc/support/kb/Using-GNU-Parallel-to-Package-Multiple-Jobs-in-a-Single-PBS-Job_303.html
-
-* GNU Parallel Notes.
-  http://xed.ch/help/parallel.html
+* GNU Parallel used in black belt tip (8:50-10:12)
+  https://aws.amazon.com/apac/awspodcast/episode20/
 
 * Bug fixes and man page updates.
 

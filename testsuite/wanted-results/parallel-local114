@@ -168,7 +168,7 @@ II IIII
 /tmp/parallel_results_test/testBstdout	a	I	b	IIII
 /tmp/parallel_results_test/testBstdout	a	II	b	III
 /tmp/parallel_results_test/testBstdout	a	II	b	IIII
-### Test --results --header :
+### Test --results --header : named
 I III
 I IIII
 II III
