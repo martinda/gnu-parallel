@@ -939,7 +939,7 @@ sub read_options {
 	}
 	if($::opt_shebang_wrap) {
 	    # exec myself to split $ARGV[0] into separate fields
-	    my $parser = shell_quote_scalar(shift @ARGV);
+	    my $parser = shift @ARGV;
 	    my $scriptfile = shell_quote_scalar(shift @ARGV);
 	    exec "$0 $parser $scriptfile ::: @ARGV";
 	}
