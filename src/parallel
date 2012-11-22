@@ -938,9 +938,9 @@ sub read_options {
 	    exec "$0 --skip-first-line -a $argfile @ARGV";
 	}
 	if($::opt_shebang_wrap) {
-	    # exec myself to split $ARGV[0] into separate fields
 	    my $parser = shift @ARGV;
 	    my $scriptfile = shell_quote_scalar(shift @ARGV);
+	    # exec myself to split $ARGV[0] into separate fields
 	    exec "$0 $parser $scriptfile ::: @ARGV";
 	}
     }
