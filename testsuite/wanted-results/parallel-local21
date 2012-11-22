@@ -1,0 +1,24 @@
+### Test basic --shebang-wrap
+Shebang from perl with args arg1
+Shebang from perl with args arg2
+### Same as
+Shebang from perl with args arg1
+Shebang from perl with args arg2
+### Test --shebang-wrap with parser options
+Shebang from perl with args 
+1
+Shebang from perl with args 
+2
+Shebang from perl with args 
+11
+Shebang from perl with args 
+12
+### Same as
+Shebang from perl with args 
+1
+Shebang from perl with args 
+2
+Shebang from perl with args 
+11
+Shebang from perl with args 
+12

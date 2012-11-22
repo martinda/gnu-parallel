@@ -923,13 +923,26 @@ sub read_options {
     #   @ARGV without --options
     # This must be done first as this may exec myself
     if(defined $ARGV[0] and ($ARGV[0]=~/^--shebang / or
-                             $ARGV[0]=~/^--hashbang /)) {
+			     $ARGV[0]=~/^--shebang-wrap / or
+			     $ARGV[0]=~/^--hashbang /)) {
         # Program is called from #! line in script
-        $ARGV[0]=~s/^--shebang *//; # remove --shebang if it is set
-        $ARGV[0]=~s/^--hashbang *//; # remove --hashbang if it is set
-        my $argfile = shell_quote_scalar(pop @ARGV);
-        # exec myself to split $ARGV[0] into separate fields
-	exec "$0 --skip-first-line -a $argfile @ARGV";
+	# remove --shebang-wrap if it is set
+        $::opt_shebang_wrap = ($ARGV[0]=~s/^--shebang-?wrap *//);
+	# remove --shebang if it is set
+	$::opt_shebang = ($ARGV[0]=~s/^--shebang *//);
+	# remove --hashbang if it is set
+        $::opt_shebang .= ($ARGV[0]=~s/^--hashbang *//);
+	if($::opt_shebang) {
+	    my $argfile = shell_quote_scalar(pop @ARGV);
+	    # exec myself to split $ARGV[0] into separate fields
+	    exec "$0 --skip-first-line -a $argfile @ARGV";
+	}
+	if($::opt_shebang_wrap) {
+	    # exec myself to split $ARGV[0] into separate fields
+	    my $parser = shell_quote_scalar(shift @ARGV);
+	    my $scriptfile = shell_quote_scalar(shift @ARGV);
+	    exec "$0 $parser $scriptfile ::: @ARGV";
+	}
     }
 
     Getopt::Long::Configure("bundling","pass_through");
