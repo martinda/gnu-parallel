@@ -47,9 +47,9 @@ print "Shebang from perl with args @ARGV\n";
 EOF
 
 chmod 755 /tmp/pipe--shebang-wrap
-# Suboptimal
+echo Suboptimal
 /tmp/pipe--shebang-wrap :::: /tmp/in12 /tmp/in45
-# Optimal
+echo Optimal
 /tmp/pipe--shebang-wrap /tmp/in12 /tmp/in45
 echo "### Same as"
 parallel --pipe /usr/bin/perl\ -p /tmp/pipe--shebang-wrap :::: /tmp/in12 /tmp/in45

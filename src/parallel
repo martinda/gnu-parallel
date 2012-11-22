@@ -574,6 +574,7 @@ sub options_hash {
 	 "wait" => \$::opt_wait,
 	 # Shebang #!/usr/bin/parallel --shebang
 	 "shebang|hashbang" => \$::opt_shebang,
+	 "--internal-pipe-means-argfiles" => \$::opt_internal_pipe_means_argfiles,
 	 "Y" => \$::opt_retired,
          "skip-first-line" => \$::opt_skip_first_line,
 	 "header=s" => \$::opt_header,
@@ -606,7 +607,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20121122;
+    $Global::version = 20121123;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -941,7 +942,7 @@ sub read_options {
 	    my $parser = shift @ARGV;
 	    my $scriptfile = shell_quote_scalar(shift @ARGV);
 	    # exec myself to split $ARGV[0] into separate fields
-	    exec "$0 $parser $scriptfile ::: @ARGV";
+	    exec "$0 --internal-pipe-means-argfiles $parser $scriptfile ::: @ARGV";
 	}
     }
 
@@ -1027,7 +1028,14 @@ sub read_args_from_command_line {
 		    push @group, $arg;
 		}
 	    }
-	    if($group eq $Global::arg_sep) {
+
+		if($group eq $Global::arg_file_sep
+		    or ($::opt_internal_pipe_means_argfiles and $::opt_pipe)
+		) {
+		# Group of file names on the command line.
+		# Append args into -a
+		push @::opt_a, @group;
+	    } elsif($group eq $Global::arg_sep) {
 		# Group of arguments on the command line.
 		# Put them into a file.
 		# Create argfile
@@ -1038,10 +1046,6 @@ sub read_args_from_command_line {
 		seek $outfh, 0, 0;
 		# Append filehandle to -a
 		push @::opt_a, $outfh;
-	    } elsif($group eq $Global::arg_file_sep) {
-		# Group of file names on the command line.
-		# Append args into -a
-		push @::opt_a, @group;
 	    } else {
 		::die_bug("Unknown command line group: $group");
 	    }
