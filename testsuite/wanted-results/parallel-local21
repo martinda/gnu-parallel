@@ -47,6 +47,7 @@ Shebang from perl with args
 Shebang from perl with args 
 5
 ### Test --shebang-wrap --pipe with parser options
+Suboptimal
 Shebang from perl with args 
 1
 Shebang from perl with args 
@@ -55,10 +56,15 @@ Shebang from perl with args
 4
 Shebang from perl with args 
 5
+Optimal
 Shebang from perl with args 
-/tmp/in12
+1
 Shebang from perl with args 
-/tmp/in45
+2
+Shebang from perl with args 
+4
+Shebang from perl with args 
+5
 ### Same as
 Shebang from perl with args 
 1
