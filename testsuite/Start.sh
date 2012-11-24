@@ -7,7 +7,7 @@ SHFILE=/tmp/unittest-parallel.sh
 
 # Run a failing test once
 ls -t tests-to-run/*${1}*.sh \
-| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2: ' \
+| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 || touch $1.sh:' \
 >$SHFILE
 
 #  # Try a failing test thrice

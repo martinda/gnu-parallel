@@ -55,7 +55,7 @@ if($Global::max_number_of_args) {
 my $command = "";
 if(@ARGV) {
     if($Global::quoting) {
-	$command = shell_quote(@ARGV);
+	$command = shell_quote_empty(@ARGV);
     } else {
 	$command = join(" ", @ARGV);
     }
@@ -574,7 +574,7 @@ sub options_hash {
 	 "wait" => \$opt::wait,
 	 # Shebang #!/usr/bin/parallel --shebang
 	 "shebang|hashbang" => \$opt::shebang,
-	 "--internal-pipe-means-argfiles" => \$opt::internal_pipe_means_argfiles,
+	 "internal-pipe-means-argfiles" => \$opt::internal_pipe_means_argfiles,
 	 "Y" => \$opt::retired,
          "skip-first-line" => \$opt::skip_first_line,
 	 "header=s" => \$opt::header,
@@ -607,7 +607,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20121123;
+    $Global::version = 20121124;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1075,6 +1075,16 @@ sub shell_quote {
     for my $a (@strings) {
         $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
         $a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
+    }
+    return wantarray ? @strings : "@strings";
+}
+
+sub shell_quote_empty {
+    my @strings = shell_quote(@_);
+    for my $a (@strings) {
+	if($a eq "") {
+	    $a = "''";
+	}
     }
     return wantarray ? @strings : "@strings";
 }

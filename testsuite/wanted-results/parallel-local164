@@ -3,3 +3,46 @@
 ### Test -k 4
 ### Test -k 2
 ### Test -k 1
+### Computing length of command line
+1 2
+11 1
+12 2
+3
+a_b_c_{4}
+a_b_c_d
+{4}
+### test08
+b
+d
+1
+10
+2
+3
+4
+5
+6
+7
+8
+9
+1
+10
+2
+3
+4
+5
+6
+7
+8
+9
+1
+10
+2
+3
+4
+5
+6
+7
+8
+9
+bug #37694: Empty string argument skipped when using --quote
+3
