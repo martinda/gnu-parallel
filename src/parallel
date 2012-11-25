@@ -924,7 +924,7 @@ sub read_options {
     #   @ARGV without --options
     # This must be done first as this may exec myself
     if(defined $ARGV[0] and ($ARGV[0]=~/^--shebang / or
-			     $ARGV[0]=~/^--shebang-wrap / or
+			     $ARGV[0]=~/^--shebang-?wrap / or
 			     $ARGV[0]=~/^--hashbang /)) {
         # Program is called from #! line in script
 	# remove --shebang-wrap if it is set
@@ -3553,6 +3553,7 @@ sub sshlogin_wrap {
 	    if($opt::workdir) {
 		$self->{'sshlogin_wrap'} =
 		    ($pre . "$sshcmd $serverlogin $parallel_env "
+		     . ::shell_quote_scalar("mkdir -p ".$self->workdir()."; ")
 		     . ::shell_quote_scalar("cd ".$self->workdir()." && ")
 		     . ::shell_quote_scalar($next_command_line).";".$post);
 	    } else {

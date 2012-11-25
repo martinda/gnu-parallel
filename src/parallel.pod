@@ -1159,6 +1159,55 @@ Use the replacement string I<replace-str> instead of B<{#}> for
 job sequence number.
 
 
+=item B<--shebang>
+
+=item B<--hashbang>
+
+GNU B<parallel> can be called as a shebang (#!) command as the first
+line of a script. The content of the file will be treated as
+inputsource.
+
+Like this:
+
+  #!/usr/bin/parallel --shebang -r traceroute
+
+  foss.org.my
+  debian.org
+  freenetproject.org
+
+B<--shebang> must be set as the first option.
+
+
+=item B<--shebang-wrap> (alpha testing)
+
+GNU B<parallel> can parallelize scripts by wrapping the shebang
+line. If the program can be run like this:
+
+  cat arguments | parallel the_program
+
+then the script can be changed to:
+
+  #!/usr/bin/parallel --shebang-wrap /the/original/parser --with-options
+
+E.g.
+
+  #!/usr/bin/parallel --shebang-wrap /usr/bin/python
+
+If the program can be run like this:
+
+  cat data | parallel --pipe the_program
+
+then the script can be changed to:
+
+  #!/usr/bin/parallel --shebang-wrap --pipe /the/original/parser --with-options
+
+E.g.
+
+  #!/usr/bin/parallel --shebang-wrap --pipe /usr/bin/perl -w
+
+B<--shebang-wrap> must be set as the first option.
+
+
 =item B<--shellquote>
 
 Does not run the command but quotes it. Useful for making quoted
@@ -1511,22 +1560,6 @@ Compare these two:
   parallel --xapply echo {1} {2} ::: 1 2 3 ::: a b c
 
 See also B<--header>.
-
-
-=item B<--shebang>
-
-=item B<--hashbang>
-
-GNU B<Parallel> can be called as a shebang (#!) command as the first line of a script. Like this:
-
-  #!/usr/bin/parallel --shebang -r traceroute
-
-  foss.org.my
-  debian.org
-  freenetproject.org
-
-For this to work B<--shebang> must be set as the first option.
-
 
 =back
 

@@ -1241,6 +1241,70 @@ See also: @strong{man sem}
 Use the replacement string @emph{replace-str} instead of @strong{@{#@}} for
 job sequence number.
 
+@item @strong{--shebang}
+@anchor{@strong{--shebang}}
+
+@item @strong{--hashbang}
+@anchor{@strong{--hashbang}}
+
+GNU @strong{Parallel} can be called as a shebang (#!) command as the first
+line of a script. The content of the file will be treated as
+inputsource.
+
+Like this:
+
+@verbatim
+  #!/usr/bin/parallel --shebang -r traceroute
+
+  foss.org.my
+  debian.org
+  freenetproject.org
+@end verbatim
+
+@strong{--shebang} must be set as the first option.
+
+@item @strong{--shebang-wrap}
+@anchor{@strong{--shebang-wrap}}
+
+GNU @strong{Parallel} can parallelize scripts by wrapping the shebang
+line. If the program can be run like this:
+
+@verbatim
+  cat arguments | parallel the_program
+@end verbatim
+
+then the script can be changed to:
+
+@verbatim
+  #!/usr/bin/parallel --shebang-wrap /the/original/parser --with-options
+@end verbatim
+
+E.g.
+
+@verbatim
+  #!/usr/bin/parallel --shebang-wrap /usr/bin/python
+@end verbatim
+
+If the program can be run like this:
+
+@verbatim
+  cat data | parallel --pipe the_program
+@end verbatim
+
+then the script can be changed to:
+
+@verbatim
+  #!/usr/bin/parallel --shebang-wrap --pipe /the/original/parser --with-options
+@end verbatim
+
+E.g.
+
+@verbatim
+  #!/usr/bin/parallel --shebang-wrap --pipe /usr/bin/perl -w
+@end verbatim
+
+@strong{--shebang-wrap} must be set as the first option.
+
 @item @strong{--shellquote}
 @anchor{@strong{--shellquote}}
 
@@ -1616,24 +1680,6 @@ Compare these two:
 @end verbatim
 
 See also @strong{--header}.
-
-@item @strong{--shebang}
-@anchor{@strong{--shebang}}
-
-@item @strong{--hashbang}
-@anchor{@strong{--hashbang}}
-
-GNU @strong{Parallel} can be called as a shebang (#!) command as the first line of a script. Like this:
-
-@verbatim
-  #!/usr/bin/parallel --shebang -r traceroute
-
-  foss.org.my
-  debian.org
-  freenetproject.org
-@end verbatim
-
-For this to work @strong{--shebang} must be set as the first option.
 
 @end table
 
