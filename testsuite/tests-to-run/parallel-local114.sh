@@ -44,6 +44,9 @@ echo "bug #36657: --load does not work with custom ssh";
 echo "bug #34958: --pipe with record size measured in lines"; 
   seq 10 | parallel -k --pipe -L 4 cat\;echo FOO | uniq
 
+echo "bug #37325: Inefficiency of --pipe -L"; 
+  seq 2000 | parallel -k --pipe --block 1k -L 4 wc\;echo FOO | uniq
+
 echo "bug #34958: --pipe with record size measured in lines"; 
   seq 10 | parallel -k --pipe -l 4 cat\;echo FOO | uniq
 

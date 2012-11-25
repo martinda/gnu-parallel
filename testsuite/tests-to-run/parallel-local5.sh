@@ -35,8 +35,10 @@ seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj' | uniq
 echo '### Test -l -N -L and -n with multiple jobslots and multiple args'
 seq 1 5 | parallel -kj2 -l 2 --pipe "cat; echo a" | uniq
 seq 1 5 | parallel -kj2 -N 2 --pipe "cat; echo b" | uniq
-seq 1 5 | parallel -kj2 -L 2 --pipe "cat; echo c" | uniq
 seq 1 5 | parallel -kj2 -n 2 --pipe "cat; echo d" | uniq
+
+echo '### Test -L --pipe'
+seq 1 5 | parallel -kj2 -L 2 --pipe "cat; echo c" | uniq
 
 echo '### Test output is the same for different block size'
 echo -n 01a02a0a0a12a34a45a6a | 

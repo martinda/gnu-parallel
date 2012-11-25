@@ -1247,7 +1247,7 @@ job sequence number.
 @item @strong{--hashbang}
 @anchor{@strong{--hashbang}}
 
-GNU @strong{Parallel} can be called as a shebang (#!) command as the first
+GNU @strong{parallel} can be called as a shebang (#!) command as the first
 line of a script. The content of the file will be treated as
 inputsource.
 
@@ -1263,10 +1263,10 @@ Like this:
 
 @strong{--shebang} must be set as the first option.
 
-@item @strong{--shebang-wrap}
-@anchor{@strong{--shebang-wrap}}
+@item @strong{--shebang-wrap} (alpha testing)
+@anchor{@strong{--shebang-wrap} (alpha testing)}
 
-GNU @strong{Parallel} can parallelize scripts by wrapping the shebang
+GNU @strong{parallel} can parallelize scripts by wrapping the shebang
 line. If the program can be run like this:
 
 @verbatim

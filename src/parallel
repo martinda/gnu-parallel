@@ -313,19 +313,25 @@ sub spreadstdin {
     my $force_one_time_through = 0;
     for my $in (@fhlist) {
 	piperead: while(1) {
-	    if(!$force_one_time_through) {
-		$force_one_time_through++;
-	    } elsif($Global::max_lines) {
-		# Read $Global::max_lines lines
-		eof($in) and last piperead;
-		for(my $t = 0; !eof($in) and
-		    substr($buf,length $buf,0) = <$in> and $t < $Global::max_lines;
-		    $t++) {}
+	    eof($in) and $force_one_time_through++ and last piperead;
+	    if($Global::max_lines) {
+		# Read records of $Global::max_lines lines
+		my @lines;
+		my $blocksize = length $buf;
+		do {
+		    for(my $t = 0; !eof($in) and $t < $Global::max_lines; $t++) {
+			my $l = <$in>;
+			push @lines, $l;
+			$blocksize += length($l);
+		    }
+		} while($blocksize < $opt::blocksize and !eof($in));
+		substr($buf,length $buf,0) = join("",@lines);
 	    } else {
 		# Read a block
-		read($in,substr($buf,length $buf,0),$opt::blocksize) or last;
+		read($in,substr($buf,length $buf,0),$opt::blocksize);
 		# substr above = append to $buf
 	    }
+
 	    if($opt::r) {
 		# Remove empty lines
 		$buf=~s/^\s*\n//gm;
@@ -767,7 +773,10 @@ sub parse_options {
     # Read more than one arg at a time (-L, -N)
     if(defined $opt::L) {
 	$Global::max_lines = $opt::L;
-	$Global::max_number_of_args ||= $Global::max_lines;
+	if(not $opt::pipe) {
+	    # --pipe -L means length of record - not max_number_of_args
+	    $Global::max_number_of_args ||= $Global::max_lines;
+	}
     }
     if(defined $opt::N) {
 	$Global::max_number_of_args = $opt::N;

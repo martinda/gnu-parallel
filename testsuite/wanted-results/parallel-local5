@@ -100,20 +100,19 @@ b
 b
 1
 2
-c
+d
 3
 4
-c
+d
 5
-c
+d
+### Test -L --pipe
 1
 2
-d
 3
 4
-d
 5
-d
+c
 ### Test output is the same for different block size
 1>01a02a0a
 2>0a12a34a
