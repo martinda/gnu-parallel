@@ -1014,7 +1014,7 @@ will generate the files:
 
 and
 
-  parallel --results foo/bar echo {1} {2} ::: 1 2 ::: 3 4
+  parallel --results foo/bar echo {1} {2} ::: I II ::: III IIII
 
 will generate the files:
 

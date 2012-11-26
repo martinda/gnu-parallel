@@ -4287,15 +4287,22 @@ sub args_as_filename {
     my @res = ();
 
     for my $rec_ref (@{$self->{'arg_list'}}) {
-	for my $n (0 .. $#$rec_ref) {
+	no warnings 'numeric';
+	my @header_indexes_sorted =	sort {
+	    # Sort headers numerically then asciibetically
+	    $Global::input_source_header{$a} <=> $Global::input_source_header{$b}
+	    or
+		$Global::input_source_header{$a} cmp $Global::input_source_header{$b}
+	} 1 .. $#$rec_ref+1;
+	for my $n (@header_indexes_sorted) {
 	    CORE::push(@res,
-		 $Global::input_source_header{$n+1},
+		 $Global::input_source_header{$n},
 		 map { my $s = $_;
 		       $s =~ s/\\/\\\\/g;
 		       $s =~ s/\t/\\t/g;
 		       $s =~ s/\0/\\0/g;
 		       $s =~ s:/:\\_:g; $s; }
-		 $rec_ref->[$n]->orig());
+		 $rec_ref->[$n-1]->orig());
 	}
     }
     return join "\t", @res;
