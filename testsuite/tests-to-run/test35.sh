@@ -41,5 +41,9 @@ stdout parallel -k --wd /tmp/ --basefile 1-col.txt --trc {}.5 -S .. -v echo ">"{
 # A few rmdir errors are OK as we have multiple files in the same dirs
 find . -name '*.5' | sort
 
+echo '### Test --wd ... --cleanup'
+stdout parallel -k --wd ... --cleanup -S lo -v echo ">"{}.6 :::  uNiQuE_sTrInG
+find ~/.parallel/tmp |grep uNiQuE_sTrInG
+
 cd ..
 rm -rf tmp

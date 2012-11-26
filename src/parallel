@@ -613,7 +613,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20121124;
+    $Global::version = 20121126;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3711,6 +3711,10 @@ sub sshcleanup {
 	$cleancmd .= "$sshcmd $serverlogin rm -f "
 	    . ::shell_quote_scalar($cleandir.$file.$removeworkdir).";";
     }
+    if(defined $opt::workdir and $opt::workdir eq "...") {
+	$cleancmd .= "$sshcmd $serverlogin rm -rf " . ::shell_quote_scalar($workdir).";";
+    }
+
     return $cleancmd;
 }
 
