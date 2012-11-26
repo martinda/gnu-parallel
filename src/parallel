@@ -498,6 +498,7 @@ sub options_hash {
 	 "basenameextensionreplace|bner=s" => \$opt::basenameextensionreplace,
 	 "seqreplace=s" => \$opt::seqreplace,
 	 "jobs|j=s" => \$opt::P,
+	 "delay=f" => \$opt::delay,
 	 "load=s" => \$opt::load,
 	 "noswap" => \$opt::noswap,
 	 "max-line-length-allowed" => \$opt::max_line_length_allowed,
@@ -613,7 +614,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20121126;
+    $Global::version = 20121127;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3905,6 +3906,9 @@ sub start {
 	    # Timeout must be set before inserting into queue
 	    $job->set_timeout($opt::timeout);
 	    $Global::timeoutq->insert($job);
+	}
+	if($opt::delay) {
+	    ::usleep($opt::delay*1000);
 	}
 	return $job;
     } else {

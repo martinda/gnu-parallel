@@ -426,6 +426,13 @@ occurs as a line of input, the rest of the input is ignored.  If
 neither B<-E> nor B<-e> is used, no end of file string is used.
 
 
+=item B<--delay> I<secs> (alpha testing)
+
+Delay starting next job I<secs> seconds. GNU B<parallel> will pause
+I<secs> seconds after starting each job. I<secs> can be less than 1
+seconds.
+
+
 =item B<--dry-run>
 
 Print the job to run on stdout (standard output), but do not run the

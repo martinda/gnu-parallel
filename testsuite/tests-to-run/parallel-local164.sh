@@ -5,6 +5,9 @@ SERVER2=parallel-server2
 
 # -L1 will join lines ending in ' '
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j10 -k -L1
+echo "### Test --delay"
+seq 9 | /usr/bin/time -f %e  parallel -j3 --delay 0.3 true {} 2>&1 | perl -pe 's/.[0-9]+$//'
+
 echo '### Test -k 5'; 
   sleep 5
 
@@ -35,6 +38,6 @@ seq 1 10 | parallel -j 2 echo | sort
 seq 1 10 | parallel -j 3 echo | sort
 
 echo "bug #37694: Empty string argument skipped when using --quote"
-parallel -q --nonall perl -le 'print scalar @ARGV' 'a' 'b' '' 
+parallel -q --nonall perl -le 'print scalar @ARGV' 'a' 'b' ''
 
 EOF

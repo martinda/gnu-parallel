@@ -1086,7 +1086,7 @@ will generate the files:
 and
 
 @verbatim
-  parallel --results foo/bar echo {1} {2} ::: 1 2 ::: 3 4
+  parallel --results foo/bar echo {1} {2} ::: I II ::: III IIII
 @end verbatim
 
 will generate the files:
