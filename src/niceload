@@ -455,10 +455,16 @@ sub over_run_limit {
 	$status += (::max(1,$self->{'runmem'}/$mem)-1);
     }
     if($self->{'runload'}) {
-	# load should be between 0-10ish
-	# 0 load => 0
+	# If used with other limits load should be between 0-10ish
+	no warnings 'numeric';
 	my $load = $self->load_status();
-	$status += ::max(0,$load - $self->{'runload'});
+	if($self->{'runload'} > 0) {
+	    # Stop if the load is above the limit
+	    $status += ::max(0,$load - $self->{'runload'});
+	} else {
+	    # Stop if the load is below the limit (for sensor)
+	    $status += ::max(0,-$load - $self->{'runload'});
+	}
     }
     if($self->{'runnoswap'}) {
 	# swap should be between 0-10ish
@@ -494,8 +500,15 @@ sub over_start_limit {
     if($self->{'startload'}) {
 	# load should be between 0-10ish
 	# 0 load => 0
+	no warnings 'numeric';
 	my $load = $self->load_status();
-	$status += ::max(0,$load - $self->{'startload'});
+	if($self->{'startload'} > 0) {
+	    # Stop if the load is above the limit
+	    $status += ::max(0,$load - $self->{'startload'});
+	} else {
+	    # Stop if the load is below the limit (for sensor)
+	    $status += ::max(0,-$load - $self->{'startload'});
+	}
     }
     if($self->{'startnoswap'}) {
 	# swap should be between 0-10ish

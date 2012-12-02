@@ -452,6 +452,13 @@ Set the end of file string to eof-str.  If the end of file string
 occurs as a line of input, the rest of the input is ignored.  If
 neither @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
+@item @strong{--delay} @emph{secs} (alpha testing)
+@anchor{@strong{--delay} @emph{secs} (alpha testing)}
+
+Delay starting next job @emph{secs} seconds. GNU @strong{parallel} will pause
+@emph{secs} seconds after starting each job. @emph{secs} can be less than 1
+seconds.
+
 @item @strong{--dry-run}
 @anchor{@strong{--dry-run}}
 

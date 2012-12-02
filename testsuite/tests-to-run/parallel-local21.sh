@@ -23,7 +23,7 @@ rm /tmp/basic--shebang-wrap
 
 echo "### Test --shebang-wrap with parser options"
 cat <<EOF > /tmp/with-parser--shebang-wrap
-#!/usr/local/bin/parallel --shebang-wrap /usr/bin/perl -p
+#!/usr/local/bin/parallel --shebang-wrap -k /usr/bin/perl -p
 
 print "Shebang from perl with args @ARGV\n";
 EOF
@@ -31,11 +31,11 @@ EOF
 chmod 755 /tmp/with-parser--shebang-wrap
 /tmp/with-parser--shebang-wrap /tmp/in12 /tmp/in45
 echo "### Same as"
-parallel /usr/bin/perl -p /tmp/with-parser--shebang-wrap ::: /tmp/in12 /tmp/in45
+parallel -k /usr/bin/perl -p /tmp/with-parser--shebang-wrap ::: /tmp/in12 /tmp/in45
 echo "### stdin"
 (echo /tmp/in12; echo /tmp/in45) | /tmp/with-parser--shebang-wrap
 echo "### Same as"
-(echo /tmp/in12; echo /tmp/in45) | parallel /usr/bin/perl /tmp/with-parser--shebang-wrap
+(echo /tmp/in12; echo /tmp/in45) | parallel -k /usr/bin/perl /tmp/with-parser--shebang-wrap
 rm /tmp/with-parser--shebang-wrap
 
 

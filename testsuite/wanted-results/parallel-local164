@@ -1,5 +1,5 @@
 ### Test --delay
-3
+More than 5 secs: OK
 ### Test -k 5
 ### Test -k 3
 ### Test -k 4

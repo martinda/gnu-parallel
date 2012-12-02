@@ -6,7 +6,8 @@ SERVER2=parallel-server2
 # -L1 will join lines ending in ' '
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j10 -k -L1
 echo "### Test --delay"
-seq 9 | /usr/bin/time -f %e  parallel -j3 --delay 0.3 true {} 2>&1 | perl -pe 's/.[0-9]+$//'
+seq 9 | /usr/bin/time -f %e  parallel -j3 --delay 0.53 true {} 2>&1 | 
+  perl -ne '$_ > 5 and print "More than 5 secs: OK\n"'
 
 echo '### Test -k 5'; 
   sleep 5
