@@ -602,6 +602,7 @@ sub nonblockGetLines {
 
 sub read_sensor {
     my $self = shift;
+    ::debug("read_sensor");
     my $fh = $self->{'sensor_fh'};
     if(not $fh) {
 	# Start the sensor
@@ -612,13 +613,18 @@ sub read_sensor {
     my ($eof,@lines) = nonblockGetLines($fh);
     
     # new load = last full line
-    foreach my $line ( @lines ) {
+    foreach my $line (@lines) {
 	if(defined $line) {
-	    print "Pipe saw: $eof [$line]\n";
+	    ::debug("Pipe saw: $eof [$line]\n");
 	    $Global::last_sensor_reading = $line;
 	}
     }
-    if($eof) { undef($self->{'sensor_fh'}); }
+    if($eof) {
+	# End of file => Restart the sensor
+	close $fh;
+	open($fh, "-|", $::opt_sensor) || ::die_bug("Cannot open: $::opt_sensor");
+	$self->{'sensor_fh'} = $fh;
+    }
 
     return $Global::last_sensor_reading;
 }
@@ -627,6 +633,7 @@ sub load_status {
     # Returns:
     #   loadavg or sensor measurement
     my $self = shift;
+
     if($::opt_sensor) {
 	if(not defined $self->{'load_status'} or
 	   $self->{'load_status_cache_time'} + $self->{'recheck'} < time) {
@@ -635,7 +642,7 @@ sub load_status {
 		sleep 1;
 		$self->{'load_status'} = $self->read_sensor();
 	    } 
-	    $self->{'load_status_cache_time'} = time;
+	    $self->{'load_status_cache_time'} = time - 0.001;
 	}
     } else {
 	# Normal load avg
