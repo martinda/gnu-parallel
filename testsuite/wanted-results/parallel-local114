@@ -140,66 +140,66 @@ I III
 I IIII
 II III
 II IIII
-/tmp/parallel_results_test/testAstderr	1	I	2	III
-/tmp/parallel_results_test/testAstderr	1	I	2	IIII
-/tmp/parallel_results_test/testAstderr	1	II	2	III
-/tmp/parallel_results_test/testAstderr	1	II	2	IIII
-/tmp/parallel_results_test/testAstdout	1	I	2	III
-/tmp/parallel_results_test/testAstdout	1	I	2	IIII
-/tmp/parallel_results_test/testAstdout	1	II	2	III
-/tmp/parallel_results_test/testAstdout	1	II	2	IIII
+/tmp/parallel_results_test/testA/1/I/2/III/stderr
+/tmp/parallel_results_test/testA/1/I/2/III/stdout
+/tmp/parallel_results_test/testA/1/I/2/IIII/stderr
+/tmp/parallel_results_test/testA/1/I/2/IIII/stdout
+/tmp/parallel_results_test/testA/1/II/2/III/stderr
+/tmp/parallel_results_test/testA/1/II/2/III/stdout
+/tmp/parallel_results_test/testA/1/II/2/IIII/stderr
+/tmp/parallel_results_test/testA/1/II/2/IIII/stdout
 ### Test --res
 I III
 I IIII
 II III
 II IIII
-/tmp/parallel_results_test/testDstderr	1	I	2	III
-/tmp/parallel_results_test/testDstderr	1	I	2	IIII
-/tmp/parallel_results_test/testDstderr	1	II	2	III
-/tmp/parallel_results_test/testDstderr	1	II	2	IIII
-/tmp/parallel_results_test/testDstdout	1	I	2	III
-/tmp/parallel_results_test/testDstdout	1	I	2	IIII
-/tmp/parallel_results_test/testDstdout	1	II	2	III
-/tmp/parallel_results_test/testDstdout	1	II	2	IIII
+/tmp/parallel_results_test/testD/1/I/2/III/stderr
+/tmp/parallel_results_test/testD/1/I/2/III/stdout
+/tmp/parallel_results_test/testD/1/I/2/IIII/stderr
+/tmp/parallel_results_test/testD/1/I/2/IIII/stdout
+/tmp/parallel_results_test/testD/1/II/2/III/stderr
+/tmp/parallel_results_test/testD/1/II/2/III/stdout
+/tmp/parallel_results_test/testD/1/II/2/IIII/stderr
+/tmp/parallel_results_test/testD/1/II/2/IIII/stdout
 ### Test --result
 I III
 I IIII
 II III
 II IIII
-/tmp/parallel_results_test/testEstderr	1	I	2	III
-/tmp/parallel_results_test/testEstderr	1	I	2	IIII
-/tmp/parallel_results_test/testEstderr	1	II	2	III
-/tmp/parallel_results_test/testEstderr	1	II	2	IIII
-/tmp/parallel_results_test/testEstdout	1	I	2	III
-/tmp/parallel_results_test/testEstdout	1	I	2	IIII
-/tmp/parallel_results_test/testEstdout	1	II	2	III
-/tmp/parallel_results_test/testEstdout	1	II	2	IIII
+/tmp/parallel_results_test/testE/1/I/2/III/stderr
+/tmp/parallel_results_test/testE/1/I/2/III/stdout
+/tmp/parallel_results_test/testE/1/I/2/IIII/stderr
+/tmp/parallel_results_test/testE/1/I/2/IIII/stdout
+/tmp/parallel_results_test/testE/1/II/2/III/stderr
+/tmp/parallel_results_test/testE/1/II/2/III/stdout
+/tmp/parallel_results_test/testE/1/II/2/IIII/stderr
+/tmp/parallel_results_test/testE/1/II/2/IIII/stdout
 ### Test --results --header :
 I III
 I IIII
 II III
 II IIII
-/tmp/parallel_results_test/testBstderr	a	I	b	III
-/tmp/parallel_results_test/testBstderr	a	I	b	IIII
-/tmp/parallel_results_test/testBstderr	a	II	b	III
-/tmp/parallel_results_test/testBstderr	a	II	b	IIII
-/tmp/parallel_results_test/testBstdout	a	I	b	III
-/tmp/parallel_results_test/testBstdout	a	I	b	IIII
-/tmp/parallel_results_test/testBstdout	a	II	b	III
-/tmp/parallel_results_test/testBstdout	a	II	b	IIII
-### Test --results --header : named
+/tmp/parallel_results_test/testB/a/I/b/III/stderr
+/tmp/parallel_results_test/testB/a/I/b/III/stdout
+/tmp/parallel_results_test/testB/a/I/b/IIII/stderr
+/tmp/parallel_results_test/testB/a/I/b/IIII/stdout
+/tmp/parallel_results_test/testB/a/II/b/III/stderr
+/tmp/parallel_results_test/testB/a/II/b/III/stdout
+/tmp/parallel_results_test/testB/a/II/b/IIII/stderr
+/tmp/parallel_results_test/testB/a/II/b/IIII/stdout
+### Test --results --header : named - a/b swapped
 I III
-I IIII
 II III
+I IIII
 II IIII
-/tmp/parallel_results_test/testCstderr	a	I	b	III
-/tmp/parallel_results_test/testCstderr	a	I	b	IIII
-/tmp/parallel_results_test/testCstderr	a	II	b	III
-/tmp/parallel_results_test/testCstderr	a	II	b	IIII
-/tmp/parallel_results_test/testCstdout	a	I	b	III
-/tmp/parallel_results_test/testCstdout	a	I	b	IIII
-/tmp/parallel_results_test/testCstdout	a	II	b	III
-/tmp/parallel_results_test/testCstdout	a	II	b	IIII
+/tmp/parallel_results_test/testC/a/I/b/III/stderr
+/tmp/parallel_results_test/testC/a/I/b/III/stdout
+/tmp/parallel_results_test/testC/a/I/b/IIII/stderr
+/tmp/parallel_results_test/testC/a/I/b/IIII/stdout
+/tmp/parallel_results_test/testC/a/II/b/III/stderr
+/tmp/parallel_results_test/testC/a/II/b/III/stdout
+/tmp/parallel_results_test/testC/a/II/b/IIII/stderr
+/tmp/parallel_results_test/testC/a/II/b/IIII/stdout
 ### Test --results --header : piped
-/tmp/parallel_results_test/testF_stderr	Col	backslash\\tab\tslash\_null\0eof
-/tmp/parallel_results_test/testF_stdout	Col	backslash\\tab\tslash\_null\0eof
+/tmp/parallel_results_test/testF/Col/backslash\\tab\tslash\_null\0eof/stderr
+/tmp/parallel_results_test/testF/Col/backslash\\tab\tslash\_null\0eof/stdout

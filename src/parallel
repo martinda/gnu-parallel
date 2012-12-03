@@ -26,6 +26,8 @@ use POSIX qw(:sys_wait_h setsid ceil :errno_h);
 use Symbol qw(gensym);
 # tempfile used in Job::start
 use File::Temp qw(tempfile tempdir);
+# mkpath used in openresultsfile
+use File::Path;
 # GetOptions used in get_options_from_array
 use Getopt::Long;
 # Used to ensure code quality
@@ -3268,15 +3270,20 @@ sub seq {
 
 sub openresultsfile {
     my $self = shift;
-    my $args_as_filename = $self->{'commandline'}->args_as_filename();
-    my ($outfh,$errfh,$name);
-    $name = $opt::results."stdout\t".$args_as_filename;
+    my $args_as_dirname = $self->{'commandline'}->args_as_dirname();
+    my ($outfh,$errfh,$name,$dir);
+    # prefix/name1/val1/name2/val2/
+    $dir = $opt::results."/".$args_as_dirname;
+    File::Path::mkpath($dir);
+    # prefix/name1/val1/name2/val2/stdout
+    $name = "$dir/stdout";
     if(not open($outfh,"+>",$name)) {
 	::error("Cannot write to `$name'.\n");
 	::wait_and_exit(255);
     }
     $self->set_stdoutfilename($name);
-    $name = $opt::results."stderr\t".$args_as_filename;
+    # prefix/name1/val1/name2/val2/stderr
+    $name = "$dir/stderr";
     if(not open($errfh,"+>",$name)) {
 	::error("Cannot write to `$name'.\n");
 	::wait_and_exit(255);
@@ -4283,9 +4290,9 @@ sub args_as_string {
 	    map { @$_ } @{$self->{'arg_list'}});
 }
 
-sub args_as_filename {
+sub args_as_dirname {
     # Returns:
-    #  all unmodified arguments joined with '\t' (similar to {})
+    #  all unmodified arguments joined with '/' (similar to {})
     #  \t \0 \\ and / are quoted
     my $self = shift;
     my @res = ();
@@ -4309,7 +4316,7 @@ sub args_as_filename {
 		 $rec_ref->[$n-1]->orig());
 	}
     }
-    return join "\t", @res;
+    return join "/", @res;
 }
 
 sub len {

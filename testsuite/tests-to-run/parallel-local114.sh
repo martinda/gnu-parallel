@@ -53,31 +53,31 @@ echo "bug #34958: --pipe with record size measured in lines";
 echo "### Test --results"; 
   mkdir -p /tmp/parallel_results_test; 
   parallel -k --results /tmp/parallel_results_test/testA echo {1} {2} ::: I II ::: III IIII; 
-  ls /tmp/parallel_results_test/testA*; rm /tmp/parallel_results_test/testA*
+  ls /tmp/parallel_results_test/testA/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testA*
 
 echo "### Test --res"; 
   mkdir -p /tmp/parallel_results_test; 
-  parallel -k --results /tmp/parallel_results_test/testD echo {1} {2} ::: I II ::: III IIII; 
-  ls /tmp/parallel_results_test/testD*; rm /tmp/parallel_results_test/testD*
+  parallel -k --res /tmp/parallel_results_test/testD echo {1} {2} ::: I II ::: III IIII; 
+  ls /tmp/parallel_results_test/testD/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testD*
 
 echo "### Test --result"; 
   mkdir -p /tmp/parallel_results_test; 
   parallel -k --result /tmp/parallel_results_test/testE echo {1} {2} ::: I II ::: III IIII; 
-  ls /tmp/parallel_results_test/testE*; rm /tmp/parallel_results_test/testE*
+  ls /tmp/parallel_results_test/testE/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testE*
 
 echo "### Test --results --header :"; 
   mkdir -p /tmp/parallel_results_test; 
   parallel -k --header : --results /tmp/parallel_results_test/testB echo {1} {2} ::: a I II ::: b III IIII; 
-  ls /tmp/parallel_results_test/testB*; rm /tmp/parallel_results_test/testB*
+  ls /tmp/parallel_results_test/testB/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testB*
 
-echo "### Test --results --header : named"; 
+echo "### Test --results --header : named - a/b swapped"; 
   mkdir -p /tmp/parallel_results_test; 
-  parallel -k --header : --results /tmp/parallel_results_test/testC echo {a} {b} ::: a I II ::: b III IIII; 
-  ls /tmp/parallel_results_test/testC*; rm /tmp/parallel_results_test/testC*
+  parallel -k --header : --results /tmp/parallel_results_test/testC echo {a} {b} ::: b III IIII ::: a I II;
+  ls /tmp/parallel_results_test/testC/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testC*
 
 echo "### Test --results --header : piped"; 
   mkdir -p /tmp/parallel_results_test; 
-  (echo Col; perl -e 'print "backslash\\tab\tslash/null\0eof\n"') | parallel  --header : --result /tmp/parallel_results_test/testF_ true; 
-  ls /tmp/parallel_results_test/testF*; rm /tmp/parallel_results_test/testF*
+  (echo Col; perl -e 'print "backslash\\tab\tslash/null\0eof\n"') | parallel  --header : --result /tmp/parallel_results_test/testF true; 
+  ls /tmp/parallel_results_test/testF/*/*/*; rm -rf /tmp/parallel_results_test/testF*
  
 EOF
