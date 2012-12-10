@@ -40,6 +40,7 @@ if($opt::factor and $opt::suspend) {
     help();
     exit;
 }
+
 if(not (defined $opt::start_io or defined $opt::run_io
 	or defined $opt::start_load or defined $opt::run_load
 	or defined $opt::start_mem or defined $opt::run_mem
@@ -63,8 +64,9 @@ if(defined $opt::load) { multiply_binary_prefix($opt::load); }
 
 my $limit = Limit->new();
 my $process = Process->new($opt::nice,@ARGV);
-if($opt::pid) {
-    $process->set_pid($opt::pid);
+$::exitstatus = 0;
+if(@opt::pid) {
+    $process->set_pid(@opt::pid);
 } elsif (@ARGV) {
     # Wait until limit is below start_limit and run_limit
     while($limit->over_start_limit()
@@ -90,6 +92,11 @@ while($process->is_alive()) {
 }
 
 exit($::exitstatus);
+
+sub uniq {
+    # Remove duplicates and return unique values
+    return keys %{{ map { $_ => 1 } @_ }};
+}
 
 sub multiply_binary_prefix {
     # Evalualte numbers with binary prefix
@@ -291,10 +298,22 @@ sub new {
     }, ref($class) || $class;
 }
 
+sub pgrp {
+    my $self = shift;
+    my @pgrp;
+    if(not $self->{'pgrp'}) {
+	for(@{$self->{'pids'}}) {
+	    push @pgrp,-getpgrp($_);
+	}
+	@pgrp = uniq(@pgrp);
+	@{$self->{'pgrp'}} = @pgrp;
+    }
+    return @{$self->{'pgrp'}};
+}
+
 sub set_pid {
     my $self = shift;
-    $self->{'pid'} = shift;
-    push(@{$self->{'pids'}},$self->{'pid'});
+    push(@{$self->{'pids'}},@_);
     $self->{'running'} = 1;
     $::exitstatus = 0;
 }
@@ -313,7 +332,6 @@ sub start {
 	$SIG{TSTP}=\&kill_child_TSTP;
 	$SIG{CONT}=\&kill_child_CONT;
  	sleep 1; # Give child time to setpgrp(0,0);
- 	$self->{'pgrp'} = getpgrp $self->{'pid'};
     } else {
  	setpgrp(0,0);
  	::debug("Child pid: $$, pgrp: ",getpgrp $$,"\n");
@@ -345,15 +363,15 @@ sub REAPER {
 
 sub kill_child_CONT {
     my $self = $Global::process;
-    ::debug("SIGCONT received. Killing $self->{'pid'}\n");
-    kill CONT => -getpgrp($self->{'pid'});
+    ::debug("SIGCONT received. Killing @{$self->{'pgrp'}}\n");
+    kill CONT => $self->pgrp();
 }
 
 
 sub kill_child_TSTP {
     my $self = $Global::process;
     ::debug("SIGTSTP received. Killing $self->{'pid'} and self ($$)\n");
-    kill TSTP => -getpgrp($self->{'pid'});
+    kill TSTP => $self->pgrp();
     kill STOP => -$$;
     kill STOP => $$;
 }
@@ -362,7 +380,7 @@ sub kill_child_TSTP {
 sub kill_child_INT {
     my $self = $Global::process;
     ::debug("SIGINT received. Killing $self->{'pid'} Exit\n");
-    kill INT => -getpgrp($self->{'pid'});
+    kill INT => $self->pgrp();
     exit;
 }
 

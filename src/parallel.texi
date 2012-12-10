@@ -1965,6 +1965,10 @@ can be written like this:
 
 @strong{cat list | parallel do_something | process_output}
 
+For example: Find which host name in a list has IP address 1.2.3 4:
+
+@strong{cat hosts.txt | parallel -P 100 host | grep 1.2.3.4}
+
 If the processing requires more steps the for-loop like this:
 
 @verbatim
@@ -2193,14 +2197,6 @@ GNU @strong{parallel} can often speed this up.
 @strong{find . -type f | parallel -k -j150% -n 1000 -m grep -H -n STRING @{@}}
 
 This will run 1.5 job per core, and give 1000 arguments to @strong{grep}.
-
-To grep a big file in parallel use @strong{--pipe}:
-
-@strong{cat bigfile | parallel --pipe grep foo}
-
-Depending on your disks and CPUs it may be faster to read larger blocks:
-
-@strong{cat bigfile | parallel --pipe --block 10M grep foo}
 
 @chapter EXAMPLE: Using remote computers
 @anchor{EXAMPLE: Using remote computers}
