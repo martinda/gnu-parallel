@@ -17,7 +17,7 @@ niceload - slow down a program when the load average is above a certain limit
 @anchor{SYNOPSIS}
 
 @strong{niceload} [-v] [-h] [-n nice] [-I io] [-L load] [-M mem] [-N]
-[--sensor program] [-t time] [-s time|-f factor] ( command | -p PID )
+[--sensor program] [-t time] [-s time|-f factor] ( command | -p PID [-p PID ...] )
 
 @chapter DESCRIPTION
 @anchor{DESCRIPTION}
@@ -118,13 +118,23 @@ indication that the system is memory stressed.
 
 Sets niceness. See @strong{nice}(1).
 
-@item @strong{-p} @emph{PID}
-@anchor{@strong{-p} @emph{PID}}
+@item @strong{-p} @emph{PID} (alpha testing)
+@anchor{@strong{-p} @emph{PID} (alpha testing)}
 
-@item @strong{--pid} @emph{PID}
-@anchor{@strong{--pid} @emph{PID}}
+@item @strong{--pid} @emph{PID} (alpha testing)
+@anchor{@strong{--pid} @emph{PID} (alpha testing)}
 
-Process ID of process to suspend.
+Process ID of process to suspend. You can specify multiple process IDs
+with multiple @strong{-p} @emph{PID}.
+
+@item @strong{--prg} @emph{program} (alpha testing)
+@anchor{@strong{--prg} @emph{program} (alpha testing)}
+
+@item @strong{--program} @emph{program} (alpha testing)
+@anchor{@strong{--program} @emph{program} (alpha testing)}
+
+Name of running program to suspend. You can specify multiple programs
+with multiple @strong{--prg} @emph{program}.
 
 @item @strong{--quote}
 @anchor{@strong{--quote}}

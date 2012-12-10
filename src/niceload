@@ -65,7 +65,11 @@ if(defined $opt::load) { multiply_binary_prefix($opt::load); }
 my $limit = Limit->new();
 my $process = Process->new($opt::nice,@ARGV);
 $::exitstatus = 0;
-if(@opt::pid) {
+if(@opt::prg) {
+    # Find all pids of prg
+    my $out = `pidof -x @opt::prg`;
+    $process->set_pid(split /\s+/,$out);
+} elsif(@opt::pid) {
     $process->set_pid(@opt::pid);
 } elsif (@ARGV) {
     # Wait until limit is below start_limit and run_limit
@@ -168,6 +172,7 @@ sub get_options_from_array {
 	 "noswap|N" => \$opt::noswap,
 
 	 "nice|n=i" => \$opt::nice,
+	 "program|prg=s" => \@opt::prg,
 	 "process|pid|p=s" => \@opt::pid,
 	 "suspend|s=s" => \$opt::suspend,
 	 "recheck|t=s" => \$opt::recheck,

@@ -7,7 +7,7 @@ niceload - slow down a program when the load average is above a certain limit
 =head1 SYNOPSIS
 
 B<niceload> [-v] [-h] [-n nice] [-I io] [-L load] [-M mem] [-N]
-[--sensor program] [-t time] [-s time|-f factor] ( command | -p PID )
+[--sensor program] [-t time] [-s time|-f factor] ( command | -p PID [-p PID ...] )
 
 
 =head1 DESCRIPTION
@@ -101,11 +101,20 @@ B<--noswap> will set both B<--start-noswap> and B<run-noswap>.
 Sets niceness. See B<nice>(1).
 
 
-=item B<-p> I<PID>
+=item B<-p> I<PID> (alpha testing)
 
-=item B<--pid> I<PID>
+=item B<--pid> I<PID> (alpha testing)
 
-Process ID of process to suspend.
+Process ID of process to suspend. You can specify multiple process IDs
+with multiple B<-p> I<PID>.
+
+
+=item B<--prg> I<program> (alpha testing)
+
+=item B<--program> I<program> (alpha testing)
+
+Name of running program to suspend. You can specify multiple programs
+with multiple B<--prg> I<program>.
 
 
 =item B<--quote>
