@@ -27,44 +27,44 @@ $Global::progname="niceload";
 $Global::version = 20121122;
 Getopt::Long::Configure("bundling","require_order");
 get_options_from_array(\@ARGV) || die_usage();
-if($::opt_version) {
+if($opt::version) {
     version();
     exit 0;
 }
-if($::opt_help) {
+if($opt::help) {
     help();
     exit 0;
 }
-if($::opt_factor and $::opt_suspend) {
+if($opt::factor and $opt::suspend) {
     # You cannot have --suspend and --factor
     help();
     exit;
 }
-if(not (defined $::opt_start_io or defined $::opt_run_io
-	or defined $::opt_start_load or defined $::opt_run_load
-	or defined $::opt_start_mem or defined $::opt_run_mem
-	or defined $::opt_start_noswap or defined $::opt_run_noswap
-	or defined $::opt_io or defined $::opt_load
-	or defined $::opt_mem or defined $::opt_noswap)) {
+if(not (defined $opt::start_io or defined $opt::run_io
+	or defined $opt::start_load or defined $opt::run_load
+	or defined $opt::start_mem or defined $opt::run_mem
+	or defined $opt::start_noswap or defined $opt::run_noswap
+	or defined $opt::io or defined $opt::load
+	or defined $opt::mem or defined $opt::noswap)) {
     # Default is --runload=1
-    $::opt_run_load = 1;
+    $opt::run_load = 1;
 }
 
-if(not defined $::opt_start_io) { $::opt_start_io = $::opt_io; }
-if(not defined $::opt_run_io) { $::opt_run_io = $::opt_io; }
-if(not defined $::opt_start_load) { $::opt_start_load = $::opt_load; }
-if(not defined $::opt_run_load) { $::opt_run_load = $::opt_load; }
-if(not defined $::opt_start_mem) { $::opt_start_mem = $::opt_mem; }
-if(not defined $::opt_run_mem) { $::opt_run_mem = $::opt_mem; }
-if(not defined $::opt_start_noswap) { $::opt_start_noswap = $::opt_noswap; }
-if(not defined $::opt_run_noswap) { $::opt_run_noswap = $::opt_noswap; }
+if(not defined $opt::start_io) { $opt::start_io = $opt::io; }
+if(not defined $opt::run_io) { $opt::run_io = $opt::io; }
+if(not defined $opt::start_load) { $opt::start_load = $opt::load; }
+if(not defined $opt::run_load) { $opt::run_load = $opt::load; }
+if(not defined $opt::start_mem) { $opt::start_mem = $opt::mem; }
+if(not defined $opt::run_mem) { $opt::run_mem = $opt::mem; }
+if(not defined $opt::start_noswap) { $opt::start_noswap = $opt::noswap; }
+if(not defined $opt::run_noswap) { $opt::run_noswap = $opt::noswap; }
 
-if(defined $::opt_load) { multiply_binary_prefix($::opt_load); }
+if(defined $opt::load) { multiply_binary_prefix($opt::load); }
 
 my $limit = Limit->new();
-my $process = Process->new($::opt_nice,@ARGV);
-if($::opt_pid) {
-    $process->set_pid($::opt_pid);
+my $process = Process->new($opt::nice,@ARGV);
+if($opt::pid) {
+    $process->set_pid($opt::pid);
 } elsif (@ARGV) {
     # Wait until limit is below start_limit and run_limit
     while($limit->over_start_limit()
@@ -138,36 +138,36 @@ sub get_options_from_array {
 	@::ARGV = @{$array_ref};
     }
     my @retval = GetOptions
-	("debug|D" => \$::opt_debug,
-	 "factor|f=s" => \$::opt_factor,
-	 "hard|H" => \$::opt_hard,
-	 "soft|S" => \$::opt_soft,
-	 "sensor=s" => \$::opt_sensor,
+	("debug|D" => \$opt::debug,
+	 "factor|f=s" => \$opt::factor,
+	 "hard|H" => \$opt::hard,
+	 "soft|S" => \$opt::soft,
+	 "sensor=s" => \$opt::sensor,
 
-	 "si|sio|startio|start-io=s" => \$::opt_start_io,
-	 "ri|rio|runio|run-io=s" => \$::opt_run_io,
-	 "io|I=s" => \$::opt_io,
+	 "si|sio|startio|start-io=s" => \$opt::start_io,
+	 "ri|rio|runio|run-io=s" => \$opt::run_io,
+	 "io|I=s" => \$opt::io,
 
-	 "sl|startload|start-load=s" => \$::opt_start_load,
-	 "rl|runload|run-load=s" => \$::opt_run_load,
-	 "load|L|l=s" => \$::opt_load,
+	 "sl|startload|start-load=s" => \$opt::start_load,
+	 "rl|runload|run-load=s" => \$opt::run_load,
+	 "load|L|l=s" => \$opt::load,
 
-	 "sm|startmem|start-mem=s" => \$::opt_start_mem,
-	 "rm|runmem|run-mem=s" => \$::opt_run_mem,
-	 "mem|M=s" => \$::opt_mem,
+	 "sm|startmem|start-mem=s" => \$opt::start_mem,
+	 "rm|runmem|run-mem=s" => \$opt::run_mem,
+	 "mem|M=s" => \$opt::mem,
 
-	 "sn|startnoswap|start-noswap|start-no-swap" => \$::opt_start_noswap,
-	 "rn|runnoswap|run-noswap|run-no-swap" => \$::opt_run_noswap,
-	 "noswap|N" => \$::opt_noswap,
+	 "sn|startnoswap|start-noswap|start-no-swap" => \$opt::start_noswap,
+	 "rn|runnoswap|run-noswap|run-no-swap" => \$opt::run_noswap,
+	 "noswap|N" => \$opt::noswap,
 
-	 "nice|n=i" => \$::opt_nice,
-	 "process|pid|p=s" => \$::opt_pid,
-	 "suspend|s=s" => \$::opt_suspend,
-	 "recheck|t=s" => \$::opt_recheck,
-	 "quote|q" => \$::opt_quote,
-	 "help|h" => \$::opt_help,
-	 "verbose|v" => \$::opt_verbose,
-	 "version|V" => \$::opt_version,
+	 "nice|n=i" => \$opt::nice,
+	 "process|pid|p=s" => \@opt::pid,
+	 "suspend|s=s" => \$opt::suspend,
+	 "recheck|t=s" => \$opt::recheck,
+	 "quote|q" => \$opt::quote,
+	 "help|h" => \$opt::help,
+	 "verbose|v" => \$opt::verbose,
+	 "version|V" => \$opt::version,
 	);
     if(not $this_is_ARGV) {
 	@{$array_ref} = @::ARGV;
@@ -217,7 +217,7 @@ sub usleep {
 
 
 sub debug {
-    if($::opt_debug) {
+    if($opt::debug) {
 	print STDERR @_;
     }
 }
@@ -318,7 +318,7 @@ sub start {
  	setpgrp(0,0);
  	::debug("Child pid: $$, pgrp: ",getpgrp $$,"\n");
  	::debug("@{$self->{'command'}}\n");
-	if($::opt_quote) {
+	if($opt::quote) {
 	    system(@{$self->{'command'}});
 	} else {
 	    system("@{$self->{'command'}}");
@@ -410,15 +410,15 @@ package Limit;
 sub new {
     my $class = shift;
     my %limits = @_;
-    my $hard = $::opt_soft ? 0 : $::opt_hard;
-    my $runio = $::opt_run_io ? ::multiply_binary_prefix($::opt_run_io) : 0;
-    my $startio = $::opt_start_io ? ::multiply_binary_prefix($::opt_start_io) : 0;
-    my $runload = $::opt_run_load ? ::multiply_binary_prefix($::opt_run_load) : 0;
-    my $startload = $::opt_start_load ? ::multiply_binary_prefix($::opt_start_load) : 0;
-    my $runmem = $::opt_run_mem ? ::multiply_binary_prefix($::opt_run_mem) : 0;
-    my $startmem = $::opt_start_mem ? ::multiply_binary_prefix($::opt_start_mem) : 0;
-    my $runnoswap = $::opt_run_noswap ? ::multiply_binary_prefix($::opt_run_noswap) : 0;
-    my $startnoswap = $::opt_start_noswap ? ::multiply_binary_prefix($::opt_start_noswap) : 0;
+    my $hard = $opt::soft ? 0 : $opt::hard;
+    my $runio = $opt::run_io ? ::multiply_binary_prefix($opt::run_io) : 0;
+    my $startio = $opt::start_io ? ::multiply_binary_prefix($opt::start_io) : 0;
+    my $runload = $opt::run_load ? ::multiply_binary_prefix($opt::run_load) : 0;
+    my $startload = $opt::start_load ? ::multiply_binary_prefix($opt::start_load) : 0;
+    my $runmem = $opt::run_mem ? ::multiply_binary_prefix($opt::run_mem) : 0;
+    my $startmem = $opt::start_mem ? ::multiply_binary_prefix($opt::start_mem) : 0;
+    my $runnoswap = $opt::run_noswap ? ::multiply_binary_prefix($opt::run_noswap) : 0;
+    my $startnoswap = $opt::start_noswap ? ::multiply_binary_prefix($opt::start_noswap) : 0;
 
     return bless {
 	'hard' => $hard,
@@ -432,12 +432,12 @@ sub new {
 	'startmem' => $startmem,
 	'runnoswap' => $runnoswap,
 	'startnoswap' => $startnoswap,
-	'factor' => $::opt_factor || 1,
-	'recheck' => $::opt_recheck || 1,
-	'runtime' => $::opt_recheck || 1,
+	'factor' => $opt::factor || 1,
+	'recheck' => $opt::recheck || 1,
+	'runtime' => $opt::recheck || 1,
 	'over_run_limit' => 1,
 	'over_start_limit' => 1,
-	'verbose' => $::opt_verbose,
+	'verbose' => $opt::verbose,
     }, ref($class) || $class;
 }
 
@@ -478,7 +478,7 @@ sub over_run_limit {
 	$status += ::max(0,$io - $self->{'runio'});
     }
     $self->{'over_run_limit'} = $status;
-    if(not $::opt_recheck) {
+    if(not $opt::recheck) {
 	$self->{'recheck'} = $self->{'factor'} * $self->{'over_run_limit'};
     }
     ::debug("over_run_limit: $status\n");
@@ -522,7 +522,7 @@ sub over_start_limit {
 	$status += ::max(0,$io - $self->{'startio'});
     }
     $self->{'over_start_limit'} = $status;
-    if(not $::opt_recheck) {
+    if(not $opt::recheck) {
 	$self->{'recheck'} = $self->{'factor'} * $self->{'over_start_limit'};
     }
     ::debug("over_start_limit: $status\n");
@@ -606,7 +606,7 @@ sub read_sensor {
     my $fh = $self->{'sensor_fh'};
     if(not $fh) {
 	# Start the sensor
-	open($fh, "-|", $::opt_sensor) || ::die_bug("Cannot open: $::opt_sensor");
+	open($fh, "-|", $opt::sensor) || ::die_bug("Cannot open: $opt::sensor");
 	$self->{'sensor_fh'} = $fh;
     }
     # Read as much as we can (non_block)
@@ -622,7 +622,7 @@ sub read_sensor {
     if($eof) {
 	# End of file => Restart the sensor
 	close $fh;
-	open($fh, "-|", $::opt_sensor) || ::die_bug("Cannot open: $::opt_sensor");
+	open($fh, "-|", $opt::sensor) || ::die_bug("Cannot open: $opt::sensor");
 	$self->{'sensor_fh'} = $fh;
     }
 
@@ -634,7 +634,7 @@ sub load_status {
     #   loadavg or sensor measurement
     my $self = shift;
 
-    if($::opt_sensor) {
+    if($opt::sensor) {
 	if(not defined $self->{'load_status'} or
 	   $self->{'load_status_cache_time'} + $self->{'recheck'} < time) {
 	    $self->{'load_status'} = $self->read_sensor();
