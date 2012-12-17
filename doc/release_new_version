@@ -171,43 +171,31 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20121122 ('Barack') released
+Subject: GNU Parallel 20121222 ('#freeandopen') released
 
-GNU Parallel 20121122 ('Barack') has been released. It is
+GNU Parallel 20121222 ('#freeandopen') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* niceload --sensor makes it possible to use a program to control if a
-  program should be suspended.
+* --shebang-wrap makes is possible to parallelize scripts by putting
+  parallel in the shebang line (the first #! line in scripts).
 
-* GNU Parallel was part of the justification for Nordic Free Software
-  Award 2012
-  https://fsfe.org/news/2012/news-20121112-01.html
+* --delay puts in a delay after starting each job. Useful to avoid
+  raceconditions and thundering herd problems.
 
-* Dateien schneller packen und konvertieren mit GNU parallel
-  http://www.linux-community.de/Archiv/Tipp-der-Woche/Dateien-schneller-packen-und-konvertieren-mit-GNU-parallel
+* --results now uses / as separator instead of TAB and thus creates
+  subdirs.
 
-* Processing images from Lunar Reconnaissance Orbiter Narrow Angle
-  Camera http://lunokhod.org/?p=774
+* niceload --sensor allows for negative numbers to signify a lower
+  number means the limit is lower.
 
-* GNU Parallel is used in types2: Type and Hapax Accumulation Curves
-  http://www.cs.helsinki.fi/u/josuomel/types2/
+* niceload --prg suspend a named program that is already running.
 
-* GNU Parallel used in: A Hybrid Factor Analysis and Probabilistic
-  PCA-based system for Dictionary Learning and Encoding for Robust
-  Speaker Recognition
-  http://www.superlectures.com/odyssey2012/lecture.php?id=8&lang=en
-  http://www.cse.iitm.ac.in/~mrsri/ppca.pdf
+* niceload --pid suspend process id that is already running.
 
-* Mapreduce avec parallel, cat et une redirection
-  http://datacratic.com/site/blog/mapreduce-avec-parallel-cat-et-une-redirection
-
-* GNU Parallel for Large Batches of Small Jobs
-  https://support.scinet.utoronto.ca/wiki/images/7/7b/Tech-talk-gnu-parallel.pdf
-
-* GNU Parallel used in black belt tip (8:50-10:12)
-  https://aws.amazon.com/apac/awspodcast/episode20/
+* Convertir des images avec find et imagemagick
+  http://roger.b.over-blog.com/article-convertir-des-images-avec-find-et-imagemagick-113416637.html
 
 * Bug fixes and man page updates.
 

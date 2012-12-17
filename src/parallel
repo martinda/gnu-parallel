@@ -2903,6 +2903,8 @@ sub no_of_cores {
 	$no_of_cores = no_of_cores_gnu_linux();
     } elsif ($^O eq 'freebsd') {
         $no_of_cores = no_of_cores_freebsd();
+    } elsif ($^O eq 'openbsd') {
+        $no_of_cores = no_of_cores_openbsd();
     } elsif ($^O eq 'solaris') {
 	$no_of_cores = no_of_cores_solaris();
     } elsif ($^O eq 'aix') {
@@ -2911,6 +2913,7 @@ sub no_of_cores {
 	$no_of_cores = no_of_cores_darwin();
     } else {
 	$no_of_cores = (no_of_cores_freebsd()
+			|| no_of_cores_openbsd()
 			|| no_of_cores_darwin()
 			|| no_of_cores_solaris()
 			|| no_of_cores_aix()
@@ -3006,6 +3009,15 @@ sub no_of_cores_freebsd {
 	(`sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`
 	 or
 	 `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`);
+    chomp $no_of_cores;
+    return $no_of_cores;
+}
+
+sub no_of_cores_openbsd {
+    # Returns:
+    #   Number of CPU cores on OpenBSD
+    #   undef if not OpenBSD
+    my $no_of_cores = `sysctl -n hw.ncpu 2>/dev/null`;
     chomp $no_of_cores;
     return $no_of_cores;
 }
