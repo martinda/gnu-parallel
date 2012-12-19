@@ -24,6 +24,7 @@ Sample usage:
     Type "help", "copyright", "credits" or "license" for more information.
     >>> import gnuparallel
     >>> help(gnuparallel.load)
+!!! THIS PART IS BROKEN !!!
     >>> my_df = gnuparallel.load('out')
     >>> my_df
       _prefix _stream  arg1   arg2                          resfile
