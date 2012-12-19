@@ -6,7 +6,7 @@ SERVER2=parallel-server2
 # -L1 will join lines ending in ' '
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j10 -k -L1
 echo "### Test --delay"
-seq 9 | /usr/bin/time -f %e  parallel -j3 --delay 0.53 true {} 2>&1 | 
+seq 9 | /usr/bin/time -f %e  parallel -j3 --delay 0.57 true {} 2>&1 | 
   perl -ne '$_ > 5 and print "More than 5 secs: OK\n"'
 
 echo '### Test -k 5'; 
@@ -40,5 +40,8 @@ seq 1 10 | parallel -j 3 echo | sort
 
 echo "bug #37694: Empty string argument skipped when using --quote"
 parallel -q --nonall perl -le 'print scalar @ARGV' 'a' 'b' ''
+
+echo "bug #37956: --colsep does not default to '\t' as specified in the man page."
+printf "A\tB\n1\tone" | parallel --header : echo {B} {A}
 
 EOF

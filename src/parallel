@@ -687,7 +687,7 @@ sub parse_options {
     if(defined $opt::tmpdir) { $ENV{'TMPDIR'} = $opt::tmpdir; }
     if(defined $opt::help) { die_usage(); }
     if(defined $opt::colsep) { $Global::trim = 'lr'; }
-#    if(defined $opt::header) { $opt::colsep = defined $opt::colsep ? $opt::colsep : "\t"; }
+    if(defined $opt::header) { $opt::colsep = defined $opt::colsep ? $opt::colsep : "\t"; }
     if(defined $opt::trim) { $Global::trim = $opt::trim; }
     if(defined $opt::arg_sep) { $Global::arg_sep = $opt::arg_sep; }
     if(defined $opt::arg_file_sep) { $Global::arg_file_sep = $opt::arg_file_sep; }
