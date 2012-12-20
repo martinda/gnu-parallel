@@ -3416,6 +3416,10 @@ Your bug report should always include:
 
 =item *
 
+The error message you get (if any).
+
+=item *
+
 The output of B<parallel --version>. If you are not running the latest
 released version you should specify why you believe the problem is not
 fixed in that version.
@@ -3434,8 +3438,9 @@ by others, the output might help them figure out the problem.
 
 =back
 
-If you suspect the error is dependent on your distribution, please see
-if you can reproduce the error on one of these VirtualBox images:
+If you suspect the error is dependent on your environment or
+distribution, please see if you can reproduce the error on one of
+these VirtualBox images:
 http://sourceforge.net/projects/virtualboximage/files/
 
 Specifying the name of your distribution is not enough as you may have
