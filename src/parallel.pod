@@ -992,49 +992,42 @@ Only used with B<--pipe>.
 
 =item B<--res> I<prefix> (beta testing)
 
-Results in files named by tab separated arguments. Save the output
-into files. The file names will be prefixed with I<prefix> which can
-contain a path with a prefix string. The file with output from stdout
-(standard output) will prefixed with 'I<prefix>stdout'.  The file
-with output from stderr (standard error) will prefixed with
-'I<prefix>stderr'.
-
-The postfix is the header of the input source (if using B<--header :>)
-or the number of the input source followed by the value of the input
-source. This is repeated for every input source and is separated by
-TAB (\t).
+Save the output into files. The files will be stored in a directory tree
+rooted at I<prefix>.  Within this directory tree, each command will result
+in two files: I<prefix>/<ARGS>/stdout and I<prefix>/<ARGS>/stderr, where
+<ARGS> is a sequence of directories representing the header of the input
+source (if using B<--header :>) or the number of the input source and
+corresponding values.
 
 E.g:
 
-  parallel --header : --results foo/bar echo {a} {b} ::: a I II ::: b III IIII
+  parallel --header : --results foo echo {a} {b} ::: a I II ::: b III IIII
 
 will generate the files:
 
-  foo/barstderr	a	I	b	III
-  foo/barstderr	a	I	b	IIII
-  foo/barstderr	a	II	b	III
-  foo/barstderr	a	II	b	IIII
-  foo/barstdout	a	I	b	III
-  foo/barstdout	a	I	b	IIII
-  foo/barstdout	a	II	b	III
-  foo/barstdout	a	II	b	IIII
+  foo/a/I/b/III/stderr
+  foo/a/I/b/IIII/stderr
+  foo/a/II/b/III/stderr
+  foo/a/II/b/IIII/stderr
+  foo/a/I/b/III/stdout
+  foo/a/I/b/IIII/stdout
+  foo/a/II/b/III/stdout
+  foo/a/II/b/IIII/stdout
 
 and
 
-  parallel --results foo/bar echo {1} {2} ::: I II ::: III IIII
+  parallel --results foo echo {1} {2} ::: I II ::: III IIII
 
 will generate the files:
 
-  foo/barstderr	1	I	2	III
-  foo/barstderr	1	I	2	IIII
-  foo/barstderr	1	II	2	III
-  foo/barstderr	1	II	2	IIII
-  foo/barstdout	1	I	2	III
-  foo/barstdout	1	I	2	IIII
-  foo/barstdout	1	II	2	III
-  foo/barstdout	1	II	2	IIII
-
-where all spaces are TABs (\t);.
+  foo/1/I/2/III/stderr
+  foo/1/I/2/IIII/stderr
+  foo/1/II/2/III/stderr
+  foo/1/II/2/IIII/stderr
+  foo/1/I/2/III/stdout
+  foo/1/I/2/IIII/stdout
+  foo/1/II/2/III/stdout
+  foo/1/II/2/IIII/stdout
 
 See also B<--files>, B<--header>, B<--joblog>.
 
