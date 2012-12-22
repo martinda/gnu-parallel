@@ -5,7 +5,5 @@
 ...OK
 ### Test --sensor -l negative
              total       used       free     shared    buffers     cached
-Mem:             7          6          1          0          0          0
 -/+ buffers/cache:          6          1
-Swap:            9          2          7
-more than 5 GB used
+more than 6 GB used

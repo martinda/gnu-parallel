@@ -1,3 +1,29 @@
+20121222
+
+* --shebang-wrap makes is possible to parallelize scripts by putting
+  parallel in the shebang line (the first #! line in scripts).
+
+* --delay puts in a delay after starting each job. Useful to avoid
+  raceconditions and thundering herd problems.
+
+* --results now uses / as separator instead of TAB and thus creates
+  subdirs. Thanks to Drew Frank.
+
+* parallel: OpenBSD CPU detection. Thanks to Michał Markowski.
+
+* niceload --sensor allows for negative numbers to signify a lower
+  number means the limit is lower.
+
+* niceload --prg suspend a named program that is already running.
+
+* niceload multiple --pid suspend process ids that are already running.
+
+* Convertir des images avec find et imagemagick
+  http://roger.b.over-blog.com/article-convertir-des-images-avec-find-et-imagemagick-113416637.html
+
+* Bug fixes and man page updates.
+
+
 20121122
 
 * niceload --sensor makes it possible to use a program to control if a

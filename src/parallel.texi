@@ -1053,63 +1053,56 @@ it to the command.
 
 Only used with @strong{--pipe}.
 
-@item @strong{--results} @emph{prefix} (beta testing)
-@anchor{@strong{--results} @emph{prefix} (beta testing)}
+@item @strong{--results} @emph{prefix} (alpha testing)
+@anchor{@strong{--results} @emph{prefix} (alpha testing)}
 
-@item @strong{--res} @emph{prefix} (beta testing)
-@anchor{@strong{--res} @emph{prefix} (beta testing)}
+@item @strong{--res} @emph{prefix} (alpha testing)
+@anchor{@strong{--res} @emph{prefix} (alpha testing)}
 
-Results in files named by tab separated arguments. Save the output
-into files. The file names will be prefixed with @emph{prefix} which can
-contain a path with a prefix string. The file with output from stdout
-(standard output) will prefixed with '@emph{prefix}stdout'.  The file
-with output from stderr (standard error) will prefixed with
-'@emph{prefix}stderr'.
-
-The postfix is the header of the input source (if using @strong{--header :})
-or the number of the input source followed by the value of the input
-source. This is repeated for every input source and is separated by
-TAB (\t).
+Save the output into files. The files will be stored in a directory tree
+rooted at @emph{prefix}.  Within this directory tree, each command will result
+in two files: @emph{prefix}/<ARGS>/stdout and @emph{prefix}/<ARGS>/stderr, where
+<ARGS> is a sequence of directories representing the header of the input
+source (if using @strong{--header :}) or the number of the input source and
+corresponding values.
 
 E.g:
 
 @verbatim
-  parallel --header : --results foo/bar echo {a} {b} ::: a I II ::: b III IIII
+  parallel --header : --results foo echo {a} {b} ::: a I II ::: b III IIII
 @end verbatim
 
 will generate the files:
 
 @verbatim
-  foo/barstderr a       I       b       III
-  foo/barstderr a       I       b       IIII
-  foo/barstderr a       II      b       III
-  foo/barstderr a       II      b       IIII
-  foo/barstdout a       I       b       III
-  foo/barstdout a       I       b       IIII
-  foo/barstdout a       II      b       III
-  foo/barstdout a       II      b       IIII
+  foo/a/I/b/III/stderr
+  foo/a/I/b/IIII/stderr
+  foo/a/II/b/III/stderr
+  foo/a/II/b/IIII/stderr
+  foo/a/I/b/III/stdout
+  foo/a/I/b/IIII/stdout
+  foo/a/II/b/III/stdout
+  foo/a/II/b/IIII/stdout
 @end verbatim
 
 and
 
 @verbatim
-  parallel --results foo/bar echo {1} {2} ::: I II ::: III IIII
+  parallel --results foo echo {1} {2} ::: I II ::: III IIII
 @end verbatim
 
 will generate the files:
 
 @verbatim
-  foo/barstderr 1       I       2       III
-  foo/barstderr 1       I       2       IIII
-  foo/barstderr 1       II      2       III
-  foo/barstderr 1       II      2       IIII
-  foo/barstdout 1       I       2       III
-  foo/barstdout 1       I       2       IIII
-  foo/barstdout 1       II      2       III
-  foo/barstdout 1       II      2       IIII
+  foo/1/I/2/III/stderr
+  foo/1/I/2/IIII/stderr
+  foo/1/II/2/III/stderr
+  foo/1/II/2/IIII/stderr
+  foo/1/I/2/III/stdout
+  foo/1/I/2/IIII/stdout
+  foo/1/II/2/III/stdout
+  foo/1/II/2/IIII/stdout
 @end verbatim
-
-where all spaces are TABs (\t);.
 
 See also @strong{--files}, @strong{--header}, @strong{--joblog}.
 
@@ -1612,11 +1605,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir}
-@anchor{@strong{--workdir} @emph{mydir}}
+@item @strong{--workdir} @emph{mydir} (alpha testing)
+@anchor{@strong{--workdir} @emph{mydir} (alpha testing)}
 
-@item @strong{--wd} @emph{mydir}
-@anchor{@strong{--wd} @emph{mydir}}
+@item @strong{--wd} @emph{mydir} (alpha testing)
+@anchor{@strong{--wd} @emph{mydir} (alpha testing)}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in
@@ -3660,6 +3653,8 @@ https://savannah.gnu.org/bugs/?func=additem&group=parallel
 Your bug report should always include:
 
 @itemize
+@item The error message you get (if any).
+
 @item The output of @strong{parallel --version}. If you are not running the latest
 released version you should specify why you believe the problem is not
 fixed in that version.
@@ -3674,8 +3669,9 @@ by others, the output might help them figure out the problem.
 
 @end itemize
 
-If you suspect the error is dependent on your distribution, please see
-if you can reproduce the error on one of these VirtualBox images:
+If you suspect the error is dependent on your environment or
+distribution, please see if you can reproduce the error on one of
+these VirtualBox images:
 http://sourceforge.net/projects/virtualboximage/files/
 
 Specifying the name of your distribution is not enough as you may have

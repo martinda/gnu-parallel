@@ -6,14 +6,14 @@ export LANG=C
 SHFILE=/tmp/unittest-parallel.sh
 
 # Run a failing test once
-ls -t tests-to-run/*${1}*.sh \
-| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 || touch $1.sh:' \
->$SHFILE
+# ls -t tests-to-run/*${1}*.sh \
+# | perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 || touch $1.sh:' \
+# >$SHFILE
 
-#  # Try a failing test thrice
-#  ls -t tests-to-run/*${1}*.sh \
-#  | perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2: ' \
-#  >$SHFILE
+# Try a failing test thrice
+ls -t tests-to-run/*${1}*.sh \
+| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2: ' \
+>$SHFILE
 
 
 mkdir -p actual-results

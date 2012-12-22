@@ -988,9 +988,9 @@ it to the command.
 Only used with B<--pipe>.
 
 
-=item B<--results> I<prefix> (beta testing)
+=item B<--results> I<prefix> (alpha testing)
 
-=item B<--res> I<prefix> (beta testing)
+=item B<--res> I<prefix> (alpha testing)
 
 Save the output into files. The files will be stored in a directory tree
 rooted at I<prefix>.  Within this directory tree, each command will result
@@ -1490,9 +1490,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir>
+=item B<--workdir> I<mydir> (alpha testing)
 
-=item B<--wd> I<mydir>
+=item B<--wd> I<mydir> (alpha testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in
