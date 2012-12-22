@@ -9,20 +9,8 @@ class TestLoader(unittest.TestCase):
 
     def test_basics(self):
         df = load(result_dir)
-        self.assertEqual(set(df.columns), set(['a', 'b', '_prefix', 'resfile', '_stream']))
-        self.assertEqual(df.shape[0], 8)
-
-    def test_prefix(self):
-        df = load(result_dir, _prefix='foo_')
+        self.assertEqual(set(df.columns), set(['a', 'b', 'resfile', '_stream']))
         self.assertEqual(df.shape[0], 4)
-        self.assertEqual(df.a.sum(), 6)
-
-        df = load(result_dir, _prefix='bar_')
-        self.assertEqual(df.shape[0], 4)
-        self.assertEqual(df.a.sum(), 22)
-
-        df = load(result_dir, _prefix='BAD')
-        self.assertTrue(df.empty)
 
     def test_filters(self):
         df = load(result_dir, a=2)
@@ -60,7 +48,7 @@ class TestLoader(unittest.TestCase):
 
     def test_process(self):
         df = load(result_dir, a=1, _process=lambda x: pd.np.loadtxt(x).sum())
-        self.assertAlmostEqual(df.res[0], 1.4)
+        self.assertAlmostEqual(df.sum()['res'], 2.7)
 
 if __name__ == '__main__':
     unittest.main()

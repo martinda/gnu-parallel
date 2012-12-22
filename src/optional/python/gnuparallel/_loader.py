@@ -8,7 +8,7 @@ import pandas as pd
 import os
 
 def load(_dir, _process=None, _format=None, _stream='stdout',
-        _prefix=None, _infer_types=True, **options):
+        _infer_types=True, **options):
     """Load files generated with parallel's --result option.
 
     One use of GNU parallel is to call one command many times, each
@@ -43,14 +43,6 @@ def load(_dir, _process=None, _format=None, _stream='stdout',
     _stream : str, optional
         Specify either "stdout" or "stderr" to load results files from the
         corresponding stream. Default is "stdout".
-    _prefix : str, optional
-        Only load result files with a specific prefix. When using the --result
-        option to parallel it is possible to specify a prefix for all of the
-        result files. For example,
-            parallel --result /some/dir/a_prefix ...
-        would place all result files into the `/some/dir` directory and all of
-        the file names would begin with "a_prefix". This parameter lets you
-        filter based on this prefix. If None, allow any prefix. Default None.
     _infer_types : bool, optional
         Infer data types for option values. All option values are techinically
         strings (since they were passed on the command line). When _infer_types
@@ -88,14 +80,15 @@ def load(_dir, _process=None, _format=None, _stream='stdout',
     for k,v in options.iteritems():
         options[k] = set(_stringify(x, _format.get(k, '')) for x in v)
     options['_stream'] = [_stream]
-    if _prefix:
-        options['_prefix'] = [_prefix]
 
     # Iterate over results files and collect the matches.
     matches = []
-    for file in os.listdir(_dir):
-        metadata = _parse_name(file)
-        metadata['resfile'] = os.path.join(_dir, metadata['resfile'])
+    normdir = os.path.normpath(_dir)
+    for path, file in _find_results(normdir):
+        # Don't include the root path as part of the metadata string.
+        metadata = _parse_path(path[len(normdir):])
+        metadata['_stream'] = file
+        metadata['resfile'] = os.path.join(path, file)
         if _select(metadata, options):
             matches.append(metadata)
 
@@ -117,19 +110,16 @@ def load(_dir, _process=None, _format=None, _stream='stdout',
 
     return df
 
-def _parse_name(file, sep='\t'):
-    """Return a dict containing metadata extracted from the file name."""
-    tokens = file.split(sep)
-    prefix_stream = tokens[0]
-    metadata = {k:v for k,v in zip(tokens[1::2], tokens[2::2])}
+def _find_results(root):
+    """Find all regular files in a directory."""
+    for (path, dirs, files) in os.walk(root):
+        for file in files:
+            yield (path, file)
 
-    stream_index = prefix_stream.find('stdout')
-    if stream_index == -1:
-        stream_index = prefix_stream.find('stderr')
-    prefix, stream = prefix_stream[:stream_index], prefix_stream[stream_index:]
-
-    metadata.update({'_prefix': prefix, '_stream': stream, 'resfile': file})
-    return metadata
+def _parse_path(path):
+    """Return a dict containing metadata extracted from a file's path."""
+    tokens = path.split(os.path.sep)
+    return {k:v for k,v in zip(tokens[1::2], tokens[2::2])}
     
 def _select(metadata, filter):
     """Return true if the metadata entry matches the filter, False otherwise."""
