@@ -3875,6 +3875,9 @@ sub start {
 	    . $job->seq() . "): $command\n");
     if($opt::pipe) {
 	my ($in);
+	$command = q{
+             eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null && echo setenv _FIRST_CHAR_FILE /tmp/$$.first_char_file || echo export _FIRST_CHAR_FILE=/tmp/$$.first_char_file`;
+             dd bs=1 count=1 of=$_FIRST_CHAR_FILE >&/dev/null; test -s "$_FIRST_CHAR_FILE" && ( cat $_FIRST_CHAR_FILE; rm $_FIRST_CHAR_FILE; cat - ) | }. "($command)";
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3($in, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
