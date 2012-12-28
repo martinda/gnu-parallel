@@ -3875,9 +3875,21 @@ sub start {
 	    . $job->seq() . "): $command\n");
     if($opt::pipe) {
 	my ($in);
+	# Wrap command with end-of-file detector, 
+	# so we do not spawn a program if there is no input.
+	# Exit value:
+	#   empty input = true
+	#   some input = exit val from command
+	# Bug:
+	#   If the command does not read the first char, the temp file
+	#   is not deleted.
 	$command = q{
              eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null && echo setenv _FIRST_CHAR_FILE /tmp/$$.first_char_file || echo export _FIRST_CHAR_FILE=/tmp/$$.first_char_file`;
-             dd bs=1 count=1 of=$_FIRST_CHAR_FILE >&/dev/null; test -s "$_FIRST_CHAR_FILE" && ( cat $_FIRST_CHAR_FILE; rm $_FIRST_CHAR_FILE; cat - ) | }. "($command)";
+             dd bs=1 count=1 of=$_FIRST_CHAR_FILE >&/dev/null;
+             test -s "$_FIRST_CHAR_FILE" || rm "$_FIRST_CHAR_FILE";
+             test -s "$_FIRST_CHAR_FILE" || exit 0;
+             (cat $_FIRST_CHAR_FILE; rm $_FIRST_CHAR_FILE; cat - ) | } .
+		 "($command)";
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3($in, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
