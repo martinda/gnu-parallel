@@ -1,28 +1,4 @@
-### Test --tollef
-1
-2
-3
-:::
-a
-b
-c
-### Test --tollef --gnu
-1
-2
-3
---
-a
-b
-c
-### Test --gnu
-1
-2
-3
---
-a
-b
-c
-### test global config
+### test global config - must run alone so the global config does not confuse others
 1
 2
 3
@@ -51,3 +27,4 @@ c
 a
 b
 c
+<<< End test global config - must run alone so the global config does not confuse others

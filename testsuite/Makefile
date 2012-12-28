@@ -9,7 +9,7 @@ testdb: ../src/parallel tests-to-run/*sql* wanted-results/*sql* prereqdb
 local:	testlocal
 	true
 
-testlocal: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal
+testlocal: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal installparallel
 	time sh Start.sh local
 	date
 
