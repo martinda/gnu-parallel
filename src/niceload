@@ -786,7 +786,7 @@ sub io_status_linux {
 	push @iostat, (split(/\s+/,$_))[13];
     }
     my $io = ::max(@iostat);
-    return ::undef_as_zero($io)/10;
+    return undef_as_zero($io)/10;
 }
 
 $::exitsignal = $::exitstatus = 0; # Dummy
