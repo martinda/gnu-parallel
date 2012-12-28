@@ -4313,13 +4313,8 @@ sub args_as_dirname {
     my @res = ();
 
     for my $rec_ref (@{$self->{'arg_list'}}) {
-	no warnings 'numeric';
-	my @header_indexes_sorted =	sort {
-	    # Sort headers numerically then asciibetically
-	    $Global::input_source_header{$a} <=> $Global::input_source_header{$b}
-	    or
-		$Global::input_source_header{$a} cmp $Global::input_source_header{$b}
-	} 1 .. $#$rec_ref+1;
+	my @header_indexes_sorted = header_indexes_sorted($#$rec_ref+1);
+
 	for my $n (@header_indexes_sorted) {
 	    CORE::push(@res,
 		 $Global::input_source_header{$n},
@@ -4332,6 +4327,29 @@ sub args_as_dirname {
 	}
     }
     return join "/", @res;
+}
+
+sub header_indexes_sorted {
+    # Sort headers first by number then by name.
+    # E.g.: 1a 1b 11a 11b
+    # Returns:
+    #  Indexes of %Global::input_source_header sorted
+    my $max_col = shift;
+    
+    no warnings 'numeric';
+    for my $col (1 .. $max_col) {
+	# Make sure the header is defined. If it is not: use column number
+	if(not defined $Global::input_source_header{$col}) {
+	    $Global::input_source_header{$col} = $col;
+	}
+    }
+    my @header_indexes_sorted = sort {
+	# Sort headers numerically then asciibetically
+	$Global::input_source_header{$a} <=> $Global::input_source_header{$b}
+	or
+	    $Global::input_source_header{$a} cmp $Global::input_source_header{$b}
+    } 1 .. $max_col;
+    return @header_indexes_sorted;
 }
 
 sub len {
