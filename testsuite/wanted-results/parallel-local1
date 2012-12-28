@@ -57,3 +57,211 @@ number2.c
 ### Test {#.}
 a/number2
 ### bug #34241: --pipe should not spawn unneeded processes
+### Test of quoting of > bug
+>/dev/null
+### Test of quoting of > bug if line continuation
+> > >
+### Test of --trim illegal
+parallel: Error: --trim must be one of: r l rl lr.
+### Test of eof string on :::
+foo
+### Test of ignore-empty string on :::
+foo
+ole
+bar
+### Test of trailing space continuation
+foo ole bar
+quux
+foo ole bar
+quux
+foo ole bar
+quux
+### Test of trailing space continuation with -E eof
+foo ole
+foo ole 
+foo ole 
+### Test of --colsep
+a b c
+a b c {4}
+a b c d
+a b c
+d e f
+a b c
+d e f
+a b c
+a b c {4}
+a b c d
+### Test of tab as colsep
+abc def
+ghi jkl
+abc def
+ghi jkl
+### Test of multiple -a plus colsep
+abc def
+mno jkl
+### Test of multiple -a no colsep
+abc	def ghi
+jkl	mno pqr
+### Test of quoting after colsplit
+>/tmp/null >/dev/null
+### Test of --colsep as regexp
+a b c {4}
+a b c d
+a b c {4}
+a b c d
+a b c {4}
+a b c d
+a_b_c_{4}
+a_b_c_d
+### Test of -C
+a_b_c_{4}
+a_b_c_d
+### Test of --trim n
+a_b_\ c\ _{4}
+a_\ b\ _c_d
+a_b_c_{4}
+a_b_c_d
+### Test of bug: If input is empty string
+echo {2}
+{2}
+echo ac
+ac
+echo ac
+ac
+### Test bug #34241: --pipe should not spawn unneeded processes
+1
+2
+3
+o
+### Test :::: mixed with :::
+### Test :::: < ::: :::
+6 4 1
+6 4 2
+6 4 3
+6 5 1
+6 5 2
+6 5 3
+7 4 1
+7 4 2
+7 4 3
+7 5 1
+7 5 2
+7 5 3
+### Test :::: <  < :::: <
+6 4 1
+6 4 2
+6 4 3
+6 5 1
+6 5 2
+6 5 3
+7 4 1
+7 4 2
+7 4 3
+7 5 1
+7 5 2
+7 5 3
+### Test -a ::::  < :::: <
+6 4 1
+6 4 2
+6 4 3
+6 5 1
+6 5 2
+6 5 3
+7 4 1
+7 4 2
+7 4 3
+7 5 1
+7 5 2
+7 5 3
+### Test -a -a :::
+6 4 1
+6 4 2
+6 4 3
+6 5 1
+6 5 2
+6 5 3
+7 4 1
+7 4 2
+7 4 3
+7 5 1
+7 5 2
+7 5 3
+### Test -a - -a :::
+6 4 1
+6 4 2
+6 4 3
+6 5 1
+6 5 2
+6 5 3
+7 4 1
+7 4 2
+7 4 3
+7 5 1
+7 5 2
+7 5 3
+### Test :::: < - :::
+6 4 1
+6 4 2
+6 4 3
+6 5 1
+6 5 2
+6 5 3
+7 4 1
+7 4 2
+7 4 3
+7 5 1
+7 5 2
+7 5 3
+### Test -E
+1 2 3
+1 2 4
+1 3 3
+1 3 4
+1 4 3
+1 4 4
+2 2 3
+2 2 4
+2 3 3
+2 3 4
+2 4 3
+2 4 4
+3 2 3
+3 2 4
+3 3 3
+3 3 4
+3 4 3
+3 4 4
+4 2 3
+4 2 4
+4 3 3
+4 3 4
+4 4 3
+4 4 4
+### Test -E one empty
+1 2
+2 2
+### Test -E 2 empty
+1
+2
+### Test -E all empty
+### Test {#}
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+### Test --seqreplace and line too long
+      1       1  130001
+      1       1  130001
+      1       1  130001
+      1       1  130001
+      1       1  130001
+      1       1  130001
+      1       1  130001
+      1       1  130001
+parallel: Command line too long (260009 >= 131071) at number 9: 10...

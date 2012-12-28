@@ -1,7 +1,16 @@
-parallel: Warning: Only enough filehandles to run 507 jobs in parallel. Raising ulimit -n may help.
+### Test if we can deal with output > 4 GB
+46a318993dfc8e2afd71ff2bc6f605f1  -
 ### Test Force outside the file handle limit, 2009-02-17 Gave fork error
+parallel: Warning: Only enough filehandles to run 507 jobs in parallel. Raising ulimit -n may help.
 Start
 end
+### Test of --retries on unreachable host
+ssh: connect to host 4.3.2.1 port 22: Connection timed out
+parallel: Warning: Could not figure out number of cpus on 4.3.2.1 (). Using 1.
+echo 1
+1
+echo 2
+2
 ### Test race condition on 8 CPU (my laptop)
 1
 2

@@ -83,19 +83,23 @@ echo '### Test bug https://savannah.gnu.org/bugs/index.php?33352'
 # read(STDIN) to take a long time - thus being interrupted by a dead
 # child.
 
-perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | md5sum
-nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
-  $PAR cat | md5sum
-nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
-  $PAR --recend '' cat | md5sum
-nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
-  $PAR --recend '' --files cat | parallel -Xj1 cat {} ';' rm {} | md5sum
-nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
-  $PAR --recend '' --files cat | parallel -Xj1 cat {} ';' rm {} | md5sum
-nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
-  $PAR --recend '' --files --tmpdir /dev/shm cat | parallel -Xj1 cat {} ';' rm {} | md5sum
-nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
-  $PAR --recend '' --files --halt-on-error 2 cat | parallel -Xj1 cat {} ';' rm {} | md5sum
+echo "# md5sum - directly"
+  perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | md5sum
+echo "# parallel | md5sum"
+  nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
+    $PAR cat | md5sum
+echo "# --recend ''"
+  nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
+    $PAR --recend '' cat | md5sum
+echo "# --recend '' --files"
+  nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
+    $PAR --recend '' --files cat | parallel -Xj1 cat {} ';' rm {} | md5sum
+echo "# --recend '' --files --tmpdir"
+  nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
+    $PAR --recend '' --files --tmpdir /dev/shm cat | parallel -Xj1 cat {} ';' rm {} | md5sum
+echo "# --recend '' --files --halt-on-error"
+  nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
+    $PAR --recend '' --files --halt-on-error 2 cat | parallel -Xj1 cat {} ';' rm {} | md5sum
 
 echo '### Test of -j filename - non-existent file'; 
   nice stdout parallel -j no_such_file echo ::: 1

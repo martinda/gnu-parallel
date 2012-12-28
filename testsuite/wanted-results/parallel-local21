@@ -1,13 +1,13 @@
 ### Test basic --shebang-wrap
 Shebang from perl with args arg1
 Shebang from perl with args arg2
-### Same as
+### Test basic --shebang-wrap Same as
 Shebang from perl with args arg1
 Shebang from perl with args arg2
-### stdin
+### Test basic --shebang-wrap stdin
 Shebang from perl with args arg1
 Shebang from perl with args arg2
-### Same as
+### Test basic --shebang-wrap Same as
 Shebang from perl with args arg1
 Shebang from perl with args arg2
 ### Test --shebang-wrap with parser options
@@ -19,7 +19,7 @@ Shebang from perl with args
 4
 Shebang from perl with args 
 5
-### Same as
+### Test --shebang-wrap with parser options Same as
 Shebang from perl with args 
 1
 Shebang from perl with args 
@@ -28,7 +28,7 @@ Shebang from perl with args
 4
 Shebang from perl with args 
 5
-### stdin
+### Test --shebang-wrap with parser options stdin
 Shebang from perl with args 
 1
 Shebang from perl with args 
@@ -37,7 +37,7 @@ Shebang from perl with args
 4
 Shebang from perl with args 
 5
-### Same as
+### Test --shebang-wrap with parser options Same as
 Shebang from perl with args 
 1
 Shebang from perl with args 
@@ -65,7 +65,7 @@ Shebang from perl with args
 4
 Shebang from perl with args 
 5
-### Same as
+### Test --shebang-wrap --pipe with parser options Same as
 Shebang from perl with args 
 1
 Shebang from perl with args 
@@ -74,7 +74,7 @@ Shebang from perl with args
 4
 Shebang from perl with args 
 5
-### stdin
+### Test --shebang-wrap --pipe with parser options stdin
 Shebang from perl with args 
 1
 Shebang from perl with args 
@@ -83,7 +83,7 @@ Shebang from perl with args
 4
 Shebang from perl with args 
 5
-### Same as
+### Test --shebang-wrap --pipe with parser options Same as
 Shebang from perl with args 
 1
 Shebang from perl with args 

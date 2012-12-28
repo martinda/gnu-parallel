@@ -50,12 +50,17 @@ a b	stdout-a stdout-b
 a
 b
 ### Test bug https://savannah.gnu.org/bugs/index.php?33352
+# md5sum - directly
 350eda13a37912d755c9d733d149bdaf  -
+# parallel | md5sum
 350eda13a37912d755c9d733d149bdaf  -
+# --recend ''
 350eda13a37912d755c9d733d149bdaf  -
+# --recend '' --files
 350eda13a37912d755c9d733d149bdaf  -
+# --recend '' --files --tmpdir
 350eda13a37912d755c9d733d149bdaf  -
-350eda13a37912d755c9d733d149bdaf  -
+# --recend '' --files --halt-on-error
 350eda13a37912d755c9d733d149bdaf  -
 ### Test of -j filename - non-existent file
 Usage:
