@@ -181,7 +181,7 @@ if($opt::nonall or $opt::onall) {
     # Copy all @fhlist into tempfiles
     my @argfiles = ();
     for my $fh (@fhlist) {
-	my ($outfh,$name) = ::tempfile(SUFFIX => ".all");
+	my ($outfh, $name) = ::tempfile(SUFFIX => ".all", UNLINK => 1);
 	print $outfh (<$fh>);
 	close $outfh;
 	push @argfiles, $name;
@@ -1051,7 +1051,7 @@ sub read_args_from_command_line {
 		# Group of arguments on the command line.
 		# Put them into a file.
 		# Create argfile
-		my ($outfh,$name) = ::tempfile(SUFFIX => ".arg");
+		my ($outfh,$name) = ::tempfile(SUFFIX => ".arg", UNLINK => 1);
 		unlink($name);
 		# Put args into argfile
 		print $outfh map { $_,$/ } @group;
@@ -2383,7 +2383,7 @@ sub swap_activity {
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'swap_activity_file'};
-        my $tmpfile = $self->{'swap_activity_file'}.$$;
+        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".swp", UNLINK => 1);
         qx{ ($swap_activity > $tmpfile; mv $tmpfile $file) & };
     }
     return $self->{'swap_activity'};
@@ -2466,7 +2466,7 @@ sub loadavg {
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'loadavg_file'};
-        my $tmpfile = $self->{'loadavg_file'}.$$;
+        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".loa", UNLINK => 1);
         qx{ ($uptime > $tmpfile && mv $tmpfile $file) & };
     }
     return $self->{'loadavg'};
@@ -3844,10 +3844,10 @@ sub start {
 	my ($outfh,$errfh,$name);
 	# To group we create temporary files for STDOUT and STDERR
 	# To avoid the cleanup unlink the files immediately (but keep them open)
-	($outfh,$name) = ::tempfile(SUFFIX => ".par");
+	($outfh, $name) = ::tempfile(SUFFIX => ".par", UNLINK => 1);
 	$job->set_stdoutfilename($name);
 	$opt::files or unlink $name;
-	($errfh,$name) = ::tempfile(SUFFIX => ".par");
+	($errfh, $name) = ::tempfile(SUFFIX => ".par", UNLINK => 1);
 	unlink $name;
 
 	open OUT, '>&', $outfh or ::die_bug("Can't redirect STDOUT: $!");
@@ -3883,13 +3883,12 @@ sub start {
 	# Bug:
 	#   If the command does not read the first char, the temp file
 	#   is not deleted.
-	$command = q{
-             eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null && echo setenv _FIRST_CHAR_FILE /tmp/$$.first_char_file || echo export _FIRST_CHAR_FILE=/tmp/$$.first_char_file`;
-             dd bs=1 count=1 of=$_FIRST_CHAR_FILE >&/dev/null;
-             test -s "$_FIRST_CHAR_FILE" || rm "$_FIRST_CHAR_FILE";
-             test -s "$_FIRST_CHAR_FILE" || exit 0;
-             (cat $_FIRST_CHAR_FILE; rm $_FIRST_CHAR_FILE; cat - ) | } .
-		 "($command)";
+        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".chr", UNLINK => 1);
+	$command = qq{
+             sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null';
+             test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true;
+             (cat $tmpfile; rm $tmpfile; cat - ) | } .
+		 "($command);";
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3($in, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
