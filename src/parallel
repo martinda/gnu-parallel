@@ -501,6 +501,7 @@ sub options_hash {
 	 "seqreplace=s" => \$opt::seqreplace,
 	 "jobs|j=s" => \$opt::P,
 	 "delay=f" => \$opt::delay,
+	 "sshdelay=f" => \$opt::sshdelay,
 	 "load=s" => \$opt::load,
 	 "noswap" => \$opt::noswap,
 	 "max-line-length-allowed" => \$opt::max_line_length_allowed,
@@ -721,6 +722,10 @@ sub parse_options {
 	} else {
 	    wait_and_exit(0);
 	}
+    }
+    if(not defined $opt::delay) {
+	# Set --delay to --sshdelay if not set
+	$opt::delay = $opt::sshdelay;
     }
     if($opt::tollef and not $opt::gnu and not $opt::plain) {
 	# Behave like tollef parallel (from moreutils)
@@ -2766,7 +2771,8 @@ sub simultaneous_sshlogin {
     my $wanted_processes = shift;
     my $sshcmd = $self->sshcommand();
     my $serverlogin = $self->serverlogin();
-    my $cmd = "$sshcmd $serverlogin echo simultaneouslogin </dev/null 2>&1 &"x$wanted_processes;
+    my $sshdelay = $opt::sshdelay ? "sleep $opt::sshdelay;" : "";
+    my $cmd = "$sshdelay$sshcmd $serverlogin echo simultaneouslogin </dev/null 2>&1 &"x$wanted_processes;
     ::debug("Trying $wanted_processes logins at $serverlogin");
     open (my $simul_fh, "-|", "($cmd)|grep simultaneouslogin | wc -l") or
 	::die_bug("simultaneouslogin");
