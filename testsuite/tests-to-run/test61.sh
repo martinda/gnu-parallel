@@ -28,4 +28,8 @@ parallel -j0 -kX  echo {}-{.} ::: a b c ::: d e f
 echo '### Test of -r with --pipe - the first should give an empty line. The second should not.'
 echo | parallel  -j2 -N1 --pipe cat | wc -l
 echo | parallel -r -j2 -N1 --pipe cat | wc -l
+
+echo '### Test --tty'
+seq 0.1 0.1 0.5 | parallel -j1 --tty tty\;sleep 
+
 EOF

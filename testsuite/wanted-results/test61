@@ -44,3 +44,9 @@ c-c f-f
 ### Test of -r with --pipe - the first should give an empty line. The second should not.
 1
 0
+### Test --tty
+/dev/tty
+/dev/tty
+/dev/tty
+/dev/tty
+/dev/tty

@@ -171,15 +171,24 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20121222 ('End of The World') released
+Subject: GNU Parallel 20130122 ('') released
 
-GNU Parallel 20121222 ('End of The World') has been released. It is
+GNU Parallel 20130122 ('') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* Mahout: Parallelising the creation of DecisionTrees
-  http://www.markhneedham.com/blog/2012/12/27/mahout-parallelising-the-creation-of-decisiontrees/
+* Official OpenBSD port:
+  http://ftp.openbsd.org/ports/sysutils/parallel/
+
+* Official DragonFlyBSD package:
+  http://www.mirrorservice.org/sites/ftp.dragonflybsd.org/packages/amd64/DragonFly-3.0.0/stable/parallel/
+
+* Post about niceload in Hungarian:
+  http://commandline.blog.hu/2013/01/02/niceload
+
+* GNU parallel+ssh で複数のリモートホストに複数のコマンドを実行させる
+  http://oshiire.to/archives/1686
 
 * Bug fixes and man page updates.
 
