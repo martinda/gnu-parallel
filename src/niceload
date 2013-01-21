@@ -24,7 +24,7 @@
 use strict;
 use Getopt::Long;
 $Global::progname="niceload";
-$Global::version = 20121222;
+$Global::version = 20130117;
 Getopt::Long::Configure("bundling","require_order");
 get_options_from_array(\@ARGV) || die_usage();
 if($opt::version) {
@@ -310,7 +310,7 @@ sub pgrp {
 	for(@{$self->{'pids'}}) {
 	    push @pgrp,-getpgrp($_);
 	}
-	@pgrp = uniq(@pgrp);
+	@pgrp = ::uniq(@pgrp);
 	@{$self->{'pgrp'}} = @pgrp;
     }
     return @{$self->{'pgrp'}};
