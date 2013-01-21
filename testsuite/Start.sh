@@ -5,16 +5,19 @@
 export LANG=C
 SHFILE=/tmp/unittest-parallel.sh
 
-# Run a failing test once
-ls -t tests-to-run/*${1}*.sh \
-| perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 || touch $1.sh:' \
->$SHFILE
-
-# Try a failing test thrice
-# ls -t tests-to-run/*${1}*.sh \
-# | perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2: ' \
-# >$SHFILE
-
+if [ "$TRIES" = "3" ] ; then
+  # Try a failing test thrice
+  echo Retrying 3 times
+  ls -t tests-to-run/*${1}*.sh |
+    perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 >/dev/null || bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 || touch $1.sh: ' \
+    >$SHFILE
+else
+  # Run a failing test once
+  echo Not retrying
+  ls -t tests-to-run/*${1}*.sh |
+    perl -pe 's:(.*/(.*)).sh:bash $1.sh > actual-results/$2; diff -Naur wanted-results/$2 actual-results/$2 || touch $1.sh:' \
+    >$SHFILE
+fi
 
 mkdir -p actual-results
 stdout sh -x $SHFILE | tee testsuite.log

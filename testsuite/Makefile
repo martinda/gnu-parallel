@@ -2,6 +2,10 @@ testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal p
 	time sh Start.sh
 	date
 
+3: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
+	TRIES=3 time sh Start.sh
+	date
+
 testdb: ../src/parallel tests-to-run/*sql* wanted-results/*sql* prereqdb
 	time sh Start.sh sql
 	date
@@ -52,7 +56,7 @@ portable:
 	time bash Portable.sh
 
 timings: tests-to-run/* ../src/parallel
-	ls tests-to-run/*.sh | xargs -n1 echo /usr/bin/time -f %e bash >/tmp/timing.script
+	ls tests-to-run/*.sh | parallel echo /usr/bin/time -f %e bash >/tmp/timing.script
 	stdout bash -x /tmp/timing.script | tee /tmp/timing.out
 	echo usr.bin.time_END >>/tmp/timing.out
 	perl -ne '/usr.bin.time/ and do { print $$last.$$h; $$h=$$_ }; chomp; $$last = $$_' /tmp/timing.out | sort -n >timings
