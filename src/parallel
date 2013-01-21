@@ -3850,10 +3850,11 @@ sub start {
 	my ($outfh,$errfh,$name);
 	# To group we create temporary files for STDOUT and STDERR
 	# To avoid the cleanup unlink the files immediately (but keep them open)
-	($outfh, $name) = ::tempfile(SUFFIX => ".par", UNLINK => 1);
+	my $unlink = $opt::files ? 0 : 1;
+	($outfh, $name) = ::tempfile(SUFFIX => ".par", UNLINK => $unlink);
 	$job->set_stdoutfilename($name);
-	$opt::files or unlink $name;
-	($errfh, $name) = ::tempfile(SUFFIX => ".par", UNLINK => 1);
+	$unlink and unlink $name;
+	($errfh, $name) = ::tempfile(SUFFIX => ".par", UNLINK => $unlink);
 	unlink $name;
 
 	open OUT, '>&', $outfh or ::die_bug("Can't redirect STDOUT: $!");
