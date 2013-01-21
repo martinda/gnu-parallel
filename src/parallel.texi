@@ -1317,6 +1317,13 @@ composed commands for GNU @strong{parallel}.
 Do not use the first line of input (used by GNU @strong{parallel} itself
 when called with @strong{--shebang}).
 
+@item @strong{--sshdelay} @emph{secs} (alpha testing)
+@anchor{@strong{--sshdelay} @emph{secs} (alpha testing)}
+
+Delay starting next ssh by @emph{secs} seconds. GNU @strong{parallel} will pause
+@emph{secs} seconds after starting each ssh. @emph{secs} can be less than 1
+seconds.
+
 @item @strong{-S} @emph{[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]}
 @anchor{@strong{-S} @emph{[ncpu/]sshlogin[@comma{}[ncpu/]sshlogin[@comma{}...]]}}
 
@@ -2612,15 +2619,21 @@ There are a two small issues when using GNU @strong{parallel} as queue
 system/batch manager:
 
 @itemize
-@item You will get a warning if you do not submit JobSlots jobs within the
-first second. E.g. if you have 8 cores and use @strong{-j+2} you have to submit
-10 jobs. These can be dummy jobs (e.g. @strong{echo foo}). You can also simply
-ignore the warning.
+@item You will get a warning if you do not submit JobSlots jobs within
+the first second. E.g. if you have 8 cores and use -j+2 you have to
+submit 10 jobs. These can be dummy jobs (e.g. echo foo). You can also
+simply ignore the warning.  For parallel versions 20110322 and higher,
+the warnings will not appear.
 
-@item Jobs will be run immediately, but output from jobs will only be
-printed when JobSlots more jobs has been started. E.g. if you have 10
-jobslots then the output from the first completed job will only be
-printed when job 11 is started.
+@item You have to submit JobSlot number of jobs before they will start, and
+after that you can submit one at a time, and job will start
+immediately if free slots are available.  Output from the running or
+completed jobs are held back and will only be printed when JobSlots
+more jobs has been started (unless you use --ungroup or -u, in which
+case the output from the jobs are printed immediately).  E.g. if you
+have 10 jobslots then the output from the first completed job will
+only be printed when job 11 has started, and the output of second
+completed job will only be printed when job 12 has started.
 
 @end itemize
 
@@ -2637,9 +2650,6 @@ called on other platforms file a bug report):
 This will run the command @strong{echo} on each file put into @strong{my_dir} or
 subdirs of @strong{my_dir}.
 
-The @strong{-u} is needed because of a small bug in GNU @strong{parallel}. If that
-proves to be a problem, file a bug report.
-
 You can of course use @strong{-S} to distribute the jobs to remote
 computers:
 
@@ -2649,6 +2659,9 @@ computers:
 If the files to be processed are in a tar file then unpacking one file
 and processing it immediately may be faster than first unpacking all
 files. Set up the dir processor as above and unpack into the dir.
+
+Using GNU Parallel as dir processor has the same limitations as using
+GNU Parallel as queue system/batch manager.
 
 @chapter QUOTING
 @anchor{QUOTING}

@@ -1220,6 +1220,13 @@ Do not use the first line of input (used by GNU B<parallel> itself
 when called with B<--shebang>).
 
 
+=item B<--sshdelay> I<secs> (alpha testing)
+
+Delay starting next ssh by I<secs> seconds. GNU B<parallel> will pause
+I<secs> seconds after starting each ssh. I<secs> can be less than 1
+seconds.
+
+
 =item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
 
 =item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
