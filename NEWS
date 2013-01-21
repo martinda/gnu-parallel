@@ -1,3 +1,27 @@
+20130122
+
+* --sshdelay Delay starting next ssh by secs seconds. GNU parallel
+  will pause secs seconds after starting each ssh. secs can be less
+  than 1 seconds.
+
+* Official OpenBSD port:
+  http://ftp.openbsd.org/ports/sysutils/parallel/
+
+* Official DragonFlyBSD package:
+  http://www.mirrorservice.org/sites/ftp.dragonflybsd.org/packages/amd64/DragonFly-3.0.0/stable/parallel/
+
+* Post about niceload in Hungarian:
+  http://commandline.blog.hu/2013/01/02/niceload
+
+* 自炊スキャンデータをKobo Gloに最適化
+  http://interstadial.wordpress.com/2013/01/20/
+
+* GNU parallel+ssh で複数のリモートホストに複数のコマンドを実行させる
+  http://oshiire.to/archives/1686
+
+* Bug fixes and man page updates.
+
+
 20121222
 
 * --shebang-wrap makes is possible to parallelize scripts by putting

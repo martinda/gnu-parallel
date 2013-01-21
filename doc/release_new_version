@@ -178,6 +178,10 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* --sshdelay Delay starting next ssh by secs seconds. GNU parallel
+  will pause secs seconds after starting each ssh. secs can be less
+  than 1 seconds.
+
 * Official OpenBSD port:
   http://ftp.openbsd.org/ports/sysutils/parallel/
 
@@ -186,6 +190,9 @@ New in this release:
 
 * Post about niceload in Hungarian:
   http://commandline.blog.hu/2013/01/02/niceload
+
+* 自炊スキャンデータをKobo Gloに最適化
+  http://interstadial.wordpress.com/2013/01/20/
 
 * GNU parallel+ssh で複数のリモートホストに複数のコマンドを実行させる
   http://oshiire.to/archives/1686

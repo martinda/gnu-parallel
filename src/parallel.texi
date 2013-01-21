@@ -479,8 +479,8 @@ because it is POSIX compliant for @strong{xargs} while this option is not.
 If @emph{eof-str} is omitted, there is no end of file string.  If neither
 @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
-@item @strong{--env} @emph{var} (beta testing)
-@anchor{@strong{--env} @emph{var} (beta testing)}
+@item @strong{--env} @emph{var}
+@anchor{@strong{--env} @emph{var}}
 
 Copy environment variable @emph{var}. This will copy @emph{var} to the
 environment that the command is run in. This is especially useful for
@@ -506,8 +506,8 @@ See also: @strong{--bg}, @strong{man sem}
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (alpha testing)
-@anchor{@strong{--filter-hosts} (alpha testing)}
+@item @strong{--filter-hosts} (beta testing)
+@anchor{@strong{--filter-hosts} (beta testing)}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -716,7 +716,7 @@ to see the difference:
 @item @strong{-L} @emph{max-lines}
 @anchor{@strong{-L} @emph{max-lines}}
 
-When used with @strong{--pipe}: Read records of @emph{max-lines} (alpha testing).
+When used with @strong{--pipe}: Read records of @emph{max-lines} (beta testing).
 
 When used otherwise: Use at most @emph{max-lines} nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -733,7 +733,7 @@ Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is 
 @item @strong{-l}[@emph{max-lines}]
 @anchor{@strong{-l}[@emph{max-lines}]}
 
-When used with @strong{--pipe}: Read records of @emph{max-lines} (alpha testing).
+When used with @strong{--pipe}: Read records of @emph{max-lines} (beta testing).
 
 When used otherwise: Synonym for the @strong{-L} option.  Unlike @strong{-L}, the
 @emph{max-lines} argument is optional.  If @emph{max-lines} is not specified,
@@ -870,8 +870,8 @@ defaults to '\n'. To have no record separator use @strong{--recend ""}.
 
 @strong{--files} is often used with @strong{--pipe}.
 
-@item @strong{--plain} (beta testing)
-@anchor{@strong{--plain} (beta testing)}
+@item @strong{--plain}
+@anchor{@strong{--plain}}
 
 Ignore any @strong{--profile}, $PARALLEL, ~/.parallel/config, and
 @strong{--tollef} to get full control on the command line (used by GNU
@@ -1612,11 +1612,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir} (alpha testing)
-@anchor{@strong{--workdir} @emph{mydir} (alpha testing)}
+@item @strong{--workdir} @emph{mydir} (beta testing)
+@anchor{@strong{--workdir} @emph{mydir} (beta testing)}
 
-@item @strong{--wd} @emph{mydir} (alpha testing)
-@anchor{@strong{--wd} @emph{mydir} (alpha testing)}
+@item @strong{--wd} @emph{mydir} (beta testing)
+@anchor{@strong{--wd} @emph{mydir} (beta testing)}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in

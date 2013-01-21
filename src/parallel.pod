@@ -452,7 +452,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var> (beta testing)
+=item B<--env> I<var>
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -479,7 +479,7 @@ See also: B<--bg>, B<man sem>
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (alpha testing)
+=item B<--filter-hosts> (beta testing)
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -664,7 +664,7 @@ to see the difference:
 
 =item B<-L> I<max-lines>
 
-When used with B<--pipe>: Read records of I<max-lines> (alpha testing).
+When used with B<--pipe>: Read records of I<max-lines> (beta testing).
 
 When used otherwise: Use at most I<max-lines> nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -680,7 +680,7 @@ Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 =item B<-l>[I<max-lines>]
 
-When used with B<--pipe>: Read records of I<max-lines> (alpha testing).
+When used with B<--pipe>: Read records of I<max-lines> (beta testing).
 
 When used otherwise: Synonym for the B<-L> option.  Unlike B<-L>, the
 I<max-lines> argument is optional.  If I<max-lines> is not specified,
@@ -814,7 +814,7 @@ defaults to '\n'. To have no record separator use B<--recend "">.
 B<--files> is often used with B<--pipe>.
 
 
-=item B<--plain> (beta testing)
+=item B<--plain>
 
 Ignore any B<--profile>, $PARALLEL, ~/.parallel/config, and
 B<--tollef> to get full control on the command line (used by GNU
@@ -1497,9 +1497,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (alpha testing)
+=item B<--workdir> I<mydir> (beta testing)
 
-=item B<--wd> I<mydir> (alpha testing)
+=item B<--wd> I<mydir> (beta testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in
