@@ -112,4 +112,6 @@ echo '### -k -i -0'
 echo '### -k -0 -i repl'
   printf '1\0002\0003\0004\0005\000' | stdout parallel -k -0 -i repl echo repl OK
 
+echo '### test --sshdelay'
+  stdout /usr/bin/time -f %e parallel -j0 --sshdelay 0.5 -S localhost true ::: 1 2 3 | perl -ne 'print($_ > 1.80 ? "OK\n" : "Not OK\n")'
 EOF

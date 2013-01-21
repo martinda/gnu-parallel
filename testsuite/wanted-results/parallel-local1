@@ -57,6 +57,7 @@ number2.c
 ### Test {#.}
 a/number2
 ### bug #34241: --pipe should not spawn unneeded processes
+OK
 ### Test of quoting of > bug
 >/dev/null
 ### Test of quoting of > bug if line continuation

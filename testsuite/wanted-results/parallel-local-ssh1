@@ -1,0 +1,8 @@
+### Test bug #34241: --pipe should not spawn unneeded processes
+1
+2
+Block_end
+3
+4
+5
+Block_end

@@ -1,5 +1,5 @@
 ### Test -k
-parallel: Warning: Only enough filehandles to run 20 jobs in parallel. Raising ulimit -n may help.
+parallel: Warning: Only enough filehandles to run 19 jobs in parallel. Raising ulimit -n may help.
 begin
 1
 2

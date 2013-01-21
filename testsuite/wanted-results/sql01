@@ -42,8 +42,8 @@ def 3
       2       6      54
       2       6      54
 ### Test --table-size --tablesize
-39
-39
+42
+42
 ### Test --debug
 dburl mysql://sqlunittest:CB5A1FFFA5A@localhost:3306/sqlunittest
 databasedriver mysql user sqlunittest password CB5A1FFFA5A host localhost port 3306 database sqlunittest query 
