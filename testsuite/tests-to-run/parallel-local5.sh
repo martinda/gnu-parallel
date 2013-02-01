@@ -21,24 +21,24 @@ echo '### Test 200M records with too small block';
   egrep -v '^0$'
 
 echo '### Test -N with multiple jobslots and multiple args'
-seq 1 1 | parallel -j2 -k -N 3 --pipe 'cat;echo a' | uniq
-seq 1 2 | parallel -j2 -k -N 3 --pipe 'cat;echo bb' | uniq
-seq 1 3 | parallel -j2 -k -N 3 --pipe 'cat;echo ccc' | uniq
-seq 1 4 | parallel -j2 -k -N 3 --pipe 'cat;echo dddd' | uniq
-seq 1 5 | parallel -j2 -k -N 3 --pipe 'cat;echo eeeee' | uniq
-seq 1 6 | parallel -j2 -k -N 3 --pipe 'cat;echo ffffff' | uniq
-seq 1 7 | parallel -j2 -k -N 3 --pipe 'cat;echo ggggggg' | uniq
-seq 1 8 | parallel -j2 -k -N 3 --pipe 'cat;echo hhhhhhhh' | uniq
-seq 1 9 | parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii' | uniq
-seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj' | uniq
+seq 1 1 | parallel -j2 -k -N 3 --pipe 'cat;echo a'
+seq 1 2 | parallel -j2 -k -N 3 --pipe 'cat;echo bb'
+seq 1 3 | parallel -j2 -k -N 3 --pipe 'cat;echo ccc'
+seq 1 4 | parallel -j2 -k -N 3 --pipe 'cat;echo dddd'
+seq 1 5 | parallel -j2 -k -N 3 --pipe 'cat;echo eeeee'
+seq 1 6 | parallel -j2 -k -N 3 --pipe 'cat;echo ffffff'
+seq 1 7 | parallel -j2 -k -N 3 --pipe 'cat;echo ggggggg'
+seq 1 8 | parallel -j2 -k -N 3 --pipe 'cat;echo hhhhhhhh'
+seq 1 9 | parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii'
+seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj'
 
 echo '### Test -l -N -L and -n with multiple jobslots and multiple args'
-seq 1 5 | parallel -kj2 -l 2 --pipe "cat; echo a" | uniq
-seq 1 5 | parallel -kj2 -N 2 --pipe "cat; echo b" | uniq
-seq 1 5 | parallel -kj2 -n 2 --pipe "cat; echo d" | uniq
+seq 1 12 | parallel -kj20 -l 2 --block 5 --pipe "cat; echo a"
+seq 1 5 | parallel -kj2 -N 2 --pipe "cat; echo b"
+seq 1 5 | parallel -kj2 -n 2 --pipe "cat; echo d"
 
 echo '### Test -L --pipe'
-seq 1 5 | parallel -kj2 -L 2 --pipe "cat; echo c" | uniq
+seq 1 5 | parallel -kj2 -L 2 --pipe "cat; echo c"
 
 echo '### Test output is the same for different block size'
 echo -n 01a02a0a0a12a34a45a6a | 
