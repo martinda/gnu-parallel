@@ -317,11 +317,12 @@ sub spreadstdin {
 	piperead: while(1) {
 	    eof($in) and $force_one_time_through++ and last piperead;
 	    if($Global::max_lines) {
-		# Read records of $Global::max_lines lines
+		# Read $Global::max_number_of_args records of $Global::max_lines lines
 		my @lines;
 		my $blocksize = length $buf;
+		my $read_n_lines = ($Global::max_number_of_args || 1) * $Global::max_lines;
 		do {
-		    for(my $t = 0; !eof($in) and $t < $Global::max_lines; $t++) {
+		    for(my $t = 0; !eof($in) and $t < $read_n_lines; $t++) {
 			my $l = <$in>;
 			push @lines, $l;
 			$blocksize += length($l);
@@ -563,12 +564,12 @@ sub options_hash {
 	 "replace|i:s" => \$opt::i,
 	 "E=s" => \$opt::E,
 	 "eof|e:s" => \$opt::E,
-	 "max-args|n=i" => \$opt::n,
-	 "max-replace-args|N=i" => \$opt::N,
+	 "max-args|n=i" => \$opt::max_args,
+	 "max-replace-args|N=i" => \$opt::max_replace_args,
 	 "colsep|col-sep|C=s" => \$opt::colsep,
 	 "help|h" => \$opt::help,
 	 "L=f" => \$opt::L,
-	 "max-lines|l:f" => \$opt::l,
+	 "max-lines|l:f" => \$opt::max_lines,
 	 "interactive|p" => \$opt::p,
 	 "verbose|t" => \$opt::verbose,
 	 "version|V" => \$opt::version,
@@ -617,7 +618,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130122;
+    $Global::version = 20130131;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -683,7 +684,7 @@ sub parse_options {
         $Global::replace{'{#}'} = $opt::seqreplace;
     }
     if(defined $opt::E) { $Global::end_of_file_string = $opt::E; }
-    if(defined $opt::n) { $Global::max_number_of_args = $opt::n; }
+    if(defined $opt::max_args) { $Global::max_number_of_args = $opt::max_args; }
     if(defined $opt::timeout) { $Global::timeoutq = TimeoutQueue->new($opt::timeout); }
     if(defined $opt::tmpdir) { $ENV{'TMPDIR'} = $opt::tmpdir; }
     if(defined $opt::help) { die_usage(); }
@@ -733,9 +734,9 @@ sub parse_options {
 	$Global::grouped = 0;
 	$Global::quoting = 1;
 	$opt::q = 1;
-	if(defined $opt::l) {
-	    $opt::load = $opt::l;
-	    $opt::l = undef;
+	if(defined $opt::max_lines) {
+	    $opt::load = $opt::max_lines;
+	    $opt::max_lines = undef;
 	}
 	if(not defined $opt::arg_sep) {
 	    $Global::arg_sep = "--";
@@ -764,18 +765,21 @@ sub parse_options {
         $opt::transfer = 1;
         $opt::cleanup = 1;
     }
-    if(defined $opt::l) {
-	if($opt::l eq "-0") {
+    if(defined $opt::max_lines) {
+	if($opt::max_lines eq "-0") {
 	    # -l -0 (swallowed -0)
-	    $opt::l = 1;
+	    $opt::max_lines = 1;
 	    $opt::0 = 1;
 	    $/ = "\0";
-	} elsif ($opt::l == 0) {
+	} elsif ($opt::max_lines == 0) {
 	    # If not given (or if 0 is given) => 1
-	    $opt::l = 1;
+	    $opt::max_lines = 1;
 	}
-	$Global::max_lines = $opt::l;
-	$Global::max_number_of_args ||= $Global::max_lines;
+	$Global::max_lines = $opt::max_lines;
+	if(not $opt::pipe) {
+	    # --pipe -L means length of record - not max_number_of_args
+	    $Global::max_number_of_args ||= $Global::max_lines;
+	}
     }
 
     # Read more than one arg at a time (-L, -N)
@@ -786,11 +790,11 @@ sub parse_options {
 	    $Global::max_number_of_args ||= $Global::max_lines;
 	}
     }
-    if(defined $opt::N) {
-	$Global::max_number_of_args = $opt::N;
+    if(defined $opt::max_replace_args) {
+	$Global::max_number_of_args = $opt::max_replace_args;
 	$Global::ContextReplace = 1;
     }
-    if((defined $opt::L or defined $opt::N)
+    if((defined $opt::L or defined $opt::max_replace_args)
        and
        not ($opt::xargs or $opt::m)) {
 	$Global::ContextReplace = 1;
