@@ -97,17 +97,18 @@ bug #34958: --pipe with record size measured in lines
 6
 7
 8
+bug 34958-1
 9
 10
-FOO
+bug 34958-1
 bug #37325: Inefficiency of --pipe -L
-    280     280    1012
+    276     276     996
+FOO
+    248     248     992
 FOO
     252     252    1008
 FOO
-    252     252    1008
-FOO
-    244     244    1005
+    244     244     997
 FOO
     200     200    1000
 FOO
@@ -117,22 +118,21 @@ FOO
 FOO
     200     200    1000
 FOO
-    172     172     860
+    180     180     900
 FOO
 bug #34958: --pipe with record size measured in lines
 1
 2
 3
 4
-FOO
 5
 6
 7
 8
-FOO
+bug 34958-2
 9
 10
-FOO
+bug 34958-2
 ### Test --results
 I III
 I IIII

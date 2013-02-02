@@ -316,24 +316,20 @@ sub spreadstdin {
     for my $in (@fhlist) {
 	piperead: while(1) {
 	    eof($in) and $force_one_time_through++ and last piperead;
-	    if($Global::max_lines) {
-		# Read $Global::max_number_of_args records of $Global::max_lines lines
-		my @lines;
-		my $blocksize = length $buf;
-		my $read_n_lines = ($Global::max_number_of_args || 1) * $Global::max_lines;
-		do {
-		    for(my $t = 0; !eof($in) and $t < $read_n_lines; $t++) {
-			my $l = <$in>;
-			push @lines, $l;
-			$blocksize += length($l);
-		    }
-		} while($blocksize < $opt::blocksize and !eof($in));
-		substr($buf,length $buf,0) = join("",@lines);
-	    } else {
+#	    if(0 and $Global::max_lines and $Global::max_number_of_args) {
+#		# Read $Global::max_number_of_args records of $Global::max_lines lines
+#		my @lines;
+#		my $read_n_lines = ($Global::max_number_of_args || 1) * $Global::max_lines;
+#		for(my $t = 0; !eof($in) and $t < $read_n_lines; $t++) {
+#		    my $l = <$in>;
+#		    push @lines, $l;
+#		}
+#		substr($buf,length $buf,0) = join("",@lines);
+#	    } else {
 		# Read a block
 		read($in,substr($buf,length $buf,0),$opt::blocksize);
 		# substr above = append to $buf
-	    }
+#	    }
 
 	    if($opt::r) {
 		# Remove empty lines
@@ -342,10 +338,23 @@ sub spreadstdin {
 		    next;
 		}
 	    }
-	    if($opt::regexp) {
+	    if($Global::max_lines and not $Global::max_number_of_args) {
+		# Read n-line records 
+		my $n_lines = $buf=~tr/\n/\n/;
+		my $last_newline_pos = rindex($buf,"\n");
+		while($n_lines % $Global::max_lines) {
+		    $n_lines--;
+		    $last_newline_pos = rindex($buf,"\n",$last_newline_pos-1);
+		}
+		# Chop at $last_newline_pos
+		write_record_to_pipe(\$header,\$buf,$recstart,$recend,$last_newline_pos+1);
+		substr($buf,0,$last_newline_pos+1) = "";
+	    } elsif($opt::regexp) {
 		if($Global::max_number_of_args) {
 		    # -N => (start..*?end){n}
-		    while($buf =~ s/((?:$recstart.*?$recend){$Global::max_number_of_args})($recstart.*)$/$2/os) {
+		    # -L -N => (start..*?end){n*l}
+		    my $read_n_lines = $Global::max_number_of_args * ($Global::max_lines || 1);
+		    while($buf =~ s/((?:$recstart.*?$recend){$read_n_lines})($recstart.*)$/$2/os) {
 			write_record_to_pipe(\$header,\$1,$recstart,$recend,length $1);
 		    }
 		} else {
@@ -358,7 +367,8 @@ sub spreadstdin {
 		if($Global::max_number_of_args) {
 		    # -N => (start..*?end){n}
 		    my $i = 0;
-		    while(($i = nindex(\$buf,$recendrecstart,$Global::max_number_of_args)) != -1) {
+		    my $read_n_lines = $Global::max_number_of_args * ($Global::max_lines || 1);
+		    while(($i = nindex(\$buf,$recendrecstart,$read_n_lines)) != -1) {
 			$i += length $recend; # find the actual splitting location
 			write_record_to_pipe(\$header,\$buf,$recstart,$recend,$i);
 			substr($buf,0,$i) = "";

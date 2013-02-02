@@ -33,7 +33,7 @@ seq 1 9 | parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii'
 seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj'
 
 echo '### Test -l -N -L and -n with multiple jobslots and multiple args'
-seq 1 12 | parallel -kj20 -l 2 --block 5 --pipe "cat; echo a"
+seq 1 12 | parallel -kj20 -l 2 --block 8 --pipe "cat; echo a"
 seq 1 5 | parallel -kj2 -N 2 --pipe "cat; echo b"
 seq 1 5 | parallel -kj2 -n 2 --pipe "cat; echo d"
 

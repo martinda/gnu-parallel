@@ -45,7 +45,7 @@ echo "bug #37956: --colsep does not default to '\t' as specified in the man page
   printf "A\tB\n1\tone" | parallel --header : echo {B} {A}
 
 echo '### Test --tollef'
-  parallel -k --tollef echo -- 1 2 3 ::: a b c
+  parallel -k --tollef echo -- 1 2 3 ::: a b c | sort
 
 echo '### Test --tollef --gnu'
   parallel -k --tollef --gnu echo ::: 1 2 3 -- a b c

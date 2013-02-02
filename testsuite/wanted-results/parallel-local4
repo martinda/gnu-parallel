@@ -7,3 +7,83 @@ bug #36707: --controlmaster eats jobs
   seq 2 | parallel -k --controlmaster --sshlogin localhost echo OK{}
 OK1
 OK2
+echo '### -L -n with pipe'
+### -L -n with pipe
+  seq 14 | parallel --pipe -k -L 3 -n 2 'cat;echo 6 Ln line record'
+1
+2
+3
+4
+5
+6
+6 Ln line record
+7
+8
+9
+10
+11
+12
+6 Ln line record
+13
+14
+6 Ln line record
+echo '### -L -N with pipe'
+### -L -N with pipe
+  seq 14 | parallel --pipe -k -L 3 -N 2 'cat;echo 6 LN line record'
+1
+2
+3
+4
+5
+6
+6 LN line record
+7
+8
+9
+10
+11
+12
+6 LN line record
+13
+14
+6 LN line record
+echo '### -l -N with pipe'
+### -l -N with pipe
+  seq 14 | parallel --pipe -k -l 3 -N 2 'cat;echo 6 lN line record'
+1
+2
+3
+4
+5
+6
+6 lN line record
+7
+8
+9
+10
+11
+12
+6 lN line record
+13
+14
+6 lN line record
+echo '### -l -n with pipe'
+### -l -n with pipe
+  seq 14 | parallel --pipe -k -l 3 -n 2 'cat;echo 6 ln line record'
+1
+2
+3
+4
+5
+6
+6 ln line record
+7
+8
+9
+10
+11
+12
+6 ln line record
+13
+14
+6 ln line record
