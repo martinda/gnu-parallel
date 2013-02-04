@@ -288,17 +288,17 @@ sub spreadstdin {
 	# If both --recstart and --recend is given then both must match
 	$recstart = $opt::recstart;
 	$recend = $opt::recend;
-	$recerror = "parallel: Warning: --recend and --recstart unmatched. Is --blocksize too small?";
+	$recerror = "parallel: Warning: --recend and --recstart unmatched. Increasing --blocksize.";
     } elsif(defined($opt::recstart)) {
 	# If --recstart is given it must match start of record
 	$recstart = $opt::recstart;
 	$recend = "";
-	$recerror = "parallel: Warning: --recstart unmatched. Is --blocksize too small?";
+	$recerror = "parallel: Warning: --recstart unmatched. Increasing --blocksize.";
     } elsif(defined($opt::recend)) {
 	# If --recend is given then it must match end of record
 	$recstart = "";
 	$recend = $opt::recend;
-	$recerror = "parallel: Warning: --recend unmatched. Is --blocksize too small?";
+	$recerror = "parallel: Warning: --recend unmatched. Increasing --blocksize.";
     }
 
     if($opt::regexp) {
@@ -316,20 +316,7 @@ sub spreadstdin {
     for my $in (@fhlist) {
 	piperead: while(1) {
 	    eof($in) and $force_one_time_through++ and last piperead;
-#	    if(0 and $Global::max_lines and $Global::max_number_of_args) {
-#		# Read $Global::max_number_of_args records of $Global::max_lines lines
-#		my @lines;
-#		my $read_n_lines = ($Global::max_number_of_args || 1) * $Global::max_lines;
-#		for(my $t = 0; !eof($in) and $t < $read_n_lines; $t++) {
-#		    my $l = <$in>;
-#		    push @lines, $l;
-#		}
-#		substr($buf,length $buf,0) = join("",@lines);
-#	    } else {
-		# Read a block
-		read($in,substr($buf,length $buf,0),$opt::blocksize);
-		# substr above = append to $buf
-#	    }
+	    read($in,substr($buf,length $buf,0),$opt::blocksize);
 
 	    if($opt::r) {
 		# Remove empty lines
@@ -346,7 +333,7 @@ sub spreadstdin {
 		    $n_lines--;
 		    $last_newline_pos = rindex($buf,"\n",$last_newline_pos-1);
 		}
-		# Chop at $last_newline_pos
+		# Chop at $last_newline_pos as that is where n-line record ends
 		write_record_to_pipe(\$header,\$buf,$recstart,$recend,$last_newline_pos+1);
 		substr($buf,0,$last_newline_pos+1) = "";
 	    } elsif($opt::regexp) {
@@ -383,6 +370,9 @@ sub spreadstdin {
 		    }
 		}
 	    }
+	    # If stuff not written: 
+	    #   Warn $recerror if not already done
+	    #   blocksize *= 1.1
 	}
     }
 
