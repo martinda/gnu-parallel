@@ -10,7 +10,7 @@ echo '### Test of xargs -m command lines > 130k';
   rm /tmp/a$$
 
 echo '### Test of xargs -X command lines > 130k'; 
-  seq 1 60000 | parallel -X -j1 echo a{}b{}c | tee >(wc) >(sort |md5sum) >/tmp/b$$; 
+  seq 1 60000 | parallel -X -j1 echo a{}b{}c | tee >(wc) >(sort | (sleep 1; md5sum)) >/tmp/b$$; 
   wait; 
   CHAR=$(cat /tmp/b$$ | wc -c); 
   LINES=$(cat /tmp/b$$ | wc -l); 
