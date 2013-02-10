@@ -270,7 +270,6 @@ sub spreadstdin {
     # read a record
     # Spawn a job and print the record to it.
     my @fhlist = @_; # Filehandles to read from (Defaults to STDIN)
-    my $record;
     my $buf = "";
     my $header = "";
     if($opt::header) {
@@ -314,8 +313,11 @@ sub spreadstdin {
     for my $in (@fhlist) {
 	piperead: while(1) {
 	    my $anything_written = 0;
-	    eof($in) and $force_one_time_through++ and last piperead;
-	    read($in,substr($buf,length $buf,0),$blocksize);
+	    if(not read($in,substr($buf,length $buf,0),$blocksize)
+	       and $force_one_time_through) {
+		last;
+	    }
+	    $force_one_time_through ||= 1;
 
 	    if($opt::r) {
 		# Remove empty lines
@@ -383,7 +385,7 @@ sub spreadstdin {
     write_record_to_pipe(\$header,\$buf,$recstart,$recend,length $buf);
 
     ::debug("Done reading input\n");
-    $Global::start_no_new_jobs = 1;
+    $Global::start_no_new_jobs ||= 1;
 }
 
 sub nindex {
@@ -1799,7 +1801,7 @@ sub start_no_new_jobs {
          "$Global::progname: Waiting for these ", scalar(keys %Global::running),
          " jobs to finish. Send SIGTERM again to stop now.\n");
     list_running_jobs();
-    $Global::start_no_new_jobs++;
+    $Global::start_no_new_jobs ||= 1;
 }
 
 sub reaper {
@@ -1857,7 +1859,7 @@ sub reaper {
                              "Waiting for ", scalar(keys %Global::running),
                              " jobs to finish. This job failed:\n",
                              $job->replaced(),"\n");
-                        $Global::start_no_new_jobs++;
+                        $Global::start_no_new_jobs ||= 1;
                         $Global::halt_on_error_exitstatus = $job->exitstatus();
                     } elsif($opt::halt_on_error == 2) {
                         # If halt on error == 2 we should exit immediately
@@ -3169,7 +3171,7 @@ sub sshcommand_of_sshlogin {
                 # Start it
                 my $pid = fork();
                 if($pid) {
-                    $Global::sshmaster{$pid}++;
+                    $Global::sshmaster{$pid} ||= 1;
                 } else {
                     ::debug($master,"\n");
                     `$master </dev/null`;
@@ -4269,7 +4271,7 @@ sub populate {
        and $self->{'arg_queue'}->empty() and $Global::max_jobs_running) {
 	# -m or -X and EOF => Spread the arguments over all jobslots
 	# (unless they are already spread)
-	$CommandLine::already_spread++;
+	$CommandLine::already_spread ||= 1;
 	if($self->number_of_args() > 1) {
 	    $self->{'max_number_of_args'} =
 		::ceil($self->number_of_args()/$Global::max_jobs_running);
@@ -4621,7 +4623,7 @@ sub context_replace_placeholders {
     my $tt = $target;
     my %word;
     while($tt =~ s/(\S*(?:$rep_str_regexp|$rep_str_pos_regexp|$rep_seq_regexp)\S*)/\0/o) {
-	$word{$1}++;
+	$word{$1} ||= 1;
     }
     # For each word: Generate the replacement string for that word.
     for my $origword (keys %word) {
@@ -4921,8 +4923,6 @@ sub is_acceptable_command_line_length {
     #   1 otherwise
     my $len = shift;
 
-    $CommandMaxLength::is_acceptable_command_line_length++;
-    ::debug("$CommandMaxLength::is_acceptable_command_line_length $len\n");
     local *STDERR;
     open (STDERR, ">", "/dev/null");
     system "true "."x"x$len;
