@@ -489,6 +489,7 @@ sub options_hash {
 	 "joblog=s" => \$opt::joblog,
 	 "results|result|res=s" => \$opt::results,
 	 "resume" => \$opt::resume,
+	 "resume-failed|resumefailed" => \$opt::resume_failed,
 	 "silent" => \$opt::silent,
 	 #"silent-error|silenterror" => \$opt::silent_error,
 	 "keep-order|keeporder|k" => \$opt::k,
@@ -901,21 +902,30 @@ sub parse_env_var {
 
 sub open_joblog {
     my $append = 0;
-    if($opt::resume and not $opt::joblog) {
-        ::error("--resume requires --joblog.\n");
+    if(($opt::resume or $opt::resume_failed) and not $opt::joblog) {
+        ::error("--resume and --resume-failed require --joblog.\n");
 	::wait_and_exit(255);
     }
     if($opt::joblog) {
-	if($opt::resume) {
+	if($opt::resume || $opt::resume_failed) {
 	    if(open(my $joblog_fh, "<", $opt::joblog)) {
 		# Read the joblog
 		$append = <$joblog_fh>; # If there is a header: Open as append later
+		my $joblog_regexp;
+		if($opt::resume_failed) {
+		    # Make a regexp that only matches commands with exit+signal=0
+		    # 4 host 1360490623.067 3.445 1023 1222 0 0 command
+		    $joblog_regexp='^(\d+)(?:\t[^\t]+){5}\t0\t0\t';
+		} else {
+		    # Just match the job number
+		    $joblog_regexp='^(\d+)';
+		}			
 		while(<$joblog_fh>) {
-		    if(/^(\d+)/) {
+		    if(/$joblog_regexp/o) {
 			# This is 30% faster than set_job_already_run($1);
-			vec($Global::job_already_run,$1,1) = 1;
-		    } else {
-			::error("Format of '$opt::joblog' is wrong.\n");
+			vec($Global::job_already_run,$1||0,1) = 1;
+		    } elsif(not /\d+\t[^\t]+\t([0-9.]+\t){6}/) {
+			::error("Format of '$opt::joblog' is wrong: $_");
 			::wait_and_exit(255);
 		    }
 		}
@@ -4908,7 +4918,7 @@ sub binary_find_max_length {
     my ($lower, $upper) = (@_);
     if($lower == $upper or $lower == $upper-1) { return $lower; }
     my $middle = int (($upper-$lower)/2 + $lower);
-    ::debug("Maxlen: $lower,$upper,$middle\n");
+    ::debug("Maxlen: $lower,$upper,$middle : ");
     if (is_acceptable_command_line_length($middle)) {
 	return binary_find_max_length($middle,$upper);
     } else {
@@ -4927,7 +4937,7 @@ sub is_acceptable_command_line_length {
     open (STDERR, ">", "/dev/null");
     system "true "."x"x$len;
     close STDERR;
-    ::debug("$len $?\n");
+    ::debug("$len=$? ");
     return not $?;
 }
 
