@@ -631,7 +631,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130131;
+    $Global::version = 20130212;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4739,6 +4739,7 @@ sub simple_replace_placeholders {
 	# Merge arguments from records into args for easy access
 	CORE::push @args, @$record;
     }
+    my $n = $#args+1;
     # Which replace strings are used?
     # {#} {} {/} {//} {.} {/.} {n} {n/} {n//} {n.} {n/.}
     for my $used (keys %{$self->{'replacecount'}}) {
@@ -4747,9 +4748,9 @@ sub simple_replace_placeholders {
 	    # {} {/} {//} {.} {/.}
 	    $replace{$Global::replace{$used}} =
 		join(" ", map { $_->replace($used) } @args);
-	} elsif($used =~ /^\{(\d+)(|\/|\/\/|\.|\/\.)\}$/) {
-	    # {n} {n/} {n//} {n.} {n/.}
-	    my $positional = $1; # number if any
+	} elsif($used =~ /^\{(-?\d+)(|\/|\/\/|\.|\/\.)\}$/) {
+	    # {n} {n/} {n//} {n.} {n/.} {-n} {-n/} {-n//} {-n.} {-n/.}
+	    my $positional = $1 > 0 ? $1 : $n+$1+1;
 	    my $replacementfunction = "{".::undef_as_empty($2)."}"; # {} {/} {//} {.} or {/.}
 	    # If -q then the replacementstrings will be quoted, too
 	    # {1.} -> \{1.\}

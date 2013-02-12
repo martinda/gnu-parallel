@@ -129,8 +129,10 @@ echo '### --resume -k'
   parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit 0 ::: 0 1 2 3 0 5 6 7
 
 echo '### Negative replacement strings'
-  parallel  -N 6 echo {-1}orrec{1} ::: t B C D E c
-  parallel  -N 6 echo {-1}orrect ::: A B C D E c
+  parallel -X -j1 -N 6 echo {-1}orrec{1} ::: t B X D E c
+  parallel -N 6 echo {-1}orrect ::: A B X D E c
+  parallel --colsep ' ' echo '{2} + {4} = {2} + {-1}=' '$(( {2} + {-1} ))' ::: "1 2 3 4"
+  parallel --colsep ' ' echo '{-3}orrect' ::: "1 c 3 4"
 
 
 EOF
