@@ -1,10 +1,7 @@
 #!/bin/bash
 
-SERVER1=parallel-server3
-SERVER2=parallel-server2
-
 # -L1 will join lines ending in ' '
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j10 -k -L1
+cat <<'EOF' | parallel -j10 -k -L1
 echo "### Test --delay"
 seq 9 | /usr/bin/time -f %e  parallel -j3 --delay 0.57 true {} 2>&1 | 
   perl -ne '$_ > 5 and print "More than 5 secs: OK\n"'
@@ -115,7 +112,7 @@ echo '### -k -0 -i repl'
 echo '### test --sshdelay'
   stdout /usr/bin/time -f %e parallel -j0 --sshdelay 0.5 -S localhost true ::: 1 2 3 | perl -ne 'print($_ > 1.80 ? "OK\n" : "Not OK\n")'
 
-echo 'bug #38299: --resume-failed -k'
+echo '### bug #38299: --resume-failed -k'
   rm /tmp/joblog-38299
   parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#}id{}\;exit {} ::: 0 1 2 3 0 1
   echo try 2
@@ -123,12 +120,17 @@ echo 'bug #38299: --resume-failed -k'
   echo with exit 0
   parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#}id{}\;exit 0  ::: 0 1 2 3 0 1
 
-echo '--resume -k'
-  rm /tmp/joblog-resume
+echo '### --resume -k'
+  rm -f /tmp/joblog-resume
   parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit {} ::: 0 1 2 3 0 5
   echo try 2 = nothing
   parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit {} ::: 0 1 2 3 0 5
   echo two extra
   parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit 0 ::: 0 1 2 3 0 5 6 7
+
+echo '### Negative replacement strings'
+  parallel  -N 6 echo {-1}orrec{1} ::: t B C D E c
+  parallel  -N 6 echo {-1}orrect ::: A B C D E c
+
 
 EOF

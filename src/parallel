@@ -4507,7 +4507,7 @@ sub number_of_replacements {
     my $multi_regexp = multi_regexp();
     my $replacement_regexp =
 	"(?:". ::maybe_quote('\{') .
-	'\d+(?:|\.|/\.|/|//)?' . # {n} {n.} {n/.} {n/} {n//}
+	'-?\d+(?:|\.|/\.|/|//)?' . # {n} {n.} {n/.} {n/} {n//} {-n} {-n.} {-n/.} {-n/} {-n//}
 	::maybe_quote('\}') .
 	'|'.
 	join("|",map {$a=$_;$a=~s/(\W)/\\$1/g; $a} values %Global::replace).
@@ -4647,7 +4647,7 @@ sub context_replace_placeholders {
     # Normal replace strings
     my $rep_str_regexp = multi_regexp();
     # Positional replace strings
-    my $rep_str_pos_regexp = ::maybe_quote('\{').'\d+'.$rep_inner_regexp.::maybe_quote('\}');
+    my $rep_str_pos_regexp = ::maybe_quote('\{').'-?\d+'.$rep_inner_regexp.::maybe_quote('\}');
 
     # Fish out the words that have replacement strings in them
     my $tt = $target;
@@ -4673,8 +4673,9 @@ sub context_replace_placeholders {
 	    } else {
 		@argset = @{$self->{'arg_list'}};
 	    }
-	    # Match 1..n where n = max args in a argset
-	    my $pos_regexp = "(?:".join("|", 1 .. $#{$argset[0]}+1).")";
+	    # Match -n..-1,1..n where n = max args in a argset
+	    my $n = $#{$argset[0]}+1;
+	    my $pos_regexp = "(?:".join("|", -$n..-1, 1..$n).")";
 	    my $pos_inner_regexp = ::maybe_quote('\{') .
 		"($pos_regexp)($rep_inner_regexp)" .
 		::maybe_quote('\}');
@@ -4689,7 +4690,9 @@ sub context_replace_placeholders {
 		    }
 		}
 		$w = $word;
-		$w =~ s/$pos_inner_regexp/$argset->[$1-1]->replace('{'.$2.'}')/geo;
+		# Replace positive replacement strings with arg[$1-1]
+		# Replace negative replacement strings with arg[$n+$1]
+		$w =~ s/$pos_inner_regexp/$argset->[$1 > 0 ? $1-1 : $n+$1]->replace('{'.$2.'}')/geo;
 		CORE::push @pos_replacements, $w;
 	    }
 	}
