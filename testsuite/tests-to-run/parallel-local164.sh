@@ -112,27 +112,28 @@ echo '### -k -0 -i repl'
 echo '### test --sshdelay'
   stdout /usr/bin/time -f %e parallel -j0 --sshdelay 0.5 -S localhost true ::: 1 2 3 | perl -ne 'print($_ > 1.80 ? "OK\n" : "Not OK\n")'
 
-echo '### bug #38299: --resume-failed -k'
-  rm /tmp/joblog-38299
-  parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#}id{}\;exit {} ::: 0 1 2 3 0 1
-  echo try 2
-  parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#}id{}\;exit {} ::: 0 1 2 3 0 1
-  echo with exit 0
-  parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#}id{}\;exit 0  ::: 0 1 2 3 0 1
-
-echo '### --resume -k'
-  rm -f /tmp/joblog-resume
-  parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit {} ::: 0 1 2 3 0 5
-  echo try 2 = nothing
-  parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit {} ::: 0 1 2 3 0 5
-  echo two extra
-  parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit 0 ::: 0 1 2 3 0 5 6 7
-
 echo '### Negative replacement strings'
   parallel -X -j1 -N 6 echo {-1}orrec{1} ::: t B X D E c
   parallel -N 6 echo {-1}orrect ::: A B X D E c
   parallel --colsep ' ' echo '{2} + {4} = {2} + {-1}=' '$(( {2} + {-1} ))' ::: "1 2 3 4"
   parallel --colsep ' ' echo '{-3}orrect' ::: "1 c 3 4"
 
+echo '### bug #38299: --resume-failed -k'; 
+  rm /tmp/joblog-38299; 
+  parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#} val {}\;exit {} ::: 0 1 2 3 0 1; 
+  echo try 2. Gives failing - not 0; 
+  parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#} val {}\;exit {} ::: 0 1 2 3 0 1; 
+  echo with exit 0; 
+  parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#} val {}\;exit 0  ::: 0 1 2 3 0 1; 
+  echo try 2 again. Gives empty; 
+  parallel -k --resume-failed --joblog /tmp/joblog-38299 echo job{#} val {}\;exit {} ::: 0 1 2 3 0 1
+
+echo '### --resume -k'; 
+  rm -f /tmp/joblog-resume; 
+  parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit {} ::: 0 1 2 3 0 5; 
+  echo try 2 = nothing; 
+  parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit {} ::: 0 1 2 3 0 5; 
+  echo two extra; 
+  parallel -k --resume --joblog /tmp/joblog-resume echo job{}id\;exit 0 ::: 0 1 2 3 0 5 6 7
 
 EOF

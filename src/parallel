@@ -500,7 +500,7 @@ sub options_hash {
 	 "resume-failed|resumefailed" => \$opt::resume_failed,
 	 "silent" => \$opt::silent,
 	 #"silent-error|silenterror" => \$opt::silent_error,
-	 "keep-order|keeporder|k" => \$opt::k,
+	 "keep-order|keeporder|k" => \$opt::keeporder,
 	 "group" => \$opt::group,
 	 "g" => \$opt::retired,
 	 "ungroup|u" => \$opt::u,
@@ -674,7 +674,7 @@ sub parse_options {
     $Global::debug = (defined $opt::D);
     if(defined $opt::X) { $Global::ContextReplace = 1; }
     if(defined $opt::silent) { $Global::verbose = 0; }
-    if(defined $opt::k) { $Global::keeporder = 1; }
+    if(defined $opt::keeporder) { $Global::keeporder = 1; }
     if(defined $opt::group) { $Global::grouped = 1; }
     if(defined $opt::u) { $Global::grouped = 0; }
     if(defined $opt::0) { $/ = "\0"; }
@@ -1858,8 +1858,11 @@ sub reaper {
                 $Private::job_end_sequence ||= 1;
                 debug("Looking for: $Private::job_end_sequence ".
                       "Current: ".$job->seq()."\n");
-                while($Private::print_later{$Private::job_end_sequence}) {
+                while($Private::print_later{$Private::job_end_sequence}
+		      or
+		      vec($Global::job_already_run,$Private::job_end_sequence,1)) {
                     debug("Found job end $Private::job_end_sequence");
+		    defined $Private::print_later{$Private::job_end_sequence} and 
                     $Private::print_later{$Private::job_end_sequence}->print();
                     delete $Private::print_later{$Private::job_end_sequence};
                     $Private::job_end_sequence++;
@@ -4070,7 +4073,7 @@ sub print {
     my $err = $self->stderr();
     my $command = $self->sshlogin_wrap();
 
-    if($Global::joblog and not $self->virgin()) {
+    if($Global::joblog and not ($opt::pipe and $self->virgin())) {
 	my $cmd;
 	if($Global::verbose <= 1) {
 	    $cmd = $self->replaced();

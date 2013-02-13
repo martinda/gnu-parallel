@@ -199,3 +199,26 @@ OK
 5 OK
 ### test --sshdelay
 OK
+### Negative replacement strings
+correct
+correct
+2 + 4 = 2 + 4= 6
+correct
+### bug #38299: --resume-failed -k
+job1 val 0
+job2 val 1
+job3 val 2
+job4 val 3
+job5 val 0
+job6 val 1
+try 2. Gives failing - not 0
+job2 val 1
+job3 val 2
+job4 val 3
+job6 val 1
+with exit 0
+job2 val 1
+job3 val 2
+job4 val 3
+job6 val 1
+try 2 again. Gives empty
