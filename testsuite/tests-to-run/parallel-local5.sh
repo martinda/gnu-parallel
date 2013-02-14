@@ -44,7 +44,7 @@ echo '### Test output is the same for different block size'
 echo -n 01a02a0a0a12a34a45a6a | 
   parallel -k -j1 --blocksize 100 --pipe --recend a  -N 3  'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 echo -n 01a02a0a0a12a34a45a6a | 
-  parallel -k -j1 --blocksize 1 --pipe --recend a  -N 3  'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
+  stdout parallel -k -j1 --blocksize 1 --pipe --recend a  -N 3  'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 
 echo '### Test 10M records with too big block'; 
   ( 

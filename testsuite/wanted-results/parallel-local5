@@ -1,5 +1,6 @@
 ### Test --pipe
 ### Test 200M records with too small block
+parallel: Warning: A full record was not matched in a block. Increasing to --blocksize 260000000
 303111434
 303111434
 303111434
@@ -126,7 +127,11 @@ c
 1>01a02a0a
 2>0a12a34a
 3>45a6a
+parallel: Warning: A full record was not matched in a block. Increasing to --blocksize 2
+parallel: Warning: A full record was not matched in a block. Increasing to --blocksize 3
+parallel: Warning: A full record was not matched in a block. Increasing to --blocksize 4
 1>01a02a0a
+parallel: Warning: A full record was not matched in a block. Increasing to --blocksize 6
 2>0a12a34a
 3>45a6a
 ### Test 10M records with too big block

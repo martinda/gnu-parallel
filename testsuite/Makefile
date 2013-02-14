@@ -1,4 +1,4 @@
-testsuite: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
+testsuite: ../src/parallel tests-to-run/* wanted-results/* prereqlocal startdb prereqremote
 	time sh Start.sh
 	date
 

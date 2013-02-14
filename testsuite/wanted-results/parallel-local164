@@ -222,3 +222,14 @@ job3 val 2
 job4 val 3
 job6 val 1
 try 2 again. Gives empty
+### --resume -k
+job0id
+job1id
+job2id
+job3id
+job0id
+job5id
+try 2 = nothing
+two extra
+job6id
+job7id

@@ -308,14 +308,16 @@ sub spreadstdin {
     }
     my $recendrecstart = $recend.$recstart;
     my $chunk_number = 1;
+    my $one_time_through;
     my $blocksize = $opt::blocksize;
     for my $in (@fhlist) {
 	piperead: while(1) {
 	    my $anything_written = 0;
-	    if(not read($in,substr($buf,length $buf,0),$blocksize)
-	       and $chunk_number != 1) {
+	    if(not read($in,substr($buf,length $buf,0),$blocksize)) {
+		# End-of-file
+		$chunk_number != 1 and last;
 		# Force the while-loop once if everything was read by header reading
-		last;
+		$one_time_through++ and last;
 	    }
 
 	    if($opt::r) {
@@ -344,15 +346,19 @@ sub spreadstdin {
 		    # -L -N => (start..*?end){n*l}
 		    my $read_n_lines = $Global::max_number_of_args * ($Global::max_lines || 1);
 		    while($buf =~ s/((?:$recstart.*?$recend){$read_n_lines})($recstart.*)$/$2/os) {
+			# Copy to modifiable variable
+			my $b = $1;
 			$anything_written +=
-			    write_record_to_pipe($chunk_number++,\$header,\$1,
+			    write_record_to_pipe($chunk_number++,\$header,\$b,
 						 $recstart,$recend,length $1);
 		    }
 		} else {
 		    # Find the last recend-recstart in $buf
 		    if($buf =~ s/(.*$recend)($recstart.*?)$/$2/os) {
+			# Copy to modifiable variable
+			my $b = $1;
 			$anything_written +=
-			    write_record_to_pipe($chunk_number++,\$header,\$1,
+			    write_record_to_pipe($chunk_number++,\$header,\$b,
 						 $recstart,$recend,length $1);
 		    }
 		}
@@ -374,13 +380,13 @@ sub spreadstdin {
 		    if($i != -1) {
 			$i += length $recend; # find the actual splitting location
 			$anything_written +=
-			    write_record_to_pipe($chunk_number++,\$header,
-						 \$buf,$recstart,$recend,$i);
+			    write_record_to_pipe($chunk_number++,\$header,\$buf,
+						 $recstart,$recend,$i);
 			substr($buf,0,$i) = "";
 		    }
 		}
 	    }
-	    if(not $anything_written) {
+	    if(not $anything_written and not eof($in)) {
 		# Nothing was written - maybe the block size < record size?
 		# Increase blocksize exponentially
 		$blocksize = ceil($blocksize * 1.3);
