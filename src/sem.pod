@@ -178,13 +178,13 @@ Report bugs to <bug-parallel@gnu.org>.
 
 =head1 AUTHOR
 
-Copyright (C) 2010,2011,2012 Ole Tange, http://ole.tange.dk and Free
+Copyright (C) 2010,2011,2012,2013 Ole Tange, http://ole.tange.dk and Free
 Software Foundation, Inc.
 
 
 =head1 LICENSE
 
-Copyright (C) 2010,2011,2012 Free Software Foundation, Inc.
+Copyright (C) 2010,2011,2012,2013 Free Software Foundation, Inc.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

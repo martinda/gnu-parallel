@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-# Copyright (C) 2007,2008,2009,2010,2011,2012 Ole Tange and Free Software
+# Copyright (C) 2007,2008,2009,2010,2011,2012,2013 Ole Tange and Free Software
 # Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -637,7 +637,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130212;
+    $Global::version = 20130217;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -749,6 +749,8 @@ sub parse_options {
     }
     if($opt::tollef and not $opt::gnu and not $opt::plain) {
 	# Behave like tollef parallel (from moreutils)
+	::warning("YOU ARE USING --tollef. --tollef is obsolete and will be retired 20140222.\n");
+	::warning("See: http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html\n");
 	$opt::u = 1;
 	$Global::grouped = 0;
 	$Global::quoting = 1;
@@ -1294,19 +1296,19 @@ sub start_more_jobs {
 
         for my $sshlogin (values %Global::host) {
             debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
-            if($opt::load and $sshlogin->loadavg_too_high()) {
-                # The load is too high or unknown
-                next;
-            }
-            if($opt::noswap and $sshlogin->swapping()) {
-                # The server is swapping
-                next;
-            }
-	    if($sshlogin->too_fast_remote_login()) {
-		next;
-	    }
-            while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
-                if($Global::JobQueue->empty() and not $opt::pipe) {
+	    while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
+		if($opt::load and $sshlogin->loadavg_too_high()) {
+		    # The load is too high or unknown
+		    next;
+		}
+		if($opt::noswap and $sshlogin->swapping()) {
+		    # The server is swapping
+		    next;
+		}
+		if($sshlogin->too_fast_remote_login()) {
+		    next;
+		}
+		if($Global::JobQueue->empty() and not $opt::pipe) {
                     last;
                 }
                 debug($sshlogin->string()." has ".$sshlogin->jobs_running()
@@ -2018,7 +2020,7 @@ sub version {
     }
     print join("\n",
                "GNU $Global::progname $Global::version",
-               "Copyright (C) 2007,2008,2009,2010,2011,2012 Ole Tange and Free Software Foundation, Inc.",
+               "Copyright (C) 2007,2008,2009,2010,2011,2012,2013 Ole Tange and Free Software Foundation, Inc.",
                "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
                "This is free software: you are free to change and redistribute it.",
                "GNU $Global::progname comes with no warranty.",
@@ -2512,6 +2514,7 @@ sub loadavg {
     }
     return $self->{'loadavg'};
 }
+
 
 sub max_loadavg {
     my $self = shift;

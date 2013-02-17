@@ -479,7 +479,7 @@ See also: B<--bg>, B<man sem>
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (beta testing)
+=item B<--filter-hosts> (alpha testing)
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -1040,7 +1040,20 @@ there. As GNU B<parallel> only looks at the sequence numbers in
 B<--joblog> then the input, the command, and B<--joblog> all have to
 remain unchanged; otherwise GNU B<parallel> may run wrong commands.
 
-See also: B<--joblog>.
+See also: B<--joblog>, B<--resume-failed>.
+
+
+=item B<--resume-failed> (alpha testing)
+
+Retry all failed and resume from the last unfinished job. By reading
+B<--joblog> GNU B<parallel> will figure out the failed jobs and run
+those again. After that it will resume last unfinished job and
+continue from there. As GNU B<parallel> only looks at the sequence
+numbers in B<--joblog> then the input, the command, and B<--joblog>
+all have to remain unchanged; otherwise GNU B<parallel> may run wrong
+commands.
+
+See also: B<--joblog>, B<--resume>.
 
 
 =item B<--retries> I<n>
@@ -1178,7 +1191,7 @@ Like this:
 B<--shebang> must be set as the first option.
 
 
-=item B<--shebang-wrap> (alpha testing)
+=item B<--shebang-wrap> (beta testing)
 
 GNU B<parallel> can parallelize scripts by wrapping the shebang
 line. If the program can be run like this:
@@ -1497,9 +1510,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (beta testing)
+=item B<--workdir> I<mydir>
 
-=item B<--wd> I<mydir> (beta testing)
+=item B<--wd> I<mydir>
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in
@@ -3432,10 +3445,11 @@ fixed in that version.
 
 =item *
 
-A complete example that others can run that shows the problem. A
-combination of B<seq>, B<cat>, B<echo>, and B<sleep> can reproduce
-most errors. If your example requires large files, see if you can make
-them by something like B<seq 1000000> > B<file>.
+A complete example that others can run that shows the problem. This
+should preferably be small and simple. A combination of B<seq>,
+B<cat>, B<echo>, and B<sleep> can reproduce most errors. If your
+example requires large files, see if you can make them by something
+like B<seq 1000000> > B<file>.
 
 =item *
 

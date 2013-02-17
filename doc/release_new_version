@@ -171,31 +171,39 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20130122 ('Jyoti Singh Pandey') released
+Subject: GNU Parallel 20130222 ('Chelyabinsk') released
 
-GNU Parallel 20130122 ('Jyoti Singh Pandey') has been released. It is
+GNU Parallel 20130222 ('Chelyabinsk') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* --sshdelay Delay starting next ssh by secs seconds. GNU parallel
-  will pause secs seconds after starting each ssh. secs can be less
-  than 1 seconds.
+* --resume works with --pipe.
 
-* Official OpenBSD port:
-  http://ftp.openbsd.org/ports/sysutils/parallel/
+* --resume-failed will go through --joblog, redo the failed jobs and
+  then continue like --resume.
 
-* Official DragonFlyBSD package:
-  http://www.mirrorservice.org/sites/ftp.dragonflybsd.org/packages/amd64/DragonFly-3.0.0/stable/parallel/
+* Negative positional arguments count from the end: {-1} means the
+  last argument, {-2} the second to last.
 
-* Post about niceload in Hungarian:
-  http://commandline.blog.hu/2013/01/02/niceload
+* NetBSD CPU detection.
 
-* 自炊スキャンデータをKobo Gloに最適化
-  http://interstadial.wordpress.com/2013/01/20/
+* --blocksize increases exponentially if it smaller than a full
+  record.
 
-* GNU parallel+ssh で複数のリモートホストに複数のコマンドを実行させる
-  http://oshiire.to/archives/1686
+* Processing n-line records (--pipe -L n) is now much faster.
+
+* GNU Parallel is the highest rated tool on:
+  http://www.biostars.org/show/tools/?sort=votes&since=all%20time
+
+* GNU Parallel was loved during FSFE's #ilovefs campaign.
+  http://fsfe.org/news/2013/news-20130212-01.en.html
+
+* Using GNU Parallel with s3cmd (Japanese).
+  http://blog.suz-lab.com/2013/02/s3cmd-gnu-paralells3.html
+
+* Intro to GNU Parallel (Chinese).
+  http://guiquanz.github.com/2013/02/12/gnu-parallel-intro/
 
 * Bug fixes and man page updates.
 
