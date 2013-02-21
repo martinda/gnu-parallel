@@ -157,18 +157,19 @@ The replacement string @strong{@{#@}} can be changed with @strong{--seqreplace}.
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{}@emph{n}@strong{@}}
-@anchor{@strong{@{}@emph{n}@strong{@}}}
+@item @strong{@{}@emph{n}@strong{@}} (alpha testing)
+@anchor{@strong{@{}@emph{n}@strong{@}} (alpha testing)}
 
 Argument from input source @emph{n} or the @emph{n}'th argument. This
 positional replacement string will be replaced by the input from input
 source @emph{n} (when used with @strong{-a} or @strong{::::}) or with the @emph{n}'th
-argument (when used with @strong{-N}).
+argument (when used with @strong{-N}). If @emph{n} is negative it refers to the
+@emph{n}'th last argument.
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{}@emph{n}.@strong{@}}
-@anchor{@strong{@{}@emph{n}.@strong{@}}}
+@item @strong{@{}@emph{n}.@strong{@}} (alpha testing)
+@anchor{@strong{@{}@emph{n}.@strong{@}} (alpha testing)}
 
 Argument from input source @emph{n} or the @emph{n}'th argument without
 extension. It is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{.@}}.
@@ -180,8 +181,8 @@ extension removed.
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
 
-@item @strong{@{}@emph{n}/@strong{@}}
-@anchor{@strong{@{}@emph{n}/@strong{@}}}
+@item @strong{@{}@emph{n}/@strong{@}} (alpha testing)
+@anchor{@strong{@{}@emph{n}/@strong{@}} (alpha testing)}
 
 Basename of argument from input source @emph{n} or the @emph{n}'th argument.
 It is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{/@}}.
@@ -193,8 +194,8 @@ directory (if any) removed.
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
 
-@item @strong{@{}@emph{n}//@strong{@}}
-@anchor{@strong{@{}@emph{n}//@strong{@}}}
+@item @strong{@{}@emph{n}//@strong{@}} (alpha testing)
+@anchor{@strong{@{}@emph{n}//@strong{@}} (alpha testing)}
 
 Dirname of argument from input source @emph{n} or the @emph{n}'th argument.
 It is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{//@}}.
@@ -205,8 +206,8 @@ the @emph{n}'th argument (when used with @strong{-N}). See @strong{dirname}(1).
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
 
-@item @strong{@{}@emph{n}/.@strong{@}}
-@anchor{@strong{@{}@emph{n}/.@strong{@}}}
+@item @strong{@{}@emph{n}/.@strong{@}} (alpha testing)
+@anchor{@strong{@{}@emph{n}/.@strong{@}} (alpha testing)}
 
 Basename of argument from input source @emph{n} or the @emph{n}'th argument
 without extension.  It is a combination of @strong{@{}@emph{n}@strong{@}}, @strong{@{/@}}, and
@@ -363,11 +364,11 @@ Implies @strong{--semaphore}.
 
 Print the BibTeX entry for GNU @strong{parallel}.
 
-@item @strong{--block} @emph{size}
-@anchor{@strong{--block} @emph{size}}
+@item @strong{--block} @emph{size} (alpha testing)
+@anchor{@strong{--block} @emph{size} (alpha testing)}
 
-@item @strong{--block-size} @emph{size}
-@anchor{@strong{--block-size} @emph{size}}
+@item @strong{--block-size} @emph{size} (alpha testing)
+@anchor{@strong{--block-size} @emph{size} (alpha testing)}
 
 Size of block in bytes. The size can be postfixed with K, M, G, T, P,
 k, m, g, t, or p which would multiply the size with 1024, 1048576,
@@ -598,8 +599,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile}
-@anchor{@strong{--joblog} @emph{logfile}}
+@item @strong{--joblog} @emph{logfile} (alpha testing)
+@anchor{@strong{--joblog} @emph{logfile} (alpha testing)}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -716,7 +717,7 @@ to see the difference:
 @item @strong{-L} @emph{max-lines}
 @anchor{@strong{-L} @emph{max-lines}}
 
-When used with @strong{--pipe}: Read records of @emph{max-lines} (beta testing).
+When used with @strong{--pipe}: Read records of @emph{max-lines} (alpha testing).
 
 When used otherwise: Use at most @emph{max-lines} nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -842,11 +843,11 @@ all the output from one server will be grouped together.
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
-@item @strong{--pipe}
-@anchor{@strong{--pipe}}
+@item @strong{--pipe} (alpha testing)
+@anchor{@strong{--pipe} (alpha testing)}
 
-@item @strong{--spreadstdin}
-@anchor{@strong{--spreadstdin}}
+@item @strong{--spreadstdin} (alpha testing)
+@anchor{@strong{--spreadstdin} (alpha testing)}
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1106,8 +1107,8 @@ will generate the files:
 
 See also @strong{--files}, @strong{--header}, @strong{--joblog}.
 
-@item @strong{--resume}
-@anchor{@strong{--resume}}
+@item @strong{--resume} (alpha testing)
+@anchor{@strong{--resume} (alpha testing)}
 
 Resumes from the last unfinished job. By reading @strong{--joblog} GNU
 @strong{parallel} will figure out the last unfinished job and continue from
@@ -1479,8 +1480,8 @@ Time out for command. If the command runs for longer than @emph{sec}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
-@item @strong{--tollef}
-@anchor{@strong{--tollef}}
+@item @strong{--tollef} (obsolete - will be retired 20140222)
+@anchor{@strong{--tollef} (obsolete - will be retired 20140222)}
 
 Make GNU @strong{parallel} behave more like Tollef's parallel command. It
 activates @strong{-u}, @strong{-q}, and @strong{--arg-sep --}. It also causes @strong{-l} to
