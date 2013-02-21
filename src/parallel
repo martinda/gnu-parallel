@@ -937,7 +937,7 @@ sub open_joblog {
 		    $joblog_regexp='^(\d+)';
 		}			
 		while(<$joblog_fh>) {
-		    if(/$joblog_regexp/) {
+		    if(/$joblog_regexp/o) {
 			# This is 30% faster than set_job_already_run($1);
 			vec($Global::job_already_run,($1||0),1) = 1;
 		    } elsif(not /\d+\t[^\t]+\t([0-9.]+\t){6}/) {
@@ -947,7 +947,6 @@ sub open_joblog {
 		}
 		close $joblog_fh;
 	    }
-	    # print unpack("b*", $Global::job_already_run)."\n";
 	}
 	if($append) {
 	    # Append to joblog

@@ -193,6 +193,8 @@ New in this release:
 
 * Processing n-line records (--pipe -L n) is now much faster.
 
+* --tollef is obsoleted after discussion on the mailing list.
+
 * GNU Parallel is the highest rated tool on:
   http://www.biostars.org/show/tools/?sort=votes&since=all%20time
 

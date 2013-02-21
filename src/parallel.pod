@@ -147,17 +147,18 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>B<}>
+=item B<{>I<n>B<}> (alpha testing)
 
 Argument from input source I<n> or the I<n>'th argument. This
 positional replacement string will be replaced by the input from input
 source I<n> (when used with B<-a> or B<::::>) or with the I<n>'th
-argument (when used with B<-N>).
+argument (when used with B<-N>). If I<n> is negative it refers to the
+I<n>'th last argument.
 
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>.B<}>
+=item B<{>I<n>.B<}> (alpha testing)
 
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
@@ -170,7 +171,7 @@ extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}>
+=item B<{>I<n>/B<}> (alpha testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.
@@ -183,7 +184,7 @@ directory (if any) removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>//B<}>
+=item B<{>I<n>//B<}> (alpha testing)
 
 Dirname of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{//}>.
@@ -195,7 +196,7 @@ the I<n>'th argument (when used with B<-N>). See B<dirname>(1).
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}>
+=item B<{>I<n>/.B<}> (alpha testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -344,9 +345,9 @@ Implies B<--semaphore>.
 Print the BibTeX entry for GNU B<parallel>.
 
 
-=item B<--block> I<size>
+=item B<--block> I<size> (alpha testing)
 
-=item B<--block-size> I<size>
+=item B<--block-size> I<size> (alpha testing)
 
 Size of block in bytes. The size can be postfixed with K, M, G, T, P,
 k, m, g, t, or p which would multiply the size with 1024, 1048576,
@@ -566,7 +567,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile>
+=item B<--joblog> I<logfile> (alpha testing)
 
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -664,7 +665,7 @@ to see the difference:
 
 =item B<-L> I<max-lines>
 
-When used with B<--pipe>: Read records of I<max-lines> (beta testing).
+When used with B<--pipe>: Read records of I<max-lines> (alpha testing).
 
 When used otherwise: Use at most I<max-lines> nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -787,9 +788,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe>
+=item B<--pipe> (alpha testing)
 
-=item B<--spreadstdin>
+=item B<--spreadstdin> (alpha testing)
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1032,7 +1033,7 @@ will generate the files:
 See also B<--files>, B<--header>, B<--joblog>.
 
 
-=item B<--resume>
+=item B<--resume> (alpha testing)
 
 Resumes from the last unfinished job. By reading B<--joblog> GNU
 B<parallel> will figure out the last unfinished job and continue from
@@ -1376,7 +1377,7 @@ seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
 
-=item B<--tollef>
+=item B<--tollef> (obsolete - will be retired 20140222)
 
 Make GNU B<parallel> behave more like Tollef's parallel command. It
 activates B<-u>, B<-q>, and B<--arg-sep -->. It also causes B<-l> to

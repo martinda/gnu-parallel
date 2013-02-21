@@ -506,8 +506,8 @@ See also: @strong{--bg}, @strong{man sem}
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (beta testing)
-@anchor{@strong{--filter-hosts} (beta testing)}
+@item @strong{--filter-hosts} (alpha testing)
+@anchor{@strong{--filter-hosts} (alpha testing)}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -1115,7 +1115,20 @@ there. As GNU @strong{parallel} only looks at the sequence numbers in
 @strong{--joblog} then the input, the command, and @strong{--joblog} all have to
 remain unchanged; otherwise GNU @strong{parallel} may run wrong commands.
 
-See also: @strong{--joblog}.
+See also: @strong{--joblog}, @strong{--resume-failed}.
+
+@item @strong{--resume-failed} (alpha testing)
+@anchor{@strong{--resume-failed} (alpha testing)}
+
+Retry all failed and resume from the last unfinished job. By reading
+@strong{--joblog} GNU @strong{parallel} will figure out the failed jobs and run
+those again. After that it will resume last unfinished job and
+continue from there. As GNU @strong{parallel} only looks at the sequence
+numbers in @strong{--joblog} then the input, the command, and @strong{--joblog}
+all have to remain unchanged; otherwise GNU @strong{parallel} may run wrong
+commands.
+
+See also: @strong{--joblog}, @strong{--resume}.
 
 @item @strong{--retries} @emph{n}
 @anchor{@strong{--retries} @emph{n}}
@@ -1263,8 +1276,8 @@ Like this:
 
 @strong{--shebang} must be set as the first option.
 
-@item @strong{--shebang-wrap} (alpha testing)
-@anchor{@strong{--shebang-wrap} (alpha testing)}
+@item @strong{--shebang-wrap} (beta testing)
+@anchor{@strong{--shebang-wrap} (beta testing)}
 
 GNU @strong{parallel} can parallelize scripts by wrapping the shebang
 line. If the program can be run like this:
@@ -1612,11 +1625,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir} (beta testing)
-@anchor{@strong{--workdir} @emph{mydir} (beta testing)}
+@item @strong{--workdir} @emph{mydir}
+@anchor{@strong{--workdir} @emph{mydir}}
 
-@item @strong{--wd} @emph{mydir} (beta testing)
-@anchor{@strong{--wd} @emph{mydir} (beta testing)}
+@item @strong{--wd} @emph{mydir}
+@anchor{@strong{--wd} @emph{mydir}}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in
@@ -3672,10 +3685,11 @@ Your bug report should always include:
 released version you should specify why you believe the problem is not
 fixed in that version.
 
-@item A complete example that others can run that shows the problem. A
-combination of @strong{seq}, @strong{cat}, @strong{echo}, and @strong{sleep} can reproduce
-most errors. If your example requires large files, see if you can make
-them by something like @strong{seq 1000000} > @strong{file}.
+@item A complete example that others can run that shows the problem. This
+should preferably be small and simple. A combination of @strong{seq},
+@strong{cat}, @strong{echo}, and @strong{sleep} can reproduce most errors. If your
+example requires large files, see if you can make them by something
+like @strong{seq 1000000} > @strong{file}.
 
 @item The output of your example. If your problem is not easily reproduced
 by others, the output might help them figure out the problem.
