@@ -895,11 +895,11 @@ By sending GNU @strong{parallel} SIGUSR2 you can toggle turning on/off
 
 See also: @strong{--eta}
 
-@item @strong{--max-args}=@emph{max-args}
-@anchor{@strong{--max-args}=@emph{max-args}}
+@item @strong{--max-args}=@emph{max-args} (alpha testing)
+@anchor{@strong{--max-args}=@emph{max-args} (alpha testing)}
 
-@item @strong{-n} @emph{max-args}
-@anchor{@strong{-n} @emph{max-args}}
+@item @strong{-n} @emph{max-args} (alpha testing)
+@anchor{@strong{-n} @emph{max-args} (alpha testing)}
 
 Use at most @emph{max-args} arguments per command line.  Fewer than
 @emph{max-args} arguments will be used if the size (see the @strong{-s} option)
@@ -911,11 +911,11 @@ line.
 
 Implies @strong{-X} unless @strong{-m} is set.
 
-@item @strong{--max-replace-args}=@emph{max-args}
-@anchor{@strong{--max-replace-args}=@emph{max-args}}
+@item @strong{--max-replace-args}=@emph{max-args} (alpha testing)
+@anchor{@strong{--max-replace-args}=@emph{max-args} (alpha testing)}
 
-@item @strong{-N} @emph{max-args}
-@anchor{@strong{-N} @emph{max-args}}
+@item @strong{-N} @emph{max-args} (alpha testing)
+@anchor{@strong{-N} @emph{max-args} (alpha testing)}
 
 Use at most @emph{max-args} arguments per command line. Like @strong{-n} but
 also makes replacement strings @strong{@{1@}} .. @strong{@{}@emph{max-args}@strong{@}} that
@@ -932,8 +932,7 @@ This will set the owner of the homedir to the user:
 Implies @strong{-X} unless @strong{-m} or @strong{--pipe} is set.
 
 When used with @strong{--pipe} @strong{-N} is the number of records to read. This
-is much slower than @strong{--block} so avoid it if performance is
-important.
+is somewhat slower than @strong{--block}.
 
 @item @strong{--max-line-length-allowed}
 @anchor{@strong{--max-line-length-allowed}}

@@ -839,9 +839,9 @@ B<--progress> on a running GNU B<parallel> process.
 See also: B<--eta>
 
 
-=item B<--max-args>=I<max-args>
+=item B<--max-args>=I<max-args> (alpha testing)
 
-=item B<-n> I<max-args>
+=item B<-n> I<max-args> (alpha testing)
 
 Use at most I<max-args> arguments per command line.  Fewer than
 I<max-args> arguments will be used if the size (see the B<-s> option)
@@ -854,9 +854,9 @@ line.
 Implies B<-X> unless B<-m> is set.
 
 
-=item B<--max-replace-args>=I<max-args>
+=item B<--max-replace-args>=I<max-args> (alpha testing)
 
-=item B<-N> I<max-args>
+=item B<-N> I<max-args> (alpha testing)
 
 Use at most I<max-args> arguments per command line. Like B<-n> but
 also makes replacement strings B<{1}> .. B<{>I<max-args>B<}> that
@@ -873,8 +873,7 @@ B<tr ':' '\n' < /etc/passwd | parallel -N7 chown {1} {6}>
 Implies B<-X> unless B<-m> or B<--pipe> is set.
 
 When used with B<--pipe> B<-N> is the number of records to read. This
-is much slower than B<--block> so avoid it if performance is
-important.
+is somewhat slower than B<--block>.
 
 
 =item B<--max-line-length-allowed>

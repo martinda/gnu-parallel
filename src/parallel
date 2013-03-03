@@ -1014,7 +1014,11 @@ sub read_options {
 	    # --profile overrides default profiles
 	    @profiles = ();
 	    for my $profile (@opt::profile) {
-		push @profiles, $ENV{'HOME'}."/.parallel/".$profile;
+		if(-r $profile) {
+		    push @profiles, $profile;
+		} else {
+		    push @profiles, $ENV{'HOME'}."/.parallel/".$profile;
+		}
 	    }
 	}
 	for my $profile (@profiles) {

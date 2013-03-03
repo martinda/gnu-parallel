@@ -1,5 +1,40 @@
+### bug #38354: -J profile_name should read from `pwd`/profile_name before ~/.parallel/profile_name
+echo from ./local_test_profile echo 1
 ### Test --delay
 More than 5 secs: OK
+### test --sshdelay
+OK
+### bug #38299: --resume-failed -k
+job1 val 0
+job2 val 1
+job3 val 2
+job4 val 3
+job5 val 0
+job6 val 1
+try 2. Gives failing - not 0
+job2 val 1
+job3 val 2
+job4 val 3
+job6 val 1
+with exit 0
+job2 val 1
+job3 val 2
+job4 val 3
+job6 val 1
+try 2 again. Gives empty
+### --resume -k
+job0id
+job1id
+job2id
+job3id
+job0id
+job5id
+try 2 = nothing
+two extra
+job6id
+job7id
+bug #37694: Empty string argument skipped when using --quote
+3
 ### Test -k 5
 ### Test -k 3
 ### Test -k 4
@@ -46,8 +81,6 @@ d
 7
 8
 9
-bug #37694: Empty string argument skipped when using --quote
-3
 bug #37956: --colsep does not default to '\t' as specified in the man page.
 one 1
 ### Test --tollef
@@ -58,6 +91,8 @@ one 1
 a
 b
 c
+parallel: Warning: See: http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html
+parallel: Warning: YOU ARE USING --tollef. --tollef is obsolete and will be retired 20140222.
 ### Test --tollef --gnu
 1
 2
@@ -197,39 +232,8 @@ OK
 3 OK
 4 OK
 5 OK
-### test --sshdelay
-OK
 ### Negative replacement strings
 correct
 correct
 2 + 4 = 2 + 4= 6
 correct
-### bug #38299: --resume-failed -k
-job1 val 0
-job2 val 1
-job3 val 2
-job4 val 3
-job5 val 0
-job6 val 1
-try 2. Gives failing - not 0
-job2 val 1
-job3 val 2
-job4 val 3
-job6 val 1
-with exit 0
-job2 val 1
-job3 val 2
-job4 val 3
-job6 val 1
-try 2 again. Gives empty
-### --resume -k
-job0id
-job1id
-job2id
-job3id
-job0id
-job5id
-try 2 = nothing
-two extra
-job6id
-job7id
