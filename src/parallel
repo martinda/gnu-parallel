@@ -1094,7 +1094,7 @@ sub read_args_from_command_line {
 		# Group of arguments on the command line.
 		# Put them into a file.
 		# Create argfile
-		my ($outfh,$name) = ::tempfile(SUFFIX => ".arg", UNLINK => 1);
+		my ($outfh,$name) = ::tempfile(SUFFIX => ".arg");
 		unlink($name);
 		# Put args into argfile
 		print $outfh map { $_,$/ } @group;
@@ -2429,7 +2429,7 @@ sub swap_activity {
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'swap_activity_file'};
-        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".swp", UNLINK => 1);
+        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".swp");
         qx{ ($swap_activity > $tmpfile; mv $tmpfile $file) & };
     }
     return $self->{'swap_activity'};
@@ -2512,7 +2512,7 @@ sub loadavg {
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'loadavg_file'};
-        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".loa", UNLINK => 1);
+        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".loa");
         qx{ ($uptime > $tmpfile && mv $tmpfile $file) & };
     }
     return $self->{'loadavg'};
@@ -3927,11 +3927,10 @@ sub start {
 	my ($outfh,$errfh,$name);
 	# To group we create temporary files for STDOUT and STDERR
 	# To avoid the cleanup unlink the files immediately (but keep them open)
-	my $unlink = $opt::files ? 0 : 1;
-	($outfh, $name) = ::tempfile(SUFFIX => ".par", UNLINK => $unlink);
+	($outfh, $name) = ::tempfile(SUFFIX => ".par");
 	$job->set_stdoutfilename($name);
-	$unlink and unlink $name;
-	($errfh, $name) = ::tempfile(SUFFIX => ".par", UNLINK => $unlink);
+	$opt::files or unlink $name;
+	($errfh, $name) = ::tempfile(SUFFIX => ".par");
 	unlink $name;
 
 	open OUT, '>&', $outfh or ::die_bug("Can't redirect STDOUT: $!");
@@ -3967,7 +3966,7 @@ sub start {
 	# Bug:
 	#   If the command does not read the first char, the temp file
 	#   is not deleted.
-        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".chr", UNLINK => 1);
+        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".chr");
 	$command = qq{
              sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null';
              test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true;
