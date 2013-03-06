@@ -1645,6 +1645,14 @@ treated as the relative path to your home dir. This means that if your
 home dir is different on remote computers (e.g. if your login is
 different) the relative path will still be relative to your home dir.
 
+To see the difference try:
+
+@strong{parallel -S server pwd ::: ""}
+
+@strong{parallel --wd . -S server pwd ::: ""}
+
+@strong{parallel --wd ... -S server pwd ::: ""}
+
 @item @strong{--wait}
 @anchor{@strong{--wait}}
 

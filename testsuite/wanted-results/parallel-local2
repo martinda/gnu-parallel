@@ -1,3 +1,6 @@
+bug #38441: CPU usage goes to 100% if load is higher than --load at first job
+More than 1 secs wall clock: OK
+Less than 1 secs user time: OK
 ### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834
 1
 2

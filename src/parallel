@@ -1297,15 +1297,18 @@ sub start_more_jobs {
             }
         }
 
+	my $sleep = 0.0001; # 0.01 ms - better performance on highend
         for my $sshlogin (values %Global::host) {
             debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
 	    while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
 		if($opt::load and $sshlogin->loadavg_too_high()) {
 		    # The load is too high or unknown
+		    $sleep = ::reap_usleep($sleep);
 		    next;
 		}
 		if($opt::noswap and $sshlogin->swapping()) {
 		    # The server is swapping
+		    $sleep = ::reap_usleep($sleep);
 		    next;
 		}
 		if($sshlogin->too_fast_remote_login()) {
@@ -2482,7 +2485,7 @@ sub loadavg {
         # load average: 0.76, 1.53, 1.45
         if($uptime_out =~ /load averages?: (\d+.\d+)/) {
             $self->{'loadavg'} = $1;
-            ::debug("New loadavg: ".$self->{'loadavg'});
+            ::debug("New loadavg: ".$self->{'loadavg'}."\n");
         } else {
 	    ::die_bug("loadavg_invalid_content: $uptime_out");
 	}
