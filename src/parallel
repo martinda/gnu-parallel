@@ -637,7 +637,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130222;
+    $Global::version = 20130307;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2476,23 +2476,24 @@ sub loadavg {
     #   last load average computed
     my $self = shift;
     # Should we update the loadavg file?
-    my $update_loadavg_file = 0;
+    my $update_loadavg_file = 1;
     if(-r $self->{'loadavg_file'}) {
-        open(my $uptime_fh, "<", $self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
+        open(my $load_fh, "<", $self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
 	local $/ = undef;
-        my $uptime_out = <$uptime_fh>;
-        close $uptime_fh;
-        # load average: 0.76, 1.53, 1.45
-        if($uptime_out =~ /load averages?: (\d+.\d+)/) {
-            $self->{'loadavg'} = $1;
-            ::debug("New loadavg: ".$self->{'loadavg'}."\n");
+        my $load_out = <$load_fh>;
+        close $load_fh;
+	my $load =()= ($load_out=~/(^[DR]....[^\[])/gm);
+        if($load > 0) {
+	    # load is overestimated by 1
+            $self->{'loadavg'} = $load - 1;
+            ::debug("New loadavg: ".$self->{'loadavg'});
         } else {
-	    ::die_bug("loadavg_invalid_content: $uptime_out");
+	    ::die_bug("loadavg_invalid_content: $load_out");
 	}
         ::debug("Last update: ".$self->{'last_loadavg_update'});
-        if(time - $self->{'last_loadavg_update'} > 10) {
-            # last loadavg was started 10 seconds ago
-            ::debug("Older than 10 sec: ".$self->{'loadavg_file'});
+        if(time - $self->{'last_loadavg_update'} > 1) {
+            # last loadavg was started 1 second ago
+            ::debug("Older than 1 sec: ".$self->{'loadavg_file'});
             $update_loadavg_file = 1;
         }
     } else {
@@ -2505,18 +2506,18 @@ sub loadavg {
         $self->{'last_loadavg_update'} = time;
         -e $ENV{'HOME'}."/.parallel" or mkdir $ENV{'HOME'}."/.parallel";
         -e $ENV{'HOME'}."/.parallel/tmp" or mkdir $ENV{'HOME'}."/.parallel/tmp";
-        my $uptime;
+        my $cmd;
         if($self->{'string'} eq ":") {
-            $uptime = "LANG=C uptime";
+	    $cmd = "ps ax -o state,command";
         } else {
-            $uptime = $self->sshcommand() . " " . $self->serverlogin() . " LANG=C uptime";
+	    $cmd = $self->sshcommand() . " " . $self->serverlogin() .
+		"ps ax -o state,command";
         }
-        # Run uptime.
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'loadavg_file'};
         my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".loa");
-        qx{ ($uptime > $tmpfile && mv $tmpfile $file) & };
+        qx{ ($cmd > $tmpfile && mv $tmpfile $file) & };
     }
     return $self->{'loadavg'};
 }
