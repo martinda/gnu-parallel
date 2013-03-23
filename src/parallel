@@ -2506,13 +2506,11 @@ sub loadavg {
         $self->{'last_loadavg_update'} = time;
         -e $ENV{'HOME'}."/.parallel" or mkdir $ENV{'HOME'}."/.parallel";
         -e $ENV{'HOME'}."/.parallel/tmp" or mkdir $ENV{'HOME'}."/.parallel/tmp";
-        my $cmd;
-        if($self->{'string'} eq ":") {
-	    $cmd = "ps ax -o state,command";
-        } else {
-	    $cmd = $self->sshcommand() . " " . $self->serverlogin() .
-		"ps ax -o state,command";
-        }
+        my $cmd = "";
+        if($self->{'string'} ne ":") {
+	    $cmd = $self->sshcommand() . " " . $self->serverlogin() . " ";
+	}
+	$cmd .= "ps ax -o state,command";
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'loadavg_file'};
@@ -4582,9 +4580,10 @@ sub replaced {
 	    }
 	}
 	if($opt::nice) {
-	    # Prepend nice -n19 $SHELL -c
+	    # Prepend \nice -n19 $SHELL -c
 	    # and quote
-	    $self->{'replaced'} = nice() ." -n" . $opt::nice . " "
+	    # \ before nice is needed to avoid tcsh's built-in
+	    $self->{'replaced'} = '\nice' ." -n" . $opt::nice . " "
 		. $ENV{SHELL}." -c "
 		. ::shell_quote_scalar($self->{'replaced'});
 	}
@@ -4601,22 +4600,6 @@ sub replaced {
 		    . " computed=" . ($self->len()));
     }
     return $self->{'replaced'};
-}
-
-sub nice {
-    # Returns:
-    #   path to nice
-    # Needed because tcsh's built-in nice does not support 'nice -n19'
-    if(not $Global::path_to_nice) {
-	$Global::path_to_nice = "nice";
-	for my $n ((split/:/, $ENV{'PATH'}), "/bin", "/usr/bin") {
-	    if(-x $n."/nice") {
-		$Global::path_to_nice = $n."/nice";
-		last;
-	    }
-	}
-    }
-    return $Global::path_to_nice;
 }
 
 sub replace_placeholders {
