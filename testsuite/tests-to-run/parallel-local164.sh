@@ -142,6 +142,6 @@ echo '### Negative replacement strings'
   parallel --colsep ' ' echo '{-3}orrect' ::: "1 c 3 4"
 
 echo 'bug #38439: "open files" with --files --pipe blocks after a while'
-  ulimit -n 15; yes |head -n 10M | parallel-20120822 --pipe -k echo {#} of 21
+  ulimit -n 20; yes |head -n 10M | parallel --pipe -k echo {#} of 21
 
 EOF
