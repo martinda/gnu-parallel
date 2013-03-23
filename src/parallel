@@ -3778,14 +3778,19 @@ sub sshreturn {
 	my @cmd = ();
 	my $rsync_destdir = ($relpath ? "./" : "/");
 	my $ret_file = $file;
-	# If relative path: prepend workdir/./ to avoid problems
-	# if the dir contains ':' and to get the right relative return path
-	my $replaced = ($relpath ? $self->workdir()."/./" : "") . $file;
+	my $cd;
+	if($relpath) {
+	    #   rsync -avR /foo/./bar/baz.c remote:/tmp/
+	    # == (on old systems)
+	    #   rsync -avR --rsync-path="cd /foo; rsync" remote:bar/baz.c /tmp/
+	    my $wd = $self->workdir();
+	    $cd = '--rsync-path='.::shell_quote_scalar("cd $wd; rsync");
+	}
 	# --return
 	# Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
-	# Rel path: rsync -rlDzR server:./subsir/file.gz ./
-	$pre .= "rsync $rsync_opt $serverlogin:".
-	     ::shell_quote_scalar($replaced) . " ".$rsync_destdir.";";
+	# Rel path: rsync -rlDzR server:./subdir/file.gz ./
+	$pre .= "rsync $cd $rsync_opt $serverlogin:".
+	     ::shell_quote_scalar($file) . " ".$rsync_destdir.";";
     }
     return $pre;
 }
@@ -3883,7 +3888,7 @@ sub workdir {
 	} else {
 	    $workdir = ".";
 	}
-	$self->{'workdir'} = $workdir;
+	$self->{'workdir'} = ::shell_quote_scalar($workdir);
     }
     return $self->{'workdir'};
 }
