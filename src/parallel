@@ -1277,62 +1277,53 @@ sub start_more_jobs {
     # Returns:
     #   number of jobs started
     my $jobs_started = 0;
-    if(not $Global::start_no_new_jobs) {
-        if($Global::max_procs_file) {
-            my $mtime = (stat($Global::max_procs_file))[9];
-            if($mtime > $Global::max_procs_file_last_mod) {
-                $Global::max_procs_file_last_mod = $mtime;
-                for my $sshlogin (values %Global::host) {
-                    $sshlogin->set_max_jobs_running(undef);
-                }
-            }
-        }
-        if($Global::max_load_file) {
-            my $mtime = (stat($Global::max_load_file))[9];
-            if($mtime > $Global::max_load_file_last_mod) {
-                $Global::max_load_file_last_mod = $mtime;
-                for my $sshlogin (values %Global::host) {
-                    $sshlogin->set_max_loadavg(undef);
-                }
-            }
-        }
-
-	my $sleep = 0.0001; # 0.01 ms - better performance on highend
-        for my $sshlogin (values %Global::host) {
-            debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
-	    while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
-		if($opt::load and $sshlogin->loadavg_too_high()) {
-		    # The load is too high or unknown
-		    $sleep = ::reap_usleep($sleep);
-		    next;
-		}
-		if($opt::noswap and $sshlogin->swapping()) {
-		    # The server is swapping
-		    $sleep = ::reap_usleep($sleep);
-		    next;
-		}
-		if($sshlogin->too_fast_remote_login()) {
-		    next;
-		}
-		if($Global::JobQueue->empty() and not $opt::pipe) {
-                    last;
-                }
-                debug($sshlogin->string()." has ".$sshlogin->jobs_running()
-		      . " out of " . $sshlogin->max_jobs_running()
-		      . " jobs running. Start another.\n");
-                if(start_another_job($sshlogin) == 0) {
-                    # No more jobs to start on this $sshlogin
-                    debug("No jobs started on ".$sshlogin->string()."\n");
-                    last;
-                }
-                debug("Job started on ".$sshlogin->string()."\n");
-                $sshlogin->inc_jobs_running();
-		$sshlogin->set_last_login_at(::hires_time());
-                $jobs_started++;
-            }
-            debug("Running jobs after on ".$sshlogin->string().": ".$sshlogin->jobs_running()
-                  ." of ".$sshlogin->max_jobs_running() ."\n");
-        }
+    if($Global::start_no_new_jobs) {
+	return $jobs_started;
+    }
+    if($Global::max_procs_file) {
+	my $mtime = (stat($Global::max_procs_file))[9];
+	if($mtime > $Global::max_procs_file_last_mod) {
+	    $Global::max_procs_file_last_mod = $mtime;
+	    for my $sshlogin (values %Global::host) {
+		$sshlogin->set_max_jobs_running(undef);
+	    }
+	}
+    }
+    my $sleep = 0.0001; # 0.01 ms - better performance on highend
+    for my $sshlogin (values %Global::host) {
+	debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
+	while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
+	    if($opt::load and $sshlogin->loadavg_too_high()) {
+		# The load is too high or unknown
+		$sleep = ::reap_usleep($sleep);
+		next;
+	    }
+	    if($opt::noswap and $sshlogin->swapping()) {
+		# The server is swapping
+		$sleep = ::reap_usleep($sleep);
+		next;
+	    }
+	    if($sshlogin->too_fast_remote_login()) {
+		next;
+	    }
+	    if($Global::JobQueue->empty() and not $opt::pipe) {
+		last;
+	    }
+	    debug($sshlogin->string()." has ".$sshlogin->jobs_running()
+		  . " out of " . $sshlogin->max_jobs_running()
+		  . " jobs running. Start another.\n");
+	    if(start_another_job($sshlogin) == 0) {
+		# No more jobs to start on this $sshlogin
+		debug("No jobs started on ".$sshlogin->string()."\n");
+		last;
+	    }
+	    debug("Job started on ".$sshlogin->string()."\n");
+	    $sshlogin->inc_jobs_running();
+	    $sshlogin->set_last_login_at(::hires_time());
+	    $jobs_started++;
+	}
+	debug("Running jobs after on ".$sshlogin->string().": ".$sshlogin->jobs_running()
+	      ." of ".$sshlogin->max_jobs_running() ."\n");
     }
     return $jobs_started;
 }
@@ -2523,6 +2514,16 @@ sub loadavg {
 
 sub max_loadavg {
     my $self = shift;
+    # If --load is a file it might be changed
+    if($Global::max_load_file) {
+	my $mtime = (stat($Global::max_load_file))[9];
+	if($mtime > $Global::max_load_file_last_mod) {
+	    $Global::max_load_file_last_mod = $mtime;
+	    for my $sshlogin (values %Global::host) {
+		$sshlogin->set_max_loadavg(undef);
+	    }
+	}
+    }
     if(not defined $self->{'max_loadavg'}) {
         $self->{'max_loadavg'} =
             $self->compute_max_loadavg($opt::load);
@@ -3766,7 +3767,7 @@ sub sshreturn {
 	my @cmd = ();
 	my $rsync_destdir = ($relpath ? "./" : "/");
 	my $ret_file = $file;
-	my $cd;
+	my $cd = "";
 	if($relpath) {
 	    #   rsync -avR /foo/./bar/baz.c remote:/tmp/
 	    # == (on old systems)
