@@ -3778,14 +3778,13 @@ sub sshreturn {
 	my @cmd = ();
 	my $rsync_destdir = ($relpath ? "./" : "/");
 	my $ret_file = $file;
-	my $remove = $opt::cleanup ? "--remove-source-files" : "";
 	# If relative path: prepend workdir/./ to avoid problems
 	# if the dir contains ':' and to get the right relative return path
 	my $replaced = ($relpath ? $self->workdir()."/./" : "") . $file;
 	# --return
 	# Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
 	# Rel path: rsync -rlDzR server:./subsir/file.gz ./
-	$pre .= "rsync $rsync_opt $remove $serverlogin:".
+	$pre .= "rsync $rsync_opt $serverlogin:".
 	     ::shell_quote_scalar($replaced) . " ".$rsync_destdir.";";
     }
     return $pre;
@@ -3813,13 +3812,15 @@ sub sshcleanup {
 	}
 	my $relpath = ($file !~ m:^/:); # Is the path relative?
 	my $cleandir = ($relpath ? $workdir."/" : "");
-	$cleancmd .= "$sshcmd $serverlogin rm -f "
-	    . ::shell_quote_scalar($cleandir.$file.$removeworkdir).";";
+	$cleancmd .= "rm -f "
+	    . ::shell_quote_scalar($cleandir.$file.$removeworkdir).'\;';
     }
     if(defined $opt::workdir and $opt::workdir eq "...") {
-	$cleancmd .= "$sshcmd $serverlogin rm -rf " . ::shell_quote_scalar($workdir).";";
+	$cleancmd .= "rm -rf " . ::shell_quote_scalar($workdir).'\;';
     }
-
+    if($cleancmd) {
+	$cleancmd = "$sshcmd $serverlogin ".$cleancmd.";";
+    }
     return $cleancmd;
 }
 
@@ -3829,7 +3830,8 @@ sub cleanup {
     my $self = shift;
     if($opt::cleanup) {
 	my @transfer = $self->transfer();
-	return @transfer;
+	my @return = $self->return();
+	return (@transfer,@return);
     } else {
 	return ();
     }
