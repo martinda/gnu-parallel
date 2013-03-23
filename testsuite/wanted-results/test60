@@ -50,16 +50,16 @@
 3
 3
 ### Test --nonall
-vm1
-vm10
-### Test --nonall -u
-vm10
-vm1
-vm10
-vm1
+centos3.tange.dk
+redhat9.tange.dk
+### Test --nonall -u - should be interleaved x y x y
+centos3.tange.dk
+redhat9.tange.dk
+centos3.tange.dk
+redhat9.tange.dk
 ### Test read sshloginfile from STDIN
-vm1
-vm1
+redhat9.tange.dk
+redhat9.tange.dk
 ### Test --nonall --basefile
 /tmp/nonall--basefile
 /tmp/nonall--basefile

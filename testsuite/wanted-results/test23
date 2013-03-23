@@ -13,9 +13,9 @@ script2 run 4
 script1 run 5
 script2 run 5
 good if no file
-ls: cannot access script1: No such file or directory
+ls: script1: No such file or directory
 OK
-ls: cannot access script2: No such file or directory
+ls: script2: No such file or directory
 OK
 ### Test --basefile + --sshlogin :
 1

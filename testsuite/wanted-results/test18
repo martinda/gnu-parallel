@@ -79,15 +79,15 @@ parallel: Warning: --cleanup ignored as there are no remote --sshlogin.
 10
 ### Check forced number of CPUs being respected
 hk
-vm1
-vm1
-vm1
-vm1
-vm1
-vm1
-vm1
-vm1
-vm1
+redhat9.tange.dk
+redhat9.tange.dk
+redhat9.tange.dk
+redhat9.tange.dk
+redhat9.tange.dk
+redhat9.tange.dk
+redhat9.tange.dk
+redhat9.tange.dk
+redhat9.tange.dk
 hk
 hk
 hk
