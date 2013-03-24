@@ -210,6 +210,7 @@ if($opt::nonall or $opt::onall) {
 	     ((defined $opt::D) ? "-D" : ""),
 	     ((defined $opt::timeout) ? "--timeout ".$opt::timeout : ""),
 	     ((defined $opt::plain) ? "--plain" : ""),
+	     ((defined $opt::retries) ? "--retries ".$opt::retries : ""),
 	     (@opt::env ? map { "--env ".::shell_quote_scalar($_) } @opt::env : ""),
 	);
     ::debug("| $0 $options\n");
@@ -3729,18 +3730,22 @@ sub sshtransfer {
 
 sub return {
     # Files to return
-    # Quoted and with {...} substituted
+    # Non-quoted and with {...} substituted
+    # Returns:
+    #   @non_quoted_filenames
     my $self = shift;
     my @return = ();
     for my $return (@{$self->{'commandline'}{'return_files'}}) {
 	CORE::push @return,
-	$self->{'commandline'}->replace_placeholders($return,1);
+	$self->{'commandline'}->replace_placeholders($return,0);
     }
     return @return;
 }
 
 sub returnsize {
     # This is called after the job has finished
+    # Returns:
+    #   $number_of_bytes transferred in return
     my $self = shift;
     for my $file ($self->return()) {
 	if(-e $file) {
@@ -3761,25 +3766,25 @@ sub sshreturn {
 	$file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
 	$file =~ s:^\./::g; # Remove ./ if any
 	my $relpath = ($file !~ m:^/:); # Is the path relative?
-	# Use different subdirs depending on abs or rel path
-
-	# Return or cleanup
-	my @cmd = ();
-	my $rsync_destdir = ($relpath ? "./" : "/");
-	my $ret_file = $file;
 	my $cd = "";
+	my $wd = "";
 	if($relpath) {
 	    #   rsync -avR /foo/./bar/baz.c remote:/tmp/
 	    # == (on old systems)
 	    #   rsync -avR --rsync-path="cd /foo; rsync" remote:bar/baz.c /tmp/
-	    my $wd = $self->workdir();
-	    $cd = '--rsync-path='.::shell_quote_scalar("cd $wd; rsync");
+	    $wd = ::shell_quote_scalar($self->workdir())."/";
 	}
+	# Only load File::Basename if actually needed
+	$Global::use{"File::Basename"} ||= eval "use File::Basename; 1;";
+	$cd = ::shell_quote_scalar(dirname($file));
+	my $rsync_cd = '--rsync-path='.::shell_quote_scalar("cd $wd$cd; rsync");
+	my $basename = ::shell_quote_scalar(::shell_quote_scalar(basename($file)));
 	# --return
-	# Abs path: rsync -rlDzR server:/home/tange/dir/subdir/file.gz /
-	# Rel path: rsync -rlDzR server:./subdir/file.gz ./
-	$pre .= "rsync $cd $rsync_opt $serverlogin:".
-	     ::shell_quote_scalar($file) . " ".$rsync_destdir.";";
+	#   mkdir -p /home/tange/dir/subdir/; 
+        #   rsync -rlDzR --rsync-path="cd /home/tange/dir/subdir/; rsync" 
+        #   server:file.gz /home/tange/dir/subdir/
+	$pre .= "mkdir -p $cd; rsync $rsync_cd $rsync_opt $serverlogin:".
+	     $basename . " ".$cd.";";
     }
     return $pre;
 }
@@ -3798,16 +3803,17 @@ sub sshcleanup {
 
     for my $file ($self->cleanup()) {
 	my @subworkdirs = parentdirs_of($file);
-	$file = ::shell_quote_scalar($file);
 	if(@subworkdirs) {
-	    $removeworkdir = "; rmdir 2>/dev/null ".
+	    $removeworkdir = "rmdir 2>/dev/null ".
 		join(" ",map { ::shell_quote_scalar($workdir."/".$_) }
-		     @subworkdirs);
+		     @subworkdirs).";";
 	}
 	my $relpath = ($file !~ m:^/:); # Is the path relative?
 	my $cleandir = ($relpath ? $workdir."/" : "");
-	$cleancmd .= "rm -f "
-	    . ::shell_quote_scalar($cleandir.$file.$removeworkdir).'\;';
+	$cleancmd .= 
+	    ::shell_quote_scalar("rm -f "
+				 . ::shell_quote_scalar($cleandir.$file).';'
+				 . $removeworkdir);
     }
     if(defined $opt::workdir and $opt::workdir eq "...") {
 	$cleancmd .= "rm -rf " . ::shell_quote_scalar($workdir).'\;';
@@ -4346,12 +4352,12 @@ sub push {
 			$self->{'positional_replace'}{$arg_no};
 		    # Find the single replacements
 		    $self->{'len'}{$used} +=
-			length $arg->replace($replacementfunction);
+			length $arg->replace($replacementfunction,1);
 		}
 	    }
 	    for my $used (keys %{$self->{'multi_replace'}}) {
 		# Add to the multireplacement
-		$self->{'len'}{$used} += length $arg->replace($used);
+		$self->{'len'}{$used} += length $arg->replace($used,1);
 	    }
 	}
     }
@@ -4365,7 +4371,7 @@ sub pop {
 	if(defined $arg) {
 	    for my $replacement_string (keys %{$self->{'replacecount'}}) {
 		$self->{'len'}{$replacement_string} -=
-		    length $arg->replace($replacement_string);
+		    length $arg->replace($replacement_string,1);
 	    }
 	}
     }
@@ -4566,7 +4572,7 @@ sub number_of_replacements {
 sub replaced {
     my $self = shift;
     if(not defined $self->{'replaced'}) {
-	$self->{'replaced'} = $self->replace_placeholders($self->{'command'},0);
+	$self->{'replaced'} = $self->replace_placeholders($self->{'command'},$Global::JobQueue->quote_args());
 	if($self->{'replaced'} =~ /^\s*(-\S+)/) {
 	    # Is this really a command in $PATH starting with '-'?
 	    my $cmd = $1;
@@ -4601,14 +4607,14 @@ sub replaced {
 sub replace_placeholders {
     my $self = shift;
     my $target = shift;
-    my $quoteall = shift;
+    my $quote = shift;
     my $context_replace = $self->{'context_replace'};
     my $replaced;
 
     if($self->{'context_replace'}) {
-	$replaced = $self->context_replace_placeholders($target,$quoteall);
+	$replaced = $self->context_replace_placeholders($target,$quote);
     } else {
-	$replaced = $self->simple_replace_placeholders($target,$quoteall);
+	$replaced = $self->simple_replace_placeholders($target,$quote);
     }
     return $replaced;
 }
@@ -4616,7 +4622,7 @@ sub replace_placeholders {
 sub context_replace_placeholders {
     my $self = shift;
     my $target = shift;
-    my $quoteall = shift;
+    my $quote = shift;
     # -X = context replace
     # maybe multiple input sources
     # maybe --xapply
@@ -4689,7 +4695,7 @@ sub context_replace_placeholders {
 		$w = $word;
 		# Replace positive replacement strings with arg[$1-1]
 		# Replace negative replacement strings with arg[$n+$1]
-		$w =~ s/$pos_inner_regexp/$argset->[$1 > 0 ? $1-1 : $n+$1]->replace('{'.$2.'}')/geo;
+		$w =~ s/$pos_inner_regexp/$argset->[$1 > 0 ? $1-1 : $n+$1]->replace('{'.$2.'}',$quote)/geo;
 		CORE::push @pos_replacements, $w;
 	    }
 	}
@@ -4702,7 +4708,7 @@ sub context_replace_placeholders {
 	    for my $w (@pos_replacements) {
 		for my $arg (@args) {
 		    my $wmulti = $w;
-		    $wmulti =~ s/($rep_str_regexp)/$arg->replace($Global::replace_rev{$1})/geo;
+		    $wmulti =~ s/($rep_str_regexp)/$arg->replace($Global::replace_rev{$1},$quote)/geo;
 		    CORE::push @replacements, $wmulti;
 		}
 	    }
@@ -4727,7 +4733,7 @@ sub simple_replace_placeholders {
     # maybe --xapply
     my $self = shift;
     my $target = shift;
-    my $quoteall = shift;
+    my $quote = shift;
     my @args=();
     my @used_multi;
     my %replace;
@@ -4744,7 +4750,7 @@ sub simple_replace_placeholders {
 	if(grep { $used eq $_ } qw({} {/} {//} {.} {/.})) {
 	    # {} {/} {//} {.} {/.}
 	    $replace{$Global::replace{$used}} =
-		join(" ", map { $_->replace($used) } @args);
+		join(" ", map { $_->replace($used,$quote) } @args);
 	} elsif($used =~ /^\{(-?\d+)(|\/|\/\/|\.|\/\.)\}$/) {
 	    # {n} {n/} {n//} {n.} {n/.} {-n} {-n/} {-n//} {-n.} {-n/.}
 	    my $positional = $1 > 0 ? $1 : $n+$1+1;
@@ -4755,7 +4761,7 @@ sub simple_replace_placeholders {
 	    if(defined $args[$positional-1]) {
 		# we have a matching argument for {n}
 		$replace{$Global::replace{$used}} =
-		    $args[$positional-1]->replace($replacementfunction);
+		    $args[$positional-1]->replace($replacementfunction,$quote);
 	    } else {
 		if($positional <= $self->{'max_number_of_args'}) {
 		    # Fill up if we have a half completed line
@@ -4772,15 +4778,7 @@ sub simple_replace_placeholders {
     # Substitute the replace strings with the replacement values
     my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } keys %replace);
     if($regexp) {
-	if($quoteall) {
-	    # This is for --return: The whole expression must be
-	    # quoted - not just the replacements
-	    %replace = map { $_ => ::shell_unquote($replace{$_}) } keys %replace;
-	    $target =~ s/($regexp)/$replace{$1}/g;
-	    $target = ::shell_quote_scalar($target);
-	} else {
-	    $target =~ s/($regexp)/$replace{$1}/g;
-	}
+	$target =~ s/($regexp)/$replace{$1}/g;
     }
     return $target;
 }
@@ -5328,9 +5326,13 @@ sub new {
 }
 
 sub replace {
+    # Calculates the corresponding value for {} {/} {//} {.} {/.}
+    # Returns:
+    #   The calculated string
     my $self = shift;
     my $replacement_string = shift; # {} {/} {//} {.} {/.}
-    if(not defined $self->{$replacement_string}) {
+    my $quote = shift; # should the string be quoted?
+    if(not defined $self->{$quote,$replacement_string}) {
 	my $s;
 	if($Global::trim eq "n") {
 	    $s = $self->{'orig'};
@@ -5351,12 +5353,12 @@ sub replace {
 	    $s =~ s:^.*/([^/]+)/?$:$1:; # Remove dir from argument. If ending in /, remove final /
 	    $s =~ s:\.[^/\.]*$::; # Remove .ext from argument
 	}
-	if($Global::JobQueue->quote_args()) {
+	if($quote) {
 	    $s = ::shell_quote_scalar($s);
 	}
-	$self->{$replacement_string} = $s;
+	$self->{$quote,$replacement_string} = $s;
     }
-    return $self->{$replacement_string};
+    return $self->{$quote,$replacement_string};
 }
 
 sub orig {
