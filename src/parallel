@@ -199,6 +199,7 @@ if($opt::nonall or $opt::onall) {
 	     ((defined $opt::group) ? "-g" : ""),
 	     ((defined $opt::D) ? "-D" : ""),
 	     ((defined $opt::plain) ? "--plain" : ""),
+	     ((defined $opt::max_chars) ? "--max-chars ".$opt::max_chars : ""),
 	);
     my $suboptions =
 	join(" ",
@@ -211,6 +212,7 @@ if($opt::nonall or $opt::onall) {
 	     ((defined $opt::timeout) ? "--timeout ".$opt::timeout : ""),
 	     ((defined $opt::plain) ? "--plain" : ""),
 	     ((defined $opt::retries) ? "--retries ".$opt::retries : ""),
+	     ((defined $opt::max_chars) ? "--max-chars ".$opt::max_chars : ""),
 	     (@opt::env ? map { "--env ".::shell_quote_scalar($_) } @opt::env : ""),
 	);
     ::debug("| $0 $options\n");
@@ -578,7 +580,7 @@ sub options_hash {
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$opt::P,
 	 "delimiter|d=s" => \$opt::d,
-	 "max-chars|s=i" => \$opt::s,
+	 "max-chars|s=i" => \$opt::max_chars,
 	 "arg-file|a=s" => \@opt::a,
 	 "no-run-if-empty|r" => \$opt::r,
 	 "replace|i:s" => \$opt::i,
@@ -4118,7 +4120,7 @@ sub print {
 	    # Verbose level > 1: Print the rsync and stuff
 	    $cmd = $command;
 	}
-	printf $Global::joblog
+	print $Global::joblog
 	    join("\t", $self->seq(), $self->sshlogin()->string(),
 		 $self->starttime(), $self->runtime(),
 		 $self->transfersize(), $self->returnsize(),
@@ -4917,15 +4919,15 @@ sub max_length {
     # Returns:
     #   number of chars on the longest command line allowed
     if(not $Limits::Command::line_max_len) {
-	if($opt::s) {
-	    if(is_acceptable_command_line_length($opt::s)) {
-		$Limits::Command::line_max_len = $opt::s;
+	if($opt::max_chars) {
+	    if(is_acceptable_command_line_length($opt::max_chars)) {
+		$Limits::Command::line_max_len = $opt::max_chars;
 	    } else {
 		# -s is too long: Find the correct
-		$Limits::Command::line_max_len = binary_find_max_length(0,$opt::s);
+		$Limits::Command::line_max_len = binary_find_max_length(0,$opt::max_chars);
 	    }
-	    if($opt::s <= $Limits::Command::line_max_len) {
-		$Limits::Command::line_max_len = $opt::s;
+	    if($opt::max_chars <= $Limits::Command::line_max_len) {
+		$Limits::Command::line_max_len = $opt::max_chars;
 	    } else {
 		::warning("Value for -s option ",
 			  "should be < $Limits::Command::line_max_len.\n");
