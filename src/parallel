@@ -2931,6 +2931,8 @@ sub no_of_cpus {
         $no_of_cpus = no_of_cpus_aix();
     } elsif ($^O eq 'darwin') {
 	$no_of_cpus = no_of_cpus_darwin();
+    } elsif ($^O eq 'hpux') {
+        $no_of_cpus = no_of_cpus_hpux();
     } else {
 	$no_of_cpus = (no_of_cpus_freebsd()
 		       || no_of_cpus_netbsd()
@@ -2968,6 +2970,8 @@ sub no_of_cores {
         $no_of_cores = no_of_cores_aix();
     } elsif ($^O eq 'darwin') {
 	$no_of_cores = no_of_cores_darwin();
+    } elsif ($^O eq 'hpux') {
+        $no_of_cores = no_of_cores_hpux();
     } else {
 	$no_of_cores = (no_of_cores_freebsd()
 			|| no_of_cores_netbsd()
@@ -3163,6 +3167,24 @@ sub no_of_cores_aix {
 	}
 	close $in_fh;
     }
+    return $no_of_cores;
+}
+
+sub no_of_cpus_hpux {
+    # Returns:
+    #   Number of physical CPUs on HP-UX
+    #   undef if not HP-UX
+    my $no_of_cpus =
+        (`/usr/bin/mpsched -s 2>/dev/null | grep 'Locality Domain Count' | awk '{ print \$4 }'`);
+    return $no_of_cpus;
+}
+
+sub no_of_cores_hpux {
+    # Returns:
+    #   Number of CPU cores on HP-UX
+    #   undef if not HP-UX
+    my $no_of_cores =
+        (`/usr/bin/mpsched -s 2>/dev/null | grep 'Processor Count' | awk '{ print \$4 }'`);
     return $no_of_cores;
 }
 

@@ -30,6 +30,9 @@ Full installation of GNU Parallel is as simple as:
 
   ./configure && make && make install
 
+
+= Personal installation =
+
 If you are not root you can add ~/bin to your path and install in
 ~/bin and ~/share:
 
