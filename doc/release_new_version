@@ -178,34 +178,8 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* --resume works with --pipe.
-
-* --resume-failed will go through --joblog, redo the failed jobs and
-  then continue like --resume.
-
-* Negative positional arguments count from the end: {-1} means the
-  last argument, {-2} the second to last.
-
-* NetBSD CPU detection.
-
-* --blocksize increases exponentially if it smaller than a full
-  record.
-
-* Processing n-line records (--pipe -L n) is now much faster.
-
-* --tollef is obsoleted after discussion on the mailing list.
-
-* GNU Parallel is the highest rated tool on:
-  http://www.biostars.org/show/tools/?sort=votes&since=all%20time
-
-* GNU Parallel was loved during FSFE's #ilovefs campaign.
-  http://fsfe.org/news/2013/news-20130212-01.en.html
-
-* Using GNU Parallel with s3cmd (Japanese).
-  http://blog.suz-lab.com/2013/02/s3cmd-gnu-paralells3.html
-
-* Intro to GNU Parallel (Chinese).
-  http://guiquanz.github.com/2013/02/12/gnu-parallel-intro/
+* GNU Parallel accepted for openSUSE.
+  http://software.opensuse.org/package/gnu_parallel
 
 * Bug fixes and man page updates.
 

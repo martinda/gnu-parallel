@@ -5,6 +5,7 @@ SERVER2=parallel-server2
 SSHLOGIN1=parallel@$SERVER1
 SSHLOGIN2=parallel@$SERVER2
 
+export PARALLEL=-j8
 # Make sure sort order is the same
 export LANG=C
 

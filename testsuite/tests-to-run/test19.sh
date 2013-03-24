@@ -19,7 +19,7 @@ echo newline > '/tmp/parallel.file.
 newline1'
 echo newline > '/tmp/parallel.file.
 newline2'
-find tmp/parallel*newline* -print0 | parallel -0 -k --transfer --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {}";"rm {}
+find tmp/parallel*newline* -print0 | stdout parallel -0 -k --transfer --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {}";"rm {}
 # Should give: No such file or directory
 echo good if no file
 stdout ssh $SSHLOGIN1 ls 'tmp/parallel.file*'
@@ -31,7 +31,7 @@ echo newline > '/tmp/parallel.file.
 newline1'
 echo newline > '/tmp/parallel.file.
 newline2'
-find tmp/parallel*newline* -print0 | parallel -0 -k --transfer --cleanup --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {}
+find tmp/parallel*newline* -print0 | stdout parallel -0 -k --transfer --cleanup --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {}
 # Should give: No such file or directory
 echo good if no file
 stdout ssh $SSHLOGIN1 ls 'tmp/parallel.file*'
@@ -44,7 +44,7 @@ echo newline > '/tmp/parallel.file.
 newline1'
 echo newline > '/tmp/parallel.file.
 newline2'
-find tmp/parallel*newline* -print0 | parallel -0 -k --return {}.out --sshlogin $SSHLOGIN1,$SSHLOGIN2 mkdir -p tmp\;echo remote '>' {}.out
+find tmp/parallel*newline* -print0 | stdout parallel -0 -k --return {}.out --sshlogin $SSHLOGIN1,$SSHLOGIN2 mkdir -p tmp\;echo remote '>' {}.out
 ls tmp/parallel*newline*out
 rm tmp/parallel*newline*out
 # Cleanup remote
@@ -56,7 +56,7 @@ echo newline > '/tmp/parallel.file.
 newline1'
 echo newline > '/tmp/parallel.file.
 newline2'
-find tmp/parallel*newline* -print0 | parallel -0 -k --return {}.out --cleanup --sshlogin $SSHLOGIN1,$SSHLOGIN2 echo remote '>' {}.out
+find tmp/parallel*newline* -print0 | stdout parallel -0 -k --return {}.out --cleanup --sshlogin $SSHLOGIN1,$SSHLOGIN2 echo remote '>' {}.out
 ls tmp/parallel*newline*out
 rm tmp/parallel*newline*out
 echo good if no file
@@ -69,7 +69,7 @@ echo newline > '/tmp/parallel.file.
 newline1'
 echo newline > '/tmp/parallel.file.
 newline2'
-find tmp/parallel*newline* -print0 | parallel -0 -k --transfer --return {}.out --cleanup --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {} '>' {}.out
+find tmp/parallel*newline* -print0 | stdout parallel -0 -k --transfer --return {}.out --cleanup --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {} '>' {}.out
 ls tmp/parallel*newline*out
 rm tmp/parallel*newline*out
 echo good if no file
@@ -82,7 +82,7 @@ echo newline > '/tmp/parallel.file.
 newline1'
 echo newline > '/tmp/parallel.file.
 newline2'
-find tmp/parallel*newline* -print0 | parallel -0 -k --trc {}.out --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {} '>' {}.out
+find tmp/parallel*newline* -print0 | stdout parallel -0 -k --trc {}.out --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {} '>' {}.out
 ls tmp/parallel*newline*out
 rm tmp/parallel*newline*out
 echo good if no file
@@ -95,7 +95,7 @@ echo newline > '/tmp/parallel.file.
 newline1'
 echo newline > '/tmp/parallel.file.
 newline2'
-find tmp/parallel*newline* -print0 | parallel -0 -k --trc {}.out --trc {}.out2 --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {} '>' {}.out';'cat {} '>' {}.out2
+find tmp/parallel*newline* -print0 | stdout parallel -0 -k --trc {}.out --trc {}.out2 --sshlogin $SSHLOGIN1,$SSHLOGIN2 cat {} '>' {}.out';'cat {} '>' {}.out2
 ls tmp/parallel*newline*out*
 rm tmp/parallel*newline*out*
 echo good if no file
@@ -112,7 +112,7 @@ echo newline > '/tmp/parallel.file.
 newline1'
 echo newline > '/tmp/parallel.file.
 newline2'
-find tmp/parallel*newline* -print0 | parallel -0 -k -j1 --trc {}.out --trc {}.out2 \
+find tmp/parallel*newline* -print0 | stdout parallel -0 -k -j1 --trc {}.out --trc {}.out2 \
   --sshlogin "/tmp/myssh1 $SSHLOGIN1, /tmp/myssh2 $SSHLOGIN2" \
   cat {} '>' {}.out';'cat {} '>' {}.out2
 ls tmp/parallel*newline*out*
@@ -125,9 +125,3 @@ echo 'Input for ssh'
 cat /tmp/myssh1-run /tmp/myssh2-run | perl -pe 's/(PID.)\d+/${1}00000/g'
 rm /tmp/myssh1-run /tmp/myssh2-run
 
-echo '### Test use special ssh with > 9 simultaneous'
-echo 'ssh "$@"; echo "$@" >>/tmp/myssh1-run' >/tmp/myssh1
-echo 'ssh "$@"; echo "$@" >>/tmp/myssh2-run' >/tmp/myssh2
-chmod 755 /tmp/myssh1 /tmp/myssh2
-seq 1 100 | parallel --sshlogin "/tmp/myssh1 $SSHLOGIN1, /tmp/myssh2 $SSHLOGIN2" \
-  -j10000% -k echo

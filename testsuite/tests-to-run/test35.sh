@@ -40,7 +40,7 @@ stdout parallel -k -j9 --wd /tmp/ --basefile 1-col.txt --trc {}.5 -S .. -v echo 
 find . -name '*.5' | sort
 
 echo '### Test --wd ... --cleanup'
-stdout parallel -j9 -k --wd ... --cleanup -S lo -v echo ">"{}.6 :::  uNiQuE_sTrInG
+stdout parallel -j9 -k --retries 3 --wd ... --cleanup -S lo -v echo ">"{}.6 :::  uNiQuE_sTrInG
 find ~/.parallel/tmp |grep uNiQuE_sTrInG
 
 cd ..

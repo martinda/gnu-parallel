@@ -43,7 +43,7 @@ echo "#2/ssh -l tange nothing" >>/tmp/parallel-sshlogin
 seq 1 10 | parallel -k --sshloginfile /tmp/parallel-sshlogin echo
 
 echo '### Check forced number of CPUs being respected'
-stdout seq 1 20 | parallel -k -j+0  -S 1/:,9/$SSHLOGIN1  "hostname; echo {} >/dev/null"
+stdout seq 1 20 | parallel -k -j+0  -S 1/:,7/$SSHLOGIN1  "hostname; echo {} >/dev/null"
 
 echo '### Check more than 9 simultaneous sshlogins'
 seq 1 11 | parallel -k -j0 -S "ssh $SSHLOGIN1" echo

@@ -4,6 +4,4 @@
 ### Test -p
 ...OK
 ### Test --sensor -l negative
-             total       used       free     shared    buffers     cached
--/+ buffers/cache:          6          1
 more than 6 GB used
