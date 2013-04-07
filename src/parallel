@@ -2941,6 +2941,8 @@ sub no_of_cpus {
         $no_of_cpus = no_of_cpus_hpux();
     } elsif ($^O eq 'nto') {
         $no_of_cpus = no_of_cpus_qnx();
+    } elsif ($^O eq 'svr5') {
+        $no_of_cpus = no_of_cpus_openserver();
     } elsif ($^O eq 'irix') {
         $no_of_cpus = no_of_cpus_irix();
     } else {
@@ -2954,6 +2956,7 @@ sub no_of_cpus {
 		       || no_of_cpus_aix()
 		       || no_of_cpus_hpux()
 		       || no_of_cpus_qnx()
+		       || no_of_cpus_openserver()
 		       || no_of_cpus_irix()
 	    );
     }
@@ -2991,6 +2994,8 @@ sub no_of_cores {
         $no_of_cores = no_of_cores_hpux();
     } elsif ($^O eq 'nto') {
         $no_of_cores = no_of_cores_qnx();
+    } elsif ($^O eq 'svr5') {
+        $no_of_cores = no_of_cores_openserver();
     } elsif ($^O eq 'irix') {
         $no_of_cores = no_of_cores_irix();
     } else {
@@ -3004,6 +3009,7 @@ sub no_of_cores {
 			|| no_of_cores_aix()
 			|| no_of_cores_hpux()
 			|| no_of_cores_qnx()
+			|| no_of_cores_openserver()
 			|| no_of_cores_irix()
 	    );
     }
@@ -3258,6 +3264,33 @@ sub no_of_cores_qnx {
     return $no_of_cores;
 }
 
+sub no_of_cpus_openserver {
+    # Returns:
+    #   Number of physical CPUs on SCO OpenServer
+    #   undef if not SCO OpenServer
+    my $no_of_cpus = 0;
+    if(-x "/usr/sbin/psrinfo") {
+        my @psrinfo = `/usr/sbin/psrinfo`;
+        if($#psrinfo >= 0) {
+            return $#psrinfo +1;
+        }
+    }
+    return $no_of_cpus;
+}
+
+sub no_of_cores_openserver {
+    # Returns:
+    #   Number of CPU cores on SCO OpenServer
+    #   undef if not SCO OpenServer
+    my $no_of_cores = 0;
+    if(-x "/usr/sbin/psrinfo") {
+        my @psrinfo = `/usr/sbin/psrinfo`;
+        if($#psrinfo >= 0) {
+            return $#psrinfo +1;
+        }
+    }
+    return $no_of_cores;
+}
 
 sub no_of_cpus_irix {
     # Returns:
