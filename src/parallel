@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
 # Copyright (C) 2007,2008,2009,2010,2011,2012,2013 Ole Tange and Free Software
 # Foundation, Inc.
@@ -2927,21 +2927,34 @@ sub no_of_cpus {
         $no_of_cpus = no_of_cpus_freebsd();
     } elsif ($^O eq 'netbsd') {
         $no_of_cpus = no_of_cpus_netbsd();
+    } elsif ($^O eq 'openbsd') {
+        $no_of_cpus = no_of_cpus_openbsd();
+    } elsif ($^O eq 'gnu') {
+        $no_of_cpus = no_of_cpus_hurd();
+    } elsif ($^O eq 'darwin') {
+	$no_of_cpus = no_of_cpus_darwin();
     } elsif ($^O eq 'solaris') {
         $no_of_cpus = no_of_cpus_solaris();
     } elsif ($^O eq 'aix') {
         $no_of_cpus = no_of_cpus_aix();
-    } elsif ($^O eq 'darwin') {
-	$no_of_cpus = no_of_cpus_darwin();
     } elsif ($^O eq 'hpux') {
         $no_of_cpus = no_of_cpus_hpux();
+    } elsif ($^O eq 'nto') {
+        $no_of_cpus = no_of_cpus_qnx();
+    } elsif ($^O eq 'irix') {
+        $no_of_cpus = no_of_cpus_irix();
     } else {
-	$no_of_cpus = (no_of_cpus_freebsd()
+	$no_of_cpus = (no_of_cpus_gnu_linux()
+		       || no_of_cpus_freebsd()
 		       || no_of_cpus_netbsd()
+		       || no_of_cpus_openbsd()
+		       || no_of_cpus_hurd()
 		       || no_of_cpus_darwin()
 		       || no_of_cpus_solaris()
 		       || no_of_cpus_aix()
-		       || no_of_cpus_gnu_linux()
+		       || no_of_cpus_hpux()
+		       || no_of_cpus_qnx()
+		       || no_of_cpus_irix()
 	    );
     }
     if($no_of_cpus) {
@@ -2966,22 +2979,32 @@ sub no_of_cores {
         $no_of_cores = no_of_cores_netbsd();
     } elsif ($^O eq 'openbsd') {
         $no_of_cores = no_of_cores_openbsd();
+    } elsif ($^O eq 'gnu') {
+        $no_of_cores = no_of_cores_hurd();
+    } elsif ($^O eq 'darwin') {
+	$no_of_cores = no_of_cores_darwin();
     } elsif ($^O eq 'solaris') {
 	$no_of_cores = no_of_cores_solaris();
     } elsif ($^O eq 'aix') {
         $no_of_cores = no_of_cores_aix();
-    } elsif ($^O eq 'darwin') {
-	$no_of_cores = no_of_cores_darwin();
     } elsif ($^O eq 'hpux') {
         $no_of_cores = no_of_cores_hpux();
+    } elsif ($^O eq 'nto') {
+        $no_of_cores = no_of_cores_qnx();
+    } elsif ($^O eq 'irix') {
+        $no_of_cores = no_of_cores_irix();
     } else {
-	$no_of_cores = (no_of_cores_freebsd()
+	$no_of_cores = (no_of_cores_gnu_linux()
+			|| no_of_cores_freebsd()
 			|| no_of_cores_netbsd()
 			|| no_of_cores_openbsd()
+			|| no_of_cores_hurd()
 			|| no_of_cores_darwin()
 			|| no_of_cores_solaris()
 			|| no_of_cores_aix()
-			|| no_of_cores_gnu_linux()
+			|| no_of_cores_hpux()
+			|| no_of_cores_qnx()
+			|| no_of_cores_irix()
 	    );
     }
     if($no_of_cores) {
@@ -3031,28 +3054,6 @@ sub no_of_cores_gnu_linux {
     return $no_of_cores;
 }
 
-sub no_of_cpus_darwin {
-    # Returns:
-    #   Number of physical CPUs on Mac Darwin
-    #   undef if not Mac Darwin
-    my $no_of_cpus =
-	(`sysctl -n hw.physicalcpu 2>/dev/null`
-	 or
-	 `sysctl -a hw 2>/dev/null | grep -w physicalcpu | awk '{ print \$2 }'`);
-    return $no_of_cpus;
-}
-
-sub no_of_cores_darwin {
-    # Returns:
-    #   Number of CPU cores on Mac Darwin
-    #   undef if not Mac Darwin
-    my $no_of_cores =
-	(`sysctl -n hw.logicalcpu 2>/dev/null`
-	 or
-	 `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`);
-    return $no_of_cores;
-}
-
 sub no_of_cpus_freebsd {
     # Returns:
     #   Number of physical CPUs on FreeBSD
@@ -3072,7 +3073,7 @@ sub no_of_cores_freebsd {
     my $no_of_cores =
 	(`sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`
 	 or
-	 `sysctl -a hw  2>/dev/null | grep -w logicalcpu | awk '{ print \$2 }'`);
+	 `sysctl -a hw  2>/dev/null | grep [^a-z]logicalcpu[^a-z] | awk '{ print \$2 }'`);
     chomp $no_of_cores;
     return $no_of_cores;
 }
@@ -3081,7 +3082,7 @@ sub no_of_cpus_netbsd {
     # Returns:
     #   Number of physical CPUs on NetBSD
     #   undef if not NetBSD
-    my $no_of_cpus = `sysctl -n hw.ncpu`;
+    my $no_of_cpus = `sysctl -n hw.ncpu 2>/dev/null`;
     chomp $no_of_cpus;
     return $no_of_cpus;
 }
@@ -3090,9 +3091,18 @@ sub no_of_cores_netbsd {
     # Returns:
     #   Number of CPU cores on NetBSD
     #   undef if not NetBSD
-    my $no_of_cores = `sysctl -n hw.ncpu`;
+    my $no_of_cores = `sysctl -n hw.ncpu 2>/dev/null`;
     chomp $no_of_cores;
     return $no_of_cores;
+}
+
+sub no_of_cpus_openbsd {
+    # Returns:
+    #   Number of physical CPUs on OpenBSD
+    #   undef if not OpenBSD
+    my $no_of_cpus = `sysctl -n hw.ncpu 2>/dev/null`;
+    chomp $no_of_cpus;
+    return $no_of_cpus;
 }
 
 sub no_of_cores_openbsd {
@@ -3101,6 +3111,46 @@ sub no_of_cores_openbsd {
     #   undef if not OpenBSD
     my $no_of_cores = `sysctl -n hw.ncpu 2>/dev/null`;
     chomp $no_of_cores;
+    return $no_of_cores;
+}
+
+sub no_of_cpus_hurd {
+    # Returns:
+    #   Number of physical CPUs on HURD
+    #   undef if not HURD
+    my $no_of_cpus = `nproc`;
+    chomp $no_of_cpus;
+    return $no_of_cpus;
+}
+
+sub no_of_cores_hurd {
+    # Returns:
+    #   Number of physical CPUs on HURD
+    #   undef if not HURD
+    my $no_of_cores = `nproc`;
+    chomp $no_of_cores;
+    return $no_of_cores;
+}
+
+sub no_of_cpus_darwin {
+    # Returns:
+    #   Number of physical CPUs on Mac Darwin
+    #   undef if not Mac Darwin
+    my $no_of_cpus =
+	(`sysctl -n hw.physicalcpu 2>/dev/null`
+	 or
+	 `sysctl -a hw 2>/dev/null | grep [^a-z]physicalcpu[^a-z] | awk '{ print \$2 }'`);
+    return $no_of_cpus;
+}
+
+sub no_of_cores_darwin {
+    # Returns:
+    #   Number of CPU cores on Mac Darwin
+    #   undef if not Mac Darwin
+    my $no_of_cores =
+	(`sysctl -n hw.logicalcpu 2>/dev/null`
+	 or
+	 `sysctl -a hw  2>/dev/null | grep [^a-z]logicalcpu[^a-z] | awk '{ print \$2 }'`);
     return $no_of_cores;
 }
 
@@ -3177,7 +3227,7 @@ sub no_of_cpus_hpux {
     #   Number of physical CPUs on HP-UX
     #   undef if not HP-UX
     my $no_of_cpus =
-        (`/usr/bin/mpsched -s 2>/dev/null | grep 'Locality Domain Count' | awk '{ print \$4 }'`);
+        (`/usr/bin/mpsched -s 2>&1 | grep 'Locality Domain Count' | awk '{ print \$4 }'`);
     return $no_of_cpus;
 }
 
@@ -3186,7 +3236,44 @@ sub no_of_cores_hpux {
     #   Number of CPU cores on HP-UX
     #   undef if not HP-UX
     my $no_of_cores =
-        (`/usr/bin/mpsched -s 2>/dev/null | grep 'Processor Count' | awk '{ print \$4 }'`);
+        (`/usr/bin/mpsched -s 2>&1 | grep 'Processor Count' | awk '{ print \$4 }'`);
+    return $no_of_cores;
+}
+
+sub no_of_cpus_qnx {
+    # Returns:
+    #   Number of physical CPUs on QNX
+    #   undef if not QNX
+    # BUG: It is now known how to calculate this.
+    my $no_of_cpus = 0;
+    return $no_of_cpus;
+}
+
+sub no_of_cores_qnx {
+    # Returns:
+    #   Number of CPU cores on QNX
+    #   undef if not QNX
+    # BUG: It is now known how to calculate this.
+    my $no_of_cores = 0;
+    return $no_of_cores;
+}
+
+
+sub no_of_cpus_irix {
+    # Returns:
+    #   Number of physical CPUs on IRIX
+    #   undef if not IRIX
+    my $no_of_cpus =
+        (`hinv | grep HZ | grep Processor | awk '{print \$1}'`);
+    return $no_of_cpus;
+}
+
+sub no_of_cores_irix {
+    # Returns:
+    #   Number of CPU cores on IRIX
+    #   undef if not IRIX
+    my $no_of_cores = 
+        (`hinv | grep HZ | grep Processor | awk '{print \$1}'`);
     return $no_of_cores;
 }
 
