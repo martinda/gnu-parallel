@@ -7,6 +7,7 @@ SSHLOGIN2=parallel@$SERVER2
 
 # Minimal version of test17
 
+export PARALLEL=-j8
 # Make sure sort order is the same
 export LANG=C
 
