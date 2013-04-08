@@ -455,6 +455,11 @@ sub write_record_to_pipe {
 	}
 	$job->write($header_ref);
 	$job->write($record_ref);
+	if($opt::ctrlc) {
+	    # Print a CTRL-D to mark EOF
+	    my $ctrld = sprintf("%c",4);
+	    $job->write(\$ctrld);
+	}
 	my $fh = $job->stdin();
 	close $fh;
 	exit(0);
@@ -548,6 +553,7 @@ sub options_hash {
 	 "cleanup" => \$opt::cleanup,
 	 "basefile|bf=s" => \@opt::basefile,
 	 "B=s" => \$opt::retired,
+	 "ctrlc|ctrl-c" => \$opt::ctrlc,
 	 "workdir|wd=s" => \$opt::workdir,
 	 "W=s" => \$opt::retired,
 	 "tmpdir=s" => \$opt::tmpdir,
@@ -1630,8 +1636,7 @@ sub terminal_columns {
 
 sub get_job_with_sshlogin {
     # Returns:
-    #   next command to run with ssh command wrapping if remote
-    #   next command to run with no wrapping (clean_command)
+    #   next job object for $sshlogin if any available
     my $sshlogin = shift;
 
     if($::oodebug and $Global::JobQueue->empty()) {
@@ -3798,17 +3803,33 @@ sub sshlogin_wrap {
 		 . q{ setenv PARALLEL_PID '$PARALLEL_PID' }
 		 . q{ || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\; }
 		 . q{ PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;' });
-	    if($opt::workdir) {
-		$self->{'sshlogin_wrap'} =
-		    ($pre . "$sshcmd $serverlogin $parallel_env "
-		     . ::shell_quote_scalar("mkdir -p ".$self->workdir()."; ")
-		     . ::shell_quote_scalar("cd ".$self->workdir()." && ")
-		     . ::shell_quote_scalar($next_command_line).";".$post);
-	    } else {
-		$self->{'sshlogin_wrap'} =
-		    ($pre . "$sshcmd $serverlogin $parallel_env "
-		     . ::shell_quote_scalar($next_command_line).";".$post);
+	    my $remote_pre = "";
+	    my $ssh_options = "";
+	    if($opt::ctrlc) {
+		# Propagating CTRL-C to kill remote jobs requires
+		# remote jobs to be run with a terminal.
+		# That means input cannot be 8-bit clean, but
+		# must be Base64-encoded.
+		# TODO this currently does not work, so --ctrlc cannot
+		# read from stdin (e.g. with --pipe)
+		$ssh_options = "-tt -oLogLevel=quiet";
+		# stty:
+		# -onlcr - make output 8-bit clean
+		# isig - pass CTRL-C as signal
+		# -echo - do not echo input
+		$remote_pre .= ::shell_quote_scalar('stty isig -onlcr -echo;');
 	    }
+	    if($opt::workdir) {
+		$remote_pre .= 
+		    ::shell_quote_scalar("mkdir -p ".$self->workdir()."; "
+					 . "cd ".$self->workdir()." && ");
+	    }
+	    $self->{'sshlogin_wrap'} =
+		($pre
+		 . "$sshcmd $ssh_options $serverlogin $parallel_env "
+		 . $remote_pre
+		 . ::shell_quote_scalar($next_command_line) . ";" 
+		 . $post);
 	}
     }
     return $self->{'sshlogin_wrap'};
@@ -4050,6 +4071,7 @@ sub start {
     # Returns:
     #   job-object or undef if job not to run
     my $job = shift;
+    # Get the shell command to be executed (possibly with ssh infront).
     my $command = $job->sshlogin_wrap();
 
     if($Global::interactive or $Global::stderr_verbose) {
