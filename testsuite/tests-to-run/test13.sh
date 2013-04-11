@@ -12,7 +12,11 @@ echo '### Test --keeporder'
 (seq 0 2) | parallel --keeporder -j100% -S 1/:,2/parallel@parallel-server2 -q perl -e 'sleep 1;print "job{}\n";exit({})'
 
 echo '### Test SIGTERM'
-(sleep 5; killall parallel -TERM) & seq 1 100 | stdout parallel -k -j9 sleep 3';' echo | sort
+parallel -k -j9 sleep 3';' echo ::: {1..99} >/tmp/$$ 2>&1 &
+A=$!
+sleep 5; kill -TERM $A
+wait
+sort /tmp/$$
 
 echo '### Test bug: empty line for | sh with -k'
 (echo echo a ; echo ; echo echo b) | parallel -k

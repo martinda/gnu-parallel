@@ -259,3 +259,7 @@ bug #38439: "open files" with --files --pipe blocks after a while
 19 of 21
 20 of 21
 21 of 21
+bug #34241: --pipe should not spawn unneeded processes - part 2
+2
+No .par should exist
+ls: cannot access *.par: No such file or directory

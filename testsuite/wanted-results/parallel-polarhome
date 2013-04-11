@@ -1,19 +1,274 @@
 ### Tests on polarhome machines
+Setup on polarhome machines
+Fedora release 17 (Beefy Miracle)
+Welcome to RedHat/Fedora ...member of polarhome.com realm
+
+Fedora release 17 (Beefy Miracle)
+Welcome to RedHat/Fedora ...member of polarhome.com realm
+
+SCO OpenServer(TM) Release 6
+Welcome to scosysv ...member of polarhome.com realm
+
+SCO OpenServer(TM) Release 6
+Welcome to scosysv ...member of polarhome.com realm
+
+
+CentOS release 5.6 (Final)
+Welcome to CentOS ...member of polarhome.com realm
+
+
+CentOS release 5.6 (Final)
+Welcome to CentOS ...member of polarhome.com realm
+
+
+DragonFly v2.10.1.1
+Welcome to DragonFly ...member of polarhome.com realm
+
+
+DragonFly v2.10.1.1
+Welcome to DragonFly ...member of polarhome.com realm
+
+
+NetBSD 5.1
+Welcome to NetBSD ...member of polarhome.com realm
+
+
+NetBSD 5.1
+Welcome to NetBSD ...member of polarhome.com realm
+
+
+FreeBSD 8.2 
+Welcome to FreeBSD ...member of polarhome.com realm
+
+
+FreeBSD 8.2 
+Welcome to FreeBSD ...member of polarhome.com realm
+
+
+SunOS 5.10 
+SUN Ultra-5
+Welcome to Solaris ...member of polarhome.com realm
+
+
+SunOS 5.10 
+SUN Ultra-5
+Welcome to Solaris ...member of polarhome.com realm
+
+
+OpenBSD 4.9 
+Welcome to OpenBSD ...member of polarhome.com realm
+
+
+OpenBSD 4.9 
+Welcome to OpenBSD ...member of polarhome.com realm
+
+
+Debian GNU/Linux 6.0.2 (squeeze)
+Welcome to debian ...member of polarhome.com realm
+
+
+Debian GNU/Linux 6.0.2 (squeeze)
+Welcome to debian ...member of polarhome.com realm
+
+
+Welcome to AIX7 ...member of polarhome.com realm
+
+Welcome to AIX7 ...member of polarhome.com realm
+
+HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
+Welcome to HPUX... member of polarhome.com realm
+
+
+HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
+Welcome to HPUX... member of polarhome.com realm
+
+
+QNX 6.5.0
+Welcome to QNX ...member of polarhome.com realm
+
+
+QNX 6.5.0
+Welcome to QNX ...member of polarhome.com realm
+
+
+IRIX64 6.5 07202013 IP35
+Welcome to irix ...member of polarhome.com realm
+
+IRIX64 6.5 07202013 IP35
+Welcome to irix ...member of polarhome.com realm
+
+openSUSE 11.4 "Celadon"
+Welcome to SuSE/openSUSE ...member of polarhome.com realm
+
+
+openSUSE 11.4 "Celadon"
+Welcome to SuSE/openSUSE ...member of polarhome.com realm
+
+
+OpenIndiana SunOS 5.11
+Welcome to OpenIndiana ...member of polarhome.com realm
+
+
+OpenIndiana SunOS 5.11
+Welcome to OpenIndiana ...member of polarhome.com realm
+
+
+Mandriva Linux release 2010.2 (Official) for x86_64
+Welcome to Mandrake/Mandriva ...member of polarhome.com realm
+
+
+Mandriva Linux release 2010.2 (Official) for x86_64
+Welcome to Mandrake/Mandriva ...member of polarhome.com realm
+
+SCO UnixWare 7.1.4
+Welcome to unixware ...member of polarhome.com realm
+
+SCO UnixWare 7.1.4
+Welcome to unixware ...member of polarhome.com realm
+
+
+MirBSD/i386 
+Welcome to MirOS ...member of polarhome.com realm
+
+
+MirBSD/i386 
+Welcome to MirOS ...member of polarhome.com realm
+
+Debian GNU/Linux 6.0
+RaspberryPi/bcm2708 reference 2.0
+Welcome to raspberrypi ...member of polarhome.com realm
+
+Debian GNU/Linux 6.0
+RaspberryPi/bcm2708 reference 2.0
+Welcome to raspberrypi ...member of polarhome.com realm
+
+
+Debian GNU/Hurd wheezy/sid
+Welcome to hurd ...member of polarhome.com realm.
+
+
+Debian GNU/Hurd wheezy/sid
+Welcome to hurd ...member of polarhome.com realm.
+
+
+Ubuntu 10.04.2 LTS
+Welcome to Ubuntu ...member of polarhome.com realm
+
+
+Ubuntu 10.04.2 LTS
+Welcome to Ubuntu ...member of polarhome.com realm
+
+Run the test on polarhome machines
+scosysv.polarhome.com	SCO OpenServer(TM) Release 6
+scosysv.polarhome.com	Welcome to scosysv ...member of polarhome.com realm
+scosysv.polarhome.com	
 scosysv.polarhome.com	Works on scosysv.polarhome.com
+centos.polarhome.com	
+centos.polarhome.com	CentOS release 5.6 (Final)
+centos.polarhome.com	Welcome to CentOS ...member of polarhome.com realm
+centos.polarhome.com	
 centos.polarhome.com	Works on centos.polarhome.com
+dragonfly.polarhome.com	
+dragonfly.polarhome.com	MirBSD/i386 
+dragonfly.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
+dragonfly.polarhome.com	
 dragonfly.polarhome.com	Works on dragonfly.polarhome.com
+netbsd.polarhome.com	
+netbsd.polarhome.com	NetBSD 5.1
+netbsd.polarhome.com	Welcome to NetBSD ...member of polarhome.com realm
+netbsd.polarhome.com	
 netbsd.polarhome.com	Works on netbsd.polarhome.com
+freebsd.polarhome.com	
+freebsd.polarhome.com	FreeBSD 8.2 
+freebsd.polarhome.com	Welcome to FreeBSD ...member of polarhome.com realm
+freebsd.polarhome.com	
 freebsd.polarhome.com	Works on freebsd.polarhome.com
+solaris.polarhome.com	
+solaris.polarhome.com	SunOS 5.10 
+solaris.polarhome.com	SUN Ultra-5
+solaris.polarhome.com	Welcome to Solaris ...member of polarhome.com realm
+solaris.polarhome.com	
 solaris.polarhome.com	Works on solaris.polarhome.com
+openbsd.polarhome.com	
+openbsd.polarhome.com	OpenBSD 4.9 
+openbsd.polarhome.com	Welcome to OpenBSD ...member of polarhome.com realm
+openbsd.polarhome.com	
 openbsd.polarhome.com	Works on openbsd.polarhome.com
+debian.polarhome.com	
+debian.polarhome.com	Debian GNU/Linux 6.0.2 (squeeze)
+debian.polarhome.com	Welcome to debian ...member of polarhome.com realm
+debian.polarhome.com	
 debian.polarhome.com	Works on debian.polarhome.com
+aix.polarhome.com	
+aix.polarhome.com	Welcome to AIX7 ...member of polarhome.com realm
 aix.polarhome.com	Works on aix.polarhome.com
+hpux.polarhome.com	
+hpux.polarhome.com	HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
+hpux.polarhome.com	Welcome to HPUX... member of polarhome.com realm
+hpux.polarhome.com	
+hpux.polarhome.com	No such file or directory: perl
+qnx.polarhome.com	
+qnx.polarhome.com	QNX 6.5.0
+qnx.polarhome.com	Welcome to QNX ...member of polarhome.com realm
+qnx.polarhome.com	
+qnx.polarhome.com	perl: No such file or directory
+irix.polarhome.com	
+irix.polarhome.com	IRIX64 6.5 07202013 IP35
+irix.polarhome.com	Welcome to irix ...member of polarhome.com realm
+irix.polarhome.com	Unknown open() mode '>&' at bin/parallel line 1271, <$fh> line 1.
+suse.polarhome.com	
+suse.polarhome.com	openSUSE 11.4 "Celadon"
+suse.polarhome.com	Welcome to SuSE/openSUSE ...member of polarhome.com realm
+suse.polarhome.com	
 suse.polarhome.com	Works on suse.polarhome.com
 minix.polarhome.com	Works on minix.polarhome.com
+openindiana.polarhome.com	
+openindiana.polarhome.com	OpenIndiana SunOS 5.11
+openindiana.polarhome.com	Welcome to OpenIndiana ...member of polarhome.com realm
+openindiana.polarhome.com	
+openindiana.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.
 openindiana.polarhome.com	Works on openindiana.polarhome.com
+mandriva.polarhome.com	
+mandriva.polarhome.com	Mandriva Linux release 2010.2 (Official) for x86_64
+mandriva.polarhome.com	Welcome to Mandrake/Mandriva ...member of polarhome.com realm
+mandriva.polarhome.com	
 mandriva.polarhome.com	Works on mandriva.polarhome.com
+unixware.polarhome.com	SCO UnixWare 7.1.4
+unixware.polarhome.com	Welcome to unixware ...member of polarhome.com realm
+unixware.polarhome.com	
 unixware.polarhome.com	Works on unixware.polarhome.com
+miros.polarhome.com	
+miros.polarhome.com	MirBSD/i386 
+miros.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
+miros.polarhome.com	
 miros.polarhome.com	Works on miros.polarhome.com
+raspberrypi.polarhome.com	
+raspberrypi.polarhome.com	MirBSD/i386 
+raspberrypi.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
+raspberrypi.polarhome.com	
 raspberrypi.polarhome.com	Works on raspberrypi.polarhome.com
+hurd.polarhome.com	
+hurd.polarhome.com	Debian GNU/Hurd wheezy/sid
+hurd.polarhome.com	Welcome to hurd ...member of polarhome.com realm.
+hurd.polarhome.com	
 hurd.polarhome.com	Works on hurd.polarhome.com
+ultrix.polarhome.com	Variable "$VERSION" is not imported at Errno.pm line 10.
+ultrix.polarhome.com	Global symbol "VERSION" requires explicit package name at Errno.pm line 10.
+ultrix.polarhome.com	Variable "$VERSION" is not imported at Errno.pm line 11.
+ultrix.polarhome.com	Global symbol "VERSION" requires explicit package name at Errno.pm line 11.
+ultrix.polarhome.com	Variable "$VERSION" is not imported at Errno.pm line 11.
+ultrix.polarhome.com	Global symbol "VERSION" requires explicit package name at Errno.pm line 11.
+ultrix.polarhome.com	Variable "@ISA" is not imported at Errno.pm line 12.
+ultrix.polarhome.com	Global symbol "ISA" requires explicit package name at Errno.pm line 12.
+ultrix.polarhome.com	Variable "@EXPORT_OK" is not imported at Errno.pm line 14.
+ultrix.polarhome.com	Global symbol "EXPORT_OK" requires explicit package name at Errno.pm line 14.
+ultrix.polarhome.com	Variable "%EXPORT_TAGS" is not imported at Errno.pm line 32.
+ultrix.polarhome.com	Global symbol "EXPORT_TAGS" requires explicit package name at Errno.pm line 32.
+ultrix.polarhome.com	BEGIN not safe after errors--compilation aborted at Errno.pm line 188.
+ultrix.polarhome.com	BEGIN failed--compilation aborted at File/Temp.pm line 148.
+ultrix.polarhome.com	BEGIN failed--compilation aborted at bin/parallel line 28.
+ubuntu.polarhome.com	
+ubuntu.polarhome.com	Ubuntu 10.04.2 LTS
+ubuntu.polarhome.com	Welcome to Ubuntu ...member of polarhome.com realm
+ubuntu.polarhome.com	
 ubuntu.polarhome.com	Works on ubuntu.polarhome.com

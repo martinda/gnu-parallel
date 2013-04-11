@@ -144,4 +144,11 @@ echo '### Negative replacement strings'
 echo 'bug #38439: "open files" with --files --pipe blocks after a while'
   ulimit -n 20; yes |head -n 10M | parallel --pipe -k echo {#} of 21
 
+echo 'bug #34241: --pipe should not spawn unneeded processes - part 2'
+  seq 500 | parallel --tmpdir . -j10 --pipe --block 1k --files wc >/dev/null; 
+  ls *.par | wc -l; rm *.par; 
+  seq 500 | parallel --tmpdir . -j10 --pipe --block 1k --files --dry-run wc >/dev/null; 
+  echo No .par should exist; 
+  stdout ls *.par
+
 EOF

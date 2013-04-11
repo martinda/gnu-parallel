@@ -20,7 +20,7 @@ echo '### Test --nonall';
   parallel --nonall -k -S $SSHLOGIN1,$SSHLOGIN2 'hostname' | sort
 
 echo '### Test --nonall -u - should be interleaved x y x y'; 
-  parallel --nonall -S $SSHLOGIN1,$SSHLOGIN2 -u 'hostname|grep -q redhat9 && sleep 3; hostname;sleep 8;hostname;'
+  parallel --nonall -S $SSHLOGIN1,$SSHLOGIN2 -u 'hostname|grep -q redhat9 && sleep 3; hostname;sleep 12;hostname;'
 
 echo '### Test read sshloginfile from STDIN'; 
   echo $SSHLOGIN1 | parallel -S - --nonall hostname; 

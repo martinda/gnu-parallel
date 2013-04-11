@@ -11,20 +11,15 @@ Modified => alpha
 
 == Update version ==
 
-=== configure.ac ===
 configure.ac: AC_INIT([parallel], [20100422], [bug-parallel@gnu.org])
-
+src/parallel: $Global::version = 20100422;
+README: parallel-20130222
 YYYYMMDD=`yyyymmdd`
 perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" configure.ac
-
-=== src/parallel ===
-
-src/parallel: $Global::version = 20100422;
-
-YYYYMMDD=`yyyymmdd`
 perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/parallel
 perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/sql
 perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/niceload
+perl -i -pe "s/parallel-20\d\d\d\d\d\d/parallel-$YYYYMMDD/" README
 
 === Autoconf/automake ===
 

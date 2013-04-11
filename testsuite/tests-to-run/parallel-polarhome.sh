@@ -6,12 +6,14 @@ P="scosysv centos dragonfly netbsd freebsd solaris openbsd debian aix hpux qnx i
 POLAR=`parallel echo {}.polarhome.com ::: $P`
 
 echo '### Tests on polarhome machines'
-parallel -j0 ssh {} mkdir -p bin ::: $POLAR 2>/dev/null &
+echo 'Setup on polarhome machines'
+stdout parallel -kj0 ssh {} mkdir -p bin ::: $POLAR >/dev/null &
 # scp to each polarhome machine do not work. From redhat it works.
-rsync -a `which parallel` redhat.polarhome.com:bin/
-ssh redhat.polarhome.com \
+stdout rsync -a `which parallel` redhat.polarhome.com:bin/
+stdout ssh redhat.polarhome.com \
   chmod 755 bin/parallel\; \
-  bin/parallel -j0 ssh {} rm -f bin/parallel\\\;scp bin/parallel {}:bin/ ::: $POLAR
+  bin/parallel -kj0 ssh {} rm -f bin/parallel\\\;scp bin/parallel {}:bin/ ::: $POLAR
 # Now test
-parallel --argsep // -k --tag ssh {} bin/parallel echo Works on ::: {} // $POLAR
+echo 'Run the test on polarhome machines'
+stdout parallel --argsep // -k --tag ssh {} bin/parallel -k echo Works on ::: {} // $POLAR
 

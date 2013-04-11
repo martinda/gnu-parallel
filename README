@@ -28,6 +28,9 @@ possible to use output from GNU Parallel as input for other programs.
 
 Full installation of GNU Parallel is as simple as:
 
+  wget http://ftpmirror.gnu.org/parallel/parallel-20130410.tar.bz2
+  bzip2 -dc parallel-20130410.tar.bz2 | tar xvf -
+  cd parallel-20130410
   ./configure && make && make install
 
 
@@ -36,6 +39,9 @@ Full installation of GNU Parallel is as simple as:
 If you are not root you can add ~/bin to your path and install in
 ~/bin and ~/share:
 
+  wget http://ftpmirror.gnu.org/parallel/parallel-20130410.tar.bz2
+  bzip2 -dc parallel-20130410.tar.bz2 | tar xvf -
+  cd parallel-20130410
   ./configure --prefix=$HOME && make && make install
 
 Or if your system lacks 'make' you can simply copy src/parallel

@@ -15,7 +15,7 @@ echo '### Bug in --load';
   nice parallel -k --load 30 sleep 0.1\;echo ::: 1 2 3
 
 echo '### Test --timeout'; 
-  nice parallel -j0 -k --timeout 1 echo {}\; sleep {}\; echo {} ::: 1.1 6.6 7.7 8.8
+  nice parallel -j0 -k --timeout 1 echo {}\; sleep {}\; echo {} ::: 1.1 7.7 8.8 9.9
 
 echo '### Test retired'; 
   stdout parallel -B; 

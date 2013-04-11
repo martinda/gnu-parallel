@@ -22,19 +22,19 @@ echo '### Test --load locally - should take >10s'
   stdout /usr/bin/time -f %e parallel --load 10 sleep ::: 1 | perl -ne '$_ > 10 and print "OK\n"'
 
 echo '### Test --load remote'
-  ssh parallel@$SERVER2 'seq 10 | parallel --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null"' &
+  ssh parallel@$SERVER2 'seq 10 | parallel --nice 19 --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null"' &
   stdout /usr/bin/time -f %e parallel -S parallel@$SERVER2 --load 10 sleep ::: 1 | perl -ne '$_ > 10 and print "OK\n"'
 
 echo '### Test --load read from a file - more than 3s'
   echo '# This will run 10 processes in parallel for 10s'; 
-  seq 10 | parallel --nice 19 --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null" &
-  ( echo 8 > /tmp/parallel_load_file; sleep 4; echo 1000 > /tmp/parallel_load_file ) & 
+  seq 10 | parallel --nice 19 --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null" & 
+  ( echo 8 > /tmp/parallel_load_file; sleep 4; echo 1000 > /tmp/parallel_load_file ) &  
   sleep 1;stdout /usr/bin/time -f %e parallel --load /tmp/parallel_load_file sleep ::: 1 | perl -ne '$_ > 3 and print "OK\n"'
 
 echo '### Test --load read from a file - less than 10s'; 
   echo '# This will run 10 processes in parallel for 10s'; 
   seq 10 | parallel --nice 19 --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null" &
   ( echo 8 > /tmp/parallel_load_file2; sleep 4; echo 1000 > /tmp/parallel_load_file2 ) & 
-  stdout /usr/bin/time -f %e parallel --load /tmp/parallel_load_file2 sleep ::: 1 | perl -ne '$_ < 10 and print "OK\n"'
+  sleep 1;stdout /usr/bin/time -f %e parallel --load /tmp/parallel_load_file2 sleep ::: 1 | perl -ne '$_ < 10 and print "OK\n"'
 
 EOF
