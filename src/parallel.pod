@@ -345,9 +345,9 @@ Implies B<--semaphore>.
 Print the BibTeX entry for GNU B<parallel>.
 
 
-=item B<--block> I<size> (alpha testing)
+=item B<--block> I<size> (beta testing)
 
-=item B<--block-size> I<size> (alpha testing)
+=item B<--block-size> I<size> (beta testing)
 
 Size of block in bytes. The size can be postfixed with K, M, G, T, P,
 k, m, g, t, or p which would multiply the size with 1024, 1048576,
@@ -363,7 +363,7 @@ I<size> defaults to 1M.
 See B<--pipe> for use of this.
 
 
-=item B<--cleanup>
+=item B<--cleanup> (alpha testing)
 
 Remove transferred files. B<--cleanup> will remove the transferred files
 on the remote computer after processing is done.
@@ -397,6 +397,11 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
+=item B<--ctrlc> (alpha testing)
+
+Sends SIGINT to tasks running on remote computers thus killing them.
+
+
 =item B<--delimiter> I<delim>
 
 =item B<-d> I<delim>
@@ -427,7 +432,7 @@ occurs as a line of input, the rest of the input is ignored.  If
 neither B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--delay> I<secs> (alpha testing)
+=item B<--delay> I<secs> (beta testing)
 
 Delay starting next job I<secs> seconds. GNU B<parallel> will pause
 I<secs> seconds after starting each job. I<secs> can be less than 1
@@ -567,7 +572,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile> (alpha testing)
+=item B<--joblog> I<logfile> (beta testing)
 
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -665,7 +670,7 @@ to see the difference:
 
 =item B<-L> I<max-lines>
 
-When used with B<--pipe>: Read records of I<max-lines> (alpha testing).
+When used with B<--pipe>: Read records of I<max-lines> (beta testing).
 
 When used otherwise: Use at most I<max-lines> nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -693,16 +698,12 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--load> I<max-load>
+=item B<--load> I<max-load> (alpha testing)
 
-Do not start new jobs on a given computer unless the load is less than
-I<max-load>. I<max-load> uses the same syntax as B<--jobs>, so I<100%>
-for one per CPU is a valid setting. Only difference is 0 which is
-interpreted as 0.01.
-
-The load average is only sampled every 10 seconds using B<uptime> to
-avoid stressing small computers. Only the first (1 minute) load is
-used.
+Do not start new jobs on a given computer unless the number of running
+processes on the computer is less than I<max-load>. I<max-load> uses
+the same syntax as B<--jobs>, so I<100%> for one per CPU is a valid
+setting. Only difference is 0 which is interpreted as 0.01.
 
 
 =item B<--controlmaster> (experimental)
@@ -988,9 +989,9 @@ it to the command.
 Only used with B<--pipe>.
 
 
-=item B<--results> I<prefix> (alpha testing)
+=item B<--results> I<prefix> (beta testing)
 
-=item B<--res> I<prefix> (alpha testing)
+=item B<--res> I<prefix> (beta testing)
 
 Save the output into files. The files will be stored in a directory tree
 rooted at I<prefix>.  Within this directory tree, each command will result
@@ -1032,7 +1033,7 @@ will generate the files:
 See also B<--files>, B<--header>, B<--joblog>.
 
 
-=item B<--resume> (alpha testing)
+=item B<--resume> (beta testing)
 
 Resumes from the last unfinished job. By reading B<--joblog> GNU
 B<parallel> will figure out the last unfinished job and continue from
@@ -1043,7 +1044,7 @@ remain unchanged; otherwise GNU B<parallel> may run wrong commands.
 See also: B<--joblog>, B<--resume-failed>.
 
 
-=item B<--resume-failed> (alpha testing)
+=item B<--resume-failed> (beta testing)
 
 Retry all failed and resume from the last unfinished job. By reading
 B<--joblog> GNU B<parallel> will figure out the failed jobs and run
@@ -1064,7 +1065,7 @@ re-use the computers. This is useful if some jobs fail for no apparent
 reason (such as network failure).
 
 
-=item B<--return> I<filename>
+=item B<--return> I<filename> (alpha testing)
 
 Transfer files from remote computers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote computers. When
@@ -1191,7 +1192,7 @@ Like this:
 B<--shebang> must be set as the first option.
 
 
-=item B<--shebang-wrap> (beta testing)
+=item B<--shebang-wrap>
 
 GNU B<parallel> can parallelize scripts by wrapping the shebang
 line. If the program can be run like this:
@@ -1398,7 +1399,7 @@ Print the job to be run on stderr (standard error).
 See also B<-v> and B<-p>.
 
 
-=item B<--transfer>
+=item B<--transfer> (alpha testing)
 
 Transfer files to remote computers. B<--transfer> is used with
 B<--sshlogin> when the arguments are files and should be transferred to
@@ -1510,9 +1511,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir>
+=item B<--workdir> I<mydir> (alpha testing)
 
-=item B<--wd> I<mydir>
+=item B<--wd> I<mydir> (alpha testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in

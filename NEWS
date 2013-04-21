@@ -1,3 +1,55 @@
+20130422
+
+* HPUX CPU/core detection. Thanks to Javier Tarradas.
+
+* CPU detection for HURD, IRIX, SCO OpenServer and (old) HPUX.
+
+* --ctrlc will send SIGINT to tasks running on remote computers and
+  thus killing them.
+
+* --load now uses 'ps' to see immediately see the number of running
+  processes instead of 'uptime' thus making --load react much faster.
+
+* Testing on Centos 3.9 and FreeBSD 7 revealed a lot of compability
+  bugs. Some of these required quite extensive changes making this
+  release beta quality.
+
+*  --retries works with --onall.
+
+* The new --load computation now works on FreeBSD 7.
+
+* --nice works under tcsh.
+
+* GNU Parallel is officially supported in NetBSD.
+  http://ftp.netbsd.org/pub/pkgsrc/current/pkgsrc/parallel/parallel/README.html
+
+* GNU Parallel is accepted for openSUSE.
+  http://software.opensuse.org/package/gnu_parallel
+
+* GNU Parallel can be installed under Microsoft Windows (CygWin).
+  http://blogs.msdn.com/b/hpctrekker/archive/2013/03/30/preparing-and-uploading-datasets-for-hdinsight.aspx
+
+* Job advert that requires GNU Parallel competence.
+  http://versium.com/about/careers/
+
+* Parallelizing Batch Jobs for Fun and Profit.
+  http://mikeseidle.com/tech/programming/2013/03/parallelizing-batch-jobs
+
+* Processing Transcription Start Sites(TSS) for the entire Mouse genome.
+  http://qbrc.swmed.edu/2013/03/gnu-parallel-speeding-up-unix-commands-and-scripts/
+
+* GNU parallel is used throughout Scrimer
+  http://scrimer.readthedocs.org/en/latest/
+
+* GNU Parallel helped making public documents searchable.
+  http://danpalmer.me/blog/articles/2013-04-06-unlocking-hillsborough.html
+
+* Identifying big movie files (German).
+  http://blackappsolutions.wordpress.com/2013/03/23/wenn-der-plattenplatz-knapp-wird-filme-identifizieren-die-viel-platz-belegen/
+
+* Bug fixes and man page updates.
+
+
 20130222
 
 * --resume works with --pipe.

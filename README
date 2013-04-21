@@ -24,13 +24,21 @@ you would get had you run the commands sequentially. This makes it
 possible to use output from GNU Parallel as input for other programs.
 
 
+= 10 second installation =
+
+Try a full installation. If that fails: a personal installation. If
+that fails: a copied installation.
+
+   wget -O - pi.dk/3 | sh -x
+
+
 = Full installation =
 
 Full installation of GNU Parallel is as simple as:
 
-  wget http://ftpmirror.gnu.org/parallel/parallel-20130410.tar.bz2
-  bzip2 -dc parallel-20130410.tar.bz2 | tar xvf -
-  cd parallel-20130410
+  wget http://ftpmirror.gnu.org/parallel/parallel-20130422.tar.bz2
+  bzip2 -dc parallel-20130422.tar.bz2 | tar xvf -
+  cd parallel-20130422
   ./configure && make && make install
 
 
@@ -39,9 +47,9 @@ Full installation of GNU Parallel is as simple as:
 If you are not root you can add ~/bin to your path and install in
 ~/bin and ~/share:
 
-  wget http://ftpmirror.gnu.org/parallel/parallel-20130410.tar.bz2
-  bzip2 -dc parallel-20130410.tar.bz2 | tar xvf -
-  cd parallel-20130410
+  wget http://ftpmirror.gnu.org/parallel/parallel-20130422.tar.bz2
+  bzip2 -dc parallel-20130422.tar.bz2 | tar xvf -
+  cd parallel-20130422
   ./configure --prefix=$HOME && make && make install
 
 Or if your system lacks 'make' you can simply copy src/parallel

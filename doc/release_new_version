@@ -56,15 +56,22 @@ pushd
 == Upload ==
 
 YYYYMMDD=`yyyymmdd`
+cp parallel-$YYYYMMDD.tar.bz2 parallel-latest.tar.bz2
 cp doc/parallel.directive parallel-$YYYYMMDD.tar.bz2.directive
 perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive
 gpg --clearsign parallel-$YYYYMMDD.tar.bz2.directive
 
+cp doc/parallel.directive parallel-latest.tar.bz2.directive
+perl -i -pe "s/20\d\d\d\d\d\d/latest/" parallel-latest.tar.*directive
+gpg --clearsign --yes parallel-latest.tar.bz2.directive
+
 YYYYMMDD=`yyyymmdd`
 gpg -b parallel-$YYYYMMDD.tar.bz2
+gpg -b --yes parallel-latest.tar.bz2
 
 YYYYMMDD=`yyyymmdd`
 echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
+echo put parallel-latest.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
 #echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/alpha/
 
 == Update OpenSUSE build system ==
@@ -166,21 +173,26 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20130422 ('Loikaw') released
+Subject: GNU Parallel 20130422 ('Boston') released
 
-GNU Parallel 20130422 ('Loikaw') has been released. It is
+GNU Parallel 20130422 ('Boston') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
 * HPUX CPU/core detection. Thanks to Javier Tarradas.
 
+* CPU detection for HURD, IRIX, SCO OpenServer and (old) HPUX.
+
+* --ctrlc will send SIGINT to tasks running on remote computers and
+  thus killing them.
+
 * --load now uses 'ps' to see immediately see the number of running
   processes instead of 'uptime' thus making --load react much faster.
 
-* Testing on Centos 3.9 revealed a lot of compability bugs. Some of
-  these required quite extensive changes making this release beta
-  quality.
+* Testing on Centos 3.9 and FreeBSD 7 revealed a lot of compability
+  bugs. Some of these required quite extensive changes making this
+  release beta quality.
 
 *  --retries works with --onall.
 

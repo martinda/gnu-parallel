@@ -126,14 +126,6 @@ Welcome to unixware ...member of polarhome.com realm
 SCO UnixWare 7.1.4
 Welcome to unixware ...member of polarhome.com realm
 
-
-MirBSD/i386 
-Welcome to MirOS ...member of polarhome.com realm
-
-
-MirBSD/i386 
-Welcome to MirOS ...member of polarhome.com realm
-
 Debian GNU/Linux 6.0
 RaspberryPi/bcm2708 reference 2.0
 Welcome to raspberrypi ...member of polarhome.com realm
@@ -169,8 +161,8 @@ centos.polarhome.com	Welcome to CentOS ...member of polarhome.com realm
 centos.polarhome.com	
 centos.polarhome.com	Works on centos.polarhome.com
 dragonfly.polarhome.com	
-dragonfly.polarhome.com	MirBSD/i386 
-dragonfly.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
+dragonfly.polarhome.com	DragonFly v2.10.1.1
+dragonfly.polarhome.com	Welcome to DragonFly ...member of polarhome.com realm
 dragonfly.polarhome.com	
 dragonfly.polarhome.com	Works on dragonfly.polarhome.com
 netbsd.polarhome.com	
@@ -237,14 +229,9 @@ unixware.polarhome.com	SCO UnixWare 7.1.4
 unixware.polarhome.com	Welcome to unixware ...member of polarhome.com realm
 unixware.polarhome.com	
 unixware.polarhome.com	Works on unixware.polarhome.com
-miros.polarhome.com	
-miros.polarhome.com	MirBSD/i386 
-miros.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
-miros.polarhome.com	
-miros.polarhome.com	Works on miros.polarhome.com
 raspberrypi.polarhome.com	
-raspberrypi.polarhome.com	MirBSD/i386 
-raspberrypi.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
+raspberrypi.polarhome.com	CentOS release 5.6 (Final)
+raspberrypi.polarhome.com	Welcome to CentOS ...member of polarhome.com realm
 raspberrypi.polarhome.com	
 raspberrypi.polarhome.com	Works on raspberrypi.polarhome.com
 hurd.polarhome.com	
