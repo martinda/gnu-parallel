@@ -24,6 +24,18 @@ you would get had you run the commands sequentially. This makes it
 possible to use output from GNU Parallel as input for other programs.
 
 
+= 10 seconds installation =
+
+The 10 seconds installation will try do to a full installation; if
+that fails, a personal installation; if that fails, a minimal
+installation.
+
+  wget -O - pi.dk/3 | sh
+
+This will literally install faster than reading the rest of this
+document.
+
+
 = Full installation =
 
 Full installation of GNU Parallel is as simple as:
