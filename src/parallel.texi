@@ -364,11 +364,11 @@ Implies @strong{--semaphore}.
 
 Print the BibTeX entry for GNU @strong{parallel}.
 
-@item @strong{--block} @emph{size} (alpha testing)
-@anchor{@strong{--block} @emph{size} (alpha testing)}
+@item @strong{--block} @emph{size} (beta testing)
+@anchor{@strong{--block} @emph{size} (beta testing)}
 
-@item @strong{--block-size} @emph{size} (alpha testing)
-@anchor{@strong{--block-size} @emph{size} (alpha testing)}
+@item @strong{--block-size} @emph{size} (beta testing)
+@anchor{@strong{--block-size} @emph{size} (beta testing)}
 
 Size of block in bytes. The size can be postfixed with K, M, G, T, P,
 k, m, g, t, or p which would multiply the size with 1024, 1048576,
@@ -383,8 +383,8 @@ than a single record.
 
 See @strong{--pipe} for use of this.
 
-@item @strong{--cleanup}
-@anchor{@strong{--cleanup}}
+@item @strong{--cleanup} (alpha testing)
+@anchor{@strong{--cleanup} (alpha testing)}
 
 Remove transferred files. @strong{--cleanup} will remove the transferred files
 on the remote computer after processing is done.
@@ -420,6 +420,11 @@ separating the columns. The n'th column can be access using
 @emph{regexp} is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
+@item @strong{--ctrlc} (alpha testing)
+@anchor{@strong{--ctrlc} (alpha testing)}
+
+Sends SIGINT to tasks running on remote computers thus killing them.
+
 @item @strong{--delimiter} @emph{delim}
 @anchor{@strong{--delimiter} @emph{delim}}
 
@@ -453,8 +458,8 @@ Set the end of file string to eof-str.  If the end of file string
 occurs as a line of input, the rest of the input is ignored.  If
 neither @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
-@item @strong{--delay} @emph{secs} (alpha testing)
-@anchor{@strong{--delay} @emph{secs} (alpha testing)}
+@item @strong{--delay} @emph{secs} (beta testing)
+@anchor{@strong{--delay} @emph{secs} (beta testing)}
 
 Delay starting next job @emph{secs} seconds. GNU @strong{parallel} will pause
 @emph{secs} seconds after starting each job. @emph{secs} can be less than 1
@@ -599,8 +604,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile} (alpha testing)
-@anchor{@strong{--joblog} @emph{logfile} (alpha testing)}
+@item @strong{--joblog} @emph{logfile} (beta testing)
+@anchor{@strong{--joblog} @emph{logfile} (beta testing)}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -717,7 +722,7 @@ to see the difference:
 @item @strong{-L} @emph{max-lines}
 @anchor{@strong{-L} @emph{max-lines}}
 
-When used with @strong{--pipe}: Read records of @emph{max-lines} (alpha testing).
+When used with @strong{--pipe}: Read records of @emph{max-lines} (beta testing).
 
 When used otherwise: Use at most @emph{max-lines} nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -745,17 +750,13 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--load} @emph{max-load}
-@anchor{@strong{--load} @emph{max-load}}
+@item @strong{--load} @emph{max-load} (alpha testing)
+@anchor{@strong{--load} @emph{max-load} (alpha testing)}
 
-Do not start new jobs on a given computer unless the load is less than
-@emph{max-load}. @emph{max-load} uses the same syntax as @strong{--jobs}, so @emph{100%}
-for one per CPU is a valid setting. Only difference is 0 which is
-interpreted as 0.01.
-
-The load average is only sampled every 10 seconds using @strong{uptime} to
-avoid stressing small computers. Only the first (1 minute) load is
-used.
+Do not start new jobs on a given computer unless the number of running
+processes on the computer is less than @emph{max-load}. @emph{max-load} uses
+the same syntax as @strong{--jobs}, so @emph{100%} for one per CPU is a valid
+setting. Only difference is 0 which is interpreted as 0.01.
 
 @item @strong{--controlmaster} (experimental)
 @anchor{@strong{--controlmaster} (experimental)}
@@ -1053,11 +1054,11 @@ it to the command.
 
 Only used with @strong{--pipe}.
 
-@item @strong{--results} @emph{prefix} (alpha testing)
-@anchor{@strong{--results} @emph{prefix} (alpha testing)}
+@item @strong{--results} @emph{prefix} (beta testing)
+@anchor{@strong{--results} @emph{prefix} (beta testing)}
 
-@item @strong{--res} @emph{prefix} (alpha testing)
-@anchor{@strong{--res} @emph{prefix} (alpha testing)}
+@item @strong{--res} @emph{prefix} (beta testing)
+@anchor{@strong{--res} @emph{prefix} (beta testing)}
 
 Save the output into files. The files will be stored in a directory tree
 rooted at @emph{prefix}.  Within this directory tree, each command will result
@@ -1106,8 +1107,8 @@ will generate the files:
 
 See also @strong{--files}, @strong{--header}, @strong{--joblog}.
 
-@item @strong{--resume} (alpha testing)
-@anchor{@strong{--resume} (alpha testing)}
+@item @strong{--resume} (beta testing)
+@anchor{@strong{--resume} (beta testing)}
 
 Resumes from the last unfinished job. By reading @strong{--joblog} GNU
 @strong{parallel} will figure out the last unfinished job and continue from
@@ -1117,8 +1118,8 @@ remain unchanged; otherwise GNU @strong{parallel} may run wrong commands.
 
 See also: @strong{--joblog}, @strong{--resume-failed}.
 
-@item @strong{--resume-failed} (alpha testing)
-@anchor{@strong{--resume-failed} (alpha testing)}
+@item @strong{--resume-failed} (beta testing)
+@anchor{@strong{--resume-failed} (beta testing)}
 
 Retry all failed and resume from the last unfinished job. By reading
 @strong{--joblog} GNU @strong{parallel} will figure out the failed jobs and run
@@ -1138,8 +1139,8 @@ there are fewer than @emph{n} computers in @strong{--sshlogin} GNU @strong{paral
 re-use the computers. This is useful if some jobs fail for no apparent
 reason (such as network failure).
 
-@item @strong{--return} @emph{filename}
-@anchor{@strong{--return} @emph{filename}}
+@item @strong{--return} @emph{filename} (alpha testing)
+@anchor{@strong{--return} @emph{filename} (alpha testing)}
 
 Transfer files from remote computers. @strong{--return} is used with
 @strong{--sshlogin} when the arguments are files on the remote computers. When
@@ -1276,8 +1277,8 @@ Like this:
 
 @strong{--shebang} must be set as the first option.
 
-@item @strong{--shebang-wrap} (beta testing)
-@anchor{@strong{--shebang-wrap} (beta testing)}
+@item @strong{--shebang-wrap}
+@anchor{@strong{--shebang-wrap}}
 
 GNU @strong{parallel} can parallelize scripts by wrapping the shebang
 line. If the program can be run like this:
@@ -1502,8 +1503,8 @@ Print the job to be run on stderr (standard error).
 
 See also @strong{-v} and @strong{-p}.
 
-@item @strong{--transfer}
-@anchor{@strong{--transfer}}
+@item @strong{--transfer} (alpha testing)
+@anchor{@strong{--transfer} (alpha testing)}
 
 Transfer files to remote computers. @strong{--transfer} is used with
 @strong{--sshlogin} when the arguments are files and should be transferred to
@@ -1625,11 +1626,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir}
-@anchor{@strong{--workdir} @emph{mydir}}
+@item @strong{--workdir} @emph{mydir} (alpha testing)
+@anchor{@strong{--workdir} @emph{mydir} (alpha testing)}
 
-@item @strong{--wd} @emph{mydir}
-@anchor{@strong{--wd} @emph{mydir}}
+@item @strong{--wd} @emph{mydir} (alpha testing)
+@anchor{@strong{--wd} @emph{mydir} (alpha testing)}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in

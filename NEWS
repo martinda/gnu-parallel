@@ -1,5 +1,7 @@
 20130422
 
+* 10 seconds installation: wget -O - pi.dk/3 | sh
+
 * HPUX CPU/core detection. Thanks to Javier Tarradas.
 
 * CPU detection for HURD, IRIX, SCO OpenServer and (old) HPUX.
@@ -29,6 +31,9 @@
 * GNU Parallel can be installed under Microsoft Windows (CygWin).
   http://blogs.msdn.com/b/hpctrekker/archive/2013/03/30/preparing-and-uploading-datasets-for-hdinsight.aspx
 
+* Excuses for not installing GNU Parallel.
+  http://oletange.blogspot.dk/2013/04/why-not-install-gnu-parallel.html
+
 * Job advert that requires GNU Parallel competence.
   http://versium.com/about/careers/
 
@@ -38,7 +43,7 @@
 * Processing Transcription Start Sites(TSS) for the entire Mouse genome.
   http://qbrc.swmed.edu/2013/03/gnu-parallel-speeding-up-unix-commands-and-scripts/
 
-* GNU parallel is used throughout Scrimer
+* GNU parallel is used throughout Scrimer.
   http://scrimer.readthedocs.org/en/latest/
 
 * GNU Parallel helped making public documents searchable.

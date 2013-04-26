@@ -61,7 +61,7 @@ cp doc/parallel.directive parallel-$YYYYMMDD.tar.bz2.directive
 perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive
 gpg --clearsign parallel-$YYYYMMDD.tar.bz2.directive
 
-cp doc/parallel.directive parallel-latest.tar.bz2.directive
+cp doc/parallel.latest.directive parallel-latest.tar.bz2.directive
 perl -i -pe "s/20\d\d\d\d\d\d/latest/" parallel-latest.tar.*directive
 gpg --clearsign --yes parallel-latest.tar.bz2.directive
 
@@ -142,6 +142,7 @@ http://freshmeat.net/projects/parallel/releases/new
 == Update Diaspora Twitter ==
 
 New release of #GNU Parallel pi.dk/0 New in this release pi.dk/2 See the intro videos pi.dk/1
+10 seconds installation: wget -O - pi.dk/3|sh
 
 [x] Twitter
 Aspect: Public
@@ -180,6 +181,8 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* 10 seconds installation: wget -O - pi.dk/3 | sh
+
 * HPUX CPU/core detection. Thanks to Javier Tarradas.
 
 * CPU detection for HURD, IRIX, SCO OpenServer and (old) HPUX.
@@ -208,6 +211,9 @@ New in this release:
 
 * GNU Parallel can be installed under Microsoft Windows (CygWin).
   http://blogs.msdn.com/b/hpctrekker/archive/2013/03/30/preparing-and-uploading-datasets-for-hdinsight.aspx
+
+* Excuses for not installing GNU Parallel.
+  http://oletange.blogspot.dk/2013/04/why-not-install-gnu-parallel.html
 
 * Job advert that requires GNU Parallel competence.
   http://versium.com/about/careers/

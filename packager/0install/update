@@ -6,12 +6,27 @@ if [ -z "${version}" ]; then
 	echo "usage: update <version>"
 	exit 1
 fi
-set -ex
-url="http://ftp.gnu.org/gnu/parallel/parallel-${version}.tar.bz2"
+set -eux
+url="http://ftpmirror.gnu.org/parallel/parallel-${version}.tar.bz2"
 file="/tmp/parallel-${version}.tgz"
 wget "$url" -O "${file}"
+wget "$url.sig" -O "${file}.sig"
+
+# verify published signature comes from expected GPG key
+gpg -n --verify "${file}.sig" "${file}" 2>&1 | tee "${file}.gpglog"
+set +x
+KEYID="$(grep '^Primary key fingerprint:' "${file}.gpglog" | tr -d ' ' | cut -f 2 -d : )"
+fingerprint="BE9CB49381DE3166A3BC66C12C6229E2FFFFFFF1"
+if [ "$KEYID" != "$fingerprint" ]; then
+	echo "Signature verification FAILED:"
+	cat "${file}.gpglog"
+	exit 1
+fi
+
+set -x
+
 ( cd "$(dirname "$0")" && \
-	0publish \
+	0install run http://0install.net/2006/interfaces/0publish \
 		--add-version ${version} \
 		--archive-url="${url}" \
 		--archive-file="${file}" \
