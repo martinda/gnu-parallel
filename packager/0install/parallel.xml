@@ -34,124 +34,124 @@ xargs or cat | sh.</description>
 		</command>
 		<environment insert="src" mode="prepend" name="PATH"/>
 		<implementation id="sha1new=3bd5646ca0c38217df8278433803b44e33272954" released="2010-06-24" version="20100620">
-			<archive extract="parallel-20100620" href="http://ftp.gnu.org/gnu/parallel/parallel-20100620.tar.bz2" size="88834" type="application/x-bzip-compressed-tar"/>
+			<archive extract="parallel-20100620" href="http://ftpmirror.gnu.org/parallel/parallel-20100620.tar.bz2" size="88834" type="application/x-bzip-compressed-tar"/>
 		</implementation>
 		<implementation id="sha1new=417da2a305e52408477fd477859dacea97f229c8" released="2010-09-06" version="20100906">
     <manifest-digest sha256="792280779fbba10bac90744e118789d98213f953a3752b111597e343e317b485"/>
-    <archive extract="parallel-20100906" href="http://ftp.gnu.org/gnu/parallel/parallel-20100906.tar.bz2" size="122492"/>
+    <archive extract="parallel-20100906" href="http://ftpmirror.gnu.org/parallel/parallel-20100906.tar.bz2" size="122492"/>
   </implementation>
 		<implementation id="sha1new=74b44c75af5d38ccf9d3dcc357f1aea8f9cce9ae" released="2010-09-22" version="20100922">
     <manifest-digest sha256="b54eefed677ef22dbbd8fcbf51cc311689b7b225cd246286e6cc7a7a43746e2e"/>
-    <archive extract="parallel-20100922" href="http://ftp.gnu.org/gnu/parallel/parallel-20100922.tar.bz2" size="125602"/>
+    <archive extract="parallel-20100922" href="http://ftpmirror.gnu.org/parallel/parallel-20100922.tar.bz2" size="125602"/>
   </implementation>
 		<implementation id="sha1new=7ff86f8f643465eb66237c9bb4e4927f774e24b3" released="2010-11-14" version="20101113">
     <manifest-digest sha256="baa84a96491d928cbd62ec378581f5e01e1c067627194f4f85d645b9c5ace16b"/>
-    <archive extract="parallel-20101113" href="http://ftp.gnu.org/gnu/parallel/parallel-20101113.tar.bz2" size="133427"/>
+    <archive extract="parallel-20101113" href="http://ftpmirror.gnu.org/parallel/parallel-20101113.tar.bz2" size="133427"/>
   </implementation>
 		<implementation id="sha1new=31035ed44ed009c58c9bf081e36567122ac357fd" released="2010-12-03" version="20101202">
     <manifest-digest sha256="3eb9f29536e0f41b34ffabddcc965cc266969ac59065f1dbcaa5161b53ef48cd"/>
-    <archive extract="parallel-20101202" href="http://ftp.gnu.org/gnu/parallel/parallel-20101202.tar.bz2" size="148142"/>
+    <archive extract="parallel-20101202" href="http://ftpmirror.gnu.org/parallel/parallel-20101202.tar.bz2" size="148142"/>
   </implementation>
 		<implementation id="sha1new=e75bde6728368f207d1bfde7b5e5d9a34ddc6886" released="2010-12-22" version="20101222">
     <manifest-digest sha256="cf2d12cd3dc171678d49ca09badbb029832d776677552b002d80c37d3162ee95"/>
-    <archive extract="parallel-20101222" href="http://ftp.gnu.org/gnu/parallel/parallel-20101222.tar.bz2" size="151264"/>
+    <archive extract="parallel-20101222" href="http://ftpmirror.gnu.org/parallel/parallel-20101222.tar.bz2" size="151264"/>
   </implementation>
 		<implementation id="sha1new=5f4293d94a95cd233d393e84fae1b449957352cb" released="2011-01-23" version="20110122">
     <manifest-digest sha256="2d906f04c08fc90e9ad49034c6ab6695c8d3e6324422cd3854f6cdb3a25be9cd"/>
-    <archive extract="parallel-20110122" href="http://ftp.gnu.org/gnu/parallel/parallel-20110122.tar.bz2" size="157049"/>
+    <archive extract="parallel-20110122" href="http://ftpmirror.gnu.org/parallel/parallel-20110122.tar.bz2" size="157049"/>
   </implementation>
 		<implementation id="sha1new=a8db8f36043febde56b07184d57ae1cfe7d2db95" released="2011-02-08" version="20110205">
     <manifest-digest sha256="ad86e3dfbea6baaa1a1c93804b58baba0093627de46abfb2dd183a33566c5883"/>
-    <archive extract="parallel-20110205" href="http://ftp.gnu.org/gnu/parallel/parallel-20110205.tar.bz2" size="159505"/>
+    <archive extract="parallel-20110205" href="http://ftpmirror.gnu.org/parallel/parallel-20110205.tar.bz2" size="159505"/>
   </implementation>
 		<implementation id="sha1new=567918fcc5d9159b4b9bf2cb7926bcb2d64a4e8d" released="2011-03-23" version="20110322">
     <manifest-digest sha256="53246d8a6ede5eb533a23d7c0cd15029e1c3848306352f50f9f441faf9eb4372"/>
-    <archive extract="parallel-20110322" href="http://ftp.gnu.org/gnu/parallel/parallel-20110322.tar.bz2" size="163481"/>
+    <archive extract="parallel-20110322" href="http://ftpmirror.gnu.org/parallel/parallel-20110322.tar.bz2" size="163481"/>
   </implementation>
 		<implementation id="sha1new=03f36986390e29a76870121efef1290e79a92d28" released="2011-04-25" version="20110422">
     <manifest-digest sha256="a3106769b07cc90cf78aee80b672cf44f3dcf86ca50c5295aa3c23422c5cafec"/>
-    <archive extract="parallel-20110422" href="http://ftp.gnu.org/gnu/parallel/parallel-20110422.tar.bz2" size="165993"/>
+    <archive extract="parallel-20110422" href="http://ftpmirror.gnu.org/parallel/parallel-20110422.tar.bz2" size="165993"/>
   </implementation>
 		<implementation id="sha1new=08e021b8ab7477e2d4d6c1948dec1bc8b61a3b2b" released="2011-05-22" version="20110522">
     <manifest-digest sha256="a68e1fc78eb3b1d3bea788685bb24f3850075be86dfc6bfb00d31e11c9a94594"/>
-    <archive extract="parallel-20110522" href="http://ftp.gnu.org/gnu/parallel/parallel-20110522.tar.bz2" size="170201"/>
+    <archive extract="parallel-20110522" href="http://ftpmirror.gnu.org/parallel/parallel-20110522.tar.bz2" size="170201"/>
   </implementation>
 		<implementation id="sha1new=87720f36a59c0b6c8797b10912496929bb977f6b" released="2011-06-23" version="20110622">
     <manifest-digest sha256="4a2d72c1c93d8c8d5a59f2a93b7c2d419101fa2d3a091a6c67a4e46485354236"/>
-    <archive extract="parallel-20110622" href="http://ftp.gnu.org/gnu/parallel/parallel-20110622.tar.bz2" size="174542"/>
+    <archive extract="parallel-20110622" href="http://ftpmirror.gnu.org/parallel/parallel-20110622.tar.bz2" size="174542"/>
   </implementation>
 		<implementation id="sha1new=2d5f552fca16026d9747ab677bba78170173b77f" released="2011-07-22" version="20110722">
     <manifest-digest sha256="b7ac1191b9605999c3be3f02ee2c8f81259c27a14347a3de056bf38e334a5d49"/>
-    <archive extract="parallel-20110722" href="http://ftp.gnu.org/gnu/parallel/parallel-20110722.tar.bz2" size="179658"/>
+    <archive extract="parallel-20110722" href="http://ftpmirror.gnu.org/parallel/parallel-20110722.tar.bz2" size="179658"/>
   </implementation>
 		<implementation id="sha1new=e08b8da720320753254051af0a028d10415f6a8a" released="2011-08-24" version="20110822">
     <manifest-digest sha256="12afae59bc92f973e9f78273d243730754512b2ab478fff0af61cfcc40c41416"/>
-    <archive extract="parallel-20110822" href="http://ftp.gnu.org/gnu/parallel/parallel-20110822.tar.bz2" size="182782"/>
+    <archive extract="parallel-20110822" href="http://ftpmirror.gnu.org/parallel/parallel-20110822.tar.bz2" size="182782"/>
   </implementation>
 		<implementation id="sha1new=2018f78fdb588754a36cabd50dfd86afcb43d67d" released="2011-10-26" version="20111022">
     <manifest-digest sha256="a93dd93a10b0ca089730063273e8042d5a211072b31038ba1d69261fdb3e1586"/>
-    <archive extract="parallel-20111022" href="http://ftp.gnu.org/gnu/parallel/parallel-20111022.tar.bz2" size="182664"/>
+    <archive extract="parallel-20111022" href="http://ftpmirror.gnu.org/parallel/parallel-20111022.tar.bz2" size="182664"/>
   </implementation>
 		<implementation id="sha1new=c6b576580bba13b701d6dc8e61d19d08006845c6" released="2011-11-23" version="20111122">
     <manifest-digest sha256="7dfb909955ab1edd9674e712002383db09bf1623a9501370b08983d221bb3d02"/>
-    <archive extract="parallel-20111122" href="http://ftp.gnu.org/gnu/parallel/parallel-20111122.tar.bz2" size="183684"/>
+    <archive extract="parallel-20111122" href="http://ftpmirror.gnu.org/parallel/parallel-20111122.tar.bz2" size="183684"/>
   </implementation>
 		<implementation id="sha1new=fd6ce0ed76b725f7eceb8010c017188da4044bba" released="2011-12-22" version="20111222">
     <manifest-digest sha256="7f53823ce997117f9cc1c67acd166b98ec7b53d609718aa6cbc7bd73488db315"/>
-    <archive extract="parallel-20111222" href="http://ftp.gnu.org/gnu/parallel/parallel-20111222.tar.bz2" size="184607"/>
+    <archive extract="parallel-20111222" href="http://ftpmirror.gnu.org/parallel/parallel-20111222.tar.bz2" size="184607"/>
   </implementation>
 		<implementation id="sha1new=cd06948aacd90f2478ad87bc313a450c3837f1f5" released="2012-02-10" version="20120122">
     <manifest-digest sha256="218d6a4e85a19c5d63644f6878879032517ae0c61f19ea71bf08ad30c531a295"/>
-    <archive extract="parallel-20120122" href="http://ftp.gnu.org/gnu/parallel/parallel-20120122.tar.bz2" size="187858"/>
+    <archive extract="parallel-20120122" href="http://ftpmirror.gnu.org/parallel/parallel-20120122.tar.bz2" size="187858"/>
   </implementation>
 		<implementation id="sha1new=32b32784a5a7fa2bd1cc17a954c7ddf2f2d6e1f1" released="2012-02-26" version="20120222">
     <manifest-digest sha256="5ae69eeb67954520e2e3630b5434e1cdc2e82908b809f8886cbf5d313a62647e"/>
-    <archive extract="parallel-20120222" href="http://ftp.gnu.org/gnu/parallel/parallel-20120222.tar.bz2" size="222011"/>
+    <archive extract="parallel-20120222" href="http://ftpmirror.gnu.org/parallel/parallel-20120222.tar.bz2" size="222011"/>
   </implementation>
 		<implementation id="sha1new=a2cbf8f59072239c569157b223f7af7ae4746c53" released="2012-03-24" version="20120322">
     <manifest-digest sha256="b14245bb521655fb064909691ebc5458fe978b1f98ae86e16d48b39f2c36d929"/>
-    <archive extract="parallel-20120322" href="http://ftp.gnu.org/gnu/parallel/parallel-20120322.tar.bz2" size="224794"/>
+    <archive extract="parallel-20120322" href="http://ftpmirror.gnu.org/parallel/parallel-20120322.tar.bz2" size="224794"/>
   </implementation>
 		<implementation id="sha1new=50f2180bb9c2e4818b004059e3c7040fa8b72e63" released="2012-04-24" version="20120422">
     <manifest-digest sha256="e78b1de8d4bb6f6fe639c4614e394dfcfc7594c72481caec5959bd648e9da9ed"/>
-    <archive extract="parallel-20120422" href="http://ftp.gnu.org/gnu/parallel/parallel-20120422.tar.bz2" size="224881"/>
+    <archive extract="parallel-20120422" href="http://ftpmirror.gnu.org/parallel/parallel-20120422.tar.bz2" size="224881"/>
   </implementation>
 		<implementation id="sha1new=539f41ac825302b6fa66893e6d9c4f51ed048200" released="2012-05-23" version="20120522">
     <manifest-digest sha256="346becd7f4a3214720b894b4d637872f33a349e362d43a048d8d4ba1d9693420"/>
-    <archive extract="parallel-20120522" href="http://ftp.gnu.org/gnu/parallel/parallel-20120522.tar.bz2" size="226625"/>
+    <archive extract="parallel-20120522" href="http://ftpmirror.gnu.org/parallel/parallel-20120522.tar.bz2" size="226625"/>
   </implementation>
 		<implementation id="sha1new=006f918cda3a7cbe620f6e2b66123379c1948089" released="2012-06-23" version="20120622">
     <manifest-digest sha256="b1182ecf93c1b93e0cf3f22784c27c01f7aa64801f038b652624c3e210e03dea"/>
-    <archive extract="parallel-20120622" href="http://ftp.gnu.org/gnu/parallel/parallel-20120622.tar.bz2" size="228881"/>
+    <archive extract="parallel-20120622" href="http://ftpmirror.gnu.org/parallel/parallel-20120622.tar.bz2" size="228881"/>
   </implementation>
 		<implementation id="sha1new=36a6f13e597193d7d163ca5c6a5097eceecc6dab" released="2012-08-23" version="20120722">
     <manifest-digest sha256="d10af8e443c12b8540a6b8ecc41f0ca480d851f45b1b93bac3001d1a5031d76c"/>
-    <archive extract="parallel-20120722" href="http://ftp.gnu.org/gnu/parallel/parallel-20120722.tar.bz2" size="230141"/>
+    <archive extract="parallel-20120722" href="http://ftpmirror.gnu.org/parallel/parallel-20120722.tar.bz2" size="230141"/>
   </implementation>
 		<implementation id="sha1new=f5da0850d901d05b9086bf5599d72ba30f7d9685" released="2012-08-23" version="20120822">
     <manifest-digest sha256="98efd866ca5cf6737922d1caf3802488ce572fadd1b643161a3a0836d8ad1790"/>
-    <archive extract="parallel-20120822" href="http://ftp.gnu.org/gnu/parallel/parallel-20120822.tar.bz2" size="231076"/>
+    <archive extract="parallel-20120822" href="http://ftpmirror.gnu.org/parallel/parallel-20120822.tar.bz2" size="231076"/>
   </implementation>
 		<implementation id="sha1new=7d21f515041cca4aab022a9f7a8bd059361a1fcd" released="2012-10-24" version="20121022">
     <manifest-digest sha256="14105011185071fe5594d8ce6d796cf1c0d5d34ea375652042168fb8bebea032"/>
-    <archive extract="parallel-20121022" href="http://ftp.gnu.org/gnu/parallel/parallel-20121022.tar.bz2" size="235026"/>
+    <archive extract="parallel-20121022" href="http://ftpmirror.gnu.org/parallel/parallel-20121022.tar.bz2" size="235026"/>
   </implementation>
 		<implementation id="sha1new=49d033e60c065c18993fd129a632d2b9951f963a" released="2012-12-23" version="20121222">
     <manifest-digest sha256="501ed8303ef8e9a8061563acf58673038262204b77c4b4192e2ca445b13c2412"/>
-    <archive extract="parallel-20121222" href="http://ftp.gnu.org/gnu/parallel/parallel-20121222.tar.bz2" size="237603"/>
+    <archive extract="parallel-20121222" href="http://ftpmirror.gnu.org/parallel/parallel-20121222.tar.bz2" size="237603"/>
   </implementation>
 		<implementation id="sha1new=10b3a92e1c8a4f0924619ff910afad500cbf8119" released="2013-01-26" version="20130122">
     <manifest-digest sha256="9a87b4595fe799788fb068d9c8d53d8b8e29c09f8a7ed03780f40efe48280b10"/>
-    <archive extract="parallel-20130122" href="http://ftp.gnu.org/gnu/parallel/parallel-20130122.tar.bz2" size="238646"/>
+    <archive extract="parallel-20130122" href="http://ftpmirror.gnu.org/parallel/parallel-20130122.tar.bz2" size="238646"/>
   </implementation>
 		<implementation id="sha1new=50f733a0a73b89ad2706587c9a99b7491ac4b857" released="2013-04-24" version="20130422">
     <manifest-digest sha256new="3XOESMVB7HDCIMMHOIYOALALE6KPZKOPR23HCQ3TIXTETIC6WQYQ"/>
-    <archive extract="parallel-20130422" href="http://ftp.gnu.org/gnu/parallel/parallel-20130422.tar.bz2" size="241817"/>
+    <archive extract="parallel-20130422" href="http://ftpmirror.gnu.org/parallel/parallel-20130422.tar.bz2" size="241817"/>
   </implementation>
 	</group>
 </interface>
 <!-- Base64 Signature
-iEYEABECAAYFAlF3thIACgkQ/lhgK1iJTtK8fQCgh/avjDotQes6nK7kODD5D6cRNVoAnjLHrdio
-xUk/AztKxX7nosLGhU9Q
+iEYEABECAAYFAlF4fKgACgkQ/lhgK1iJTtLZLQCgklJKW/UaImzKjylh0QBIdN87u9EAnjoxoD5V
+8Cd9IutO/VX2RzB9NdFX
 
 -->
