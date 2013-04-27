@@ -3805,7 +3805,7 @@ sub sshlogin_wrap {
 		 . q{ PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;' });
 	    my $remote_pre = "";
 	    my $ssh_options = "";
-	    if($opt::ctrlc) {
+	    if(not $opt::pipe or $opt::ctrlc) {
 		# Propagating CTRL-C to kill remote jobs requires
 		# remote jobs to be run with a terminal.
 		# That means input cannot be 8-bit clean, but
