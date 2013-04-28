@@ -1473,12 +1473,16 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{sec}
-@anchor{@strong{--timeout} @emph{sec}}
+@item @strong{--timeout} @emph{val} (new alpha testing)
+@anchor{@strong{--timeout} @emph{val} (new alpha testing)}
 
-Time out for command. If the command runs for longer than @emph{sec}
+Time out for command. If the command runs for longer than @emph{val}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
+
+If @emph{val} is followed by a % then the timeout will dynamically be
+computed as a percentage of the smoothed average runtime. Only values
+> 100% will make sense.
 
 @item @strong{--tollef} (obsolete - will be retired 20140222)
 @anchor{@strong{--tollef} (obsolete - will be retired 20140222)}

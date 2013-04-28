@@ -1370,11 +1370,15 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<sec>
+=item B<--timeout> I<val> (new alpha testing)
 
-Time out for command. If the command runs for longer than I<sec>
+Time out for command. If the command runs for longer than I<val>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
+
+If I<val> is followed by a % then the timeout will dynamically be
+computed as a percentage of the smoothed average runtime. Only values
+> 100% will make sense.
 
 
 =item B<--tollef> (obsolete - will be retired 20140222)
