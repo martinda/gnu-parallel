@@ -5565,12 +5565,14 @@ sub new {
 	$pct = $1/100;
 	$delta_time = 1_000_000;
 	$avg_damper = (1-0.001)/0.9;
-   }
+    }
     return bless {
 	'queue' => [],
 	'delta_time' => $delta_time,
 	'pct' => $pct,
-	'avg_damper' => $avg_damper,
+	'remedian_idx' => 0,
+	'remedian_arr' => [],
+	'remedian' => undef,
     }, ref($class) || $class;
 }
 
@@ -5584,17 +5586,36 @@ sub set_delta_time {
     $self->{'delta_time'} = shift;
 }
 
+sub remedian {
+    my $self = shift;
+    return $self->{'remedian'};
+}
+
+sub set_remedian {
+    # Set median of the last 999^3 (=997002999) values using Remedian 
+    #
+    # Rousseeuw, Peter J., and Gilbert W. Bassett Jr. "The remedian: A
+    # robust averaging method for large data sets." Journal of the
+    # American Statistical Association 85.409 (1990): 97-104.
+    my $self = shift;
+    my $val = shift;
+    my $i = $self->{'remedian_idx'}++;
+    my $rref = $self->{'remedian_arr'};
+    $rref->[0][$i%999] = $val;
+    $rref->[1][$i/999%999] = (sort @{$rref->[0]})[$#{$rref->[0]}/2];
+    $rref->[2][$i/999/999%999] = (sort @{$rref->[1]})[$#{$rref->[1]}/2];
+    $self->{'remedian'} = (sort @{$rref->[2]})[$#{$rref->[2]}/2];
+#    die((sort @{$rref->[2]})[$#{$rref->[2]}/2]);
+}
+
 sub update_delta_time {
     # Update delta_time based on runtime of finished job if timeout is
     # a percentage
     my $self = shift;
     my $runtime = shift;
     if($self->{'pct'}) {
-	# Converge to the average fast in the start, and slower later
-	$self->{'avg_damper'} = $self->{'avg_damper'} * 0.9 + 0.001;
-	$self->{'delta_time'} = 
-	    $self->{'pct'} * $runtime * $self->{'avg_damper'} +
-	    (1 - $self->{'avg_damper'}) * $self->{'delta_time'};
+	$self->set_remedian($runtime);
+	$self->{'delta_time'} = $self->{'pct'} * $self->remedian();
 	::debug("Timeout: $self->{'delta_time'}s ");
     }
 }
