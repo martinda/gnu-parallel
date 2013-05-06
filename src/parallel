@@ -1289,6 +1289,7 @@ sub start_more_jobs {
     # Returns:
     #   number of jobs started
     my $jobs_started = 0;
+    my $jobs_started_this_round = 0;
     if($Global::start_no_new_jobs) {
 	return $jobs_started;
     }
@@ -1301,18 +1302,17 @@ sub start_more_jobs {
 	    }
 	}
     }
-    my $sleep = 0.0001; # 0.01 ms - better performance on highend
+    do {
+	$jobs_started_this_round = 0;
     for my $sshlogin (values %Global::host) {
 	debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
-	while ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
+	if ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
 	    if($opt::load and $sshlogin->loadavg_too_high()) {
 		# The load is too high or unknown
-		$sleep = ::reap_usleep($sleep);
 		next;
 	    }
 	    if($opt::noswap and $sshlogin->swapping()) {
 		# The server is swapping
-		$sleep = ::reap_usleep($sleep);
 		next;
 	    }
 	    if($sshlogin->too_fast_remote_login()) {
@@ -1333,10 +1333,13 @@ sub start_more_jobs {
 	    $sshlogin->inc_jobs_running();
 	    $sshlogin->set_last_login_at(::now());
 	    $jobs_started++;
+	    $jobs_started_this_round++;
 	}
 	debug("Running jobs after on ".$sshlogin->string().": ".$sshlogin->jobs_running()
 	      ." of ".$sshlogin->max_jobs_running() ."\n");
     }
+    } while($jobs_started_this_round);
+
     return $jobs_started;
 }
 
