@@ -1327,7 +1327,7 @@ sub start_more_jobs {
 	    if(start_another_job($sshlogin) == 0) {
 		# No more jobs to start on this $sshlogin
 		debug("No jobs started on ".$sshlogin->string()."\n");
-		last;
+		next;
 	    }
 	    debug("Job started on ".$sshlogin->string()."\n");
 	    $sshlogin->inc_jobs_running();
