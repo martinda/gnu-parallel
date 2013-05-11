@@ -91,8 +91,9 @@ one 1
 a
 b
 c
+parallel: Warning: --tollef is obsolete and will be retired 20140222.
 parallel: Warning: See: http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html
-parallel: Warning: YOU ARE USING --tollef. --tollef is obsolete and will be retired 20140222.
+parallel: Warning: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.
 ### Test --tollef --gnu
 1
 2

@@ -33,7 +33,6 @@ use Getopt::Long;
 # Used to ensure code quality
 use strict;
 
-$::oodebug=0;
 $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
 if(not $ENV{SHELL}) {
     # $ENV{SHELL} is sometimes not set on Mac OS X and Windows
@@ -646,7 +645,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130429;
+    $Global::version = 20130511;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -761,7 +760,12 @@ sub parse_options {
     }
     if($opt::tollef and not $opt::gnu and not $opt::plain) {
 	# Behave like tollef parallel (from moreutils)
-	::warning("YOU ARE USING --tollef. --tollef is obsolete and will be retired 20140222.\n");
+	if($Global::version > 20140222) {
+	    ::error("--tollef has been retired. See http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html\n");
+	    ::wait_and_exit(255);
+	}
+	::warning("YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n");
+	::warning("--tollef is obsolete and will be retired 20140222.\n");
 	::warning("See: http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html\n");
 	$opt::u = 1;
 	$Global::grouped = 0;
@@ -1304,40 +1308,41 @@ sub start_more_jobs {
     }
     do {
 	$jobs_started_this_round = 0;
-    for my $sshlogin (values %Global::host) {
-	debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
-	if ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
-	    if($opt::load and $sshlogin->loadavg_too_high()) {
-		# The load is too high or unknown
-		next;
-	    }
-	    if($opt::noswap and $sshlogin->swapping()) {
-		# The server is swapping
-		next;
-	    }
-	    if($sshlogin->too_fast_remote_login()) {
-		next;
-	    }
+	# This will start 1 job on each --sshlogin (if possible)
+	# thus distribute the jobs on the --sshlogins round robin
+	for my $sshlogin (values %Global::host) {
 	    if($Global::JobQueue->empty() and not $opt::pipe) {
 		last;
 	    }
-	    debug($sshlogin->string()." has ".$sshlogin->jobs_running()
-		  . " out of " . $sshlogin->max_jobs_running()
-		  . " jobs running. Start another.\n");
-	    if(start_another_job($sshlogin) == 0) {
-		# No more jobs to start on this $sshlogin
-		debug("No jobs started on ".$sshlogin->string()."\n");
-		next;
+	    debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
+	    if ($sshlogin->jobs_running() < $sshlogin->max_jobs_running()) {
+		if($opt::load and $sshlogin->loadavg_too_high()) {
+		    # The load is too high or unknown
+		    next;
+		}
+		if($opt::noswap and $sshlogin->swapping()) {
+		    # The server is swapping
+		    next;
+		}
+		if($sshlogin->too_fast_remote_login()) {
+		    next;
+		}
+		debug($sshlogin->string()." has ".$sshlogin->jobs_running()
+		      . " out of " . $sshlogin->max_jobs_running()
+		      . " jobs running. Start another.\n");
+		if(start_another_job($sshlogin) == 0) {
+		    # No more jobs to start on this $sshlogin
+		    debug("No jobs started on ".$sshlogin->string()."\n");
+		    next;
+		}
+		$sshlogin->inc_jobs_running();
+		$sshlogin->set_last_login_at(::now());
+		$jobs_started++;
+		$jobs_started_this_round++;
 	    }
-	    debug("Job started on ".$sshlogin->string()."\n");
-	    $sshlogin->inc_jobs_running();
-	    $sshlogin->set_last_login_at(::now());
-	    $jobs_started++;
-	    $jobs_started_this_round++;
+	    debug("Running jobs after on ".$sshlogin->string().": ".$sshlogin->jobs_running()
+		  ." of ".$sshlogin->max_jobs_running() ."\n");
 	}
-	debug("Running jobs after on ".$sshlogin->string().": ".$sshlogin->jobs_running()
-	      ." of ".$sshlogin->max_jobs_running() ."\n");
-    }
     } while($jobs_started_this_round);
 
     return $jobs_started;
@@ -1645,10 +1650,6 @@ sub get_job_with_sshlogin {
     #   next job object for $sshlogin if any available
     my $sshlogin = shift;
 
-    if($::oodebug and $Global::JobQueue->empty()) {
-        Carp::confess("get_job_with_sshlogin should never be called if empty");
-    }
-
     my $job = $Global::JobQueue->get();
     if(not defined $job) {
         # No more jobs
@@ -1656,9 +1657,6 @@ sub get_job_with_sshlogin {
         return undef;
     }
 
-    if($::oodebug and not defined $job->{'commandline'}) {
-        Carp::confess("get_job_with_sshlogin job->commandline should never be empty");
-    }
     my $clean_command = $job->replaced();
     if($clean_command =~ /^\s*$/) {
         # Do not run empty lines
@@ -1673,7 +1671,6 @@ sub get_job_with_sshlogin {
        $job->failed_here()) {
         # This command with these args failed for this sshlogin
         my ($no_of_failed_sshlogins,$min_failures) = $job->min_failed();
-        #::my_dump(($no_of_failed_sshlogins,$min_failures));
         if($no_of_failed_sshlogins == keys %Global::host and
            $job->failed_here() == $min_failures) {
             # It failed the same or more times on another host:
@@ -4761,11 +4758,6 @@ sub replaced {
 		::shell_quote_scalar(::shell_quote_scalar($self->{'replaced'}));
 	}
     }
-    if($::oodebug and length($self->{'replaced'}) != ($self->len())) {
-	::my_dump($self);
-	Carp::cluck("replaced len=" . length($self->{'replaced'})
-		    . " computed=" . ($self->len()));
-    }
     return $self->{'replaced'};
 }
 
@@ -5255,10 +5247,6 @@ sub new {
     my $fhs = shift;
     for my $fh (@$fhs) {
 	if(-t $fh) {
-	    if($opt::tollef and not $opt::gnu) {
-		::warning("YOU ARE USING --tollef. "
-			  . "IF THINGS ARE ACTING WEIRD USE --gnu.");
-	    }
 	    ::warning("Input is read from the terminal. ".
 		      "Only experts do this on purpose. ".
 		      "Press CTRL-D to exit.\n");
@@ -5482,9 +5470,6 @@ package Arg;
 sub new {
     my $class = shift;
     my $orig = shift;
-    if($::oodebug and not defined $orig) {
-	Carp::cluck($orig);
-    }
     return bless {
 	'orig' => $orig,
     }, ref($class) || $class;

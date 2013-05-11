@@ -25,18 +25,18 @@ a'   * ? >o  <i*? ][\!#¤%=( ) | }b 5
 a'   * ? >o  <i*? ][\!#¤%=( ) | }b 5
 a'   * ? >o  <i*? ][\!#¤%=( ) | }b 5
 ### Test --env for \n and \\ - single and double - no output is good
-      2 setenv: Too many arguments.
-      1 export: Command not found.
-      1 V: Undefined variable.
       2 1 10V2= 10
-      3 2\\ \92V2=\\ \92
       1 2\ \92V2=\ \92
+      3 2\\ \92V2=\\ \92
+      1 V: Undefined variable.
+      1 export: Command not found.
+      2 setenv: Too many arguments.
 ### Test --env for \n and \\ - single and double --onall - no output is good
-      2 setenv: Too many arguments.
-      1 export: Command not found.
-      1 V: Undefined variable.
       2 1 10V2= 10
-      3 2\\ \92V2=\\ \92
       1 2\ \92V2=\ \92
+      3 2\\ \92V2=\\ \92
+      1 V: Undefined variable.
+      1 export: Command not found.
+      2 setenv: Too many arguments.
 ### Test --env for \160 - which kills csh - single and double - no output is good
 ### Test --env for \160  - which kills csh - single and double --onall - no output is good
