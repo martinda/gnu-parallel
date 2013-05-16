@@ -645,7 +645,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130511;
+    $Global::version = 20130514;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -760,7 +760,7 @@ sub parse_options {
     }
     if($opt::tollef and not $opt::gnu and not $opt::plain) {
 	# Behave like tollef parallel (from moreutils)
-	if($Global::version > 20140222) {
+	if($Global::version > 20130514) {
 	    ::error("--tollef has been retired. See http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html\n");
 	    ::wait_and_exit(255);
 	}
@@ -3795,16 +3795,13 @@ sub sshlogin_wrap {
 	    if(not $opt::pipe or $opt::ctrlc) {
 		# Propagating CTRL-C to kill remote jobs requires
 		# remote jobs to be run with a terminal.
-		# That means input cannot be 8-bit clean, but
-		# must be Base64-encoded.
-		# TODO this currently does not work, so --ctrlc cannot
-		# read from stdin (e.g. with --pipe)
 		$ssh_options = "-tt -oLogLevel=quiet";
+		# tty - check if we have a tty.
 		# stty:
-		# -onlcr - make output 8-bit clean
-		# isig - pass CTRL-C as signal
-		# -echo - do not echo input
-		$remote_pre .= ::shell_quote_scalar('stty isig -onlcr -echo;');
+		#   -onlcr - make output 8-bit clean
+		#   isig - pass CTRL-C as signal
+		#   -echo - do not echo input
+		$remote_pre .= ::shell_quote_scalar('tty >/dev/null && stty isig -onlcr -echo;');
 	    }
 	    if($opt::workdir) {
 		$remote_pre .= 

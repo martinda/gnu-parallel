@@ -65,14 +65,27 @@ cp doc/parallel.latest.directive parallel-latest.tar.bz2.directive
 perl -i -pe "s/20\d\d\d\d\d\d/latest/" parallel-latest.tar.*directive
 gpg --clearsign --yes parallel-latest.tar.bz2.directive
 
-YYYYMMDD=`yyyymmdd`
-gpg -b parallel-$YYYYMMDD.tar.bz2
-gpg -b --yes parallel-latest.tar.bz2
+(echo "To check the signature run:";
+ echo "  echo | gpg";
+ echo "  gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-$YYYYMMDD.tar.bz2.sig";
+ echo
+ gpg -ab -o - parallel-$YYYYMMDD.tar.bz2
+) > parallel-$YYYYMMDD.tar.bz2.sig
 
-YYYYMMDD=`yyyymmdd`
+(echo "To check the signature run:";
+ echo "  echo | gpg";
+ echo "  gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-latest.tar.bz2.sig";
+ echo
+ gpg -ab -o - parallel-latest.tar.bz2
+) > parallel-latest.tar.bz2.sig
+
+gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-latest.tar.bz2.sig
+gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-$YYYYMMDD.tar.bz2.sig
+
 echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
 echo put parallel-latest.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
 #echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/alpha/
+
 
 == Update OpenSUSE build system ==
 
@@ -170,12 +183,24 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20130522 ('') released
+Subject: GNU Parallel 20130522 ('Rana Plaza') released
 
-GNU Parallel 20130522 ('') has been released. It is
+GNU Parallel 20130522 ('Rana Plaza') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
+The changes for this release has been in the core of the code, so this
+release should be considered beta quality.
+
 New in this release:
+
+* --ctrlc is now default if --pipe is not used; thus making it
+  possible to kill remotely started jobs simply by pressing Ctrl-C.
+
+* --timeout 200% now means kill jobs that take more than twice the
+  time of the median run time of a job.
+
+* Jobs are now distributed round robin when having mulitiple
+  --sshlogin instead of filling up one --sshlogin at a time.
 
 * Bug fixes and man page updates.
 

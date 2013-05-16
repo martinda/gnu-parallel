@@ -6,150 +6,182 @@ Welcome to RedHat/Fedora ...member of polarhome.com realm
 Fedora release 17 (Beefy Miracle)
 Welcome to RedHat/Fedora ...member of polarhome.com realm
 
-SCO OpenServer(TM) Release 6
-Welcome to scosysv ...member of polarhome.com realm
-
-SCO OpenServer(TM) Release 6
-Welcome to scosysv ...member of polarhome.com realm
-
-
-CentOS release 5.6 (Final)
-Welcome to CentOS ...member of polarhome.com realm
-
-
-CentOS release 5.6 (Final)
-Welcome to CentOS ...member of polarhome.com realm
-
-
-DragonFly v2.10.1.1
-Welcome to DragonFly ...member of polarhome.com realm
-
-
-DragonFly v2.10.1.1
-Welcome to DragonFly ...member of polarhome.com realm
-
-
-NetBSD 5.1
-Welcome to NetBSD ...member of polarhome.com realm
-
-
-NetBSD 5.1
-Welcome to NetBSD ...member of polarhome.com realm
-
-
-FreeBSD 8.2 
-Welcome to FreeBSD ...member of polarhome.com realm
-
-
-FreeBSD 8.2 
-Welcome to FreeBSD ...member of polarhome.com realm
-
-
-SunOS 5.10 
-SUN Ultra-5
-Welcome to Solaris ...member of polarhome.com realm
-
-
-SunOS 5.10 
-SUN Ultra-5
-Welcome to Solaris ...member of polarhome.com realm
-
-
-OpenBSD 4.9 
-Welcome to OpenBSD ...member of polarhome.com realm
-
-
-OpenBSD 4.9 
-Welcome to OpenBSD ...member of polarhome.com realm
-
-
-Debian GNU/Linux 6.0.2 (squeeze)
-Welcome to debian ...member of polarhome.com realm
-
-
-Debian GNU/Linux 6.0.2 (squeeze)
-Welcome to debian ...member of polarhome.com realm
-
-
-Welcome to AIX7 ...member of polarhome.com realm
-
-Welcome to AIX7 ...member of polarhome.com realm
-
-HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
-Welcome to HPUX... member of polarhome.com realm
-
-
-HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
-Welcome to HPUX... member of polarhome.com realm
-
-
-QNX 6.5.0
-Welcome to QNX ...member of polarhome.com realm
-
-
-QNX 6.5.0
-Welcome to QNX ...member of polarhome.com realm
-
-
-IRIX64 6.5 07202013 IP35
-Welcome to irix ...member of polarhome.com realm
-
-IRIX64 6.5 07202013 IP35
-Welcome to irix ...member of polarhome.com realm
-
-openSUSE 11.4 "Celadon"
-Welcome to SuSE/openSUSE ...member of polarhome.com realm
-
-
-openSUSE 11.4 "Celadon"
-Welcome to SuSE/openSUSE ...member of polarhome.com realm
-
-
-OpenIndiana SunOS 5.11
-Welcome to OpenIndiana ...member of polarhome.com realm
-
-
-OpenIndiana SunOS 5.11
-Welcome to OpenIndiana ...member of polarhome.com realm
-
-
-Mandriva Linux release 2010.2 (Official) for x86_64
-Welcome to Mandrake/Mandriva ...member of polarhome.com realm
-
-
-Mandriva Linux release 2010.2 (Official) for x86_64
-Welcome to Mandrake/Mandriva ...member of polarhome.com realm
-
-SCO UnixWare 7.1.4
-Welcome to unixware ...member of polarhome.com realm
-
-SCO UnixWare 7.1.4
-Welcome to unixware ...member of polarhome.com realm
-
-Debian GNU/Linux 6.0
-RaspberryPi/bcm2708 reference 2.0
-Welcome to raspberrypi ...member of polarhome.com realm
-
-Debian GNU/Linux 6.0
-RaspberryPi/bcm2708 reference 2.0
-Welcome to raspberrypi ...member of polarhome.com realm
-
-
-Debian GNU/Hurd wheezy/sid
-Welcome to hurd ...member of polarhome.com realm.
-
-
-Debian GNU/Hurd wheezy/sid
-Welcome to hurd ...member of polarhome.com realm.
-
-
-Ubuntu 10.04.2 LTS
-Welcome to Ubuntu ...member of polarhome.com realm
-
-
-Ubuntu 10.04.2 LTS
-Welcome to Ubuntu ...member of polarhome.com realm
-
+ssh scosysv.polarhome.com rm -f bin/parallel;scp bin/parallel scosysv.polarhome.com:bin/
+ssh centos.polarhome.com rm -f bin/parallel;scp bin/parallel centos.polarhome.com:bin/
+ssh dragonfly.polarhome.com rm -f bin/parallel;scp bin/parallel dragonfly.polarhome.com:bin/
+ssh netbsd.polarhome.com rm -f bin/parallel;scp bin/parallel netbsd.polarhome.com:bin/
+ssh freebsd.polarhome.com rm -f bin/parallel;scp bin/parallel freebsd.polarhome.com:bin/
+ssh solaris.polarhome.com rm -f bin/parallel;scp bin/parallel solaris.polarhome.com:bin/
+ssh openbsd.polarhome.com rm -f bin/parallel;scp bin/parallel openbsd.polarhome.com:bin/
+ssh debian.polarhome.com rm -f bin/parallel;scp bin/parallel debian.polarhome.com:bin/
+ssh aix.polarhome.com rm -f bin/parallel;scp bin/parallel aix.polarhome.com:bin/
+ssh hpux.polarhome.com rm -f bin/parallel;scp bin/parallel hpux.polarhome.com:bin/
+ssh qnx.polarhome.com rm -f bin/parallel;scp bin/parallel qnx.polarhome.com:bin/
+ssh irix.polarhome.com rm -f bin/parallel;scp bin/parallel irix.polarhome.com:bin/
+ssh suse.polarhome.com rm -f bin/parallel;scp bin/parallel suse.polarhome.com:bin/
+ssh minix.polarhome.com rm -f bin/parallel;scp bin/parallel minix.polarhome.com:bin/
+ssh openindiana.polarhome.com rm -f bin/parallel;scp bin/parallel openindiana.polarhome.com:bin/
+ssh mandriva.polarhome.com rm -f bin/parallel;scp bin/parallel mandriva.polarhome.com:bin/
+ssh unixware.polarhome.com rm -f bin/parallel;scp bin/parallel unixware.polarhome.com:bin/
+ssh miros.polarhome.com rm -f bin/parallel;scp bin/parallel miros.polarhome.com:bin/
+ssh raspberrypi.polarhome.com rm -f bin/parallel;scp bin/parallel raspberrypi.polarhome.com:bin/
+ssh hurd.polarhome.com rm -f bin/parallel;scp bin/parallel hurd.polarhome.com:bin/
+ssh ultrix.polarhome.com rm -f bin/parallel;scp bin/parallel ultrix.polarhome.com:bin/
+ssh ubuntu.polarhome.com rm -f bin/parallel;scp bin/parallel ubuntu.polarhome.com:bin/
+scosysv.polarhome.com	SCO OpenServer(TM) Release 6
+scosysv.polarhome.com	Welcome to scosysv ...member of polarhome.com realm
+scosysv.polarhome.com	
+scosysv.polarhome.com	SCO OpenServer(TM) Release 6
+scosysv.polarhome.com	Welcome to scosysv ...member of polarhome.com realm
+scosysv.polarhome.com	
+centos.polarhome.com	
+centos.polarhome.com	CentOS release 5.6 (Final)
+centos.polarhome.com	Welcome to CentOS ...member of polarhome.com realm
+centos.polarhome.com	
+centos.polarhome.com	
+centos.polarhome.com	CentOS release 5.6 (Final)
+centos.polarhome.com	Welcome to CentOS ...member of polarhome.com realm
+centos.polarhome.com	
+dragonfly.polarhome.com	
+dragonfly.polarhome.com	DragonFly v2.10.1.1
+dragonfly.polarhome.com	Welcome to DragonFly ...member of polarhome.com realm
+dragonfly.polarhome.com	
+dragonfly.polarhome.com	
+dragonfly.polarhome.com	DragonFly v2.10.1.1
+dragonfly.polarhome.com	Welcome to DragonFly ...member of polarhome.com realm
+dragonfly.polarhome.com	
+netbsd.polarhome.com	
+netbsd.polarhome.com	NetBSD 5.1
+netbsd.polarhome.com	Welcome to NetBSD ...member of polarhome.com realm
+netbsd.polarhome.com	
+netbsd.polarhome.com	MANPATH: Undefined variable.
+netbsd.polarhome.com	
+netbsd.polarhome.com	NetBSD 5.1
+netbsd.polarhome.com	Welcome to NetBSD ...member of polarhome.com realm
+netbsd.polarhome.com	
+netbsd.polarhome.com	MANPATH: Undefined variable.
+freebsd.polarhome.com	
+freebsd.polarhome.com	FreeBSD 8.2 
+freebsd.polarhome.com	Welcome to FreeBSD ...member of polarhome.com realm
+freebsd.polarhome.com	
+freebsd.polarhome.com	
+freebsd.polarhome.com	FreeBSD 8.2 
+freebsd.polarhome.com	Welcome to FreeBSD ...member of polarhome.com realm
+freebsd.polarhome.com	
+solaris.polarhome.com	
+solaris.polarhome.com	SunOS 5.10 
+solaris.polarhome.com	SUN Ultra-5
+solaris.polarhome.com	Welcome to Solaris ...member of polarhome.com realm
+solaris.polarhome.com	
+solaris.polarhome.com	
+solaris.polarhome.com	SunOS 5.10 
+solaris.polarhome.com	SUN Ultra-5
+solaris.polarhome.com	Welcome to Solaris ...member of polarhome.com realm
+solaris.polarhome.com	
+openbsd.polarhome.com	
+openbsd.polarhome.com	OpenBSD 4.9 
+openbsd.polarhome.com	Welcome to OpenBSD ...member of polarhome.com realm
+openbsd.polarhome.com	
+openbsd.polarhome.com	
+openbsd.polarhome.com	OpenBSD 4.9 
+openbsd.polarhome.com	Welcome to OpenBSD ...member of polarhome.com realm
+openbsd.polarhome.com	
+debian.polarhome.com	
+debian.polarhome.com	Debian GNU/Linux 6.0.2 (squeeze)
+debian.polarhome.com	Welcome to debian ...member of polarhome.com realm
+debian.polarhome.com	
+debian.polarhome.com	
+debian.polarhome.com	Debian GNU/Linux 6.0.2 (squeeze)
+debian.polarhome.com	Welcome to debian ...member of polarhome.com realm
+debian.polarhome.com	
+aix.polarhome.com	
+aix.polarhome.com	Welcome to AIX7 ...member of polarhome.com realm
+aix.polarhome.com	
+aix.polarhome.com	Welcome to AIX7 ...member of polarhome.com realm
+hpux.polarhome.com	
+hpux.polarhome.com	HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
+hpux.polarhome.com	Welcome to HPUX... member of polarhome.com realm
+hpux.polarhome.com	
+hpux.polarhome.com	
+hpux.polarhome.com	HP-UX hpux.polarhome.com B.11.11 U 9000/785 (ta)
+hpux.polarhome.com	Welcome to HPUX... member of polarhome.com realm
+hpux.polarhome.com	
+qnx.polarhome.com	
+qnx.polarhome.com	QNX 6.5.0
+qnx.polarhome.com	Welcome to QNX ...member of polarhome.com realm
+qnx.polarhome.com	
+qnx.polarhome.com	
+qnx.polarhome.com	QNX 6.5.0
+qnx.polarhome.com	Welcome to QNX ...member of polarhome.com realm
+qnx.polarhome.com	
+irix.polarhome.com	
+irix.polarhome.com	IRIX64 6.5 07202013 IP35
+irix.polarhome.com	Welcome to irix ...member of polarhome.com realm
+irix.polarhome.com	
+irix.polarhome.com	IRIX64 6.5 07202013 IP35
+irix.polarhome.com	Welcome to irix ...member of polarhome.com realm
+suse.polarhome.com	
+suse.polarhome.com	openSUSE 11.4 "Celadon"
+suse.polarhome.com	Welcome to SuSE/openSUSE ...member of polarhome.com realm
+suse.polarhome.com	
+suse.polarhome.com	
+suse.polarhome.com	openSUSE 11.4 "Celadon"
+suse.polarhome.com	Welcome to SuSE/openSUSE ...member of polarhome.com realm
+suse.polarhome.com	
+openindiana.polarhome.com	
+openindiana.polarhome.com	OpenIndiana SunOS 5.11
+openindiana.polarhome.com	Welcome to OpenIndiana ...member of polarhome.com realm
+openindiana.polarhome.com	
+openindiana.polarhome.com	
+openindiana.polarhome.com	OpenIndiana SunOS 5.11
+openindiana.polarhome.com	Welcome to OpenIndiana ...member of polarhome.com realm
+openindiana.polarhome.com	
+mandriva.polarhome.com	
+mandriva.polarhome.com	Mandriva Linux release 2010.2 (Official) for x86_64
+mandriva.polarhome.com	Welcome to Mandrake/Mandriva ...member of polarhome.com realm
+mandriva.polarhome.com	
+mandriva.polarhome.com	
+mandriva.polarhome.com	Mandriva Linux release 2010.2 (Official) for x86_64
+mandriva.polarhome.com	Welcome to Mandrake/Mandriva ...member of polarhome.com realm
+mandriva.polarhome.com	
+unixware.polarhome.com	SCO UnixWare 7.1.4
+unixware.polarhome.com	Welcome to unixware ...member of polarhome.com realm
+unixware.polarhome.com	
+unixware.polarhome.com	SCO UnixWare 7.1.4
+unixware.polarhome.com	Welcome to unixware ...member of polarhome.com realm
+unixware.polarhome.com	
+miros.polarhome.com	
+miros.polarhome.com	MirBSD/i386 
+miros.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
+miros.polarhome.com	
+miros.polarhome.com	
+miros.polarhome.com	MirBSD/i386 
+miros.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
+miros.polarhome.com	
+raspberrypi.polarhome.com	Debian GNU/Linux 6.0
+raspberrypi.polarhome.com	RaspberryPi/bcm2708 reference 2.0
+raspberrypi.polarhome.com	Welcome to raspberrypi ...member of polarhome.com realm
+raspberrypi.polarhome.com	
+raspberrypi.polarhome.com	Debian GNU/Linux 6.0
+raspberrypi.polarhome.com	RaspberryPi/bcm2708 reference 2.0
+raspberrypi.polarhome.com	Welcome to raspberrypi ...member of polarhome.com realm
+raspberrypi.polarhome.com	
+hurd.polarhome.com	
+hurd.polarhome.com	Debian GNU/Hurd wheezy/sid
+hurd.polarhome.com	Welcome to hurd ...member of polarhome.com realm.
+hurd.polarhome.com	
+hurd.polarhome.com	
+hurd.polarhome.com	Debian GNU/Hurd wheezy/sid
+hurd.polarhome.com	Welcome to hurd ...member of polarhome.com realm.
+hurd.polarhome.com	
+ubuntu.polarhome.com	
+ubuntu.polarhome.com	Ubuntu 10.04.2 LTS
+ubuntu.polarhome.com	Welcome to Ubuntu ...member of polarhome.com realm
+ubuntu.polarhome.com	
+ubuntu.polarhome.com	
+ubuntu.polarhome.com	Ubuntu 10.04.2 LTS
+ubuntu.polarhome.com	Welcome to Ubuntu ...member of polarhome.com realm
+ubuntu.polarhome.com	
 Run the test on polarhome machines
 scosysv.polarhome.com	SCO OpenServer(TM) Release 6
 scosysv.polarhome.com	Welcome to scosysv ...member of polarhome.com realm
@@ -169,6 +201,8 @@ netbsd.polarhome.com
 netbsd.polarhome.com	NetBSD 5.1
 netbsd.polarhome.com	Welcome to NetBSD ...member of polarhome.com realm
 netbsd.polarhome.com	
+netbsd.polarhome.com	MANPATH: Undefined variable.
+netbsd.polarhome.com	MANPATH: Undefined variable.
 netbsd.polarhome.com	Works on netbsd.polarhome.com
 freebsd.polarhome.com	
 freebsd.polarhome.com	FreeBSD 8.2 
@@ -207,7 +241,7 @@ qnx.polarhome.com	perl: No such file or directory
 irix.polarhome.com	
 irix.polarhome.com	IRIX64 6.5 07202013 IP35
 irix.polarhome.com	Welcome to irix ...member of polarhome.com realm
-irix.polarhome.com	Unknown open() mode '>&' at bin/parallel line 1271, <$fh> line 1.
+irix.polarhome.com	Unknown open() mode '>&' at bin/parallel line 1278, <$fh> line 1.
 suse.polarhome.com	
 suse.polarhome.com	openSUSE 11.4 "Celadon"
 suse.polarhome.com	Welcome to SuSE/openSUSE ...member of polarhome.com realm
@@ -229,6 +263,11 @@ unixware.polarhome.com	SCO UnixWare 7.1.4
 unixware.polarhome.com	Welcome to unixware ...member of polarhome.com realm
 unixware.polarhome.com	
 unixware.polarhome.com	Works on unixware.polarhome.com
+miros.polarhome.com	
+miros.polarhome.com	MirBSD/i386 
+miros.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
+miros.polarhome.com	
+miros.polarhome.com	Works on miros.polarhome.com
 raspberrypi.polarhome.com	
 raspberrypi.polarhome.com	CentOS release 5.6 (Final)
 raspberrypi.polarhome.com	Welcome to CentOS ...member of polarhome.com realm
