@@ -287,6 +287,19 @@ sub max {
     return $max;
 }
 
+sub min {
+    # Returns:
+    #   Minimum value of array
+    my $min;
+    for (@_) {
+        # Skip undefs
+        defined $_ or next;
+        defined $min or do { $min = $_; next; }; # Set $_ to the first non-undef
+        $min = ($min < $_) ? $min : $_;
+    }
+    return $min;
+}
+
 
 package Process;
 
@@ -672,7 +685,8 @@ sub load_status {
 	# Cache for some seconds
 	if(not defined $self->{'load_status'} or
 	   $self->{'load_status_cache_time'} + $self->{'recheck'} < time) {
-	    $self->{'load_status'} = load_status_linux();
+	    $self->{'load_status'} = load_status_linux() if $^O ne 'darwin';
+	    $self->{'load_status'} = load_status_darwin() if $^O eq 'darwin';
 	    $self->{'load_status_cache_time'} = time;
 	}
     }
@@ -709,15 +723,33 @@ sub load_status_linux {
     return $loadavg;
 }
 
+sub load_status_darwin {
+    my $loadavg = `sysctl vm.loadavg`;
+    if($loadavg =~ /vm\.loadavg: { ([0-9.]+) ([0-9.]+) ([0-9.]+) }/) {
+	$loadavg = $1;
+    } elsif (open(IN,"LANG=C uptime|")) {
+	my $upString = <IN>;
+	if($upString =~ m/averages?.\s*(\d+\.\d+)/) {
+	    $loadavg = $1;
+	} else {
+	    ::die_bug("uptime");
+	}
+	close IN;
+    }
+    return $loadavg;
+}
+
 
 sub swap_status {
     # Returns:
     #   (swap in)*(swap out) kb
     my $self = shift;
+    my $status;
     # Cache for some seconds
     if(not defined $self->{'swap_status'} or
        $self->{'swap_status_cache_time'}+$self->{'recheck'} < time) {
-	my $status = swap_status_linux();
+	$status = swap_status_linux() if $^O ne 'darwin';
+	$status = swap_status_darwin() if $^O eq 'darwin';
 	$self->{'swap_status'} = ::max($status,0);
 	$self->{'swap_status_cache_time'} = time;
     }
@@ -733,6 +765,19 @@ sub swap_status_linux {
     return qx{ $swap_activity };
 }
 
+sub swap_status_darwin {
+    # Mach Virtual Memory Statistics: (page size of 4096 bytes, cache hits 0%)
+    #   free active   spec inactive   wire   faults     copy    0fill reactive  pageins  pageout
+    # 298987 251463 162637    69437 265724 29730558   299022  2308237        1   110058        0
+    # 298991 251479 162637    69437 265726       43        4       16        0        0        0
+    my ($pagesize, $pageins, $pageouts);
+    my @vm_stat = `vm_stat 1 | head -n4`;
+    $pagesize = $1 if $vm_stat[0] =~ m/page size of (\d+) bytes/;
+    $pageins = (split(/\s+/,$vm_stat[3]))[9];
+    $pageouts = (split(/\s+/,$vm_stat[3]))[10];
+    return ($pageins*$pageouts*$pagesize)/1024;
+}
+
 
 sub mem_status {
     # Returns:
@@ -741,7 +786,8 @@ sub mem_status {
     # Cache for one second
     if(not defined $self->{'mem_status'} or
        $self->{'mem_status_cache_time'}+$self->{'recheck'} < time) {
-	$self->{'mem_status'} = mem_status_linux();
+	$self->{'mem_status'} = mem_status_linux() if $^O ne 'darwin';
+	$self->{'mem_status'} = mem_status_darwin() if $^O eq 'darwin';
 	$self->{'mem_status_cache_time'} = time;
     }
     ::debug("mem_status: $self->{'mem_status'}\n");
@@ -759,6 +805,19 @@ sub mem_status_linux {
     return $free*1024;
 }
 
+sub mem_status_darwin {
+    # Mach Virtual Memory Statistics: (page size of 4096 bytes, cache hits 0%)
+    #   free active   spec inactive   wire   faults     copy    0fill reactive  pageins  pageout
+    # 298987 251463 162637    69437 265724 29730558   299022  2308237        1   110058        0
+    # 298991 251479 162637    69437 265726       43        4       16        0        0        0
+    my ($pagesize, $pages_free, $pages_speculative);
+    my @vm_stat = `vm_stat 1 | head -n4`;
+    $pagesize = $1 if $vm_stat[0] =~ m/page size of (\d+) bytes/;
+    $pages_free = (split(/\s+/,$vm_stat[3]))[0];
+    $pages_speculative = (split(/\s+/,$vm_stat[3]))[2];
+    return ($pages_free+$pages_speculative)*$pagesize;
+}
+
 
 sub io_status {
     # Returns:
@@ -767,7 +826,8 @@ sub io_status {
     # Cache for one second
     if(not defined $self->{'io_status'} or
        $self->{'io_status_cache_time'}+$self->{'recheck'} < time) {
-	$self->{'io_status'} = io_status_linux();
+	$self->{'io_status'} = io_status_linux() if $^O ne 'darwin';
+	$self->{'io_status'} = io_status_darwin() if $^O eq 'darwin';
 	$self->{'io_status_cache_time'} = time;
     }
     ::debug("io_status: $self->{'io_status'}\n");
@@ -787,6 +847,18 @@ sub io_status_linux {
     }
     my $io = ::max(@iostat);
     return undef_as_zero($io)/10;
+}
+
+sub io_status_darwin {
+    #           disk0           disk1           disk2
+    #     KB/t tps  MB/s     KB/t tps  MB/s     KB/t tps  MB/s
+    #    14.95  15  0.22    11.18  35  0.38     2.00   0  0.00
+    #     0.00   0  0.00     0.00   0  0.00     0.00   0  0.00
+    my @iostat_out = `LANG=C iostat -d -w 1 -c 2`;
+    # return the MB/s of the last second (not the %util)
+    my @iostat = split(/\s+/, $iostat_out[3]);
+    my $io = $iostat[3] + $iostat[6] + $iostat[9];
+    return ::min($io, 10);
 }
 
 $::exitsignal = $::exitstatus = 0; # Dummy
