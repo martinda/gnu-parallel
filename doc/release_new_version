@@ -202,6 +202,9 @@ New in this release:
 * Jobs are now distributed round robin when having mulitiple
   --sshlogin instead of filling up one --sshlogin at a time.
 
+* niceload: darwin version of --io --mem --swap. Thanks to Anders F
+  Björklund.
+
 * Bug fixes and man page updates.
 
 

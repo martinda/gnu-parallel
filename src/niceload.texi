@@ -66,7 +66,7 @@ under the limits. The default is @strong{--soft}.
 @anchor{@strong{-I} @emph{iolimit}}
 
 Limit for I/O. The amount of disk I/O will be computed as a value 0 -
-10, where 0 is no I/O and 10 is at least one disk is 100% satuated.
+10, where 0 is no I/O and 10 is at least one disk is 100% saturated.
 
 @strong{--io} will set both @strong{--start-io} and @strong{run-io}.
 

@@ -454,11 +454,6 @@ sub write_record_to_pipe {
 	}
 	$job->write($header_ref);
 	$job->write($record_ref);
-	if($opt::ctrlc) {
-	    # Print a CTRL-D to mark EOF
-	    my $ctrld = sprintf("%c",4);
-	    $job->write(\$ctrld);
-	}
 	my $fh = $job->stdin();
 	close $fh;
 	exit(0);
@@ -553,6 +548,7 @@ sub options_hash {
 	 "basefile|bf=s" => \@opt::basefile,
 	 "B=s" => \$opt::retired,
 	 "ctrlc|ctrl-c" => \$opt::ctrlc,
+	 "noctrlc|no-ctrlc|no-ctrl-c" => \$opt::noctrlc,
 	 "workdir|wd=s" => \$opt::workdir,
 	 "W=s" => \$opt::retired,
 	 "tmpdir=s" => \$opt::tmpdir,
@@ -645,7 +641,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130514;
+    $Global::version = 20130522;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -760,7 +756,7 @@ sub parse_options {
     }
     if($opt::tollef and not $opt::gnu and not $opt::plain) {
 	# Behave like tollef parallel (from moreutils)
-	if($Global::version > 20130514) {
+	if($Global::version > 20130522) {
 	    ::error("--tollef has been retired. See http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html\n");
 	    ::wait_and_exit(255);
 	}
@@ -919,11 +915,11 @@ sub parse_env_var {
     my @qbash = map { my $a=$_; "export $a=" . env_quote($ENV{$a}) } @vars;
 
     # Create lines like:
-    # echo $SHELL | grep -E "/t?csh" >/dev/null && setenv V1 val1 && setenv V2 val2 || export V1=val1 && export V2=val2 ; echo "$V1$V2"
+    # echo $SHELL | grep "/t\\{0,1\\}csh" >/dev/null && setenv V1 val1 && setenv V2 val2 || export V1=val1 && export V2=val2 ; echo "$V1$V2"
     if(@vars) {
 	$Global::envvar = 
 	    join"", 
-	    (q{echo $SHELL | grep -E "/t?csh" > /dev/null && }
+	    (q{echo $SHELL | grep "/t\\{0,1\\}csh" > /dev/null && }
 	     . join(" && ", @qcsh)
 	     . q{ || }
 	     . join(" && ", @qbash)
@@ -3343,7 +3339,9 @@ sub sshcommand_of_sshlogin {
             my $control_path = $self->control_path_dir()."/ssh-%r@%h:%p";
             $sshcmd = "ssh -S ".$control_path;
             $serverlogin = $self->{'string'};
-            my $master = "ssh -MTS $control_path $serverlogin sleep 1";
+	    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
+	    # 2>/dev/null to ignore "process_mux_new_session: tcgetattr: Invalid argument"
+            my $master = "ssh -MTS $control_path $serverlogin sleep 1 2>/dev/null";
             if(not $self->{'control_path'}{$control_path}++) {
                 # Master is not running for this control_path
                 # Start it
@@ -3785,14 +3783,16 @@ sub sshlogin_wrap {
 	    # We cannot use parse_env_var(), as PARALLEL_SEQ changes
 	    # for each command
 	    my $parallel_env =
-		(q{ 'eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null }
+		(q{ 'eval `echo $SHELL | grep "/t\\{0,1\\}csh" > /dev/null }
 		 . q{ && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\; }
 		 . q{ setenv PARALLEL_PID '$PARALLEL_PID' }
 		 . q{ || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\; }
 		 . q{ PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;' });
 	    my $remote_pre = "";
 	    my $ssh_options = "";
-	    if(not $opt::pipe or $opt::ctrlc) {
+	    if($opt::pipe and $opt::ctrlc
+	       or
+	       not $opt::pipe and not $opt::noctrlc) {
 		# Propagating CTRL-C to kill remote jobs requires
 		# remote jobs to be run with a terminal.
 		$ssh_options = "-tt -oLogLevel=quiet";
@@ -4283,12 +4283,25 @@ sub print {
     }
     if($opt::tag or defined $opt::tagstring) {
 	my $tag = $self->tag();
+	# OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
+	# This is a crappy way of ignoring it.
+	while(<$err>) {
+	    if($_ ne "tcgetattr: Invalid argument\n") {
+		print STDERR $tag,$_;
+	    }
+	    # At most run the loop once
+	    last;
+	}
 	while(<$err>) {
 	    print STDERR $tag,$_;
 	}
     } else {
 	my $buf;
-	while(sysread($err,$buf,1000_000)) {
+	sysread($err,$buf,1_000_000);
+	# OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
+	$buf =~ s/^tcgetattr: Invalid argument\n//;
+	print STDERR $buf;
+	while(sysread($err,$buf,1_000_000)) {
 	    print STDERR $buf;
 	}
     }
@@ -4309,7 +4322,7 @@ sub print {
 	    }
 	} else {
 	    my $buf;
-	    while(sysread($out,$buf,1000_000)) {
+	    while(sysread($out,$buf,1_000_000)) {
 		print STDOUT $buf;
 	    }
 	}

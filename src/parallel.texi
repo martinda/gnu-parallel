@@ -157,8 +157,8 @@ The replacement string @strong{@{#@}} can be changed with @strong{--seqreplace}.
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{}@emph{n}@strong{@}} (alpha testing)
-@anchor{@strong{@{}@emph{n}@strong{@}} (alpha testing)}
+@item @strong{@{}@emph{n}@strong{@}} (beta testing)
+@anchor{@strong{@{}@emph{n}@strong{@}} (beta testing)}
 
 Argument from input source @emph{n} or the @emph{n}'th argument. This
 positional replacement string will be replaced by the input from input
@@ -168,8 +168,8 @@ argument (when used with @strong{-N}). If @emph{n} is negative it refers to the
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{}@emph{n}.@strong{@}} (alpha testing)
-@anchor{@strong{@{}@emph{n}.@strong{@}} (alpha testing)}
+@item @strong{@{}@emph{n}.@strong{@}} (beta testing)
+@anchor{@strong{@{}@emph{n}.@strong{@}} (beta testing)}
 
 Argument from input source @emph{n} or the @emph{n}'th argument without
 extension. It is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{.@}}.
@@ -181,8 +181,8 @@ extension removed.
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
 
-@item @strong{@{}@emph{n}/@strong{@}} (alpha testing)
-@anchor{@strong{@{}@emph{n}/@strong{@}} (alpha testing)}
+@item @strong{@{}@emph{n}/@strong{@}} (beta testing)
+@anchor{@strong{@{}@emph{n}/@strong{@}} (beta testing)}
 
 Basename of argument from input source @emph{n} or the @emph{n}'th argument.
 It is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{/@}}.
@@ -194,8 +194,8 @@ directory (if any) removed.
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
 
-@item @strong{@{}@emph{n}//@strong{@}} (alpha testing)
-@anchor{@strong{@{}@emph{n}//@strong{@}} (alpha testing)}
+@item @strong{@{}@emph{n}//@strong{@}} (beta testing)
+@anchor{@strong{@{}@emph{n}//@strong{@}} (beta testing)}
 
 Dirname of argument from input source @emph{n} or the @emph{n}'th argument.
 It is a combination of @strong{@{}@emph{n}@strong{@}} and @strong{@{//@}}.
@@ -206,8 +206,8 @@ the @emph{n}'th argument (when used with @strong{-N}). See @strong{dirname}(1).
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
 
-@item @strong{@{}@emph{n}/.@strong{@}} (alpha testing)
-@anchor{@strong{@{}@emph{n}/.@strong{@}} (alpha testing)}
+@item @strong{@{}@emph{n}/.@strong{@}} (beta testing)
+@anchor{@strong{@{}@emph{n}/.@strong{@}} (beta testing)}
 
 Basename of argument from input source @emph{n} or the @emph{n}'th argument
 without extension.  It is a combination of @strong{@{}@emph{n}@strong{@}}, @strong{@{/@}}, and
@@ -364,11 +364,11 @@ Implies @strong{--semaphore}.
 
 Print the BibTeX entry for GNU @strong{parallel}.
 
-@item @strong{--block} @emph{size} (beta testing)
-@anchor{@strong{--block} @emph{size} (beta testing)}
+@item @strong{--block} @emph{size}
+@anchor{@strong{--block} @emph{size}}
 
-@item @strong{--block-size} @emph{size} (beta testing)
-@anchor{@strong{--block-size} @emph{size} (beta testing)}
+@item @strong{--block-size} @emph{size}
+@anchor{@strong{--block-size} @emph{size}}
 
 Size of block in bytes. The size can be postfixed with K, M, G, T, P,
 k, m, g, t, or p which would multiply the size with 1024, 1048576,
@@ -383,8 +383,8 @@ than a single record.
 
 See @strong{--pipe} for use of this.
 
-@item @strong{--cleanup} (alpha testing)
-@anchor{@strong{--cleanup} (alpha testing)}
+@item @strong{--cleanup} (beta testing)
+@anchor{@strong{--cleanup} (beta testing)}
 
 Remove transferred files. @strong{--cleanup} will remove the transferred files
 on the remote computer after processing is done.
@@ -458,8 +458,8 @@ Set the end of file string to eof-str.  If the end of file string
 occurs as a line of input, the rest of the input is ignored.  If
 neither @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
-@item @strong{--delay} @emph{secs} (beta testing)
-@anchor{@strong{--delay} @emph{secs} (beta testing)}
+@item @strong{--delay} @emph{secs}
+@anchor{@strong{--delay} @emph{secs}}
 
 Delay starting next job @emph{secs} seconds. GNU @strong{parallel} will pause
 @emph{secs} seconds after starting each job. @emph{secs} can be less than 1
@@ -604,8 +604,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile} (beta testing)
-@anchor{@strong{--joblog} @emph{logfile} (beta testing)}
+@item @strong{--joblog} @emph{logfile}
+@anchor{@strong{--joblog} @emph{logfile}}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -722,7 +722,7 @@ to see the difference:
 @item @strong{-L} @emph{max-lines}
 @anchor{@strong{-L} @emph{max-lines}}
 
-When used with @strong{--pipe}: Read records of @emph{max-lines} (beta testing).
+When used with @strong{--pipe}: Read records of @emph{max-lines}.
 
 When used otherwise: Use at most @emph{max-lines} nonblank input lines per
 command line.  Trailing blanks cause an input line to be logically
@@ -739,7 +739,7 @@ Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is 
 @item @strong{-l}[@emph{max-lines}]
 @anchor{@strong{-l}[@emph{max-lines}]}
 
-When used with @strong{--pipe}: Read records of @emph{max-lines} (beta testing).
+When used with @strong{--pipe}: Read records of @emph{max-lines}.
 
 When used otherwise: Synonym for the @strong{-L} option.  Unlike @strong{-L}, the
 @emph{max-lines} argument is optional.  If @emph{max-lines} is not specified,
@@ -750,8 +750,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--load} @emph{max-load} (alpha testing)
-@anchor{@strong{--load} @emph{max-load} (alpha testing)}
+@item @strong{--load} @emph{max-load} (beta testing)
+@anchor{@strong{--load} @emph{max-load} (beta testing)}
 
 Do not start new jobs on a given computer unless the number of running
 processes on the computer is less than @emph{max-load}. @emph{max-load} uses
@@ -844,11 +844,11 @@ all the output from one server will be grouped together.
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
-@item @strong{--pipe} (alpha testing)
-@anchor{@strong{--pipe} (alpha testing)}
+@item @strong{--pipe} (beta testing)
+@anchor{@strong{--pipe} (beta testing)}
 
-@item @strong{--spreadstdin} (alpha testing)
-@anchor{@strong{--spreadstdin} (alpha testing)}
+@item @strong{--spreadstdin} (beta testing)
+@anchor{@strong{--spreadstdin} (beta testing)}
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -896,11 +896,11 @@ By sending GNU @strong{parallel} SIGUSR2 you can toggle turning on/off
 
 See also: @strong{--eta}
 
-@item @strong{--max-args}=@emph{max-args} (alpha testing)
-@anchor{@strong{--max-args}=@emph{max-args} (alpha testing)}
+@item @strong{--max-args}=@emph{max-args} (beta testing)
+@anchor{@strong{--max-args}=@emph{max-args} (beta testing)}
 
-@item @strong{-n} @emph{max-args} (alpha testing)
-@anchor{@strong{-n} @emph{max-args} (alpha testing)}
+@item @strong{-n} @emph{max-args} (beta testing)
+@anchor{@strong{-n} @emph{max-args} (beta testing)}
 
 Use at most @emph{max-args} arguments per command line.  Fewer than
 @emph{max-args} arguments will be used if the size (see the @strong{-s} option)
@@ -912,11 +912,11 @@ line.
 
 Implies @strong{-X} unless @strong{-m} is set.
 
-@item @strong{--max-replace-args}=@emph{max-args} (alpha testing)
-@anchor{@strong{--max-replace-args}=@emph{max-args} (alpha testing)}
+@item @strong{--max-replace-args}=@emph{max-args} (beta testing)
+@anchor{@strong{--max-replace-args}=@emph{max-args} (beta testing)}
 
-@item @strong{-N} @emph{max-args} (alpha testing)
-@anchor{@strong{-N} @emph{max-args} (alpha testing)}
+@item @strong{-N} @emph{max-args} (beta testing)
+@anchor{@strong{-N} @emph{max-args} (beta testing)}
 
 Use at most @emph{max-args} arguments per command line. Like @strong{-n} but
 also makes replacement strings @strong{@{1@}} .. @strong{@{}@emph{max-args}@strong{@}} that
@@ -1054,11 +1054,11 @@ it to the command.
 
 Only used with @strong{--pipe}.
 
-@item @strong{--results} @emph{prefix} (beta testing)
-@anchor{@strong{--results} @emph{prefix} (beta testing)}
+@item @strong{--results} @emph{prefix}
+@anchor{@strong{--results} @emph{prefix}}
 
-@item @strong{--res} @emph{prefix} (beta testing)
-@anchor{@strong{--res} @emph{prefix} (beta testing)}
+@item @strong{--res} @emph{prefix}
+@anchor{@strong{--res} @emph{prefix}}
 
 Save the output into files. The files will be stored in a directory tree
 rooted at @emph{prefix}.  Within this directory tree, each command will result
@@ -1107,8 +1107,8 @@ will generate the files:
 
 See also @strong{--files}, @strong{--header}, @strong{--joblog}.
 
-@item @strong{--resume} (beta testing)
-@anchor{@strong{--resume} (beta testing)}
+@item @strong{--resume}
+@anchor{@strong{--resume}}
 
 Resumes from the last unfinished job. By reading @strong{--joblog} GNU
 @strong{parallel} will figure out the last unfinished job and continue from
@@ -1118,8 +1118,8 @@ remain unchanged; otherwise GNU @strong{parallel} may run wrong commands.
 
 See also: @strong{--joblog}, @strong{--resume-failed}.
 
-@item @strong{--resume-failed} (beta testing)
-@anchor{@strong{--resume-failed} (beta testing)}
+@item @strong{--resume-failed}
+@anchor{@strong{--resume-failed}}
 
 Retry all failed and resume from the last unfinished job. By reading
 @strong{--joblog} GNU @strong{parallel} will figure out the failed jobs and run
@@ -1139,8 +1139,8 @@ there are fewer than @emph{n} computers in @strong{--sshlogin} GNU @strong{paral
 re-use the computers. This is useful if some jobs fail for no apparent
 reason (such as network failure).
 
-@item @strong{--return} @emph{filename} (alpha testing)
-@anchor{@strong{--return} @emph{filename} (alpha testing)}
+@item @strong{--return} @emph{filename} (beta testing)
+@anchor{@strong{--return} @emph{filename} (beta testing)}
 
 Transfer files from remote computers. @strong{--return} is used with
 @strong{--sshlogin} when the arguments are files on the remote computers. When
@@ -1331,8 +1331,8 @@ composed commands for GNU @strong{parallel}.
 Do not use the first line of input (used by GNU @strong{parallel} itself
 when called with @strong{--shebang}).
 
-@item @strong{--sshdelay} @emph{secs} (alpha testing)
-@anchor{@strong{--sshdelay} @emph{secs} (alpha testing)}
+@item @strong{--sshdelay} @emph{secs} (beta testing)
+@anchor{@strong{--sshdelay} @emph{secs} (beta testing)}
 
 Delay starting next ssh by @emph{secs} seconds. GNU @strong{parallel} will pause
 @emph{secs} seconds after starting each ssh. @emph{secs} can be less than 1
@@ -1473,8 +1473,8 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{val} (new alpha testing)
-@anchor{@strong{--timeout} @emph{val} (new alpha testing)}
+@item @strong{--timeout} @emph{val} (alpha testing)
+@anchor{@strong{--timeout} @emph{val} (alpha testing)}
 
 Time out for command. If the command runs for longer than @emph{val}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1507,8 +1507,8 @@ Print the job to be run on stderr (standard error).
 
 See also @strong{-v} and @strong{-p}.
 
-@item @strong{--transfer} (alpha testing)
-@anchor{@strong{--transfer} (alpha testing)}
+@item @strong{--transfer} (beta testing)
+@anchor{@strong{--transfer} (beta testing)}
 
 Transfer files to remote computers. @strong{--transfer} is used with
 @strong{--sshlogin} when the arguments are files and should be transferred to
@@ -1630,11 +1630,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir} (alpha testing)
-@anchor{@strong{--workdir} @emph{mydir} (alpha testing)}
+@item @strong{--workdir} @emph{mydir} (beta testing)
+@anchor{@strong{--workdir} @emph{mydir} (beta testing)}
 
-@item @strong{--wd} @emph{mydir} (alpha testing)
-@anchor{@strong{--wd} @emph{mydir} (alpha testing)}
+@item @strong{--wd} @emph{mydir} (beta testing)
+@anchor{@strong{--wd} @emph{mydir} (beta testing)}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in

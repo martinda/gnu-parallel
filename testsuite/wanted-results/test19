@@ -76,7 +76,7 @@ ls: tmp/parallel.file*: No such file or directory
 OK
 Input for ssh
 -l parallel parallel-server1 rsync --server -lDrRze.iLsf . .
--tt -oLogLevel=quiet parallel@parallel-server1 eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null  && echo setenv PARALLEL_SEQ 2\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=2\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
+-tt -oLogLevel=quiet parallel@parallel-server1 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ 2\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=2\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
 'newline2 > tmp/parallel.file.'
 'newline2.out;cat tmp/parallel.file.'
 'newline2 > tmp/parallel.file.'
@@ -90,7 +90,7 @@ parallel@parallel-server1 rm -f ./tmp/parallel.file.'
 'newline2.out;rmdir 2>/dev/null ./tmp;rm -f ./tmp/parallel.file.'
 'newline2.out2;rmdir 2>/dev/null ./tmp;
 -l parallel parallel-server2 rsync --server -lDrRze.iLsf . .
--tt -oLogLevel=quiet parallel@parallel-server2 eval `echo $SHELL | grep -E "/(t)?csh" > /dev/null  && echo setenv PARALLEL_SEQ 1\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=1\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
+-tt -oLogLevel=quiet parallel@parallel-server2 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ 1\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=1\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
 'newline1 > tmp/parallel.file.'
 'newline1.out;cat tmp/parallel.file.'
 'newline1 > tmp/parallel.file.'
