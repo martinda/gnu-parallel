@@ -62,7 +62,7 @@ perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive
 gpg --clearsign parallel-$YYYYMMDD.tar.bz2.directive
 
 cp doc/parallel.latest.directive parallel-latest.tar.bz2.directive
-perl -i -pe "s/20\d\d\d\d\d\d/latest/" parallel-latest.tar.*directive
+perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-latest.tar.*directive
 gpg --clearsign --yes parallel-latest.tar.bz2.directive
 
 (echo "To check the signature run:";

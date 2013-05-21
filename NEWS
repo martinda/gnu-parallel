@@ -1,3 +1,20 @@
+20130522
+
+* --ctrlc is now default if --pipe is not used; thus making it
+  possible to kill remotely started jobs simply by pressing Ctrl-C.
+
+* --timeout 200% now means kill jobs that take more than twice the
+  time of the median run time of a job.
+
+* Jobs are now distributed round robin when having mulitiple
+  --sshlogin instead of filling up one --sshlogin at a time.
+
+* niceload: darwin version of --io --mem --swap. Thanks to Anders F
+  Björklund.
+
+* Bug fixes and man page updates.
+
+
 20130422
 
 * 10 seconds installation: wget -O - pi.dk/3 | sh
