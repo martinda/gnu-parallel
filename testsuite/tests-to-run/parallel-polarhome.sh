@@ -1,7 +1,7 @@
 #!/bin/bash
 
 P="scosysv centos dragonfly netbsd freebsd solaris openbsd debian aix hpux qnx irix suse minix openindiana mandriva unixware miros raspberrypi hurd ultrix ubuntu redhat"
-P="scosysv centos dragonfly netbsd freebsd solaris openbsd debian aix hpux qnx irix suse minix openindiana mandriva unixware miros raspberrypi hurd ultrix ubuntu"
+P="scosysv centos dragonfly netbsd freebsd solaris openbsd debian aix hpux qnx irix suse minix openindiana mandriva unixware raspberrypi hurd ultrix ubuntu"
 #P="scosysv hpux qnx irix openindiana ultrix"
 POLAR=`parallel echo {}.polarhome.com ::: $P`
 

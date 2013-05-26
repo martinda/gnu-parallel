@@ -2118,16 +2118,19 @@ sub hostname {
 
 sub reap_usleep {
     # Reap dead children.
-    # If no children: Sleep specified amount with exponential backoff
+    # If no dead children: Sleep specified amount with exponential backoff
     # Returns:
-    #   0.00001 if children reaped (0.00001 ms works best on highend)
+    #   $ms/2+0.001 if children reaped
     #   $ms*1.1 if no children reaped
     my $ms = shift;
     if(reaper()) {
-	return 0.00001;
+	# Sleep exponentially shorter (1/2^n) if a job finished
+	return $ms/2+0.001;
     } else {
 	usleep($ms);
-	return (($ms < 1000) ? ($ms * 1.1) : ($ms)); # exponential back off
+	# Sleep exponentially longer (1.1^n) if a job did not finish
+	# though at most 1000 ms.
+	return (($ms < 1000) ? ($ms * 1.1) : ($ms));
     }
 }
 
@@ -2813,7 +2816,7 @@ sub simultaneous_sshlogin {
     my $serverlogin = $self->serverlogin();
     my $sshdelay = $opt::sshdelay ? "sleep $opt::sshdelay;" : "";
     my $cmd = "$sshdelay$sshcmd $serverlogin echo simultaneouslogin </dev/null 2>&1 &"x$wanted_processes;
-    ::debug("Trying $wanted_processes logins at $serverlogin");
+    ::debug("Trying $wanted_processes logins at $serverlogin\n");
     open (my $simul_fh, "-|", "($cmd)|grep simultaneouslogin | wc -l") or
 	::die_bug("simultaneouslogin");
     my $ssh_limit = <$simul_fh>;
@@ -3606,7 +3609,7 @@ sub runtime {
     # Returns:
     #   Run time in seconds
     my $self = shift;
-    return $self->endtime() - $self->starttime();
+    return int(($self->endtime() - $self->starttime())*1000)/1000;
 }
 
 sub endtime {
@@ -4176,7 +4179,10 @@ sub start {
 	    $Global::timeoutq->insert($job);
 	}
 	if($opt::delay) {
-	    ::usleep($opt::delay*1000);
+	    my $now = ::now();
+	    $Global::last_job_started_at ||= $now;
+	    ::usleep(($opt::delay - ($now - $Global::last_job_started_at))*1000);
+	    $Global::last_job_started_at = $now;
 	}
 	return $job;
     } else {
@@ -5017,7 +5023,7 @@ sub unget {
 sub empty {
     my $self = shift;
     my $empty = (not @{$self->{'unget'}}) && $self->{'arg_queue'}->empty();
-    ::debug("CommandLineQueue->empty $empty\n");
+    ::debug("CommandLineQueue->empty $empty");
     return $empty;
 }
 
@@ -5179,7 +5185,7 @@ sub empty {
     my $self = shift;
     my $empty = not @{$self->{'unget'}};
     $empty &&= $self->{'arg_sub_queue'}->empty();
-    ::debug("RecordQueue->empty $empty\n");
+    ::debug("RecordQueue->empty $empty");
     return $empty;
 }
 
@@ -5291,7 +5297,7 @@ sub empty {
     for my $fh (@{$self->{'fhs'}}) {
 	$empty &&= eof($fh);
     }
-    ::debug("MultifileQueue->empty $empty\n");
+    ::debug("MultifileQueue->empty $empty");
     return $empty;
 }
 

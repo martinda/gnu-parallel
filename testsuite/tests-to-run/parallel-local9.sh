@@ -220,4 +220,4 @@ EOF
 echo '### Test of -j filename with file content changing'; 
   echo 1 >/tmp/jobs_to_run2; 
   (sleep 3; echo 10 >/tmp/jobs_to_run2) &
-  parallel -j /tmp/jobs_to_run2 -v sleep {} ::: 3.3 1.21 1.43 1.54 1.32 1 1 1 1 1 1 1 1 1 1 1
+  parallel -j /tmp/jobs_to_run2 -v sleep {} ::: 3.3 1.5 1.5 1.5 1.5 1 1 1 1 1 1 1 1 1 1 1

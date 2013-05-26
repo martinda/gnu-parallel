@@ -1,3 +1,4 @@
+replace: true
 version: 1.1
 directory: parallel
 filename: parallel-20100424.tar.bz2
