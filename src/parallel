@@ -641,7 +641,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130522;
+    $Global::version = 20130606;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -5311,11 +5311,16 @@ sub xapply_get {
     my $empty = 1;
     for my $fh (@{$self->{'fhs'}}) {
 	my $arg = read_arg_from_fh($fh);
+	# Record $arg for recycling at end of file
+	push @{$self->{'arg_matrix'}{$fh}}, $arg;
 	if(defined $arg) {
 	    push @record, $arg;
 	    $empty = 0;
 	} else {
-	    push @record, Arg->new("");
+	    # End of file: Recycle arguments
+	    push @{$self->{'arg_matrix'}{$fh}}, shift @{$self->{'arg_matrix'}{$fh}};
+	    # return last @{$args->{'args'}{$fh}};
+	    push @record, @{$self->{'arg_matrix'}{$fh}}[-1];
 	}
     }
     if($empty) {
