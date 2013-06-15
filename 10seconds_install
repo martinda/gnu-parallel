@@ -7,25 +7,68 @@
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
-# This script downloads the latest version of GNU Parallel and
-# installs it.
+# This script downloads the latest version of GNU Parallel, checks
+# the signature and installs it.
 #
 # It first tries to install it globally.
 # If that fails, it does a personal installation.
 # If that fails, it does copies to $HOME/bin
 
 LATEST=$(wget -qO- http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | tail -n1)
-test -d $LATEST/src/ || wget http://ftpmirror.gnu.org/parallel/parallel-latest.tar.bz2 -O - | bzip2 -dc | tar xvf -
+if test \! -d $LATEST/src/; then
+  # Source dir does not exist
+  rm -f $LATEST.tar.bz2 $LATEST.tar.bz2.sig
+  wget http://ftpmirror.gnu.org/parallel/$LATEST.tar.bz2
+  wget http://ftpmirror.gnu.org/parallel/$LATEST.tar.bz2.sig
+fi
+
+# Check signature - in case ftpmirror.gnu.org is compromised
+if gpg -h 2>/dev/null >/dev/null; then
+  # GnuPG installed
+  # Setup .gnupg/gpg.conf if not already done
+  echo | gpg 2>/dev/null >/dev/null
+  if gpg  --with-fingerprint --auto-key-locate keyserver --keyserver-options auto-key-retrieve $LATEST.tar.bz2.sig 2>&1 | grep -E '^Primary key fingerprint: BE9C B493 81DE 3166 A3BC  66C1 2C62 29E2 FFFF FFF1' ; then
+    # Source code signed by Ole Tange <ole@tange.dk> KeyID FFFFFFF1
+    true
+  else
+    # GnuPG signature failed
+    echo 
+    echo "The signature on $LATEST.tar.bz2 is wrong. This may indicate that a criminal has changed the code."
+    echo "THIS IS BAD AND THE CODE WILL NOT BE INSTALLED."
+    echo
+    echo "See http://git.savannah.gnu.org/cgit/parallel.git/tree/README for other installation methods."
+    exit 1
+  fi
+else
+  # GnuPG not installed
+  echo "GnuPG (gpg) is not installed so the signature cannot be checked."
+  echo "This means that if the code has been changed by criminals, you will not discover that!"
+  echo 
+  echo "Continue anyway? (y/n)"
+  read YN
+  if test $YN = "y" -o $YN = "Y"; then
+	# Continue
+	true
+  else
+	# Stop
+	exit 2
+  fi
+fi
+
+bzip2 -dc $LATEST.tar.bz2 | tar xf -
 cd $LATEST || exit 2
 if ./configure && make && make install; then
+  echo
   echo GNU $LATEST installed globally
 else
   if ./configure --prefix=$HOME && make && make install; then
+    echo
     echo GNU $LATEST installed in $HOME/bin
   else
     mkdir -p $HOME/bin/;
     chmod 755 src/*;
     cp src/parallel src/sem src/sql src/niceload $HOME/bin;
+    echo
     echo GNU $LATEST copied to $HOME/bin
   fi
 
