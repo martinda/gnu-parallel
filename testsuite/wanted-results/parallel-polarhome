@@ -72,14 +72,6 @@ mandriva.polarhome.com	Mandriva Linux release 2010.2 (Official) for x86_64
 mandriva.polarhome.com	Mandriva Linux release 2010.2 (Official) for x86_64
 mandriva.polarhome.com	Welcome to Mandrake/Mandriva ...member of polarhome.com realm
 mandriva.polarhome.com	Welcome to Mandrake/Mandriva ...member of polarhome.com realm
-miros.polarhome.com	
-miros.polarhome.com	
-miros.polarhome.com	
-miros.polarhome.com	
-miros.polarhome.com	MirBSD/i386 
-miros.polarhome.com	MirBSD/i386 
-miros.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
-miros.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
 netbsd.polarhome.com	
 netbsd.polarhome.com	
 netbsd.polarhome.com	
@@ -146,7 +138,6 @@ ssh hurd.polarhome.com rm -f bin/parallel;scp bin/parallel hurd.polarhome.com:bi
 ssh irix.polarhome.com rm -f bin/parallel;scp bin/parallel irix.polarhome.com:bin/
 ssh mandriva.polarhome.com rm -f bin/parallel;scp bin/parallel mandriva.polarhome.com:bin/
 ssh minix.polarhome.com rm -f bin/parallel;scp bin/parallel minix.polarhome.com:bin/
-ssh miros.polarhome.com rm -f bin/parallel;scp bin/parallel miros.polarhome.com:bin/
 ssh netbsd.polarhome.com rm -f bin/parallel;scp bin/parallel netbsd.polarhome.com:bin/
 ssh openbsd.polarhome.com rm -f bin/parallel;scp bin/parallel openbsd.polarhome.com:bin/
 ssh openindiana.polarhome.com rm -f bin/parallel;scp bin/parallel openindiana.polarhome.com:bin/
@@ -224,11 +215,6 @@ mandriva.polarhome.com	Mandriva Linux release 2010.2 (Official) for x86_64
 mandriva.polarhome.com	Welcome to Mandrake/Mandriva ...member of polarhome.com realm
 mandriva.polarhome.com	Works on mandriva.polarhome.com
 minix.polarhome.com	Works on minix.polarhome.com
-miros.polarhome.com	
-miros.polarhome.com	
-miros.polarhome.com	MirBSD/i386 
-miros.polarhome.com	Welcome to MirOS ...member of polarhome.com realm
-miros.polarhome.com	Works on miros.polarhome.com
 netbsd.polarhome.com	
 netbsd.polarhome.com	
 netbsd.polarhome.com	NetBSD 5.1

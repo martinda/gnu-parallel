@@ -1,10 +1,12 @@
 testsuite: ../src/parallel tests-to-run/* wanted-results/* prereqlocal startdb prereqremote
-	time sh Start.sh
+	time sh Start.sh || true
 	date
+	make stopvm
 
 3: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
-	TRIES=3 time sh Start.sh
+	TRIES=3 time sh Start.sh || true
 	date
+	make stopvm
 
 testdb: ../src/parallel tests-to-run/*sql* wanted-results/*sql* prereqdb
 	time sh Start.sh sql
@@ -30,10 +32,19 @@ prereqlocal: installparallel
 	which burnP6 || (echo burnP6 is required for testsuite; /bin/false)
 	which timeout || (echo timeout is required for testsuite; /bin/false)
 
-prereqremote: installparallel
+prereqremote: installparallel startvm
+	parallel ssh parallel@parallel-server{} parallel --minversion 20121021 ::: 1 2 3 || (echo parallel on remote required for testsuite; /bin/true)
+
+startvm:
 	# Make sure we can reach the virtual machines
 	sudo ifconfig wlan0:0 192.168.1.72
-	parallel ssh parallel@parallel-server{} parallel --minversion 20121021 ::: 1 2 3 || (echo parallel on remote required for testsuite; /bin/true)
+	# If they are already running: Don't fail
+	VBoxManage startvm CentOS3-root:centos3 || true
+	VBoxManage startvm RedHat9-root:redhat9 || true
+
+stopvm:
+	VBoxManage controlvm CentOS3-root:centos3 savestate
+	VBoxManage controlvm RedHat9-root:redhat9 savestate
 
 installparallel: ../src/parallel
 	cd .. && make -j && sudo make -j install
