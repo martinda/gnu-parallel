@@ -10,7 +10,7 @@ build:
 	echo "To install, run:" ; \
 	echo -e "\tapt-get install dpkg-dev" ; \
 	false )
-	cd parallel-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]; perl -i -pe "s/201[0-9]{5}-[0-9]+/"`src/parallel --minversion 1`"/"  debian/{changelog,control}
+	cd parallel-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]; perl -i -pe "s/201[0-9]{5}-[0-9]+/"$$(src/parallel --minversion 1)"/" debian/changelog
 	cd parallel-[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]; dpkg-buildpackage -us -uc -tc
 	@echo 
 	@echo "To install the GNU Parallel Debian package, run:"
