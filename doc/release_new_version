@@ -59,24 +59,36 @@ YYYYMMDD=`yyyymmdd`
 cp parallel-$YYYYMMDD.tar.bz2 parallel-latest.tar.bz2
 cp doc/parallel.directive parallel-$YYYYMMDD.tar.bz2.directive
 perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive
-gpg --clearsign parallel-$YYYYMMDD.tar.bz2.directive
+gpg --clearsign --yes parallel-$YYYYMMDD.tar.bz2.directive
 
 cp doc/parallel.latest.directive parallel-latest.tar.bz2.directive
 perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-latest.tar.*directive
 gpg --clearsign --yes parallel-latest.tar.bz2.directive
 
-(echo "To check the signature run:";
- echo "  echo | gpg";
- echo "  gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-$YYYYMMDD.tar.bz2.sig";
+(echo '#!/bin/bash';
+ echo;
+ echo "# To check the signature run:"
+ echo "#  echo | gpg"
+ echo "#  gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-$YYYYMMDD.tar.bz2.sig"
+ echo
+ echo "echo | gpg 2>/dev/null"
+ echo 'gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve $0'
+ echo 'exit $?'
  echo
  gpg -ab -o - parallel-$YYYYMMDD.tar.bz2
 ) > parallel-$YYYYMMDD.tar.bz2.sig
 
-(echo "To check the signature run:";
- echo "  echo | gpg";
- echo "  gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-latest.tar.bz2.sig";
+(echo '#!/bin/bash';
+ echo;
+ echo "# To check the signature run:"
+ echo "#  echo | gpg"
+ echo "#  gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-latest.tar.bz2.sig"
  echo
- gpg -ab -o - parallel-latest.tar.bz2
+ echo "echo | gpg 2>/dev/null"
+ echo 'gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve $0'
+ echo 'exit $?'
+ echo
+ gpg -ab -o - parallel-$YYYYMMDD.tar.bz2
 ) > parallel-latest.tar.bz2.sig
 
 gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-latest.tar.bz2.sig

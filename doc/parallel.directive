@@ -1,6 +1,5 @@
-replace: true
 version: 1.2
+replace: true
 directory: parallel
 filename: parallel-20100424.tar.bz2
-symlink: parallel-20100424.tar.bz2 parallel-latest.tar.bz2
 comment: New release
