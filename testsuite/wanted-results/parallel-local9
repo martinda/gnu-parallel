@@ -110,7 +110,7 @@ sleep 4
 8 12
 9 13
 10 14
-15
+1 15
 1 5
 2 6
 3 7
@@ -121,7 +121,7 @@ sleep 4
 8 12
 9 13
 10 14
-15
+1 15
 1 5
 2 6
 3 7
@@ -132,7 +132,7 @@ sleep 4
 8 12
 9 13
 10 14
-15
+1 15
 1 5
 2 6
 3 7
@@ -143,7 +143,7 @@ sleep 4
 8 12
 9 13
 10 14
-15
+1 15
 ### Test xapply --max-replace-args
 2 1 0
 5 4 3
@@ -168,7 +168,7 @@ parallel: Error: Cannot open input file `nonexistent': No such file or directory
 8 12
 9 13
 10 14
-15
+1 15
 ### Test -d, ::::
 a1 5b
 a2 6b
@@ -217,16 +217,16 @@ echo a echo b
 ### Quoting if there is a command and 2 arg files of uneven length
 echo echo\ a echo\ b
 echo a echo b
-echo a1 
-a1
+echo a1 echo\ b
+a1 echo b
 ### Quoting if there is no command and 2 arg files
 echo a echo b
 a echo b
 ### Quoting if there is no command and 2 arg files of uneven length
 echo a echo b
 a echo b
-echo a1 
-a1
+echo a1 echo b
+a1 echo b
 ### Test multiple -a
 echo b a
 b a
@@ -272,7 +272,7 @@ press CTRL-D or CTRL-C
 4 5
 ### Test --arg-file-sep with files of different lengths
 1 3
-4
+1 4
 ### Test respect -s
 echo 1 22 333
 1 22 333

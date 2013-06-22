@@ -147,7 +147,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>B<}> (beta testing)
+=item B<{>I<n>B<}>
 
 Argument from input source I<n> or the I<n>'th argument. This
 positional replacement string will be replaced by the input from input
@@ -158,7 +158,7 @@ I<n>'th last argument.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>.B<}> (beta testing)
+=item B<{>I<n>.B<}>
 
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
@@ -171,7 +171,7 @@ extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}> (beta testing)
+=item B<{>I<n>/B<}>
 
 Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.
@@ -184,7 +184,7 @@ directory (if any) removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>//B<}> (beta testing)
+=item B<{>I<n>//B<}>
 
 Dirname of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{//}>.
@@ -196,7 +196,7 @@ the I<n>'th argument (when used with B<-N>). See B<dirname>(1).
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}> (beta testing)
+=item B<{>I<n>/.B<}>
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -363,7 +363,7 @@ I<size> defaults to 1M.
 See B<--pipe> for use of this.
 
 
-=item B<--cleanup> (beta testing)
+=item B<--cleanup>
 
 Remove transferred files. B<--cleanup> will remove the transferred files
 on the remote computer after processing is done.
@@ -397,7 +397,7 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
-=item B<--ctrlc> (alpha testing)
+=item B<--ctrlc> (beta testing)
 
 Sends SIGINT to tasks running on remote computers thus killing them.
 
@@ -698,7 +698,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--load> I<max-load> (beta testing)
+=item B<--load> I<max-load>
 
 Do not start new jobs on a given computer unless the number of running
 processes on the computer is less than I<max-load>. I<max-load> uses
@@ -789,9 +789,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe> (beta testing)
+=item B<--pipe>
 
-=item B<--spreadstdin> (beta testing)
+=item B<--spreadstdin>
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -840,9 +840,9 @@ B<--progress> on a running GNU B<parallel> process.
 See also: B<--eta>
 
 
-=item B<--max-args>=I<max-args> (beta testing)
+=item B<--max-args>=I<max-args>
 
-=item B<-n> I<max-args> (beta testing)
+=item B<-n> I<max-args>
 
 Use at most I<max-args> arguments per command line.  Fewer than
 I<max-args> arguments will be used if the size (see the B<-s> option)
@@ -855,9 +855,9 @@ line.
 Implies B<-X> unless B<-m> is set.
 
 
-=item B<--max-replace-args>=I<max-args> (beta testing)
+=item B<--max-replace-args>=I<max-args>
 
-=item B<-N> I<max-args> (beta testing)
+=item B<-N> I<max-args>
 
 Use at most I<max-args> arguments per command line. Like B<-n> but
 also makes replacement strings B<{1}> .. B<{>I<max-args>B<}> that
@@ -1065,7 +1065,7 @@ re-use the computers. This is useful if some jobs fail for no apparent
 reason (such as network failure).
 
 
-=item B<--return> I<filename> (beta testing)
+=item B<--return> I<filename>
 
 Transfer files from remote computers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote computers. When
@@ -1234,7 +1234,7 @@ Do not use the first line of input (used by GNU B<parallel> itself
 when called with B<--shebang>).
 
 
-=item B<--sshdelay> I<secs> (beta testing)
+=item B<--sshdelay> I<secs>
 
 Delay starting next ssh by I<secs> seconds. GNU B<parallel> will pause
 I<secs> seconds after starting each ssh. I<secs> can be less than 1
@@ -1370,7 +1370,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<val> (alpha testing)
+=item B<--timeout> I<val> (beta testing)
 
 Time out for command. If the command runs for longer than I<val>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1403,7 +1403,7 @@ Print the job to be run on stderr (standard error).
 See also B<-v> and B<-p>.
 
 
-=item B<--transfer> (beta testing)
+=item B<--transfer>
 
 Transfer files to remote computers. B<--transfer> is used with
 B<--sshlogin> when the arguments are files and should be transferred to
@@ -1515,9 +1515,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (beta testing)
+=item B<--workdir> I<mydir>
 
-=item B<--wd> I<mydir> (beta testing)
+=item B<--wd> I<mydir>
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in
@@ -1579,7 +1579,7 @@ See also B<-m>.
 Exit if the size (see the B<-s> option) is exceeded.
 
 
-=item B<--xapply>
+=item B<--xapply> (alpha testing)
 
 Read multiple input sources like B<xapply>. If multiple input sources
 are given, one argument will be read from each of the input
@@ -1592,6 +1592,10 @@ Compare these two:
 
   parallel echo {1} {2} ::: 1 2 3 ::: a b c
   parallel --xapply echo {1} {2} ::: 1 2 3 ::: a b c
+
+Arguments will be recycled if one input source has more arguments than the others:
+
+  parallel --xapply echo {1} {2} {3} ::: 1 2 ::: I II III ::: a b c d e f g 
 
 See also B<--header>.
 

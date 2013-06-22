@@ -183,21 +183,32 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20130622 ('') released
+Subject: GNU Parallel 20130622 ('Snowden') released
 
-GNU Parallel 20130622 ('') has been released. It is
+GNU Parallel 20130622 ('Snowden') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
-The changes for this release has been in the core of the code, so this
-release should be considered beta quality.
+Very few changes so this can be considered a stable release.
 
 New in this release:
 
-* Developer job asking for GNU Parallel expertise:
+* --xapply now recycles arguments if an input source has more
+  arguments than others.
+
+* The sleep time between jobs is now both increased and decreased
+  exponentially.
+
+* 10 seconds installation check the signature using GnuPG if GnuPG is
+  installed.
+
+* Developer job asking for GNU Parallel expertise.
   http://careers.stackoverflow.com/jobs/35562/developer-big-data-geo-and-web-climate-central
 
-https://github.com/dlh/youtube-dl-parallel
-http://blog.cogneurostats.com/?p=148
+* A small utility program to run youtube-dl in parallel.
+  https://github.com/dlh/youtube-dl-parallel
+
+* Parallelizing Freesurfer:
+  http://blog.cogneurostats.com/?p=148
 
 * Bug fixes and man page updates.
 

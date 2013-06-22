@@ -641,7 +641,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130606;
+    $Global::version = 20130622;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -756,7 +756,7 @@ sub parse_options {
     }
     if($opt::tollef and not $opt::gnu and not $opt::plain) {
 	# Behave like tollef parallel (from moreutils)
-	if($Global::version > 20130522) {
+	if($Global::version > 20130622) {
 	    ::error("--tollef has been retired. See http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html\n");
 	    ::wait_and_exit(255);
 	}
@@ -5311,12 +5311,13 @@ sub xapply_get {
     my $empty = 1;
     for my $fh (@{$self->{'fhs'}}) {
 	my $arg = read_arg_from_fh($fh);
-	# Record $arg for recycling at end of file
-	push @{$self->{'arg_matrix'}{$fh}}, $arg;
 	if(defined $arg) {
+	    # Record $arg for recycling at end of file
+	    push @{$self->{'arg_matrix'}{$fh}}, $arg;
 	    push @record, $arg;
 	    $empty = 0;
 	} else {
+	    ::debug("EOA");
 	    # End of file: Recycle arguments
 	    push @{$self->{'arg_matrix'}{$fh}}, shift @{$self->{'arg_matrix'}{$fh}};
 	    # return last @{$args->{'args'}{$fh}};

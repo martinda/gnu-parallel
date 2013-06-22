@@ -9,7 +9,7 @@ echo '### bug #38354: -J profile_name should read from `pwd`/profile_name before
 
 echo "### Test --delay"
 seq 9 | /usr/bin/time -f %e  parallel -j3 --delay 0.57 true {} 2>&1 | 
-  perl -ne '$_ > 5 and print "More than 5 secs: OK\n"'
+  perl -ne '$_ > 3.3 and print "More than 3.3 secs: OK\n"'
 
 echo '### test --sshdelay'
   stdout /usr/bin/time -f %e parallel -j0 --sshdelay 0.5 -S localhost true ::: 1 2 3 | perl -ne 'print($_ > 1.80 ? "OK\n" : "Not OK\n")'
