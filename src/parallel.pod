@@ -1377,7 +1377,7 @@ seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
 If I<val> is followed by a % then the timeout will dynamically be
-computed as a percentage of the smoothed average runtime. Only values
+computed as a percentage of the median average runtime. Only values
 > 100% will make sense.
 
 
