@@ -79,8 +79,8 @@ If @emph{command} is given, GNU @strong{parallel} solve the same tasks as
 similar to @strong{cat | sh}.
 
 The @emph{command} must be an executable, a script, a composed command, or
-a function. If it is a function you need to @strong{export -f} the function
-first. An alias will, however, not work (see why
+a function. If it is a Bash function you need to @strong{export -f} the
+function first. An alias will, however, not work (see why
 http://www.perlmonks.org/index.pl?node_id=484296).
 
 @item @strong{@{@}}
