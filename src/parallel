@@ -112,7 +112,7 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
     my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".ssh");
     print $fh @cores, @cpus, @maxline, @echo;
     close $fh;
-    my $cmd = "cat $tmpfile | $0 -j0 -s 1000 --joblog - --plain --tag --tagstring {1} --colsep '\t' -k eval {2}";
+    my $cmd = "cat $tmpfile | $0 -j0 -s 1000 --joblog - --plain --tag --tagstring {1} --colsep '\t' -k eval {2} 2>/dev/null";
     ::debug($cmd."\n");
     open(my $host_fh, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
     my (%ncores, %ncpus, %time_to_login, %maxlen, %echo);
@@ -142,9 +142,8 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 		$ncpus{$col[1]} = 1;
 		$maxlen{$col[1]} = Limits::Command::max_length();
 	    } elsif($col[0] =~ /^\d+$/ and $Global::host{$host}) {
-		# 1  server  1338156112.05  0.303  0  0  0  0
-		# parallel --number-of-cores ; parallel --number-of-cpus
 		# Remember how log it took to log in
+		# 2 : 1372607672.654 0.675 0 0 0 0 eval true\ m\;ssh\ m\ echo
 		$time_to_login{$host} = ::min($time_to_login{$host},$col[3]);
 	    } else {
 		::die_bug("host check unmatched long jobline: $_");
@@ -1341,6 +1340,7 @@ sub start_more_jobs {
 		    next;
 		}
 		if($sshlogin->too_fast_remote_login()) {
+		    # It has been too short since 
 		    next;
 		}
 		debug($sshlogin->string()." has ".$sshlogin->jobs_running()
@@ -1458,7 +1458,9 @@ sub drain_job_queue {
 	       and not $Global::JobQueue->empty()) {
 		# These jobs may not be started because of loadavg
 		# or too little time between each ssh login.
-		start_more_jobs();
+		if(start_more_jobs() > 0) {
+		    $sleep = $sleep/2;
+		}
 	    }
             # Sometimes SIGCHLD is not registered, so force reaper
 	    $sleep = ::reap_usleep($sleep);
@@ -2450,10 +2452,13 @@ sub swap_activity {
 sub too_fast_remote_login {
     my $self = shift;
     if($self->{'last_login_at'} and $self->{'time_to_login'}) {
-	# If now <= last_login + wait time: Then it is too soon.
+	# sshd normally allows 10 simultaneous logins
+	# A login takes time_to_login
+	# So time_to_login/5 should be safe
+	# If now <= last_login + time_to_login/5: Then it is too soon.
 	my $too_fast = (::now() <= $self->{'last_login_at'}
-			+ $self->{'time_to_login'});
-	::debug("Too fast? $too_fast\n");
+			+ $self->{'time_to_login'}/5);
+	::debug("Too fast? $too_fast ");
 	return $too_fast;
     } else {
 	# No logins so far (or time_to_login not computed): it is not too fast
@@ -2805,6 +2810,10 @@ sub simultaneous_sshlogin_limit {
     #   min($wanted_processes,$working_simultaneous_ssh_logins-1)
     my $self = shift;
     my $wanted_processes = shift;
+    if($self->{'time_to_login'}) {
+	return $wanted_processes;
+    }
+
     # Try twice because it guesses wrong sometimes
     # Choose the minimal
     my $ssh_limit =
@@ -3446,7 +3455,7 @@ sub empty {
     my $self = shift;
     my $empty = (not @{$self->{'unget'}})
 	&& $self->{'commandlinequeue'}->empty();
-    ::debug("JobQueue->empty $empty\n");
+    ::debug("JobQueue->empty $empty ");
     return $empty;
 }
 
