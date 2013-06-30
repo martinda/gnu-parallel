@@ -1481,7 +1481,7 @@ seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
 later, followed by SIGKILL 200 ms later.
 
 If @emph{val} is followed by a % then the timeout will dynamically be
-computed as a percentage of the smoothed average runtime. Only values
+computed as a percentage of the median average runtime. Only values
 > 100% will make sense.
 
 @item @strong{--tollef} (obsolete - will be retired 20140222)
@@ -1866,6 +1866,31 @@ Find the files in a list that do not exist
 
 @strong{cat file_list | parallel 'if [ ! -e @{@} ] ; then echo @{@}; fi'}
 
+@chapter EXAMPLE: Calling Bash functions
+@anchor{EXAMPLE: Calling Bash functions}
+
+If the composed command is longer than a line, it becomes hard to
+read. In Bash you can use functions. Just remember to @strong{export -f} the
+function.
+
+@verbatim
+  doit() {
+    echo Doing it for $1
+    sleep 2
+    echo Done with $1
+  }
+  export -f doit
+  parallel doit ::: 1 2 3
+
+  doubleit() {
+    echo Doing it for $1 $2
+    sleep 2
+    echo Done with $1 $2
+  }
+  export -f doubleit
+  parallel doubleit ::: 1 2 3 ::: a b
+@end verbatim
+
 @chapter EXAMPLE: Removing file extension when processing files
 @anchor{EXAMPLE: Removing file extension when processing files}
 
@@ -1904,7 +1929,7 @@ foo) you can do:
 Let us assume a website stores images like:
 
 @verbatim
-   http://www.example.com/path/to/YYYYMMDD_##.jpg
+  http://www.example.com/path/to/YYYYMMDD_##.jpg
 @end verbatim
 
 where YYYYMMDD is the date and ## is the number 01-10. This will

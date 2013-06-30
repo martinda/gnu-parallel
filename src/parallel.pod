@@ -68,8 +68,8 @@ B<xargs>. If I<command> is not given GNU B<parallel> will behave
 similar to B<cat | sh>.
 
 The I<command> must be an executable, a script, a composed command, or
-a function. If it is a function you need to B<export -f> the function
-first. An alias will, however, not work (see why
+a function. If it is a Bash function you need to B<export -f> the
+function first. An alias will, however, not work (see why
 http://www.perlmonks.org/index.pl?node_id=484296).
 
 
@@ -1745,6 +1745,31 @@ Find the files in a list that do not exist
 
 B<cat file_list | parallel 'if [ ! -e {} ] ; then echo {}; fi'>
 
+
+=head1 EXAMPLE: Calling Bash functions
+
+If the composed command is longer than a line, it becomes hard to
+read. In Bash you can use functions. Just remember to B<export -f> the
+function.
+
+  doit() {
+    echo Doing it for $1
+    sleep 2
+    echo Done with $1
+  }
+  export -f doit
+  parallel doit ::: 1 2 3
+
+  doubleit() {
+    echo Doing it for $1 $2
+    sleep 2
+    echo Done with $1 $2
+  }
+  export -f doubleit
+  parallel doubleit ::: 1 2 3 ::: a b
+
+
+
 =head1 EXAMPLE: Removing file extension when processing files
 
 When processing files removing the file extension using B<{.}> is
@@ -1782,7 +1807,7 @@ B<ls *.tar.gz| parallel --er {tar} 'echo {tar}|parallel "mkdir -p {.} ; tar -C {
 
 Let us assume a website stores images like:
 
-   http://www.example.com/path/to/YYYYMMDD_##.jpg
+  http://www.example.com/path/to/YYYYMMDD_##.jpg
 
 where YYYYMMDD is the date and ## is the number 01-10. This will
 download images for the past 30 days:

@@ -99,21 +99,36 @@ if($opt::header and not $opt::pipe) {
 # Parallel check for all hosts are up
 #if(not $opt::plain and (@opt::sshlogin or @opt::sshloginfile)) {
 if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
-    my @S = map { "-S " . ::shell_quote_scalar($_) } @opt::sshlogin;
-    my @slf = map { "--slf " . ::shell_quote_scalar($_) } @opt::sshloginfile;
-    my $cmd = "$0 --plain --tag --joblog - -k --onall @S @slf " .
-	"::: ".
-	"'parallel --number-of-cores ' ".
-	"'parallel --number-of-cpus' ".
-	"'parallel --max-line-length-allowed' ".
-	"'true' ";
+    my(@cores, @cpus, @maxline, @echo);
+    while (my ($host, $sshlogin) = each %Global::host) {
+	# The 'true' is used to get the $host out later
+	my $sshcmd = "true $host;" . $sshlogin->sshcommand()." ".$sshlogin->serverlogin();
+	push(@cores, $host."\t".$sshcmd." parallel --number-of-cores\n");
+	push(@cpus, $host."\t".$sshcmd." parallel --number-of-cpus\n");
+	push(@maxline, $host."\t".$sshcmd." parallel --max-line-length-allowed\n");
+	# 'echo' is used to get the best possible value for an ssh login time
+	push(@echo, $host."\t".$sshcmd." echo\n");
+    }
+    my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".ssh");
+    print $fh @cores, @cpus, @maxline, @echo;
+    close $fh;
+    my $cmd = "cat $tmpfile | $0 -j0 -s 1000 --joblog - --plain --tag --tagstring {1} --colsep '\t' -k eval {2}";
     ::debug($cmd."\n");
     open(my $host_fh, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
-    my (%ncores, %ncpus, %time_to_login, %maxlen);
+    my (%ncores, %ncpus, %time_to_login, %maxlen, %echo);
     while(<$host_fh>) {
 	my @col = split /\t/, $_;
 	if(defined $col[6]) {
 	    # This is a line from --joblog
+	    # 2 : 1372607672.654 0.675 0 0 0 0 eval true\ m\;ssh\ m\ parallel\ --number-of-cores
+	    if($col[0] eq "Seq" and $col[1] eq "Host" and
+		    $col[2] eq "Starttime" and $col[3] eq "Runtime") {
+		# Header => skip
+		next;
+	    }
+	    # Get server from: eval true server\;
+	    $col[8] =~ /eval true..([^;]+).;/ or ::die_bug("col8 does not contain host: $col[8]");
+	    my $host = $1;
 	    if($col[6] eq "255") {
 		# signal == 255: ssh failed
 		# Remove sshlogin
@@ -126,14 +141,11 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 		$ncores{$col[1]} = 1;
 		$ncpus{$col[1]} = 1;
 		$maxlen{$col[1]} = Limits::Command::max_length();
-	    } elsif($col[0] =~ /^\d+$/ and $Global::host{$col[1]}) {
+	    } elsif($col[0] =~ /^\d+$/ and $Global::host{$host}) {
 		# 1  server  1338156112.05  0.303  0  0  0  0
 		# parallel --number-of-cores ; parallel --number-of-cpus
 		# Remember how log it took to log in
-		$time_to_login{$col[1]} = ::min($time_to_login{$col[1]},$col[3]);
-	    } elsif($col[0] eq "Seq" and $col[1] eq "Host" and
-		    $col[2] eq "Starttime" and $col[3] eq "Runtime") {
-		# skip
+		$time_to_login{$host} = ::min($time_to_login{$host},$col[3]);
 	    } else {
 		::die_bug("host check unmatched long jobline: $_");
 	    }
@@ -149,6 +161,8 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 		$ncpus{$col[0]} = $col[1];
 	    } elsif(not $maxlen{$col[0]}) {
 		$maxlen{$col[0]} = $col[1];
+	    } elsif(not $echo{$col[0]}) {
+		$echo{$col[0]} = $col[1];
 	    } else {
 		::die_bug("host check too many col0: $_");
 	    }
@@ -157,6 +171,7 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 	}
     }
     close $host_fh;
+    unlink $tmpfile;
     while (my ($sshlogin, $obj) = each %Global::host) {
 	$ncpus{$sshlogin} or ::die_bug("ncpus missing: ".$obj->serverlogin());
 	$ncores{$sshlogin} or ::die_bug("ncores missing: ".$obj->serverlogin());
