@@ -75,7 +75,7 @@ if($opt::header and not $opt::pipe) {
     # split with colsep or \t
     # $header force $colsep = \t if undef?
     my $delimiter = $opt::colsep;
-    $delimiter ||= '$';
+    $delimiter ||= "\$";
     my $id = 1;
     for my $fh (@fhlist) {
 	my $line = <$fh>;
@@ -162,6 +162,15 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 		$maxlen{$col[0]} = $col[1];
 	    } elsif(not $echo{$col[0]}) {
 		$echo{$col[0]} = $col[1];
+	    } elsif(m/perl: warning:|LANGUAGE =|LC_ALL =|LANG =|are supported and installed/) {
+		# Skip these:
+		# perl: warning: Setting locale failed.
+		# perl: warning: Please check that your locale settings:
+		#         LANGUAGE = (unset),
+		#         LC_ALL = (unset),
+		#         LANG = "en_US.UTF-8"
+		#     are supported and installed on your system.
+		# perl: warning: Falling back to the standard locale ("C").
 	    } else {
 		::die_bug("host check too many col0: $_");
 	    }
@@ -1023,10 +1032,10 @@ sub read_options {
 	}
     }
 
-    Getopt::Long::Configure("bundling","pass_through");
+    Getopt::Long::Configure("bundling","require_order");
+    my @ARGV_copy = @ARGV;
     # Check if there is a --profile to set @opt::profile
-    GetOptions("profile|J=s" => \@opt::profile,
-	       "plain" => \$opt::plain) || die_usage();
+    get_options_from_array(\@ARGV_copy) || die_usage();
     my @ARGV_profile = ();
     my @ARGV_env = ();
     if(not $opt::plain) {
@@ -2490,7 +2499,7 @@ sub loadavg {
     #   last load average computed
     my $self = shift;
     # Should we update the loadavg file?
-    my $update_loadavg_file = 1;
+    my $update_loadavg_file = 0;
     if(-r $self->{'loadavg_file'}) {
         open(my $load_fh, "<", $self->{'loadavg_file'}) || ::die_bug("loadavg_file-r");
 	local $/ = undef;
@@ -2505,9 +2514,9 @@ sub loadavg {
 	    ::die_bug("loadavg_invalid_content: $load_out");
 	}
         ::debug("Last update: ".$self->{'last_loadavg_update'});
-        if(time - $self->{'last_loadavg_update'} > 1) {
-            # last loadavg was started 1 second ago
-            ::debug("Older than 1 sec: ".$self->{'loadavg_file'});
+        if(time - $self->{'last_loadavg_update'} > 10) {
+            # last loadavg was started 10 seconds ago
+            ::debug((time - $self->{'last_loadavg_update'}). " secs old: ".$self->{'loadavg_file'});
             $update_loadavg_file = 1;
         }
     } else {
