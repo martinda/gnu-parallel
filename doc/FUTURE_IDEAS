@@ -1,16 +1,8 @@
-Aliases for bash -c:
-
-bash -c 'shopt -s expand_aliases; alias llll="ls -l"; alias bbb=ls;
-bbb; llll'
-
-
 Luk filen ved EOF - lad være med bare at læse videre.
 
 > /tmp/ged; tail -f /tmp/ged| xargs -n1 -E eof & sleep 1; echo echo a >>/tmp/ged; echo eof >>/tmp/ged; seq 4 >>/tmp/ged; wait
 
 > /tmp/ged; tail -f /tmp/ged| parallel -n1 -E eof & sleep 1; echo echo a >>/tmp/ged; echo eof >>/tmp/ged; seq 4 >>/tmp/ged; wait
-
---timeout auto: If a jobs takes > 3*moving average runtime then kill it. Only after job 3.
 
 niceload seeks last column:
 
@@ -59,8 +51,8 @@ locate .gz | parallel -X find {} -size +1000 -size -2000 | parallel --workdir ..
 
 == Compare ==
 
-http://code.google.com/p/spawntool/
-http://code.google.com/p/push/
+Unchanged since 2008 http://code.google.com/p/spawntool/
+Unchanged since 2011 http://code.google.com/p/push/
 
 == Bug? ==
 
@@ -106,8 +98,6 @@ for potentiel:
 
 colsep = [sepchars]{no_of_sepchars}
 
-
-# TODO max_line_length on remote
 # TODO compute how many can be transferred within max_line_length
 
 Til inspiration.

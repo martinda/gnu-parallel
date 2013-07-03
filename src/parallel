@@ -643,6 +643,7 @@ sub get_options_from_array {
     #   false if parsing failed
     #   @array is changed
     my $array_ref = shift;
+    my @keep_only = @_;
     # A bit of shuffling of @ARGV needed as GetOptionsFromArray is not
     # supported everywhere
     my @save_argv;
@@ -651,7 +652,17 @@ sub get_options_from_array {
 	@save_argv = @::ARGV;
 	@::ARGV = @{$array_ref};
     }
-    my @retval = GetOptions(options_hash());
+    # If @keep_only set: Ignore all values except @keep_only
+    my %options = options_hash();
+    if(@keep_only) {
+	my (%keep,@dummy);
+	@keep{@keep_only} = @keep_only;
+	for my $k (grep { not $keep{$_} } keys %options) {
+	    # Store the value of the option in @dummy
+	    $options{$k} = \@dummy;
+	}
+    }
+    my @retval = GetOptions(%options);
     if(not $this_is_ARGV) {
 	@{$array_ref} = @::ARGV;
 	@::ARGV = @save_argv;
@@ -1035,7 +1046,7 @@ sub read_options {
     Getopt::Long::Configure("bundling","require_order");
     my @ARGV_copy = @ARGV;
     # Check if there is a --profile to set @opt::profile
-    get_options_from_array(\@ARGV_copy) || die_usage();
+    get_options_from_array(\@ARGV_copy,"profile|J=s","plain") || die_usage();
     my @ARGV_profile = ();
     my @ARGV_env = ();
     if(not $opt::plain) {
@@ -2192,32 +2203,44 @@ sub now {
 
 sub multiply_binary_prefix {
     # Evalualte numbers with binary prefix
-    # k=10^3, m=10^6, g=10^9, t=10^12, p=10^15, e=10^18, z=10^21, y=10^24
-    # K=2^10, M=2^20, G=2^30, T=2^40, P=2^50, E=2^70, Z=2^80, Y=2^80
     # Ki=2^10, Mi=2^20, Gi=2^30, Ti=2^40, Pi=2^50, Ei=2^70, Zi=2^80, Yi=2^80
     # ki=2^10, mi=2^20, gi=2^30, ti=2^40, pi=2^50, ei=2^70, zi=2^80, yi=2^80
+    # K =2^10, M =2^20, G =2^30, T =2^40, P =2^50, E =2^70, Z =2^80, Y =2^80
+    # k =10^3, m =10^6, g =10^9, t=10^12, p=10^15, e=10^18, z=10^21, y=10^24
     # 13G = 13*1024*1024*1024 = 13958643712
     my $s = shift;
-    $s =~ s/k/*1000/g;
-    $s =~ s/M/*1000*1000/g;
-    $s =~ s/G/*1000*1000*1000/g;
-    $s =~ s/T/*1000*1000*1000*1000/g;
-    $s =~ s/P/*1000*1000*1000*1000*1000/g;
-    $s =~ s/E/*1000*1000*1000*1000*1000*1000/g;
-    $s =~ s/Z/*1000*1000*1000*1000*1000*1000*1000/g;
-    $s =~ s/Y/*1000*1000*1000*1000*1000*1000*1000*1000/g;
-    $s =~ s/X/*1000*1000*1000*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/ki/*1024/gi;
+    $s =~ s/mi/*1024*1024/gi;
+    $s =~ s/gi/*1024*1024*1024/gi;
+    $s =~ s/ti/*1024*1024*1024*1024/gi;
+    $s =~ s/pi/*1024*1024*1024*1024*1024/gi;
+    $s =~ s/ei/*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/zi/*1024*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/yi/*1024*1024*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/xi/*1024*1024*1024*1024*1024*1024*1024*1024*1024/gi;
 
-    $s =~ s/Ki?/*1024/gi;
-    $s =~ s/Mi?/*1024*1024/gi;
-    $s =~ s/Gi?/*1024*1024*1024/gi;
-    $s =~ s/Ti?/*1024*1024*1024*1024/gi;
-    $s =~ s/Pi?/*1024*1024*1024*1024*1024/gi;
-    $s =~ s/Ei?/*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/Zi?/*1024*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/Yi?/*1024*1024*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/Xi?/*1024*1024*1024*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/K/*1024/g;
+    $s =~ s/M/*1024*1024/g;
+    $s =~ s/G/*1024*1024*1024/g;
+    $s =~ s/T/*1024*1024*1024*1024/g;
+    $s =~ s/P/*1024*1024*1024*1024*1024/g;
+    $s =~ s/E/*1024*1024*1024*1024*1024*1024/g;
+    $s =~ s/Z/*1024*1024*1024*1024*1024*1024*1024/g;
+    $s =~ s/Y/*1024*1024*1024*1024*1024*1024*1024*1024/g;
+    $s =~ s/X/*1024*1024*1024*1024*1024*1024*1024*1024*1024/g;
+
+    $s =~ s/k/*1000/g;
+    $s =~ s/m/*1000*1000/g;
+    $s =~ s/g/*1000*1000*1000/g;
+    $s =~ s/t/*1000*1000*1000*1000/g;
+    $s =~ s/p/*1000*1000*1000*1000*1000/g;
+    $s =~ s/e/*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/z/*1000*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/y/*1000*1000*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/x/*1000*1000*1000*1000*1000*1000*1000*1000*1000/g;
+
     $s = eval $s;
+    ::debug($s);
     return $s;
 }
 

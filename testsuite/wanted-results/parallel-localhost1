@@ -1,1 +1,3 @@
 ### Test --env all chars except \n,\92,\160 - single and double - no output is good
+### bug #37262: --slf + --filter-hosts fails
+OK

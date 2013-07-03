@@ -2616,7 +2616,8 @@ B<perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' file>
 
 It needs to be quoted like this:
 
-B<ls | parallel  perl -ne '/^\\S+\\s+\\S+\$/\ and\ print\ \$ARGV,\"\\n\"'>
+B<ls | parallel perl -ne '/^\\S+\\s+\\S+\$/\ and\ print\ \$ARGV,\"\\n\"'>
+B<ls | parallel perl -ne \''/^\S+\s+\S+$/ and print $ARGV,"\n"'\'>
 
 Notice how spaces, \'s, "'s, and $'s need to be quoted. GNU B<parallel>
 can do the quoting by using option -q:
@@ -2651,8 +2652,8 @@ Or for substituting output:
 B<ls | parallel -q bash -c 'tar c {} | tee >>B<(gzip >>B<{}.tar.gz) | bzip2 >>B<{}.tar.bz2'>
 
 B<Conclusion>: To avoid dealing with the quoting problems it may be
-easier just to write a small script and have GNU B<parallel> call that
-script.
+easier just to write a small script or a function (remember to
+B<export -f> the function) and have GNU B<parallel> call that.
 
 
 =head1 LIST RUNNING JOBS

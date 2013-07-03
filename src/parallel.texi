@@ -2820,7 +2820,8 @@ This is particularly useful if you have lots of quoting. If you want to run a pe
 
 It needs to be quoted like this:
 
-@strong{ls | parallel  perl -ne '/^\\S+\\s+\\S+\$/\ and\ print\ \$ARGV,\"\\n\"'}
+@strong{ls | parallel perl -ne '/^\\S+\\s+\\S+\$/\ and\ print\ \$ARGV,\"\\n\"'}
+@strong{ls | parallel perl -ne \''/^\S+\s+\S+$/ and print $ARGV,"\n"'\'}
 
 Notice how spaces, \'s, "'s, and $'s need to be quoted. GNU @strong{parallel}
 can do the quoting by using option -q:
@@ -2857,8 +2858,8 @@ Or for substituting output:
 @strong{ls | parallel -q bash -c 'tar c @{@} | tee }>@strong{(gzip }>@strong{@{@}.tar.gz) | bzip2 }>@strong{@{@}.tar.bz2'}
 
 @strong{Conclusion}: To avoid dealing with the quoting problems it may be
-easier just to write a small script and have GNU @strong{parallel} call that
-script.
+easier just to write a small script or a function (remember to
+@strong{export -f} the function) and have GNU @strong{parallel} call that.
 
 @chapter LIST RUNNING JOBS
 @anchor{LIST RUNNING JOBS}
