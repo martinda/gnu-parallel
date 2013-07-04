@@ -10,6 +10,10 @@ VBoxManage startvm CentOS3-root:centos3 >/dev/null 2>&1
 VBoxManage startvm CentOS5-root:centos5 >/dev/null 2>&1
 VBoxManage startvm RedHat9-root:redhat9 >/dev/null 2>&1
 VBoxManage startvm FreeBSD71 >/dev/null 2>&1
+ping -c 1 centos3.tange.dk >/dev/null 2>&1
+ping -c 1 centos5.tange.dk >/dev/null 2>&1
+ping -c 1 redhat9.tange.dk >/dev/null 2>&1
+ping -c 1 freebsd7.tange.dk >/dev/null 2>&1
 
 echo "### bug #37589: Red Hat 9 (Shrike) perl v5.8.0 built for i386-linux-thread-multi error"
 cp `which parallel` /tmp/parallel

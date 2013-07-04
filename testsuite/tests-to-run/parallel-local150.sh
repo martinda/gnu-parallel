@@ -18,12 +18,12 @@ echo '### Test --timeout';
   nice parallel -j0 -k --timeout 1 echo {}\; sleep {}\; echo {} ::: 1.1 7.7 8.8 9.9
 
 echo '### Test retired'; 
-  stdout parallel -B; 
+  stdout parallel -B foo; 
   stdout parallel -g; 
-  stdout parallel -H; 
+  stdout parallel -H 1; 
   stdout parallel -T; 
-  stdout parallel -U; 
-  stdout parallel -W; 
+  stdout parallel -U foo; 
+  stdout parallel -W foo; 
   stdout parallel -Y;
 
 echo '### Test --joblog followed by --resume --joblog'

@@ -207,7 +207,7 @@ hurd.polarhome.com	Welcome to hurd ...member of polarhome.com realm.
 hurd.polarhome.com	Works on hurd.polarhome.com
 irix.polarhome.com	
 irix.polarhome.com	IRIX64 6.5 07202013 IP35
-irix.polarhome.com	Unknown open() mode '>&' at bin/parallel line 1274, <$fh> line 1.
+irix.polarhome.com	Unknown open() mode '>&' at bin/parallel line 1310.
 irix.polarhome.com	Welcome to irix ...member of polarhome.com realm
 mandriva.polarhome.com	
 mandriva.polarhome.com	

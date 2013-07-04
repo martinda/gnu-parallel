@@ -204,6 +204,17 @@ Very few changes so this can be considered a stable release.
 
 New in this release:
 
+* GNU Parallel was used (unfortunately with improper citation) in:
+  Understanding the Impact of E-Commerce Software on the Adoption of Structured Data on the Web
+  http://link.springer.com/chapter/10.1007/978-3-642-38366-3_9#page-1
+
+* GNU Parallel was used (unfortunately with improper citation) in:
+  CWI at TREC 2012, KBA track and Session Track
+  http://trec.nist.gov/pubs/trec21/papers/CWI.kba.session.final.pdf
+
+* Mitigation of Adverse Effects Caused by Shock Wave Boundary Layer Interactions through Optimal Wall Shaping
+  http://arc.aiaa.org/doi/abs/10.2514/6.2013-2653
+
 * http://www.brunokim.com.br/blog/?p=18
 
 * http://www.open-open.com/news/view/371301

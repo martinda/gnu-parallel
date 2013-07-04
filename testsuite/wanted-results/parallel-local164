@@ -239,27 +239,26 @@ correct
 2 + 4 = 2 + 4= 6
 correct
 bug #38439: "open files" with --files --pipe blocks after a while
-1 of 21
-2 of 21
-3 of 21
-4 of 21
-5 of 21
-6 of 21
-7 of 21
-8 of 21
-9 of 21
-10 of 21
-11 of 21
-12 of 21
-13 of 21
-14 of 21
-15 of 21
-16 of 21
-17 of 21
-18 of 21
-19 of 21
-20 of 21
-21 of 21
+1 of 20
+2 of 20
+3 of 20
+4 of 20
+5 of 20
+6 of 20
+7 of 20
+8 of 20
+9 of 20
+10 of 20
+11 of 20
+12 of 20
+13 of 20
+14 of 20
+15 of 20
+16 of 20
+17 of 20
+18 of 20
+19 of 20
+20 of 20
 bug #34241: --pipe should not spawn unneeded processes - part 2
 2
 No .par should exist

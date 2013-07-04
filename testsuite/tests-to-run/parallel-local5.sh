@@ -17,7 +17,7 @@ echo '### Test 200M records with too small block';
    echo start; 
    seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true; 
    echo end; 
-  ) | stdout parallel -k --block 200M -j2 --pipe --recend 'end\n' wc -c | 
+  ) | stdout parallel -k --block 200m -j2 --pipe --recend 'end\n' wc -c | 
   egrep -v '^0$'
 
 echo '### Test -N with multiple jobslots and multiple args'
@@ -90,7 +90,7 @@ echo '### Test -N even+2';
   seq 1 12 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 1.\$PARALLEL_SEQ"
 
 echo '### Test --recstart + --recend'; 
-  cat /tmp/blocktest | parallel --block 1m -k --recstart 44 --recend "44" -j10 --pipe sort -n |md5sum
+  cat /tmp/blocktest | parallel --block 1M -k --recstart 44 --recend "44" -j10 --pipe sort -n |md5sum
 
 echo '### Race condition bug - 1 - would block'; 
   seq 1 80  | nice parallel -j0 'seq 1 10| parallel --block 1 --recend "" --pipe cat;true' >/dev/null

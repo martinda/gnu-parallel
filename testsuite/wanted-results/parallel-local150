@@ -45,6 +45,34 @@ parallel: Error: -U has been retired. Use --er.
 parallel: Error: -W has been retired. Use --wd.
 parallel: Error: -Y has been retired. Use --shebang.
 parallel: Error: -H has been retired. Use --halt.
+parallel: Error: -g has been retired. Use --group.
+parallel: Error: -B has been retired. Use --bf.
+parallel: Error: -T has been retired. Use --tty.
+parallel: Error: -U has been retired. Use --er.
+parallel: Error: -W has been retired. Use --wd.
+parallel: Error: -Y has been retired. Use --shebang.
+parallel: Error: -H has been retired. Use --halt.
+parallel: Error: -g has been retired. Use --group.
+parallel: Error: -B has been retired. Use --bf.
+parallel: Error: -T has been retired. Use --tty.
+parallel: Error: -U has been retired. Use --er.
+parallel: Error: -W has been retired. Use --wd.
+parallel: Error: -Y has been retired. Use --shebang.
+parallel: Error: -H has been retired. Use --halt.
+parallel: Error: -g has been retired. Use --group.
+parallel: Error: -B has been retired. Use --bf.
+parallel: Error: -T has been retired. Use --tty.
+parallel: Error: -U has been retired. Use --er.
+parallel: Error: -W has been retired. Use --wd.
+parallel: Error: -Y has been retired. Use --shebang.
+parallel: Error: -H has been retired. Use --halt.
+parallel: Error: -g has been retired. Use --group.
+parallel: Error: -B has been retired. Use --bf.
+parallel: Error: -T has been retired. Use --tty.
+parallel: Error: -U has been retired. Use --er.
+parallel: Error: -W has been retired. Use --wd.
+parallel: Error: -Y has been retired. Use --shebang.
+parallel: Error: -H has been retired. Use --halt.
 ### Test --joblog followed by --resume --joblog
       5      49
 ### Test --resume --joblog followed by --resume --joblog
