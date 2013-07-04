@@ -3657,7 +3657,7 @@ sub starttime {
     # Returns:
     #   UNIX-timestamp this job started
     my $self = shift;
-    return $self->{'starttime'};
+    return sprintf("%.3f",$self->{'starttime'});
 }
 
 sub set_starttime {

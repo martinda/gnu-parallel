@@ -89,7 +89,7 @@ echo '### -l -n with pipe'
 6 ln line record
 echo '### bug #39360: --joblog does not work with --pipe'
 ### bug #39360: --joblog does not work with --pipe
-  seq 100 | parallel --joblog - --pipe wc 
+  seq 100 | parallel --joblog - --pipe wc | tr '0-9' 'X'
 Seq	Host	Starttime	Runtime	Send	Receive	Exitval	Signal	Command
-1	:	1372951218.155	0.246	0	0	0	0	wc 
-    100     100     292
+X	:	XXXXXXXXXX.XXX	X.XXX	X	X	X	X	wc 
+    XXX     XXX     XXX
