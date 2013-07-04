@@ -4291,7 +4291,7 @@ sub print {
     my $err = $self->stderr();
     my $command = $self->sshlogin_wrap();
 
-    if($Global::joblog and not $opt::pipe) {
+    if($Global::joblog) {
 	my $cmd;
 	if($Global::verbose <= 1) {
 	    $cmd = $self->replaced();
