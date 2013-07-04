@@ -19,5 +19,7 @@ echo '### -l -N with pipe'
 echo '### -l -n with pipe'
   seq 14 | parallel --pipe -k -l 3 -n 2 'cat;echo 6 ln line record'
 
+echo '### bug #39360: --joblog does not work with --pipe'
+  seq 100 | parallel --joblog - --pipe wc 
 
 EOF
