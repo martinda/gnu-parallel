@@ -12,7 +12,7 @@
 #
 # It first tries to install it globally.
 # If that fails, it does a personal installation.
-# If that fails, it does copies to $HOME/bin
+# If that fails, it copies to $HOME/bin
 
 LATEST=$(wget -qO- http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | tail -n1)
 if test \! -d $LATEST/src/; then

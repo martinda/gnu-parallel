@@ -39,6 +39,12 @@ if(not $ENV{SHELL}) {
     ::warning("\$SHELL not set. Using /bin/sh.\n");
     $ENV{SHELL} = "/bin/sh";
 }
+if(not $ENV{HOME}) {
+    # $ENV{HOME} is sometimes not set if called from PHP
+    ::warning("\$HOME not set. Using /tmp\n");
+    $ENV{HOME} = "/tmp";
+}
+
 save_sig_stdin_stdout_stderr();
 
 parse_options();
