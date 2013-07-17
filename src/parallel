@@ -934,7 +934,8 @@ sub parse_options {
 sub env_quote {
     my $v = shift;
     $v =~ s/([\\])/\\$1/g;
-    $v =~ s/([\[\] \#\'\n\&\<\>\(\)\;\{\}\t\"\$\`\*\174\!\?\~])/\\$1/g;
+    $v =~ s/([\[\] \#\'\&\<\>\(\)\;\{\}\t\"\$\`\*\174\!\?\~])/\\$1/g;
+    $v =~ s/\n/"\n"/g;
     return $v;
 }
 
@@ -951,6 +952,8 @@ sub parse_env_var {
     @vars = grep { defined($ENV{$_}) } @vars;
     my @qcsh = map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  } @vars;
     my @qbash = map { my $a=$_; "export $a=" . env_quote($ENV{$a}) } @vars;
+    my @bash_functions = grep { substr($ENV{$_},0,4) eq "() {" } @vars;
+    push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_functions;
 
     # Create lines like:
     # echo $SHELL | grep "/t\\{0,1\\}csh" >/dev/null && setenv V1 val1 && setenv V2 val2 || export V1=val1 && export V2=val2 ; echo "$V1$V2"
