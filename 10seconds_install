@@ -46,12 +46,12 @@ else
   echo 
   echo "Continue anyway? (y/n)"
   read YN
-  if test $YN = "y" -o $YN = "Y"; then
-	# Continue
-	true
-  else
+  if test "$YN" = "n"; then
 	# Stop
 	exit 2
+  else
+	# Continue
+	true
   fi
 fi
 
