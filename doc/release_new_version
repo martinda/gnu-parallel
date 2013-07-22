@@ -127,6 +127,7 @@ cd parallel-$YYYYMMDD
 ./configure
 make -j && sudo make -j install
 pushd
+sudo cp /usr/local/bin/parallel /usr/local/bin/parallel-$YYYYMMDD
 
 == Update website ==
 
@@ -207,7 +208,8 @@ New in this release:
 * --round-robin with --pipe will write all blocks to already running
   jobs.
 
-* --env can now transfer Bash function for remote execution.
+* --env can now transfer Bash function for remote execution. That is
+  pretty cool!
 
 * New signing key. Due to recommendations from NIST
   http://www.keylength.com/en/4/ the signing key was changed from
