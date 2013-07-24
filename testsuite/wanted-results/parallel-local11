@@ -1,9 +1,12 @@
 ### Test if we can deal with output > 4 GB
 46a318993dfc8e2afd71ff2bc6f605f1  -
+**
 ### Test Force outside the file handle limit, 2009-02-17 Gave fork error
-parallel: Warning: Only enough filehandles to run 506 jobs in parallel. Raising ulimit -n may help.
+parallel: Warning: Only enough file handles to run 506 jobs in parallel.
+Raising ulimit -n or /etc/security/limits.conf may help.
 Start
 end
+**
 ### Test of --retries on unreachable host
 ssh: connect to host 4.3.2.1 port 22: Connection timed out
 parallel: Warning: Could not figure out number of cpus on 4.3.2.1 (). Using 1.
@@ -11,6 +14,7 @@ echo 1
 1
 echo 2
 2
+**
 ### Test race condition on 8 CPU (my laptop)
 1
 2
@@ -22,14 +26,21 @@ echo 2
 8
 9
 10
+**
 ### Test exit val - true
 0
+**
 ### Test exit val - false
 1
-/bin/bash: non_exist: command not found
+**
 ### Test --halt-on-error 0
 1
 2
+/bin/bash: non_exist: command not found
+**
+### Test --halt-on-error 1
+1
+127
 parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
 sleep 2;false
 /bin/bash: non_exist: command not found
@@ -37,16 +48,17 @@ parallel: Starting no more jobs. Waiting for 3 jobs to finish. This job failed:
 sleep 2;false
 parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
 sleep 4; non_exist
-### Test --halt-on-error 1
-1
-127
-parallel: This job failed:
-sleep 2;false
-parallel: This job failed:
-sleep 2;false
+**
 ### Test --halt-on-error 2
 1
 1
+parallel: This job failed:
+sleep 2;false
+parallel: This job failed:
+sleep 2;false
+**
+### Test last dying print --halt-on-error 1
+exit code 9
 0
 1
 2
@@ -76,13 +88,13 @@ parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
 perl -e sleep\ \$ARGV\[0\]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 8
 parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
 perl -e sleep\ \$ARGV\[0\]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 9
+### Test last dying print --halt-on-error 2
+exit code 1
 0
 1
 parallel: This job failed:
 perl -e sleep\ \$ARGV\[0\]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 1
-### Test last dying print --halt-on-error
-9
-1
+**
 ### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834
 1
 2

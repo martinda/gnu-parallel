@@ -94,6 +94,8 @@ gpg --clearsign --yes parallel-latest.tar.bz2.directive
 gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-latest.tar.bz2.sig
 gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-$YYYYMMDD.tar.bz2.sig
 
+#../ftpsync/src/ftpsync parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} ftp://ftp-upload.gnu.org/incoming/alpha/
+
 echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
 echo put parallel-latest.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
 #echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/alpha/
@@ -125,6 +127,7 @@ cd parallel-$YYYYMMDD
 ./configure
 make -j && sudo make -j install
 pushd
+sudo cp /usr/local/bin/parallel /usr/local/bin/parallel-$YYYYMMDD
 
 == Update website ==
 
@@ -200,9 +203,17 @@ Subject: GNU Parallel 20130722 ('Engelbart') released
 GNU Parallel 20130722 ('Engelbart') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
-Very few changes so this can be considered a stable release.
-
 New in this release:
+
+* --round-robin with --pipe will write all blocks to already running
+  jobs.
+
+* --env can now transfer Bash function for remote execution. That is
+  pretty cool!
+
+* New signing key. Due to recommendations from NIST
+  http://www.keylength.com/en/4/ the signing key was changed from
+  1024D/4000g/ID:FFFFFFF1 to 9888R/ID:88888888.
 
 * GNU Parallel was used (unfortunately with improper citation) in:
   Understanding the Impact of E-Commerce Software on the Adoption of Structured Data on the Web
@@ -212,14 +223,20 @@ New in this release:
   CWI at TREC 2012, KBA track and Session Track
   http://trec.nist.gov/pubs/trec21/papers/CWI.kba.session.final.pdf
 
-* Mitigation of Adverse Effects Caused by Shock Wave Boundary Layer Interactions through Optimal Wall Shaping
+* Mitigation of Adverse Effects Caused by Shock Wave Boundary Layer
+  Interactions through Optimal Wall Shaping.
   http://arc.aiaa.org/doi/abs/10.2514/6.2013-2653
 
-* http://www.brunokim.com.br/blog/?p=18
+* Using GNU parallel to convert images.
+  http://www.brunokim.com.br/blog/?p=18
 
-* http://www.open-open.com/news/view/371301
+* A quick way to parallelize.
+  http://timotheepoisot.fr/2013/07/08/parallel/
 
-* Bug fixes and man page updates.
+* GNU Parallel 20130522 ('Rana Plaza') 发布，并行作业执行.
+  http://www.open-open.com/news/view/371301
+
+* Quite a few bug fixes and man page updates.
 
 
 = About GNU Parallel =

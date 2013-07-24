@@ -33,7 +33,6 @@ use Getopt::Long;
 # Used to ensure code quality
 use strict;
 
-$SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
 if(not $ENV{SHELL}) {
     # $ENV{SHELL} is sometimes not set on Mac OS X and Windows
     ::warning("\$SHELL not set. Using /bin/sh.\n");
@@ -45,9 +44,10 @@ if(not $ENV{HOME}) {
     $ENV{HOME} = "/tmp";
 }
 
-save_sig_stdin_stdout_stderr();
-
+save_stdin_stdout_stderr();
+save_original_signal_handler();
 parse_options();
+::debug("Open file descriptors: ".join(" ",keys %Global::fd)."\n");
 my $number_of_args;
 if($Global::max_number_of_args) {
     $number_of_args=$Global::max_number_of_args;
@@ -527,12 +527,12 @@ sub write_record_to_pipe {
 	}
 	$job->write($header_ref);
 	$job->write($record_ref);
-	my $fh = $job->stdin();
-	close $fh;
+	my $stdin_fh = $job->fd(0);
+	close $stdin_fh;
 	exit(0);
     }
-    my $fh = $job->stdin();
-    close $fh;
+    my $stdin_fh = $job->fd(0);
+    close $stdin_fh;
     return 1;
 }
 
@@ -726,7 +726,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130630;
+    $Global::version = 20130722;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1057,7 +1057,7 @@ sub open_joblog {
 	} else {
 	    if($opt::joblog eq "-") {
 		# Use STDOUT as joblog
-		$Global::joblog = $Global::original_stdout
+		$Global::joblog = $Global::fd{1};
 	    } elsif(not open($Global::joblog, ">", $opt::joblog)) {
 		# Overwrite the joblog
 		::error("Cannot write to --joblog $opt::joblog.\n");
@@ -1304,6 +1304,26 @@ sub shell_unquote {
 
 sub __FILEHANDLES__ {}
 
+
+sub save_stdin_stdout_stderr {
+    # Remember the original STDIN, STDOUT and STDERR
+    # and file descriptors opened by the shell (e.g. 3>/tmp/foo)
+    # Returns: N/A
+
+    # Find file descriptors that are already opened (by the shell)
+    for my $fdno (1..61) { 
+	# /dev/fd/62 and above are used by bash for <(cmd)
+	my $fh;
+	if(open($fh,">&=",$fdno)) {
+	    $Global::fd{$fdno}=$fh;
+	}
+    }
+    open $Global::original_stderr, ">&", "STDERR" or
+	::die_bug("Can't dup STDERR: $!");
+    open $Global::original_stdin, "<&", "STDIN" or
+	::die_bug("Can't dup STDIN: $!");
+}
+
 sub enough_file_handles {
     # check that we have enough filehandles available for starting
     # another job
@@ -1314,16 +1334,18 @@ sub enough_file_handles {
     if($Global::grouped) {
         my %fh;
         my $enough_filehandles = 1;
-        # We need a filehandle for STDOUT and STDERR
-	# perl uses 7 filehandles for something?
+  	# perl uses 7 filehandles for something?
         # open3 uses 2 extra filehandles temporarily
-        for my $i (1..8) {
+        # We need a filehandle for each redirected file descriptor 
+	# (normally just STDOUT and STDERR)
+	for my $i (1..(7+2+keys %Global::fd)) {
             $enough_filehandles &&= open($fh{$i}, "<", "/dev/null");
         }
         for (values %fh) { close $_; }
         return $enough_filehandles;
     } else {
-        return 1;
+	# Ungrouped does not need extra file handles
+	return 1;
     }
 }
 
@@ -1357,19 +1379,6 @@ sub __RUNNING_THE_JOBS_AND_PRINTING_PROGRESS__ {}
 #    $Global::host{$sshlogin} = Pointer to SSHLogin-object
 #    $Global::total_running = total number of running jobs
 #    $Global::total_started = total jobs started
-
-sub save_sig_stdin_stdout_stderr {
-    # Remember the original signal handler, STDIN, STDOUT and STDERR
-    # Returns: N/A
-    %Global::original_sig = %SIG;
-    $SIG{TERM} = sub {}; # Dummy until jobs really start
-    open $Global::original_stdout, ">&", "STDOUT" or
-	::die_bug("Can't dup STDOUT: $!");
-    open $Global::original_stderr, ">&", "STDERR" or
-	::die_bug("Can't dup STDERR: $!");
-    open $Global::original_stdin, "<&", "STDIN" or
-	::die_bug("Can't dup STDIN: $!");
-}
 
 sub init_run_jobs {
     $Global::total_running = 0;
@@ -1483,13 +1492,15 @@ sub start_another_job {
 		::usleep(rand()*300);
 		::warning("No more processes: ",
 			  "Decreasing number of running jobs to $max. ",
-			  "Raising ulimit -u may help.\n");
+			  "Raising ulimit -u or /etc/security/limits.conf may help.\n");
 		return 0;
             }
         }
     } else {
         # No more file handles
-	debug("Not starting: no more file handles\n");
+	$Global::no_more_file_handles_warned++ or
+	    ::warning("No more file handles. ".
+		      "Raising ulimit -n or /etc/security/limits.conf may help.\n");
         return 0;
     }
 }
@@ -1518,8 +1529,8 @@ sub drain_job_queue {
 	    if($opt::pipe) {
 		# When using --pipe sometimes file handles are not closed properly
 		for my $job (values %Global::running) {
-		    my $fh = $job->stdin();
-		    close $fh;
+		    my $stdin_fh = $job->fd(0);
+		    close $stdin_fh;
 		}
 	    }
             if($opt::progress) {
@@ -1915,6 +1926,14 @@ sub cleanup_basefile {
 
 sub __SIGNAL_HANDLING__ {}
 
+sub save_original_signal_handler {
+    # Remember the original signal handler
+    # Returns: N/A
+    $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
+    %Global::original_sig = %SIG;
+    $SIG{TERM} = sub {}; # Dummy until jobs really start
+}
+
 sub list_running_jobs {
     # Returns: N/A
     for my $v (values %Global::running) {
@@ -2306,8 +2325,10 @@ sub debug {
     # Returns: N/A
     $Global::debug or return;
     @_ = grep { defined $_ ? $_ : "" } @_;
-    if($Global::original_stdout) {
-        print $Global::original_stdout @_;
+    if($Global::fd{1}) {
+	# Original stdout was saved
+	my $stdout = $Global::fd{1};
+        print $stdout @_;
     } else {
         print @_;
     }
@@ -2865,16 +2886,16 @@ sub processes_available_by_system_limit {
     if($system_limit < $wanted_processes) {
 	# The system_limit is less than the wanted_processes
 	if($system_limit < 1 and not $Global::JobQueue->empty()) {
-	    ::warning("Cannot spawn any jobs. Raising ulimit -u may help.\n");
+	    ::warning("Cannot spawn any jobs. Raising ulimit -u or /etc/security/limits.conf may help.\n");
 	    ::wait_and_exit(255);
 	}
 	if(not $more_filehandles) {
-	    ::warning("Only enough filehandles to run ", $system_limit,
-		      " jobs in parallel. Raising ulimit -n may help.\n");
+	    ::warning("Only enough file handles to run ", $system_limit, " jobs in parallel.\n",
+		      "Raising ulimit -n or /etc/security/limits.conf may help.\n");
 	}
 	if($max_system_proc_reached) {
 	    ::warning("Only enough available processes to run ", $system_limit,
-		      " jobs in parallel. Raising ulimit -u may help.\n");
+		      " jobs in parallel. Raising ulimit -u or /etc/security/limits.conf may help.\n");
 	}
     }
     if($] == 5.008008 and $system_limit > 1000) {
@@ -3582,10 +3603,7 @@ sub new {
         'commandline' => $commandline, # The commandline with no args
         'workdir' => undef, # --workdir
         'stdin' => undef, # filehandle for stdin (used for --pipe)
-        'stdout' => undef, # filehandle for stdout (used for --group)
 	# filename for writing stdout to (used for --files)
-        'stdoutfilename' => undef,
-        'stderr' => undef, # filehandle for stderr (used for --group)
         'remaining' => "", # remaining data not sent to stdin (used for --pipe)
 	'datawritten' => 0, # amount of data sent via stdin (used for --pipe)
         'transfersize' => 0, # size of files using --transfer
@@ -3628,65 +3646,53 @@ sub openresultsfile {
 	::error("Cannot write to `$name'.\n");
 	::wait_and_exit(255);
     }
-    $self->set_stdoutfilename($name);
+    $self->set_fd_file_name(1,$name);
     # prefix/name1/val1/name2/val2/stderr
     $name = "$dir/stderr";
     if(not open($errfh,"+>",$name)) {
 	::error("Cannot write to `$name'.\n");
 	::wait_and_exit(255);
     }
+    $self->set_fd_file_name(2,$name);
     open OUT, '>&', $outfh or ::die_bug("Can't redirect STDOUT: $!");
     open ERR, '>&', $errfh or ::die_bug("Can't dup STDOUT: $!");
-    $self->set_stdout($outfh);
-    $self->set_stderr($errfh);
+    $self->set_fd(1,$outfh);
+    $self->set_fd(2,$errfh);
 }
 
-sub set_stdout {
+sub set_fd {
+    # Set file descriptor
     my $self = shift;
-    $self->{'stdout'} = shift;
+    my $fd_no = shift;
+    $self->{'fd'}{$fd_no} = shift;
 }
 
-sub stdout {
+sub fd {
+    # Get file descriptor
     my $self = shift;
-    return $self->{'stdout'};
+    my $fd_no = shift;
+    return $self->{'fd'}{$fd_no};
 }
 
-sub set_stdoutfilename {
+sub set_fd_file_name {
+    # Set file name for a file descriptor
     my $self = shift;
-    $self->{'stdoutfilename'} = shift;
+    my $fd_no = shift;
+    $self->{'fd_file_name',$fd_no} = shift;
 }
 
-sub stdoutfilename {
+sub fd_file_name {
+    # Get file name for a file descriptor
     my $self = shift;
-    return $self->{'stdoutfilename'};
-}
-
-sub stderr {
-    my $self = shift;
-    return $self->{'stderr'};
-}
-
-sub set_stderr {
-    my $self = shift;
-    $self->{'stderr'} = shift;
-}
-
-sub stdin {
-    my $self = shift;
-    return $self->{'stdin'};
-}
-
-sub set_stdin {
-    my $self = shift;
-    my $stdin = shift;
-    $self->{'stdin'} = $stdin;
+    my $fd_no = shift;
+    return $self->{'fd_file_name',$fd_no};
 }
 
 sub write {
     my $self = shift;
     my $remaining_ref = shift;
-    my $in = $self->{'stdin'};
-    syswrite($in,$$remaining_ref);
+    my $stdin_fh = $self->fd(0);
+    syswrite($stdin_fh,$$remaining_ref);
 }
 
 sub set_stdin_buffer {
@@ -3787,7 +3793,7 @@ sub runtime {
     # Returns:
     #   Run time in seconds
     my $self = shift;
-    return int(($self->endtime() - $self->starttime())*1000)/1000;
+    return sprintf("%.3f",int(($self->endtime() - $self->starttime())*1000)/1000);
 }
 
 sub endtime {
@@ -4263,15 +4269,15 @@ sub start {
 	# To group we create temporary files for STDOUT and STDERR
 	# To avoid the cleanup unlink the files immediately (but keep them open)
 	($outfh, $name) = ::tempfile(SUFFIX => ".par");
-	$job->set_stdoutfilename($name);
+	$job->set_fd_file_name(1,$name);
 	$opt::files or unlink $name;
 	($errfh, $name) = ::tempfile(SUFFIX => ".par");
 	unlink $name;
 
 	open OUT, '>&', $outfh or ::die_bug("Can't redirect STDOUT: $!");
 	open ERR, '>&', $errfh or ::die_bug("Can't dup STDOUT: $!");
-	$job->set_stdout($outfh);
-	$job->set_stderr($errfh);
+	$job->set_fd(1,$outfh);
+	$job->set_fd(2,$errfh);
     } else {
 	(*OUT,*ERR)=(*STDOUT,*STDERR);
     }
@@ -4292,7 +4298,7 @@ sub start {
     ::debug("$Global::total_running processes. Starting ("
 	    . $job->seq() . "): $command\n");
     if($opt::pipe) {
-	my ($in);
+	my ($stdin_fh);
 	# Wrap command with end-of-file detector, 
 	# so we do not spawn a program if there is no input.
 	# Exit value:
@@ -4309,11 +4315,11 @@ sub start {
 		 "($command);";
 	# The eval is needed to catch exception from open3
 	eval {
-	    $pid = ::open3($in, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+	    $pid = ::open3($stdin_fh, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 		::die_bug("open3-pipe");
 	    1;
 	};
-	$job->set_stdin($in);
+	$job->set_fd(0,$stdin_fh);
     } elsif(@opt::a and not $Global::stdin_in_opt_a and $job->seq() == 1
 	    and $job->sshlogin()->string() eq ":") {
 	# Give STDIN to the first job if using -a (but only if running
@@ -4326,7 +4332,7 @@ sub start {
 	    1;
 	};
 	# Re-open to avoid complaining
-	open STDIN, "<&", $Global::original_stdin
+	open(STDIN, "<&", $Global::original_stdin)
 	    or ::die_bug("dup-\$Global::original_stdin: $!");
     } elsif ($opt::tty and not $Global::tty_taken and -c "/dev/tty" and
 	     open(my $devtty_fh, "<", "/dev/tty")) {
@@ -4417,18 +4423,16 @@ sub print {
     if($opt::pipe and $self->virgin()) {
 	# Nothing was printed to this job:
 	# cleanup tmp files if --files was set
-	unlink $self->{'stdoutfilename'};
+	unlink $self->fd_file_name(1);
 	return;
     }
     if($opt::dryrun) {
 	# Nothing was printed to this job:
 	# cleanup tmp files if --files was set
-	unlink $self->{'stdoutfilename'};
+	unlink $self->fd_file_name(1);
     }
     # Only relevant for grouping
     $Global::grouped or return;
-    my $out = $self->stdout();
-    my $err = $self->stderr();
     my $command = $self->sshlogin_wrap();
 
     if($Global::joblog) {
@@ -4461,60 +4465,61 @@ sub print {
 	# so flush to avoid STDOUT being buffered
 	flush STDOUT;
     }
-    seek $err, 0, 0;
-    if($Global::debug) {
-	print STDERR "ERR:\n";
-    }
-    if($opt::tag or defined $opt::tagstring) {
-	my $tag = $self->tag();
-	# OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
-	# This is a crappy way of ignoring it.
-	while(<$err>) {
-	    if($_ ne "tcgetattr: Invalid argument\n") {
-		print STDERR $tag,$_;
-	    }
-	    # At most run the loop once
-	    last;
+    for my $fdno (sort { $a <=> $b } keys %Global::fd) {
+	# Sort by file descriptor numerically: 1,2,3,..,9,10,11
+	$fdno == 0 and next;
+	my $out_fd = $Global::fd{$fdno};
+	my $in_fd = $self->fd($fdno);
+	if(not $in_fd) {
+#	    ::warning("File descriptor $fdno not defined\n");
+	    next;
 	}
-	while(<$err>) {
-	    print STDERR $tag,$_;
-	}
-    } else {
-	my $buf;
-	sysread($err,$buf,1_000_000);
-	# OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
-	$buf =~ s/^tcgetattr: Invalid argument\n//;
-	print STDERR $buf;
-	while(sysread($err,$buf,1_000_000)) {
-	    print STDERR $buf;
-	}
-    }
-    flush STDERR;
-
-    if($opt::files) {
-	print STDOUT $self->{'stdoutfilename'},"\n";
-    } else {
-	my $buf;
-	seek $out, 0, 0;
+	seek $in_fd, 0, 0;
 	if($Global::debug) {
-	    print STDOUT "OUT:\n";
+	    print STDERR "File descriptor $fdno:\n";
 	}
-	if($opt::tag or defined $opt::tagstring) {
-	    my $tag = $self->tag();
-	    while(<$out>) {
-		print STDOUT $tag,$_;
-	    }
+	if($opt::files) {
+	    $self->fd_file_name($fdno) and print $out_fd $self->fd_file_name($fdno),"\n";
 	} else {
 	    my $buf;
-	    while(sysread($out,$buf,1_000_000)) {
-		print STDOUT $buf;
+	    seek $in_fd, 0, 0;
+	    if($Global::debug) {
+		print STDOUT "OUT:\n";
+	    }
+	    if($opt::tag or defined $opt::tagstring) {
+		my $tag = $self->tag();
+		if($fdno == 2) {
+		    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
+		    # This is a crappy way of ignoring it.
+		    while(<$in_fd>) {
+			if($_ ne "tcgetattr: Invalid argument\n") {
+			    print $out_fd $tag,$_;
+			}
+			# At most run the loop once
+			last;
+		    }
+		}
+		while(<$in_fd>) {
+		    print $out_fd $tag,$_;
+		}
+	    } else {
+		my $buf;
+		if($fdno == 2) {
+		    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
+		    # This is a crappy way of ignoring it.
+		    sysread($in_fd,$buf,1_000_000);
+		    $buf =~ s/^tcgetattr: Invalid argument\n//;
+		    print $out_fd $buf;
+		}
+		while(sysread($in_fd,$buf,1_000_000)) {
+		    print $out_fd $buf;
+		}
 	    }
 	}
-	flush STDOUT;
+	flush $out_fd;
 	::debug("<<joboutput $command\n");
+	close $in_fd;
     }
-    close $out;
-    close $err;
 }
 
 sub tag {
@@ -6006,6 +6011,6 @@ sub mkdir_or_die {
 }
 
 # Keep perl -w happy
-$opt::x = $Semaphore::timeout = $Semaphore::wait = $opt::shebang =
+$opt::x = $Semaphore::timeout = $Semaphore::wait = $opt::shebang = $Global::no_more_file_handles_warned =
 0;
 

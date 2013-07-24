@@ -397,7 +397,7 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
-=item B<--ctrlc> (beta testing)
+=item B<--ctrlc>
 
 Sends SIGINT to tasks running on remote computers thus killing them.
 
@@ -458,13 +458,14 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var>
+=item B<--env> I<var> (alpha testing)
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
-remote environments.
+remote execution.
 
-Caveat: If I<var> contains newline ('\n') the value is messed up.
+In Bash I<var> can also be a Bash function - just remember to B<export
+-f> the function.
 
 
 =item B<--eta>
@@ -485,7 +486,7 @@ See also: B<--bg>, B<man sem>
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (alpha testing)
+=item B<--filter-hosts> (beta testing)
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -1100,6 +1101,19 @@ B<--return> is ignored when used with B<--sshlogin :> or when not used
 with B<--sshlogin>.
 
 
+=item B<--round-robin> (alpha testing)
+
+=item B<--round> (alpha testing)
+
+Normally B<--pipe> will give a single block to each instance of the
+command. With B<--round-robin> all blocks will at random be written to
+commands already running. This is useful if the command takes a long
+time to initialize.
+
+B<--keep-order> will not work with B<--round-robin> as it is
+impossible to track which input block corresponds to which output.
+
+
 =item B<--max-chars>=I<max-chars>
 
 =item B<-s> I<max-chars>
@@ -1370,7 +1384,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<val> (beta testing)
+=item B<--timeout> I<val>
 
 Time out for command. If the command runs for longer than I<val>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1579,7 +1593,7 @@ See also B<-m>.
 Exit if the size (see the B<-s> option) is exceeded.
 
 
-=item B<--xapply> (alpha testing)
+=item B<--xapply> (beta testing)
 
 Read multiple input sources like B<xapply>. If multiple input sources
 are given, one argument will be read from each of the input

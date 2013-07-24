@@ -420,8 +420,8 @@ separating the columns. The n'th column can be access using
 @emph{regexp} is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
-@item @strong{--ctrlc} (beta testing)
-@anchor{@strong{--ctrlc} (beta testing)}
+@item @strong{--ctrlc}
+@anchor{@strong{--ctrlc}}
 
 Sends SIGINT to tasks running on remote computers thus killing them.
 
@@ -485,14 +485,15 @@ because it is POSIX compliant for @strong{xargs} while this option is not.
 If @emph{eof-str} is omitted, there is no end of file string.  If neither
 @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
-@item @strong{--env} @emph{var}
-@anchor{@strong{--env} @emph{var}}
+@item @strong{--env} @emph{var} (alpha testing)
+@anchor{@strong{--env} @emph{var} (alpha testing)}
 
 Copy environment variable @emph{var}. This will copy @emph{var} to the
 environment that the command is run in. This is especially useful for
-remote environments.
+remote execution.
 
-Caveat: If @emph{var} contains newline ('\n') the value is messed up.
+In Bash @emph{var} can also be a Bash function - just remember to @strong{export
+-f} the function.
 
 @item @strong{--eta}
 @anchor{@strong{--eta}}
@@ -512,8 +513,8 @@ See also: @strong{--bg}, @strong{man sem}
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (alpha testing)
-@anchor{@strong{--filter-hosts} (alpha testing)}
+@item @strong{--filter-hosts} (beta testing)
+@anchor{@strong{--filter-hosts} (beta testing)}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -1180,6 +1181,20 @@ times:
 @strong{--return} is ignored when used with @strong{--sshlogin :} or when not used
 with @strong{--sshlogin}.
 
+@item @strong{--round-robin} (alpha testing)
+@anchor{@strong{--round-robin} (alpha testing)}
+
+@item @strong{--round} (alpha testing)
+@anchor{@strong{--round} (alpha testing)}
+
+Normally @strong{--pipe} will give a single block to each instance of the
+command. With @strong{--round-robin} all blocks will at random be written to
+commands already running. This is useful if the command takes a long
+time to initialize.
+
+@strong{--keep-order} will not work with @strong{--round-robin} as it is
+impossible to track which input block corresponds to which output.
+
 @item @strong{--max-chars}=@emph{max-chars}
 @anchor{@strong{--max-chars}=@emph{max-chars}}
 
@@ -1473,8 +1488,8 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{val} (beta testing)
-@anchor{@strong{--timeout} @emph{val} (beta testing)}
+@item @strong{--timeout} @emph{val}
+@anchor{@strong{--timeout} @emph{val}}
 
 Time out for command. If the command runs for longer than @emph{val}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1695,8 +1710,8 @@ See also @strong{-m}.
 
 Exit if the size (see the @strong{-s} option) is exceeded.
 
-@item @strong{--xapply} (alpha testing)
-@anchor{@strong{--xapply} (alpha testing)}
+@item @strong{--xapply} (beta testing)
+@anchor{@strong{--xapply} (beta testing)}
 
 Read multiple input sources like @strong{xapply}. If multiple input sources
 are given, one argument will be read from each of the input

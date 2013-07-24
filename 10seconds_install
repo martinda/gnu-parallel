@@ -14,7 +14,12 @@
 # If that fails, it does a personal installation.
 # If that fails, it copies to $HOME/bin
 
-LATEST=$(wget -qO- http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | tail -n1)
+# tail on openindiana must be /usr/xpg4/bin/tail
+TAIL=$(echo | tail -n 1 2>/dev/null && echo tail || (echo | /usr/xpg4/bin/tail -n 1 && echo /usr/xpg4/bin/tail))
+# grep on openindiana must be /usr/xpg4/bin/grep
+GREP=$(echo | grep -vE . 2>/dev/null && echo grep || (echo | /usr/xpg4/bin/grep -vE . && echo /usr/xpg4/bin/grep))
+
+LATEST=$(wget -qO- http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | $TAIL -n1)
 if test \! -d $LATEST/src/; then
   # Source dir does not exist
   rm -f $LATEST.tar.bz2 $LATEST.tar.bz2.sig
@@ -27,8 +32,10 @@ if gpg -h 2>/dev/null >/dev/null; then
   # GnuPG installed
   # Setup .gnupg/gpg.conf if not already done
   echo | gpg 2>/dev/null >/dev/null
-  if gpg  --with-fingerprint --auto-key-locate keyserver --keyserver-options auto-key-retrieve $LATEST.tar.bz2.sig 2>&1 | grep -E '^Primary key fingerprint: BE9C B493 81DE 3166 A3BC  66C1 2C62 29E2 FFFF FFF1' ; then
-    # Source code signed by Ole Tange <ole@tange.dk> KeyID FFFFFFF1
+  gpg --keyserver keys.gnupg.net --recv-key FFFFFFF1
+  gpg --keyserver keys.gnupg.net --recv-key 88888888
+  if gpg  --with-fingerprint $LATEST.tar.bz2.sig 2>&1 | $GREP -E '^Primary key fingerprint: BE9C B493 81DE 3166 A3BC  66C1 2C62 29E2 FFFF FFF1|^Primary key fingerprint: CDA0 1A42 08C4 F745 0610  7E7B D1AB 4516 8888 8888' ; then
+    # Source code signed by Ole Tange <ole@tange.dk> KeyID FFFFFFF1/88888888
     true
   else
     # GnuPG signature failed
@@ -46,12 +53,12 @@ else
   echo 
   echo "Continue anyway? (y/n)"
   read YN
-  if test $YN = "y" -o $YN = "Y"; then
-	# Continue
-	true
-  else
+  if test "$YN" = "n"; then
 	# Stop
 	exit 2
+  else
+	# Continue
+	true
   fi
 fi
 

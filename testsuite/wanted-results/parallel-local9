@@ -36,16 +36,16 @@ Cores should complete first on machines with less than 4 physical CPUs
 cores done
 CPUs done
 ### Test --tag ::: a ::: b
-a b	stderr-a b
 a b	stdout-a b
+a b	stderr-a b
 ### Test --tag ::: a b
-a	stderr-a
 a	stdout-a
-b	stderr-b
+a	stderr-a
 b	stdout-b
+b	stderr-b
 ### Test --tag -X ::: a b
-a b	stderr-a stderr-b
 a b	stdout-a stdout-b
+a b	stderr-a stderr-b
 ### Test bash redirection <()
 a
 b
