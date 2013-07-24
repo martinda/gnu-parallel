@@ -295,7 +295,7 @@ B<sql -s '\t' :myalias 'SELECT * FROM foo;' | parallel --colsep '\t' do_stuff {4
 
 =head2 Retry if the connection fails
 
-If the access to the database fails occationally B<--retries> can help
+If the access to the database fails occasionally B<--retries> can help
 make sure the query succeeds:
 
 B<sql --retries 5 :myalias 'SELECT * FROM really_big_foo;'>
