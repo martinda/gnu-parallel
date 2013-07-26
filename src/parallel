@@ -4431,9 +4431,6 @@ sub print {
 	# cleanup tmp files if --files was set
 	unlink $self->fd_file_name(1);
     }
-    # Only relevant for grouping
-    $Global::grouped or return;
-    my $command = $self->sshlogin_wrap();
 
     if($Global::joblog) {
 	my $cmd;
@@ -4452,6 +4449,10 @@ sub print {
 	flush $Global::joblog;
 	$self->set_job_in_joblog();
     }
+
+    # Printing is only relevant for grouped output.
+    $Global::grouped or return;
+    my $command = $self->sshlogin_wrap();
 
     if(($opt::dryrun or $Global::verbose) and $Global::grouped) {
 	if($Global::verbose <= 1) {
