@@ -2,12 +2,21 @@
 
 rm -rf tmp 2>/dev/null
 cp -a input-files/testdir2 tmp
-cd tmp
 
-echo '### Test filenames containing UTF-8'
-find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+echo '### Test filenames containing UTF-8'; 
+  cd tmp; 
+  find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}; 
+  find |grep -v CVS | sort; 
 
-find |grep -v CVS | sort
+echo '### bug #39554: Feature request: line buffered output'; 
+  parallel -j0 --linebuffer 'echo -n start {};sleep 0.{#};echo middle -n {};sleep 1.{#}5;echo next to last {};sleep 1.{#};echo -n last {}' ::: A B C
+echo
 
-cd ..
+echo '### bug #39554: Feature request: line buffered output --tag'; 
+  parallel --tag -j0 --linebuffer 'echo -n start {};sleep 0.{#};echo middle -n {};sleep 1.{#}5;echo next to last {};sleep 1.{#};echo -n last {}' ::: A B C
+echo
+
+EOF
+
 rm -rf tmp

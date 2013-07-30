@@ -12,3 +12,19 @@
 ./中国 (Zhōngguó)
 ./中国 (Zhōngguó)/China's (中国) road.jpg
 ./中国 (Zhōngguó)/thumb_China's (中国) road.jpg
+### bug #39554: Feature request: line buffered output
+start Amiddle -n A
+start Bmiddle -n B
+start Cmiddle -n C
+next to last A
+next to last B
+next to last C
+last Alast Blast C
+### bug #39554: Feature request: line buffered output --tag
+A	start Amiddle -n A
+B	start Bmiddle -n B
+C	start Cmiddle -n C
+A	next to last A
+B	next to last B
+C	next to last C
+A	last AB	last BC	last C
