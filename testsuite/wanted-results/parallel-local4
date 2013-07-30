@@ -93,6 +93,11 @@ echo '### bug #39360: --joblog does not work with --pipe'
 Seq	Host	Starttime	Runtime	Send	Receive	Exitval	Signal	Command
 X	:	XXXXXXXXXX.XXX	X.XXX	X	X	X	X	wc 
     XXX     XXX     XXX
+echo '### bug #39572: --tty and --joblog do not work'
+### bug #39572: --tty and --joblog do not work
+  seq 1 | parallel --joblog - -u true | tr '0-9' 'X'
+Seq	Host	Starttime	Runtime	Send	Receive	Exitval	Signal	Command
+X	:	XXXXXXXXXX.XXX	X.XXX	X	X	X	X	true X
 echo '### How do we deal with missing $HOME'
 ### How do we deal with missing $HOME
    unset HOME; stdout perl -w $(which parallel) echo ::: 1 2 3

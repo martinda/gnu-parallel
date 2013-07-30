@@ -329,7 +329,7 @@ Use GNU @strong{parallel}'s @strong{--colsep} to separate columns:
 @section Retry if the connection fails
 @anchor{Retry if the connection fails}
 
-If the access to the database fails occationally @strong{--retries} can help
+If the access to the database fails occasionally @strong{--retries} can help
 make sure the query succeeds:
 
 @strong{sql --retries 5 :myalias 'SELECT * FROM really_big_foo;'}

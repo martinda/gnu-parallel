@@ -448,7 +448,7 @@ sub spreadstdin {
 		}
 	    }
 	    if($something_written) {
-		$sleep = $sleep/2;
+		$sleep = $sleep/2+0.001;
 	    }
 	    $sleep = ::reap_usleep($sleep);
 	}
@@ -523,7 +523,7 @@ sub write_record_to_pipe {
 	substr($$record_ref,$endpos,length $$record_ref) = "";
 	# Remove rec_sep
 	if($opt::remove_rec_sep) {
-	    remove_rec_sep($record_ref,$recstart,$recend);
+	    Job::remove_rec_sep($record_ref,$recstart,$recend);
 	}
 	$job->write($header_ref);
 	$job->write($record_ref);
@@ -727,7 +727,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130722;
+    $Global::version = 20130730;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1547,7 +1547,7 @@ sub drain_job_queue {
 		# These jobs may not be started because of loadavg
 		# or too little time between each ssh login.
 		if(start_more_jobs() > 0) {
-		    $sleep = $sleep/2;
+		    $sleep = $sleep/2+0.001;
 		}
 	    }
             # Sometimes SIGCHLD is not registered, so force reaper
@@ -4482,7 +4482,7 @@ sub print {
 	my $in_fd = $self->fd($fdno);
 	if(not $in_fd) {
 	    if(not $Job::file_descriptor_warning_printed{$fdno}++) {
-		::warning("File descriptor $fdno not defined\n");
+		# ::warning("File descriptor $fdno not defined\n");
 	    }
 	    next;
 	}
@@ -6062,5 +6062,5 @@ sub mkdir_or_die {
 
 # Keep perl -w happy
 $opt::x = $Semaphore::timeout = $Semaphore::wait = $opt::shebang = $Global::no_more_file_handles_warned =
-0;
+$Job::file_descriptor_warning_printed = 0;
 

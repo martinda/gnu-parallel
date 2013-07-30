@@ -198,45 +198,33 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20130722 ('Engelbart') released
+Subject: GNU Parallel 20130822 ('Compostela') released
 
-GNU Parallel 20130722 ('Engelbart') has been released. It is
+GNU Parallel 20130822 ('Compostela') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
-
-* --round-robin with --pipe will write all blocks to already running
-  jobs.
-
-* --env can now transfer Bash function for remote execution. That is
-  pretty cool!
 
 * New signing key. Due to recommendations from NIST
   http://www.keylength.com/en/4/ the signing key was changed from
   1024D/4000g/ID:FFFFFFF1 to 9888R/ID:88888888.
 
-* GNU Parallel was used (unfortunately with improper citation) in:
-  Understanding the Impact of E-Commerce Software on the Adoption of Structured Data on the Web
-  http://link.springer.com/chapter/10.1007/978-3-642-38366-3_9#page-1
+* Agalma: an automated phylogenomics workflow
+  http://arxiv.org/pdf/1307.6432
 
-* GNU Parallel was used (unfortunately with improper citation) in:
-  CWI at TREC 2012, KBA track and Session Track
-  http://trec.nist.gov/pubs/trec21/papers/CWI.kba.session.final.pdf
+* Aligning to unique regions
+  http://davetang.org/muse/2013/07/22/aligning-to-unique-regions/
 
-* Mitigation of Adverse Effects Caused by Shock Wave Boundary Layer
-  Interactions through Optimal Wall Shaping.
-  http://arc.aiaa.org/doi/abs/10.2514/6.2013-2653
+* Top 10 scripting tricks for basic bioinformatics
+  http://students.washington.edu/bowmanjs/wordpress/?p=873
 
-* Using GNU parallel to convert images.
-  http://www.brunokim.com.br/blog/?p=18
+* Using GNU Parallel to speed up and simplify data analyzes
+  http://www.sergeymarkov.com/blog/2013/07/using-gnu-parallel-to-speed-up-and-simplify-data-analyzes/
 
-* A quick way to parallelize.
-  http://timotheepoisot.fr/2013/07/08/parallel/
+* Compression of files in parallel using GNU parallel
+  http://codextechnicanum.blogspot.dk/2013/07/compression-of-files-in-parallel-using.html
 
-* GNU Parallel 20130522 ('Rana Plaza') 发布，并行作业执行.
-  http://www.open-open.com/news/view/371301
-
-* Quite a few bug fixes and man page updates.
+* Bug fixes and man page updates.
 
 
 = About GNU Parallel =

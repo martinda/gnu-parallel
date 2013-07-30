@@ -22,6 +22,9 @@ echo '### -l -n with pipe'
 echo '### bug #39360: --joblog does not work with --pipe'
   seq 100 | parallel --joblog - --pipe wc | tr '0-9' 'X'
 
+echo '### bug #39572: --tty and --joblog do not work'
+  seq 1 | parallel --joblog - -u true | tr '0-9' 'X'
+
 echo '### How do we deal with missing $HOME'
    unset HOME; stdout perl -w $(which parallel) echo ::: 1 2 3
 
