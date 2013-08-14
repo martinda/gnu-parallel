@@ -335,7 +335,7 @@ Run command in background thus GNU B<parallel> will not wait for
 completion of the command before exiting. This is the default if
 B<--semaphore> is set.
 
-See also: B<--fg>, B<man sem>
+See also: B<--fg>, B<man sem>.
 
 Implies B<--semaphore>.
 
@@ -467,6 +467,11 @@ remote execution.
 In Bash I<var> can also be a Bash function - just remember to B<export
 -f> the function.
 
+The variable '_' is special. It will copy all enviroment variables
+except for the ones mentioned in ~/.parallel/recorded_env.
+
+See also: B<--record-env>.
+
 
 =item B<--eta>
 
@@ -481,7 +486,7 @@ Implies B<--progress>.
 Run command in foreground thus GNU B<parallel> will wait for
 completion of the command before exiting.
 
-See also: B<--bg>, B<man sem>
+See also B<--bg>, B<man sem>.
 
 Implies B<--semaphore>.
 
@@ -838,7 +843,7 @@ reading everything at startup.
 By sending GNU B<parallel> SIGUSR2 you can toggle turning on/off
 B<--progress> on a running GNU B<parallel> process.
 
-See also: B<--eta>
+See also B<--eta>.
 
 
 =item B<--max-args>=I<max-args>
@@ -950,6 +955,14 @@ If the stdin (standard input) only contains whitespace, do not run the command.
 If used with B<--pipe> this is slow.
 
 
+=item B<--record-env> (alpha testing)
+
+Record current environment variables in ~/.parallel/recorded_env. This
+is useful before using B<--env _>.
+
+See also B<--env>.
+
+
 =item B<--recstart> I<startstring>
 
 =item B<--recend> I<endstring>
@@ -1042,7 +1055,7 @@ there. As GNU B<parallel> only looks at the sequence numbers in
 B<--joblog> then the input, the command, and B<--joblog> all have to
 remain unchanged; otherwise GNU B<parallel> may run wrong commands.
 
-See also: B<--joblog>, B<--resume-failed>.
+See also B<--joblog>, B<--resume-failed>.
 
 
 =item B<--resume-failed>
@@ -1055,7 +1068,7 @@ numbers in B<--joblog> then the input, the command, and B<--joblog>
 all have to remain unchanged; otherwise GNU B<parallel> may run wrong
 commands.
 
-See also: B<--joblog>, B<--resume>.
+See also B<--joblog>, B<--resume>.
 
 
 =item B<--retries> I<n>
@@ -1151,7 +1164,7 @@ Used with B<--fg>, B<--wait>, and B<--semaphorename>.
 
 The command B<sem> is an alias for B<parallel --semaphore>.
 
-See also: B<man sem>
+See also B<man sem>.
 
 
 =item B<--semaphorename> I<name>
@@ -1169,7 +1182,7 @@ The semaphore is stored in ~/.parallel/semaphores/
 
 Implies B<--semaphore>.
 
-See also: B<man sem>
+See also B<man sem>.
 
 
 =item B<--semaphoretimeout> I<secs> (not implemented)
@@ -1178,7 +1191,7 @@ If the semaphore is not released within secs seconds, take it anyway.
 
 Implies B<--semaphore>.
 
-See also: B<man sem>
+See also B<man sem>.
 
 
 =item B<--seqreplace> I<replace-str>
@@ -1414,7 +1427,7 @@ To override use B<--gnu>.
 
 Print the job to be run on stderr (standard error).
 
-See also B<-v> and B<-p>.
+See also B<-v>, B<-p>.
 
 
 =item B<--transfer>
@@ -1563,7 +1576,7 @@ Wait for all commands to complete.
 
 Implies B<--semaphore>.
 
-See also: B<man sem>
+See also B<man sem>.
 
 
 =item B<-X>
@@ -2286,7 +2299,7 @@ B<rsync -Havessh src-dir/ fooserver:/dest-dir/>
 If you are unable to push data, but need to pull them and the files
 are called digits.png (e.g. 000000.png) you might be able to do:
 
-<seq -w 0 99 | parallel rsync -Havessh fooserver:src-path/*{}.png destdir/>
+B<seq -w 0 99 | parallel rsync -Havessh fooserver:src-path/*{}.png destdir/>
 
 
 =head1 EXAMPLE: Use multiple inputs in one command
@@ -3672,8 +3685,8 @@ it also uses rsync with ssh.
 
 =head1 SEE ALSO
 
-B<ssh>(1), B<rsync>(1), B<find>(1), B<xargs>(1), B<dirname>,
+B<ssh>(1), B<rsync>(1), B<find>(1), B<xargs>(1), B<dirname>(1),
 B<make>(1), B<pexec>(1), B<ppss>(1), B<xjobs>(1), B<prll>(1),
-B<dxargs>(1), B<mdm>(1),
+B<dxargs>(1), B<mdm>(1)
 
 =cut

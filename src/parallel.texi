@@ -355,7 +355,7 @@ Run command in background thus GNU @strong{parallel} will not wait for
 completion of the command before exiting. This is the default if
 @strong{--semaphore} is set.
 
-See also: @strong{--fg}, @strong{man sem}
+See also: @strong{--fg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
 
@@ -495,6 +495,11 @@ remote execution.
 In Bash @emph{var} can also be a Bash function - just remember to @strong{export
 -f} the function.
 
+The variable '_' is special. It will copy all enviroment variables
+except for the ones mentioned in ~/.parallel/recorded_env.
+
+See also: @strong{--record-env}.
+
 @item @strong{--eta}
 @anchor{@strong{--eta}}
 
@@ -509,7 +514,7 @@ Implies @strong{--progress}.
 Run command in foreground thus GNU @strong{parallel} will wait for
 completion of the command before exiting.
 
-See also: @strong{--bg}, @strong{man sem}
+See also @strong{--bg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
 
@@ -895,7 +900,7 @@ reading everything at startup.
 By sending GNU @strong{parallel} SIGUSR2 you can toggle turning on/off
 @strong{--progress} on a running GNU @strong{parallel} process.
 
-See also: @strong{--eta}
+See also @strong{--eta}.
 
 @item @strong{--max-args}=@emph{max-args}
 @anchor{@strong{--max-args}=@emph{max-args}}
@@ -1012,6 +1017,14 @@ If the stdin (standard input) only contains whitespace, do not run the command.
 
 If used with @strong{--pipe} this is slow.
 
+@item @strong{--record-env} (alpha testing)
+@anchor{@strong{--record-env} (alpha testing)}
+
+Record current environment variables in ~/.parallel/recorded_env. This
+is useful before using @strong{--env _}.
+
+See also @strong{--env}.
+
 @item @strong{--recstart} @emph{startstring}
 @anchor{@strong{--recstart} @emph{startstring}}
 
@@ -1117,7 +1130,7 @@ there. As GNU @strong{parallel} only looks at the sequence numbers in
 @strong{--joblog} then the input, the command, and @strong{--joblog} all have to
 remain unchanged; otherwise GNU @strong{parallel} may run wrong commands.
 
-See also: @strong{--joblog}, @strong{--resume-failed}.
+See also @strong{--joblog}, @strong{--resume-failed}.
 
 @item @strong{--resume-failed}
 @anchor{@strong{--resume-failed}}
@@ -1130,7 +1143,7 @@ numbers in @strong{--joblog} then the input, the command, and @strong{--joblog}
 all have to remain unchanged; otherwise GNU @strong{parallel} may run wrong
 commands.
 
-See also: @strong{--joblog}, @strong{--resume}.
+See also @strong{--joblog}, @strong{--resume}.
 
 @item @strong{--retries} @emph{n}
 @anchor{@strong{--retries} @emph{n}}
@@ -1234,7 +1247,7 @@ Used with @strong{--fg}, @strong{--wait}, and @strong{--semaphorename}.
 
 The command @strong{sem} is an alias for @strong{parallel --semaphore}.
 
-See also: @strong{man sem}
+See also @strong{man sem}.
 
 @item @strong{--semaphorename} @emph{name}
 @anchor{@strong{--semaphorename} @emph{name}}
@@ -1253,7 +1266,7 @@ The semaphore is stored in ~/.parallel/semaphores/
 
 Implies @strong{--semaphore}.
 
-See also: @strong{man sem}
+See also @strong{man sem}.
 
 @item @strong{--semaphoretimeout} @emph{secs} (not implemented)
 @anchor{@strong{--semaphoretimeout} @emph{secs} (not implemented)}
@@ -1262,7 +1275,7 @@ If the semaphore is not released within secs seconds, take it anyway.
 
 Implies @strong{--semaphore}.
 
-See also: @strong{man sem}
+See also @strong{man sem}.
 
 @item @strong{--seqreplace} @emph{replace-str}
 @anchor{@strong{--seqreplace} @emph{replace-str}}
@@ -1520,7 +1533,7 @@ To override use @strong{--gnu}.
 
 Print the job to be run on stderr (standard error).
 
-See also @strong{-v} and @strong{-p}.
+See also @strong{-v}, @strong{-p}.
 
 @item @strong{--transfer}
 @anchor{@strong{--transfer}}
@@ -1680,7 +1693,7 @@ Wait for all commands to complete.
 
 Implies @strong{--semaphore}.
 
-See also: @strong{man sem}
+See also @strong{man sem}.
 
 @item @strong{-X}
 @anchor{@strong{-X}}
@@ -2474,7 +2487,7 @@ are not being transferred. To fix those run @strong{rsync} a final time:
 If you are unable to push data, but need to pull them and the files
 are called digits.png (e.g. 000000.png) you might be able to do:
 
-<seq -w 0 99 | parallel rsync -Havessh fooserver:src-path/*@{@}.png destdir/>
+@strong{seq -w 0 99 | parallel rsync -Havessh fooserver:src-path/*@{@}.png destdir/}
 
 @chapter EXAMPLE: Use multiple inputs in one command
 @anchor{EXAMPLE: Use multiple inputs in one command}
@@ -3911,8 +3924,8 @@ it also uses rsync with ssh.
 @chapter SEE ALSO
 @anchor{SEE ALSO}
 
-@strong{ssh}(1), @strong{rsync}(1), @strong{find}(1), @strong{xargs}(1), @strong{dirname},
+@strong{ssh}(1), @strong{rsync}(1), @strong{find}(1), @strong{xargs}(1), @strong{dirname}(1),
 @strong{make}(1), @strong{pexec}(1), @strong{ppss}(1), @strong{xjobs}(1), @strong{prll}(1),
-@strong{dxargs}(1), @strong{mdm}(1),
+@strong{dxargs}(1), @strong{mdm}(1)
 
 @bye

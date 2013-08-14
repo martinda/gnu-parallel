@@ -17,6 +17,12 @@ echo '### bug #39554: Feature request: line buffered output --tag';
   parallel --tag -j0 --linebuffer 'echo -n start {};sleep 0.{#};echo middle -n {};sleep 1.{#}5;echo next to last {};sleep 1.{#};echo -n last {}' ::: A B C
 echo
 
+echo '### test round-robin';
+  seq 1000 | parallel --block 1k --pipe --round-robin wc | sort
+
+echo '### --version must have higher priority than retired options'
+   parallel --version -g -Y -U -W -T | tail
+
 EOF
 
 rm -rf tmp

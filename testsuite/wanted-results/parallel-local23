@@ -28,3 +28,17 @@ A	next to last A
 B	next to last B
 C	next to last C
 A	last AB	last BC	last C
+### test round-robin
+    473     473    1893
+    527     527    2000
+### --version must have higher priority than retired options
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+GNU parallel comes with no warranty.
+
+Web site: http://www.gnu.org/software/parallel
+
+When using GNU Parallel for a publication please cite:
+
+O. Tange (2011): GNU Parallel - The Command-Line Power Tool, 
+;login: The USENIX Magazine, February 2011:42-47.

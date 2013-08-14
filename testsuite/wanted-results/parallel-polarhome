@@ -33,7 +33,7 @@ redhat.polarhome.com	Works on redhat.polarhome.com
 hpux.polarhome.com	Works on hpux.polarhome.com
 qnx.polarhome.com	Works on qnx.polarhome.com
 qnx.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.
-irix.polarhome.com	Unknown open() mode '>&=' at bin/parallel line 1318.
+irix.polarhome.com	Unknown open() mode '>&=' at bin/parallel line 1346.
 openindiana.polarhome.com	Works on openindiana.polarhome.com
 openindiana.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.
 suse.polarhome.com	Works on suse.polarhome.com

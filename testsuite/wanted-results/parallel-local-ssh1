@@ -6,3 +6,7 @@ Block_end
 4
 5
 Block_end
+### --env _
+OK FUBAR /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games test
+### --env _ with explicit mentioning of normally ignored var $PATH
+OK FUBAR /home/tange/bin:/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin test

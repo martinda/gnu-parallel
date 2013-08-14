@@ -432,7 +432,7 @@ sub spreadstdin {
     $Global::start_no_new_jobs ||= 1;
     if($opt::roundrobin) {
 	for my $job (values %Global::running) {
-	    my $fh = $job->stdin();
+	    my $fh = $job->fd(0);
 	    close $fh;
 	}
 	my %incomplete_jobs = %Global::running;
@@ -608,7 +608,7 @@ sub options_hash {
 	 "nice=i" => \$opt::nice,
 	 "timeout=s" => \$opt::timeout,
 	 "tag" => \$opt::tag,
-	 "tagstring=s" => \$opt::tagstring,
+	 "tagstring|tag-string=s" => \$opt::tagstring,
 	 "onall" => \$opt::onall,
 	 "nonall" => \$opt::nonall,
 	 "filter-hosts|filterhosts|filter-host" => \$opt::filter_hosts,
@@ -639,6 +639,7 @@ sub options_hash {
 	 "arg-file-sep|argfilesep=s" => \$opt::arg_file_sep,
 	 "trim=s" => \$opt::trim,
 	 "env=s" => \@opt::env,
+	 "recordenv|record-env" => \$opt::record_env,
 	 "plain" => \$opt::plain,
 	 "profile|J=s" => \@opt::profile,
 	 "pipe|spreadstdin" => \$opt::pipe,
@@ -727,7 +728,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130730;
+    $Global::version = 20130814;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -756,16 +757,6 @@ sub parse_options {
 
     @ARGV=read_options();
 
-    if(defined $opt::retired) {
-	    ::error("-g has been retired. Use --group.\n");
-	    ::error("-B has been retired. Use --bf.\n");
-	    ::error("-T has been retired. Use --tty.\n");
-	    ::error("-U has been retired. Use --er.\n");
-	    ::error("-W has been retired. Use --wd.\n");
-	    ::error("-Y has been retired. Use --shebang.\n");
-	    ::error("-H has been retired. Use --halt.\n");
-            ::wait_and_exit(255);
-    }
     if(@opt::v) { $Global::verbose = $#opt::v+1; } # Convert -v -v to v=2
     $Global::debug = (defined $opt::D);
     if(defined $opt::X) { $Global::ContextReplace = 1; }
@@ -811,6 +802,7 @@ sub parse_options {
     }
     if(defined $opt::version) { version(); wait_and_exit(0); }
     if(defined $opt::bibtex) { bibtex(); wait_and_exit(0); }
+    if(defined $opt::record_env) { record_env(); wait_and_exit(0); }
     if(defined $opt::show_limits) { show_limits(); }
     if(@opt::sshlogin) { @Global::sshlogin = @opt::sshlogin; }
     if(@opt::sshloginfile) { read_sshloginfiles(@opt::sshloginfile); }
@@ -962,6 +954,16 @@ sub parse_options {
     if(defined $opt::eta) {
         $opt::progress = $opt::eta;
     }
+    if(defined $opt::retired) {
+	    ::error("-g has been retired. Use --group.\n");
+	    ::error("-B has been retired. Use --bf.\n");
+	    ::error("-T has been retired. Use --tty.\n");
+	    ::error("-U has been retired. Use --er.\n");
+	    ::error("-W has been retired. Use --wd.\n");
+	    ::error("-Y has been retired. Use --shebang.\n");
+	    ::error("-H has been retired. Use --halt.\n");
+            ::wait_and_exit(255);
+    }
 
     parse_sshlogin();
     parse_env_var();
@@ -987,6 +989,17 @@ sub env_quote {
     return $v;
 }
 
+sub record_env {
+    # Record current %ENV-keys in ~/.parallel/recorded_env
+    # Returns: N/A
+    if(open(my $vars_fh, ">", $ENV{'HOME'} . "/.parallel/recorded_env")) {
+	print $vars_fh map { $_,"\n" } keys %ENV;
+    } else {
+	::error("Cannot write to ".$ENV{'HOME'} . "/.parallel/recorded_env\n");
+	::wait_and_exit(255);
+    }
+}
+
 sub parse_env_var {
     # Parse --env and set $Global::envvar
     # Returns: N/A
@@ -995,6 +1008,21 @@ sub parse_env_var {
     for my $varstring (@opt::env) {
         # Split up --env VAR1,VAR2
 	push @vars, split /,/, $varstring;
+    }
+    if(grep { /^_$/ } @vars) {
+	# Include all vars that are not in a clean environment
+	if(open(my $vars_fh, "<", $ENV{'HOME'} . "/.parallel/recorded_env")) {
+	    my @ignore = <$vars_fh>;
+	    chomp @ignore;
+	    my %ignore;
+	    @ignore{@ignore} = @ignore;
+	    close $vars_fh;
+	    push @vars, grep { not defined $ignore{$_} } keys %ENV;
+	    @vars = grep { not /^_$/ } @vars;
+	} else {
+	    ::error("Run '$Global::progname --record-env' in a clean environment first.\n");
+	    ::wait_and_exit(255);
+	}
     }
     # Keep only defined variables
     @vars = grep { defined($ENV{$_}) } @vars;
@@ -3729,13 +3757,10 @@ sub non_block_write {
     my $self = shift;
     my $something_written = 0;
     use POSIX qw(:errno_h);
-    use Fcntl;
-
-    my $flags = '';
-
-
+#    use Fcntl;
+#    my $flags = '';
     for my $buf (substr($self->{'stdin_buffer'},$self->{'stdin_buffer_pos'})) {
-	my $in = $self->{'stdin'};
+	my $in = $self->fd(0);
 #	fcntl($in, F_GETFL, $flags)
 #	    or die "Couldn't get flags for HANDLE : $!\n";
 #	$flags |= O_NONBLOCK;
