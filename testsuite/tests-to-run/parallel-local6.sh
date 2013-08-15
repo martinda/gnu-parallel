@@ -5,7 +5,7 @@ parallel --joblog /tmp/parallel_joblog_exitval 'sleep {} && echo sleep was not k
 parallel --joblog /tmp/parallel_joblog_signal 'sleep {}' ::: 100 2>/dev/null &
 sleep 1
 killall -6 sleep
-sleep 1
+sleep 1.5
 grep -q 134 /tmp/parallel_joblog_exitval && echo exitval OK
 grep -q '[^0-9]6[^0-9]' /tmp/parallel_joblog_signal && echo signal OK
 

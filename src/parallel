@@ -51,7 +51,7 @@ parse_options();
 my $number_of_args;
 if($Global::max_number_of_args) {
     $number_of_args=$Global::max_number_of_args;
-} elsif ($opt::X or $opt::m) {
+} elsif ($opt::X or $opt::m or $opt::xargs) {
     $number_of_args = undef;
 } else {
     $number_of_args = 1;
@@ -728,7 +728,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130814;
+    $Global::version = 20130815;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -990,12 +990,13 @@ sub env_quote {
 }
 
 sub record_env {
-    # Record current %ENV-keys in ~/.parallel/recorded_env
+    # Record current %ENV-keys in ~/.parallel/ignored_vars
     # Returns: N/A
-    if(open(my $vars_fh, ">", $ENV{'HOME'} . "/.parallel/recorded_env")) {
+    my $ignore_filename = $ENV{'HOME'} . "/.parallel/ignored_vars";
+    if(open(my $vars_fh, ">", $ignore_filename)) {
 	print $vars_fh map { $_,"\n" } keys %ENV;
     } else {
-	::error("Cannot write to ".$ENV{'HOME'} . "/.parallel/recorded_env\n");
+	::error("Cannot write to $ignore_filename\n");
 	::wait_and_exit(255);
     }
 }
@@ -1011,7 +1012,7 @@ sub parse_env_var {
     }
     if(grep { /^_$/ } @vars) {
 	# Include all vars that are not in a clean environment
-	if(open(my $vars_fh, "<", $ENV{'HOME'} . "/.parallel/recorded_env")) {
+	if(open(my $vars_fh, "<", $ENV{'HOME'} . "/.parallel/ignored_vars")) {
 	    my @ignore = <$vars_fh>;
 	    chomp @ignore;
 	    my %ignore;
@@ -4394,10 +4395,7 @@ sub start {
 	    $Global::timeoutq->insert($job);
 	}
 	if($opt::delay) {
-	    my $now = ::now();
-	    $Global::last_job_started_at ||= $now;
-	    ::usleep(($opt::delay - ($now - $Global::last_job_started_at))*1000);
-	    $Global::last_job_started_at = $now;
+	    $Global::JobQueue->empty() or ::usleep($opt::delay*1000);
 	}
 	return $job;
     } else {
@@ -4726,6 +4724,9 @@ sub populate {
 	}
 	$self->push($next_arg);
 	if($self->len() >= Limits::Command::max_length()) {
+	    # Command length is now > max_length
+	    # If there are arguments: remove the last
+	    # If there are no arguments: Error
 	    # TODO stuff about -x opt_x
 	    if($self->number_of_args() > 1) {
 		# There is something to work on
@@ -4733,13 +4734,13 @@ sub populate {
 		last;
 	    } else {
 		my $args = join(" ", map { $_->orig() } @$next_arg);
-		print STDERR ("$Global::progname: Command line too ",
-			      "long (", $self->len(), " >= ",
-			      Limits::Command::max_length(),
-			      ") at number ",
-			      $self->{'arg_queue'}->arg_number(),
-			      ": ".
-			      (substr($args,0,50))."...\n");
+		::error("Command line too long (", 
+			$self->len(), " >= ",
+			Limits::Command::max_length(),
+			") at number ",
+			$self->{'arg_queue'}->arg_number(),
+			": ".
+			(substr($args,0,50))."...\n");
 		$self->{'arg_queue'}->unget($self->pop());
 		::wait_and_exit(255);
 	    }

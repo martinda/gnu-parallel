@@ -42,3 +42,9 @@ When using GNU Parallel for a publication please cite:
 
 O. Tange (2011): GNU Parallel - The Command-Line Power Tool, 
 ;login: The USENIX Magazine, February 2011:42-47.
+### bug #39787: --xargs broken
+131064
+37830
+### --delay should grow by 2 sec per arg
+OK
+OK

@@ -496,7 +496,7 @@ In Bash @emph{var} can also be a Bash function - just remember to @strong{export
 -f} the function.
 
 The variable '_' is special. It will copy all enviroment variables
-except for the ones mentioned in ~/.parallel/recorded_env.
+except for the ones mentioned in ~/.parallel/ignored_vars.
 
 See also: @strong{--record-env}.
 
@@ -1020,7 +1020,7 @@ If used with @strong{--pipe} this is slow.
 @item @strong{--record-env} (alpha testing)
 @anchor{@strong{--record-env} (alpha testing)}
 
-Record current environment variables in ~/.parallel/recorded_env. This
+Record current environment variables in ~/.parallel/ignored_vars. This
 is useful before using @strong{--env _}.
 
 See also @strong{--env}.

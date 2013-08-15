@@ -468,7 +468,7 @@ In Bash I<var> can also be a Bash function - just remember to B<export
 -f> the function.
 
 The variable '_' is special. It will copy all enviroment variables
-except for the ones mentioned in ~/.parallel/recorded_env.
+except for the ones mentioned in ~/.parallel/ignored_vars.
 
 See also: B<--record-env>.
 
@@ -957,7 +957,7 @@ If used with B<--pipe> this is slow.
 
 =item B<--record-env> (alpha testing)
 
-Record current environment variables in ~/.parallel/recorded_env. This
+Record current environment variables in ~/.parallel/ignored_vars. This
 is useful before using B<--env _>.
 
 See also B<--env>.

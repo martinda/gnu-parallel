@@ -6,7 +6,7 @@ cp -a input-files/testdir2 tmp
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
 echo '### Test filenames containing UTF-8'; 
   cd tmp; 
-  find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}; 
+  find . -name '*.jpg' | nice parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}; 
   find |grep -v CVS | sort; 
 
 echo '### bug #39554: Feature request: line buffered output'; 
@@ -18,10 +18,17 @@ echo '### bug #39554: Feature request: line buffered output --tag';
 echo
 
 echo '### test round-robin';
-  seq 1000 | parallel --block 1k --pipe --round-robin wc | sort
+  nice seq 1000 | parallel --block 1k --pipe --round-robin wc | sort
 
 echo '### --version must have higher priority than retired options'
    parallel --version -g -Y -U -W -T | tail
+
+echo '### bug #39787: --xargs broken'
+  perl -e 'for(1..30000){print "$_\n"}' | nice parallel --xargs -k echo  | perl -ne 'print length $_,"\n"'
+
+echo '### --delay should grow by 2 sec per arg'
+stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 | perl -ne '$_ >= 2 and $_ <= 4 and print "OK\n"'
+stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 3 | perl -ne '$_ >= 4 and $_ <= 6 and print "OK\n"'
 
 EOF
 
