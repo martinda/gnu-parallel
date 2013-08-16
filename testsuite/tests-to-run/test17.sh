@@ -5,7 +5,8 @@ SERVER2=parallel-server2
 SSHLOGIN1=parallel@$SERVER1
 SSHLOGIN2=parallel@$SERVER2
 
-export PARALLEL=-j8
+export PARALLEL=-j0
+#export PARALLEL="--sshdelay 0.3"
 # Make sure sort order is the same
 export LANG=C
 
@@ -14,7 +15,8 @@ echo '### Test --transfer --return --cleanup'
 rm -rf /tmp/parallel.file*
 stdout ssh $SSHLOGIN1 rm -rf 'tmp/parallel.file*'  '/tmp/parallel.file*'
 stdout ssh $SSHLOGIN2 rm -rf 'tmp/parallel.file*' '/tmp/parallel.file*'
-(seq 1 3;echo '>fire';seq 5 10; /bin/echo ' : & ) \n*.jpg'; echo '/./sub dir'; seq 13 20) >/tmp/test17
+# (seq 1 3;echo '>fire';seq 5 10; /bin/echo ' : & ) \n*.jpg'; echo '/./sub dir'; seq 13 20) >/tmp/test17
+(echo '>fire';/bin/echo ' : & ) \n*.jpg'; echo '/./sub dir') >/tmp/test17
 echo '# Create some weirdly files in /tmp'
 mkdir -p /tmp/parallel.file
 cat /tmp/test17 | parallel -k /bin/echo file{} '>'/tmp/parallel.file{}.file

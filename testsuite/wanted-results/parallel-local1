@@ -265,7 +265,7 @@ o
       1       1  130001
       1       1  130001
       1       1  130001
-parallel: Command line too long (260009 >= 131071) at number 9: 10...
+parallel: Error: Command line too long (260009 >= 131071) at number 9: 10...
 ### bug #37042: -J foo is taken from the whole command line - not just the part before the command
 foo	tag_with_foo
 a	tag_with_a

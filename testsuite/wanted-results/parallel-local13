@@ -71,7 +71,7 @@ y
 ###  -i -s26 -0 echo from \{\} to x{}y < items-0.xi
 xargs: argument list too long
 from one to xoney
-parallel: Command line too long (42 >= 26) at number 2:  	
+parallel: Error: Command line too long (42 >= 26) at number 2:  	
 ...
 ###  -l -0 echo < ldata-0.xi
 1 22 333 4444
@@ -808,7 +808,7 @@ with 'single	quotes' as well.
 /src/gnu/autoconf-1.11/texinfo.tex
 ###  -s6 echo < files.xi
 xargs: argument line too long
-parallel: Command line too long (27 >= 6) at number 1: /src/gnu/autoconf-1.11...
+parallel: Error: Command line too long (27 >= 6) at number 1: /src/gnu/autoconf-1.11...
 ###  -iARG -s86 echo ARG is xARGx < files.xi
 /src/gnu/autoconf-1.11 is x/src/gnu/autoconf-1.11x
 /src/gnu/autoconf-1.11/README is x/src/gnu/autoconf-1.11/READMEx
@@ -974,7 +974,7 @@ from: can't read /var/mail/{}
 ###  -i -s26 echo from \{\} to x{}y < items.xi
 xargs: argument list too long
 from dumb to xdumby
-parallel: Command line too long (36 >= 26) at number 1:  	...
+parallel: Error: Command line too long (36 >= 26) at number 1:  	...
 ###  -i__ echo FIRST __ IS OK < quotes.xi
 FIRST this is IS OK
 FIRST quoted 	stuff   IS OK

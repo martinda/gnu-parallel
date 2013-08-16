@@ -118,7 +118,7 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
     my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".ssh");
     print $fh @cores, @cpus, @maxline, @echo;
     close $fh;
-    my $cmd = "cat $tmpfile | $0 -j0 -s 1000 --joblog - --plain --tag --tagstring {1} --colsep '\t' -k eval {2} 2>/dev/null";
+    my $cmd = "cat $tmpfile | $0 -j0 --timeout 5 -s 1000 --joblog - --plain --tag --tagstring {1} --colsep '\t' -k eval {2} 2>/dev/null";
     ::debug($cmd."\n");
     open(my $host_fh, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
     my (%ncores, %ncpus, %time_to_login, %maxlen, %echo);
@@ -135,18 +135,21 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 	    # Get server from: eval true server\;
 	    $col[8] =~ /eval true..([^;]+).;/ or ::die_bug("col8 does not contain host: $col[8]");
 	    my $host = $1;
-	    if($col[6] eq "255") {
-		# signal == 255: ssh failed
+	    $host =~ s/\\//g;
+	    $Global::host{$host} or next;
+	    if($col[6] eq "255" or $col[7] eq "15") {
+		# exit == 255 or signal == 15: ssh failed
 		# Remove sshlogin
-		delete $Global::host{$col[1]};
+		::debug("--filtered $host\n");
+		delete $Global::host{$host};
 	    } elsif($col[6] eq "127") {
 		# signal == 127: parallel not installed remote
 		# Set ncpus and ncores = 1
 		::warning("Could not figure out ",
-			  "number of cpus on $col[1]. Using 1.\n");
-		$ncores{$col[1]} = 1;
-		$ncpus{$col[1]} = 1;
-		$maxlen{$col[1]} = Limits::Command::max_length();
+			  "number of cpus on $host. Using 1.\n");
+		$ncores{$host} = 1;
+		$ncpus{$host} = 1;
+		$maxlen{$host} = Limits::Command::max_length();
 	    } elsif($col[0] =~ /^\d+$/ and $Global::host{$host}) {
 		# Remember how log it took to log in
 		# 2 : 1372607672.654 0.675 0 0 0 0 eval true\ m\;ssh\ m\ echo
@@ -728,7 +731,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130815;
+    $Global::version = 20130816;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1852,8 +1855,12 @@ sub read_sshloginfile {
 	$close = 0;
     } else {
 	if(not open($in_fh, "<", $file)) {
-	    ::error("Cannot open $file.\n");
-	    ::wait_and_exit(255);
+	    # Try the filename
+	    if(not open($in_fh, "<", $ENV{'HOME'}."/.parallel/".$file)) {
+		# Try prepending ~/.parallel
+		::error("Cannot open $file.\n");
+		::wait_and_exit(255);
+	    }
 	}
     }
     while(<$in_fh>) {
@@ -3831,9 +3838,9 @@ sub runtime {
 sub endtime {
     # Returns:
     #   UNIX-timestamp this job ended
-    #   now if not ended yet
+    #   0 if not ended yet
     my $self = shift;
-    return ($self->{'endtime'} || ::now());
+    return ($self->{'endtime'} || 0);
 }
 
 sub set_endtime {
@@ -3853,7 +3860,7 @@ sub kill {
     my $self = shift;
     my @family_pids = $self->family_pids();
     # Record this jobs as failed
-    $self->set_exitstatus(1);
+    $self->set_exitstatus(-1);
     # Send two TERMs to give time to clean up
     for my $signal ("TERM", "TERM", "KILL") {
 	my $alive = 0;
@@ -3864,8 +3871,15 @@ sub kill {
 		$alive = 1;
 	    }
 	}
-	# Wait 200 ms between TERMs - but only if any pids are alive
-	if($signal eq "TERM" and $alive) { ::usleep(200); }
+
+	if($signal eq "TERM" and $alive) {
+	    # Wait up to 200 ms between TERMs - but only if any pids are alive
+	    my $sleep = 1;
+	    for (my $sleepsum = 0; kill 0, $family_pids[0] and $sleepsum < 200;
+		 $sleepsum += $sleep) {
+		$sleep = ::reap_usleep($sleep);
+	    }
+	}
     }
 }
 
@@ -5895,7 +5909,11 @@ sub process_timeouts {
     # $self->{'queue'} is sorted by start time
     while (@{$self->{'queue'}}) {
 	my $job = $self->{'queue'}[0];
-	if($job->timedout($self->{'delta_time'})) {
+	if($job->endtime()) {
+	    # Job already finished. No need to timeout the job
+	    # This could be because of --keep-order
+	    shift @{$self->{'queue'}};
+	} elsif($job->timedout($self->{'delta_time'})) {
 	    # Need to shift off queue before kill
 	    # because kill calls usleep that calls process_timeouts
 	    shift @{$self->{'queue'}};

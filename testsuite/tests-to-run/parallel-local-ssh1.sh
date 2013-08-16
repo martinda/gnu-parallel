@@ -9,4 +9,7 @@ echo '### --env _'
 echo '### --env _ with explicit mentioning of normally ignored var $PATH'
   fUbAr="OK FUBAR" parallel -S csh@lo --env PATH,_ echo '$fUbAr $PATH' ::: test
 
+echo '### --filter-hosts --slf <()'
+  parallel --nonall --filter-hosts --slf <(echo localhost) echo OK
+
 EOF

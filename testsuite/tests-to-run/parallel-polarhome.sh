@@ -2,9 +2,9 @@
 
 P_ALL="vax freebsd solaris openbsd netbsd debian alpha aix redhat hpux ultrix qnx irix tru64 openindiana suse openstep mandriva ubuntu scosysv unixware dragonfly centos miros hurd minix raspberrypi"
 P_NOTWORKING="vax alpha openstep"
-P_NOTWORKING_YET="ultrix tru64"
+P_NOTWORKING_YET="ultrix tru64 irix"
 
-P_WORKING="freebsd solaris openbsd netbsd debian aix redhat hpux  qnx irix openindiana suse mandriva ubuntu scosysv unixware dragonfly centos miros hurd minix raspberrypi"
+P_WORKING="freebsd solaris openbsd netbsd debian aix redhat hpux qnx openindiana suse mandriva ubuntu scosysv unixware dragonfly centos miros hurd minix raspberrypi"
 
 P="$P_WORKING"
 POLAR=`parallel -k echo {}.polarhome.com ::: $P`

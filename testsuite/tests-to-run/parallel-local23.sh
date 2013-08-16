@@ -27,8 +27,11 @@ echo '### bug #39787: --xargs broken'
   perl -e 'for(1..30000){print "$_\n"}' | nice parallel --xargs -k echo  | perl -ne 'print length $_,"\n"'
 
 echo '### --delay should grow by 2 sec per arg'
-stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 | perl -ne '$_ >= 2 and $_ <= 4 and print "OK\n"'
-stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 3 | perl -ne '$_ >= 4 and $_ <= 6 and print "OK\n"'
+stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 | perl -ne '$_ >= 2 and $_ <= 5 and print "OK\n"'
+stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 3 | perl -ne '$_ >= 4 and $_ <= 7 and print "OK\n"'
+
+echo '### Exit value should not be affected if an earlier job times out'
+  parallel -j2 --timeout 1 --joblog - -k  ::: "sleep 10" "exit 255" | field 7
 
 EOF
 

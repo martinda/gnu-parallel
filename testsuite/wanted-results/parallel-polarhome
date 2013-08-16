@@ -9,7 +9,6 @@ copy_to_host aix.polarhome.com
 copy_to_host redhat.polarhome.com
 copy_to_host hpux.polarhome.com
 copy_to_host qnx.polarhome.com
-copy_to_host irix.polarhome.com
 copy_to_host openindiana.polarhome.com
 copy_to_host suse.polarhome.com
 copy_to_host mandriva.polarhome.com
@@ -33,7 +32,6 @@ redhat.polarhome.com	Works on redhat.polarhome.com
 hpux.polarhome.com	Works on hpux.polarhome.com
 qnx.polarhome.com	Works on qnx.polarhome.com
 qnx.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.
-irix.polarhome.com	Unknown open() mode '>&=' at bin/parallel line 1346.
 openindiana.polarhome.com	Works on openindiana.polarhome.com
 openindiana.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.
 suse.polarhome.com	Works on suse.polarhome.com

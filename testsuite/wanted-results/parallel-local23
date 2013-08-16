@@ -48,3 +48,7 @@ O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
 ### --delay should grow by 2 sec per arg
 OK
 OK
+### Exit value should not be affected if an earlier job times out
+Exitval
+-1
+255
