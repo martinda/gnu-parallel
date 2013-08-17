@@ -22,6 +22,10 @@ niceload.1: niceload.pod Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
 		--section=1 $(srcdir)/niceload.pod > $(srcdir)/niceload.1
 
+parallel.html: parallel.pod Makefile
+	pod2html $(srcdir)/parallel.pod > $(srcdir)/parallel.html
+	rm -f $(srcdir)/pod2htm*
+
 # Depending on parallel.html to avoid stupid pod2html race condition
 parallel_tutorial.html: parallel_tutorial.pod Makefile parallel.html
 	pod2html $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.html
