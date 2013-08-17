@@ -1,10 +1,14 @@
 bin_SCRIPTS = parallel sem sql niceload
-man_MANS = parallel.1 sem.1 sql.1 niceload.1
-doc_DATA = parallel.html sem.html sql.html niceload.html parallel.texi sem.texi sql.texi niceload.texi
+man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1
+doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi
 
 parallel.1: parallel.pod Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
 		--section=1 $(srcdir)/parallel.pod > $(srcdir)/parallel.1
+
+parallel_tutorial.1: parallel_tutorial.pod Makefile
+	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
+		--section=1 $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.1
 
 sem.1: sem.pod Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
@@ -18,12 +22,13 @@ niceload.1: niceload.pod Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
 		--section=1 $(srcdir)/niceload.pod > $(srcdir)/niceload.1
 
-parallel.html: parallel.pod Makefile
-	pod2html $(srcdir)/parallel.pod > $(srcdir)/parallel.html
+# Depending on parallel.html to avoid stupid pod2html race condition
+parallel_tutorial.html: parallel_tutorial.pod Makefile parallel.html
+	pod2html $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.html
 	rm -f $(srcdir)/pod2htm*
 
-# Depending on parallel.html to avoid stupid pod2html race condition
-sem.html: sem.pod Makefile parallel.html
+# Depending on parallel_tutorial.html to avoid stupid pod2html race condition
+sem.html: sem.pod Makefile parallel_tutorial.html
 	pod2html $(srcdir)/sem.pod > $(srcdir)/sem.html
 	rm -f $(srcdir)/pod2htm*
 
@@ -41,6 +46,10 @@ parallel.texi: parallel.pod
 # If pod2texi is not installed: Forget about it
 	pod2texi --output=$(srcdir)/parallel.texi $(srcdir)/parallel.pod || true
 
+parallel_tutorial.texi: parallel_tutorial.pod
+# If pod2texi is not installed: Forget about it
+	pod2texi --output=$(srcdir)/parallel_tutorial.texi $(srcdir)/parallel_tutorial.pod || true
+
 sem.texi: sem.pod
 # If pod2texi is not installed: Forget about it
 	pod2texi --output=$(srcdir)/sem.texi $(srcdir)/sem.pod || true
@@ -56,9 +65,9 @@ niceload.texi: niceload.pod
 sem: parallel
 	ln -fs parallel sem
 
-DISTCLEANFILES = parallel.html sem.html sql.html niceload.html
+DISTCLEANFILES = parallel.html sem.html sql.html niceload.html parallel_tutorial.html
 EXTRA_DIST = parallel sem sql niceload \
-	parallel.1 sem.1 sql.1 niceload.1 \
-	parallel.html sem.html sql.html niceload.html \
-	sem.pod parallel.pod niceload.pod \
-	parallel.texi sem.texi sql.texi niceload.texi
+	parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 \
+	parallel.html sem.html sql.html niceload.html parallel_tutorial.1 \
+	sem.pod parallel.pod niceload.pod parallel_tutorial.pod \
+	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi
