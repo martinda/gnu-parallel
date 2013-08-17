@@ -305,12 +305,13 @@ sub spreadstdin {
     my $buf = "";
     my $header = "";
     if($opt::header) {
-	my $non_greedy_regexp = $opt::header;
-	# ? , * , + , {} => ?? , *? , +? , {}?
-	$non_greedy_regexp =~ s/(\?|\*|\+|\})/$1\?/g;
+	if($opt::header eq ":") { $opt::header = "(.*\n)"; }
+	# Number = number of lines
+	$opt::header =~ s/^(\d+)$/"(.*\n)"x$1/e;
 	while(read(STDIN,substr($buf,length $buf,0),$opt::blocksize)) {
-	    if($buf=~s/^(.*?$non_greedy_regexp)//) {
-		$header = $1; last;
+	    if($buf=~s/^($opt::header)//) {
+		$header = $1; 
+		last;
 	    }
 	}
     }
@@ -424,9 +425,8 @@ sub spreadstdin {
 		$blocksize = ceil($blocksize * 1.3 + 1);
 		::warning("A full record was not matched in a block. Increasing to --blocksize ".$blocksize."\n");
 	    }
-	}
+	} 
     }
-
     # If there is anything left in the buffer write it
     substr($buf,0,0) = "";
     write_record_to_pipe($chunk_number++,\$header,\$buf,$recstart,$recend,length $buf);
@@ -482,7 +482,7 @@ sub round_robin_write {
 	    if($job->stdin_buffer_length() > 0) {
 		$something_written += $job->non_block_write();
 	    } else {
-		$job->set_stdin_buffer($block_ref,$endpos,$recstart,$recend);
+		$job->set_stdin_buffer($header_ref,$block_ref,$endpos,$recstart,$recend);
 		$block_passed = 1;
 		$job->set_virgin(0);
 		$something_written += $job->non_block_write();
@@ -626,7 +626,7 @@ sub options_hash {
 	 "B=s" => \$opt::retired,
 	 "ctrlc|ctrl-c" => \$opt::ctrlc,
 	 "noctrlc|no-ctrlc|no-ctrl-c" => \$opt::noctrlc,
-	 "workdir|wd=s" => \$opt::workdir,
+	 "workdir|work-dir|wd=s" => \$opt::workdir,
 	 "W=s" => \$opt::retired,
 	 "tmpdir=s" => \$opt::tmpdir,
 	 "tempdir=s" => \$opt::tmpdir,
@@ -820,8 +820,9 @@ sub parse_options {
     if(defined $opt::fg) { $Global::semaphore = 1; }
     if(defined $opt::bg) { $Global::semaphore = 1; }
     if(defined $opt::wait) { $Global::semaphore = 1; }
-    if(defined $opt::timeout and $opt::timeout !~ /^\d+%?$/) {
+    if(defined $opt::timeout and $opt::timeout !~ /^\d+(\.\d+)?%?$/) {
 	::error("--timeout must be seconds or percentage\n");
+	wait_and_exit(255);
     }
     if(defined $opt::minversion) {
 	print $Global::version,"\n";
@@ -3739,8 +3740,8 @@ sub write {
 
 sub set_stdin_buffer {
     my $self = shift;
-    my ($block_ref,$endpos,$recstart,$recend) = @_;
-    $self->{'stdin_buffer'} = substr($$block_ref,0,$endpos);
+    my ($header_ref,$block_ref,$endpos,$recstart,$recend) = @_;
+    $self->{'stdin_buffer'} = ($self->virgin() ? $$header_ref : "").substr($$block_ref,0,$endpos);
     if($opt::remove_rec_sep) {
 	remove_rec_sep(\$self->{'stdin_buffer'},$recstart,$recend);
     }
@@ -3786,10 +3787,11 @@ sub non_block_write {
 	} else {
 	    # successfully wrote everything
 	    my $a="";
-	    $self->set_stdin_buffer(\$a,0,"","");
+	    $self->set_stdin_buffer(\$a,\$a,"","");
 	    $something_written = $rv;
 	}
     }
+
     ::debug("Non-block: $something_written");
     return $something_written;
 }
@@ -4231,7 +4233,7 @@ sub workdir {
 		my $home = $ENV{'HOME'};
 		eval 'use Cwd';
 		my $cwd = cwd();
-		$opt::workdir = $cwd;
+		$workdir = $cwd;
 		if($home) {
 		    # If homedir exists: remove the homedir from
 		    # workdir if cwd starts with homedir
@@ -4247,7 +4249,7 @@ sub workdir {
 			my ($parent_dev, $parent_ino) = (stat($parent))[0,1];
 			if($parent_dev == $home_dev and $parent_ino == $home_ino) {
 			    # dev and ino is the same: We found the homedir.
-			    $opt::workdir = join("/",@dir_parts);
+			    $workdir = join("/",@dir_parts);
 			    last;
 			}
 		    }
@@ -5842,12 +5844,11 @@ package TimeoutQueue;
 sub new {
     my $class = shift;
     my $delta_time = shift;
-    my ($pct,$avg_damper);
-    if($delta_time =~ /(\d+)%/) {
+    my ($pct);
+    if($delta_time =~ /(\d+(\.\d+)?)%/) {
 	# Timeout in percent
 	$pct = $1/100;
 	$delta_time = 1_000_000;
-	$avg_damper = (1-0.001)/0.9;
     }
     return bless {
 	'queue' => [],

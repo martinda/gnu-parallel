@@ -553,15 +553,18 @@ status will be the exit status from the failing job.
 =back
 
 
-=item B<--header> I<regexp>
+=item B<--header> I<regexp> (alpha testing)
 
-Use upto regexp as header. For normal usage the matched header
-(typically the first line: B<--header '\n'>) will be split using
-B<--colsep> (which will default to '\t') and column names can be used
-as replacement variables: B<{column name}>. For B<--pipe> the matched
-header will be prepended to each output.
+Use regexp as header. For normal usage the matched header (typically
+the first line: B<--header '.*\n'>) will be split using B<--colsep>
+(which will default to '\t') and column names can be used as
+replacement variables: B<{column name}>.
 
-B<--header :> is an alias for B<--header '\n'>.
+For B<--pipe> the matched header will be prepended to each output.
+
+B<--header :> is an alias for B<--header '.*\n'>.
+
+If I<regexp> is a number, it will match that many lines.
 
 
 =item B<-I> I<replace-str>

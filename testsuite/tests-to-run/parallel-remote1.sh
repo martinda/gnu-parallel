@@ -14,3 +14,7 @@ seq 1 100 | parallel --sshlogin "/tmp/myssh1 $SSHLOGIN1, /tmp/myssh2 $SSHLOGIN2"
 
 echo '### --filter-hosts - OK, non-such-user, connection refused, wrong host'
   parallel --nonall --filter-hosts -S localhost,NoUser@localhost,154.54.72.206,"ssh 5.5.5.5" hostname
+
+echo '### test --workdir . in $HOME'
+  cd && mkdir parallel-test && cd parallel-test && 
+    echo OK > testfile && parallel --workdir . --transfer -S $SSHLOGIN1 cat {} ::: testfile

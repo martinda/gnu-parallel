@@ -584,16 +584,19 @@ status will be the exit status from the failing job.
 
 @end table
 
-@item @strong{--header} @emph{regexp}
-@anchor{@strong{--header} @emph{regexp}}
+@item @strong{--header} @emph{regexp} (alpha testing)
+@anchor{@strong{--header} @emph{regexp} (alpha testing)}
 
-Use upto regexp as header. For normal usage the matched header
-(typically the first line: @strong{--header '\n'}) will be split using
-@strong{--colsep} (which will default to '\t') and column names can be used
-as replacement variables: @strong{@{column name@}}. For @strong{--pipe} the matched
-header will be prepended to each output.
+Use regexp as header. For normal usage the matched header (typically
+the first line: @strong{--header '.*\n'}) will be split using @strong{--colsep}
+(which will default to '\t') and column names can be used as
+replacement variables: @strong{@{column name@}}.
 
-@strong{--header :} is an alias for @strong{--header '\n'}.
+For @strong{--pipe} the matched header will be prepended to each output.
+
+@strong{--header :} is an alias for @strong{--header '.*\n'}.
+
+If @emph{regexp} is a number, it will match that many lines.
 
 @item @strong{-I} @emph{replace-str}
 @anchor{@strong{-I} @emph{replace-str}}

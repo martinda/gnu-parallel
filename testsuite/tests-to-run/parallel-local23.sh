@@ -33,6 +33,18 @@ stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 3 | perl -ne '$_ >= 4
 echo '### Exit value should not be affected if an earlier job times out'
   parallel -j2 --timeout 1 --joblog - -k  ::: "sleep 10" "exit 255" | field 7
 
+echo '### --header regexp'
+  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --header '(%.*\n)*' echo JOB{#}\;cat
+
+echo '### --header num'
+  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --header 2 echo JOB{#}\;cat
+
+echo '### --header regexp --round-robin'
+  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header '(%.*\n)*' echo JOB{#}\;cat
+
+echo '### --header num --round-robin'
+  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header 2  echo JOB{#}\;cat
+
 EOF
 
 rm -rf tmp
