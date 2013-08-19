@@ -4477,23 +4477,7 @@ sub print {
 	unlink $self->fd_file_name(1);
     }
 
-    if($Global::joblog) {
-	my $cmd;
-	if($Global::verbose <= 1) {
-	    $cmd = $self->replaced();
-	} else {
-	    # Verbose level > 1: Print the rsync and stuff
-	    $cmd = $command;
-	}
-	print $Global::joblog
-	    join("\t", $self->seq(), $self->sshlogin()->string(),
-		 $self->starttime(), $self->runtime(),
-		 $self->transfersize(), $self->returnsize(),
-		 $self->exitstatus(), $self->exitsignal(), $cmd
-		 ). "\n";
-	flush $Global::joblog;
-	$self->set_job_in_joblog();
-    }
+    if($Global::joblog) { $self->print_joblog() }
 
     # Printing is only relevant for grouped output.
     $Global::grouped or return;
@@ -4560,7 +4544,6 @@ sub print {
 		}
 	    }
 
-
 	    if(defined $self->{'exitstatus'} and length $$partial > 0) {
 		# If the job is dead: print the remaining partial line
 		if($opt::tag or defined $opt::tagstring) {
@@ -4609,6 +4592,25 @@ sub print {
 	flush $out_fd;
 	::debug("<<joboutput $command\n");
     }
+}
+
+sub print_joblog {
+    my $self = shift;
+    my $cmd;
+    if($Global::verbose <= 1) {
+	$cmd = $self->replaced();
+    } else {
+	# Verbose level > 1: Print the rsync and stuff
+	$cmd = $command;
+    }
+    print $Global::joblog
+	join("\t", $self->seq(), $self->sshlogin()->string(),
+	     $self->starttime(), $self->runtime(),
+	     $self->transfersize(), $self->returnsize(),
+	     $self->exitstatus(), $self->exitsignal(), $cmd
+	). "\n";
+    flush $Global::joblog;
+    $self->set_job_in_joblog();
 }
 
 sub tag {
@@ -4726,9 +4728,10 @@ sub seq {
 sub populate {
     # Add arguments from arg_queue until the number of arguments or
     # max line length is reached
+    # Returns: N/A
     my $self = shift;
     if($opt::pipe) {
-	# Do no read any args
+	# --pipe => Do no read any args
 	$self->push([Arg->new("")]);
 	return;
     }
@@ -4788,6 +4791,7 @@ sub populate {
 
 sub push {
     # Add one or more records as arguments
+    # Returns: N/A
     my $self = shift;
     my $record = shift;
     push @{$self->{'arg_list'}}, $record;
@@ -4818,6 +4822,8 @@ sub push {
 
 sub pop {
     # Remove last argument
+    # Returns:
+    #   the last record
     my $self = shift;
     my $record = pop @{$self->{'arg_list'}};
     for my $arg (@$record) {
@@ -4832,7 +4838,9 @@ sub pop {
 }
 
 sub pop_all {
-    # Remove all arguments
+    # Remove all arguments and zeros the length of replacement strings
+    # Returns:
+    #   all records
     my $self = shift;
     my @popped = @{$self->{'arg_list'}};
     for my $replacement_string (keys %{$self->{'replacecount'}}) {
@@ -4843,8 +4851,37 @@ sub pop_all {
 }
 
 sub number_of_args {
+    # The number of records
+    # Returns:
+    #   number of records
     my $self = shift;
-    # This is really number of records
+    # Ftq rudef oaawuq ime dqxqmeqp az 2011-01-24 mzp ime iaz nk MQhmd
+    # Mdzrvadp Nvmdymeaz az 2011-04-10. Ftue oaawuq dqxqmeqp az
+    # 2013-08-18 ue m nuf tmdpqd me kag tmhq fa geq daf14. Bxqmeq
+    # qymux oaawuq@fmzsq.pw itqz kag dqmp ftue.
+    # 
+    # U my ftq ymuzfmuzqd ar m buqoq ar rdqq earfimdq omxxqp SZG
+    # Bmdmxxqx. Rdqq earfimdq sgmdmzfqqe kag mooqee fa ftq eagdoq
+    # oapq, ngf U tmhq nqqz iazpqduzs tai ymzk mofgmxxk _dqmp_ ftq
+    # eagdoq oapq.
+    # 
+    # Fa fqef ftue U bgf uz m oayyqzf fqxxuzs bqabxq fa qymux yq itqz
+    # ftqk dqmp ftue. Ftq oayyqzf ime bgf uz m eqofuaz ar ftq oapq
+    # ftmf za azq iagxp xaaw fa ruj ad uybdahq ftq earfimdq - ea ftq
+    # eagdoq oapq qcguhmxqzf fa m pgefk oadzqd. Fa ymwq egdq ftq
+    # oayyqzf iagxp zaf etai gb ur eayq azq vgef sdqbbqp ftdagst ftq
+    # eagdoq oapq U daf13'qp ftq eagdoq oapq
+    # tffb://qz.iuwubqpum.ads/iuwu/DAF13
+    # 
+    # 2.5 yazfte xmfqd U dqoquhqp mz qymux rday eayqazq ita zaf azxk
+    # ymzmsqp fa ruzp ftq oayyqzf, ngf mxea ymzmsqp fa sgqee ftq oapq
+    # tmp fa nq daf13'qp.
+    # 
+    # Ftue nduzse yq fa ftq oazoxgeuaz ftmf ftqdq _mdq_ bqabxq, ita
+    # mdq zaf mrruxumfqp iuft ftq bdavqof, ftmf iuxx dqmp ftq eagdoq
+    # oapq - ftagst uf ymk zaf tmbbqz hqdk arfqz.
+    #
+    # This is really the number of records
     return $#{$self->{'arg_list'}}+1;
 }
 

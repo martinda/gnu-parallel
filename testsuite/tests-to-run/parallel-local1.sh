@@ -155,10 +155,10 @@ echo '### Bug introduce by fixing bug #37042'
   parallel --xapply -a <(printf 'abc') --colsep '\t' echo {1}
 
 echo "### Test --header with -N"
-  (echo h1; echo h2; echo 1a;echo 1b; echo 2a;echo 2b; echo 3a)| parallel -j1 --pipe -N2 -k --header '\n.*\n' echo Start\;cat \; echo Stop
+  (echo h1; echo h2; echo 1a;echo 1b; echo 2a;echo 2b; echo 3a)| parallel -j1 --pipe -N2 -k --header '.*\n.*\n' echo Start\;cat \; echo Stop
 
 echo "### Test --header with --block 1k"
-  (echo h1; echo h2; perl -e '$a="x"x110;for(1..22){print $_,$a,"\n"'})| parallel -j1 --pipe -k --block 1k --header '\n.*\n' echo Start\;cat \; echo Stop
+  (echo h1; echo h2; perl -e '$a="x"x110;for(1..22){print $_,$a,"\n"'})| parallel -j1 --pipe -k --block 1k --header '.*\n.*\n' echo Start\;cat \; echo Stop
 
 echo "### Test --header with multiple :::"
   parallel --header : echo {a} {b} {1} {2} ::: b b1 ::: a a2

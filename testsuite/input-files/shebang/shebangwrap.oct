@@ -1,0 +1,6 @@
+#!/usr/bin/parallel --shebang-wrap -k /usr/bin/octave -qf
+
+arg_list = argv ();
+filename = arg_list{1};
+printf(filename);
+printf("\n");

@@ -6,7 +6,7 @@ cp -a input-files/testdir2 tmp
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
 echo '### Test filenames containing UTF-8'; 
   cd tmp; 
-  find . -name '*.jpg' | nice parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}; 
+  find . -name '*.jpg' | nice nice parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}; 
   find |grep -v CVS | sort; 
 
 echo '### bug #39554: Feature request: line buffered output'; 
@@ -24,7 +24,7 @@ echo '### --version must have higher priority than retired options'
    parallel --version -g -Y -U -W -T | tail
 
 echo '### bug #39787: --xargs broken'
-  perl -e 'for(1..30000){print "$_\n"}' | nice parallel --xargs -k echo  | perl -ne 'print length $_,"\n"'
+  nice perl -e 'for(1..30000){print "$_\n"}' | nice parallel --xargs -k echo  | perl -ne 'print length $_,"\n"'
 
 echo '### --delay should grow by 2 sec per arg'
 stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 | perl -ne '$_ >= 2 and $_ <= 5 and print "OK\n"'
@@ -40,10 +40,13 @@ echo '### --header num'
   (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --header 2 echo JOB{#}\;cat
 
 echo '### --header regexp --round-robin'
-  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header '(%.*\n)*' echo JOB{#}\;cat
+  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header '(%.*\n)*' echo JOB\;wc | sort
 
 echo '### --header num --round-robin'
-  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header 2  echo JOB{#}\;cat
+  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header 2  echo JOB{#}\;wc | sort
+
+echo '### shebang-wrap'
+  nice nice parallel -k {} A B C ::: ./input-files/shebang/shebangwrap.*[^~]
 
 EOF
 

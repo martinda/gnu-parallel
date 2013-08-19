@@ -49,8 +49,6 @@ after the list of options. That will give you an idea of what GNU
 B<parallel> is capable of.
 
 You can also watch the intro video for a quick introduction:
-http://tinyogg.com/watch/TORaR/ http://tinyogg.com/watch/hfxKj/ and
-http://tinyogg.com/watch/YQuXd/ or
 http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
 
 =head1 OPTIONS

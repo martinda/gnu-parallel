@@ -83,26 +83,34 @@ JOB3
 %head2
 5
 ### --header regexp --round-robin
-JOB1
-%head1
-%head2
-3
-4
-JOB2
-%head1
-%head2
-1
-2
-5
+      4       4      18
+      5       5      20
+JOB
+JOB
 ### --header num --round-robin
+      4       4      18
+      5       5      20
 JOB1
-%head1
-%head2
-1
-2
-5
 JOB2
-%head1
-%head2
-3
-4
+### shebang-wrap
+A
+B
+C
+A
+B
+C
+A
+B
+C
+[1] "A"
+[1] "B"
+[1] "C"
+["A"]
+["B"]
+["C"]
+A
+B
+C
+A
+B
+C

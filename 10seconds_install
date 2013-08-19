@@ -18,13 +18,15 @@
 TAIL=$(echo | tail -n 1 2>/dev/null && echo tail || (echo | /usr/xpg4/bin/tail -n 1 && echo /usr/xpg4/bin/tail))
 # grep on openindiana must be /usr/xpg4/bin/grep
 GREP=$(echo | grep -vE . 2>/dev/null && echo grep || (echo | /usr/xpg4/bin/grep -vE . && echo /usr/xpg4/bin/grep))
+# wget is not default on MacOS, so try curl
+GET=$(curl -h >/dev/null && echo curl -L || echo wget -qO -)
 
-LATEST=$(wget -qO- http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | $TAIL -n1)
+LATEST=$($GET http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | $TAIL -n1)
 if test \! -d $LATEST/src/; then
   # Source dir does not exist
   rm -f $LATEST.tar.bz2 $LATEST.tar.bz2.sig
-  wget http://ftpmirror.gnu.org/parallel/$LATEST.tar.bz2
-  wget http://ftpmirror.gnu.org/parallel/$LATEST.tar.bz2.sig
+  $GET http://ftpmirror.gnu.org/parallel/$LATEST.tar.bz2 > $LATEST.tar.bz2
+  $GET http://ftpmirror.gnu.org/parallel/$LATEST.tar.bz2.sig > $LATEST.tar.bz2.sig
 fi
 
 # Check signature - in case ftpmirror.gnu.org is compromised

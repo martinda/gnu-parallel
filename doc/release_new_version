@@ -230,8 +230,14 @@ New in this release:
 * Compression of files in parallel using GNU parallel
   http://codextechnicanum.blogspot.dk/2013/07/compression-of-files-in-parallel-using.html
 
+* Using GNU Parallel to roll-your-own Map Reduce!
+  http://www.rankfocus.com/?p=1
+
 * TimeMachineっぽいバックアップスクリプト
   http://rio.tc/2013/07/timemachine-1.html
+
+* Using GNU Parallel with Amazon
+  media.amazonwebservices.com/AWS_Amazon_EMR_Best_Practices.pdf
 
 * Some useful comments on GNU Parallel
   https://news.ycombinator.com/item?id=6209767
