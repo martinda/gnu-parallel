@@ -68,7 +68,7 @@ if(@ARGV) {
 
 my @fhlist;
 @fhlist = map { open_or_exit($_) } @opt::a;
-if(not @fhlist) {
+if(not @fhlist and not $opt::pipe) {
     @fhlist = (*STDIN);
 }
 if($opt::skip_first_line) {
@@ -280,7 +280,7 @@ if($Global::semaphore) {
 $SIG{TERM} = \&start_no_new_jobs;
 start_more_jobs();
 if($opt::pipe) {
-    spreadstdin(@fhlist);
+    spreadstdin();
 }
 ::debug("Start draining\n");
 drain_job_queue();
@@ -301,7 +301,6 @@ sub __PIPE_MODE__ {}
 sub spreadstdin {
     # read a record
     # Spawn a job and print the record to it.
-    my @fhlist = @_; # Filehandles to read from (Defaults to STDIN)
     my $buf = "";
     my $header = "";
     if($opt::header) {
@@ -343,7 +342,7 @@ sub spreadstdin {
     my $chunk_number = 1;
     my $one_time_through;
     my $blocksize = $opt::blocksize;
-    for my $in (@fhlist) {
+    my $in = *STDIN;
 	piperead: while(1) {
 	    my $anything_written = 0;
 	    if(not read($in,substr($buf,length $buf,0),$blocksize)) {
@@ -426,7 +425,6 @@ sub spreadstdin {
 		::warning("A full record was not matched in a block. Increasing to --blocksize ".$blocksize."\n");
 	    }
 	} 
-    }
     # If there is anything left in the buffer write it
     substr($buf,0,0) = "";
     write_record_to_pipe($chunk_number++,\$header,\$buf,$recstart,$recend,length $buf);
@@ -731,7 +729,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130817;
+    $Global::version = 20130819;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1220,8 +1218,8 @@ sub read_args_from_command_line {
 		}
 	    }
 
-		if($group eq $Global::arg_file_sep
-		    or ($opt::internal_pipe_means_argfiles and $opt::pipe)
+	    if($group eq $Global::arg_file_sep
+	       or ($opt::internal_pipe_means_argfiles and $opt::pipe)
 		) {
 		# Group of file names on the command line.
 		# Append args into -a
@@ -1506,7 +1504,7 @@ sub start_another_job {
 		    return 0;
 		}
 	    } while ($job->is_already_in_joblog());
-	    debug("Command to run on '".$job->sshlogin()."': '".$job->replaced()."'\n");
+	    debug("Command to run on '".$job->sshlogin()->string()."': '".$job->replaced()."'\n");
             if($job->start()) {
                 $Global::running{$job->pid()} = $job;
 		if($opt::pipe) {
@@ -2847,8 +2845,8 @@ sub processes_available_by_system_limit {
         not $more_filehandles and last;
         $max_system_proc_reached and last;
 	my $before_getting_arg = time;
-        if($Global::semaphore) {
-	    # Skip
+        if($Global::semaphore or $opt::pipe) {
+	    # Skip: No need to get args
         } elsif(defined $opt::retries and $count_jobs_already_read) {
             # For retries we may need to run all jobs on this sshlogin
             # so include the already read jobs for this sshlogin
@@ -4677,10 +4675,15 @@ sub new {
     if($sum == 0) {
 	if($command eq "") {
 	    $command = $Global::replace{'{}'};
-	} else {
+	} elsif($opt::pipe) {
+	    # With --pipe you can have ::: or not
+	    if(@opt::a) {
+		$command .=" ".$Global::replace{'{}'};
+	    }
+        } else {
 	    # Add {} to the command if there are no {...}'s
 	    $command .=" ".$Global::replace{'{}'};
-        }
+	}
 	($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},
 	 %replacecount) = number_of_replacements($command,$context_replace);
     }
@@ -4730,11 +4733,15 @@ sub populate {
     # max line length is reached
     # Returns: N/A
     my $self = shift;
-    if($opt::pipe) {
-	# --pipe => Do no read any args
-	$self->push([Arg->new("")]);
-	return;
-    }
+#    if($opt::pipe) {
+#	# --pipe => Do no read any args
+#	$self->push([Arg->new("")]);
+#	return;
+#    }
+#    if($opt::roundrobin) {
+#	$self->push([Arg->new("")]);
+#	return;
+#    }
     my $next_arg;
     while (not $self->{'arg_queue'}->empty()) {
 	$next_arg = $self->{'arg_queue'}->get();
@@ -5096,6 +5103,8 @@ sub replace_placeholders {
     my $context_replace = $self->{'context_replace'};
     my $replaced;
 
+#    print ::my_dump($self);
+
     if($self->{'context_replace'}) {
 	$replaced = $self->context_replace_placeholders($target,$quote);
     } else {
@@ -5105,6 +5114,11 @@ sub replace_placeholders {
 }
 
 sub context_replace_placeholders {
+    # Replace foo{}bar with fooargbar 
+    # Input:
+    #   target = foo{}bar
+    #   quote = should this be quoted?
+    # Returns: $target
     my $self = shift;
     my $target = shift;
     my $quote = shift;
@@ -5142,6 +5156,10 @@ sub context_replace_placeholders {
     my %word;
     while($tt =~ s/(\S*(?:$rep_str_regexp|$rep_str_pos_regexp|$rep_seq_regexp)\S*)/\0/o) {
 	$word{$1} ||= 1;
+    }
+    if(not %word) {
+	# The line did no contain any replacementstrings => return unchanged
+	return $target;	
     }
     # For each word: Generate the replacement string for that word.
     for my $origword (keys %word) {
@@ -5778,7 +5796,7 @@ sub read_arg_from_fh {
 sub expand_combinations {
     # Input:
     #   ([xmin,xmax], [ymin,ymax], ...)
-    # Returns ([x,y,...],[x,y,...])
+    # Returns: ([x,y,...],[x,y,...])
     # where xmin <= x <= xmax and ymin <= y <= ymax
     my $minmax_ref = shift;
     my $xmin = $$minmax_ref[0];

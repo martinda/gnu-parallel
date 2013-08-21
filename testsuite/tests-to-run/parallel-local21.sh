@@ -5,7 +5,7 @@ seq 4 5 >/tmp/in45
 
 echo "### Test basic --shebang-wrap"
 cat <<EOF > /tmp/basic--shebang-wrap
-#!/usr/local/bin/parallel --shebang-wrap /usr/bin/perl
+#!/usr/local/bin/parallel --shebang-wrap -k /usr/bin/perl
 
 print "Shebang from perl with args @ARGV\n";
 EOF
@@ -13,11 +13,11 @@ EOF
 chmod 755 /tmp/basic--shebang-wrap
 /tmp/basic--shebang-wrap arg1 arg2
 echo "### Test basic --shebang-wrap Same as"
-parallel /usr/bin/perl /tmp/basic--shebang-wrap ::: arg1 arg2
+parallel -k /usr/bin/perl /tmp/basic--shebang-wrap ::: arg1 arg2
 echo "### Test basic --shebang-wrap stdin"
 (echo arg1; echo arg2) | /tmp/basic--shebang-wrap
 echo "### Test basic --shebang-wrap Same as"
-(echo arg1; echo arg2) | parallel /usr/bin/perl /tmp/basic--shebang-wrap
+(echo arg1; echo arg2) | parallel -k /usr/bin/perl /tmp/basic--shebang-wrap
 rm /tmp/basic--shebang-wrap
 
 
@@ -47,12 +47,6 @@ print "Shebang from perl with args @ARGV\n";
 EOF
 
 chmod 755 /tmp/pipe--shebang-wrap
-echo Suboptimal
-/tmp/pipe--shebang-wrap :::: /tmp/in12 /tmp/in45
-echo Optimal
-/tmp/pipe--shebang-wrap /tmp/in12 /tmp/in45
-echo "### Test --shebang-wrap --pipe with parser options Same as"
-parallel -k --pipe /usr/bin/perl\ -p /tmp/pipe--shebang-wrap :::: /tmp/in12 /tmp/in45
 echo "### Test --shebang-wrap --pipe with parser options stdin"
 cat /tmp/in12 /tmp/in45 | /tmp/pipe--shebang-wrap
 echo "### Test --shebang-wrap --pipe with parser options Same as"
