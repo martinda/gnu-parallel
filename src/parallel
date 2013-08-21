@@ -343,88 +343,87 @@ sub spreadstdin {
     my $one_time_through;
     my $blocksize = $opt::blocksize;
     my $in = *STDIN;
-	piperead: while(1) {
-	    my $anything_written = 0;
-	    if(not read($in,substr($buf,length $buf,0),$blocksize)) {
-		# End-of-file
-		$chunk_number != 1 and last;
-		# Force the while-loop once if everything was read by header reading
-		$one_time_through++ and last;
-	    }
-
-	    if($opt::r) {
-		# Remove empty lines
-		$buf=~s/^\s*\n//gm;
-		if(length $buf == 0) {
-		    next;
-		}
-	    }
-	    if($Global::max_lines and not $Global::max_number_of_args) {
-		# Read n-line records 
-		my $n_lines = $buf=~tr/\n/\n/;
-		my $last_newline_pos = rindex($buf,"\n");
-		while($n_lines % $Global::max_lines) {
-		    $n_lines--;
-		    $last_newline_pos = rindex($buf,"\n",$last_newline_pos-1);
-		}
-		# Chop at $last_newline_pos as that is where n-line record ends
-		$anything_written +=
-		    write_record_to_pipe($chunk_number++,\$header,\$buf,
-					 $recstart,$recend,$last_newline_pos+1);
-		substr($buf,0,$last_newline_pos+1) = "";
-	    } elsif($opt::regexp) {
-		if($Global::max_number_of_args) {
-		    # -N => (start..*?end){n}
-		    # -L -N => (start..*?end){n*l}
-		    my $read_n_lines = $Global::max_number_of_args * ($Global::max_lines || 1);
-		    while($buf =~ s/((?:$recstart.*?$recend){$read_n_lines})($recstart.*)$/$2/os) {
-			# Copy to modifiable variable
-			my $b = $1;
-			$anything_written +=
-			    write_record_to_pipe($chunk_number++,\$header,\$b,
-						 $recstart,$recend,length $1);
-		    }
-		} else {
-		    # Find the last recend-recstart in $buf
-		    if($buf =~ s/(.*$recend)($recstart.*?)$/$2/os) {
-			# Copy to modifiable variable
-			my $b = $1;
-			$anything_written +=
-			    write_record_to_pipe($chunk_number++,\$header,\$b,
-						 $recstart,$recend,length $1);
-		    }
-		}
-	    } else {
-		if($Global::max_number_of_args) {
-		    # -N => (start..*?end){n}
-		    my $i = 0;
-		    my $read_n_lines = $Global::max_number_of_args * ($Global::max_lines || 1);
-		    while(($i = nindex(\$buf,$recendrecstart,$read_n_lines)) != -1) {
-			$i += length $recend; # find the actual splitting location
-			$anything_written +=
-			    write_record_to_pipe($chunk_number++,\$header,\$buf,
-						 $recstart,$recend,$i);
-			substr($buf,0,$i) = "";
-		    }
-		} else {
-		    # Find the last recend-recstart in $buf
-		    my $i = rindex($buf,$recendrecstart);
-		    if($i != -1) {
-			$i += length $recend; # find the actual splitting location
-			$anything_written +=
-			    write_record_to_pipe($chunk_number++,\$header,\$buf,
-						 $recstart,$recend,$i);
-			substr($buf,0,$i) = "";
-		    }
-		}
-	    }
-	    if(not $anything_written and not eof($in)) {
-		# Nothing was written - maybe the block size < record size?
-		# Increase blocksize exponentially
-		$blocksize = ceil($blocksize * 1.3 + 1);
-		::warning("A full record was not matched in a block. Increasing to --blocksize ".$blocksize."\n");
-	    }
-	} 
+    while(1) {
+      my $anything_written = 0;
+      if(not read($in,substr($buf,length $buf,0),$blocksize)) {
+	  # End-of-file
+	  $chunk_number != 1 and last;
+	  # Force the while-loop once if everything was read by header reading
+	  $one_time_through++ and last;
+      }
+      if($opt::r) {
+	  # Remove empty lines
+	  $buf=~s/^\s*\n//gm;
+	  if(length $buf == 0) {
+	      next;
+	  }
+      }
+      if($Global::max_lines and not $Global::max_number_of_args) {
+	  # Read n-line records 
+	  my $n_lines = $buf=~tr/\n/\n/;
+	  my $last_newline_pos = rindex($buf,"\n");
+	  while($n_lines % $Global::max_lines) {
+	      $n_lines--;
+	      $last_newline_pos = rindex($buf,"\n",$last_newline_pos-1);
+	  }
+	  # Chop at $last_newline_pos as that is where n-line record ends
+	  $anything_written +=
+	      write_record_to_pipe($chunk_number++,\$header,\$buf,
+				   $recstart,$recend,$last_newline_pos+1);
+	  substr($buf,0,$last_newline_pos+1) = "";
+      } elsif($opt::regexp) {
+	  if($Global::max_number_of_args) {
+	      # -N => (start..*?end){n}
+	      # -L -N => (start..*?end){n*l}
+	      my $read_n_lines = $Global::max_number_of_args * ($Global::max_lines || 1);
+	      while($buf =~ s/((?:$recstart.*?$recend){$read_n_lines})($recstart.*)$/$2/os) {
+		  # Copy to modifiable variable
+		  my $b = $1;
+		  $anything_written +=
+		      write_record_to_pipe($chunk_number++,\$header,\$b,
+					   $recstart,$recend,length $1);
+	      }
+	  } else {
+	      # Find the last recend-recstart in $buf
+	      if($buf =~ s/(.*$recend)($recstart.*?)$/$2/os) {
+		  # Copy to modifiable variable
+		  my $b = $1;
+		  $anything_written +=
+		      write_record_to_pipe($chunk_number++,\$header,\$b,
+					   $recstart,$recend,length $1);
+	      }
+	  }
+      } else {
+	  if($Global::max_number_of_args) {
+	      # -N => (start..*?end){n}
+	      my $i = 0;
+	      my $read_n_lines = $Global::max_number_of_args * ($Global::max_lines || 1);
+	      while(($i = nindex(\$buf,$recendrecstart,$read_n_lines)) != -1) {
+		  $i += length $recend; # find the actual splitting location
+		  $anything_written +=
+		      write_record_to_pipe($chunk_number++,\$header,\$buf,
+					   $recstart,$recend,$i);
+		  substr($buf,0,$i) = "";
+	      }
+	  } else {
+	      # Find the last recend-recstart in $buf
+	      my $i = rindex($buf,$recendrecstart);
+	      if($i != -1) {
+		  $i += length $recend; # find the actual splitting location
+		  $anything_written +=
+		      write_record_to_pipe($chunk_number++,\$header,\$buf,
+					   $recstart,$recend,$i);
+		  substr($buf,0,$i) = "";
+	      }
+	  }
+      }
+      if(not $anything_written and not eof($in)) {
+	  # Nothing was written - maybe the block size < record size?
+	  # Increase blocksize exponentially
+	  $blocksize = ceil($blocksize * 1.3 + 1);
+	  ::warning("A full record was not matched in a block. Increasing to --blocksize ".$blocksize."\n");
+      }
+    } 
     # If there is anything left in the buffer write it
     substr($buf,0,0) = "";
     write_record_to_pipe($chunk_number++,\$header,\$buf,$recstart,$recend,length $buf);
@@ -4733,15 +4732,6 @@ sub populate {
     # max line length is reached
     # Returns: N/A
     my $self = shift;
-#    if($opt::pipe) {
-#	# --pipe => Do no read any args
-#	$self->push([Arg->new("")]);
-#	return;
-#    }
-#    if($opt::roundrobin) {
-#	$self->push([Arg->new("")]);
-#	return;
-#    }
     my $next_arg;
     while (not $self->{'arg_queue'}->empty()) {
 	$next_arg = $self->{'arg_queue'}->get();
@@ -5102,9 +5092,6 @@ sub replace_placeholders {
     my $quote = shift;
     my $context_replace = $self->{'context_replace'};
     my $replaced;
-
-#    print ::my_dump($self);
-
     if($self->{'context_replace'}) {
 	$replaced = $self->context_replace_placeholders($target,$quote);
     } else {
@@ -5158,7 +5145,7 @@ sub context_replace_placeholders {
 	$word{$1} ||= 1;
     }
     if(not %word) {
-	# The line did no contain any replacementstrings => return unchanged
+	# The line did no contain any replacement strings => return unchanged
 	return $target;	
     }
     # For each word: Generate the replacement string for that word.
