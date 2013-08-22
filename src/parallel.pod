@@ -430,7 +430,7 @@ occurs as a line of input, the rest of the input is ignored.  If
 neither B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--delay> I<secs>
+=item B<--delay> I<secs> (alpha testing)
 
 Delay starting next job I<secs> seconds. GNU B<parallel> will pause
 I<secs> seconds after starting each job. I<secs> can be less than 1
@@ -489,7 +489,7 @@ See also B<--bg>, B<man sem>.
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (beta testing)
+=item B<--filter-hosts> (alpha testing)
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -579,7 +579,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile>
+=item B<--joblog> I<logfile> (alpha testing)
 
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -705,6 +705,17 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
+=item B<--line-buffer> (alpha testing)
+
+Buffer output on line basis. B<--group> will keep the output together
+for a whole job. B<--ungroup> allows output to mixup with half a line
+coming from one job and half a line coming from another
+job. B<--line-buffer> fits between these two: GNU B<parallel> will
+print a full line, but will allow for mixing lines of different jobs.
+
+B<--line-buffer> is slower than both B<--group> and B<--ungroup>.
+
+
 =item B<--load> I<max-load>
 
 Do not start new jobs on a given computer unless the number of running
@@ -786,19 +797,19 @@ When using B<--group> the output will be grouped by each server, so
 all the output from one server will be grouped together.
 
 
-=item B<--output-as-files>
+=item B<--output-as-files> (alpha testing)
 
-=item B<--outputasfiles>
+=item B<--outputasfiles> (alpha testing)
 
-=item B<--files>
+=item B<--files> (alpha testing)
 
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe>
+=item B<--pipe> (alpha testing)
 
-=item B<--spreadstdin>
+=item B<--spreadstdin> (alpha testing)
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1004,9 +1015,9 @@ it to the command.
 Only used with B<--pipe>.
 
 
-=item B<--results> I<prefix>
+=item B<--results> I<prefix> (alpha testing)
 
-=item B<--res> I<prefix>
+=item B<--res> I<prefix> (alpha testing)
 
 Save the output into files. The files will be stored in a directory tree
 rooted at I<prefix>.  Within this directory tree, each command will result
@@ -1307,9 +1318,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename>
+=item B<--sshloginfile> I<filename> (alpha testing)
 
-=item B<--slf> I<filename>
+=item B<--slf> I<filename> (alpha testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1333,6 +1344,9 @@ lines. Empty lines and lines starting with '#' are ignored. Example:
 When using a different ssh program the last argument must be the hostname.
 
 Multiple B<--sshloginfile> are allowed.
+
+GNU B<parallel> will first look for the file in current dir; if that
+fails it look for the file in ~/.parallel.
 
 The sshloginfile '..' is special, it read sshlogins from
 ~/.parallel/sshloginfile
@@ -1398,7 +1412,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<val>
+=item B<--timeout> I<val> (alpha testing)
 
 Time out for command. If the command runs for longer than I<val>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1543,9 +1557,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir>
+=item B<--workdir> I<mydir> (alpha testing)
 
-=item B<--wd> I<mydir>
+=item B<--wd> I<mydir> (alpha testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in
@@ -1607,7 +1621,7 @@ See also B<-m>.
 Exit if the size (see the B<-s> option) is exceeded.
 
 
-=item B<--xapply> (beta testing)
+=item B<--xapply>
 
 Read multiple input sources like B<xapply>. If multiple input sources
 are given, one argument will be read from each of the input

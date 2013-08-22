@@ -266,21 +266,32 @@ if($opt::nonall or $opt::onall) {
 $Global::JobQueue = JobQueue->new(
     $command,\@fhlist,$Global::ContextReplace,$number_of_args,\@Global::ret_files);
 if($opt::pipe and @opt::a) {
-    # Disabled for now
     # ... | parallel --pipe cmd ::: arg1 arg2
     # The command to run is:
     # tee >((cmd arg1) >/tmp/tmp1 2>/tmp/err1) >((cmd arg2) >/tmp/tmp2 2>/tmp/err2) >/dev/null
     my @jobs;
     # Get all jobs
+    my $sshlogin = SSHLogin->new(":");
     while(not $Global::JobQueue->empty()) {
-	push @jobs, $Global::JobQueue->get();
+	my $job = $Global::JobQueue->get();
+	$job->openoutputfiles(); # Do not delete
+	$job->set_virgin(0);
+	$job->set_sshlogin($sshlogin);
+	push @jobs, $job;
     }
-    $command = "tee ".join("",map {">((".$_->replaced().") >/tmp/tmp) "} @jobs)
+    @Global::tee_jobs = @jobs;
+    $command = "tee".join("",map {" >((".$_->replaced().")".
+				       " >".$_->fd_file_name(1).
+				       " 2>".$_->fd_file_name(2).")" } @jobs)
 	." >/dev/null";
     $Global::JobQueue = JobQueue->new(
 	$command,\@fhlist,$Global::ContextReplace,$number_of_args,\@Global::ret_files);
+    #print ::my_dump($jobs[0]);
+    #print ::my_dump($Global::JobQueue);
+    $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->unget([Arg->new("")]);
+    #my $cmd = $Global::JobQueue->get();
+    #print ::my_dump($cmd);
 }
-
 
 if($opt::eta) {
     # Count the number of jobs before starting any
@@ -304,6 +315,14 @@ if($opt::pipe) {
 drain_job_queue();
 ::debug("Done draining\n");
 reaper();
+if($opt::pipe and @opt::a) {
+    for my $job (@Global::tee_jobs) {
+	unlink $job->fd_file_name(2);
+	$job->set_fd_file_name(2,"");
+	$job->print();
+	unlink $job->fd_file_name(1);
+    }
+}
 cleanup();
 if($Global::semaphore) {
     $sem->release();
@@ -746,7 +765,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130819;
+    $Global::version = 20130822;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3715,14 +3734,21 @@ sub openoutputfiles {
 	# To group we create temporary files for STDOUT and STDERR
 	# To avoid the cleanup unlink the files immediately (but keep them open)
 	($outfh, $outname) = ::tempfile(SUFFIX => ".par");
-	$opt::files or unlink $outname;
 	($errfh, $errname) = ::tempfile(SUFFIX => ".par");
-	unlink $errname;
-	$errname = "";
+	if(@Global::tee_jobs) {
+	    # files must be removed when the tee is done
+	} elsif($opt::files) {
+	    # --files => only remove stderr
+	    unlink $errname;
+	} else {
+	    unlink $outname;
+	    unlink $errname;
+	}
     } else {
 	# --ungroup
 	$outfh = *STDOUT;
 	$errfh = *STDERR;
+	# File name must be empty as it will otherwise be printed
 	$outname = "";
 	$errname = "";
     }
@@ -4525,7 +4551,9 @@ sub print {
 	}
 	::debug("File descriptor $fdno:");
 	if($opt::files) {
-	    $self->fd_file_name($fdno) and print $out_fd $self->fd_file_name($fdno),"\n";
+	    if($fdno == 1 and $self->fd_file_name($fdno)) {
+		print $out_fd $self->fd_file_name($fdno),"\n";
+	    }
 	} elsif($opt::linebuffer) {
 	    # Line buffered print out
 	    my $partial = \$self->{'partial_line',$fdno};
@@ -5181,6 +5209,7 @@ sub context_replace_placeholders {
 		# Only one input source: Treat it as a set
 		@argset = [ @args ];
 	    } else {
+		# Multiple input sources
 		@argset = @{$self->{'arg_list'}};
 	    }
 	    # Match -n..-1,1..n where n = max args in a argset

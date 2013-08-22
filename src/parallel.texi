@@ -456,8 +456,8 @@ Set the end of file string to eof-str.  If the end of file string
 occurs as a line of input, the rest of the input is ignored.  If
 neither @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
-@item @strong{--delay} @emph{secs}
-@anchor{@strong{--delay} @emph{secs}}
+@item @strong{--delay} @emph{secs} (alpha testing)
+@anchor{@strong{--delay} @emph{secs} (alpha testing)}
 
 Delay starting next job @emph{secs} seconds. GNU @strong{parallel} will pause
 @emph{secs} seconds after starting each job. @emph{secs} can be less than 1
@@ -516,8 +516,8 @@ See also @strong{--bg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (beta testing)
-@anchor{@strong{--filter-hosts} (beta testing)}
+@item @strong{--filter-hosts} (alpha testing)
+@anchor{@strong{--filter-hosts} (alpha testing)}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -611,8 +611,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile}
-@anchor{@strong{--joblog} @emph{logfile}}
+@item @strong{--joblog} @emph{logfile} (alpha testing)
+@anchor{@strong{--joblog} @emph{logfile} (alpha testing)}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -757,6 +757,17 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
+@item @strong{--line-buffer} (alpha testing)
+@anchor{@strong{--line-buffer} (alpha testing)}
+
+Buffer output on line basis. @strong{--group} will keep the output together
+for a whole job. @strong{--ungroup} allows output to mixup with half a line
+coming from one job and half a line coming from another
+job. @strong{--line-buffer} fits between these two: GNU @strong{parallel} will
+print a full line, but will allow for mixing lines of different jobs.
+
+@strong{--line-buffer} is slower than both @strong{--group} and @strong{--ungroup}.
+
 @item @strong{--load} @emph{max-load}
 @anchor{@strong{--load} @emph{max-load}}
 
@@ -839,23 +850,23 @@ adjusts how many computers to log into in parallel.
 When using @strong{--group} the output will be grouped by each server, so
 all the output from one server will be grouped together.
 
-@item @strong{--output-as-files}
-@anchor{@strong{--output-as-files}}
+@item @strong{--output-as-files} (alpha testing)
+@anchor{@strong{--output-as-files} (alpha testing)}
 
-@item @strong{--outputasfiles}
-@anchor{@strong{--outputasfiles}}
+@item @strong{--outputasfiles} (alpha testing)
+@anchor{@strong{--outputasfiles} (alpha testing)}
 
-@item @strong{--files}
-@anchor{@strong{--files}}
+@item @strong{--files} (alpha testing)
+@anchor{@strong{--files} (alpha testing)}
 
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
-@item @strong{--pipe}
-@anchor{@strong{--pipe}}
+@item @strong{--pipe} (alpha testing)
+@anchor{@strong{--pipe} (alpha testing)}
 
-@item @strong{--spreadstdin}
-@anchor{@strong{--spreadstdin}}
+@item @strong{--spreadstdin} (alpha testing)
+@anchor{@strong{--spreadstdin} (alpha testing)}
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1069,11 +1080,11 @@ it to the command.
 
 Only used with @strong{--pipe}.
 
-@item @strong{--results} @emph{prefix}
-@anchor{@strong{--results} @emph{prefix}}
+@item @strong{--results} @emph{prefix} (alpha testing)
+@anchor{@strong{--results} @emph{prefix} (alpha testing)}
 
-@item @strong{--res} @emph{prefix}
-@anchor{@strong{--res} @emph{prefix}}
+@item @strong{--res} @emph{prefix} (alpha testing)
+@anchor{@strong{--res} @emph{prefix} (alpha testing)}
 
 Save the output into files. The files will be stored in a directory tree
 rooted at @emph{prefix}.  Within this directory tree, each command will result
@@ -1408,11 +1419,11 @@ The remote host must have GNU @strong{parallel} installed.
 @strong{--sshlogin} is often used with @strong{--transfer}, @strong{--return},
 @strong{--cleanup}, and @strong{--trc}.
 
-@item @strong{--sshloginfile} @emph{filename}
-@anchor{@strong{--sshloginfile} @emph{filename}}
+@item @strong{--sshloginfile} @emph{filename} (alpha testing)
+@anchor{@strong{--sshloginfile} @emph{filename} (alpha testing)}
 
-@item @strong{--slf} @emph{filename}
-@anchor{@strong{--slf} @emph{filename}}
+@item @strong{--slf} @emph{filename} (alpha testing)
+@anchor{@strong{--slf} @emph{filename} (alpha testing)}
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1438,6 +1449,9 @@ lines. Empty lines and lines starting with '#' are ignored. Example:
 When using a different ssh program the last argument must be the hostname.
 
 Multiple @strong{--sshloginfile} are allowed.
+
+GNU @strong{parallel} will first look for the file in current dir; if that
+fails it look for the file in ~/.parallel.
 
 The sshloginfile '..' is special, it read sshlogins from
 ~/.parallel/sshloginfile
@@ -1502,8 +1516,8 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{val}
-@anchor{@strong{--timeout} @emph{val}}
+@item @strong{--timeout} @emph{val} (alpha testing)
+@anchor{@strong{--timeout} @emph{val} (alpha testing)}
 
 Time out for command. If the command runs for longer than @emph{val}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1659,11 +1673,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir}
-@anchor{@strong{--workdir} @emph{mydir}}
+@item @strong{--workdir} @emph{mydir} (alpha testing)
+@anchor{@strong{--workdir} @emph{mydir} (alpha testing)}
 
-@item @strong{--wd} @emph{mydir}
-@anchor{@strong{--wd} @emph{mydir}}
+@item @strong{--wd} @emph{mydir} (alpha testing)
+@anchor{@strong{--wd} @emph{mydir} (alpha testing)}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in
@@ -1724,8 +1738,8 @@ See also @strong{-m}.
 
 Exit if the size (see the @strong{-s} option) is exceeded.
 
-@item @strong{--xapply} (beta testing)
-@anchor{@strong{--xapply} (beta testing)}
+@item @strong{--xapply}
+@anchor{@strong{--xapply}}
 
 Read multiple input sources like @strong{xapply}. If multiple input sources
 are given, one argument will be read from each of the input

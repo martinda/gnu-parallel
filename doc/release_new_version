@@ -138,6 +138,7 @@ http://www.gnu.org/software/parallel/sem.html
 http://www.gnu.org/software/parallel/niceload.html
 
 pod2html src/parallel.pod > ../parallel-web/parallel/man.html
+pod2html src/parallel_tutorial.pod > ../parallel-web/parallel/parallel_tutorial.html
 pod2html src/sql > ../parallel-web/parallel/sql.html
 pod2html src/niceload.pod > ../parallel-web/parallel/niceload.html
 pod2html src/sem.pod > ../parallel-web/parallel/sem.html
@@ -203,7 +204,26 @@ Subject: GNU Parallel 20130822 ('Compostela') released
 GNU Parallel 20130822 ('Compostela') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
+It includes a big code reorganization making this release beta
+quality.
+
 New in this release:
+
+* A tutorial showing much of GNU Parallel's functionality. Spend an
+  hour walking through the tutorial. Your commandline will love you
+  for it. man parallel_tutorial
+
+* --line-buffer will buffer output on line basis. --group keeps the
+  output together for a whole job. --ungroup allows output to mixup
+  with half a line coming from one job and half a line coming from
+  another job. --line-buffer fits between these two; it prints a full
+  line, but will allow for mixing lines of different jobs.
+
+* --record-env records all variables and functions set. Useful to
+  record the normal environment before using --env _.
+
+* --env _ exports all functions and variables to the remote server
+  except for the ones recorded.
 
 * New signing key. Due to recommendations from NIST
   http://www.keylength.com/en/4/ the signing key was changed from

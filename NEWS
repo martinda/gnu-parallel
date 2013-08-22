@@ -1,3 +1,67 @@
+20130822
+
+* A tutorial showing much of GNU Parallel's functionality. Spend an
+  hour walking through the tutorial. Your commandline will love you
+  for it. man parallel_tutorial
+
+* --line-buffer will buffer output on line basis. --group keeps the
+  output together for a whole job. --ungroup allows output to mixup
+  with half a line coming from one job and half a line coming from
+  another job. --line-buffer fits between these two; it prints a full
+  line, but will allow for mixing lines of different jobs.
+
+* --record-env records all variables and functions set. Useful to
+  record the normal environment before using --env _.
+
+* --env _ exports all functions and variables to the remote server
+  except for the ones recorded.
+
+* New signing key. Due to recommendations from NIST
+  http://www.keylength.com/en/4/ the signing key was changed from
+  1024D/ID:FFFFFFF1 to 9888R/ID:88888888.
+
+* Agalma: an automated phylogenomics workflow
+  http://arxiv.org/pdf/1307.6432
+
+* Job ad asking for GNU Parallel expertise
+  http://seattle.craigslist.org/est/sof/4006079352.html
+
+* Transient Beowulf Clustering with GNU Parallel and SSHfs
+  http://www.reddit.com/r/linux/comments/1ka8mn/transient_beowulf_clustering_with_gnu_parallel/
+
+* Aligning to unique regions
+  http://davetang.org/muse/2013/07/22/aligning-to-unique-regions/
+
+* Top 10 scripting tricks for basic bioinformatics
+  http://students.washington.edu/bowmanjs/wordpress/?p=873
+
+* Using GNU Parallel to speed up and simplify data analyzes
+  http://www.sergeymarkov.com/blog/2013/07/using-gnu-parallel-to-speed-up-and-simplify-data-analyzes/
+
+* Compression of files in parallel using GNU parallel
+  http://codextechnicanum.blogspot.dk/2013/07/compression-of-files-in-parallel-using.html
+
+* Using GNU Parallel to roll-your-own Map Reduce!
+  http://www.rankfocus.com/?p=1
+
+* Using GNU Parallel with Amazon
+  media.amazonwebservices.com/AWS_Amazon_EMR_Best_Practices.pdf
+
+* Some useful comments on GNU Parallel
+  https://news.ycombinator.com/item?id=6209767
+
+* Using GNU Parallel to count reads mapping to genes for multiple BAMs
+  http://drduanehassane.com/blog/sequencing-resources
+
+* TimeMachineっぽいバックアップスクリプト
+  http://rio.tc/2013/07/timemachine-1.html
+
+* GNU ParallelでAndroid NDKの全バージョンを一括ダウンロード
+  http://qiita.com/mazgi/items/b10bf0ff3da2045d19ab
+
+* Bug fixes and man page updates.
+
+
 20130722
 
 * --round-robin with --pipe will write all blocks to already running

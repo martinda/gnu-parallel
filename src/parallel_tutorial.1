@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL_TUTORIAL 1"
-.TH PARALLEL_TUTORIAL 1 "2013-08-17" "20130817" "parallel"
+.TH PARALLEL_TUTORIAL 1 "2013-08-22" "20130822" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -135,7 +135,7 @@ This tutorial shows off much of \s-1GNU\s0 Parallel's functionality. The
 tutorial is meant to learn the options in \s-1GNU\s0 Parallel.  The tutorial
 is not to show realistic examples from the real world.
 .PP
-Spend an hour on walking through the tutorial. Your commandline will
+Spend an hour walking through the tutorial. Your commandline will
 love you for it.
 .SH "Prerequisites"
 .IX Header "Prerequisites"
@@ -311,7 +311,7 @@ Output: Same as above.
 \fIMatching arguments from all input sources\fR
 .IX Subsection "Matching arguments from all input sources"
 .PP
-With \fB\-\-xapply\fR you can get one argument from each input source:
+With \-\-xapply you can get one argument from each input source:
 .PP
 .Vb 1
 \&  parallel \-\-xapply echo ::: A B C ::: D E F
@@ -1717,16 +1717,16 @@ To remove it from the remote host after the last job use \-\-cleanup.
 The default working dir on the remote machines is the login dir. This
 can be changed with \-\-workdir \fImydir\fR.
 .PP
-Files transferred using \fB\-\-transfer\fR and \fB\-\-return\fR will be relative
+Files transferred using \-\-transfer and \-\-return will be relative
 to \fImydir\fR on remote computers, and the command will be executed in
 the dir \fImydir\fR.
 .PP
-The special \fImydir\fR value \fB...\fR will create working dirs under
-\&\fB~/.parallel/tmp/\fR on the remote computers. If \fB\-\-cleanup\fR is given
+The special \fImydir\fR value ... will create working dirs under
+~/.parallel/tmp/ on the remote computers. If \-\-cleanup is given
 these dirs will be removed.
 .PP
-The special \fImydir\fR value \fB.\fR uses the current working dir.  If the
-current working dir is beneath your home dir, the value \fB.\fR is
+The special \fImydir\fR value . uses the current working dir.  If the
+current working dir is beneath your home dir, the value . is
 treated as the relative path to your home dir. This means that if your
 home dir is different on remote computers (e.g. if your login is
 different) the relative path will still be relative to your home dir.
@@ -1932,19 +1932,15 @@ Output will be similar to:
 \&  \*(Aq\e"\e\e\e}\e \e|\e|\e export\e my_func3=\e\e\e(\e\e\e)\e\e\e \e\e\e{\e\e\e \e\e\e echo\e\e\e in\e\e\e my_func\e\e\e \e\e\e$1\e\e\e \e\e\e>\e\e\e \e\e\e$1.out\e"\*(Aq
 \&  \*(Aq\e"\e\e\e}\e \e&\e&\e export\e VAR=foo\e \e&\e&\e export\e my_func2=\e\e\e(\e\e\e)\e\e\e \e\e\e{\e\e\e \e\e\e echo\e\e\e in\e\e\e my_func2\e\e\e \e\e\e$VAR\e\e\e \e\e\e$1\e"\*(Aq
 \&  \*(Aq\e"\e\e\e}\e \e&\e&\e eval\e my_func3\e"\e$my_func3\e"\e \e&\e&\e eval\e my_func2\e"\e$my_func2\e"\e;\e\enice\e \-n17\e /bin/bash\e \-c\e my_func3\e\e\e abc\-file;_EXIT_status=$?; mkdir \-p .; rsync \-\-rsync\-path=cd\e .parallel/tmp/hk\-31483\-1/.\e;\e rsync \-rlDzR \-essh server:abc\-file.out .;ssh server rm\e \-f\e .parallel/tmp/hk\-31483\-1/abc\-file\e;rm\e \-f\e .parallel/tmp/hk\-31483\-1/abc\-file.out\e;rm \-rf .parallel/tmp/hk\-31483\-1\e;; exit $_EXIT_status;
-\&
-\&  ssh lo mkdir \-p .parallel/tmp/hk\-20978\-1; rsync \-rlDzR \-essh ./abc\-file lo:.parallel/tmp/hk\-20978\-1;ssh \-tt \-oLogLevel=quiet lo  \*(Aqeval \`echo $SHELL | grep "/t\e{0,1\e}csh" > /dev/null  && echo setenv PARALLEL_SEQ \*(Aq$PARALLEL_SEQ\*(Aq\e;  setenv PARALLEL_PID \*(Aq$PARALLEL_PID\*(Aq  || echo PARALLEL_SEQ=\*(Aq$PARALLEL_SEQ\*(Aq\e;export PARALLEL_SEQ\e;  PARALLEL_PID=\*(Aq$PARALLEL_PID\*(Aq\e;export PARALLEL_PID\` ;\*(Aq  tty\e \e>/dev/null\e \e&\e&\e stty\e isig\e \-onlcr\e \-echo\e;mkdir\e \-p\e .parallel/tmp/hk\-20978\-1\e;\e cd\e .parallel/tmp/hk\-20978\-1\e \e&\e&\e echo\e \e$SHELL\e \e|\e grep\e \e"/t\e\e\e{0,1\e\e\e}csh\e"\e \e>\e /dev/null\e \e&\e&\e setenv\e my_func\e \e\e\e(\e\e\e)\e\e\e \e\e\e{\e\e\e \e\e\e echo\e\e\e in\e\e\e my_func\e\e\e \e\e\e$1\e\e\e \e\e\e>\e\e\e \e\e\e$1.out\e"\*(Aq
-\&  \*(Aq\e"\e\e\e}\e \e|\e|\e export\e my_func=\e\e\e(\e\e\e)\e\e\e \e\e\e{\e\e\e \e\e\e echo\e\e\e in\e\e\e my_func\e\e\e \e\e\e$1\e\e\e \e\e\e>\e\e\e \e\e\e$1.out\e"\*(Aq
-\&  \*(Aq\e"\e\e\e}\e \e&\e&\e eval\e my_func\e"\e$my_func\e"\e;\e\enice\e \-n17\e /bin/bash\e \-c\e my_func\e\e\e abc\-file;_EXIT_status=$?; mkdir \-p .; rsync \-\-rsync\-path=cd\e .parallel/tmp/hk\-20978\-1/.\e;\e rsync \-rlDzR \-essh lo:abc\-file.out .;ssh lo rm\e \-f\e .parallel/tmp/hk\-20978\-1/abc\-file\e;rm\e \-f\e .parallel/tmp/hk\-20978\-1/abc\-file.out\e;rm \-rf .parallel/tmp/hk\-20978\-1\e;; exit $_EXIT_status;
 .Ve
 .SH "\-\-pipe"
 .IX Header "--pipe"
 The \-\-pipe functionality puts \s-1GNU\s0 Parallel in a different mode:
-Instead of treating the input sources as arguments for a command to
-run, they will be sent to stdin (standard input) of the command.
+Instead of treating the data on stdin (standard input) as arguments
+for a command to run, the data will be sent to stdin (standard input)
+of the command.
 .PP
-The normal situation is that the input for \s-1GNU\s0 Parallel in \-\-pipe mode
-is on stdin (standard input), so you typically have a situation like:
+The typical situation is:
 .PP
 .Vb 1
 \&  command_A | command_B | command_C

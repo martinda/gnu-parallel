@@ -6,7 +6,7 @@ This tutorial shows off much of GNU Parallel's functionality. The
 tutorial is meant to learn the options in GNU Parallel.  The tutorial
 is not to show realistic examples from the real world.
 
-Spend an hour on walking through the tutorial. Your commandline will
+Spend an hour walking through the tutorial. Your commandline will
 love you for it.
 
 =head1 Prerequisites
@@ -161,7 +161,7 @@ Output: Same as above.
 
 =head3 Matching arguments from all input sources
 
-With B<--xapply> you can get one argument from each input source:
+With --xapply you can get one argument from each input source:
 
   parallel --xapply echo ::: A B C ::: D E F
 
@@ -1245,16 +1245,16 @@ To remove it from the remote host after the last job use --cleanup.
 The default working dir on the remote machines is the login dir. This
 can be changed with --workdir I<mydir>.
 
-Files transferred using B<--transfer> and B<--return> will be relative
+Files transferred using --transfer and --return will be relative
 to I<mydir> on remote computers, and the command will be executed in
 the dir I<mydir>.
 
-The special I<mydir> value B<...> will create working dirs under
-B<~/.parallel/tmp/> on the remote computers. If B<--cleanup> is given
+The special I<mydir> value ... will create working dirs under
+~/.parallel/tmp/ on the remote computers. If --cleanup is given
 these dirs will be removed.
 
-The special I<mydir> value B<.> uses the current working dir.  If the
-current working dir is beneath your home dir, the value B<.> is
+The special I<mydir> value . uses the current working dir.  If the
+current working dir is beneath your home dir, the value . is
 treated as the relative path to your home dir. This means that if your
 home dir is different on remote computers (e.g. if your login is
 different) the relative path will still be relative to your home dir.
@@ -1418,19 +1418,14 @@ Output will be similar to:
   '\"\\\}\ \&\&\ export\ VAR=foo\ \&\&\ export\ my_func2=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
   '\"\\\}\ \&\&\ eval\ my_func3\"\$my_func3\"\ \&\&\ eval\ my_func2\"\$my_func2\"\;\\nice\ -n17\ /bin/bash\ -c\ my_func3\\\ abc-file;_EXIT_status=$?; mkdir -p .; rsync --rsync-path=cd\ .parallel/tmp/hk-31483-1/.\;\ rsync -rlDzR -essh server:abc-file.out .;ssh server rm\ -f\ .parallel/tmp/hk-31483-1/abc-file\;rm\ -f\ .parallel/tmp/hk-31483-1/abc-file.out\;rm -rf .parallel/tmp/hk-31483-1\;; exit $_EXIT_status;
 
-  ssh lo mkdir -p .parallel/tmp/hk-20978-1; rsync -rlDzR -essh ./abc-file lo:.parallel/tmp/hk-20978-1;ssh -tt -oLogLevel=quiet lo  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;mkdir\ -p\ .parallel/tmp/hk-20978-1\;\ cd\ .parallel/tmp/hk-20978-1\ \&\&\ echo\ \$SHELL\ \|\ grep\ \"/t\\\{0,1\\\}csh\"\ \>\ /dev/null\ \&\&\ setenv\ my_func\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\\\ \\\>\\\ \\\$1.out\"'
-  '\"\\\}\ \|\|\ export\ my_func=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\\\ \\\>\\\ \\\$1.out\"'
-  '\"\\\}\ \&\&\ eval\ my_func\"\$my_func\"\;\\nice\ -n17\ /bin/bash\ -c\ my_func\\\ abc-file;_EXIT_status=$?; mkdir -p .; rsync --rsync-path=cd\ .parallel/tmp/hk-20978-1/.\;\ rsync -rlDzR -essh lo:abc-file.out .;ssh lo rm\ -f\ .parallel/tmp/hk-20978-1/abc-file\;rm\ -f\ .parallel/tmp/hk-20978-1/abc-file.out\;rm -rf .parallel/tmp/hk-20978-1\;; exit $_EXIT_status;
-
-
 =head1 --pipe
 
 The --pipe functionality puts GNU Parallel in a different mode:
-Instead of treating the input sources as arguments for a command to
-run, they will be sent to stdin (standard input) of the command.
+Instead of treating the data on stdin (standard input) as arguments
+for a command to run, the data will be sent to stdin (standard input)
+of the command.
 
-The normal situation is that the input for GNU Parallel in --pipe mode
-is on stdin (standard input), so you typically have a situation like:
+The typical situation is:
 
   command_A | command_B | command_C
 
