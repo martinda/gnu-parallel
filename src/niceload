@@ -397,8 +397,14 @@ sub kill_child_TSTP {
 
 sub kill_child_INT {
     my $self = $Global::process;
-    ::debug("SIGINT received. Killing $self->{'pid'} Exit\n");
-    kill INT => $self->pgrp();
+    ::debug("SIGINT received.\n");
+    if(not @opt::pid) {
+	::debug("Killing $self->{'pid'} Exit\n");
+	kill INT => $self->pgrp();
+    } else {
+	::debug("Continue pids $self->{'pid'} Exit\n");
+	kill CONT => $self->pgrp();
+    }
     exit;
 }
 
