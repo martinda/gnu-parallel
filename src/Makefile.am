@@ -1,6 +1,6 @@
 bin_SCRIPTS = parallel sem sql niceload
 man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1
-doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi
+doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
 
 parallel.1: parallel.pod Makefile
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
@@ -66,12 +66,33 @@ niceload.texi: niceload.pod
 # If pod2texi is not installed: Forget about it
 	pod2texi --output=$(srcdir)/niceload.texi $(srcdir)/niceload.pod || true
 
+parallel.pdf: parallel.pod
+# If pod2pdf is not installed: Forget about it
+	pod2pdf --output-file $(srcdir)/parallel.pdf $(srcdir)/parallel.pod || true
+
+parallel_tutorial.pdf: parallel_tutorial.pod
+# If pod2pdf is not installed: Forget about it
+	pod2pdf --output-file $(srcdir)/parallel_tutorial.pdf $(srcdir)/parallel_tutorial.pod || true
+
+sem.pdf: sem.pod
+# If pod2pdf is not installed: Forget about it
+	pod2pdf --output-file $(srcdir)/sem.pdf $(srcdir)/sem.pod || true
+
+sql.pdf: sql
+# If pod2pdf is not installed: Forget about it
+	pod2pdf --output-file $(srcdir)/sql.pdf $(srcdir)/sql || true
+
+niceload.pdf: niceload.pod
+# If pod2pdf is not installed: Forget about it
+	pod2pdf --output-file $(srcdir)/niceload.pdf $(srcdir)/niceload.pod || true
+
 sem: parallel
 	ln -fs parallel sem
 
 DISTCLEANFILES = parallel.html sem.html sql.html niceload.html parallel_tutorial.html
 EXTRA_DIST = parallel sem sql niceload \
 	parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 \
-	parallel.html sem.html sql.html niceload.html parallel_tutorial.1 \
+	parallel.html sem.html sql.html niceload.html parallel_tutorial.html \
 	sem.pod parallel.pod niceload.pod parallel_tutorial.pod \
-	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi
+	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi \
+	parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf

@@ -30,11 +30,7 @@ The 10 seconds installation will try do to a full installation; if
 that fails, a personal installation; if that fails, a minimal
 installation.
 
-  wget -O - pi.dk/3 | bash
-
-or:
-
-  curl pi.dk/3/ | bash  
+  (wget -O - pi.dk/3 || curl pi.dk/3/) | bash
 
 This will literally install faster than reading the rest of this
 document.
@@ -85,8 +81,10 @@ This will send 3 ping packets to 3 different hosts in parallel and print
 the output when they complete.
 
 Watch the intro video for a quick introduction:
-https://www.youtube.com/playlist?list=PL284C9FF2488BC6D1 or at
-http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
+https://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
+
+Walk through the tutorial (man parallel_tutorial). You command line
+with love you for it.
 
 
 = New versions =

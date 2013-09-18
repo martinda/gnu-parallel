@@ -56,13 +56,20 @@ make install prefix=$RPM_BUILD_ROOT%{_prefix} exec_prefix=$RPM_BUILD_ROOT%{_pref
     mandir=$RPM_BUILD_ROOT%{_mandir}
 
 rm $RPM_BUILD_ROOT%{_docdir}/parallel.html
+rm $RPM_BUILD_ROOT%{_docdir}/parallel_tutorial.html
 rm $RPM_BUILD_ROOT%{_docdir}/niceload.html
 rm $RPM_BUILD_ROOT%{_docdir}/sem.html
 rm $RPM_BUILD_ROOT%{_docdir}/sql.html
 rm $RPM_BUILD_ROOT%{_docdir}/parallel.texi
+rm $RPM_BUILD_ROOT%{_docdir}/parallel_tutorial.texi
 rm $RPM_BUILD_ROOT%{_docdir}/niceload.texi
 rm $RPM_BUILD_ROOT%{_docdir}/sem.texi
 rm $RPM_BUILD_ROOT%{_docdir}/sql.texi
+rm $RPM_BUILD_ROOT%{_docdir}/parallel.pdf
+rm $RPM_BUILD_ROOT%{_docdir}/parallel_tutorial.pdf
+rm $RPM_BUILD_ROOT%{_docdir}/niceload.pdf
+rm $RPM_BUILD_ROOT%{_docdir}/sem.pdf
+rm $RPM_BUILD_ROOT%{_docdir}/sql.pdf
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -71,7 +78,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 /usr/bin/*
 /usr/share/man/man1/*
-%doc README NEWS src/parallel.html src/sem.html src/sql.html src/niceload.html
+%doc README NEWS src/parallel.html src/parallel_tutorial.html src/sem.html src/sql.html src/niceload.html
 
 %changelog
 * Sat Jan 22 2011 Ole Tange

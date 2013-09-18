@@ -106,6 +106,7 @@ echo put parallel-latest.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/in
 cd ~/privat/parallel/packager/obs
 # Update version number
 em home:tange/parallel/parallel.spec
+
 find home:tange/parallel/* -type f | grep -v parallel.spec | parallel -Xj1 osc rm {}
 # This should not create new files
 osc up home:tange/parallel/
@@ -150,6 +151,7 @@ pushd
 == Commit released version ==
 
 git diff
+
 git commit -a
 
 == Update Savannah ==
@@ -166,8 +168,8 @@ http://freshmeat.net/projects/parallel/releases/new
 
 == Update Diaspora Twitter ==
 
-New release of #GNU Parallel pi.dk/0 New in this release pi.dk/2 See the intro videos pi.dk/1
-10 secs installation: wget -O - pi.dk/3|sh
+New release of #GNU Parallel pi․dk/0 New in this release pi․dk/2 See the intro videos pi․dk/1 
+10 secs installation: wget -O - pi․dk/3|bash
 
 [x] Twitter
 Aspect: Public
@@ -199,74 +201,24 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20130822 ('Compostela') released
+Subject: GNU Parallel 20130922 ('') released
 
-GNU Parallel 20130822 ('Compostela') has been released. It is
+GNU Parallel 20130922 ('') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
-
-It includes a big code reorganization making this release beta
-quality.
 
 New in this release:
 
-* A tutorial showing much of GNU Parallel's functionality. Spend an
-  hour walking through the tutorial. Your commandline will love you
-  for it. man parallel_tutorial
+* Cloning at warp speed 100 VMs in 1 minute using one command line
+  http://www.beebotech.com.au/tag/command-line/
 
-* --line-buffer will buffer output on line basis. --group keeps the
-  output together for a whole job. --ungroup allows output to mixup
-  with half a line coming from one job and half a line coming from
-  another job. --line-buffer fits between these two; it prints a full
-  line, but will allow for mixing lines of different jobs.
+* Calcul Quebec's introduction to GNU Parallel
+  https://wiki.calculquebec.ca/w/GNU_parallel
 
-* --record-env records all variables and functions set. Useful to
-  record the normal environment before using --env _.
+* Brincando com o GNU parallel
+  http://blog.tadeucruz.com/2013/09/brincando-com-o-gnu-parallel/
 
-* --env _ exports all functions and variables to the remote server
-  except for the ones recorded.
-
-* New signing key. Due to recommendations from NIST
-  http://www.keylength.com/en/4/ the signing key was changed from
-  1024D/ID:FFFFFFF1 to 9888R/ID:88888888.
-
-* Agalma: an automated phylogenomics workflow
-  http://arxiv.org/pdf/1307.6432
-
-* Job ad asking for GNU Parallel expertise
-  http://seattle.craigslist.org/est/sof/4006079352.html
-
-* Transient Beowulf Clustering with GNU Parallel and SSHfs
-  http://www.reddit.com/r/linux/comments/1ka8mn/transient_beowulf_clustering_with_gnu_parallel/
-
-* Aligning to unique regions
-  http://davetang.org/muse/2013/07/22/aligning-to-unique-regions/
-
-* Top 10 scripting tricks for basic bioinformatics
-  http://students.washington.edu/bowmanjs/wordpress/?p=873
-
-* Using GNU Parallel to speed up and simplify data analyzes
-  http://www.sergeymarkov.com/blog/2013/07/using-gnu-parallel-to-speed-up-and-simplify-data-analyzes/
-
-* Compression of files in parallel using GNU parallel
-  http://codextechnicanum.blogspot.dk/2013/07/compression-of-files-in-parallel-using.html
-
-* Using GNU Parallel to roll-your-own Map Reduce!
-  http://www.rankfocus.com/?p=1
-
-* Using GNU Parallel with Amazon
-  media.amazonwebservices.com/AWS_Amazon_EMR_Best_Practices.pdf
-
-* Some useful comments on GNU Parallel
-  https://news.ycombinator.com/item?id=6209767
-
-* Using GNU Parallel to count reads mapping to genes for multiple BAMs
-  http://drduanehassane.com/blog/sequencing-resources
-
-* TimeMachineっぽいバックアップスクリプト
-  http://rio.tc/2013/07/timemachine-1.html
-
-* GNU ParallelでAndroid NDKの全バージョンを一括ダウンロード
-  http://qiita.com/mazgi/items/b10bf0ff3da2045d19ab
+* GNU Parallelで並列処理を行う 
+  http://qiita.com/PENGUINANA_/items/af27a833e835fe17f09b
 
 * Bug fixes and man page updates.
 
@@ -298,8 +250,10 @@ You can install GNU Parallel in just 10 seconds with:
 wget -O - pi.dk/3 | sh
 
 Watch the intro video on
-http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1 or at
-http://tinyogg.com/watch/TORaR/ and http://tinyogg.com/watch/hfxKj/
+http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
+
+Walk through the tutorial (man parallel_tutorial). Your commandline
+will love you for it.
 
 When using GNU Parallel for a publication please cite:
 
