@@ -16,7 +16,7 @@ wget "$url.sig" -O "${file}.sig"
 gpg -n --verify "${file}.sig" "${file}" 2>&1 | tee "${file}.gpglog"
 set +x
 KEYID="$(grep '^Primary key fingerprint:' "${file}.gpglog" | tr -d ' ' | cut -f 2 -d : )"
-fingerprint="BE9CB49381DE3166A3BC66C12C6229E2FFFFFFF1"
+fingerprint="CDA01A4208C4F74506107E7BD1AB451688888888"
 if [ "$KEYID" != "$fingerprint" ]; then
 	echo "Signature verification FAILED:"
 	cat "${file}.gpglog"

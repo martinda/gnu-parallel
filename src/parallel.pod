@@ -1987,6 +1987,18 @@ can be written like this:
 B<parallel echo {1} {2} ::: M F ::: S M L XL XXL | sort>
 
 
+=head1 EXAMPLE: Finding the lowest difference between files
+
+B<diff> is good for finding differences in text files. B<diff | wc -l>
+gives an indication of the size of the difference. To find the
+differences between all files in the current dir do:
+
+B<parallel --tag 'diff {1} {2} | wc -l' ::: * ::: * | sort -nk3>
+
+This way it is possible to see if some files are closer to other
+files.
+
+
 =head1 EXAMPLE: for-loops with column names
 
 When doing multiple nested for-loops it can be easier to keep track of

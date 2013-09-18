@@ -207,6 +207,15 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 }
 
 if($opt::nonall or $opt::onall) {
+  sub tmp_joblog {
+    my $joblog = shift;
+    if(not defined $joblog) {
+      return undef;
+    }
+    my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".log");
+    close $fh;
+    return $tmpfile;
+  }
     # Copy all @fhlist into tempfiles
     my @argfiles = ();
     for my $fh (@fhlist) {
@@ -234,7 +243,7 @@ if($opt::nonall or $opt::onall) {
 	join(" ",
 	     ((defined $opt::u) ? "-u" : ""),
 	     ((defined $opt::group) ? "-g" : ""),
-	     ((defined $opt::joblog) ? "--joblog $opt::joblog" : ""),
+	     ((defined $opt::files) ? "--files" : ""),
 	     ((defined $opt::colsep) ? "--colsep ".shell_quote($opt::colsep) : ""),
 	     ((@opt::v) ? "-vv" : ""),
 	     ((defined $opt::D) ? "-D" : ""),
@@ -247,8 +256,14 @@ if($opt::nonall or $opt::onall) {
     ::debug("| $0 $options\n");
     open(my $parallel_fh, "|-", "$0 -j0 $options") ||
 	::die_bug("This does not run GNU Parallel: $0 $options");
+  my @joblogs;
     for my $sshlogin (values %Global::host) {
-	print $parallel_fh "$0 $suboptions -j1 ".
+      my $joblog = tmp_joblog($opt::joblog);
+      if($joblog) {
+	push @joblogs, $joblog;
+	$joblog = "--joblog $joblog";
+      }
+	print $parallel_fh "$0 $suboptions -j1 $joblog ".
 	    ((defined $opt::tag) ?
 	     "--tagstring ".shell_quote_scalar($sshlogin->string()) : "").
 	     " -S ". shell_quote_scalar($sshlogin->string())." ".
@@ -259,6 +274,16 @@ if($opt::nonall or $opt::onall) {
     debug("--onall exitvalue ",$?);
     if(@opt::basefile) { cleanup_basefile(); }
     unlink(@argfiles);
+    my %seen;
+  for my $joblog (@joblogs) {
+    # Append to $joblog
+    open(my $fh, "<", $joblog) || ::die_bug("Cannot open tmp joblog $joblog");
+    # Skip first line (header);
+    <$fh>;
+    print $Global::joblog (<$fh>);
+    close $fh;
+    unlink($joblog);
+  }
     wait_and_exit(min(undef_as_zero($Global::exitstatus),254));
 }
 
