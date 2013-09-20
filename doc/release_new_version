@@ -138,11 +138,9 @@ http://www.gnu.org/software/parallel/sql.html
 http://www.gnu.org/software/parallel/sem.html
 http://www.gnu.org/software/parallel/niceload.html
 
-pod2html src/parallel.pod > ../parallel-web/parallel/man.html
-pod2html src/parallel_tutorial.pod > ../parallel-web/parallel/parallel_tutorial.html
-pod2html src/sql > ../parallel-web/parallel/sql.html
-pod2html src/niceload.pod > ../parallel-web/parallel/niceload.html
-pod2html src/sem.pod > ../parallel-web/parallel/sem.html
+cp src/*.pdf src/*.html  ../parallel-web/parallel
+cp src/parallel.html  ../parallel-web/parallel/man.html
+
 pushd ../parallel-web/parallel
 cvs up
 cvs ci -m "New release"
@@ -174,6 +172,8 @@ New release of #GNU Parallel pi․dk/0 New in this release pi․dk/2 See the int
 [x] Twitter
 Aspect: Public
 
+GNU Parallel - for people who live life in the parallel lane.
+
 == Send announce ==
 
 http://groups.google.com/group/comp.unix.shell/post
@@ -201,12 +201,17 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20130922 ('') released
+Subject: GNU Parallel 20130922 ('Manning') released
 
-GNU Parallel 20130922 ('') has been released. It is
+GNU Parallel 20130922 ('Manning') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
+This release has no new features, and very few changes, making it a
+good candidate for a stable release.
+
 New in this release:
+
+* PDF-files of documentation is now included.
 
 * Cloning at warp speed 100 VMs in 1 minute using one command line
   http://www.beebotech.com.au/tag/command-line/

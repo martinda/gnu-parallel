@@ -6115,7 +6115,7 @@ sub acquire {
 	    # Acquire the lock anyway
 	    if(not -e $self->{'idfile'}) {
 		open (my $fh, ">", $self->{'idfile'}) or
-		    ::die_bug("write_idfile: $self->{'idfile'}");
+		    ::die_bug("timeout_write_idfile: $self->{'idfile'}");
 		close $fh;
 	    }
 	    link $self->{'idfile'}, $self->{'pidfile'};

@@ -68,23 +68,23 @@ niceload.texi: niceload.pod
 
 parallel.pdf: parallel.pod
 # If pod2pdf is not installed: Forget about it
-	pod2pdf --output-file $(srcdir)/parallel.pdf $(srcdir)/parallel.pod || true
+	pod2pdf --output-file $(srcdir)/parallel.pdf $(srcdir)/parallel.pod --title "GNU Parallel" || true
 
 parallel_tutorial.pdf: parallel_tutorial.pod
 # If pod2pdf is not installed: Forget about it
-	pod2pdf --output-file $(srcdir)/parallel_tutorial.pdf $(srcdir)/parallel_tutorial.pod || true
+	pod2pdf --output-file $(srcdir)/parallel_tutorial.pdf $(srcdir)/parallel_tutorial.pod --title "GNU Parallel Tutorial" || true
 
 sem.pdf: sem.pod
 # If pod2pdf is not installed: Forget about it
-	pod2pdf --output-file $(srcdir)/sem.pdf $(srcdir)/sem.pod || true
+	pod2pdf --output-file $(srcdir)/sem.pdf $(srcdir)/sem.pod --title "GNU sem" || true
 
 sql.pdf: sql
 # If pod2pdf is not installed: Forget about it
-	pod2pdf --output-file $(srcdir)/sql.pdf $(srcdir)/sql || true
+	pod2pdf --output-file $(srcdir)/sql.pdf $(srcdir)/sql --title "GNU SQL" || true
 
 niceload.pdf: niceload.pod
 # If pod2pdf is not installed: Forget about it
-	pod2pdf --output-file $(srcdir)/niceload.pdf $(srcdir)/niceload.pod || true
+	pod2pdf --output-file $(srcdir)/niceload.pdf $(srcdir)/niceload.pod --title "GNU niceload" || true
 
 sem: parallel
 	ln -fs parallel sem

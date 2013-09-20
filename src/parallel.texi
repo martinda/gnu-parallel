@@ -2124,6 +2124,18 @@ can be written like this:
 
 @strong{parallel echo @{1@} @{2@} ::: M F ::: S M L XL XXL | sort}
 
+@chapter EXAMPLE: Finding the lowest difference between files
+@anchor{EXAMPLE: Finding the lowest difference between files}
+
+@strong{diff} is good for finding differences in text files. @strong{diff | wc -l}
+gives an indication of the size of the difference. To find the
+differences between all files in the current dir do:
+
+@strong{parallel --tag 'diff @{1@} @{2@} | wc -l' ::: * ::: * | sort -nk3}
+
+This way it is possible to see if some files are closer to other
+files.
+
 @chapter EXAMPLE: for-loops with column names
 @anchor{EXAMPLE: for-loops with column names}
 
