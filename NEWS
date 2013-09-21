@@ -1,3 +1,22 @@
+20130922
+
+* PDF-files of documentation is now included.
+
+* Cloning at warp speed 100 VMs in 1 minute using one command line
+  http://www.beebotech.com.au/tag/command-line/
+
+* Calcul Quebec's introduction to GNU Parallel
+  https://wiki.calculquebec.ca/w/GNU_parallel
+
+* Brincando com o GNU parallel
+  http://blog.tadeucruz.com/2013/09/brincando-com-o-gnu-parallel/
+
+* GNU Parallelで並列処理を行う 
+  http://qiita.com/PENGUINANA_/items/af27a833e835fe17f09b
+
+* Bug fixes and man page updates.
+
+
 20130822
 
 * A tutorial showing much of GNU Parallel's functionality. Spend an

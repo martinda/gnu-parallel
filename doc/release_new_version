@@ -121,7 +121,7 @@ https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 YYYYMMDD=`yyyymmdd`
 pushd /tmp
 rm -rf parallel-${YYYYMMDD}*
-wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
+while ! wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2 ; do sleep 2; done
 #wget http://alpha.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
 tar xjvf parallel-$YYYYMMDD.tar.bz2
 cd parallel-$YYYYMMDD
@@ -252,7 +252,7 @@ You can find more about GNU Parallel at:
 http://www.gnu.org/s/parallel/
 
 You can install GNU Parallel in just 10 seconds with:
-wget -O - pi.dk/3 | sh
+(wget -O - pi.dk/3 || curl pi.dk/3/) | bash
 
 Watch the intro video on
 http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1

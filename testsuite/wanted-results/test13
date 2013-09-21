@@ -1,5 +1,5 @@
 ### Test -k
-parallel: Warning: Only enough file handles to run 18 jobs in parallel.
+parallel: Warning: Only enough file handles to run 19 jobs in parallel.
 Raising ulimit -n or /etc/security/limits.conf may help.
 begin
 1
@@ -17,9 +17,9 @@ begin
 13
 14
 15
-parallel: Warning: No more file handles. Raising ulimit -n or /etc/security/limits.conf may help.
 16
 17
+parallel: Warning: No more file handles. Raising ulimit -n or /etc/security/limits.conf may help.
 18
 19
 20

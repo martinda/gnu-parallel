@@ -1,6 +1,6 @@
 Summary:	Shell tool for executing jobs in parallel
 Name: 		parallel
-Version: 	20130822
+Version: 	20130922
 Release: 	1
 License: 	GPL
 Group: 		Productivity/File utilities
@@ -78,7 +78,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 /usr/bin/*
 /usr/share/man/man1/*
-%doc README NEWS src/parallel.html src/parallel_tutorial.html src/sem.html src/sql.html src/niceload.html
+%doc README NEWS src/parallel.html src/parallel_tutorial.html src/sem.html src/sql.html src/niceload.html src/parallel.texi src/parallel_tutorial.texi src/niceload.texi src/sem.texi src/sql.texi src/parallel.pdf src/parallel_tutorial.pdf src/niceload.pdf src/sem.pdf src/sql.pdf
 
 %changelog
 * Sat Jan 22 2011 Ole Tange
