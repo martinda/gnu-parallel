@@ -164,10 +164,14 @@ xargs or cat | sh.</description>
     <manifest-digest sha256new="CPD27BRNTCCOD3UZVTCKP7AL3XHJOBOWM75J2HE2N3ANZ3AZXJ5Q"/>
     <archive extract="parallel-20130822" href="http://ftpmirror.gnu.org/parallel/parallel-20130822.tar.bz2" size="270689"/>
   </implementation>
+		<implementation id="sha1new=0d995d986e89840886ca9fb0d26db6d98e2e8a95" released="2013-09-22" version="20130922">
+    <manifest-digest sha256new="3A4RPPYU4HGILKPSKG47HAKXDPOSVZWS2WR56MNTIIGXQGIXMMWA"/>
+    <archive extract="parallel-20130922" href="http://ftpmirror.gnu.org/parallel/parallel-20130922.tar.bz2" size="769344"/>
+  </implementation>
 	</group>
 </interface>
 <!-- Base64 Signature
-iEUEABECAAYFAlIbM/QACgkQ/lhgK1iJTtKIOwCgtJirkjgy0bWJVXooZtsvWd/EcqIAmNzgQajN
-UYaU5aOneAQ9k7qK/AI=
+iEYEABECAAYFAlI+jJIACgkQ/lhgK1iJTtIhwQCeNFmxA6Rftv/IVGfccKUcXGVoj8gAnRig+pSI
+5dvDwNln9WEg/IQwpzZG
 
 -->
