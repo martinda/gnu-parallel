@@ -5456,21 +5456,28 @@ sub max_length {
     # Returns:
     #   number of chars on the longest command line allowed
     if(not $Limits::Command::line_max_len) {
+	# Disk cache of max command line length 
+	my $len_cache = $ENV{'HOME'} . "/.parallel/tmp/linelen-" . ::hostname();
+	my $cached_limit;
+	if(-e $len_cache) {
+	    open(my $fh, "<", $len_cache) || ::die_bug("Cannot read $len_cache");
+	    $cached_limit = <$fh>;
+	    close $fh;
+	} else {
+	    $cached_limit = real_max_length();
+	    Semaphore::mkdir_or_die($ENV{'HOME'} . "/.parallel/tmp");
+	    open(my $fh, ">", $len_cache) || ::die_bug("Cannot write $len_cache");
+	    print $fh $cached_limit;
+	    close $fh;
+	}
+	$Limits::Command::line_max_len = $cached_limit;
 	if($opt::max_chars) {
-	    if(is_acceptable_command_line_length($opt::max_chars)) {
-		$Limits::Command::line_max_len = $opt::max_chars;
-	    } else {
-		# -s is too long: Find the correct
-		$Limits::Command::line_max_len = binary_find_max_length(0,$opt::max_chars);
-	    }
-	    if($opt::max_chars <= $Limits::Command::line_max_len) {
+	    if($opt::max_chars <= $cached_limit) {
 		$Limits::Command::line_max_len = $opt::max_chars;
 	    } else {
 		::warning("Value for -s option ",
-			  "should be < $Limits::Command::line_max_len.\n");
+			  "should be < $cached_limit.\n");
 	    }
-	} else {
-	    $Limits::Command::line_max_len = real_max_length();
 	}
     }
     return $Limits::Command::line_max_len;

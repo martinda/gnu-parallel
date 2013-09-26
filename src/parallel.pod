@@ -430,7 +430,7 @@ occurs as a line of input, the rest of the input is ignored.  If
 neither B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--delay> I<secs> (alpha testing)
+=item B<--delay> I<secs> (beta testing)
 
 Delay starting next job I<secs> seconds. GNU B<parallel> will pause
 I<secs> seconds after starting each job. I<secs> can be less than 1
@@ -456,7 +456,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var> (alpha testing)
+=item B<--env> I<var> (beta testing)
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -489,7 +489,7 @@ See also B<--bg>, B<man sem>.
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (alpha testing)
+=item B<--filter-hosts> (beta testing)
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -551,7 +551,7 @@ status will be the exit status from the failing job.
 =back
 
 
-=item B<--header> I<regexp> (alpha testing)
+=item B<--header> I<regexp> (beta testing)
 
 Use regexp as header. For normal usage the matched header (typically
 the first line: B<--header '.*\n'>) will be split using B<--colsep>
@@ -705,7 +705,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--line-buffer> (alpha testing)
+=item B<--line-buffer> (beta testing)
 
 Buffer output on line basis. B<--group> will keep the output together
 for a whole job. B<--ungroup> allows output to mixup with half a line
@@ -774,7 +774,7 @@ This is useful for scripts that depend on features only available from
 a certain version of GNU B<parallel>.
 
 
-=item B<--nonall>
+=item B<--nonall> (alpha testing)
 
 B<--onall> with no arguments. Run the command on all computers given
 with B<--sshlogin> but take no arguments. GNU B<parallel> will log
@@ -785,7 +785,7 @@ This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
 
-=item B<--onall>
+=item B<--onall> (alpha testing)
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
@@ -807,9 +807,9 @@ Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
 
-=item B<--pipe> (alpha testing)
+=item B<--pipe> (beta testing)
 
-=item B<--spreadstdin> (alpha testing)
+=item B<--spreadstdin> (beta testing)
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -967,7 +967,7 @@ If the stdin (standard input) only contains whitespace, do not run the command.
 If used with B<--pipe> this is slow.
 
 
-=item B<--record-env> (alpha testing)
+=item B<--record-env> (beta testing)
 
 Record current environment variables in ~/.parallel/ignored_vars. This
 is useful before using B<--env _>.
@@ -1015,9 +1015,9 @@ it to the command.
 Only used with B<--pipe>.
 
 
-=item B<--results> I<prefix> (alpha testing)
+=item B<--results> I<prefix> (beta testing)
 
-=item B<--res> I<prefix> (alpha testing)
+=item B<--res> I<prefix> (beta testing)
 
 Save the output into files. The files will be stored in a directory tree
 rooted at I<prefix>.  Within this directory tree, each command will result
@@ -1126,9 +1126,9 @@ B<--return> is ignored when used with B<--sshlogin :> or when not used
 with B<--sshlogin>.
 
 
-=item B<--round-robin> (alpha testing)
+=item B<--round-robin> (beta testing)
 
-=item B<--round> (alpha testing)
+=item B<--round> (beta testing)
 
 Normally B<--pipe> will give a single block to each instance of the
 command. With B<--round-robin> all blocks will at random be written to
@@ -1318,9 +1318,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename> (alpha testing)
+=item B<--sshloginfile> I<filename> (beta testing)
 
-=item B<--slf> I<filename> (alpha testing)
+=item B<--slf> I<filename> (beta testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1412,7 +1412,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--timeout> I<val> (alpha testing)
+=item B<--timeout> I<val> (beta testing)
 
 Time out for command. If the command runs for longer than I<val>
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1557,9 +1557,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (alpha testing)
+=item B<--workdir> I<mydir> (beta testing)
 
-=item B<--wd> I<mydir> (alpha testing)
+=item B<--wd> I<mydir> (beta testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in

@@ -201,29 +201,12 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20130922 ('Manning') released
+Subject: GNU Parallel 20131022 ('Westgate') released
 
-GNU Parallel 20130922 ('Manning') has been released. It is
+GNU Parallel 20131022 ('Westgate') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
-This release has no new features, and very few changes, making it a
-good candidate for a stable release.
-
 New in this release:
-
-* PDF-files of documentation is now included.
-
-* Cloning at warp speed 100 VMs in 1 minute using one command line
-  http://www.beebotech.com.au/tag/command-line/
-
-* Calcul Quebec's introduction to GNU Parallel
-  https://wiki.calculquebec.ca/w/GNU_parallel
-
-* Brincando com o GNU parallel
-  http://blog.tadeucruz.com/2013/09/brincando-com-o-gnu-parallel/
-
-* GNU Parallelで並列処理を行う 
-  http://qiita.com/PENGUINANA_/items/af27a833e835fe17f09b
 
 * Bug fixes and man page updates.
 
