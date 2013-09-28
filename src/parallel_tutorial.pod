@@ -285,6 +285,7 @@ Output (the order may be different):
 The command can be a script, a binary or a Bash function if the function is
 exported using 'export -f':
 
+  # Only works in Bash and only if $SHELL=.../bash
   my_func() {
     echo in my_func $1
   }
@@ -1089,7 +1090,7 @@ Output:
   tried 2
   tried 0
 
-Note how job 1 and 2 was tried 3 times, but 0 was not retried because it had exit code 0.
+Note how job 1 and 2 were tried 3 times, but 0 was not retried because it had exit code 0.
 
 =head2 Limiting the ressources
 
@@ -1358,8 +1359,9 @@ Output:
 
   foo bar baz
 
-This works for functions too:
+This works for functions too if your shell is Bash:
 
+  # This only works in Bash
   my_func() {
     echo in my_func $1
   }
@@ -1384,6 +1386,7 @@ Output:
 Now all new variables and functions defined will be copied when using
 --env _:
 
+  # The function is only copied if using Bash
   my_func2() {
     echo in my_func2 $VAR $1
   }
@@ -1391,10 +1394,11 @@ Now all new variables and functions defined will be copied when using
   VAR=foo
   export VAR
 
-  parallel --env _ -S $SERVER1 my_func2 ::: bar
+  parallel --env _ -S $SERVER1 'echo $VAR; my_func2' ::: bar
 
 Output:
 
+  foo
   in my_func2 foo bar
 
 =head2 Showing what is actually run

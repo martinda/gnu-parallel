@@ -374,6 +374,7 @@ treated as commands:</p>
 <p>The command can be a script, a binary or a Bash function if the function is
 exported using 'export -f':</p>
 <pre>
+  # Only works in Bash and only if $SHELL=.../bash
   my_func() {
     echo in my_func $1
   }
@@ -1051,7 +1052,7 @@ command fails for unkown reasons now and then.</p>
   tried 1
   tried 2
   tried 0</pre>
-<p>Note how job 1 and 2 was tried 3 times, but 0 was not retried because it had exit code 0.</p>
+<p>Note how job 1 and 2 were tried 3 times, but 0 was not retried because it had exit code 0.</p>
 <p>
 </p>
 <h2><a name="limiting_the_ressources">Limiting the ressources</a></h2>
@@ -1274,8 +1275,9 @@ remote system.</p>
 <p>Output:</p>
 <pre>
   foo bar baz</pre>
-<p>This works for functions too:</p>
+<p>This works for functions too if your shell is Bash:</p>
 <pre>
+  # This only works in Bash
   my_func() {
     echo in my_func $1
   }
@@ -1296,6 +1298,7 @@ remote system. It just need to record which ones to ignore in
 <p>Now all new variables and functions defined will be copied when using
 --env _:</p>
 <pre>
+  # The function is only copied if using Bash
   my_func2() {
     echo in my_func2 $VAR $1
   }
@@ -1303,9 +1306,10 @@ remote system. It just need to record which ones to ignore in
   VAR=foo
   export VAR</pre>
 <pre>
-  parallel --env _ -S $SERVER1 my_func2 ::: bar</pre>
+  parallel --env _ -S $SERVER1 'echo $VAR; my_func2' ::: bar</pre>
 <p>Output:</p>
 <pre>
+  foo
   in my_func2 foo bar</pre>
 <p>
 </p>

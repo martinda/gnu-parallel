@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL_TUTORIAL 1"
-.TH PARALLEL_TUTORIAL 1 "2013-09-18" "20130922" "parallel"
+.TH PARALLEL_TUTORIAL 1 "2013-09-28" "20130922" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -465,7 +465,8 @@ Output (the order may be different):
 The command can be a script, a binary or a Bash function if the function is
 exported using 'export \-f':
 .PP
-.Vb 5
+.Vb 6
+\&  # Only works in Bash and only if $SHELL=.../bash
 \&  my_func() {
 \&    echo in my_func $1
 \&  }
@@ -1516,7 +1517,7 @@ Output:
 \&  tried 0
 .Ve
 .PP
-Note how job 1 and 2 was tried 3 times, but 0 was not retried because it had exit code 0.
+Note how job 1 and 2 were tried 3 times, but 0 was not retried because it had exit code 0.
 .SS "Limiting the ressources"
 .IX Subsection "Limiting the ressources"
 To avoid overloading systems \s-1GNU\s0 Parallel can look at the system load
@@ -1858,9 +1859,10 @@ Output:
 \&  foo bar baz
 .Ve
 .PP
-This works for functions too:
+This works for functions too if your shell is Bash:
 .PP
-.Vb 5
+.Vb 6
+\&  # This only works in Bash
 \&  my_func() {
 \&    echo in my_func $1
 \&  }
@@ -1892,7 +1894,8 @@ Output:
 Now all new variables and functions defined will be copied when using
 \&\-\-env _:
 .PP
-.Vb 6
+.Vb 7
+\&  # The function is only copied if using Bash
 \&  my_func2() {
 \&    echo in my_func2 $VAR $1
 \&  }
@@ -1900,12 +1903,13 @@ Now all new variables and functions defined will be copied when using
 \&  VAR=foo
 \&  export VAR
 \&
-\&  parallel \-\-env _ \-S $SERVER1 my_func2 ::: bar
+\&  parallel \-\-env _ \-S $SERVER1 \*(Aqecho $VAR; my_func2\*(Aq ::: bar
 .Ve
 .PP
 Output:
 .PP
-.Vb 1
+.Vb 2
+\&  foo
 \&  in my_func2 foo bar
 .Ve
 .SS "Showing what is actually run"

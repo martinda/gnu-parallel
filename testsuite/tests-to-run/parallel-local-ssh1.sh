@@ -12,4 +12,9 @@ echo '### --env _ with explicit mentioning of normally ignored var $DISPLAY'
 echo '### --filter-hosts --slf <()'
   parallel --nonall --filter-hosts --slf <(echo localhost) echo OK
 
+echo '### bug #40002: --files and --nonall seem not to work together:'
+  parallel --files --nonall -S localhost true | tee >(parallel rm) | wc -l
+
+echo '### bug #40001: --joblog and --nonall seem not to work together:'
+  parallel --joblog - --nonall -S lo,localhost true | wc -l
 EOF

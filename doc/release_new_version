@@ -208,6 +208,29 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* Using GNU Parallel to roll-your-own Map Reduce!
+  http://www.rankfocus.com/hello-world/
+
+* 平行化你的工作
+  http://www.slideshare.net/drakeguan/part1-23705978
+
+* Best Practices for Amazon EMR
+  http://media.amazonwebservices.com/AWS_Amazon_EMR_Best_Practices.pdf
+
+* Using GNU Parallel at HPC @ Uni.lu
+  https://hpc.uni.lu/users/use_cases/
+
+* Scaling up with parallelization
+  https://www.msi.umn.edu/sites/default/files/AdvPython_1.pdf
+
+* Optimizing translated file downloads
+  http://www.smartling.com/blog/2013/05/20/optimizing-translated-file-downloads/
+
+https://identi.ca/evan/note/6yf1GzAARtyBhj__xzMvAg
+
+* Faster Rasters For All
+  http://2013.foss4g.org/conf/programme/presentations/52/
+
 * Bug fixes and man page updates.
 
 

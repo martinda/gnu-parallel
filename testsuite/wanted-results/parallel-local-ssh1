@@ -9,6 +9,10 @@ Block_end
 ### --env _
 DISPLAY: Undefined variable.
 ### --env _ with explicit mentioning of normally ignored var $DISPLAY
-OK FUBAR :0 test
+OK FUBAR :0.0 test
 ### --filter-hosts --slf <()
 OK
+### bug #40002: --files and --nonall seem not to work together:
+1
+### bug #40001: --joblog and --nonall seem not to work together:
+3

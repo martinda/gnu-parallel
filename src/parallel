@@ -5465,8 +5465,10 @@ sub max_length {
 	    close $fh;
 	} else {
 	    $cached_limit = real_max_length();
-	    Semaphore::mkdir_or_die($ENV{'HOME'} . "/.parallel/tmp");
-	    open(my $fh, ">", $len_cache) || ::die_bug("Cannot write $len_cache");
+	    # If $HOME is write protected: Do not fail
+	    mkdir($ENV{'HOME'} . "/.parallel");
+	    mkdir($ENV{'HOME'} . "/.parallel/tmp");
+	    open(my $fh, ">", $len_cache);
 	    print $fh $cached_limit;
 	    close $fh;
 	}
