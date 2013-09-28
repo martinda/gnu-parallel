@@ -21,4 +21,8 @@ echo '### bug #40002: --files and --nonall seem not to work together:'
 
 echo '### bug #40001: --joblog and --nonall seem not to work together:'
   parallel --joblog - --nonall -S lo,localhost true | wc -l
+
+echo '### bug #40132: FreeBSD: --workdir . gives warning if . == $HOME'
+  cd && parallel --workdir . -S lo pwd ::: "" 
+
 EOF

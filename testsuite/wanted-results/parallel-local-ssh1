@@ -20,3 +20,5 @@ OK
 1
 ### bug #40001: --joblog and --nonall seem not to work together:
 3
+### bug #40132: FreeBSD: --workdir . gives warning if . == $HOME
+/home/tange

@@ -1,4 +1,7 @@
 ### test global config - must run alone so the global config does not confuse others
+parallel: Warning: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.
+parallel: Warning: --tollef is obsolete and will be retired 20140222.
+parallel: Warning: See: http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html
 1
 2
 3

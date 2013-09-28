@@ -4340,6 +4340,9 @@ sub workdir {
 			}
 		    }
 		}
+		if($workdir eq "") {
+		    $workdir = ".";
+		}
 	    } elsif($opt::workdir eq "...") {
 		$workdir = ".parallel/tmp/" . ::hostname() . "-" . $$
 		    . "-" . $self->seq();
