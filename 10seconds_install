@@ -14,12 +14,23 @@
 # If that fails, it does a personal installation.
 # If that fails, it copies to $HOME/bin
 
+# Download and run the script directly by:
+#   (wget -O - pi.dk/3 || curl pi.dk/3/ || fetch -o - http://pi.dk/3) | bash
+
 # tail on openindiana must be /usr/xpg4/bin/tail
 TAIL=$(echo | tail -n 1 2>/dev/null && echo tail || (echo | /usr/xpg4/bin/tail -n 1 && echo /usr/xpg4/bin/tail))
 # grep on openindiana must be /usr/xpg4/bin/grep
 GREP=$(echo | grep -vE . 2>/dev/null && echo grep || (echo | /usr/xpg4/bin/grep -vE . && echo /usr/xpg4/bin/grep))
-# wget is not default on MacOS, so try curl
-GET=$(curl -h >/dev/null && echo curl -L || echo wget -qO -)
+# FreeBSD prefers 'fetch', MacOS prefers 'curl', Linux prefers 'wget'
+GET=$(
+    (fetch -o /dev/null file:///bin/sh && echo fetch -o -) ||
+    (curl -h >/dev/null && echo curl -L) || 
+    (wget -h >/dev/null && echo wget -qO -) ||
+    echo 'No wget, curl, fetch: Please inform parallel@gnu.org what you use for downloading URLs' >&2
+)
+if test "$GET" = ""; then
+  exit 1
+fi
 
 LATEST=$($GET http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | $TAIL -n1)
 if test \! -d $LATEST/src/; then
@@ -54,7 +65,7 @@ else
   echo "This means that if the code has been changed by criminals, you will not discover that!"
   echo 
   echo "Continue anyway? (y/n)"
-  read YN
+  read YN </dev/tty
   if test "$YN" = "n"; then
 	# Stop
 	exit 2

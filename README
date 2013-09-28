@@ -30,7 +30,7 @@ The 10 seconds installation will try do to a full installation; if
 that fails, a personal installation; if that fails, a minimal
 installation.
 
-  (wget -O - pi.dk/3 || curl pi.dk/3/) | bash
+  (wget -O - pi.dk/3 || curl pi.dk/3/ || fetch -o - http://pi.dk/3) | bash
 
 This will literally install faster than reading the rest of this
 document.
