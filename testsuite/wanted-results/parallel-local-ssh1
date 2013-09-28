@@ -10,6 +10,10 @@ Block_end
 DISPLAY: Undefined variable.
 ### --env _ with explicit mentioning of normally ignored var $DISPLAY
 OK FUBAR :0.0 test
+bug #40137: SHELL not bash: Warning when exporting funcs
+no_warning
+warning
+parallel: Warning: Shell functions may not be supported in /bin/sh
 ### --filter-hosts --slf <()
 OK
 ### bug #40002: --files and --nonall seem not to work together:

@@ -1093,6 +1093,12 @@ sub parse_env_var {
     my @qcsh = map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  } @vars;
     my @qbash = map { my $a=$_; "export $a=" . env_quote($ENV{$a}) } @vars;
     my @bash_functions = grep { substr($ENV{$_},0,4) eq "() {" } @vars;
+    if(@bash_functions) {
+	# Functions are not supported for all shells
+	if($ENV{'SHELL'} !~ m:/(bash|rbash|zsh|rzsh|dash|ksh):) {
+	    ::warning("Shell functions may not be supported in $ENV{'SHELL'}\n");
+	}
+    }
     push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_functions;
 
     # Create lines like:
