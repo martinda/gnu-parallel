@@ -3,25 +3,24 @@
 ### --transfer - abspath
 file>fire
 file : & ) \n*.jpg
-file/./sub dir
 good if no file
+ls: /tmp/parallel.file*: No such file or directory
 ls: /tmp/parallel.file*: No such file or directory
 ### --transfer - relpath
 file>fire
 file : & ) \n*.jpg
-file/./sub dir
 good if no file
+ls: tmp/parallel.file*: No such file or directory
 ls: tmp/parallel.file*: No such file or directory
 ### --transfer --cleanup - abspath
 file>fire
 file : & ) \n*.jpg
-file/./sub dir
 good if no file
+ls: /tmp/parallel.file*: No such file or directory
 ls: /tmp/parallel.file*: No such file or directory
 ### --transfer --cleanup - relpath
 file>fire
 file : & ) \n*.jpg
-file/./sub dir
 good if no file
 ls: tmp/parallel.file*: No such file or directory
 OK
@@ -29,62 +28,46 @@ ls: tmp/parallel.file*: No such file or directory
 OK
 ### --return - abspath
 /tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.out
 /tmp/parallel.file>fire.out
 ### --return - relpath
 tmp/parallel.file : & ) \n*.jpg.out
-tmp/parallel.file/sub dir.out
 tmp/parallel.file>fire.out
 ### --return - multiple files
 tmp/parallel.file : & ) \n*.jpg.file.done
 tmp/parallel.file : & ) \n*.jpg.out
-tmp/parallel.file/sub dir.file.done
-tmp/parallel.file/sub dir.out
 tmp/parallel.file>fire.file.done
 tmp/parallel.file>fire.out
 ### --return --cleanup - abspath
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 good if no file
 ### --return --cleanup - relpath
 tmp/parallel.file : & ) \n*.jpg.file.done
 tmp/parallel.file : & ) \n*.jpg.out
-tmp/parallel.file/sub dir.file.done
-tmp/parallel.file/sub dir.out
 tmp/parallel.file>fire.file.done
 tmp/parallel.file>fire.out
 good if no file
-ls: tmp/parallel.file*: No such file or directory
-OK
 ### --return --cleanup - multiple returns
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 good if no file
-ls: tmp/parallel.file*: No such file or directory
-OK
 ### --transfer --return --cleanup - abspath
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 good if no file
 ls: /tmp/parallel.file*: No such file or directory
 OK
+ls: /tmp/parallel.file*: No such file or directory
+OK
 ### --transfer --return --cleanup - relpath
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 good if no file
@@ -95,8 +78,6 @@ OK
 ### --transfer --return --cleanup - multiple files
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 ls: tmp/parallel.file*: No such file or directory
@@ -106,18 +87,16 @@ OK
 ### --trc - abspath
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 good if no file
 ls: /tmp/parallel.file*: No such file or directory
 OK
+ls: /tmp/parallel.file*: No such file or directory
+OK
 ### --trc - relpath
 tmp/parallel.file : & ) \n*.jpg.file.done
 tmp/parallel.file : & ) \n*.jpg.out
-tmp/parallel.file/sub dir.file.done
-tmp/parallel.file/sub dir.out
 tmp/parallel.file>fire.file.done
 tmp/parallel.file>fire.out
 good if no file
@@ -128,20 +107,19 @@ OK
 ### --trc - multiple files
 /tmp/parallel.file : & ) \n*.jpg.file.done
 /tmp/parallel.file : & ) \n*.jpg.out
-/tmp/parallel.file/sub dir.file.done
-/tmp/parallel.file/sub dir.out
 /tmp/parallel.file>fire.file.done
 /tmp/parallel.file>fire.out
 good if no file
+ls: /tmp/parallel.file*: No such file or directory
+OK
 ls: /tmp/parallel.file*: No such file or directory
 OK
 ### --transfer --cleanup - multiple argument files
 cat /tmp/parallel.file\>fire.file tmp/parallel.file\>fire.file
 file>fire
 file>fire
-cat /tmp/parallel.file/./sub\ dir.file tmp/parallel.file\ :\ \&\ \)\ \\n\*.jpg.file
-file/./sub dir
+cat /tmp/parallel.file\ :\ \&\ \)\ \\n\*.jpg.file tmp/parallel.file\ :\ \&\ \)\ \\n\*.jpg.file
 file : & ) \n*.jpg
-cat /tmp/parallel.file\ :\ \&\ \)\ \\n\*.jpg.file tmp/parallel.file/./sub\ dir.file
 file : & ) \n*.jpg
-file/./sub dir
+ls: /tmp/parallel.file*: No such file or directory
+OK

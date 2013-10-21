@@ -208,14 +208,31 @@ available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
+* --transfer files with /./ in the path will copy the files relative
+  to the --workdir.
+
+* The maximal command length is now cached in a file halfing the
+  startup time.
+
+* GNU Parallel was cited in: Investigating speaker gender using rhythm
+  metrics in Arabic dialects
+  http://ieeexplore.ieee.org/xpl/login.jsp?tp=&arnumber=6602389&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D6602389
+
+* GNU Parallel was cited in: Tiedon erist ̈minen ja visualisointi a
+  lastensuojelun asiakaskertomuksista
+  https://tampub.uta.fi/handle/10024/84978
+
+* Some Additional Useful Bioinformatics Software
+  http://nix-bio.blogspot.dk/2013/10/additional-software-for-bioinformatics.html
+
+* GNU Parallel Example Screen Cast (bil to Geotiff conversion)
+  http://www.youtube.com/watch?v=PpF27eC7Mys
+
 * Using GNU Parallel to roll-your-own Map Reduce!
   http://www.rankfocus.com/hello-world/
 
-* 平行化你的工作
-  http://www.slideshare.net/drakeguan/part1-23705978
-
-* Best Practices for Amazon EMR
-  http://media.amazonwebservices.com/AWS_Amazon_EMR_Best_Practices.pdf
+* Use multiple CPU Cores with your Linux commands
+  http://www.rankfocus.com/use-cpu-cores-linux-commands/
 
 * Using GNU Parallel at HPC @ Uni.lu
   https://hpc.uni.lu/users/use_cases/
@@ -223,13 +240,33 @@ New in this release:
 * Scaling up with parallelization
   https://www.msi.umn.edu/sites/default/files/AdvPython_1.pdf
 
-* Optimizing translated file downloads
-  http://www.smartling.com/blog/2013/05/20/optimizing-translated-file-downloads/
-
-https://identi.ca/evan/note/6yf1GzAARtyBhj__xzMvAg
+* How to teach yourself to be a technical tester
+  http://infiniteundo.com/post/62421363463/qa-toc
 
 * Faster Rasters For All
   http://2013.foss4g.org/conf/programme/presentations/52/
+
+* Optimizing translated file downloads
+  http://www.smartling.com/blog/2013/05/20/optimizing-translated-file-downloads/
+
+* EMC NetWorker parallel saveset cloning with nsrclone and GNU parallel
+  http://www.beebotech.com.au/2013/10/emc-networker-parallel-saveset-cloning-with-nsrclone-and-gnu-parallel/
+
+* Best Practices for Amazon EMR
+  http://media.amazonwebservices.com/AWS_Amazon_EMR_Best_Practices.pdf
+
+* Computing checksums for backup
+  https://identi.ca/evan/note/6yf1GzAARtyBhj__xzMvAg
+
+* Un exemplu de utilizare a programului GNU parallel
+  http://vundicind.blogspot.dk/2013/10/exemplu-utilizare-gnu-parallel.html
+
+* 平行化你的工作
+  http://www.slideshare.net/drakeguan/part1-23705978
+
+* なんか気持ちよかです Gnu Parallel
+  http://a3-lab.jpn.org/note/%E3%81%AA%E3%82%93%E3%81%8B%E6%B0%97%E6%8C%81%E3%81%A1%E3%82%88%E3%81%8B%E3%81%A7%E3%81%99-gnu-parallel
+
 
 * Bug fixes and man page updates.
 

@@ -66,5 +66,3 @@ echo >./a\ b/cd\ /\ ef/efg.5
 ./a b/cd / ef/efg.5
 ./b/bar.5
 ./b/foo.5
-### Test --wd ... --cleanup
-echo >uNiQuE_sTrInG.6

@@ -18,8 +18,8 @@ begin
 14
 15
 16
-17
 parallel: Warning: No more file handles. Raising ulimit -n or /etc/security/limits.conf may help.
+17
 18
 19
 20

@@ -18,15 +18,15 @@ echo '### Test --wd /tmp/newtempdir/newdir/tmp/ with space dirs';
   find . -name '*.7' | sort
 
 echo '### Test --workdir ...'
-parallel -j9 -k --workdir ... --basefile 1-col.txt --trc {}.1 -S .. echo ">"{}.1 ::: 2-col.txt
+parallel -j9 -k --workdir ... --trc {}.1 -S .. echo ">"{}.1 ::: 2-col.txt
 find . -name '*.1' | sort
 
 echo '### Test --wd ...'
-parallel -k --wd ... --basefile 1-col.txt --trc {}.2 -S .. -v echo ">"{}.2 ::: 2-col.txt
+parallel -k --wd ... --trc {}.2 -S .. -v echo ">"{}.2 ::: 2-col.txt
 find . -name '*.2' | sort
 
 echo '### Test --wd ... with space dirs'
-stdout parallel -j9 -k --wd ... --basefile 1-col.txt --trc {}.3 -S .. -v echo ">"{}.3 ::: './ ab/c"d/ef g' ' ab/c"d/efg' ./b/bar ./b/foo "./ ab /c' d/ ef\"g" ./2-col.txt './a b/cd / ef/efg'
+stdout parallel -j9 -k --wd ... --trc {}.3 -S .. -v echo ">"{}.3 ::: './ ab/c"d/ef g' ' ab/c"d/efg' ./b/bar ./b/foo "./ ab /c' d/ ef\"g" ./2-col.txt './a b/cd / ef/efg'
 # A few rmdir errors are OK as we have multiple files in the same dirs
 find . -name '*.3' | sort
 
@@ -38,10 +38,6 @@ echo '### Test --wd /tmp/ with space dirs'
 stdout parallel -k -j9 --wd /tmp/ --basefile 1-col.txt --trc {}.5 -S .. -v echo ">"{}.5 ::: './ ab/c"d/ef g' ' ab/c"d/efg' ./b/bar ./b/foo "./ ab /c' d/ ef\"g" ./2-col.txt './a b/cd / ef/efg'
 # A few rmdir errors are OK as we have multiple files in the same dirs
 find . -name '*.5' | sort
-
-echo '### Test --wd ... --cleanup'
-stdout parallel -j9 -k --retries 3 --wd ... --cleanup -S lo -v echo ">"{}.6 :::  uNiQuE_sTrInG
-find ~/.parallel/tmp |grep uNiQuE_sTrInG
 
 cd ..
 rm -rf tmp
