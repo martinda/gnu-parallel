@@ -32,6 +32,7 @@ use File::Path;
 use Getopt::Long;
 # Used to ensure code quality
 use strict;
+use File::Basename;
 
 if(not $ENV{SHELL}) {
     # $ENV{SHELL} is sometimes not set on Mac OS X and Windows
@@ -184,7 +185,7 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 		::die_bug("host check too many col0: $_");
 	    }
 	} else {
-	    ::die_bug("host check unmatched short jobline: $_");
+	    ::die_bug("host check unmatched short jobline ($col[0]): $_");
 	}
     }
     close $host_fh;
@@ -207,6 +208,10 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 }
 
 if($opt::nonall or $opt::onall) {
+
+# TODO --transfer foo/./bar --cleanup
+# multiple --transfer and --basefile with different /./
+
   sub tmp_joblog {
     my $joblog = shift;
     if(not defined $joblog) {
@@ -790,7 +795,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20130927;
+    $Global::version = 20131022;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1355,6 +1360,40 @@ sub shell_quote_scalar {
 	$a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
     }
     return $a;
+}
+
+sub shell_quote_file {
+    # Quote the string so shell will not expand any special chars and prepend ./ if needed
+    # Returns:
+    #   string quoted with \ as needed by the shell and ./ if needed
+    my $a = shell_quote_scalar(shift);
+    if(defined $a) {
+	if($a =~ m:^/: or $a =~ m:^\./:) {
+	    # /abs/path or ./rel/path => skip
+	} else {
+	    # rel/path => ./rel/path
+	    $a = "./".$a;
+	}
+    }
+    return $a;
+}
+
+sub shell_quote_files {
+    # Quote the strings so shell will not expand any special chars and prepend ./ if needed
+    # Returns:
+    #   strings quoted with \ as needed by the shell and ./ if needed
+    my @strings = shell_quote(@_);
+    for my $a (@strings) {
+	if(defined $a) {
+	    if($a =~ m:^/: or m:\./:) {
+		# /abs/path or ./rel/path => skip
+	    } else {
+		# rel/path => ./rel/path
+		$a = "./".$a;
+	    }
+	}
+    }
+    return @strings;;
 }
 
 sub maybe_quote {
@@ -1990,20 +2029,18 @@ sub setup_basefile {
     # This needs to be done before first jobs on $sshlogin is run
     # Returns: N/A
     my $cmd = "";
+    my $rsync_destdir;
+    my $workdir;
     for my $sshlogin (values %Global::host) {
-        if($sshlogin->string() eq ":") { next }
-        my $sshcmd = $sshlogin->sshcommand();
-        my $serverlogin = $sshlogin->serverlogin();
-        my $rsync_opt = "-rlDzR -e".shell_quote_scalar($sshcmd);
-        for my $file (@opt::basefile) {
-            my $f = $file;
-            my $relpath = ($f !~ m:^/:); # Is the path relative?
-            # Use different subdirs depending on abs or rel path
-            my $rsync_destdir = ($relpath ? "./" : "/");
-            $f =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
-            $f = shell_quote_scalar($f);
-            $cmd .= "rsync $rsync_opt $f $serverlogin:$rsync_destdir &";
-        }
+      if($sshlogin->string() eq ":") { next }
+      for my $file (@opt::basefile) {
+	if($file !~ m:^/: and $opt::workdir eq "...") {
+	  ::error("Work dir '...' will not work with relative basefiles\n");
+	  ::wait_and_exit(255);
+	}
+	$workdir ||= Job->new("")->workdir();
+	$cmd .= $sshlogin->rsync_transfer_cmd($file,$workdir) . "&";
+      }
     }
     $cmd .= "wait;";
     debug("basesetup: $cmd\n");
@@ -2014,12 +2051,11 @@ sub cleanup_basefile {
     # Remove the basefiles transferred
     # Returns: N/A
     my $cmd="";
+    my $workdir = Job->new("")->workdir();
     for my $sshlogin (values %Global::host) {
         if($sshlogin->string() eq ":") { next }
-        my $sshcmd = $sshlogin->sshcommand();
-        my $serverlogin = $sshlogin->serverlogin();
         for my $file (@opt::basefile) {
-            $cmd .= "$sshcmd $serverlogin rm -f ".shell_quote_scalar(shell_quote_scalar($file))."&";
+	  $cmd .= $sshlogin->cleanup_cmd($file,$workdir)."&";
         }
     }
     $cmd .= "wait;";
@@ -3627,6 +3663,73 @@ sub control_path_dir {
 }
 
 
+sub rsync_transfer_cmd {
+  # Command to run to transfer a file
+  # Input:
+  #   $file = filename of file to transfer
+  #   $workdir = destination dir
+  # Returns:
+  #   $cmd = rsync command to run to transfer $file ("" if unreadable)
+  my $self = shift;
+  my $file = shift;
+  my $workdir = shift;
+  if(not -r $file) {
+    ::warning($file, " is not readable and will not be transferred.\n");
+    return "true";
+  }
+  my $rsync_destdir;
+  if($file =~ m:^/:) {
+    # rsync /foo/bar /
+    $rsync_destdir = "/";
+  } else {
+    $rsync_destdir = ::shell_quote_file($workdir);
+  }
+  $file = ::shell_quote_file($file);
+  my $sshcmd = $self->sshcommand();
+  my $rsync_opt = "-rlDzR -e" . ::shell_quote_scalar($sshcmd);
+  my $serverlogin = $self->serverlogin();
+  # Make dir if it does not exist
+  return "( $sshcmd $serverlogin mkdir -p $rsync_destdir;" .
+    "rsync $rsync_opt $file $serverlogin:$rsync_destdir )";
+}
+
+sub cleanup_cmd {
+  # Command to run to remove the remote file
+  # Input:
+  #   $file = filename to remove
+  #   $workdir = destination dir
+  # Returns:
+  #   $cmd = ssh command to run to remove $file and empty parent dirs
+  my $self = shift;
+  my $file = shift;
+  my $workdir = shift;
+  my $f = $file;
+  if($f =~ m:/\./:) {
+      # foo/bar/./baz/quux => workdir/baz/quux
+      # /foo/bar/./baz/quux => workdir/baz/quux
+      $f =~ s:.*/\./:$workdir/:;
+  } elsif($f =~ m:^[^/]:) {
+      # foo/bar => workdir/foo/bar
+      $f = $workdir."/".$f;
+  }
+  my @subdirs = split m:/:, ::dirname($f);
+  my @rmdir;
+  my $dir = "";
+  for(@subdirs) {
+    $dir .= $_."/";
+    unshift @rmdir, ::shell_quote_file($dir);
+  }
+  my $rmdir = @rmdir ? "rmdir @rmdir 2>/dev/null;" : "";
+  if(defined $opt::workdir and $opt::workdir eq "...") {
+    $rmdir .= "rm -rf " . ::shell_quote_file($workdir).';';
+  }
+
+  $f = ::shell_quote_file($f);
+  my $sshcmd = $self->sshcommand();
+  my $serverlogin = $self->serverlogin();
+  return "$sshcmd $serverlogin ".::shell_quote_scalar("(rm -f $f; $rmdir)");
+}
+
 package JobQueue;
 
 sub new {
@@ -4125,9 +4228,9 @@ sub sshlogin_wrap {
 		$remote_pre .= ::shell_quote_scalar('tty >/dev/null && stty isig -onlcr -echo;');
 	    }
 	    if($opt::workdir) {
-		$remote_pre .= 
-		    ::shell_quote_scalar("mkdir -p ".$self->workdir()."; "
-					 . "cd ".$self->workdir()." && ");
+		my $wd = ::shell_quote_file($self->workdir());
+		$remote_pre .= ::shell_quote_scalar("mkdir -p ") . $wd .
+		    ::shell_quote_scalar("; cd ") . $wd . ::shell_quote_scalar(" && ");
 	    }
 	    $self->{'sshlogin_wrap'} =
 		($pre
@@ -4142,6 +4245,8 @@ sub sshlogin_wrap {
 
 sub transfer {
     # Files to transfer
+    # Returns:
+    #   @transfer - File names of files to transfer
     my $self = shift;
     my @transfer = ();
     $self->{'transfersize'} = 0;
@@ -4166,36 +4271,16 @@ sub transfersize {
 }
 
 sub sshtransfer {
+  # Returns for each transfer file:
+  #   rsync $file remote:$workdir
     my $self = shift;
+    my @pre;
     my $sshlogin = $self->sshlogin();
-    my $sshcmd = $sshlogin->sshcommand();
-    my $serverlogin = $sshlogin->serverlogin();
-    my $rsync_opt = "-rlDzR -e".::shell_quote_scalar($sshcmd);
-    my $pre = "";
+    my $workdir = $self->workdir();
     for my $file ($self->transfer()) {
-	$file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
-	$file =~ s:^\./::g; # Remove ./ if any
-	my $relpath = ($file !~ m:^/:); # Is the path relative?
-	# Use different subdirs depending on abs or rel path
-	# Abs path: rsync -rlDzR /home/tange/dir/subdir/file.gz server:/
-	# Rel path: rsync -rlDzR ./subdir/file.gz server:.parallel/tmp/tempid/
-	# Rel path: rsync -rlDzR ./subdir/file.gz server:$workdir/
-	my $remote_workdir = $self->workdir($file);
-	my $rsync_destdir = ($relpath ? $remote_workdir : "/");
-	if($relpath) {
-	    $file = "./".$file;
-	}
-	if(-r $file) {
-	    my $mkremote_workdir =
-		$remote_workdir eq "." ? "true" :
-		"$sshcmd $serverlogin mkdir -p $rsync_destdir";
-	    $pre .= "$mkremote_workdir; rsync $rsync_opt "
-		. ::shell_quote_scalar($file)." $serverlogin:$rsync_destdir;";
-	} else {
-	    ::warning($file, " is not readable and will not be transferred.\n");
-	}
+      push @pre, $sshlogin->rsync_transfer_cmd($file,$workdir).";";
     }
-    return $pre;
+    return join("",@pre);
 }
 
 sub return {
@@ -4226,6 +4311,8 @@ sub returnsize {
 }
 
 sub sshreturn {
+  # Returns for each return-file:
+  #   rsync remote:$workdir/$file .
     my $self = shift;
     my $sshlogin = $self->sshlogin();
     my $sshcmd = $sshlogin->sshcommand();
@@ -4242,13 +4329,13 @@ sub sshreturn {
 	    #   rsync -avR /foo/./bar/baz.c remote:/tmp/
 	    # == (on old systems)
 	    #   rsync -avR --rsync-path="cd /foo; rsync" remote:bar/baz.c /tmp/
-	    $wd = ::shell_quote_scalar($self->workdir())."/";
+	    $wd = ::shell_quote_file($self->workdir()."/");
 	}
 	# Only load File::Basename if actually needed
 	$Global::use{"File::Basename"} ||= eval "use File::Basename; 1;";
-	$cd = ::shell_quote_scalar(dirname($file));
+	$cd = ::shell_quote_file(dirname($file));
 	my $rsync_cd = '--rsync-path='.::shell_quote_scalar("cd $wd$cd; rsync");
-	my $basename = ::shell_quote_scalar(::shell_quote_scalar(basename($file)));
+	my $basename = ::shell_quote_scalar(::shell_quote_file(basename($file)));
 	# --return
 	#   mkdir -p /home/tange/dir/subdir/; 
         #   rsync -rlDzR --rsync-path="cd /home/tange/dir/subdir/; rsync" 
@@ -4268,28 +4355,14 @@ sub sshcleanup {
     my $sshcmd = $sshlogin->sshcommand();
     my $serverlogin = $sshlogin->serverlogin();
     my $workdir = $self->workdir();
-    my $removeworkdir = "";
     my $cleancmd = "";
 
     for my $file ($self->cleanup()) {
 	my @subworkdirs = parentdirs_of($file);
-	if(@subworkdirs) {
-	    $removeworkdir = "rmdir 2>/dev/null ".
-		join(" ",map { ::shell_quote_scalar($workdir."/".$_) }
-		     @subworkdirs).";";
-	}
-	my $relpath = ($file !~ m:^/:); # Is the path relative?
-	my $cleandir = ($relpath ? $workdir."/" : "");
-	$cleancmd .= 
-	    ::shell_quote_scalar("rm -f "
-				 . ::shell_quote_scalar($cleandir.$file).';'
-				 . $removeworkdir);
+	$cleancmd .= $sshlogin->cleanup_cmd($file,$workdir).";";
     }
     if(defined $opt::workdir and $opt::workdir eq "...") {
-	$cleancmd .= "rm -rf " . ::shell_quote_scalar($workdir).'\;';
-    }
-    if($cleancmd) {
-	$cleancmd = "$sshcmd $serverlogin ".$cleancmd.";";
+	$cleancmd .= "$sshcmd $serverlogin rm -rf " . ::shell_quote_scalar($workdir).';';
     }
     return $cleancmd;
 }

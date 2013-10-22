@@ -7,18 +7,42 @@ Block_end
 5
 Block_end
 ### --env _
-DISPLAY: Undefined variable.
-### --env _ with explicit mentioning of normally ignored var $DISPLAY
-OK FUBAR :0.0 test
+DEBEMAIL: Undefined variable.
+### --env _ with explicit mentioning of normally ignored var $DEBEMAIL
+OK FUBAR ole@tange.dk test
 bug #40137: SHELL not bash: Warning when exporting funcs
 no_warning
 warning
 parallel: Warning: Shell functions may not be supported in /bin/sh
-### --filter-hosts --slf <()
-OK
 ### bug #40002: --files and --nonall seem not to work together:
 1
 ### bug #40001: --joblog and --nonall seem not to work together:
 3
 ### bug #40132: FreeBSD: --workdir . gives warning if . == $HOME
 /home/tange
+### test filename :
+remote-:.:
+content-of-:
+### Test --wd ... --cleanup which should remove the filled tmp dir
+echo >uNiQuE_sTrInG.6
+### Test --wd --
+OK
+### Test --wd " "
+OK
+### Test --wd "'"
+OK
+### Test --trc --/--foo1
+Content --/--foo1
+remote1
+Content --/--foo1
+remote2
+### Test --trc :dir/:foo2
+Content :dir/:foo2
+remote1
+Content :dir/:foo2
+remote2
+### Test --trc " "/" "foo3
+Content _/_foo3
+remote1
+Content _/_foo3
+remote2

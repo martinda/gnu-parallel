@@ -317,11 +317,11 @@ string that is not in the command line.
 
 See also: @strong{:::}.
 
-@item @strong{--basefile} @emph{file}
-@anchor{@strong{--basefile} @emph{file}}
+@item @strong{--basefile} @emph{file} (alpha testing)
+@anchor{@strong{--basefile} @emph{file} (alpha testing)}
 
-@item @strong{--bf} @emph{file}
-@anchor{@strong{--bf} @emph{file}}
+@item @strong{--bf} @emph{file} (alpha testing)
+@anchor{@strong{--bf} @emph{file} (alpha testing)}
 
 @emph{file} will be transferred to each sshlogin before a jobs is
 started. It will be removed if @strong{--cleanup} is active. The file may be
@@ -381,8 +381,8 @@ than a single record.
 
 See @strong{--pipe} for use of this.
 
-@item @strong{--cleanup}
-@anchor{@strong{--cleanup}}
+@item @strong{--cleanup} (alpha testing)
+@anchor{@strong{--cleanup} (alpha testing)}
 
 Remove transferred files. @strong{--cleanup} will remove the transferred files
 on the remote computer after processing is done.
@@ -456,8 +456,8 @@ Set the end of file string to eof-str.  If the end of file string
 occurs as a line of input, the rest of the input is ignored.  If
 neither @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
-@item @strong{--delay} @emph{secs} (beta testing)
-@anchor{@strong{--delay} @emph{secs} (beta testing)}
+@item @strong{--delay} @emph{secs}
+@anchor{@strong{--delay} @emph{secs}}
 
 Delay starting next job @emph{secs} seconds. GNU @strong{parallel} will pause
 @emph{secs} seconds after starting each job. @emph{secs} can be less than 1
@@ -483,8 +483,8 @@ because it is POSIX compliant for @strong{xargs} while this option is not.
 If @emph{eof-str} is omitted, there is no end of file string.  If neither
 @strong{-E} nor @strong{-e} is used, no end of file string is used.
 
-@item @strong{--env} @emph{var} (beta testing)
-@anchor{@strong{--env} @emph{var} (beta testing)}
+@item @strong{--env} @emph{var}
+@anchor{@strong{--env} @emph{var}}
 
 Copy environment variable @emph{var}. This will copy @emph{var} to the
 environment that the command is run in. This is especially useful for
@@ -516,8 +516,8 @@ See also @strong{--bg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (beta testing)
-@anchor{@strong{--filter-hosts} (beta testing)}
+@item @strong{--filter-hosts}
+@anchor{@strong{--filter-hosts}}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -582,8 +582,8 @@ status will be the exit status from the failing job.
 
 @end table
 
-@item @strong{--header} @emph{regexp} (beta testing)
-@anchor{@strong{--header} @emph{regexp} (beta testing)}
+@item @strong{--header} @emph{regexp}
+@anchor{@strong{--header} @emph{regexp}}
 
 Use regexp as header. For normal usage the matched header (typically
 the first line: @strong{--header '.*\n'}) will be split using @strong{--colsep}
@@ -611,8 +611,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile} (alpha testing)
-@anchor{@strong{--joblog} @emph{logfile} (alpha testing)}
+@item @strong{--joblog} @emph{logfile} (beta testing)
+@anchor{@strong{--joblog} @emph{logfile} (beta testing)}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -757,8 +757,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--line-buffer} (beta testing)
-@anchor{@strong{--line-buffer} (beta testing)}
+@item @strong{--line-buffer}
+@anchor{@strong{--line-buffer}}
 
 Buffer output on line basis. @strong{--group} will keep the output together
 for a whole job. @strong{--ungroup} allows output to mixup with half a line
@@ -827,8 +827,8 @@ GNU @strong{parallel} is less than @emph{version} the exit code is
 This is useful for scripts that depend on features only available from
 a certain version of GNU @strong{parallel}.
 
-@item @strong{--nonall} (alpha testing)
-@anchor{@strong{--nonall} (alpha testing)}
+@item @strong{--nonall} (beta testing)
+@anchor{@strong{--nonall} (beta testing)}
 
 @strong{--onall} with no arguments. Run the command on all computers given
 with @strong{--sshlogin} but take no arguments. GNU @strong{parallel} will log
@@ -838,8 +838,8 @@ computer. @strong{-j} adjusts how many computers to log into in parallel.
 This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
-@item @strong{--onall} (alpha testing)
-@anchor{@strong{--onall} (alpha testing)}
+@item @strong{--onall} (beta testing)
+@anchor{@strong{--onall} (beta testing)}
 
 Run all the jobs on all computers given with @strong{--sshlogin}. GNU
 @strong{parallel} will log into @strong{--jobs} number of computers in parallel
@@ -850,23 +850,23 @@ adjusts how many computers to log into in parallel.
 When using @strong{--group} the output will be grouped by each server, so
 all the output from one server will be grouped together.
 
-@item @strong{--output-as-files} (alpha testing)
-@anchor{@strong{--output-as-files} (alpha testing)}
+@item @strong{--output-as-files} (beta testing)
+@anchor{@strong{--output-as-files} (beta testing)}
 
-@item @strong{--outputasfiles} (alpha testing)
-@anchor{@strong{--outputasfiles} (alpha testing)}
+@item @strong{--outputasfiles} (beta testing)
+@anchor{@strong{--outputasfiles} (beta testing)}
 
-@item @strong{--files} (alpha testing)
-@anchor{@strong{--files} (alpha testing)}
+@item @strong{--files} (beta testing)
+@anchor{@strong{--files} (beta testing)}
 
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
-@item @strong{--pipe} (beta testing)
-@anchor{@strong{--pipe} (beta testing)}
+@item @strong{--pipe}
+@anchor{@strong{--pipe}}
 
-@item @strong{--spreadstdin} (beta testing)
-@anchor{@strong{--spreadstdin} (beta testing)}
+@item @strong{--spreadstdin}
+@anchor{@strong{--spreadstdin}}
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1029,8 +1029,8 @@ If the stdin (standard input) only contains whitespace, do not run the command.
 
 If used with @strong{--pipe} this is slow.
 
-@item @strong{--record-env} (beta testing)
-@anchor{@strong{--record-env} (beta testing)}
+@item @strong{--record-env}
+@anchor{@strong{--record-env}}
 
 Record current environment variables in ~/.parallel/ignored_vars. This
 is useful before using @strong{--env _}.
@@ -1080,11 +1080,11 @@ it to the command.
 
 Only used with @strong{--pipe}.
 
-@item @strong{--results} @emph{prefix} (beta testing)
-@anchor{@strong{--results} @emph{prefix} (beta testing)}
+@item @strong{--results} @emph{prefix}
+@anchor{@strong{--results} @emph{prefix}}
 
-@item @strong{--res} @emph{prefix} (beta testing)
-@anchor{@strong{--res} @emph{prefix} (beta testing)}
+@item @strong{--res} @emph{prefix}
+@anchor{@strong{--res} @emph{prefix}}
 
 Save the output into files. The files will be stored in a directory tree
 rooted at @emph{prefix}.  Within this directory tree, each command will result
@@ -1165,8 +1165,8 @@ there are fewer than @emph{n} computers in @strong{--sshlogin} GNU @strong{paral
 re-use the computers. This is useful if some jobs fail for no apparent
 reason (such as network failure).
 
-@item @strong{--return} @emph{filename}
-@anchor{@strong{--return} @emph{filename}}
+@item @strong{--return} @emph{filename} (alpha testing)
+@anchor{@strong{--return} @emph{filename} (alpha testing)}
 
 Transfer files from remote computers. @strong{--return} is used with
 @strong{--sshlogin} when the arguments are files on the remote computers. When
@@ -1206,11 +1206,11 @@ times:
 @strong{--return} is ignored when used with @strong{--sshlogin :} or when not used
 with @strong{--sshlogin}.
 
-@item @strong{--round-robin} (beta testing)
-@anchor{@strong{--round-robin} (beta testing)}
+@item @strong{--round-robin}
+@anchor{@strong{--round-robin}}
 
-@item @strong{--round} (beta testing)
-@anchor{@strong{--round} (beta testing)}
+@item @strong{--round}
+@anchor{@strong{--round}}
 
 Normally @strong{--pipe} will give a single block to each instance of the
 command. With @strong{--round-robin} all blocks will at random be written to
@@ -1394,7 +1394,7 @@ be needed.
 An @emph{sshlogin} is of the form:
 
 @verbatim
-  [sshcommand [options]][username@]hostname
+  [sshcommand [options]] [username@]hostname
 @end verbatim
 
 The sshlogin must not require a password.
@@ -1419,11 +1419,11 @@ The remote host must have GNU @strong{parallel} installed.
 @strong{--sshlogin} is often used with @strong{--transfer}, @strong{--return},
 @strong{--cleanup}, and @strong{--trc}.
 
-@item @strong{--sshloginfile} @emph{filename} (beta testing)
-@anchor{@strong{--sshloginfile} @emph{filename} (beta testing)}
+@item @strong{--sshloginfile} @emph{filename}
+@anchor{@strong{--sshloginfile} @emph{filename}}
 
-@item @strong{--slf} @emph{filename} (beta testing)
-@anchor{@strong{--slf} @emph{filename} (beta testing)}
+@item @strong{--slf} @emph{filename}
+@anchor{@strong{--slf} @emph{filename}}
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1516,8 +1516,8 @@ into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
 
-@item @strong{--timeout} @emph{val} (beta testing)
-@anchor{@strong{--timeout} @emph{val} (beta testing)}
+@item @strong{--timeout} @emph{val}
+@anchor{@strong{--timeout} @emph{val}}
 
 Time out for command. If the command runs for longer than @emph{val}
 seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
@@ -1550,8 +1550,8 @@ Print the job to be run on stderr (standard error).
 
 See also @strong{-v}, @strong{-p}.
 
-@item @strong{--transfer}
-@anchor{@strong{--transfer}}
+@item @strong{--transfer} (alpha testing)
+@anchor{@strong{--transfer} (alpha testing)}
 
 Transfer files to remote computers. @strong{--transfer} is used with
 @strong{--sshlogin} when the arguments are files and should be transferred to
@@ -1673,11 +1673,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir} (beta testing)
-@anchor{@strong{--workdir} @emph{mydir} (beta testing)}
+@item @strong{--workdir} @emph{mydir}
+@anchor{@strong{--workdir} @emph{mydir}}
 
-@item @strong{--wd} @emph{mydir} (beta testing)
-@anchor{@strong{--wd} @emph{mydir} (beta testing)}
+@item @strong{--wd} @emph{mydir}
+@anchor{@strong{--wd} @emph{mydir}}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in
@@ -2316,6 +2316,25 @@ This will run 1.5 job per core, and give 1000 arguments to @strong{grep}.
 To run commands on a remote computer SSH needs to be set up and you
 must be able to login without entering a password (The commands
 @strong{ssh-copy-id} and @strong{ssh-agent} may help you do that).
+
+If you need to login to a whole cluster, you typically do not want to
+accept the host key for every host. You want to accept them the first
+time and be warned if they are ever changed. To do that:
+
+@verbatim
+  # Add the servers to the sshloginfile
+  (echo servera; echo serverb) > .parallel/my_cluster
+  # Make sure .ssh/config exist
+  touch .ssh/config
+  cp .ssh/config .ssh/config.backup
+  # Disable StrictHostKeyChecking temporarily
+  (echo 'Host *'; echo StrictHostKeyChecking no) >> .ssh/config
+  parallel --slf my_cluster --nonall true
+  # Remove the disabling of StrictHostKeyChecking
+  mv .ssh/config.backup .ssh/config 
+@end verbatim
+
+The servers in @strong{.parallel/my_cluster} are now added in @strong{.ssh/known_hosts}.
 
 To run @strong{echo} on @strong{server.example.com}:
 
