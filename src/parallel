@@ -323,7 +323,7 @@ if($opt::pipe and @opt::a) {
     #print ::my_dump($cmd);
 }
 
-if($opt::eta or $opt::etas) {
+if($opt::eta or $opt::bar) {
     # Count the number of jobs before starting any
     $Global::JobQueue->total_jobs();
 }
@@ -1685,12 +1685,14 @@ sub drain_job_queue {
                     $last_header = $progress{'header'};
                 }
                 print $Global::original_stderr "\r",$progress{'status'};
+		flush $Global::original_stderr;
             }
 	    if($Global::total_running < $Global::max_jobs_running
 	       and not $Global::JobQueue->empty()) {
 		# These jobs may not be started because of loadavg
 		# or too little time between each ssh login.
 		if(start_more_jobs() > 0) {
+		    # Exponential back-on if jobs were started
 		    $sleep = $sleep/2+0.001;
 		}
 	    }
@@ -1709,6 +1711,7 @@ sub drain_job_queue {
     if($opt::progress) {
 	my %progress = progress();
 	print $Global::original_stderr "\r", $progress{'status'}, "\n";
+	flush $Global::original_stderr;
     }
 }
 
