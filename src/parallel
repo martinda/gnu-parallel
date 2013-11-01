@@ -323,7 +323,7 @@ if($opt::pipe and @opt::a) {
     #print ::my_dump($cmd);
 }
 
-if($opt::eta) {
+if($opt::eta or $opt::etas) {
     # Count the number of jobs before starting any
     $Global::JobQueue->total_jobs();
 }
@@ -702,6 +702,7 @@ sub options_hash {
 	 "dry-run|dryrun" => \$opt::dryrun,
 	 "progress" => \$opt::progress,
 	 "eta" => \$opt::eta,
+	 "etas" => \$opt::etas,
 	 "arg-sep|argsep=s" => \$opt::arg_sep,
 	 "arg-file-sep|argfilesep=s" => \$opt::arg_file_sep,
 	 "trim=s" => \$opt::trim,
@@ -1022,6 +1023,9 @@ sub parse_options {
     if(defined $opt::eta) {
         $opt::progress = $opt::eta;
     }
+    if(defined $opt::etas) {
+        $opt::progress = $opt::etas;
+    }
     if(defined $opt::retired) {
 	    ::error("-g has been retired. Use --group.\n");
 	    ::error("-B has been retired. Use --bf.\n");
@@ -1180,9 +1184,9 @@ sub read_options {
     # Returns:
     #   @ARGV without --options
     # This must be done first as this may exec myself
-    if(defined $ARGV[0] and ($ARGV[0]=~/^--shebang / or
-			     $ARGV[0]=~/^--shebang-?wrap / or
-			     $ARGV[0]=~/^--hashbang /)) {
+    if(defined $ARGV[0] and ($ARGV[0]=~/^--shebang/ or
+			     $ARGV[0]=~/^--shebang-?wrap/ or
+			     $ARGV[0]=~/^--hashbang/)) {
         # Program is called from #! line in script
 	# remove --shebang-wrap if it is set
         $opt::shebang_wrap = ($ARGV[0]=~s/^--shebang-?wrap *//);
@@ -1647,6 +1651,9 @@ sub init_progress {
     # Returns:
     #   list of computers for progress output
     $|=1;
+    if($opt::etas) {
+	return("","");
+    }
     my %progress = progress();
     return ("\nComputers / CPU cores / Max jobs to run\n",
             $progress{'workerlist'});
@@ -1720,7 +1727,6 @@ sub progress {
     #   header that will fit on the screen
     #   status message that will fit on the screen
     my $termcols = terminal_columns();
-    my ($status, $header) = ("x"x($termcols+1),"");
     my @workers = sort keys %Global::host;
     my %sshlogin = map { $_ eq ":" ? ($_=>"local") : ($_=>$_) } @workers;
     my $workerno = 1;
@@ -1733,7 +1739,8 @@ sub progress {
             $Global::host{$w}->max_jobs_running()."\n";
     }
     my $eta = "";
-    if($opt::eta) {
+    my ($status,$header)=("","");
+    if($opt::eta or $opt::etas) {
         my $completed = 0;
         for(@workers) { $completed += $Global::host{$_}->jobs_completed() }
         if($completed) {
@@ -1757,9 +1764,26 @@ sub progress {
 		$this_eta = $Private::last_eta;
 	    }
 	    $eta = sprintf("ETA: %ds %dleft %.2favg  ", $this_eta, $left, $avgtime);
+	    if($opt::etas) {
+		my $arg = $Global::newest_job ? 
+		    $Global::newest_job->{'commandline'}->simple_replace_placeholders($Global::replace{"{}"}) : "";
+		my $etas = sprintf("%d%% %ds %s", $pctcomplete*100, $this_eta, $arg);
+		my $rev = '[7m';
+		my $reset = '[0m';
+		my $terminal_width = terminal_columns();
+		my $s = sprintf("%-${terminal_width}s",$etas);
+		my $width = int($terminal_width * $pctcomplete);
+		$s =~ s/^(.{$width})/$1$reset/;
+		$s = "\r#   ".int($this_eta)." sec $arg" . "\r". $pctcomplete*100 # Prefix with zenity header
+		    . "\r" . $rev . $s;  
+		$status = $s;
+	    }
         }
     }
-
+    if($opt::etas) {
+	return ("workerlist" => "", "header" => "", "status" => $status);
+    }
+    $status = "x"x($termcols+1);
     if(length $status > $termcols) {
         # sshlogin1:XX/XX/XX%/XX.Xs sshlogin2:XX/XX/XX%/XX.Xs sshlogin3:XX/XX/XX%/XX.Xs
         $header = "Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete";
@@ -4560,6 +4584,7 @@ sub start {
 	if($opt::delay) {
 	    $Global::JobQueue->empty() or ::usleep($opt::delay*1000);
 	}
+	$Global::newest_job = $job;
 	return $job;
     } else {
 	# No more processes
