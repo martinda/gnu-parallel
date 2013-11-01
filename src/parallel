@@ -702,7 +702,7 @@ sub options_hash {
 	 "dry-run|dryrun" => \$opt::dryrun,
 	 "progress" => \$opt::progress,
 	 "eta" => \$opt::eta,
-	 "etas" => \$opt::etas,
+	 "bar" => \$opt::bar,
 	 "arg-sep|argsep=s" => \$opt::arg_sep,
 	 "arg-file-sep|argfilesep=s" => \$opt::arg_file_sep,
 	 "trim=s" => \$opt::trim,
@@ -785,12 +785,12 @@ sub get_options_from_array {
 	    $options{$k} = \@dummy;
 	}
     }
-    my @retval = GetOptions(%options);
+    my $retval = GetOptions(%options);
     if(not $this_is_ARGV) {
 	@{$array_ref} = @::ARGV;
 	@::ARGV = @save_argv;
     }
-    return @retval;
+    return $retval;
 }
 
 sub parse_options {
@@ -1023,8 +1023,8 @@ sub parse_options {
     if(defined $opt::eta) {
         $opt::progress = $opt::eta;
     }
-    if(defined $opt::etas) {
-        $opt::progress = $opt::etas;
+    if(defined $opt::bar) {
+        $opt::progress = $opt::bar;
     }
     if(defined $opt::retired) {
 	    ::error("-g has been retired. Use --group.\n");
@@ -1651,7 +1651,7 @@ sub init_progress {
     # Returns:
     #   list of computers for progress output
     $|=1;
-    if($opt::etas) {
+    if($opt::bar) {
 	return("","");
     }
     my %progress = progress();
@@ -1740,7 +1740,7 @@ sub progress {
     }
     my $eta = "";
     my ($status,$header)=("","");
-    if($opt::eta or $opt::etas) {
+    if($opt::eta or $opt::bar) {
         my $completed = 0;
         for(@workers) { $completed += $Global::host{$_}->jobs_completed() }
         if($completed) {
@@ -1764,23 +1764,23 @@ sub progress {
 		$this_eta = $Private::last_eta;
 	    }
 	    $eta = sprintf("ETA: %ds %dleft %.2favg  ", $this_eta, $left, $avgtime);
-	    if($opt::etas) {
+	    if($opt::bar) {
 		my $arg = $Global::newest_job ? 
 		    $Global::newest_job->{'commandline'}->simple_replace_placeholders($Global::replace{"{}"}) : "";
-		my $etas = sprintf("%d%% %ds %s", $pctcomplete*100, $this_eta, $arg);
+		my $bar = sprintf("%d%% %ds %s", $pctcomplete*100, $this_eta, $arg);
 		my $rev = '[7m';
 		my $reset = '[0m';
 		my $terminal_width = terminal_columns();
-		my $s = sprintf("%-${terminal_width}s",$etas);
+		my $s = sprintf("%-${terminal_width}s",$bar);
 		my $width = int($terminal_width * $pctcomplete);
 		$s =~ s/^(.{$width})/$1$reset/;
 		$s = "\r#   ".int($this_eta)." sec $arg" . "\r". $pctcomplete*100 # Prefix with zenity header
-		    . "\r" . $rev . $s;  
+		    . "\r" . $rev . $s . $reset;  
 		$status = $s;
 	    }
         }
     }
-    if($opt::etas) {
+    if($opt::bar) {
 	return ("workerlist" => "", "header" => "", "status" => $status);
     }
     $status = "x"x($termcols+1);
