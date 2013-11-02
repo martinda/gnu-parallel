@@ -418,6 +418,24 @@ separating the columns. The n'th column can be access using
 @emph{regexp} is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
+@item @strong{--compress} (pre-alpha testing)
+@anchor{@strong{--compress} (pre-alpha testing)}
+
+Compress temporary files. If the output is big and very compressible
+this will take up less disk space in $TMPDIR and possibly be faster due to less
+disk I/O.
+
+GNU @strong{parallel} will try @strong{lzop}, @strong{pigz}, @strong{gzip}, @strong{pbzip2},
+@strong{plzip}, @strong{bzip2}, @strong{lzma}, @strong{lzip}, @strong{xz} in that order, and use the
+first available.
+
+@item @strong{--compress-program} @emph{prg} (pre-alpha testing)
+@anchor{@strong{--compress-program} @emph{prg} (pre-alpha testing)}
+
+Use @emph{prg} for compressing temporary files. It is assumed that @emph{prg
+-dc} will decompress stdin (standard input) to stdout (standard
+output).
+
 @item @strong{--ctrlc}
 @anchor{@strong{--ctrlc}}
 
@@ -2751,27 +2769,16 @@ computers:
 
 @strong{echo }>@strong{jobqueue}; @strong{tail -f jobqueue | parallel -S ..}
 
-There are a two small issues when using GNU @strong{parallel} as queue
-system/batch manager:
-
-@itemize
-@item You will get a warning if you do not submit JobSlots jobs within
-the first second. E.g. if you have 8 cores and use -j+2 you have to
-submit 10 jobs. These can be dummy jobs (e.g. echo foo). You can also
-simply ignore the warning.  For parallel versions 20110322 and higher,
-the warnings will not appear.
-
-@item You have to submit JobSlot number of jobs before they will start, and
-after that you can submit one at a time, and job will start
-immediately if free slots are available.  Output from the running or
-completed jobs are held back and will only be printed when JobSlots
-more jobs has been started (unless you use --ungroup or -u, in which
-case the output from the jobs are printed immediately).  E.g. if you
-have 10 jobslots then the output from the first completed job will
-only be printed when job 11 has started, and the output of second
-completed job will only be printed when job 12 has started.
-
-@end itemize
+There is a a small issue when using GNU @strong{parallel} as queue
+system/batch manager: You have to submit JobSlot number of jobs before
+they will start, and after that you can submit one at a time, and job
+will start immediately if free slots are available.  Output from the
+running or completed jobs are held back and will only be printed when
+JobSlots more jobs has been started (unless you use --ungroup or -u,
+in which case the output from the jobs are printed immediately).
+E.g. if you have 10 jobslots then the output from the first completed
+job will only be printed when job 11 has started, and the output of
+second completed job will only be printed when job 12 has started.
 
 @chapter EXAMPLE: GNU Parallel as dir processor
 @anchor{EXAMPLE: GNU Parallel as dir processor}

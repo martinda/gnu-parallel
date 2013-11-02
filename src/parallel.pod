@@ -395,6 +395,24 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
+=item B<--compress> (pre-alpha testing)
+
+Compress temporary files. If the output is big and very compressible
+this will take up less disk space in $TMPDIR and possibly be faster due to less
+disk I/O.
+
+GNU B<parallel> will try B<lzop>, B<pigz>, B<gzip>, B<pbzip2>,
+B<plzip>, B<bzip2>, B<lzma>, B<lzip>, B<xz> in that order, and use the
+first available.
+
+
+=item B<--compress-program> I<prg> (pre-alpha testing)
+
+Use I<prg> for compressing temporary files. It is assumed that I<prg
+-dc> will decompress stdin (standard input) to stdout (standard
+output).
+
+
 =item B<--ctrlc>
 
 Sends SIGINT to tasks running on remote computers thus killing them.
@@ -2543,32 +2561,16 @@ computers:
 
 B<echo >>B<jobqueue>; B<tail -f jobqueue | parallel -S ..>
 
-There are a two small issues when using GNU B<parallel> as queue
-system/batch manager:
-
-=over 2
-
-=item *
-
-You will get a warning if you do not submit JobSlots jobs within
-the first second. E.g. if you have 8 cores and use -j+2 you have to
-submit 10 jobs. These can be dummy jobs (e.g. echo foo). You can also
-simply ignore the warning.  For parallel versions 20110322 and higher,
-the warnings will not appear.
-
-=item *
-
-You have to submit JobSlot number of jobs before they will start, and
-after that you can submit one at a time, and job will start
-immediately if free slots are available.  Output from the running or
-completed jobs are held back and will only be printed when JobSlots
-more jobs has been started (unless you use --ungroup or -u, in which
-case the output from the jobs are printed immediately).  E.g. if you
-have 10 jobslots then the output from the first completed job will
-only be printed when job 11 has started, and the output of second
-completed job will only be printed when job 12 has started.
-
-=back
+There is a a small issue when using GNU B<parallel> as queue
+system/batch manager: You have to submit JobSlot number of jobs before
+they will start, and after that you can submit one at a time, and job
+will start immediately if free slots are available.  Output from the
+running or completed jobs are held back and will only be printed when
+JobSlots more jobs has been started (unless you use --ungroup or -u,
+in which case the output from the jobs are printed immediately).
+E.g. if you have 10 jobslots then the output from the first completed
+job will only be printed when job 11 has started, and the output of
+second completed job will only be printed when job 12 has started.
 
 
 =head1 EXAMPLE: GNU Parallel as dir processor
