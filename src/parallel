@@ -1137,8 +1137,10 @@ sub parse_env_var {
 
 sub open_joblog {
     my $append = 0;
-    if(($opt::resume or $opt::resume_failed) and not $opt::joblog) {
-        ::error("--resume and --resume-failed require --joblog.\n");
+    if(($opt::resume or $opt::resume_failed)
+       and
+       not ($opt::joblog or $opt::results)) {
+        ::error("--resume and --resume-failed require --joblog or --results.\n");
 	::wait_and_exit(255);
     }
     if($opt::joblog) {
@@ -1650,6 +1652,8 @@ sub start_another_job {
 	    return 0;
         } else {
             my $job;
+	    # Skip jobs already in job log
+	    # Skip jobs already in results
             do {
 		$job = get_job_with_sshlogin($sshlogin);
 		if(not defined $job) {
@@ -1657,7 +1661,9 @@ sub start_another_job {
 		    debug("Not starting: no jobs available for ".$sshlogin->string()."\n");
 		    return 0;
 		}
-	    } while ($job->is_already_in_joblog());
+	    } while ($job->is_already_in_joblog()
+		     or
+		     ($opt::results and $opt::resume and $job->is_already_in_results()));
 	    debug("Command to run on '".$job->sshlogin()->string()."': '".$job->replaced()."'\n");
             if($job->start()) {
                 $Global::running{$job->pid()} = $job;
@@ -4669,6 +4675,18 @@ sub start {
 	::debug("Cannot spawn more jobs.\n");
 	return undef;
     }
+}
+
+sub is_already_in_results {
+    # Do we already have results for this job?
+    # Returns:
+    #   $job_already_run = bool whether there is output for this or not
+    my $job = $_[0];
+    my $args_as_dirname = $job->{'commandline'}->args_as_dirname();
+    # prefix/name1/val1/name2/val2/
+    my $dir = $opt::results."/".$args_as_dirname;
+    ::debug("Test $dir/stdout",  -e "$dir/stdout","\n");
+    return -e "$dir/stdout";
 }
 
 sub is_already_in_joblog {
