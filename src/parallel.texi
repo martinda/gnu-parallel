@@ -1004,10 +1004,10 @@ to determine the number of CPU cores on remote computers).
 @item @strong{--no-notice} (alpha testing)
 @anchor{@strong{--no-notice} (alpha testing)}
 
-Do not display citing notice. A citation notice is printed on stderr
+Do not display citation notice. A citation notice is printed on stderr
 (standard error) only if stderr (standard error) is a terminal, the
-user has not specified @strong{--no-notice} and the user has not run --bibtex
-once.
+user has not specified @strong{--no-notice}, and the user has not run
+@strong{--bibtex} once.
 
 @item @strong{--nice} @emph{niceness}
 @anchor{@strong{--nice} @emph{niceness}}
