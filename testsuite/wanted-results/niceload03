@@ -1,6 +1,6 @@
 ### --soft -f and test if child is actually suspended and thus takes longer
 ### niceload with no arguments should give no output
-1000000 1000000 6888896
+20000000 20000000 168888897
 This should finish first
-1000000 1000000 6888896
+20000000 20000000 168888897
 This should finish last

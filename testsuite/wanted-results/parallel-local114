@@ -201,20 +201,20 @@ II IIII
 ### Test --results --header : piped
 /tmp/parallel_results_test/testF/Col/backslash\\tab/2
 /tmp/parallel_results_test/testF/Col/backslash\\tab/2/slash\_null\0eof
-/tmp/parallel_results_test/testF/Col/backslash\\tab/2/slash\_null\0eof/stdout
 /tmp/parallel_results_test/testF/Col/backslash\\tab/2/slash\_null\0eof/stderr
+/tmp/parallel_results_test/testF/Col/backslash\\tab/2/slash\_null\0eof/stdout
 ### Test --results --header : piped - non-existing column header
 /tmp/parallel_results_test/testG/
 /tmp/parallel_results_test/testG/Col1
+/tmp/parallel_results_test/testG/Col1/backslash\\tab
+/tmp/parallel_results_test/testG/Col1/backslash\\tab/2
+/tmp/parallel_results_test/testG/Col1/backslash\\tab/2/slash\_null\0eof
+/tmp/parallel_results_test/testG/Col1/backslash\\tab/2/slash\_null\0eof/stderr
+/tmp/parallel_results_test/testG/Col1/backslash\\tab/2/slash\_null\0eof/stdout
 /tmp/parallel_results_test/testG/Col1/v1
 /tmp/parallel_results_test/testG/Col1/v1/2
 /tmp/parallel_results_test/testG/Col1/v1/2/v2
 /tmp/parallel_results_test/testG/Col1/v1/2/v2/3
 /tmp/parallel_results_test/testG/Col1/v1/2/v2/3/v3
-/tmp/parallel_results_test/testG/Col1/v1/2/v2/3/v3/stdout
 /tmp/parallel_results_test/testG/Col1/v1/2/v2/3/v3/stderr
-/tmp/parallel_results_test/testG/Col1/backslash\\tab
-/tmp/parallel_results_test/testG/Col1/backslash\\tab/2
-/tmp/parallel_results_test/testG/Col1/backslash\\tab/2/slash\_null\0eof
-/tmp/parallel_results_test/testG/Col1/backslash\\tab/2/slash\_null\0eof/stdout
-/tmp/parallel_results_test/testG/Col1/backslash\\tab/2/slash\_null\0eof/stderr
+/tmp/parallel_results_test/testG/Col1/v1/2/v2/3/v3/stdout

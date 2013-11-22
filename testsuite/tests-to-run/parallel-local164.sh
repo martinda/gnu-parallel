@@ -12,7 +12,7 @@ seq 9 | /usr/bin/time -f %e  parallel -j3 --delay 0.57 true {} 2>&1 |
   perl -ne '$_ > 3.3 and print "More than 3.3 secs: OK\n"'
 
 echo '### test --sshdelay'
-  stdout /usr/bin/time -f %e parallel -j0 --sshdelay 0.5 -S localhost true ::: 1 2 3 | perl -ne 'print($_ > 1.80 ? "OK\n" : "Not OK\n")'
+  stdout /usr/bin/time -f %e parallel -j0 --sshdelay 0.5 -S localhost true ::: 1 2 3 | perl -ne 'print($_ > 1.30 ? "OK\n" : "Not OK\n")'
 
 echo '### bug #38299: --resume-failed -k'
   rm /tmp/joblog-38299; 

@@ -4,14 +4,17 @@ echo '### Test niceload -q'
 niceload -q perl -e '$a = "works";$b="This $a\n"; print($b);'
 echo 
 
-# Force swapping
-MEMAVAIL=$(free | perl -ane '/buffers.cache:/ and print $F[3]')
-while [ $MEMAVAIL -gt 1000000 ] ; do
-  BS=$(echo $MEMAVAIL/10 | bc)
-  (seq 1 10 | parallel -j0 -N0 timeout 15 nice dd if=/dev/zero bs=${BS}k '|' wc -c >/dev/null &)
-  sleep 2
-  MEMAVAIL=$(free | perl -ane '/buffers.cache:/ and print $F[3]')
-done
+freepl >/dev/null
+freepl >/dev/null &
+## # Force swapping
+## MEMAVAIL=$(free | perl -ane '/buffers.cache:/ and print $F[3]')
+## while [ $MEMAVAIL -gt 1000000 ] ; do
+##   BS=$(echo $MEMAVAIL/20 | bc)
+##   (seq 1 10 | parallel -j0 -N0 --timeout 15 nice nice dd if=/dev/zero bs=${BS}k '|' wc -c >/dev/null &)
+##   sleep 2
+##   MEMAVAIL=$(free | perl -ane '/buffers.cache:/ and print $F[3]')
+##   echo $MEMAVAIL
+## done
 
 #echo 1 | parallel --timeout 20 'seq 10000{} | gzip -1 | perl -e '\'\$a=join\"\",\<\>\;\ while\(1\)\{push\ @a,\$a\}\'
 

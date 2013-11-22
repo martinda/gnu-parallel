@@ -19,8 +19,6 @@ copy_to_host dragonfly.polarhome.com
 copy_to_host centos.polarhome.com
 copy_to_host miros.polarhome.com
 copy_to_host hurd.polarhome.com
-copy_to_host minix.polarhome.com
-copy_to_host raspberrypi.polarhome.com
 ### Run the test on polarhome machines
 freebsd.polarhome.com	Works on freebsd.polarhome.com
 solaris.polarhome.com	Works on solaris.polarhome.com
@@ -43,6 +41,3 @@ dragonfly.polarhome.com	Works on dragonfly.polarhome.com
 centos.polarhome.com	Works on centos.polarhome.com
 miros.polarhome.com	Works on miros.polarhome.com
 hurd.polarhome.com	Works on hurd.polarhome.com
-minix.polarhome.com	Works on minix.polarhome.com
-raspberrypi.polarhome.com	Works on raspberrypi.polarhome.com
-raspberrypi.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.

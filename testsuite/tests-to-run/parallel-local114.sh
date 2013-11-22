@@ -78,10 +78,10 @@ echo "### Test --results --header : named - a/b swapped";
 echo "### Test --results --header : piped"; 
   mkdir -p /tmp/parallel_results_test; 
   (echo Col; perl -e 'print "backslash\\tab\tslash/null\0eof\n"') | parallel  --header : --result /tmp/parallel_results_test/testF true; 
-  find /tmp/parallel_results_test/testF/*/*/*; rm -rf /tmp/parallel_results_test/testF*
+  find /tmp/parallel_results_test/testF/*/*/* | sort; rm -rf /tmp/parallel_results_test/testF*
 
 echo "### Test --results --header : piped - non-existing column header"; 
   mkdir -p /tmp/parallel_results_test; 
-  (printf "Col1\t\n"; printf "v1\tv2\tv3\n"; perl -e 'print "backslash\\tab\tslash/null\0eof\n"') | parallel --header : --result /tmp/parallel_results_test/testG true; find /tmp/parallel_results_test/testG/; rm -rf /tmp/parallel_results_test/testG*
+  (printf "Col1\t\n"; printf "v1\tv2\tv3\n"; perl -e 'print "backslash\\tab\tslash/null\0eof\n"') | parallel --header : --result /tmp/parallel_results_test/testG true; find /tmp/parallel_results_test/testG/ | sort; rm -rf /tmp/parallel_results_test/testG*
 
 EOF

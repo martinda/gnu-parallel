@@ -201,17 +201,31 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20131122 ('') released
+Subject: GNU Parallel 20131122 ('Haiyan') released
 
-GNU Parallel 20131122 ('') has been released. It is
+GNU Parallel 20131122 ('Haiyan') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* 
+* GNU Parallel was used (unfortunately with improper citation) in:
+  'fastphylo: Fast tools for phylogenetics'
+  http://www.biomedcentral.com/1471-2105/14/334/abstract
+
+* Using GNU parallel
+  http://davetang.org/muse/2013/11/18/using-gnu-parallel/
+
+* Techlux - GNU - Parallel (German)
+  https://techlux.de/blog/2013/11/07/gnu-parallel/
+
+* awk, sed, bzip2, grep, wc на всех ядрах
+  http://vk.com/page-30666517_45528467
 
 * 如何利用多核CPU來加速你的Linux命令 — awk, sed, bzip2, grep, wc等
   http://www.hksilicon.com/kb/articles/290543/CPULinuxawk-sed-bzip2-grep-wc
+
+* GNU Parallel (Japanese)
+  http://jarp.does.notwork.org/diary/201311b.html#20131117
 
 * Bug fixes and man page updates.
 

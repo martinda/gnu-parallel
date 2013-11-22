@@ -20,6 +20,7 @@ testlocal: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqloc
 	date
 
 prereqlocal: installparallel
+	tcsh -c echo tcsh installed || (echo tcsh is required for testsuite; /bin/false)
 	seq 1 2 >/dev/null || (echo seq is required for testsuite; /bin/false)
 	stdout echo || (echo stdout is required for testsuite; /bin/false)
 	convert >/dev/null || (echo convert is required for testsuite; /bin/false)
@@ -50,7 +51,7 @@ installparallel: ../src/parallel
 	cd .. && make -j && sudo make -j install
 
 startdb:
-	sudo parallel /etc/init.d/{} start ::: postgresql mysql oracle-xe
+	sudo parallel /etc/init.d/{} restart ::: postgresql mysql oracle-xe
 
 clean:
 	rm -rf input-files/random_dirs_no_newline

@@ -7,7 +7,7 @@ Block_end
 5
 Block_end
 ### --env _
-DEBEMAIL: Undefined variable.
+OK FUBAR test
 ### --env _ with explicit mentioning of normally ignored var $DEBEMAIL
 OK FUBAR ole@tange.dk test
 bug #40137: SHELL not bash: Warning when exporting funcs

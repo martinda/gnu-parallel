@@ -100,14 +100,14 @@ Seq	Host	Starttime	Runtime	Send	Receive	Exitval	Signal	Command
 X	:	XXXXXXXXXX.XXX	X.XXX	X	X	X	X	true X
 echo '### How do we deal with missing $HOME'
 ### How do we deal with missing $HOME
-   unset HOME; stdout perl -w $(which parallel) echo ::: 1 2 3
+   unset HOME; stdout perl -w $(which parallel) -k echo ::: 1 2 3
 parallel: Warning: $HOME not set. Using /tmp
 1
 2
 3
 echo '### How do we deal with missing $SHELL'
 ### How do we deal with missing $SHELL
-   unset SHELL; stdout perl -w $(which parallel) echo ::: 1 2 3
+   unset SHELL; stdout perl -w $(which parallel) -k echo ::: 1 2 3
 parallel: Warning: $SHELL not set. Using /bin/sh.
 1
 2

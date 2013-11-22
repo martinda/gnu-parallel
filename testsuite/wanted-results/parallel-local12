@@ -1,9 +1,27 @@
 ### Test stdin goes to first command only ("-" as argument)
+When using GNU Parallel to process data for publication please cite:
+
+  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
+  ;login: The USENIX Magazine, February 2011:42-47.
+
+This helps funding further development; and it won't cost you a cent.
+
+To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.
+
 cat -
 via first cat
 cat -
 via pseudotty
 ### Test stdin goes to first command only ("cat" as argument)
+When using GNU Parallel to process data for publication please cite:
+
+  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
+  ;login: The USENIX Magazine, February 2011:42-47.
+
+This helps funding further development; and it won't cost you a cent.
+
+To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.
+
 echo a
 a
 cat

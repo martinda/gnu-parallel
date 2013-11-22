@@ -724,6 +724,7 @@ sub options_hash {
 	 "gnu" => \$opt::gnu,
 	 "xapply" => \$opt::xapply,
 	 "bibtex" => \$opt::bibtex,
+	 "nonotice|no-notice" => \$opt::no_notice,
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$opt::P,
 	 "delimiter|d=s" => \$opt::d,
@@ -924,7 +925,7 @@ sub parse_options {
 	$opt::u = 1;
 	$Global::grouped = 0;
 	$Global::quoting = 1;
-	$opt::q = 1;
+	$opt::q = 1; # =
 	if(defined $opt::max_lines) {
 	    $opt::load = $opt::max_lines;
 	    $opt::max_lines = undef;
@@ -1047,6 +1048,7 @@ sub parse_options {
 	    ::error("-H has been retired. Use --halt.\n");
             ::wait_and_exit(255);
     }
+    citation_notice();
 
     parse_sshlogin();
     parse_env_var();
@@ -1224,16 +1226,16 @@ sub read_options {
     # Returns:
     #   @ARGV_no_opt = @ARGV without --options
     # This must be done first as this may exec myself
-    if(defined $ARGV[0] and ($ARGV[0]=~/^--shebang/ or
-			     $ARGV[0]=~/^--shebang-?wrap/ or
-			     $ARGV[0]=~/^--hashbang/)) {
+    if(defined $ARGV[0] and ($ARGV[0] =~ /^--shebang/ or
+			     $ARGV[0] =~ /^--shebang-?wrap/ or
+			     $ARGV[0] =~ /^--hashbang/)) {
         # Program is called from #! line in script
 	# remove --shebang-wrap if it is set
-        $opt::shebang_wrap = ($ARGV[0]=~s/^--shebang-?wrap *//);
+        $opt::shebang_wrap = ($ARGV[0] =~ s/^--shebang-?wrap *//);
 	# remove --shebang if it is set
-	$opt::shebang = ($ARGV[0]=~s/^--shebang *//);
+	$opt::shebang = ($ARGV[0] =~ s/^--shebang *//);
 	# remove --hashbang if it is set
-        $opt::shebang .= ($ARGV[0]=~s/^--hashbang *//);
+        $opt::shebang .= ($ARGV[0] =~ s/^--hashbang *//);
 	if($opt::shebang) {
 	    my $argfile = shell_quote_scalar(pop @ARGV);
 	    # exec myself to split $ARGV[0] into separate fields
@@ -2309,6 +2311,34 @@ sub usage {
 	 "");
 }
 
+
+sub citation_notice {
+    # if --no-notice: do nothing
+    # if stderr redirected: do nothing
+    # if ~/.parallel/will-cite: do nothing
+    # else: print citation notice to stderr
+    if($opt::no_notice
+       or
+       not -t $Global::original_stderr
+       or
+       -e $ENV{'HOME'}."/.parallel/will-cite") {
+	# skip
+    } else {
+	print $Global::original_stderr 
+	    ("When using GNU Parallel to process data for publication please cite:\n",
+	     "\n",
+	     "  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,\n",
+	     "  ;login: The USENIX Magazine, February 2011:42-47.\n",
+	     "\n",
+	     "This helps funding further development; and it won't cost you a cent.\n",
+	     "\n",
+	     "To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.\n\n",
+	    );
+	flush $Global::original_stderr;
+    }
+}
+
+
 sub warning {
     my @w = @_;
     my $fh = $Global::original_stderr || *STDERR;
@@ -2364,6 +2394,8 @@ sub bibtex {
 	print "WARNING: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n";
     }
     print join("\n",
+	       "When using GNU Parallel to process data for publication please cite:",
+	       "",
                "\@article{Tange2011a,",
 	       " title = {GNU Parallel - The Command-Line Power Tool},",
 	       " author = {O. Tange},",
@@ -2377,7 +2409,21 @@ sub bibtex {
 	       " pages = {42-47}",
 	       "}",
 	       "",
+	       "This helps funding further development.",
+	       ""
         );
+    while(not -e $ENV{'HOME'}."/.parallel/will-cite") {
+	print "\nType: 'will cite' and press enter.\n> ";
+	my $input = <STDIN>;
+	if($input =~ /will cite/i) {
+	    mkdir $ENV{'HOME'}."/.parallel";
+	    open (my $fh, ">", $ENV{'HOME'}."/.parallel/will-cite") 
+		|| ::die_bug("Cannot write: ".$ENV{'HOME'}."/.parallel/will-cite");
+	    close $fh;
+	    print "\nThank you for your support. It is much appreciated. The citation\n",
+	    "notice is now silenced.\n";
+	}
+    }
 }
 
 sub show_limits {

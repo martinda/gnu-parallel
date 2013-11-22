@@ -29,8 +29,10 @@ B	next to last B
 C	next to last C
 A	last AB	last BC	last C
 ### test round-robin
-    473     473    1893
-    527     527    2000
+    223     223     893
+    250     250    1000
+    250     250    1000
+    277     277    1000
 ### --version must have higher priority than retired options
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
 This is free software: you are free to change and redistribute it.

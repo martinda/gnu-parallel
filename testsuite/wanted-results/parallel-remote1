@@ -1,4 +1,5 @@
-### Test use special ssh with > 9 simultaneous
+### Test use special ssh
+TODO test ssh with > 9 simultaneous
 1
 2
 3
@@ -100,6 +101,6 @@
 99
 100
 ### --filter-hosts - OK, non-such-user, connection refused, wrong host
-hk
+aspire
 ### test --workdir . in $HOME
 OK
