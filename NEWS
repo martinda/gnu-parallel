@@ -1,3 +1,46 @@
+20131122
+
+* A citation notice is printed on stderr only if stderr is a terminal,
+  the user has not specified --no-notice and the user has not run
+  --bibtex once. This makes the release alpha quality.
+
+* --compress will compress temporary files. If the output is big and
+  very compressible this will take up less disk space in $TMPDIR and
+  possibly be faster due to less disk I/O.
+
+* --compress-program comtrols which program to use for compressing
+  temporary files.
+
+* --bar show progress as a progress bar compatible with zenity.
+
+* --resume can now be used with --result: Jobs already run will be
+  skipped.
+
+* --transfer and --basefile support paths relative to the --workdir by
+  inserting /./ into the path. 
+
+* GNU Parallel was used (unfortunately with improper citation) in:
+  'fastphylo: Fast tools for phylogenetics'
+  http://www.biomedcentral.com/1471-2105/14/334/abstract
+
+* Using GNU parallel
+  http://davetang.org/muse/2013/11/18/using-gnu-parallel/
+
+* Techlux - GNU - Parallel (German)
+  https://techlux.de/blog/2013/11/07/gnu-parallel/
+
+* awk, sed, bzip2, grep, wc на всех ядрах
+  http://vk.com/page-30666517_45528467
+
+* 如何利用多核CPU來加速你的Linux命令 — awk, sed, bzip2, grep, wc等
+  http://www.hksilicon.com/kb/articles/290543/CPULinuxawk-sed-bzip2-grep-wc
+
+* GNU Parallel (Japanese)
+  http://jarp.does.notwork.org/diary/201311b.html#20131117
+
+* Bug fixes and man page updates.
+
+
 20131022
 
 * --transfer files with /./ in the path will copy the files relative
