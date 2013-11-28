@@ -647,7 +647,7 @@ Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
 sshlogin, start time as seconds since epoch, run time in seconds,
 bytes in files transferred, bytes in files returned, exit status,
-and command run.
+signal, and command run.
 
 To convert the times into ISO-8601 strict do:
 
@@ -2690,6 +2690,22 @@ to @strong{sort} and the output from @strong{sort} is saved into files. These
 files are passed to the second @strong{parallel} that runs @strong{sort -m} on the
 files before it removes the files. The output is saved to
 @strong{bigfile.sort}.
+
+@chapter EXAMPLE: Running more than 500 jobs workaround
+@anchor{EXAMPLE: Running more than 500 jobs workaround}
+
+If you need to run a massive amount of jobs in parallel, then you will
+likely hit the filehandle limit which is often around 500 jobs. If you
+are super user you can raise the limit in /etc/security/limits.conf
+but you can also use this workaround. The filehandle limit is per
+process. That means that if you just spawn more GNU @strong{parallel}s then
+each of them can run 500 jobs. This will spawn up to 2500 jobs:
+
+@strong{cat myinput | parallel --pipe -N 50 --round-robin -j50 parallel -j50 your_prg}
+
+This will spawn up to 250000 jobs (use with caution - you need 250 GB RAM to do this):
+
+@strong{cat myinput | parallel --pipe -N 500 --round-robin -j500 parallel -j500 your_prg}
 
 @chapter EXAMPLE: Working as mutex and counting semaphore
 @anchor{EXAMPLE: Working as mutex and counting semaphore}

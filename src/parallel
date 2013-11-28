@@ -119,6 +119,7 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
     my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".ssh");
     print $fh @cores, @cpus, @maxline, @echo;
     close $fh;
+#    my $cmd = "cat $tmpfile | $0 -j0 --timeout 5 -s 1000 --joblog - --plain --delay 0.1 --retries 3 --tag --tagstring {1} --colsep '\t' -k eval {2} 2>/dev/null";
     my $cmd = "cat $tmpfile | $0 -j0 --timeout 5 -s 1000 --joblog - --plain --tag --tagstring {1} --colsep '\t' -k eval {2} 2>/dev/null";
     ::debug($cmd."\n");
     open(my $host_fh, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
@@ -127,6 +128,7 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 	my @col = split /\t/, $_;
 	if(defined $col[6]) {
 	    # This is a line from --joblog
+	    # seq host time spent sent received exit signal command
 	    # 2 : 1372607672.654 0.675 0 0 0 0 eval true\ m\;ssh\ m\ parallel\ --number-of-cores
 	    if($col[0] eq "Seq" and $col[1] eq "Host" and
 		    $col[2] eq "Starttime" and $col[3] eq "Runtime") {
@@ -259,7 +261,7 @@ if($opt::nonall or $opt::onall) {
 	     (@opt::env ? map { "--env ".::shell_quote_scalar($_) } @opt::env : ""),
 	);
     ::debug("| $0 $options\n");
-    open(my $parallel_fh, "|-", "$0 -j0 $options") ||
+    open(my $parallel_fh, "|-", "$0 --no-notice -j0 $options") ||
 	::die_bug("This does not run GNU Parallel: $0 $options");
   my @joblogs;
     for my $sshlogin (values %Global::host) {
@@ -2190,7 +2192,7 @@ sub reaper {
         $job->set_exitstatus($? >> 8);
         $job->set_exitsignal($? & 127);
         debug("died (".$job->exitstatus()."): ".$job->seq());
-        $job->set_endtime();
+        $job->set_endtime(::now());
         if($stiff == $Global::tty_taken) {
             # The process that died had the tty => release it
             $Global::tty_taken = 0;
@@ -2313,11 +2315,13 @@ sub usage {
 
 
 sub citation_notice {
-    # if --no-notice: do nothing
+    # if --no-notice or --plain: do nothing
     # if stderr redirected: do nothing
     # if ~/.parallel/will-cite: do nothing
     # else: print citation notice to stderr
     if($opt::no_notice
+       or
+       $opt::plain
        or
        not -t $Global::original_stderr
        or
@@ -2394,7 +2398,7 @@ sub bibtex {
 	print "WARNING: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n";
     }
     print join("\n",
-	       "When using GNU Parallel to process data for publication please cite:",
+	       "When using programs that use GNU Parallel to process data for publication please cite:",
 	       "",
                "\@article{Tange2011a,",
 	       " title = {GNU Parallel - The Command-Line Power Tool},",
@@ -2408,6 +2412,8 @@ sub bibtex {
 	       " year = {2011},",
 	       " pages = {42-47}",
 	       "}",
+	       "",
+	       "(Feel free to use \\nocite{Tange2011a})",
 	       "",
 	       "This helps funding further development.",
 	       ""
@@ -4190,7 +4196,7 @@ sub endtime {
 
 sub set_endtime {
     my $self = shift;
-    my $endtime = shift || ::now();
+    my $endtime = shift;
     $self->{'endtime'} = $endtime;
 }
 
@@ -4207,6 +4213,7 @@ sub kill {
     # Record this jobs as failed
     $self->set_exitstatus(-1);
     # Send two TERMs to give time to clean up
+    ::debug("Kill seq ".$self->seq()."\n");
     for my $signal ("TERM", "TERM", "KILL") {
 	my $alive = 0;
 	for my $pid (@family_pids) {
@@ -4766,6 +4773,7 @@ sub should_be_retried {
 	    return 0;
 	} else {
 	    # This command should be retried
+	    $self->set_endtime(undef);
 	    $Global::JobQueue->unget($self);
 	    ::debug("Retry ".$self->seq()."\n");
 	    return 1;
