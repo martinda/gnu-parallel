@@ -19,4 +19,11 @@ echo '### --filter-hosts - OK, non-such-user, connection refused, wrong host'
 echo '### test --workdir . in $HOME'
   cd && mkdir -p parallel-test && cd parallel-test && 
     echo OK > testfile && parallel --workdir . --transfer -S $SSHLOGIN1 cat {} ::: testfile
+
+echo '### test --timeout --retries'
+  parallel -j0 --timeout 5 --retries 3 -k ssh {} echo {} ::: 192.168.1.197 8.8.8.8 n m o c f w
+
+echo '### test --filter-hosts with server w/o ssh, non-existing server, and 5 proxied through the same'
+  parallel -S 192.168.1.197,8.8.8.8,n,m,o,c,f,w --filter-hosts --nonall --tag echo | sort
+
 EOF
