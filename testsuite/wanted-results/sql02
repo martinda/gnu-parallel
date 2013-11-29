@@ -1,5 +1,6 @@
 ### Test of sqlite
 Current command: sqlite
+foo
 sqltest.sqlite: SQLite 2.x database
 n|t
 1|Line 1
@@ -35,6 +36,7 @@ bytes
 bytes
 3072
 Current command: sqlite3
+foo
 sqltest.sqlite3: SQLite 3.x database
 n|t
 1|Line 1

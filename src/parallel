@@ -103,9 +103,13 @@ if($opt::header and not $opt::pipe) {
     }
 }
 
-# Parallel check for all hosts are up
-#if(not $opt::plain and (@opt::sshlogin or @opt::sshloginfile)) {
+
 if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
+    # Parallel check all hosts are up. Remove hosts that are down
+    filter_hosts();
+}
+
+sub filter_hosts {
     my(@cores, @cpus, @maxline, @echo);
     while (my ($host, $sshlogin) = each %Global::host) {
 	# The 'true' is used to get the $host out later
@@ -119,6 +123,11 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
     my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".ssh");
     print $fh @cores, @cpus, @maxline, @echo;
     close $fh;
+    # --timeout 5: Setting up an SSH connection and running a simple
+    #              command should never take > 5 sec.
+    # --delay 0.1: If multiple sshlogins use the same proxy the delay
+    #              will make it less likely to overload the ssh daemon.
+    # --retries 3: If the ssh daemon it overloaded, try 3 times
     my $cmd = "cat $tmpfile | $0 -j0 --timeout 5 -s 1000 --joblog - --plain --delay 0.1 --retries 3 --tag --tagstring {1} --colsep '\t' -k eval {2} 2>/dev/null";
     ::debug($cmd."\n");
     open(my $host_fh, "-|", $cmd) || ::die_bug("parallel host check: $cmd");

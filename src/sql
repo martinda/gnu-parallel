@@ -556,7 +556,7 @@ $Global::Initfile && unlink $Global::Initfile;
 exit ($err);
 
 sub parse_options {
-    $Global::version = 20131122;
+    $Global::version = 20131130;
     $Global::progname = 'sql';
 
     # This must be done first as this may exec myself
@@ -783,6 +783,7 @@ sub tablelist {
 	("mysql" => "show tables;",
 	 "postgresql" => '\dt',
 	 "oracle" => ("SELECT object_name FROM user_objects WHERE object_type = 'TABLE';"),
+	 "sqlite" => ".tables",
 	 "sqlite3" => ".tables",
 	);
     if($statement{$dbdriver}) {
