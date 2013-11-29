@@ -122,8 +122,9 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
     my $cmd = "cat $tmpfile | $0 -j0 --timeout 5 -s 1000 --joblog - --plain --delay 0.1 --retries 3 --tag --tagstring {1} --colsep '\t' -k eval {2} 2>/dev/null";
     ::debug($cmd."\n");
     open(my $host_fh, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
-    my (%ncores, %ncpus, %time_to_login, %maxlen, %echo);
+    my (%ncores, %ncpus, %time_to_login, %maxlen, %echo, @down_hosts);
     while(<$host_fh>) {
+	chomp;
 	my @col = split /\t/, $_;
 	if(defined $col[6]) {
 	    # This is a line from --joblog
@@ -143,7 +144,8 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 		# exit == 255 or signal == 15: ssh failed
 		# Remove sshlogin
 		::debug("--filtered $host\n");
-		delete $Global::host{$host};
+		push(@down_hosts, $host);
+		@down_hosts = uniq(@down_hosts);
 	    } elsif($col[6] eq "127") {
 		# signal == 127: parallel not installed remote
 		# Set ncpus and ncores = 1
@@ -191,6 +193,8 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
     }
     close $host_fh;
     unlink $tmpfile;
+    delete @Global::host{@down_hosts};
+    @down_hosts and ::warning("Removed @down_hosts\n");
     while (my ($sshlogin, $obj) = each %Global::host) {
 	$ncpus{$sshlogin} or ::die_bug("ncpus missing: ".$obj->serverlogin());
 	$ncores{$sshlogin} or ::die_bug("ncores missing: ".$obj->serverlogin());
@@ -204,24 +208,28 @@ if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
 	$obj->set_time_to_login($time_to_login{$sshlogin});
         $obj->set_maxlength($maxlen{$sshlogin});
 	::debug("Timing from -S:$sshlogin ncpus:$ncpus{$sshlogin} ncores:$ncores{$sshlogin} ",
-		"time_to_login:$time_to_login{$sshlogin} maxlen:$maxlen{$sshlogin}");
+		"time_to_login:$time_to_login{$sshlogin} maxlen:$maxlen{$sshlogin}\n");
     }
 }
 
 if($opt::nonall or $opt::onall) {
+    onall();
+    wait_and_exit(min(undef_as_zero($Global::exitstatus),254));
+}
 
+sub onall {
 # TODO --transfer foo/./bar --cleanup
 # multiple --transfer and --basefile with different /./
 
-  sub tmp_joblog {
-    my $joblog = shift;
-    if(not defined $joblog) {
-      return undef;
+    sub tmp_joblog {
+	my $joblog = shift;
+	if(not defined $joblog) {
+	    return undef;
+	}
+	my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".log");
+	close $fh;
+	return $tmpfile;
     }
-    my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".log");
-    close $fh;
-    return $tmpfile;
-  }
     # Copy all @fhlist into tempfiles
     my @argfiles = ();
     for my $fh (@fhlist) {
@@ -241,6 +249,7 @@ if($opt::nonall or $opt::onall) {
 	     ((defined $opt::P) ? "-P $opt::P" : ""),
 	     ((defined $opt::u) ? "-u" : ""),
 	     ((defined $opt::group) ? "-g" : ""),
+	     ((defined $opt::keeporder) ? "--keeporder" : ""),
 	     ((defined $opt::D) ? "-D" : ""),
 	     ((defined $opt::plain) ? "--plain" : ""),
 	     ((defined $opt::max_chars) ? "--max-chars ".$opt::max_chars : ""),
@@ -250,6 +259,7 @@ if($opt::nonall or $opt::onall) {
 	     ((defined $opt::u) ? "-u" : ""),
 	     ((defined $opt::group) ? "-g" : ""),
 	     ((defined $opt::files) ? "--files" : ""),
+	     ((defined $opt::keeporder) ? "--keeporder" : ""),
 	     ((defined $opt::colsep) ? "--colsep ".shell_quote($opt::colsep) : ""),
 	     ((@opt::v) ? "-vv" : ""),
 	     ((defined $opt::D) ? "-D" : ""),
@@ -262,13 +272,14 @@ if($opt::nonall or $opt::onall) {
     ::debug("| $0 $options\n");
     open(my $parallel_fh, "|-", "$0 --no-notice -j0 $options") ||
 	::die_bug("This does not run GNU Parallel: $0 $options");
-  my @joblogs;
-    for my $sshlogin (values %Global::host) {
-      my $joblog = tmp_joblog($opt::joblog);
-      if($joblog) {
-	push @joblogs, $joblog;
-	$joblog = "--joblog $joblog";
-      }
+    my @joblogs;
+    for my $host (sort keys %Global::host) {
+	my $sshlogin = $Global::host{$host};
+	my $joblog = tmp_joblog($opt::joblog);
+	if($joblog) {
+	    push @joblogs, $joblog;
+	    $joblog = "--joblog $joblog";
+	}
 	print $parallel_fh "$0 $suboptions -j1 $joblog ".
 	    ((defined $opt::tag) ?
 	     "--tagstring ".shell_quote_scalar($sshlogin->string()) : "").
@@ -281,16 +292,15 @@ if($opt::nonall or $opt::onall) {
     if(@opt::basefile) { cleanup_basefile(); }
     unlink(@argfiles);
     my %seen;
-  for my $joblog (@joblogs) {
-    # Append to $joblog
-    open(my $fh, "<", $joblog) || ::die_bug("Cannot open tmp joblog $joblog");
-    # Skip first line (header);
-    <$fh>;
-    print $Global::joblog (<$fh>);
-    close $fh;
-    unlink($joblog);
-  }
-    wait_and_exit(min(undef_as_zero($Global::exitstatus),254));
+    for my $joblog (@joblogs) {
+	# Append to $joblog
+	open(my $fh, "<", $joblog) || ::die_bug("Cannot open tmp joblog $joblog");
+	# Skip first line (header);
+	<$fh>;
+	print $Global::joblog (<$fh>);
+	close $fh;
+	unlink($joblog);
+    }
 }
 
 
@@ -725,7 +735,7 @@ sub options_hash {
 	 "gnu" => \$opt::gnu,
 	 "xapply" => \$opt::xapply,
 	 "bibtex" => \$opt::bibtex,
-	 "nonotice|no-notice" => \$opt::no_notice,
+	 "nn|nonotice|no-notice" => \$opt::no_notice,
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$opt::P,
 	 "delimiter|d=s" => \$opt::d,
@@ -2442,6 +2452,11 @@ sub show_limits {
 }
 
 sub __GENERIC_COMMON_FUNCTION__ {}
+
+sub uniq {
+    # Remove duplicates and return unique values
+    return keys %{{ map { $_ => 1 } @_ }};
+}
 
 sub min {
     # Returns:

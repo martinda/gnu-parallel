@@ -24,6 +24,6 @@ echo '### test --timeout --retries'
   parallel -j0 --timeout 5 --retries 3 -k ssh {} echo {} ::: 192.168.1.197 8.8.8.8 n m o c f w
 
 echo '### test --filter-hosts with server w/o ssh, non-existing server, and 5 proxied through the same'
-  parallel -S 192.168.1.197,8.8.8.8,n,m,o,c,f,w --filter-hosts --nonall --tag echo | sort
+  parallel -S 192.168.1.197,8.8.8.8,n,m,o,c,f,w --filter-hosts --nonall -k --tag echo
 
 EOF

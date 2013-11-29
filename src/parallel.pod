@@ -704,6 +704,10 @@ to see the difference:
   parallel -j4 sleep {}\; echo {} ::: 2 1 4 3
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 
+If used with B<--onall> or B<--nonall> output will be sorted according
+to sshlogin.
+
+
 =item B<-L> I<max-lines>
 
 When used with B<--pipe>: Read records of I<max-lines>.
