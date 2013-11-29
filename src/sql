@@ -783,6 +783,7 @@ sub tablelist {
 	("mysql" => "show tables;",
 	 "postgresql" => '\dt',
 	 "oracle" => ("SELECT object_name FROM user_objects WHERE object_type = 'TABLE';"),
+	 "sqlite3" => ".tables",
 	);
     if($statement{$dbdriver}) {
 	return $statement{$dbdriver};
