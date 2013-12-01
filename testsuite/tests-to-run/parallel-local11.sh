@@ -10,6 +10,11 @@ echo '### Test if we can deal with output > 4 GB'
 
 echo '**'
 
+echo "### Test --tmpdir running full. bug #40733 was caused by this"
+  stdout parallel -j1 --tmpdir /run/shm cat /dev/zero ::: dummy
+
+echo '**'
+
 echo "### Test Force outside the file handle limit, 2009-02-17 Gave fork error"
   (echo echo Start; seq 1 20000 | perl -pe 's/^/true /'; echo echo end) | stdout parallel -uj 0 | egrep -v 'processes took|adjusting'
 

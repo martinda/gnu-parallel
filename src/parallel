@@ -4927,7 +4927,9 @@ sub print {
 		my $pos = tell $in_fd;
 		print $in_fd "x"x8193;
 		if(tell $in_fd == $pos) {
-		    ::error("Cannot append to buffer file in \$TMPDIR. Disk full?\n");
+		    ::error("Output is incomplete. Cannot append to buffer file in \$TMPDIR. Is the disk full?\n");
+		    ::error("Change \$TMPDIR with --tmpdir.\n");
+		    ::wait_and_exit(255);
 		}
 		truncate $in_fd, $pos;
 		# Seek to start
