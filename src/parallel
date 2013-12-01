@@ -2347,7 +2347,7 @@ sub citation_notice {
 	# skip
     } else {
 	print $Global::original_stderr 
-	    ("When using GNU Parallel to process data for publication please cite:\n",
+	    ("When using programs that use GNU Parallel to process data for publication please cite:\n",
 	     "\n",
 	     "  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,\n",
 	     "  ;login: The USENIX Magazine, February 2011:42-47.\n",
@@ -4922,8 +4922,18 @@ sub print {
 		# Put STDIN file handle back
 		open(STDIN, "<&", $stdin_copy) or ::die_bug("Can't dup STDIN: $!");
 	    } else {
+		# Check for disk full by appending 8kbytes (> 1 page frame).
+		seek $in_fd, 0, 2;
+		my $pos = tell $in_fd;
+		print $in_fd "x"x8193;
+		if(tell $in_fd == $pos) {
+		    ::error("Cannot append to buffer file in \$TMPDIR. Disk full?\n");
+		}
+		truncate $in_fd, $pos;
+		# Seek to start
 		seek $in_fd, 0, 0;
 	    }
+	    # $in_fd is now ready for reading at position 0
 	    if($opt::tag or defined $opt::tagstring) {
 		my $tag = $self->tag();
 		if($fdno == 2) {
