@@ -819,7 +819,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20131129;
+    $Global::version = 20131202;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2281,13 +2281,21 @@ sub __USAGE__ {}
 sub wait_and_exit {
     # If we do not wait, we sometimes get segfault
     # Returns: N/A
+    my $error = shift;
+    if($error) {
+	# Kill all without printing
+	for my $job (values %Global::running) {
+	    $job->kill("TERM");
+	    $job->kill("TERM");
+	}
+    }
     for (keys %Global::unkilled_children) {
         kill 9, $_;
         waitpid($_,0);
         delete $Global::unkilled_children{$_};
     }
     wait();
-    exit(shift);
+    exit($error);
 }
 
 sub die_usage {
@@ -2536,6 +2544,7 @@ sub reap_usleep {
 	return $ms/2+0.001;
     } else {
 	usleep($ms);
+	Job::exit_if_disk_full();
 	if($opt::linebuffer) {
 	    for my $job (values %Global::running) {
 		$job->print();
@@ -4232,12 +4241,14 @@ sub timedout {
 sub kill {
     # kill the jobs
     my $self = shift;
+    my @signals = @_;
     my @family_pids = $self->family_pids();
     # Record this jobs as failed
     $self->set_exitstatus(-1);
     # Send two TERMs to give time to clean up
     ::debug("Kill seq ".$self->seq()."\n");
-    for my $signal ("TERM", "TERM", "KILL") {
+    my @send_signals = @signals || ("TERM", "TERM", "KILL");
+    for my $signal (@send_signals) {
 	my $alive = 0;
 	for my $pid (@family_pids) {
 	    if(kill 0, $pid) {
@@ -4246,6 +4257,8 @@ sub kill {
 		$alive = 1;
 	    }
 	}
+	# If a signal was given as input, do not do the sleep below
+	@signals and next;
 
 	if($signal eq "TERM" and $alive) {
 	    # Wait up to 200 ms between TERMs - but only if any pids are alive
@@ -4822,6 +4835,8 @@ sub print {
 	unlink $self->fd_file_name(1);
     }
 
+    # Check for disk full
+    exit_if_disk_full();
     if($Global::joblog) { $self->print_joblog() }
 
     # Printing is only relevant for grouped output.
@@ -4922,16 +4937,6 @@ sub print {
 		# Put STDIN file handle back
 		open(STDIN, "<&", $stdin_copy) or ::die_bug("Can't dup STDIN: $!");
 	    } else {
-		# Check for disk full by appending 8kbytes (> 1 page frame).
-		seek $in_fd, 0, 2;
-		my $pos = tell $in_fd;
-		print $in_fd "x"x8193;
-		if(tell $in_fd == $pos) {
-		    ::error("Output is incomplete. Cannot append to buffer file in \$TMPDIR. Is the disk full?\n");
-		    ::error("Change \$TMPDIR with --tmpdir.\n");
-		    ::wait_and_exit(255);
-		}
-		truncate $in_fd, $pos;
 		# Seek to start
 		seek $in_fd, 0, 0;
 	    }
@@ -5027,6 +5032,27 @@ sub set_exitsignal {
     my $self = shift;
     my $exitsignal = shift;
     $self->{'exitsignal'} = $exitsignal;
+}
+
+{
+    my ($disk_full_fh,$error_printed);
+    sub exit_if_disk_full {
+	# Checks if $TMPDIR is full by writing 8kb to a tmpfile
+	# If the disk is full: Exit immediately.
+	# Returns:
+	#   N/A
+	if(not $disk_full_fh) {
+	    $disk_full_fh = ::tempfile();
+	}
+	my $pos = tell $disk_full_fh;
+	print $disk_full_fh "x"x8193;
+	if(tell $disk_full_fh == $pos) {
+	    ::error("Output is incomplete. Cannot append to buffer file in \$TMPDIR. Is the disk full?\n");
+	    ::error("Change \$TMPDIR with --tmpdir.\n");
+	    ::wait_and_exit(255);
+	}
+	truncate $disk_full_fh, $pos;
+    }
 }
 
 
