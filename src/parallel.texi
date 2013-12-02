@@ -1976,6 +1976,14 @@ function.
   parallel doubleit ::: 1 2 3 ::: a b
 @end verbatim
 
+To do this on remote servers you need to transfer the function using
+@strong{--env}:
+
+@verbatim
+  parallel --env doit -S server doit ::: 1 2 3
+  parallel --env doubleit -S server doubleit ::: 1 2 3 ::: a b
+@end verbatim
+
 @chapter EXAMPLE: Removing file extension when processing files
 @anchor{EXAMPLE: Removing file extension when processing files}
 

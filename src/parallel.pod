@@ -1853,6 +1853,11 @@ function.
   export -f doubleit
   parallel doubleit ::: 1 2 3 ::: a b
 
+To do this on remote servers you need to transfer the function using
+B<--env>:
+
+  parallel --env doit -S server doit ::: 1 2 3
+  parallel --env doubleit -S server doubleit ::: 1 2 3 ::: a b
 
 
 =head1 EXAMPLE: Removing file extension when processing files
