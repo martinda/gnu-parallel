@@ -4427,7 +4427,9 @@ sub sshlogin_wrap {
 	    if($opt::workdir) {
 		my $wd = ::shell_quote_file($self->workdir());
 		$remote_pre .= ::shell_quote_scalar("mkdir -p ") . $wd .
-		    ::shell_quote_scalar("; cd ") . $wd . ::shell_quote_scalar(" && ");
+		    ::shell_quote_scalar("; cd ") . $wd . 
+		    ::shell_quote_scalar(qq{ || sh -c 'echo "$Global::progname: Error: cannot cd to $wd" 1>&2' }.
+					 "&& exit 255; ");
 	    }
 	    $self->{'sshlogin_wrap'} =
 		($pre

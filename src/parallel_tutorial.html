@@ -1287,7 +1287,7 @@ remote system.</p>
 <pre>
   in my_func baz</pre>
 <p>GNU Parallel can copy all defined variables and functions to the
-remote system. It just need to record which ones to ignore in
+remote system. It just needs to record which ones to ignore in
 ~/.parallel/ignored_vars. Do that by running this once:</p>
 <pre>
   parallel --record-env
@@ -1413,7 +1413,8 @@ line.</p>
   140000  140000  980000
   140000  140000  980000
    20000   20000  140001</pre>
-<p>Notice that the last jobs could not get the full 140000 lines.</p>
+<p>Notice that the last job could not get the full 140000 lines, but only
+20000 lines.</p>
 <p>If a record is 75 lines -L can be used:</p>
 <pre>
   cat num1000000 | parallel --pipe -L75 wc</pre>

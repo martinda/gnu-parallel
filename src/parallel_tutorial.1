@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL_TUTORIAL 1"
-.TH PARALLEL_TUTORIAL 1 "2013-09-28" "20131122" "parallel"
+.TH PARALLEL_TUTORIAL 1 "2013-12-03" "20131122" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1877,7 +1877,7 @@ Output:
 .Ve
 .PP
 \&\s-1GNU\s0 Parallel can copy all defined variables and functions to the
-remote system. It just need to record which ones to ignore in
+remote system. It just needs to record which ones to ignore in
 ~/.parallel/ignored_vars. Do that by running this once:
 .PP
 .Vb 2
@@ -2049,7 +2049,8 @@ Output (the order may be different):
 \&   20000   20000  140001
 .Ve
 .PP
-Notice that the last jobs could not get the full 140000 lines.
+Notice that the last job could not get the full 140000 lines, but only
+20000 lines.
 .PP
 If a record is 75 lines \-L can be used:
 .PP
