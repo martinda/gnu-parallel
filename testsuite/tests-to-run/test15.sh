@@ -2,6 +2,8 @@
 
 # Test xargs compatibility
 
+rm -f ~/.parallel/will-cite
+
 echo '### Test -p --interactive'
 cat >/tmp/parallel-script-for-expect <<_EOF
 #!/bin/bash

@@ -201,12 +201,48 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20131222 ('Yutu' 玉兔) released
+Subject: GNU Parallel 20131222 ('Yutu' 玉兔 eller Mandela) released
 
-GNU Parallel 20131222 ('Yutu' 玉兔) has been released. It is
+GNU Parallel 20131222 ('Yutu' 玉兔 eller Mandela) has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
+
+* GNU Parallel was cited in: Variational Message-Passing: Extension to
+  Continuous Variables and Applications in Multi-Target Tracking
+  http://www.ics.uci.edu/~ajfrank/pubs/thesis.pdf
+
+* GNU Parallel was cited in: Genome Assembly: Scaffolding Guided by
+  Related Genomes
+  https://www.duo.uio.no/handle/10852/37431
+
+* GNU Parallel was cited in: Metagenomic analysis of Mariana Trench
+  sediment samples
+  http://repositorio.ul.pt/handle/10451/9436
+
+* GNU Parallel was cited in: Diacritization, automatic segmentation
+  and labeling for Levantine Arabic speech
+  http://ieeexplore.ieee.org/xpl/articleDetails.jsp?tp=&arnumber=6642556
+
+* GNU Parallel was cited in: Investigation of emotion classification
+  using speech rhythm metrics
+  http://ieeexplore.ieee.org/xpl/articleDetails.jsp?tp=&arnumber=6642591
+
+* GNU Parallel was cited in: A Rhythm-Based Analysis of Arabic Native
+  and Non-Native Speaking Styles
+  http://www.ijsps.com/uploadfile/2013/1128/20131128014413279.pdf
+
+* GNU Parallel was cited in: Evolutionary optimization of wetlands
+  design
+  http://dl.acm.org/citation.cfm?id=2480400
+
+* GNU Parallel was cited (unfortunately with wrong citation) in:
+  RDBMS vs NoSQL: Performance and Scaling Comparison
+  http://www.epcc.ed.ac.uk/sites/default/files/Dissertations/2012-2013/RDBMS%20vs%20NoSQL%20-%20Performance%20and%20Scaling%20Comparison.pdf
+
+* GNU Parallel was used (without proper citation) in: Comprehensive
+  Analysis Pipeline for Discovery of Human Genetic Variation
+  http://www.google.com/patents/US20130311106
 
 * Using GNU Parallel to create a SVM classifier 
   http://ivanyu.me/blog/2013/12/01/parallel/

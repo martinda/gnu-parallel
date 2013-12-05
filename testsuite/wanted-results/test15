@@ -1,6 +1,6 @@
 ### Test -p --interactive
 spawn /tmp/parallel-script-for-expect
-When using GNU Parallel to process data for publication please cite:
+When using programs that use GNU Parallel to process data for publication please cite:
 
   O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
   ;login: The USENIX Magazine, February 2011:42-47.
@@ -14,7 +14,7 @@ sleep 0.1; echo opt-p 2 ?...n
 sleep 0.1; echo opt-p 3 ?...y
 opt-p 1
 opt-p 3
-When using GNU Parallel to process data for publication please cite:
+When using programs that use GNU Parallel to process data for publication please cite:
 
   O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
   ;login: The USENIX Magazine, February 2011:42-47.
@@ -199,7 +199,7 @@ xargs Expect: 3 1 2
 1
 2
 parallel Expect: 3 1 via psedotty  2
-When using GNU Parallel to process data for publication please cite:
+When using programs that use GNU Parallel to process data for publication please cite:
 
   O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
   ;login: The USENIX Magazine, February 2011:42-47.
@@ -217,7 +217,7 @@ xargs Expect: 1 3 2
 3
 2
 parallel Expect: 1 3 2 via pseudotty
-When using GNU Parallel to process data for publication please cite:
+When using programs that use GNU Parallel to process data for publication please cite:
 
   O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
   ;login: The USENIX Magazine, February 2011:42-47.

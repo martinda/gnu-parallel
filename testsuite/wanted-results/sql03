@@ -46,7 +46,7 @@ Error:
 sql [-hnr] [--table-size] [--db-size] [-p pass-through] [-s string] dburl [command]
 ### Test dburl :
 Error:
-: is not defined in /home/tange/.sql/aliases /home/tange/.dburl.aliases /etc/sql/aliases /home/tange/bin/dburl.aliases /home/tange/bin/dburl.aliases.dist
+: is not defined in /home/tange/.sql/aliases /home/tange/.dburl.aliases /etc/sql/aliases /usr/local/bin/dburl.aliases /usr/local/bin/dburl.aliases.dist
 
 sql [-hnr] [--table-size] [--db-size] [-p pass-through] [-s string] dburl [command]
 ### Test oracle with multiple arguments on the command line

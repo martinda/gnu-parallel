@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -f ~/.parallel/will-cite
+
 echo '### Test stdin goes to first command only ("-" as argument)'
 cat >/tmp/parallel-script-for-script <<EOF
 #!/bin/bash

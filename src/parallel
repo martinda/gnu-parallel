@@ -3384,6 +3384,8 @@ sub no_of_cpus {
         $no_of_cpus = no_of_cpus_openserver();
     } elsif ($^O eq 'irix') {
         $no_of_cpus = no_of_cpus_irix();
+    } elsif ($^O eq 'dec_osf') {
+        $no_of_cpus = no_of_cpus_tru64();
     } else {
 	$no_of_cpus = (no_of_cpus_gnu_linux()
 		       || no_of_cpus_freebsd()
@@ -3397,6 +3399,7 @@ sub no_of_cpus {
 		       || no_of_cpus_qnx()
 		       || no_of_cpus_openserver()
 		       || no_of_cpus_irix()
+		       || no_of_cpus_tru64()
 	    );
     }
     if($no_of_cpus) {
@@ -3437,6 +3440,8 @@ sub no_of_cores {
         $no_of_cores = no_of_cores_openserver();
     } elsif ($^O eq 'irix') {
         $no_of_cores = no_of_cores_irix();
+    } elsif ($^O eq 'dec_osf') {
+        $no_of_cores = no_of_cores_tru64();
     } else {
 	$no_of_cores = (no_of_cores_gnu_linux()
 			|| no_of_cores_freebsd()
@@ -3450,6 +3455,7 @@ sub no_of_cores {
 			|| no_of_cores_qnx()
 			|| no_of_cores_openserver()
 			|| no_of_cores_irix()
+			|| no_of_cores_tru64()
 	    );
     }
     if($no_of_cores) {
@@ -3746,6 +3752,24 @@ sub no_of_cores_irix {
     #   undef if not IRIX
     my $no_of_cores = 
         (`hinv | grep HZ | grep Processor | awk '{print \$1}'`);
+    return $no_of_cores;
+}
+
+sub no_of_cpus_tru64 {
+    # Returns:
+    #   Number of physical CPUs on Tru64
+    #   undef if not Tru64
+    my $no_of_cpus =
+        (`sizer -pr`);
+    return $no_of_cpus;
+}
+
+sub no_of_cores_tru64 {
+    # Returns:
+    #   Number of CPU cores on Tru64
+    #   undef if not Tru64
+    my $no_of_cores = 
+        (`sizer -pr`);
     return $no_of_cores;
 }
 
@@ -4428,8 +4452,7 @@ sub sshlogin_wrap {
 		my $wd = ::shell_quote_file($self->workdir());
 		$remote_pre .= ::shell_quote_scalar("mkdir -p ") . $wd .
 		    ::shell_quote_scalar("; cd ") . $wd . 
-		    ::shell_quote_scalar(qq{ || sh -c 'echo "$Global::progname: Error: cannot cd to $wd" 1>&2' }.
-					 "&& exit 255; ");
+		    ::shell_quote_scalar(qq{ || exit 255;});
 	    }
 	    $self->{'sshlogin_wrap'} =
 		($pre
