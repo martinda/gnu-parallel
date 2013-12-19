@@ -5,6 +5,5 @@ Less than 1 secs user time: OK
 1
 2
 3
-### Test too slow spawning - TODO THIS CURRENTLY DOES NOT OVERLOAD
-parallel: Warning: Only enough file handles to run 506 jobs in parallel.
-Raising ulimit -n or /etc/security/limits.conf may help.
+### Test too slow spawning
+OK

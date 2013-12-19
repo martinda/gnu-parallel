@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TMP=/tmp/parallel_local105
+TMP=/run/shm/parallel_local105
 rm -rf $TMP 2>/dev/null
 mkdir -p $TMP
 tar -C $TMP -xf input-files/random_dirs_with_newline.tar.bz2

@@ -1,0 +1,16 @@
+### Test race condition on 8 CPU (my laptop)
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+**
+### Test --tmpdir running full. bug #40733 was caused by this
+parallel: Error: Output is incomplete. Cannot append to buffer file in $TMPDIR. Is the disk full?
+parallel: Error: Change $TMPDIR with --tmpdir.
+**

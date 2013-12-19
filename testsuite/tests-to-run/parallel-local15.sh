@@ -1,7 +1,9 @@
 #!/bin/bash
 
-rsync -Ha --delete input-files/testdir/ /tmp/parallel_$$
-cd /tmp/parallel_$$
+TMP=/run/shm/parallel_$$
+
+rsync -Ha --delete input-files/testdir/ $TMP/
+cd $TMP/
 
 echo echo test of cat pipe sh | parallel -j 50 2>&1
 find . -name '*.jpg' | parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}
@@ -25,4 +27,4 @@ find . -type f | parallel -qv --group perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\
 EOF
 
 cd -
-rm -rf /tmp/parallel_$$
+rm -rf $TMP/

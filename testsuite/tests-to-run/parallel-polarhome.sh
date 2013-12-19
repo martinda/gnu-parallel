@@ -13,17 +13,14 @@ POLAR=`parallel -k echo {}.polarhome.com ::: $P`
 echo '### Tests on polarhome machines'
 echo 'Setup on polarhome machines'
 stdout parallel -kj0 ssh -oLogLevel=quiet {} mkdir -p bin ::: $POLAR &
-# scp to each polarhome machine do not work. Use cat
-copy_to_host() {
-    H=$1
-    # Avoid the stupid /etc/issue.net banner with -oLogLevel=quiet
-    ssh -oLogLevel=quiet $H rm -f bin/parallel
-    cat `which parallel` | ssh -oLogLevel=quiet $H 'cat > bin/parallel; chmod 755 bin/parallel'
-}
-export -f copy_to_host
-stdout parallel -j0 --timeout 20 --tag -kj0 -v copy_to_host {} ::: $POLAR
-# Now test
-echo '### Run the test on polarhome machines'
-stdout parallel -j0 --argsep // -k --tag ssh -oLogLevel=quiet {} bin/perl bin/parallel -k echo Works on ::: {} // $POLAR
 
+copy_and_test() {
+    H=$1
+    # scp to each polarhome machine do not work. Use cat
+    # Avoid the stupid /etc/issue.net banner with -oLogLevel=quiet
+    echo '### Run the test on '$H
+    cat `which parallel` | ssh -oLogLevel=quiet $H 'cat > bin/p.tmp && chmod 755 bin/p.tmp && mv bin/p.tmp bin/parallel; bin/perl bin/parallel echo Works on ::: '$H
+}
+export -f copy_and_test
+stdout parallel -j0 -k --timeout 80 --delay 0.1 --tag  -v copy_and_test {} ::: $POLAR
 

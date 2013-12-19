@@ -19,8 +19,7 @@
 * --transfer and --basefile support paths relative to the --workdir by
   inserting /./ into the path. 
 
-* GNU Parallel was used (unfortunately with improper citation) in:
-  'fastphylo: Fast tools for phylogenetics'
+* GNU Parallel was cited in: 'fastphylo: Fast tools for phylogenetics'
   http://www.biomedcentral.com/1471-2105/14/334/abstract
 
 * Using GNU parallel

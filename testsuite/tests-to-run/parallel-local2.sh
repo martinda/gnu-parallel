@@ -27,7 +27,7 @@ echo "bug #38441: CPU usage goes to 100% if load is higher than --load at first 
 echo '### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834'
   seq 1 3 | parallel -j1 "sleep 2; echo {}" | parallel -kj2 echo
 
-echo '### Test too slow spawning - TODO THIS CURRENTLY DOES NOT OVERLOAD'
+echo '### Test too slow spawning'
 # Let the commands below run during high load
 seq `parallel --number-of-cores` | parallel -j200% -N0 timeout -k 25 26 burnP6 & 
   sleep 1; 

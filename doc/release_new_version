@@ -244,11 +244,11 @@ New in this release:
   Analysis Pipeline for Discovery of Human Genetic Variation
   http://www.google.com/patents/US20130311106
 
+* Encrypt and decrypt in parallel with GPG
+  http://blog.tkassembled.com/412/encrypt-and-decrypt-in-parallel-with-gpg/
+
 * Using GNU Parallel to create a SVM classifier 
   http://ivanyu.me/blog/2013/12/01/parallel/
-
-* Mon make à moi (French)
-  http://www.slideshare.net/lindenb/mon-make-moi-tout-sauf-galaxy
 
 * Parallel xz compression
   http://anthon.home.xs4all.nl/rants/2013/parallel_xz/
@@ -262,8 +262,17 @@ New in this release:
 * Gnu Parallel for fun and profit
   https://gist.github.com/celoyd/f7eb55ad69c9b33fd8c3
 
+* Parallelization of Exploitation
+  http://rantsideasstuff.com/parallelization-of-exploitation/
+
+* Running assemblies in parallel
+  https://khmer-protocols.readthedocs.org/en/v0.8.3/metagenomics/4-assemble.html
+
 * Procesando la contabilidad del PP
   http://www.neorazorx.com/2013/07/procesando-la-contabilidad-del-pp.html
+
+* Mon make à moi (French)
+  http://www.slideshare.net/lindenb/mon-make-moi-tout-sauf-galaxy
 
 * Bug fixes and man page updates.
 

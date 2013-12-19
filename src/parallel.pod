@@ -3619,7 +3619,7 @@ B<seq>, B<cat>, B<echo>, and B<sleep> can reproduce most errors. If
 your example requires large files, see if you can make them by
 something like B<seq 1000000> > B<file> or B<yes | head -n 10000000> >
 B<file>. If your example requires remote execution, see if you can
-use B<localhost>.
+use B<localhost> - maybe using another login.
 
 =item *
 
