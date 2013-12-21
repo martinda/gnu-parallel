@@ -1,10 +1,13 @@
-testsuite: ../src/parallel tests-to-run/* wanted-results/* prereqlocal startdb prereqremote
-	time sh Start.sh || true
-	date
-	make stopvm
+testsuite: 3
+	true
 
 3: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
 	TRIES=3 time sh Start.sh || true
+	date
+	make stopvm
+
+1: ../src/parallel tests-to-run/* wanted-results/* prereqlocal startdb prereqremote
+	time sh Start.sh || true
 	date
 	make stopvm
 

@@ -3646,7 +3646,8 @@ installed software that is not in the VirtualBox images.
 If you cannot reproduce the error on any of the VirtualBox images
 above, you should assume the debugging will be done through you. That
 will put more burden on you and it is extra important you give any
-information that help.
+information that help. In general the problem will be fixed faster and
+with less work for you if you can reproduce the error on a VirtualBox.
 
 
 =head1 AUTHOR

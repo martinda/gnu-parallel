@@ -5071,7 +5071,9 @@ sub set_exitsignal {
 	}
 	my $pos = tell $disk_full_fh;
 	print $disk_full_fh "x"x8193;
-	if(tell $disk_full_fh == $pos) {
+	if(not $disk_full_fh
+	   or
+	   tell $disk_full_fh == $pos) {
 	    ::error("Output is incomplete. Cannot append to buffer file in \$TMPDIR. Is the disk full?\n");
 	    ::error("Change \$TMPDIR with --tmpdir.\n");
 	    ::wait_and_exit(255);
