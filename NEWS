@@ -8,7 +8,7 @@
 
 * --keep-order --(n)onall will sort according to the sshlogin.
 
-* Detection number of CPUs on DEC Tru64.
+* Detect the number of CPUs on DEC Tru64.
 
 * GNU sql: --list-tables for sqlite3.
 
