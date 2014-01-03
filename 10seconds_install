@@ -33,8 +33,8 @@ if test "$GET" = ""; then
 fi
 
 LATEST=$($GET http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | $TAIL -n1)
-if test \! -d $LATEST/src/; then
-  # Source dir does not exist
+if test \! -e $LATEST.tar.bz2; then
+  # Source tar does not exist
   rm -f $LATEST.tar.bz2 $LATEST.tar.bz2.sig
   $GET http://ftpmirror.gnu.org/parallel/$LATEST.tar.bz2 > $LATEST.tar.bz2
   $GET http://ftpmirror.gnu.org/parallel/$LATEST.tar.bz2.sig > $LATEST.tar.bz2.sig
@@ -47,7 +47,7 @@ if gpg -h 2>/dev/null >/dev/null; then
   echo | gpg 2>/dev/null >/dev/null
   gpg --keyserver keys.gnupg.net --recv-key FFFFFFF1
   gpg --keyserver keys.gnupg.net --recv-key 88888888
-  if gpg  --with-fingerprint $LATEST.tar.bz2.sig 2>&1 | $GREP -E '^Primary key fingerprint: BE9C B493 81DE 3166 A3BC  66C1 2C62 29E2 FFFF FFF1|^Primary key fingerprint: CDA0 1A42 08C4 F745 0610  7E7B D1AB 4516 8888 8888' ; then
+  if gpg --with-fingerprint $LATEST.tar.bz2.sig 2>&1 | $GREP -E '^Primary key fingerprint: BE9C B493 81DE 3166 A3BC  66C1 2C62 29E2 FFFF FFF1|^Primary key fingerprint: CDA0 1A42 08C4 F745 0610  7E7B D1AB 4516 8888 8888' ; then
     # Source code signed by Ole Tange <ole@tange.dk> KeyID FFFFFFF1/88888888
     true
   else
