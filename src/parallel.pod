@@ -44,12 +44,18 @@ often be used as a substitute for B<xargs> or B<cat | bash>.
 
 =head2 Reader's guide
 
-Before looking at the options you may want to check out the B<EXAMPLE>s
-after the list of options. That will give you an idea of what GNU
-B<parallel> is capable of.
-
-You can also watch the intro video for a quick introduction:
+Start by watching the intro videos for a quick introduction:
 http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
+
+Then look at the B<EXAMPLE>s after the list of B<OPTIONS>. That will
+give you an idea of what GNU B<parallel> is capable of.
+
+Then spend an hour walking through the tutorial (B<man
+parallel_tutorial>). Your command line will love you for it.
+
+Finally you may want to look at the rest of this manual if you have
+special needs not already covered.
+
 
 =head1 OPTIONS
 

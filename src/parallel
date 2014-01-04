@@ -625,7 +625,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140102;
+    $Global::version = 20140103;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3398,6 +3398,8 @@ sub no_of_cpus {
 		       || no_of_cpus_openserver()
 		       || no_of_cpus_irix()
 		       || no_of_cpus_tru64()
+			# Number of cores is better than no guess for #CPUs
+		       || nproc()
 	    );
     }
     if($no_of_cpus) {
@@ -3454,6 +3456,7 @@ sub no_of_cores {
 			|| no_of_cores_openserver()
 			|| no_of_cores_irix()
 			|| no_of_cores_tru64()
+			|| nproc()
 	    );
     }
     if($no_of_cores) {
@@ -3464,6 +3467,13 @@ sub no_of_cores {
         return 1;
     }
 }
+
+sub nproc {
+    # Returns:
+    #   Number of cores using `nproc`
+    my $no_of_cores = `nproc 2>/dev/null`;
+    return $no_of_cores;
+}    
 
 sub no_of_cpus_gnu_linux {
     # Returns:
@@ -3480,7 +3490,7 @@ sub no_of_cpus_gnu_linux {
             if(/^physical id.*[:](.*)/ and not $seen{$1}++) {
                 $no_of_cpus++;
             }
-            /^processor.*[:]/ and $no_of_cores++;
+            /^processor.*[:]/i and $no_of_cores++;
         }
         close $in_fh;
     }
@@ -3496,7 +3506,7 @@ sub no_of_cores_gnu_linux {
         $no_of_cores = 0;
         open(my $in_fh, "-|", "cat /proc/cpuinfo") || return undef;
         while(<$in_fh>) {
-            /^processor.*[:]/ and $no_of_cores++;
+            /^processor.*[:]/i and $no_of_cores++;
         }
         close $in_fh;
     }
