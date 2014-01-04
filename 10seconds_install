@@ -32,6 +32,7 @@ if test "$GET" = ""; then
   exit 1
 fi
 
+LANG=C
 LATEST=$($GET http://ftpmirror.gnu.org/parallel | perl -ne '/(parallel-\d{8})/ and print $1."\n"' | sort | $TAIL -n1)
 if test \! -e $LATEST.tar.bz2; then
   # Source tar does not exist
