@@ -65,4 +65,3 @@ hurd.polarhome.com	Works on hurd.polarhome.com
 copy_and_test raspberrypi.polarhome.com
 raspberrypi.polarhome.com	### Run the test on raspberrypi.polarhome.com
 raspberrypi.polarhome.com	Works on raspberrypi.polarhome.com
-raspberrypi.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.

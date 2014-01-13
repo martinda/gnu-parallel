@@ -625,7 +625,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140103;
+    $Global::version = 20140113;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1119,7 +1119,8 @@ sub read_options {
 	}
 	# Add options from shell variable $PARALLEL
 	if($ENV{'PARALLEL'}) {
-	    @ARGV_env = shell_unquote(split/(?<![\\])\s/, $ENV{'PARALLEL'});
+	    # Split options on space, but ignore empty options
+	    @ARGV_env = grep { /./ } shell_unquote(split/(?<![\\])\s/, $ENV{'PARALLEL'});
 	}
     }
     Getopt::Long::Configure("bundling","require_order");
@@ -5505,7 +5506,7 @@ sub replaced {
 	if($self->{'replaced'} =~ /^\s*(-\S+)/) {
 	    # Is this really a command in $PATH starting with '-'?
 	    my $cmd = $1;
-	    if(not which($cmd)) {
+	    if(not ::which($cmd)) {
 		::error("Command ($cmd) starts with '-'. Is this a wrong option?\n");
 		::wait_and_exit(255);
 	    }

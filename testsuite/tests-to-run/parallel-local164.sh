@@ -151,4 +151,7 @@ echo 'bug #34241: --pipe should not spawn unneeded processes - part 2'
   echo No .par should exist; 
   stdout ls *.par
 
+echo "bug: --gnu was ignored if env var started with space: PARALLEL=' --gnu'"
+  export PARALLEL=" -v" &&  parallel echo ::: 'space in envvar OK'
+
 EOF
