@@ -307,7 +307,7 @@ string that is not in the command line.
 See also: B<:::>.
 
 
-=item B<--bar> (beta testing)
+=item B<--bar>
 
 Show progress as a progress bar. In the bar is shown: % of jobs
 completed, estimated seconds left, and number of jobs started.
@@ -317,9 +317,9 @@ It is compatible with B<zenity>:
 seq 1000 | parallel -j30 --bar '(echo {};sleep 0.1)' 2> >(zenity --progress --auto-kill) | wc
 
 
-=item B<--basefile> I<file> (beta testing)
+=item B<--basefile> I<file>
 
-=item B<--bf> I<file> (beta testing)
+=item B<--bf> I<file>
 
 I<file> will be transferred to each sshlogin before a jobs is
 started. It will be removed if B<--cleanup> is active. The file may be
@@ -354,7 +354,7 @@ See also: B<--fg>, B<man sem>.
 Implies B<--semaphore>.
 
 
-=item B<--bibtex> (beta testing)
+=item B<--bibtex>
 
 Print the BibTeX entry for GNU B<parallel> and disable citation
 notice.
@@ -378,7 +378,7 @@ I<size> defaults to 1M.
 See B<--pipe> for use of this.
 
 
-=item B<--cleanup> (beta testing)
+=item B<--cleanup>
 
 Remove transferred files. B<--cleanup> will remove the transferred files
 on the remote computer after processing is done.
@@ -412,7 +412,7 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
-=item B<--compress> (beta testing)
+=item B<--compress>
 
 Compress temporary files. If the output is big and very compressible
 this will take up less disk space in $TMPDIR and possibly be faster due to less
@@ -423,7 +423,7 @@ B<plzip>, B<bzip2>, B<lzma>, B<lzip>, B<xz> in that order, and use the
 first available.
 
 
-=item B<--compress-program> I<prg> (beta testing)
+=item B<--compress-program> I<prg>
 
 Use I<prg> for compressing temporary files. It is assumed that I<prg
 -dc> will decompress stdin (standard input) to stdout (standard
@@ -524,7 +524,7 @@ See also B<--bg>, B<man sem>.
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (alpha testing)
+=item B<--filter-hosts> (beta testing)
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -614,7 +614,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile> (beta testing)
+=item B<--joblog> I<logfile>
 
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -813,7 +813,7 @@ This is useful for scripts that depend on features only available from
 a certain version of GNU B<parallel>.
 
 
-=item B<--nonall> (alpha testing)
+=item B<--nonall> (beta testing)
 
 B<--onall> with no arguments. Run the command on all computers given
 with B<--sshlogin> but take no arguments. GNU B<parallel> will log
@@ -824,7 +824,7 @@ This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
 
-=item B<--onall> (alpha testing)
+=item B<--onall> (beta testing)
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
@@ -836,11 +836,11 @@ When using B<--group> the output will be grouped by each server, so
 all the output from one server will be grouped together.
 
 
-=item B<--output-as-files> (beta testing)
+=item B<--output-as-files>
 
-=item B<--outputasfiles> (beta testing)
+=item B<--outputasfiles>
 
-=item B<--files> (beta testing)
+=item B<--files>
 
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
@@ -953,7 +953,7 @@ Print the number of CPU cores and exit (used by GNU B<parallel> itself
 to determine the number of CPU cores on remote computers).
 
 
-=item B<--no-notice> (beta testing)
+=item B<--no-notice>
 
 Do not display citation notice. A citation notice is printed on stderr
 (standard error) only if stderr (standard error) is a terminal, the
@@ -1106,7 +1106,7 @@ will generate the files:
 See also B<--files>, B<--header>, B<--joblog>.
 
 
-=item B<--resume> (beta testing)
+=item B<--resume>
 
 Resumes from the last unfinished job. By reading B<--joblog> or the
 B<--results> dir GNU B<parallel> will figure out the last unfinished
@@ -1139,7 +1139,7 @@ re-use the computers. This is useful if some jobs fail for no apparent
 reason (such as network failure).
 
 
-=item B<--return> I<filename> (beta testing)
+=item B<--return> I<filename>
 
 Transfer files from remote computers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote computers. When
@@ -1493,7 +1493,7 @@ Print the job to be run on stderr (standard error).
 See also B<-v>, B<-p>.
 
 
-=item B<--transfer> (beta testing)
+=item B<--transfer>
 
 Transfer files to remote computers. B<--transfer> is used with
 B<--sshlogin> when the arguments are files and should be transferred
@@ -1606,9 +1606,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (alpha testing)
+=item B<--workdir> I<mydir> (beta testing)
 
-=item B<--wd> I<mydir> (alpha testing)
+=item B<--wd> I<mydir> (beta testing)
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in

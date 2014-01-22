@@ -1,3 +1,37 @@
+20140122
+
+* GNU Parallel was cited in: On the likelihood of multiple bit upsets
+  in logic circuits
+  http://arxiv-web3.library.cornell.edu/pdf/1401.1003
+
+* HaploClique uses GNU Parallel
+  https://github.com/armintoepfer/haploclique
+
+* Scraping NSScreencast
+  https://blog.nicolai86.eu/posts/2014-01-12/scraping-nsscreencast/
+
+* 30 Cool Open Source Software I Discovered in 2013
+  http://www.cyberciti.biz/open-source/30-cool-best-open-source-softwares-of-2013/
+
+* [Unix] 13. The power of doing things in Parallel
+  http://leetaey.tistory.com/384
+
+* Parallel the execution of a job that read from stdin
+  http://www.linuxask.com/questions/parallel-the-execution-of-a-job-that-read-from-stdin
+
+* Mon Make à moi (6:38-11:50)
+  http://videos.rennes.inria.fr/ReNaBI-GO2013/indexPierreLindenbaum.html
+
+* Shell-Abarbeitung beschleunigen: Wie Sie mit parallelen Prozesse
+  effizienter in der Shell arbeiten
+  https://www.hosteurope.ch/blog/shell-abarbeitung-beschleunigen-wie-sie-mit-parallelen-prozesse-effizienter-in-der-shell-arbeiten/
+
+* Summary of GNU Parallel tutorial
+  http://hacktracking.blogspot.dk/2014/01/gnu-parallel-tutorial.html
+
+* Bug fixes and man page updates.
+
+
 20131222
 
 * GNU Parallel now has a motto: For people who live life in the

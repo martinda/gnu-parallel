@@ -209,6 +209,9 @@ Subject: GNU Parallel 20140122 ('Opportunity') released
 GNU Parallel 20140122 ('Opportunity') has been released. It is
 available for download at: http://ftp.gnu.org/gnu/parallel/
 
+No new functionality was introduced so this is a good candidate for a
+stable release.
+
 New in this release:
 
 * GNU Parallel was cited in: On the likelihood of multiple bit upsets
@@ -233,7 +236,8 @@ New in this release:
 * Mon Make à moi (6:38-11:50)
   http://videos.rennes.inria.fr/ReNaBI-GO2013/indexPierreLindenbaum.html
 
-* Shell-Abarbeitung beschleunigen: Wie Sie mit parallelen Prozesse effizienter in der Shell arbeiten
+* Shell-Abarbeitung beschleunigen: Wie Sie mit parallelen Prozesse
+  effizienter in der Shell arbeiten
   https://www.hosteurope.ch/blog/shell-abarbeitung-beschleunigen-wie-sie-mit-parallelen-prozesse-effizienter-in-der-shell-arbeiten/
 
 * Summary of GNU Parallel tutorial

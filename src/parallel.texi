@@ -322,8 +322,8 @@ string that is not in the command line.
 
 See also: @strong{:::}.
 
-@item @strong{--bar} (beta testing)
-@anchor{@strong{--bar} (beta testing)}
+@item @strong{--bar}
+@anchor{@strong{--bar}}
 
 Show progress as a progress bar. In the bar is shown: % of jobs
 completed, estimated seconds left, and number of jobs started.
@@ -332,11 +332,11 @@ It is compatible with @strong{zenity}:
 
 seq 1000 | parallel -j30 --bar '(echo @{@};sleep 0.1)' 2> >(zenity --progress --auto-kill) | wc
 
-@item @strong{--basefile} @emph{file} (beta testing)
-@anchor{@strong{--basefile} @emph{file} (beta testing)}
+@item @strong{--basefile} @emph{file}
+@anchor{@strong{--basefile} @emph{file}}
 
-@item @strong{--bf} @emph{file} (beta testing)
-@anchor{@strong{--bf} @emph{file} (beta testing)}
+@item @strong{--bf} @emph{file}
+@anchor{@strong{--bf} @emph{file}}
 
 @emph{file} will be transferred to each sshlogin before a jobs is
 started. It will be removed if @strong{--cleanup} is active. The file may be
@@ -372,8 +372,8 @@ See also: @strong{--fg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
 
-@item @strong{--bibtex} (beta testing)
-@anchor{@strong{--bibtex} (beta testing)}
+@item @strong{--bibtex}
+@anchor{@strong{--bibtex}}
 
 Print the BibTeX entry for GNU @strong{parallel} and disable citation
 notice.
@@ -397,8 +397,8 @@ than a single record.
 
 See @strong{--pipe} for use of this.
 
-@item @strong{--cleanup} (beta testing)
-@anchor{@strong{--cleanup} (beta testing)}
+@item @strong{--cleanup}
+@anchor{@strong{--cleanup}}
 
 Remove transferred files. @strong{--cleanup} will remove the transferred files
 on the remote computer after processing is done.
@@ -434,8 +434,8 @@ separating the columns. The n'th column can be access using
 @emph{regexp} is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
-@item @strong{--compress} (beta testing)
-@anchor{@strong{--compress} (beta testing)}
+@item @strong{--compress}
+@anchor{@strong{--compress}}
 
 Compress temporary files. If the output is big and very compressible
 this will take up less disk space in $TMPDIR and possibly be faster due to less
@@ -445,8 +445,8 @@ GNU @strong{parallel} will try @strong{lzop}, @strong{pigz}, @strong{gzip}, @str
 @strong{plzip}, @strong{bzip2}, @strong{lzma}, @strong{lzip}, @strong{xz} in that order, and use the
 first available.
 
-@item @strong{--compress-program} @emph{prg} (beta testing)
-@anchor{@strong{--compress-program} @emph{prg} (beta testing)}
+@item @strong{--compress-program} @emph{prg}
+@anchor{@strong{--compress-program} @emph{prg}}
 
 Use @emph{prg} for compressing temporary files. It is assumed that @emph{prg
 -dc} will decompress stdin (standard input) to stdout (standard
@@ -550,8 +550,8 @@ See also @strong{--bg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (alpha testing)
-@anchor{@strong{--filter-hosts} (alpha testing)}
+@item @strong{--filter-hosts} (beta testing)
+@anchor{@strong{--filter-hosts} (beta testing)}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -645,8 +645,8 @@ This option is a synonym for @strong{-I}@emph{replace-str} if @emph{replace-str}
 specified, and for @strong{-I}@{@} otherwise.  This option is deprecated;
 use @strong{-I} instead.
 
-@item @strong{--joblog} @emph{logfile} (beta testing)
-@anchor{@strong{--joblog} @emph{logfile} (beta testing)}
+@item @strong{--joblog} @emph{logfile}
+@anchor{@strong{--joblog} @emph{logfile}}
 
 Logfile for executed jobs. Save a list of the executed jobs to
 @emph{logfile} in the following TAB separated format: sequence number,
@@ -864,8 +864,8 @@ GNU @strong{parallel} is less than @emph{version} the exit code is
 This is useful for scripts that depend on features only available from
 a certain version of GNU @strong{parallel}.
 
-@item @strong{--nonall} (alpha testing)
-@anchor{@strong{--nonall} (alpha testing)}
+@item @strong{--nonall} (beta testing)
+@anchor{@strong{--nonall} (beta testing)}
 
 @strong{--onall} with no arguments. Run the command on all computers given
 with @strong{--sshlogin} but take no arguments. GNU @strong{parallel} will log
@@ -875,8 +875,8 @@ computer. @strong{-j} adjusts how many computers to log into in parallel.
 This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
-@item @strong{--onall} (alpha testing)
-@anchor{@strong{--onall} (alpha testing)}
+@item @strong{--onall} (beta testing)
+@anchor{@strong{--onall} (beta testing)}
 
 Run all the jobs on all computers given with @strong{--sshlogin}. GNU
 @strong{parallel} will log into @strong{--jobs} number of computers in parallel
@@ -887,14 +887,14 @@ adjusts how many computers to log into in parallel.
 When using @strong{--group} the output will be grouped by each server, so
 all the output from one server will be grouped together.
 
-@item @strong{--output-as-files} (beta testing)
-@anchor{@strong{--output-as-files} (beta testing)}
+@item @strong{--output-as-files}
+@anchor{@strong{--output-as-files}}
 
-@item @strong{--outputasfiles} (beta testing)
-@anchor{@strong{--outputasfiles} (beta testing)}
+@item @strong{--outputasfiles}
+@anchor{@strong{--outputasfiles}}
 
-@item @strong{--files} (beta testing)
-@anchor{@strong{--files} (beta testing)}
+@item @strong{--files}
+@anchor{@strong{--files}}
 
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
@@ -1009,8 +1009,8 @@ itself to determine the number of physical CPUs on remote computers).
 Print the number of CPU cores and exit (used by GNU @strong{parallel} itself
 to determine the number of CPU cores on remote computers).
 
-@item @strong{--no-notice} (beta testing)
-@anchor{@strong{--no-notice} (beta testing)}
+@item @strong{--no-notice}
+@anchor{@strong{--no-notice}}
 
 Do not display citation notice. A citation notice is printed on stderr
 (standard error) only if stderr (standard error) is a terminal, the
@@ -1178,8 +1178,8 @@ will generate the files:
 
 See also @strong{--files}, @strong{--header}, @strong{--joblog}.
 
-@item @strong{--resume} (beta testing)
-@anchor{@strong{--resume} (beta testing)}
+@item @strong{--resume}
+@anchor{@strong{--resume}}
 
 Resumes from the last unfinished job. By reading @strong{--joblog} or the
 @strong{--results} dir GNU @strong{parallel} will figure out the last unfinished
@@ -1211,8 +1211,8 @@ there are fewer than @emph{n} computers in @strong{--sshlogin} GNU @strong{paral
 re-use the computers. This is useful if some jobs fail for no apparent
 reason (such as network failure).
 
-@item @strong{--return} @emph{filename} (beta testing)
-@anchor{@strong{--return} @emph{filename} (beta testing)}
+@item @strong{--return} @emph{filename}
+@anchor{@strong{--return} @emph{filename}}
 
 Transfer files from remote computers. @strong{--return} is used with
 @strong{--sshlogin} when the arguments are files on the remote computers. When
@@ -1596,8 +1596,8 @@ Print the job to be run on stderr (standard error).
 
 See also @strong{-v}, @strong{-p}.
 
-@item @strong{--transfer} (beta testing)
-@anchor{@strong{--transfer} (beta testing)}
+@item @strong{--transfer}
+@anchor{@strong{--transfer}}
 
 Transfer files to remote computers. @strong{--transfer} is used with
 @strong{--sshlogin} when the arguments are files and should be transferred
@@ -1720,11 +1720,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir} (alpha testing)
-@anchor{@strong{--workdir} @emph{mydir} (alpha testing)}
+@item @strong{--workdir} @emph{mydir} (beta testing)
+@anchor{@strong{--workdir} @emph{mydir} (beta testing)}
 
-@item @strong{--wd} @emph{mydir} (alpha testing)
-@anchor{@strong{--wd} @emph{mydir} (alpha testing)}
+@item @strong{--wd} @emph{mydir} (beta testing)
+@anchor{@strong{--wd} @emph{mydir} (beta testing)}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in
