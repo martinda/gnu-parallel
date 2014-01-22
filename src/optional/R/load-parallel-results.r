@@ -91,8 +91,6 @@ raw_to_data.table <- function(raw, ...) {
   require(data.table)
   ## Keep all columns except stdout and stderr
   varnames = setdiff(colnames(raw), c("stdout","stderr"))  
-  ## Remove rownames
-  rownames(raw) = NULL
   ## after data.table feature request the as.data.frame can be skipped
   ## and will thus be much faster
   ddt = as.data.table(as.data.frame(raw,stringsAsFactors=FALSE))

@@ -1,5 +1,8 @@
 ### Tests on polarhome machines
 Setup on polarhome machines
+copy_and_test minix.polarhome.com
+minix.polarhome.com	### Run the test on minix.polarhome.com
+minix.polarhome.com	Works on minix.polarhome.com
 copy_and_test freebsd.polarhome.com
 freebsd.polarhome.com	### Run the test on freebsd.polarhome.com
 freebsd.polarhome.com	Works on freebsd.polarhome.com
@@ -38,6 +41,9 @@ openindiana.polarhome.com	parallel: Warning: Cannot figure out number of CPU cor
 copy_and_test suse.polarhome.com
 suse.polarhome.com	### Run the test on suse.polarhome.com
 suse.polarhome.com	Works on suse.polarhome.com
+copy_and_test solaris-x86.polarhome.com
+solaris-x86.polarhome.com	### Run the test on solaris-x86.polarhome.com
+solaris-x86.polarhome.com	Works on solaris-x86.polarhome.com
 copy_and_test mandriva.polarhome.com
 mandriva.polarhome.com	### Run the test on mandriva.polarhome.com
 mandriva.polarhome.com	Works on mandriva.polarhome.com

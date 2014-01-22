@@ -710,8 +710,8 @@ to see the difference:
   parallel -j4 sleep {}\; echo {} ::: 2 1 4 3
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 
-If used with B<--onall> or B<--nonall> output will be sorted according
-to sshlogin.
+If used with B<--onall> or B<--nonall> the output will grouped by
+sshlogin in sorted order.
 
 
 =item B<-L> I<max-lines>

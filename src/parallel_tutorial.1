@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL_TUTORIAL 1"
-.TH PARALLEL_TUTORIAL 1 "2013-12-03" "20131222" "parallel"
+.TH PARALLEL_TUTORIAL 1 "2014-01-14" "20131222" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -777,8 +777,14 @@ Output:
 For better parallelism \s-1GNU\s0 Parallel can distribute the arguments
 between all the parallel jobs when end of file is met.
 .PP
-Running 4 jobs in parallel will split the last line of arguments into
-4 jobs resulting in a total of 5 jobs:
+Below \s-1GNU\s0 Parallel reads the last argument when generating the second
+job. When \s-1GNU\s0 Parallel reads the last argument, it spreads all the
+arguments for the second job over 4 jobs instead, as 4 parallel jobs
+are requested.
+.PP
+The first job will be the same as the \-\-xargs example above, but the
+second job will be split into 4 evenly sized jobs, resulting in a
+total of 5 jobs:
 .PP
 .Vb 1
 \&  cat num30000 | parallel \-\-jobs 4 \-m echo | wc \-l
@@ -788,6 +794,22 @@ Output:
 .PP
 .Vb 1
 \&  5
+.Ve
+.PP
+This is even more visible when running 4 jobs with 10 arguments. The
+10 arguments are being spread over 4 jobs:
+.PP
+.Vb 1
+\&  parallel \-\-jobs 4 \-m echo ::: {1..10}
+.Ve
+.PP
+Output:
+.PP
+.Vb 4
+\&  1 2 3
+\&  4 5 6
+\&  7 8 9
+\&  10
 .Ve
 .PP
 A replacement string can be part of a word. \-m will not repeat the context:

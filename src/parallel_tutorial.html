@@ -564,13 +564,28 @@ line length of 10000 chars 17 commands will be run:</p>
   17</pre>
 <p>For better parallelism GNU Parallel can distribute the arguments
 between all the parallel jobs when end of file is met.</p>
-<p>Running 4 jobs in parallel will split the last line of arguments into
-4 jobs resulting in a total of 5 jobs:</p>
+<p>Below GNU Parallel reads the last argument when generating the second
+job. When GNU Parallel reads the last argument, it spreads all the
+arguments for the second job over 4 jobs instead, as 4 parallel jobs
+are requested.</p>
+<p>The first job will be the same as the --xargs example above, but the
+second job will be split into 4 evenly sized jobs, resulting in a
+total of 5 jobs:</p>
 <pre>
   cat num30000 | parallel --jobs 4 -m echo | wc -l</pre>
 <p>Output:</p>
 <pre>
   5</pre>
+<p>This is even more visible when running 4 jobs with 10 arguments. The
+10 arguments are being spread over 4 jobs:</p>
+<pre>
+  parallel --jobs 4 -m echo ::: {1..10}</pre>
+<p>Output:</p>
+<pre>
+  1 2 3
+  4 5 6
+  7 8 9
+  10</pre>
 <p>A replacement string can be part of a word. -m will not repeat the context:</p>
 <pre>
   parallel --jobs 4 -m echo pre-{}-post ::: A B C D E F G</pre>

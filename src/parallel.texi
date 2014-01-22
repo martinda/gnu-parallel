@@ -760,8 +760,8 @@ to see the difference:
   parallel -j4 -k sleep {}\; echo {} ::: 2 1 4 3
 @end verbatim
 
-If used with @strong{--onall} or @strong{--nonall} output will be sorted according
-to sshlogin.
+If used with @strong{--onall} or @strong{--nonall} the output will grouped by
+sshlogin in sorted order.
 
 @item @strong{-L} @emph{max-lines}
 @anchor{@strong{-L} @emph{max-lines}}
