@@ -1528,6 +1528,7 @@ job by matching the header with --header. If headers start with %:</p>
   cat num_%header | parallel --header '(%.*\n)*' --pipe -N3 echo JOB{#}\;cat</pre>
 <p>Output (the order may be different):</p>
 <pre>
+  JOB1
   %head1
   %head2
   1

@@ -1649,11 +1649,12 @@ sub progress {
 	    if($opt::bar) {
 		my $arg = $Global::newest_job ? 
 		    $Global::newest_job->{'commandline'}->simple_replace_placeholders($Global::replace{"{}"}) : "";
-		my $bar = sprintf("%d%% %ds %s", $pctcomplete*100, $this_eta, $arg);
+		my $bar_text = sprintf("%d%% %d:%d=%ds %s", 
+				  $pctcomplete*100, $completed, $left, $this_eta, $arg);
 		my $rev = '[7m';
 		my $reset = '[0m';
 		my $terminal_width = terminal_columns();
-		my $s = sprintf("%-${terminal_width}s",$bar);
+		my $s = sprintf("%-${terminal_width}s",$bar_text);
 		my $width = int($terminal_width * $pctcomplete);
 		$s =~ s/^(.{$width})/$1$reset/;
 		$s = "\r#   ".int($this_eta)." sec $arg" . "\r". $pctcomplete*100 # Prefix with zenity header

@@ -204,112 +204,52 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140122 ('Opportunity') released
+Subject: GNU Parallel 20140222 ('') released
 
-GNU Parallel 20140122 ('Opportunity') has been released. It is
-available for download at: http://ftp.gnu.org/gnu/parallel/
-
-No new functionality was introduced so this is a good candidate for a
-stable release.
+GNU Parallel 20140222 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
-* GNU Parallel was cited in: On the likelihood of multiple bit upsets
-  in logic circuits
-  http://arxiv-web3.library.cornell.edu/pdf/1401.1003
+* --tollef has been retired.
 
-* HaploClique uses GNU Parallel
-  https://github.com/armintoepfer/haploclique
-
-* Scraping NSScreencast
-  https://blog.nicolai86.eu/posts/2014-01-12/scraping-nsscreencast/
-
-* 30 Cool Open Source Software I Discovered in 2013
-  http://www.cyberciti.biz/open-source/30-cool-best-open-source-softwares-of-2013/
-
-* [Unix] 13. The power of doing things in Parallel
-  http://leetaey.tistory.com/384
-
-* Parallel the execution of a job that read from stdin
-  http://www.linuxask.com/questions/parallel-the-execution-of-a-job-that-read-from-stdin
-
-* Mon Make à moi (6:38-11:50)
-  http://videos.rennes.inria.fr/ReNaBI-GO2013/indexPierreLindenbaum.html
-
-* Shell-Abarbeitung beschleunigen: Wie Sie mit parallelen Prozesse
-  effizienter in der Shell arbeiten
-  https://www.hosteurope.ch/blog/shell-abarbeitung-beschleunigen-wie-sie-mit-parallelen-prozesse-effizienter-in-der-shell-arbeiten/
-
-* Summary of GNU Parallel tutorial
-  http://hacktracking.blogspot.dk/2014/01/gnu-parallel-tutorial.html
+* GNU Parallel is co-distributed with RepeatExplorer
+  http://www.vcru.wisc.edu/simonlab/bioinformatics/programs/repeatexplorer/README.txt
 
 * Bug fixes and man page updates.
 
 
 = About GNU Parallel =
 
-GNU Parallel is a shell tool for executing jobs in parallel using one
-or more computers. A job is can be a single command or a small script
-that has to be run for each of the lines in the input. The typical
-input is a list of files, a list of hosts, a list of users, a list of
-URLs, or a list of tables. A job can also be a command that reads from
-a pipe. GNU Parallel can then split the input and pipe it into
-commands in parallel.
+GNU Parallel is a shell tool for executing jobs in parallel using one or more computers. A job is can be a single command or a small script that has to be run for each of the lines in the input. The typical input is a list of files, a list of hosts, a list of users, a list of URLs, or a list of tables. A job can also be a command that reads from a pipe. GNU Parallel can then split the input and pipe it into commands in parallel.
 
-If you use xargs and tee today you will find GNU Parallel very easy to
-use as GNU Parallel is written to have the same options as xargs. If
-you write loops in shell, you will find GNU Parallel may be able to
-replace most of the loops and make them run faster by running several
-jobs in parallel. GNU Parallel can even replace nested loops.
+If you use xargs and tee today you will find GNU Parallel very easy to use as GNU Parallel is written to have the same options as xargs. If you write loops in shell, you will find GNU Parallel may be able to replace most of the loops and make them run faster by running several jobs in parallel. GNU Parallel can even replace nested loops.
 
-GNU Parallel makes sure output from the commands is the same output as
-you would get had you run the commands sequentially. This makes it
-possible to use output from GNU Parallel as input for other programs.
+GNU Parallel makes sure output from the commands is the same output as you would get had you run the commands sequentially. This makes it possible to use output from GNU Parallel as input for other programs.
 
-You can find more about GNU Parallel at:
-http://www.gnu.org/s/parallel/
+You can find more about GNU Parallel at: http://www.gnu.org/s/parallel/
 
-You can install GNU Parallel in just 10 seconds with:
-(wget -O - pi.dk/3 || curl pi.dk/3/) | bash
+You can install GNU Parallel in just 10 seconds with: (wget -O - pi.dk/3 || curl pi.dk/3/) | bash
 
-Watch the intro video on
-http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
+Watch the intro video on http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
 
-Walk through the tutorial (man parallel_tutorial). Your commandline
-will love you for it.
+Walk through the tutorial (man parallel_tutorial). Your commandline will love you for it.
 
-When using programs that use GNU Parallel to process data for
-publication please cite:
+When using programs that use GNU Parallel to process data for publication please cite:
 
-O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
-The USENIX Magazine, February 2011:42-47.
+O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login: The USENIX Magazine, February 2011:42-47.
 
 
 = About GNU SQL =
 
-GNU sql aims to give a simple, unified interface for accessing
-databases through all the different databases' command line
-clients. So far the focus has been on giving a common way to specify
-login information (protocol, username, password, hostname, and port
-number), size (database and table size), and running queries.
+GNU sql aims to give a simple, unified interface for accessing databases through all the different databases' command line clients. So far the focus has been on giving a common way to specify login information (protocol, username, password, hostname, and port number), size (database and table size), and running queries.
 
-The database is addressed using a DBURL. If commands are left out you
-will get that database's interactive shell.
+The database is addressed using a DBURL. If commands are left out you will get that database's interactive shell.
 
 When using GNU SQL for a publication please cite:
 
-O. Tange (2011): GNU SQL - A Command Line Tool for Accessing Different
-Databases Using DBURLs, ;login: The USENIX Magazine, April 2011:29-32.
+O. Tange (2011): GNU SQL - A Command Line Tool for Accessing Different Databases Using DBURLs, ;login: The USENIX Magazine, April 2011:29-32.
 
 
 = About GNU Niceload =
 
-GNU niceload slows down a program when the computer load average (or
-other system activity) is above a certain limit. When the limit is
-reached the program will be suspended for some time. If the limit is a
-soft limit the program will be allowed to run for short amounts of
-time before being suspended again. If the limit is a hard limit the
-program will only be allowed to run when the system is below the
-limit.
-
->>>>>
+GNU niceload slows down a program when the computer load average (or other system activity) is above a certain limit. When the limit is reached the program will be suspended for some time. If the limit is a soft limit the program will be allowed to run for short amounts of time before being suspended again. If the limit is a hard limit the program will only be allowed to run when the system is below the limit.

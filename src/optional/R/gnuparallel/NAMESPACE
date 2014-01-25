@@ -1,0 +1,7 @@
+export(heckbert)
+export(gnu.parallel.filenames)
+export(gnu.parallel.load)
+export(gnu.parallel.load.lines)
+export(gnu.parallel.load.data.frame)
+export(gnu.parallel.load.data.table)
+
