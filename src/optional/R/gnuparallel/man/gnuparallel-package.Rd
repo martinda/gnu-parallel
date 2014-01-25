@@ -21,21 +21,6 @@ gnu.parallel.load(fn)
 gnu.parallel.load.lines(fn)
 gnu.parallel.load.data.frame(fn)
 gnu.parallel.load.data.table(fn)
-
-heckbert(8.1, 14.1, 4)	# 5 10 15
-# When plotting, extend the plot range to include the labeling
-# Should probably have a helper function to make this easier
-data(iris)
-x <- iris$Sepal.Width
-y <- iris$Sepal.Length
-xl <- heckbert(min(x), max(x), 6)
-yl <- heckbert(min(y), max(y), 6)
-plot(x, y,
-    xlim=c(min(x,xl),max(x,xl)),
-    ylim=c(min(y,yl),max(y,yl)),
-    axes=FALSE, main="Extended labeling")
-axis(1, at=xl)
-axis(2, at=yl)
 }
 \author{
   Ole Tange \email{tange@gnu.org}, David Rosenberg

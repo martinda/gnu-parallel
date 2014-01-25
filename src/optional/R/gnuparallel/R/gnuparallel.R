@@ -38,23 +38,17 @@
 #' Tange, O. (2011) GNU Parallel - The Command-Line Power Tool, ;login: The USENIX Magazine, February 2011:42-47.
 #' Talbot, J. (2011) labeling R-package, CRAN 2011.
 #' @keywords parallel
-#' @seealso \code{\link{heckbert}}, \code{\link{gnu.parallel.filenames}}
+#' @seealso \code{\link{gnu.parallel.filenames}}, \code{\link{gnu.parallel.load}},
+#' \code{\link{gnu.parallel.load.data.frame}}, \code{\link{gnu.parallel.load.data.table}},
+#' \code{\link{gnu.parallel.load.lines}}
 #' @examples
-#' heckbert(8.1, 14.1, 4)	# 5 10 15
-
-#' # When plotting, extend the plot range to include the labeling
-#' # Should probably have a helper function to make this easier
-#' data(iris)
-#' x <- iris$Sepal.Width
-#' y <- iris$Sepal.Length
-#' xl <- extended(min(x), max(x), 6)
-#' yl <- extended(min(y), max(y), 6)
-#' plot(x, y, 
-#'     xlim=c(min(x,xl),max(x,xl)), 
-#'     ylim=c(min(y,yl),max(y,yl)), 
-#'     axes=FALSE, main="Extended labeling")
-#' axis(1, at=xl)
-#' axis(2, at=yl)
+#' library(gnuparallel)
+#' system("parallel --header : --results foobar printf out{1}\\\\\\\\tout{2}\\\\\\\\nline2{1}\\\\\\\\t{2}\\\\\\\\n ::: letters a b c ::: numbers 4 5 6")
+#' fn <- gnu.parallel.filenames("foobar")
+#' gnu.parallel.load(fn)
+#' gnu.parallel.load.lines(fn)
+#' gnu.parallel.load.data.frame(fn)
+#' gnu.parallel.load.data.table(fn)
 c()
 
 
@@ -128,6 +122,8 @@ gnu.parallel.load.lines <- function(filenametable,split="\n") {
   reps = rep(1:nrow(raw), lens)
   ## Merge the repeating argument and the lines into a matrix
   m = cbind(raw[reps, header_cols], unlist(splits))
+  ## Set the stdout colname
+  colnames(m)[length(colnames(m))] <- "stdout"
   return(m)
 }
 
@@ -176,49 +172,3 @@ gnu.parallel.load.data.frame <- function(filenametable, ...) {
   })
   return(dd)
 }
-
-
-#' Heckbert's labeling algorithm
-#'
-#' @param dmin minimum of the data range
-#' @param dmax maximum of the data range
-#' @param m number of axis labels
-#' @return vector of axis label locations
-#' @references
-#' Heckbert, P. S. (1990) Nice numbers for graph labels, Graphics Gems I, Academic Press Professional, Inc.
-#' @author Justin Talbot \email{jtalbot@@stanford.edu}
-#' @export
-heckbert <- function(dmin, dmax, m)
-{
-    range <- .heckbert.nicenum((dmax-dmin), FALSE)
-    lstep <- .heckbert.nicenum(range/(m-1), TRUE)
-    lmin <- floor(dmin/lstep)*lstep
-    lmax <- ceiling(dmax/lstep)*lstep
-    seq(lmin, lmax, by=lstep)
-}
-    
-.heckbert.nicenum <- function(x, round)
-{
-	e <- floor(log10(x))
-	f <- x / (10^e)
-	if(round)
-	{
-		if(f < 1.5) nf <- 1
-		else if(f < 3) nf <- 2
-		else if(f < 7) nf <- 5
-		else nf <- 10
-	}
-	else
-	{
-		if(f <= 1) nf <- 1
-		else if(f <= 2) nf <- 2
-		else if(f <= 5) nf <- 5
-		else nf <- 10
-	}
-	nf * (10^e)
-}
-
-
-
-
-

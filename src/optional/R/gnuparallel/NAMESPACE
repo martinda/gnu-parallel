@@ -1,4 +1,3 @@
-export(heckbert)
 export(gnu.parallel.filenames)
 export(gnu.parallel.load)
 export(gnu.parallel.load.lines)
