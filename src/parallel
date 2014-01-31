@@ -546,7 +546,7 @@ sub options_hash {
 	 "remove-rec-sep|removerecsep|rrs" => \$opt::remove_rec_sep,
 	 "files|output-as-files|outputasfiles" => \$opt::files,
 	 "block|block-size|blocksize=s" => \$opt::blocksize,
-	 "tollef" => \$opt::tollef,
+	 "tollef" => \$opt::retired,
 	 "gnu" => \$opt::gnu,
 	 "xapply" => \$opt::xapply,
 	 "bibtex" => \$opt::bibtex,
@@ -739,31 +739,6 @@ sub parse_options {
 	$opt::compress_program ||= $compress;
 	$opt::decompress_program ||= $decompress;
     }
-    if($opt::tollef and not $opt::gnu and not $opt::plain) {
-	# Behave like tollef parallel (from moreutils)
-	if($Global::version > 2014_02_22) {
-	    ::error("--tollef has been retired. See http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html\n");
-	    ::wait_and_exit(255);
-	}
-	::warning("YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n");
-	::warning("--tollef is obsolete and will be retired 20140222.\n");
-	::warning("See: http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html\n");
-	$opt::u = 1;
-	$Global::grouped = 0;
-	$Global::quoting = 1;
-	$opt::q = 1; # =
-	if(defined $opt::max_lines) {
-	    $opt::load = $opt::max_lines;
-	    $opt::max_lines = undef;
-	}
-	if(not defined $opt::arg_sep) {
-	    $Global::arg_sep = "--";
-	}
-	if(not grep(/$Global::arg_sep/, @ARGV)) {
-	    unshift(@ARGV, $ENV{SHELL}, "-c", "--");
-	}
-    }
-
     if(defined $opt::nonall) {
 	# Append a dummy empty argument
 	push @ARGV, $Global::arg_sep, "";
@@ -872,6 +847,7 @@ sub parse_options {
 	    ::error("-W has been retired. Use --wd.\n");
 	    ::error("-Y has been retired. Use --shebang.\n");
 	    ::error("-H has been retired. Use --halt.\n");
+	    ::error("--tollef has been retired. Use -u -q --arg-sep -- and --load for -l.\n");
             ::wait_and_exit(255);
     }
     citation_notice();
