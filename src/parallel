@@ -1439,6 +1439,10 @@ sub start_more_jobs {
 		    # It has been too short since 
 		    next;
 		}
+		if($opt::delay and $opt::delay > ::now() - $Global::newest_starttime) {
+		    # It has been too short since
+		    next;
+		}
 		debug($sshlogin->string()." has ".$sshlogin->jobs_running()
 		      . " out of " . $sshlogin->max_jobs_running()
 		      . " jobs running. Start another.\n");
@@ -1495,7 +1499,6 @@ sub start_another_job {
 		     ($opt::results and $opt::resume and $job->is_already_in_results()));
 	    debug("Command to run on '".$job->sshlogin()->string()."': '".$job->replaced()."'\n");
             if($job->start()) {
-                $Global::running{$job->pid()} = $job;
 		if($opt::pipe) {
 		    push(@Global::virgin_jobs,$job);
 		}
@@ -2272,7 +2275,6 @@ sub reaper {
         $sshlogin->inc_jobs_completed();
         $Global::total_running--;
         delete $Global::running{$stiff};
-        start_more_jobs();
     }
     debug("done ");
     return $children_reaped;
@@ -2545,6 +2547,9 @@ sub reap_usleep {
 	# Sleep exponentially shorter (1/2^n) if a job finished
 	return $ms/2+0.001;
     } else {
+	if($opt::timeout) {
+	    $Global::timeoutq->process_timeouts();
+	}
 	usleep($ms);
 	Job::exit_if_disk_full();
 	if($opt::linebuffer) {
@@ -2563,9 +2568,6 @@ sub usleep {
     my $secs = shift;
     ::debug(int($secs),"ms ");
     select(undef, undef, undef, $secs/1000);
-    if($opt::timeout) {
-	$Global::timeoutq->process_timeouts();
-    }
 }
 
 sub now {
@@ -4786,13 +4788,12 @@ sub start {
 	$Global::total_started++;
 	$job->set_pid($pid);
 	$job->set_starttime();
+	$Global::running{$job->pid()} = $job;
 	if($opt::timeout) {
 	    $Global::timeoutq->insert($job);
 	}
-	if($opt::delay) {
-	    $Global::JobQueue->empty() or ::usleep($opt::delay*1000);
-	}
 	$Global::newest_job = $job;
+	$Global::newest_starttime = ::now();
 	return $job;
     } else {
 	# No more processes

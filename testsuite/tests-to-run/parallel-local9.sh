@@ -6,6 +6,11 @@ XAP="nice nice parallel --xapply"
 export XAP
 
 cat <<'EOF' | sed -e 's/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+echo 'bug #41412: --timeout + --delay causes deadlock';
+seq 10 | parallel -j10 --timeout 1 --delay .3 echo
+parallel -j3 --timeout 1 --delay 2 echo ::: 1 2 3
+parallel -j10 --timeout 2.2 --delay 3 "sleep {}; echo {}" ::: 1 2 4 5 6
+
 echo '### Test --spreadstdin - more procs than args'; 
   rm -f /tmp/parallel.ss.*; 
   seq 1 5 | stdout parallel -j 10 --spreadstdin 'cat >/tmp/parallel.ss.$PARALLEL_SEQ' >/dev/null; 
