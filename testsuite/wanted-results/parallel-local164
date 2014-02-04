@@ -84,24 +84,23 @@ d
 bug #37956: --colsep does not default to '\t' as specified in the man page.
 one 1
 ### Test --tollef
-1
-2
-3
-:::
-a
-b
-c
-parallel: Warning: --tollef is obsolete and will be retired 20140222.
-parallel: Warning: See: http://lists.gnu.org/archive/html/parallel/2013-02/msg00018.html
-parallel: Warning: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.
+parallel: Error: --tollef has been retired. Use -u -q --arg-sep -- and --load for -l.
+parallel: Error: -B has been retired. Use --bf.
+parallel: Error: -H has been retired. Use --halt.
+parallel: Error: -T has been retired. Use --tty.
+parallel: Error: -U has been retired. Use --er.
+parallel: Error: -W has been retired. Use --wd.
+parallel: Error: -Y has been retired. Use --shebang.
+parallel: Error: -g has been retired. Use --group.
 ### Test --tollef --gnu
-1
-2
-3
---
-a
-b
-c
+parallel: Error: -g has been retired. Use --group.
+parallel: Error: -B has been retired. Use --bf.
+parallel: Error: -T has been retired. Use --tty.
+parallel: Error: -U has been retired. Use --er.
+parallel: Error: -W has been retired. Use --wd.
+parallel: Error: -Y has been retired. Use --shebang.
+parallel: Error: -H has been retired. Use --halt.
+parallel: Error: --tollef has been retired. Use -u -q --arg-sep -- and --load for -l.
 ### Test --gnu
 1
 2

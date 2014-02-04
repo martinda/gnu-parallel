@@ -1,3 +1,5 @@
+### Deal with long command lines on remote servers
+      4      10  100010
 ### Test bug #34241: --pipe should not spawn unneeded processes
 1
 2

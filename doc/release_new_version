@@ -204,16 +204,23 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140222 ('') released
+Subject: GNU Parallel 20140222 ('Sochi') released
 
-GNU Parallel 20140222 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140222 ('Sochi') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 New in this release:
 
 * --tollef has been retired.
 
+* GNU Parallel was cited in: Speaker Verification and Keyword Spotting
+  Systems for Forensic Applications
+  http://lantana.tenet.res.in/website_files/thesis/Phd/srikanth.pdf
+
 * GNU Parallel is co-distributed with RepeatExplorer
   http://www.vcru.wisc.edu/simonlab/bioinformatics/programs/repeatexplorer/README.txt
+
+* PHP wrapper class for the GNU Parallel tool
+  https://github.com/geopal-solutions/gnu-parallel-wrapper/tree/master
 
 * Bug fixes and man page updates.
 

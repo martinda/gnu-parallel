@@ -1879,11 +1879,21 @@ sub parse_sshlogin {
             }
         }
     }
+    $Global::minimal_command_line_length = 8_000_000;
     for my $sshlogin_string (@login) {
         my $sshlogin = SSHLogin->new($sshlogin_string);
-        $sshlogin->set_maxlength(Limits::Command::max_length());
+	if($sshlogin_string eq ":") {
+	    $sshlogin->set_maxlength(Limits::Command::max_length());
+	} else {
+	    # If all chars needs to be quoted, every other character will be \
+	    $sshlogin->set_maxlength(Limits::Command::max_length()/2);
+	}
+	$Global::minimal_command_line_length =
+	    ::min($Global::minimal_command_line_length, $sshlogin->maxlength());
         $Global::host{$sshlogin->string()} = $sshlogin;
     }
+
+
     debug("sshlogin: ", my_dump(%Global::host),"\n");
     if($opt::transfer or @opt::return or $opt::cleanup or @opt::basefile) {
         if(not remote_hosts()) {
@@ -2044,6 +2054,7 @@ sub filter_hosts {
     unlink $tmpfile;
     delete @Global::host{@down_hosts};
     @down_hosts and ::warning("Removed @down_hosts\n");
+    $Global::minimal_command_line_length = 8_000_000;
     while (my ($sshlogin, $obj) = each %Global::host) {
 	$ncpus{$sshlogin} or ::die_bug("ncpus missing: ".$obj->serverlogin());
 	$ncores{$sshlogin} or ::die_bug("ncores missing: ".$obj->serverlogin());
@@ -2056,8 +2067,12 @@ sub filter_hosts {
 	}
 	$obj->set_time_to_login($time_to_login{$sshlogin});
         $obj->set_maxlength($maxlen{$sshlogin});
+	$Global::minimal_command_line_length =
+	    ::min($Global::minimal_command_line_length,
+		  int($maxlen{$sshlogin}/2));
 	::debug("Timing from -S:$sshlogin ncpus:$ncpus{$sshlogin} ncores:$ncores{$sshlogin} ",
-		"time_to_login:$time_to_login{$sshlogin} maxlen:$maxlen{$sshlogin}\n");
+		"time_to_login:$time_to_login{$sshlogin} maxlen:$maxlen{$sshlogin} ",
+		"min_max_len:$Global::minimal_command_line_length\n");
     }
 }
 
@@ -5154,13 +5169,14 @@ sub populate {
     # Returns: N/A
     my $self = shift;
     my $next_arg;
+    my $max_len = $Global::minimal_command_line_length || Limits::Command::max_length();
     while (not $self->{'arg_queue'}->empty()) {
 	$next_arg = $self->{'arg_queue'}->get();
 	if(not defined $next_arg) {
 	    next;
 	}
 	$self->push($next_arg);
-	if($self->len() >= Limits::Command::max_length()) {
+	if($self->len() >= $max_len) {
 	    # Command length is now > max_length
 	    # If there are arguments: remove the last
 	    # If there are no arguments: Error

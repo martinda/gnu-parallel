@@ -5,6 +5,9 @@ mkdir tmp
 cd tmp
 
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -j8 -k -L1
+echo '### Deal with long command lines on remote servers'
+  perl -e 'print((("\""x10000)."\n")x10)' | parallel -j1 -S lo -N 10000 echo {} |wc
+
 echo '### Test bug #34241: --pipe should not spawn unneeded processes'
   seq 5 | ssh csh@lo parallel -k --block 5 --pipe -j10 cat\\\;echo Block_end
 
