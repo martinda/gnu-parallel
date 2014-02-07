@@ -989,7 +989,7 @@ sub open_joblog {
 		::wait_and_exit(255);
 	    }
 	    print $Global::joblog
-		join("\t", "Seq", "Host", "Starttime", "Runtime",
+		join("\t", "Seq", "Host", "Starttime", "JobRuntime",
 		     "Send", "Receive", "Exitval", "Signal", "Command"
 		). "\n";
 	}
@@ -1990,7 +1990,7 @@ sub filter_hosts {
 	    # seq host time spent sent received exit signal command
 	    # 2 : 1372607672.654 0.675 0 0 0 0 eval true\ m\;ssh\ m\ parallel\ --number-of-cores
 	    if($col[0] eq "Seq" and $col[1] eq "Host" and
-		    $col[2] eq "Starttime" and $col[3] eq "Runtime") {
+		    $col[2] eq "Starttime") {
 		# Header => skip
 		next;
 	    }
@@ -5015,7 +5015,7 @@ sub print_joblog {
     }
     print $Global::joblog
 	join("\t", $self->seq(), $self->sshlogin()->string(),
-	     $self->starttime(), $self->runtime(),
+	     $self->starttime(), sprintf("%10.3f",$self->runtime()),
 	     $self->transfersize(), $self->returnsize(),
 	     $self->exitstatus(), $self->exitsignal(), $cmd
 	). "\n";
