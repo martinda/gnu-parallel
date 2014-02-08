@@ -965,7 +965,7 @@ sub open_joblog {
 		    if(/$joblog_regexp/o) {
 			# This is 30% faster than set_job_already_run($1);
 			vec($Global::job_already_run,($1||0),1) = 1;
-		    } elsif(not /\d+\t[^\t]+\t([0-9.]+\t){6}/) {
+		    } elsif(not /\d+\s+[^\s]+\s+([0-9.]+\s+){6}/) {
 			::error("Format of '$opt::joblog' is wrong: $_");
 			::wait_and_exit(255);
 		    }
@@ -4084,6 +4084,8 @@ sub openoutputfiles {
     $self->set_fd_file_name(1,$outname);
     $self->set_fd_file_name(2,$errname);
     if($opt::compress) {
+	# Send stdout to stdin for $opt::compress_program(1)
+	# Send stderr to stdin for $opt::compress_program(2)
 	$self->set_fd_input(1, $outfh);
 	$self->set_fd_input(2, $errfh);
 	my $rm = $unlink_out ? "rm" : "true";
@@ -5336,7 +5338,6 @@ sub args_as_dirname {
 
     for my $rec_ref (@{$self->{'arg_list'}}) {
 	my @header_indexes_sorted = header_indexes_sorted($#$rec_ref+1);
-
 	for my $n (@header_indexes_sorted) {
 	    CORE::push(@res,
 		 $Global::input_source_header{$n},
