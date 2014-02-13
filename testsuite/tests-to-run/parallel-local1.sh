@@ -143,7 +143,7 @@ echo '### Test {#}'
   seq 1 10 | parallel -k echo {#}
 
 echo '### Test --seqreplace and line too long'
-  seq 1 100 | stdout parallel -k --seqreplace I echo $(perl -e 'print "I"x130000') \|wc
+  seq 1 100 | stdout parallel -k --seqreplace I echo $(perl -e 'print "I"x130000') \|wc | uniq
 
 echo '### bug #37042: -J foo is taken from the whole command line - not just the part before the command'
   echo '--tagstring foo' > ~/.parallel/bug_37042_profile; 

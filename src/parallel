@@ -1624,7 +1624,7 @@ sub progress {
 	    } else {
 		$this_eta = $Private::last_eta;
 	    }
-	    $eta = sprintf("ETA: %ds %dleft %.2favg  ", $this_eta, $left, $avgtime);
+	    $eta = sprintf("ETA: %ds Left: %d AVG: %.2fs  ", $this_eta, $left, $avgtime);
 	    if($opt::bar) {
 		my $arg = $Global::newest_job ? 
 		    $Global::newest_job->{'commandline'}->simple_replace_placeholders($Global::replace{"{}"}) : "";
