@@ -5,6 +5,10 @@ cd tmp
 
 # -L1 will join lines ending in ' '
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j0 -k -L1
+echo '### bug #41565: Print happens in blocks - not after each job complete'
+echo 'The timing here is important: 2 3 4 5 6'
+  ping -c 7 lo  | parallel -j3 --delay 0.1 'echo {#}' | timestamp | head -n5 | cut -f 1 -d .
+
 echo '### Test --tagstring'
   nice parallel -j1 -X -v --tagstring a{}b echo  ::: 3 4
   nice parallel -j1 -k -v --tagstring a{}b echo  ::: 3 4
