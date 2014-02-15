@@ -2226,15 +2226,16 @@ sub reaper {
                 $Private::job_end_sequence ||= 1;
                 debug("Looking for: $Private::job_end_sequence ".
                       "Current: ".$job->seq()."\n");
-                while($Private::print_later{$Private::job_end_sequence}
-		      or
-		      vec($Global::job_already_run,$Private::job_end_sequence,1)) {
+		for(my $j = $Private::print_later{$Private::job_end_sequence};
+		    $j or vec($Global::job_already_run,$Private::job_end_sequence,1);
+                    $Private::job_end_sequence++,
+		    $j = $Private::print_later{$Private::job_end_sequence}) {
                     debug("Found job end $Private::job_end_sequence");
-		    defined $Private::print_later{$Private::job_end_sequence} and 
-                    $Private::print_later{$Private::job_end_sequence}->print();
-                    delete $Private::print_later{$Private::job_end_sequence};
-                    $Private::job_end_sequence++;
-                }
+                    if($j) { 
+			$j->print();
+			delete $Private::print_later{$Private::job_end_sequence};
+		    }
+		}		    
             } else {
                 $job->print();
             }
@@ -2266,6 +2267,7 @@ sub reaper {
         $sshlogin->inc_jobs_completed();
         $Global::total_running--;
         delete $Global::running{$stiff};
+	start_more_jobs();
     }
     debug("done ");
     return $children_reaped;
@@ -4864,12 +4866,12 @@ sub print {
 	unlink $self->fd_file_name(1);
     }
 
-    # Check for disk full
-    exit_if_disk_full();
     if($Global::joblog) { $self->print_joblog() }
 
     # Printing is only relevant for grouped output.
     $Global::grouped or return;
+    # Check for disk full
+    exit_if_disk_full();
     my $command = $self->sshlogin_wrap();
 
     if(($opt::dryrun or $Global::verbose) and $Global::grouped
