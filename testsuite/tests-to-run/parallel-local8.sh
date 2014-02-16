@@ -13,8 +13,9 @@ for i in $(seq 2 10); do
 done
 
 echo "### Test if --load blocks. Bug.";
-seq 1 1000 | parallel -kj2 --load 300% --recend "\n" --spreadstdin gzip -1 | zcat | sort -n | md5sum
-seq 1 1000 | parallel -kj0 --load 300% --recend "\n" --spreadstdin gzip -1 | zcat | sort -n | md5sum
+  seq 1 1000 | parallel -kj2 --load 300% --recend "\n" --spreadstdin gzip -1 | zcat | sort -n | md5sum
+  seq 1 1000 | parallel -kj0 --load 300% --recend "\n" --spreadstdin gzip -1 | zcat | sort -n | md5sum
 
-seq 1 1000000 | parallel -kj0 --recend "\n" --spreadstdin gzip -1 | zcat | sort -n | md5sum
-seq 1 1000000 | parallel -kj20 --recend "\n" --spreadstdin gzip -1 | zcat | sort -n | md5sum
+echo "### Test reading load from PARALLEL"
+  seq 1 1000000 | parallel -kj0 --recend "\n" --spreadstdin gzip -1 | zcat | sort -n | md5sum
+  seq 1 1000000 | parallel -kj20 --recend "\n" --spreadstdin gzip -1 | zcat | sort -n | md5sum

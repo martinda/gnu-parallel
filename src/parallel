@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-# Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014 Ole Tange and Free Software
-# Foundation, Inc.
+# Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014 Ole Tange and
+# Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -518,6 +518,7 @@ sub options_hash {
 	 "tmpdir=s" => \$opt::tmpdir,
 	 "tempdir=s" => \$opt::tmpdir,
 	 "use-compress-program|compress-program=s" => \$opt::compress_program,
+	 "use-decompress-program|decompress-program=s" => \$opt::decompress_program,
 	 "compress" => \$opt::compress,
 	 "tty" => \$opt::tty,
 	 "T" => \$opt::retired,
@@ -729,7 +730,7 @@ sub parse_options {
     }
     if($opt::compress_program) {
 	$opt::compress = 1;
-	$opt::decompress_program = $opt::compress_program." -dc";
+	$opt::decompress_program ||= $opt::compress_program." -dc";
     }
     if($opt::compress) {
 	my ($compress, $decompress) = find_compression_program();
@@ -4065,11 +4066,15 @@ sub cattail {
         $read = sysread(IN,$buf,1_000_000);
         if($read) {
 	    # Blocking print
-	    syswrite(OUT,$buf);
+            while($buf) {
+                my $bytes_written = syswrite(OUT,$buf);
+                # syswrite may be interrupted by SIGHUP
+                substr($buf,0,$bytes_written) = "";
+            }
 	    # Something printed: Wait less next time
 	    $sleep /= 2;
         } else {
-	    if($Global::sighup) {
+	    if(eof(IN) and $Global::sighup) {
                 # SIGHUP received: There will never be more to read => exit
                 exit;
             }

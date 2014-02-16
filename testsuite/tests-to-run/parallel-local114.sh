@@ -1,6 +1,10 @@
 #!/bin/bash
 
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+echo "bug #41609: --compress fails"
+  seq 12 | parallel --compress --compress-program bzip2 -k seq {} 1000000 | md5sum
+  seq 12 | parallel --compress -k seq {} 1000000 | md5sum
+
 echo "### Test -I"; 
   seq 1 10 | parallel -k 'seq 1 {} | parallel -k -I :: echo {} ::'
 

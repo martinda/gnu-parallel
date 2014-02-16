@@ -24,5 +24,6 @@ c88e1757ddc619efd9ee507a7702b53c  -
 ### Test if --load blocks. Bug.
 53d025127ae99ab79e8502aae2d9bea6  -
 53d025127ae99ab79e8502aae2d9bea6  -
+### Test reading load from PARALLEL
 8a7095c1c23bfadc311fe6b16d950582  -
 8a7095c1c23bfadc311fe6b16d950582  -
