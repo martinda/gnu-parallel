@@ -171,6 +171,7 @@ if($opt::pipe) {
 drain_job_queue();
 ::debug("Done draining\n");
 reaper();
+::debug("Done reaping\n");
 if($opt::pipe and @opt::a) {
     for my $job (@Global::tee_jobs) {
 	unlink $job->fh(2,"name");
@@ -179,10 +180,12 @@ if($opt::pipe and @opt::a) {
 	unlink $job->fh(1,"name");
     }
 }
+::debug("Cleaning\n");
 cleanup();
 if($Global::semaphore) {
     $sem->release();
 }
+::debug("Halt\n");
 if($opt::halt_on_error) {
     wait_and_exit($Global::halt_on_error_exitstatus);
 } else {

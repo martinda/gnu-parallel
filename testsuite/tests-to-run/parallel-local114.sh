@@ -1,7 +1,15 @@
 #!/bin/bash
 
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
-echo "bug #41609: --compress fails"
+echo "### --pipe --line-buffer"
+  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --tagstring {#} pv -qL 10 > /tmp/parallel_$$; 
+  cat /tmp/parallel_$$ | wc; 
+  diff <(sort /tmp/parallel_$$) /tmp/parallel_$$ >/dev/null ; echo These must diff: $?
+
+echo "### --pipe --line-buffer --compress (fails)"
+#  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --compress --tagstring {#} pv -qL 10 | wc
+
+echo "### bug #41609: --compress fails"
   seq 12 | parallel --compress --compress-program bzip2 -k seq {} 1000000 | md5sum
   seq 12 | parallel --compress -k seq {} 1000000 | md5sum
 

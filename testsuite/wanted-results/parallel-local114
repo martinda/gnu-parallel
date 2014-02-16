@@ -1,4 +1,8 @@
-bug #41609: --compress fails
+### --pipe --line-buffer
+    200     400    1202
+These must diff: 1
+### --pipe --line-buffer --compress (fails)
+### bug #41609: --compress fails
 24812dd0f24a26d08a780f988b9d5ad2  -
 24812dd0f24a26d08a780f988b9d5ad2  -
 ### Test -I
