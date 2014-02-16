@@ -1,5 +1,3 @@
-### Test weird regexp chars
-a1b1^c1[.}c a2b2^c2[.}c a3b3^c3[.}c a4b4^c4[.}c a5b5^c5[.}c a6b6^c6[.}c
 ### Test {.} and {}
 ### Test {.} with files that have no . but dir does
 /tmp/test-of-{.}-parallel/subdir/file
@@ -57,6 +55,40 @@ rm -- 2-col/abc-2-col-2-col.txt
 rm -- a/abc-a-a
 rm -- b/abc-b-b
 rm -- \‰\∏\≠\Â\õ\Ω\ \(Zh\≈\çnggu\√\≥\)/abc-\‰\∏\≠\Â\õ\Ω\ \(Zh\≈\çnggu\√\≥\)-\‰\∏\≠\Â\õ\Ω\ \(Zh\≈\çnggu\√\≥\)
+### Test compress
+1	1
+2	1
+2	2
+3	1
+3	2
+3	3
+4	1
+4	2
+4	3
+4	4
+5	1
+5	2
+5	3
+5	4
+5	5
+### Test compress - stderr
+1	1
+2	1
+2	2
+3	1
+3	2
+3	3
+4	1
+4	2
+4	3
+4	4
+5	1
+5	2
+5	3
+5	4
+5	5
+### Test weird regexp chars
+a1b1^c1[.}c a2b2^c2[.}c a3b3^c3[.}c a4b4^c4[.}c a5b5^c5[.}c a6b6^c6[.}c
 ### Test -m
 1foo bar joe.gif2foo bar joe3 Afoo bar joeBfoo bar joeC
 1foo2foo3 1bar2bar3 1joe.gif2joe3 AfooBfooC AbarBbarC AjoeBjoeC

@@ -54,6 +54,7 @@ installparallel: ../src/parallel
 	cd .. && make -j && sudo make -j install
 
 startdb:
+	echo shutdown abort | sudo su - oracle -c "sqlplus / as sysdba"
 	sudo parallel /etc/init.d/{} restart ::: postgresql mysql oracle-xe
 
 clean:

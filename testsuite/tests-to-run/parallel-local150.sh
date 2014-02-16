@@ -9,7 +9,7 @@ echo '### bug #41565: Print happens in blocks - not after each job complete'
 echo 'The timing here is important: 2 3 4 5 6'
   ping -c 7 lo  | parallel -j3  'echo {#}' | timestamp -dd | perl -pe '$_=int($_+0.2)."\n"'
 echo '300 ms jobs:'
-  ping -i .3 -c 10 lo | parallel -j3 --delay 0.3 echo | timestamp -d -d | perl -pe 's/(...).*/$1/' | tail -n +2
+  ping -i .3 -c 10 lo | parallel -j3 --delay 0.3 echo | timestamp -d -d | perl -pe 's/(...).*/int($1*10+0.2)/e' | tail -n +2
 
 echo '### Test --tagstring'
   nice parallel -j1 -X -v --tagstring a{}b echo  ::: 3 4

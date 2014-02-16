@@ -2,9 +2,6 @@
 
 # Test {.}
 
-echo '### Test weird regexp chars'
-seq 1 6 | parallel -j1 -I :: -X echo a::b::^c::[.}c
-
 rsync -Ha --delete input-files/testdir2/ tmp/
 cd tmp
 
@@ -32,6 +29,15 @@ ls | parallel -kv rm -- {.}/abc-{.}-{} 2>&1
 
 # -L1 will join lines ending in ' '
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | nice parallel -j0 -k -L1
+echo '### Test compress'
+  seq 5 | parallel -j2 --tag --compress 'seq {} | pv -q -L 10'
+
+echo '### Test compress - stderr'
+  seq 5 | parallel -j2 --tag --compress 'seq {} | pv -q -L 10 >&2' 2>&1 >/dev/null
+
+echo '### Test weird regexp chars'
+  seq 1 6 | parallel -j1 -I :: -X echo a::b::^c::[.}c
+
 echo '### Test -m'
 (echo foo;echo bar;echo joe.gif) | parallel -j1 -km echo 1{}2{.}3 A{.}B{.}C
 (echo foo;echo bar;echo joe.gif) | parallel -j1 -kX echo 1{}2{.}3 A{.}B{.}C
