@@ -1,7 +1,43 @@
+### --line-buffer
+     55      55     120
+These must diff: 1
 ### --pipe --line-buffer
     200     400    1202
 These must diff: 1
 ### --pipe --line-buffer --compress (fails)
+### bug #41482: --pipe --compress blocks at different -j/seq combinations
+1
+echo 1-4 + 1-4
+echo 1
+1
+echo 2
+2
+echo 3
+3
+echo 4
+4
+4 times wc to stderr to stdout
+      1       1       2
+      1       1       2
+      1       1       2
+      1       1       2
+1 2 3 4
+1
+2
+3
+4
+1 2 3 4
+1
+2
+3
+4
+1 2
+1
+2
+1 2 3
+1
+2
+3
 ### bug #41609: --compress fails
 24812dd0f24a26d08a780f988b9d5ad2  -
 24812dd0f24a26d08a780f988b9d5ad2  -

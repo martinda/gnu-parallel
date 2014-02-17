@@ -1,13 +1,35 @@
 #!/bin/bash
 
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+echo "### --line-buffer"
+  seq 10 | parallel -j20 --line-buffer  'seq {} 10 | pv -qL 10' > /tmp/parallel_l$$; 
+  seq 10 | parallel -j20                'seq {} 10 | pv -qL 10' > /tmp/parallel_$$; 
+  cat /tmp/parallel_l$$ | wc; 
+  diff /tmp/parallel_$$ /tmp/parallel_l$$ >/dev/null ; echo These must diff: $?
+
 echo "### --pipe --line-buffer"
-  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --tagstring {#} pv -qL 10 > /tmp/parallel_$$; 
-  cat /tmp/parallel_$$ | wc; 
-  diff <(sort /tmp/parallel_$$) /tmp/parallel_$$ >/dev/null ; echo These must diff: $?
+  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --tagstring {#} pv -qL 10 > /tmp/parallel_pl$$; 
+  seq 200| parallel -N10 -L1 --pipe  -j20               --tagstring {#} pv -qL 10 > /tmp/parallel_p$$; 
+  cat /tmp/parallel_pl$$ | wc; 
+  diff /tmp/parallel_p$$ /tmp/parallel_pl$$ >/dev/null ; echo These must diff: $?
 
 echo "### --pipe --line-buffer --compress (fails)"
 #  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --compress --tagstring {#} pv -qL 10 | wc
+
+echo "### bug #41482: --pipe --compress blocks at different -j/seq combinations"
+  seq 1 | parallel -k -j2 --compress -N1 -L1 --pipe cat;
+  echo echo 1-4 + 1-4
+    seq 4 | parallel -k -j3 --compress -N1 -L1 -vv echo;
+  echo 4 times wc to stderr to stdout
+    (seq 4 | parallel -k -j3 --compress -N1 -L1 --pipe wc '>&2') 2>&1 >/dev/null
+  echo 1 2 3 4
+    seq 4 | parallel -k -j3 --compress echo;
+  echo 1 2 3 4
+    seq 4 | parallel -k -j1 --compress echo;
+  echo 1 2
+    seq 2 | parallel -k -j1 --compress echo;
+  echo 1 2 3
+    seq 3 | parallel -k -j2 --compress -N1 -L1 --pipe cat;
 
 echo "### bug #41609: --compress fails"
   seq 12 | parallel --compress --compress-program bzip2 -k seq {} 1000000 | md5sum

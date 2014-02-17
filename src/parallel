@@ -4907,19 +4907,27 @@ sub print {
 
     my $self = shift;
     ::debug(">>joboutput ".$self->replaced()."\n");
-    if($opt::pipe and $self->virgin()) {
-	# Nothing was printed to this job:
-	# cleanup tmp files if --files was set
-	unlink $self->fh(1,"name");
-	return;
-    }
+#    if($opt::pipe and $self->virgin()) {
+#	# Nothing was printed to this job:
+#	# cleanup tmp files if --files was set
+#	close $self->fh(0,"w");
+#	for my $fdno (1,2) {
+#	    close $self->fh($fdno,"w");
+#	    close $self->fh($fdno,"r");
+#	    # Unlink files that are empty
+#	    unlink $self->fh($fdno,"name");
+#	}
+#	return;
+#    }
     if($opt::dryrun) {
 	# Nothing was printed to this job:
 	# cleanup tmp files if --files was set
 	unlink $self->fh(1,"name");
     }
-
-    if($Global::joblog) { $self->print_joblog() }
+    if($opt::pipe and $self->virgin()) {
+    } else {
+	if($Global::joblog) { $self->print_joblog() }
+    }
 
     # Printing is only relevant for grouped output.
     $Global::grouped or return;
@@ -4957,7 +4965,14 @@ sub print {
 	if($opt::files) {
 	    # If --compress: $in_fh must be closed first.
 	    close $self->fh($fdno,"w");
-	    if($fdno == 1 and $self->fh($fdno,"name")) {
+	    close $in_fh;
+	    if($opt::pipe and $self->virgin()) {
+		# Nothing was printed to this job:                                                                                           # cleanup tmp files if --files was set
+		for my $fdno (1,2) {
+		    unlink $self->fh($fdno,"name");
+		    unlink $self->fh($fdno,"unlink");
+		}
+	    } elsif($fdno == 1 and $self->fh($fdno,"name")) {
 		print $out_fd $self->fh($fdno,"name"),"\n";
 	    }
 	} elsif($opt::linebuffer) {
