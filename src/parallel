@@ -626,7 +626,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140122;
+    $Global::version = 20140220;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4183,6 +4183,17 @@ sub openoutputfiles {
             unlink $self->fh($fdno,"unlink");
 	}
     }
+    if($opt::linebuffer) {
+	# Set non-blocking when using --linebuffer
+	$Global::use{"Fcntl"} ||= eval "use Fcntl qw(:DEFAULT :flock); 1;";
+	for my $fdno (1,2) {
+	    my $fdr = $self->fh($fdno,'r');
+	    my $flags;
+	    fcntl($fdr, &F_GETFL, $flags) || die $!; # Get the current flags on the filehandle
+	    $flags |= &O_NONBLOCK; # Add non-blocking to the flags
+	    fcntl($fdr, &F_SETFL, $flags) || die $!; # Set the flags on the filehandle
+	}
+    }
 }
 
 sub set_fh {
@@ -4908,48 +4919,37 @@ sub print {
 
     my $self = shift;
     ::debug(">>joboutput ".$self->replaced()."\n");
-#    if($opt::pipe and $self->virgin()) {
-#	# Nothing was printed to this job:
-#	# cleanup tmp files if --files was set
-#	close $self->fh(0,"w");
-#	for my $fdno (1,2) {
-#	    close $self->fh($fdno,"w");
-#	    close $self->fh($fdno,"r");
-#	    # Unlink files that are empty
-#	    unlink $self->fh($fdno,"name");
-#	}
-#	return;
-#    }
     if($opt::dryrun) {
 	# Nothing was printed to this job:
 	# cleanup tmp files if --files was set
 	unlink $self->fh(1,"name");
     }
     if($opt::pipe and $self->virgin()) {
+	# Skip --joblog, --dryrun, --verbose
     } else {
 	if($Global::joblog) { $self->print_joblog() }
 
-    # Printing is only relevant for grouped output.
-    $Global::grouped or return;
-    # Check for disk full
-    exit_if_disk_full();
-    my $command = $self->sshlogin_wrap();
-
-    if(($opt::dryrun or $Global::verbose) and $Global::grouped
-       and
-       not $self->{'verbose_printed'}) {
-	$self->{'verbose_printed'}++;
-	if($Global::verbose <= 1) {
-	    print STDOUT $self->replaced(),"\n";
-	} else {
-	    # Verbose level > 1: Print the rsync and stuff
-	    print STDOUT $command,"\n";
+	# Printing is only relevant for grouped output.
+	$Global::grouped or return;
+	# Check for disk full
+	exit_if_disk_full();
+	my $command = $self->sshlogin_wrap();
+	
+	if(($opt::dryrun or $Global::verbose) and $Global::grouped
+	   and
+	   not $self->{'verbose_printed'}) {
+	    $self->{'verbose_printed'}++;
+	    if($Global::verbose <= 1) {
+		print STDOUT $self->replaced(),"\n";
+	    } else {
+		# Verbose level > 1: Print the rsync and stuff
+		print STDOUT $command,"\n";
+	    }
+	    # If STDOUT and STDERR are merged,
+	    # we want the command to be printed first
+	    # so flush to avoid STDOUT being buffered
+	    flush STDOUT;
 	}
-	# If STDOUT and STDERR are merged,
-	# we want the command to be printed first
-	# so flush to avoid STDOUT being buffered
-	flush STDOUT;
-    }
     }
     for my $fdno (sort { $a <=> $b } keys %Global::fd) {
 	# Sort by file descriptor numerically: 1,2,3,..,9,10,11
@@ -4968,7 +4968,7 @@ sub print {
 	    close $self->fh($fdno,"w");
 	    close $in_fh;
 	    if($opt::pipe and $self->virgin()) {
-		# Nothing was printed to this job:                                                                                           # cleanup tmp files if --files was set
+		# Nothing was printed to this job:                                                                                           # cleanup unused tmp files if --files was set
 		for my $fdno (1,2) {
 		    unlink $self->fh($fdno,"name");
 		    unlink $self->fh($fdno,"unlink");
@@ -5015,7 +5015,7 @@ sub print {
 
 	    if($self->fh($fdno,"rpid") and kill 0, $self->fh($fdno,"rpid")) {
 		# decompress still running
-	    } elsif(defined $self->{'exitstatus'} and length $$partial > 0) {
+	    } elsif(defined $self->{'exitstatus'}) {
 		# If the job is dead: print the remaining partial line
 		# read remaining
 		if($opt::tag or defined $opt::tagstring) {
@@ -5023,8 +5023,9 @@ sub print {
 		    $$partial =~ s/^/$tag/gm;
 		}
 		print $out_fd $$partial;
+		# Release the memory
 		$$partial = undef;
-		# then close fd
+		# then close fh
 		close $in_fh;
 	    }
 	} else {
