@@ -35,6 +35,12 @@ echo "### bug #41609: --compress fails"
   seq 12 | parallel --compress --compress-program bzip2 -k seq {} 1000000 | md5sum
   seq 12 | parallel --compress -k seq {} 1000000 | md5sum
 
+echo "### --compress race condition (use nice): Fewer than 400 would run"
+  seq 400| nice parallel -j200 --compress echo | wc
+
+echo "### -v --pipe: Dont spawn too many - 1 is enough"
+  seq 1 | parallel -j10 -v --pipe cat
+
 echo "### Test -I"; 
   seq 1 10 | parallel -k 'seq 1 {} | parallel -k -I :: echo {} ::'
 

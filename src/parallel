@@ -4037,21 +4037,17 @@ sub seq {
 
 sub cattail {
     # Returns:
-    #   $cattail = perl program for: cattail "decompress program" [file_to_decompress or stdin]
+    #   $cattail = perl program for: cattail "decompress program" writerpid [file_to_decompress or stdin] [file_to_unlink]
     my $cattail = q{
     # cat followed by tail.
-    # SIGHUP says there will be appended no more, so just finish after this round.
-    
+    # If $writerpid dead: finish after this round
     use Fcntl;
-    
-    $SIG{HUP} = sub { $Global::sighup = 1; };
     
     $|=1;
 
-    $cmd = shift;
-    
-    if(@ARGV) {
-        open(IN,"<",$ARGV[0]) || die("Cannot open $ARGV[0]");
+    my ($cmd, $writerpid, $read_file, $unlink_file) = @ARGV;
+    if($read_file) {
+        open(IN,"<",$read_file) || die("cattail: Cannot open $read_file");
     } else {
         *IN = *STDIN;
     }
@@ -4060,14 +4056,16 @@ sub cattail {
     fcntl(IN, F_GETFL, $flags) || die $!; # Get the current flags on the filehandle
     $flags |= O_NONBLOCK; # Add non-blocking to the flags
     fcntl(IN, F_SETFL, $flags) || die $!; # Set the flags on the filehandle
-    
-    open(OUT,"|-",$cmd) || die;
+    open(OUT,"|-",$cmd) || die("cattail: Cannot run $cmd");
 
     while(1) {
         # clear EOF
         seek(IN,0,1);
+        my $writer_running = kill 0, $writerpid;
         $read = sysread(IN,$buf,1_000_000);
         if($read) {
+            # We can unlink the file now: The writer has written something
+            -e $unlink_file and unlink $unlink_file;
 	    # Blocking print
             while($buf) {
                 my $bytes_written = syswrite(OUT,$buf);
@@ -4077,12 +4075,14 @@ sub cattail {
 	    # Something printed: Wait less next time
 	    $sleep /= 2;
         } else {
-	    if(eof(IN) and $Global::sighup) {
-                # SIGHUP received: There will never be more to read => exit
+	    if(eof(IN) and not $writer_running) {
+                # Writer dead: There will never be more to read => exit
                 exit;
             }
-	    # Nothing read: Wait longer next time
-	    $sleep = 1.05*$sleep + 0.01;
+            # TODO This could probably be done more efficiently using select(2)
+	    # Nothing read: Wait longer before next read
+            # Up to 30 milliseconds
+            $sleep = ($sleep < 30) ? ($sleep * 1.001 + 0.01) : ($sleep);
 	    usleep($sleep);
         }
     }
@@ -4159,12 +4159,13 @@ sub openoutputfiles {
 	# cattail get pid i  $pid = $self->fh($fdno,'rpid');
 	my $cattail = cattail();
 	for my $fdno (1,2) {
-	    my $wpid = open(my $fdw,"|-","$opt::compress_program >".
+	    my $wpid = open(my $fdw,"|-","$opt::compress_program >>".
 			    $self->fh($fdno,'name')) || die $?;
 	    $self->set_fh($fdno,'w',$fdw);
 	    $self->set_fh($fdno,'wpid',$wpid);
 	    my $rpid = open(my $fdr, "-|", "perl", "-e", $cattail, 
-			    $opt::decompress_program, $self->fh($fdno,'name')) || die $?;
+			    $opt::decompress_program, $wpid,
+			    $self->fh($fdno,'name'),$self->fh($fdno,'unlink')) || die $?;
 	    $self->set_fh($fdno,'r',$fdr);
 	    $self->set_fh($fdno,'rpid',$rpid);
 	    # Unlink if required but only when cattail and compress_program has started.
@@ -4927,7 +4928,6 @@ sub print {
     if($opt::pipe and $self->virgin()) {
     } else {
 	if($Global::joblog) { $self->print_joblog() }
-    }
 
     # Printing is only relevant for grouped output.
     $Global::grouped or return;
@@ -4950,6 +4950,7 @@ sub print {
 	# so flush to avoid STDOUT being buffered
 	flush STDOUT;
     }
+    }
     for my $fdno (sort { $a <=> $b } keys %Global::fd) {
 	# Sort by file descriptor numerically: 1,2,3,..,9,10,11
 	$fdno == 0 and next;
@@ -4961,7 +4962,7 @@ sub print {
 	    }
 	    next;
 	}
-	::debug("File descriptor $fdno:");
+	::debug("File descriptor $fdno (".$self->fh($fdno,"name")."):");
 	if($opt::files) {
 	    # If --compress: $in_fh must be closed first.
 	    close $self->fh($fdno,"w");
@@ -4978,8 +4979,13 @@ sub print {
 	} elsif($opt::linebuffer) {
 	    # Line buffered print out
 	    my $partial = \$self->{'partial_line',$fdno};
+	    if(defined $self->{'exitstatus'}) {
+		# If the job is dead: close printing fh. Needed for --compress
+		close $self->fh($fdno,"w");
+	    }
 	    # This seek will clear EOF
 	    seek $in_fh, tell($in_fh), 0;
+	    # The read is non-blocking: The $in_fh is set to non-blocking.
 	    while(read($in_fh,substr($$partial,length $$partial),1_000_000)) {
 		# Append to $$partial
 		# Find the last \n
@@ -5007,8 +5013,11 @@ sub print {
 		}
 	    }
 
-	    if(defined $self->{'exitstatus'} and length $$partial > 0) {
+	    if($self->fh($fdno,"rpid") and kill 0, $self->fh($fdno,"rpid")) {
+		# decompress still running
+	    } elsif(defined $self->{'exitstatus'} and length $$partial > 0) {
 		# If the job is dead: print the remaining partial line
+		# read remaining
 		if($opt::tag or defined $opt::tagstring) {
 		    my $tag = $self->tag();
 		    $$partial =~ s/^/$tag/gm;
@@ -5021,16 +5030,7 @@ sub print {
 	} else {
 	    my $buf;
 	    close $self->fh($fdno,"w");
-	    if($self->fh($fdno,"wpid")) {
-		# This is --compress
-		# Wait for $compress_program to finish
-		waitpid($self->fh($fdno,"wpid"),0);
-		# Then tell cattail this the last reading
-		CORE::kill "HUP", $self->fh($fdno,"rpid");
-	    } else {
-		# Seek to start
-		seek $in_fh, 0, 0;
-	    }
+	    seek $in_fh, 0, 0;
 	    # $in_fh is now ready for reading at position 0
 	    if($opt::tag or defined $opt::tagstring) {
 		my $tag = $self->tag();
@@ -5064,8 +5064,8 @@ sub print {
 	    close $in_fh;   
 	}
 	flush $out_fd;
-	::debug("<<joboutput $command\n");
     }
+    ::debug("<<joboutput $command\n");
 }
 
 sub print_joblog {

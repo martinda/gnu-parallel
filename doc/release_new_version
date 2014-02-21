@@ -204,11 +204,14 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140222 ('Со́чи') released
+Subject: GNU Parallel 20140222 ('Со́чи/Euromaidan') released
 
-GNU Parallel 20140222 ('Со́чи') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140222 ('Со́чи/Euromaidan') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+
+Packagers that default to --tollef should take note that --tollef is now retired after a full year of being obsolete.
 
 The --compress change is so big that this release is of alpha quality.
+
 
 New in this release:
 
@@ -216,39 +219,37 @@ New in this release:
 
 * --compress has be redesigned due to bugs.
 
-* GNU Parallel was cited in: Speaker Verification and Keyword Spotting
-  Systems for Forensic Applications
-  http://lantana.tenet.res.in/website_files/thesis/Phd/srikanth.pdf
+* GNU Parallel was cited in: Speaker Verification and Keyword Spotting Systems for Forensic Applications http://lantana.tenet.res.in/website_files/thesis/Phd/srikanth.pdf
 
-* GNU Parallel was cited in: Scaleable Code Clone Detection
-  http://scg.unibe.ch/archive/phd/schwarz-phd.pdf
+* GNU Parallel was cited in: Scaleable Code Clone Detection http://scg.unibe.ch/archive/phd/schwarz-phd.pdf
 
-* GNU Parallel was used (unfortunately without citation) in:
-  Performance and Energy Efficiency of Common Compression /
-  Decompression Utilities
-  http://www.researchgate.net/publication/243962643_Performance_and_Energy_Efficiency_of_Common_CompressionDecompression_Utilities_An_Experimental_Study_in_Mobile_and_Workstation_Computer_Platforms/file/3deec51d1dbc0474f9.pdf
+* GNU Parallel was cited in: Clone Detection that scales http://scg.unibe.ch/archive/masters/Vogt14a.pdf
 
-* GNU Parallel was recommended (without citation) in: Redesigning the
-  Specificity of Protein-DNA Interactions with Rosetta
-  http://link.springer.com/protocol/10.1007/978-1-62703-968-0_17
+* GNU Parallel was cited in: Scalable Positional Analysis for Studying Evolution of Nodes in Networks http://arxiv-web3.library.cornell.edu/pdf/1402.3797
 
-* GNU Parallel is co-distributed with RepeatExplorer
-  http://www.vcru.wisc.edu/simonlab/bioinformatics/programs/repeatexplorer/README.txt
+* GNU Parallel was cited in: Aggregate Characterization of User Behavior in Twitter and Analysis of the Retweet Graph http://arxiv.org/pdf/1402.2671v1
 
-* Convert MP3 to a scrolling spectrum waterfall plot video
-  http://jdesbonnet.blogspot.dk/2014/02/convert-mp3-to-scrolling-spectrum.html
+* GNU Parallel was used (unfortunately without citation) in: Causal Network Models for Predicting Compound Targets and Driving Pathways in Cancer http://jbx.sagepub.com/content/early/2014/02/10/1087057114522690.full
 
-* PHP wrapper class for the GNU Parallel tool
-  https://github.com/geopal-solutions/gnu-parallel-wrapper/tree/master
+* GNU Parallel was used (unfortunately without citation) in: Performance and Energy Efficiency of Common Compression / Decompression Utilities http://www.researchgate.net/publication/243962643_Performance_and_Energy_Efficiency_of_Common_CompressionDecompression_Utilities_An_Experimental_Study_in_Mobile_and_Workstation_Computer_Platforms/file/3deec51d1dbc0474f9.pdf
 
-* Exploratory Data Analysis
-  http://www.slideshare.net/thinrhino/gnunify
+* GNU Parallel was used (unfortunately without citation) in: SpringFS: Bridging Agility and Performance in Elastic Distributed Storage http://www.istc-cc.cmu.edu/publications/papers/2014/SpringFS-FAST14.pdf
 
-* Single-Thread-Programme auf Multicore-Rechnern parallelisieren
-  http://www.adlerweb.info/blog/2014/02/08/linux-single-thread-programme-auf-multicore-rechnern-parallelisieren
+* GNU Parallel was recommended (without citation) in: Redesigning the Specificity of Protein-DNA Interactions with Rosetta http://link.springer.com/protocol/10.1007/978-1-62703-968-0_17
 
-* Распараллеливаем процессы для ускорения вычислений и выполнения заданий в Linux
-  http://savepearlharbor.com/?p=210480
+* GNU Parallel is co-distributed with RepeatExplorer http://www.vcru.wisc.edu/simonlab/bioinformatics/programs/repeatexplorer/README.txt
+
+* Convert MP3 to a scrolling spectrum waterfall plot video http://jdesbonnet.blogspot.dk/2014/02/convert-mp3-to-scrolling-spectrum.html
+
+* PHP wrapper class for the GNU Parallel tool https://github.com/geopal-solutions/gnu-parallel-wrapper/tree/master
+
+* Exploratory Data Analysis http://www.slideshare.net/thinrhino/gnunify
+
+* Copias de archivos con rsync y parallel http://linuxmanr4.com/2014/02/20/copias-de-archivos-con-rsync-y-parallel
+
+* Single-Thread-Programme auf Multicore-Rechnern parallelisieren http://www.adlerweb.info/blog/2014/02/08/linux-single-thread-programme-auf-multicore-rechnern-parallelisieren
+
+* Распараллеливаем процессы для ускорения вычислений и выполнения заданий в Linux http://savepearlharbor.com/?p=210480
 
 * Bug fixes and man page updates.
 

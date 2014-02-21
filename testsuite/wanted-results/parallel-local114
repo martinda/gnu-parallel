@@ -41,6 +41,11 @@ echo 4
 ### bug #41609: --compress fails
 24812dd0f24a26d08a780f988b9d5ad2  -
 24812dd0f24a26d08a780f988b9d5ad2  -
+### --compress race condition (use nice): Fewer than 400 would run
+    400     400    1492
+### -v --pipe: Dont spawn too many - 1 is enough
+cat
+1
 ### Test -I
 1 1
 2 1
