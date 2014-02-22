@@ -626,7 +626,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140221;
+    $Global::version = 20140222;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4103,7 +4103,6 @@ sub cattail {
 sub openoutputfiles {
     # Open files for STDOUT and STDERR
     # Set file handles in $self->fh
-    # TODO non-blocking $opt::linebuffer
     my $self = shift;
     my ($outfhw, $errfhw, $outname, $errname);
     if($opt::results) {

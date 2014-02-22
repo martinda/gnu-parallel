@@ -434,8 +434,8 @@ separating the columns. The n'th column can be access using
 @emph{regexp} is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
-@item @strong{--compress}
-@anchor{@strong{--compress}}
+@item @strong{--compress} (alpha testing)
+@anchor{@strong{--compress} (alpha testing)}
 
 Compress temporary files. If the output is big and very compressible
 this will take up less disk space in $TMPDIR and possibly be faster due to less
@@ -445,12 +445,15 @@ GNU @strong{parallel} will try @strong{lzop}, @strong{pigz}, @strong{gzip}, @str
 @strong{plzip}, @strong{bzip2}, @strong{lzma}, @strong{lzip}, @strong{xz} in that order, and use the
 first available.
 
-@item @strong{--compress-program} @emph{prg}
-@anchor{@strong{--compress-program} @emph{prg}}
+@item @strong{--compress-program} @emph{prg} (alpha testing)
+@anchor{@strong{--compress-program} @emph{prg} (alpha testing)}
 
-Use @emph{prg} for compressing temporary files. It is assumed that @emph{prg
+@item @strong{--decompress-program} @emph{prg} (alpha testing)
+@anchor{@strong{--decompress-program} @emph{prg} (alpha testing)}
+
+Use @emph{prg} for (de)compressing temporary files. It is assumed that @emph{prg
 -dc} will decompress stdin (standard input) to stdout (standard
-output).
+output) unless @strong{--decompress-program} is given.
 
 @item @strong{--ctrlc}
 @anchor{@strong{--ctrlc}}
@@ -550,8 +553,8 @@ See also @strong{--bg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
 
-@item @strong{--filter-hosts} (beta testing)
-@anchor{@strong{--filter-hosts} (beta testing)}
+@item @strong{--filter-hosts}
+@anchor{@strong{--filter-hosts}}
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -794,8 +797,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--line-buffer}
-@anchor{@strong{--line-buffer}}
+@item @strong{--line-buffer} (alpha testing)
+@anchor{@strong{--line-buffer} (alpha testing)}
 
 Buffer output on line basis. @strong{--group} will keep the output together
 for a whole job. @strong{--ungroup} allows output to mixup with half a line
@@ -864,8 +867,8 @@ GNU @strong{parallel} is less than @emph{version} the exit code is
 This is useful for scripts that depend on features only available from
 a certain version of GNU @strong{parallel}.
 
-@item @strong{--nonall} (beta testing)
-@anchor{@strong{--nonall} (beta testing)}
+@item @strong{--nonall}
+@anchor{@strong{--nonall}}
 
 @strong{--onall} with no arguments. Run the command on all computers given
 with @strong{--sshlogin} but take no arguments. GNU @strong{parallel} will log
@@ -875,8 +878,8 @@ computer. @strong{-j} adjusts how many computers to log into in parallel.
 This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
-@item @strong{--onall} (beta testing)
-@anchor{@strong{--onall} (beta testing)}
+@item @strong{--onall}
+@anchor{@strong{--onall}}
 
 Run all the jobs on all computers given with @strong{--sshlogin}. GNU
 @strong{parallel} will log into @strong{--jobs} number of computers in parallel
@@ -1720,11 +1723,11 @@ Use @strong{-v} @strong{-v} to print the wrapping ssh command when running remot
 
 Print the version GNU @strong{parallel} and exit.
 
-@item @strong{--workdir} @emph{mydir} (beta testing)
-@anchor{@strong{--workdir} @emph{mydir} (beta testing)}
+@item @strong{--workdir} @emph{mydir}
+@anchor{@strong{--workdir} @emph{mydir}}
 
-@item @strong{--wd} @emph{mydir} (beta testing)
-@anchor{@strong{--wd} @emph{mydir} (beta testing)}
+@item @strong{--wd} @emph{mydir}
+@anchor{@strong{--wd} @emph{mydir}}
 
 Files transferred using @strong{--transfer} and @strong{--return} will be relative
 to @emph{mydir} on remote computers, and the command will be executed in

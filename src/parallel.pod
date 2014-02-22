@@ -412,7 +412,7 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
-=item B<--compress>
+=item B<--compress> (alpha testing)
 
 Compress temporary files. If the output is big and very compressible
 this will take up less disk space in $TMPDIR and possibly be faster due to less
@@ -423,11 +423,13 @@ B<plzip>, B<bzip2>, B<lzma>, B<lzip>, B<xz> in that order, and use the
 first available.
 
 
-=item B<--compress-program> I<prg>
+=item B<--compress-program> I<prg> (alpha testing)
 
-Use I<prg> for compressing temporary files. It is assumed that I<prg
+=item B<--decompress-program> I<prg> (alpha testing)
+
+Use I<prg> for (de)compressing temporary files. It is assumed that I<prg
 -dc> will decompress stdin (standard input) to stdout (standard
-output).
+output) unless B<--decompress-program> is given.
 
 
 =item B<--ctrlc>
@@ -524,7 +526,7 @@ See also B<--bg>, B<man sem>.
 Implies B<--semaphore>.
 
 
-=item B<--filter-hosts> (beta testing)
+=item B<--filter-hosts>
 
 Remove down hosts. For each remote host: check that login through ssh
 works. If not: do not use this host.
@@ -744,7 +746,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--line-buffer>
+=item B<--line-buffer> (alpha testing)
 
 Buffer output on line basis. B<--group> will keep the output together
 for a whole job. B<--ungroup> allows output to mixup with half a line
@@ -813,7 +815,7 @@ This is useful for scripts that depend on features only available from
 a certain version of GNU B<parallel>.
 
 
-=item B<--nonall> (beta testing)
+=item B<--nonall>
 
 B<--onall> with no arguments. Run the command on all computers given
 with B<--sshlogin> but take no arguments. GNU B<parallel> will log
@@ -824,7 +826,7 @@ This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
 
-=item B<--onall> (beta testing)
+=item B<--onall>
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
@@ -1606,9 +1608,9 @@ Use B<-v> B<-v> to print the wrapping ssh command when running remotely.
 Print the version GNU B<parallel> and exit.
 
 
-=item B<--workdir> I<mydir> (beta testing)
+=item B<--workdir> I<mydir>
 
-=item B<--wd> I<mydir> (beta testing)
+=item B<--wd> I<mydir>
 
 Files transferred using B<--transfer> and B<--return> will be relative
 to I<mydir> on remote computers, and the command will be executed in

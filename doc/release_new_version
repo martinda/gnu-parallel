@@ -124,6 +124,7 @@ https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 YYYYMMDD=`yyyymmdd`
 pushd /tmp
 rm -rf parallel-${YYYYMMDD}*
+# This can take 7 minutes
 while ! wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2 ; do sleep 2; done
 #wget http://alpha.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2
 tar xjvf parallel-$YYYYMMDD.tar.bz2
@@ -186,6 +187,8 @@ https://lists.gnu.org/mailman/admindb/bug-parallel
 https://lists.gnu.org/mailman/admindb/parallel
 
 <<<<<
+file:///home/tange/privat/parallel/doc/release_new_version
+
 from:tange@gnu.org
 to:parallel@gnu.org, bug-parallel@gnu.org
 cc:Sandro Cazzaniga <kharec@mandriva.org>,
@@ -204,9 +207,9 @@ cc:Sandro Cazzaniga <kharec@mandriva.org>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140222 ('Со́чи/Euromaidan') released
+Subject: GNU Parallel 20140222 ('Euromaidan') released
 
-GNU Parallel 20140222 ('Со́чи/Euromaidan') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140222 ('Euromaidan') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 Packagers that default to --tollef should take note that --tollef is now retired after a full year of being obsolete.
 
@@ -218,6 +221,8 @@ New in this release:
 * --tollef has been retired.
 
 * --compress has be redesigned due to bugs.
+
+* Format of --eta and --joblog has changed slightly.
 
 * GNU Parallel was cited in: Speaker Verification and Keyword Spotting Systems for Forensic Applications http://lantana.tenet.res.in/website_files/thesis/Phd/srikanth.pdf
 
