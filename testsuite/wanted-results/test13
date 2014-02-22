@@ -1,5 +1,5 @@
 ### Test -k
-parallel: Warning: Only enough file handles to run 18 jobs in parallel.
+parallel: Warning: Only enough file handles to run 8 jobs in parallel.
 Raising ulimit -n or /etc/security/limits.conf may help.
 begin
 1
@@ -59,9 +59,10 @@ job2
 7
 8
 9
+Raising ulimit -n or /etc/security/limits.conf may help.
 parallel: SIGTERM received. No new jobs will be started.
 parallel: Waiting for these 8 jobs to finish. Send SIGTERM again to stop now.
-parallel: Warning: No more file handles. Raising ulimit -n or /etc/security/limits.conf may help.
+parallel: Warning: Only enough file handles to run 8 jobs in parallel.
 parallel: sleep 3; echo 10
 parallel: sleep 3; echo 11
 parallel: sleep 3; echo 12

@@ -13,8 +13,8 @@ echo "### --pipe --line-buffer"
   cat /tmp/parallel_pl$$ | wc; 
   diff /tmp/parallel_p$$ /tmp/parallel_pl$$ >/dev/null ; echo These must diff: $?
 
-echo "### --pipe --line-buffer --compress (fails)"
-#  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --compress --tagstring {#} pv -qL 10 | wc
+echo "### --pipe --line-buffer --compress"
+  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --compress --tagstring {#} pv -qL 10 | wc
 
 echo "### bug #41482: --pipe --compress blocks at different -j/seq combinations"
   seq 1 | parallel -k -j2 --compress -N1 -L1 --pipe cat;
@@ -40,6 +40,9 @@ echo "### --compress race condition (use nice): Fewer than 400 would run"
 
 echo "### -v --pipe: Dont spawn too many - 1 is enough"
   seq 1 | parallel -j10 -v --pipe cat
+
+echo "### Test -N0 and --tagstring (fails)"
+  echo tagstring arg | parallel --tag -N0 echo foo
 
 echo "### Test -I"; 
   seq 1 10 | parallel -k 'seq 1 {} | parallel -k -I :: echo {} ::'

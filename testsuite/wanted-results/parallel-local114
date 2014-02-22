@@ -4,7 +4,8 @@ These must diff: 1
 ### --pipe --line-buffer
     200     400    1202
 These must diff: 1
-### --pipe --line-buffer --compress (fails)
+### --pipe --line-buffer --compress
+    200     400    1202
 ### bug #41482: --pipe --compress blocks at different -j/seq combinations
 1
 echo 1-4 + 1-4
@@ -46,6 +47,8 @@ echo 4
 ### -v --pipe: Dont spawn too many - 1 is enough
 cat
 1
+### Test -N0 and --tagstring (fails)
+	foo
 ### Test -I
 1 1
 2 1

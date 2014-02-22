@@ -626,7 +626,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140220;
+    $Global::version = 20140221;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3077,7 +3077,8 @@ sub processes_available_by_system_limit {
     # Reserve filehandles
     # perl uses 7 filehandles for something?
     # parallel uses 1 for memory_usage
-    for my $i (1..8) {
+    # parallel uses 4 for ?
+    for my $i (1..12) {
         open($fh{"init-$i"}, "<", "/dev/null");
     }
 
@@ -3139,8 +3140,11 @@ sub processes_available_by_system_limit {
         $system_limit++;
 
         # Every simultaneous process uses 2 filehandles when grouping
+        # Every simultaneous process uses 2 filehandles when compressing
         $more_filehandles = open($fh{$system_limit*10}, "<", "/dev/null")
-            && open($fh{$system_limit*10+2}, "<", "/dev/null");
+            && open($fh{$system_limit*10+2}, "<", "/dev/null")
+            && open($fh{$system_limit*10+3}, "<", "/dev/null")
+            && open($fh{$system_limit*10+4}, "<", "/dev/null");
 
         # System process limit
         my $child;
@@ -4982,6 +4986,17 @@ sub print {
 	    if(defined $self->{'exitstatus'}) {
 		# If the job is dead: close printing fh. Needed for --compress
 		close $self->fh($fdno,"w");
+		if($opt::compress && $opt::linebuffer) {
+		    # Blocked reading in final round
+		    $Global::use{"Fcntl"} ||= eval "use Fcntl qw(:DEFAULT :flock); 1;";
+		    for my $fdno (1,2) {
+			my $fdr = $self->fh($fdno,'r');
+			my $flags;
+			fcntl($fdr, &F_GETFL, $flags) || die $!; # Get the current flags on the filehandle
+			$flags &= ~&O_NONBLOCK; # Remove non-blocking to the flags
+			fcntl($fdr, &F_SETFL, $flags) || die $!; # Set the flags on the filehandle
+		    }
+		}
 	    }
 	    # This seek will clear EOF
 	    seek $in_fh, tell($in_fh), 0;
@@ -5013,12 +5028,12 @@ sub print {
 		}
 	    }
 
-	    if($self->fh($fdno,"rpid") and kill 0, $self->fh($fdno,"rpid")) {
+	    if($self->fh($fdno,"rpid") and CORE::kill 0, $self->fh($fdno,"rpid")) {
 		# decompress still running
 	    } elsif(defined $self->{'exitstatus'}) {
 		# If the job is dead: print the remaining partial line
 		# read remaining
-		if($opt::tag or defined $opt::tagstring) {
+		if($$partial and ($opt::tag or defined $opt::tagstring)) {
 		    my $tag = $self->tag();
 		    $$partial =~ s/^/$tag/gm;
 		}
