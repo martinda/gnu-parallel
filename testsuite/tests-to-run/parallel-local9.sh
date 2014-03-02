@@ -6,10 +6,35 @@ XAP="nice nice parallel --xapply"
 export XAP
 
 cat <<'EOF' | sed -e 's/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+echo 'bug #41613: --compress --line-buffer no newline';
+  perl -e 'print "It worked"'| parallel --pipe --compress --line-buffer cat; echo
+
+echo 'bug #41613: --compress --line-buffer no --tagstring';
+  diff 
+    <(perl -e 'for("x011".."x110"){print "$_\t", (map { rand } (1..100000)),"\n"}'| 
+      parallel -N10 -L1 --pipe -j6 --block 20M --compress 
+      pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
+    <(perl -e 'for("x011".."x110"){print "$_\t", (map { rand } (1..100000)),"\n"}'| 
+      parallel -N10 -L1 --pipe -j6 --block 20M --compress --line-buffer 
+      pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
+    >/dev/null 
+  || echo 'Good: --line-buffer matters'
+
+echo 'bug #41613: --compress --line-buffer with --tagstring';
+  diff 
+    <(perl -e 'for("x011".."x110"){print "$_\t", (map { rand } (1..100000)),"\n"}'| 
+      parallel -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} 
+      pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
+    <(perl -e 'for("x011".."x110"){print "$_\t", (map { rand } (1..100000)),"\n"}'| 
+      parallel -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} --line-buffer 
+      pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
+    >/dev/null 
+  || echo 'Good: --line-buffer matters'
+
 echo 'bug #41412: --timeout + --delay causes deadlock';
-seq 10 | parallel -j10 --timeout 1 --delay .3 echo
-parallel -j3 --timeout 1 --delay 2 echo ::: 1 2 3
-parallel -j10 --timeout 2.2 --delay 3 "sleep {}; echo {}" ::: 1 2 4 5 6
+  seq 10 | parallel -j10 --timeout 1 --delay .3 echo;
+  parallel -j3 --timeout 1 --delay 2 echo ::: 1 2 3;
+  parallel -j10 --timeout 2.2 --delay 3 "sleep {}; echo {}" ::: 1 2 4 5 6
 
 echo '### Test --spreadstdin - more procs than args'; 
   rm -f /tmp/parallel.ss.*; 

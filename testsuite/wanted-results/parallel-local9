@@ -1,3 +1,9 @@
+bug #41613: --compress --line-buffer no newline
+It worked
+bug #41613: --compress --line-buffer no --tagstring
+Good: --line-buffer matters
+bug #41613: --compress --line-buffer with --tagstring
+Good: --line-buffer matters
 bug #41412: --timeout + --delay causes deadlock
 1
 2

@@ -5025,6 +5025,11 @@ sub print {
 		    # Remove the printed part
 		    substr($$partial,0,$i+1)="";
 		}
+
+	    }
+	    if(defined $self->{'exitstatus'}) {
+		# The job is finished, there might be line with no \n left
+		print $out_fd $$partial;
 	    }
 
 	    if($self->fh($fdno,"rpid") and CORE::kill 0, $self->fh($fdno,"rpid")) {
