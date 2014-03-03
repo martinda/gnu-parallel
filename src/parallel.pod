@@ -1701,7 +1701,7 @@ GNU B<parallel> can work similar to B<xargs -n1>.
 
 To compress all html files using B<gzip> run:
 
-B<find . -name '*.html' | parallel gzip>
+B<find . -name '*.html' | parallel gzip --best>
 
 If the file names may contain a newline use B<-0>. Substitute FOO BAR with
 FUBAR in all files in this dir and subdirs:
@@ -1717,7 +1717,7 @@ GNU B<parallel> can take the arguments from command line instead of
 stdin (standard input). To compress all html files in the current dir
 using B<gzip> run:
 
-B<parallel gzip ::: *.html>
+B<parallel gzip --best ::: *.html>
 
 To convert *.wav to *.mp3 using LAME running one process per CPU core
 run:
@@ -3486,6 +3486,84 @@ using GNU B<parallel>:
   parallel echo {} '| awk {print\ toupper\(\$0\)}' <<EOF [...]
 
 =back
+
+=head2 DIFFERENCES BETWEEN map AND GNU Parallel
+
+B<map> sees it as a feature to have less features and in doing so it
+also handles corner cases incorrectly. A lot of GNU B<parallel>'s code
+is to handle corner cases correctly on every platform, so you will not
+get a nasty surprise if a user for example saves a file called: I<My
+brother's 12" records.txt>
+
+B<map>'s example showing how to deal with special characters fails on
+special characters:
+
+  echo "The Cure" > My\ brother\'s\ 12\"\ records
+
+  ls | map 'echo -n `gzip < "%" | wc -c`; echo -n '*100/'; wc -c < "%"' | bc
+
+It works with GNU B<parallel>:
+
+  ls | parallel 'echo -n `gzip < {} | wc -c`; echo -n '*100/'; wc -c < {}' | bc
+
+And you can even get the file name prepended:
+
+  ls | parallel --tag '(echo -n `gzip < {} | wc -c`'*100/'; wc -c < {}) | bc'
+
+B<map> has no support for grouping. So this gives the wrong results
+without any warnings:
+
+  parallel perl -e '\$a=\"1{}\"x10000000\;print\ \$a,\"\\n\"' '>' {} ::: a b c d e f
+  ls -l a b c d e f
+  parallel -kP4 -n1 grep 1 > out.par ::: a b c d e f
+  map -p 4 'grep 1' a b c d e f > out.map-unbuf
+  map -p 4 'grep --line-buffered 1' a b c d e f > out.map-linebuf
+  map -p 1 'grep --line-buffered 1' a b c d e f > out.map-serial
+  ls -l out*
+  md5sum out*
+
+The documentation shows a workaround, but not only does that mix
+stdout (standard output) with stderr (standard error) it also fails
+completely for certain jobs (and may even be considered less readable):
+
+  parallel echo -n {} ::: 1 2 3
+
+  map -p 4 'echo -n % 2>&1 | sed -e "s/^/$$:/"' 1 2 3 | sort | cut -f2- -d:
+
+B<map> cannot handle bundled options: B<map -vp 0 echo this fails>
+
+B<map> does not have an argument separator on the command line, but
+uses the first argument as command. This makes quoting harder which again
+may affect readability. Compare:
+
+  map -p 2 perl\\\ -ne\\\ \\\'/^\\\\S+\\\\s+\\\\S+\\\$/\\\ and\\\ print\\\ \\\$ARGV,\\\"\\\\n\\\"\\\' *
+
+  parallel -q perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' ::: *
+
+B<map> can do multiple arguments with context replace, but not without
+context replace:
+
+  parallel --xargs echo 'BEGIN{'{}'}END' ::: 1 2 3
+
+B<map> does not set exit value according to whether one of the jobs
+failed:
+
+  parallel false ::: 1 || echo Job failed
+
+  map false 1 || echo Never run
+
+B<map> requires Perl v5.10.0 making it harder to use on old systems.
+
+B<map> has no way of using % in the command (GNU Parallel has -I to
+specify another replacement string than {}).
+
+By design B<map> is option incompatible with B<xargs>, it does not
+have remote job execution, a structured way of saving results,
+multiple input sources, progress indicator, configurable record
+delimiter (only field delimiter), logging of jobs run with possibility
+to resume, keeping the output in the same order as input, --pipe
+processing, and dynamically timeouts.
+
 
 =head2 DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel
 

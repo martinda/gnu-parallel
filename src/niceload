@@ -69,8 +69,12 @@ if(@opt::prg) {
     # Find all pids of prg
     my $out = `pidof -x @opt::prg`;
     $process->set_pid(split /\s+/,$out);
+    $::resume_process = $process;
+    $SIG{TERM} = $SIG{INT} = \&resume;
 } elsif(@opt::pid) {
     $process->set_pid(@opt::pid);
+    $::resume_process = $process;
+    $SIG{TERM} = $SIG{INT} = \&resume;
 } elsif (@ARGV) {
     # Wait until limit is below start_limit and run_limit
     while($limit->over_start_limit()
@@ -96,6 +100,11 @@ while($process->is_alive()) {
 }
 
 exit($::exitstatus);
+
+sub resume {
+    $::resume_process->resume();
+    exit(0);
+}
 
 sub uniq {
     # Remove duplicates and return unique values
@@ -462,11 +471,12 @@ sub new {
     my $startmem = $opt::start_mem ? ::multiply_binary_prefix($opt::start_mem) : 0;
     my $runnoswap = $opt::run_noswap ? ::multiply_binary_prefix($opt::run_noswap) : 0;
     my $startnoswap = $opt::start_noswap ? ::multiply_binary_prefix($opt::start_noswap) : 0;
+    my $recheck = $opt::recheck ? ::multiply_binary_prefix($opt::recheck) : 1; # Default
+    my $runtime = $opt::suspend ? ::multiply_binary_prefix($opt::suspend) : 1; # Default
 
     return bless {
 	'hard' => $hard,
-	'recheck' => 1, # Default
-	'runtime' => 1, # Default
+	'recheck' => $recheck,
 	'runio' => $runio,
 	'startio' => $startio,
 	'runload' => $runload,
@@ -476,8 +486,8 @@ sub new {
 	'runnoswap' => $runnoswap,
 	'startnoswap' => $startnoswap,
 	'factor' => $opt::factor || 1,
-	'recheck' => $opt::recheck || 1,
-	'runtime' => $opt::recheck || 1,
+	'recheck' => $recheck,
+	'runtime' => $runtime,
 	'over_run_limit' => 1,
 	'over_start_limit' => 1,
 	'verbose' => $opt::verbose,

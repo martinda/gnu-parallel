@@ -1,6 +1,21 @@
 ### --soft -f and test if child is actually suspended and thus takes longer
-### niceload with no arguments should give no output
 20000000 20000000 168888897
 This should finish first
 20000000 20000000 168888897
 This should finish last
+### niceload with no arguments should give no output
+### Test -t and -s
+Sleeping 1s
+Running 2s
+Sleeping 1s
+Running 2s
+bug #38908: niceload: Ctrl-C/TERM should resume jobs if using -p
+Sleeping 1s
+Running 10s
+done
+10
+bug #38908: niceload: Ctrl-C should resume jobs if using -p
+Sleeping 1s
+Running 10s
+done
+10
