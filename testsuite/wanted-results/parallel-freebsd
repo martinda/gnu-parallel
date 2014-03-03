@@ -1,0 +1,25 @@
+### These tests requires VirtualBox running with the following images
+tange@freebsd7
+bug #40136: FreeBSD: No more processes
+First started
+Second started
+Third started
+The first finished
+Fourth started
+The second finished
+The third finished
+The fourth finished
+Test --compress --pipe
+    1000    1000    3893
+bug #41613: --compress --line-buffer no newline
+It worked
+bug #40135: FreeBSD: sem --fg does not finish under /bin/sh
+The job finished
+bug #40133: FreeBSD: --round-robin gives no output
+  299592  299592 2097144
+  299594  299594 2097158
+  400814  400814 2694594
+  149797  149797 1048579
+  235145  235145 1646016
+  299593  299593 2097151
+  315465  315465 2097150
