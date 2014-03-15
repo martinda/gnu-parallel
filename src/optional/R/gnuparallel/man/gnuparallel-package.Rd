@@ -4,7 +4,7 @@
 \alias{gnuparallel-package}
 \title{GNU Parallel}
 \description{
-  Loading of GNU Parallel --results output
+  Loading of GNU Parallel -{}-results output
 }
 \details{
   \tabular{ll}{ Package: \tab gnuparallel\cr Type: \tab
@@ -15,7 +15,9 @@
 }
 \examples{
 library(gnuparallel)
-system("parallel --header : --results foobar printf out{1}\\\\\\\\tout{2}\\\\\\\\nline2{1}\\\\\\\\t{2}\\\\\\\\n ::: letters a b c ::: numbers 4 5 6")
+system(paste("parallel --header : --results foobar",
+   "printf out{let}\\\\\\\\\\\\\\\\tout{num}\\\\\\\\\\\\\\\\nline2{let}\\\\\\\\\\\\\\\\t{num}\\\\\\\\\\\\\\\\n",
+   "::: let a b c ::: num 4 5 6"))
 fn <- gnu.parallel.filenames("foobar")
 gnu.parallel.load(fn)
 gnu.parallel.load.lines(fn)

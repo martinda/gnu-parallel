@@ -5,7 +5,7 @@
   gnu.parallel.filenames(resdir)
 }
 \arguments{
-  \item{resdir}{results dir from GNU Parallel's --results}
+  \item{resdir}{results dir from GNU Parallel's ---results}
 }
 \value{
   filenametable with a column for each of GNU Parallel's input sources

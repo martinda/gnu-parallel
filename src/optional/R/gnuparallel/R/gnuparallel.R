@@ -43,7 +43,7 @@
 #' \code{\link{gnu.parallel.load.lines}}
 #' @examples
 #' library(gnuparallel)
-#' system("parallel --header : --results foobar printf out{1}\\\\\\\\tout{2}\\\\\\\\nline2{1}\\\\\\\\t{2}\\\\\\\\n ::: letters a b c ::: numbers 4 5 6")
+#' system("parallel --results foobar printf out{1}\\\\\\\\tout{2}\\\\\\\\nline2{1}\\\\\\\\t{2}\\\\\\\\n ::: a b c ::: 4 5 6")
 #' fn <- gnu.parallel.filenames("foobar")
 #' gnu.parallel.load(fn)
 #' gnu.parallel.load.lines(fn)
@@ -54,7 +54,7 @@ c()
 
 #' Find the filenames in a results dir
 #'
-#' @param resdir results dir from GNU Parallel's --results
+#' @param resdir results dir from GNU Parallel's -{}-results
 #' @return filenametable with a column for each of GNU Parallel's input sources and a column for file name of both stdout and stderr
 #' @export
 gnu.parallel.filenames <- function(resdir) {

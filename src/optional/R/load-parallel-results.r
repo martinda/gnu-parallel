@@ -20,7 +20,9 @@
 ## LIBRARY FOR READING GNU PARALLEL RESULTS 
 ##
 ## Example:
-## parallel --results my/results/dir --header : 'printf "FOO={foo}\\tBAR={bar}\\n";paste <(seq {bar}) <(seq {bar} -1 1)' :::: <(echo foo; seq 100) <(echo bar; seq 10)
+## parallel --results my/results/dir --header : \
+##   'printf "FOO={foo}\\tBAR={bar}\\n";paste <(seq {bar}) <(seq {bar} -1 1)' \
+##   :::: <(echo foo; seq 100) <(echo bar; seq 10)
 ##
 ## dir="my/results/dir"
 ## filenametable <- load_parallel_results_filenames(dir);
