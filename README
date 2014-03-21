@@ -30,7 +30,7 @@ The 10 seconds installation will try do to a full installation; if
 that fails, a personal installation; if that fails, a minimal
 installation.
 
-  (wget -O - pi.dk/3 || curl pi.dk/3/ || fetch -o - http://pi.dk/3) | bash
+    (wget -O - pi.dk/3 || curl pi.dk/3/ || fetch -o - http://pi.dk/3) | bash
 
 This will literally install faster than reading the rest of this
 document.
@@ -40,10 +40,10 @@ document.
 
 Full installation of GNU Parallel is as simple as:
 
-  wget http://ftpmirror.gnu.org/parallel/parallel-20140222.tar.bz2
-  bzip2 -dc parallel-20140222.tar.bz2 | tar xvf -
-  cd parallel-20140222
-  ./configure && make && make install
+    wget http://ftpmirror.gnu.org/parallel/parallel-20140222.tar.bz2
+    bzip2 -dc parallel-20140222.tar.bz2 | tar xvf -
+    cd parallel-20140222
+    ./configure && make && make install
 
 
 = Personal installation =
@@ -51,10 +51,10 @@ Full installation of GNU Parallel is as simple as:
 If you are not root you can add ~/bin to your path and install in
 ~/bin and ~/share:
 
-  wget http://ftpmirror.gnu.org/parallel/parallel-20140222.tar.bz2
-  bzip2 -dc parallel-20140222.tar.bz2 | tar xvf -
-  cd parallel-20140222
-  ./configure --prefix=$HOME && make && make install
+    wget http://ftpmirror.gnu.org/parallel/parallel-20140222.tar.bz2
+    bzip2 -dc parallel-20140222.tar.bz2 | tar xvf -
+    cd parallel-20140222
+    ./configure --prefix=$HOME && make && make install
 
 Or if your system lacks 'make' you can simply copy src/parallel
 src/sem src/niceload src/sql to a dir in your path.
@@ -65,17 +65,17 @@ src/sem src/niceload src/sql to a dir in your path.
 If you just need parallel and do not have 'make' installed (maybe the
 system is old or Microsoft Windows):
 
-  wget http://git.savannah.gnu.org/cgit/parallel.git/plain/src/parallel
-  chmod 755 parallel
-  cp parallel sem
-  mv parallel sem dir-in-your-$PATH/bin/
+    wget http://git.savannah.gnu.org/cgit/parallel.git/plain/src/parallel
+    chmod 755 parallel
+    cp parallel sem
+    mv parallel sem dir-in-your-$PATH/bin/
 
 
 = Test the installation =
 
 After this you should be able to do:
 
-  parallel -j0 ping -nc 3 ::: foss.org.my gnu.org freenetproject.org
+    parallel -j0 ping -nc 3 ::: foss.org.my gnu.org freenetproject.org
 
 This will send 3 ping packets to 3 different hosts in parallel and print
 the output when they complete.

@@ -537,10 +537,11 @@ B<parallel> uses GNU B<parallel> to compute this, so you will get an
 infinite loop. This will likely be fixed in a later release.
 
 
-=item B<--gnu>
+=item B<--gnu> 
 
 Behave like GNU B<parallel>. If B<--tollef> and B<--gnu> are both set,
-B<--gnu> takes precedence.
+B<--gnu> takes precedence. B<--tollef> is retired, but B<--gnu> is
+kept for compatibility.
 
 
 =item B<--group>
@@ -877,9 +878,9 @@ B<--files> is often used with B<--pipe>.
 
 =item B<--plain>
 
-Ignore any B<--profile>, $PARALLEL, ~/.parallel/config, and
-B<--tollef> to get full control on the command line (used by GNU
-B<parallel> internally when called with B<--sshlogin>).
+Ignore any B<--profile>, $PARALLEL, and ~/.parallel/config to get full
+control on the command line (used by GNU B<parallel> internally when
+called with B<--sshlogin>).
 
 
 =item B<--progress>
@@ -1471,19 +1472,6 @@ later, followed by SIGKILL 200 ms later.
 If I<val> is followed by a % then the timeout will dynamically be
 computed as a percentage of the median average runtime. Only values
 > 100% will make sense.
-
-
-=item B<--tollef> (obsolete - will be retired 20140222)
-
-Make GNU B<parallel> behave more like Tollef's parallel command. It
-activates B<-u>, B<-q>, and B<--arg-sep -->. It also causes B<-l> to
-change meaning to B<--load>.
-
-Not giving '--' is unsupported.
-
-B<Do not use --tollef unless you know what you are doing>.
-
-To override use B<--gnu>.
 
 
 =item B<--verbose>
@@ -3109,7 +3097,7 @@ this. To see this in action try:
   parallel -kP4 -n1 grep 1 > out.par ::: a b c d e f
   echo a b c d e f | xargs -P4 -n1 grep 1 > out.xargs-unbuf
   echo a b c d e f | xargs -P4 -n1 grep --line-buffered 1 > out.xargs-linebuf
-  echo a b c d e f | xargs -n1 grep --line-buffered 1 > out.xargs-serial
+  echo a b c d e f | xargs -n1 grep 1 > out.xargs-serial
   ls -l out*
   md5sum out*
 

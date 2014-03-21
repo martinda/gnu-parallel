@@ -603,7 +603,7 @@ sub sleep_for_recheck {
     }
     if($self->verbose()) {
 	$self->{'recheck'} = int($self->{'recheck'}*100)/100;
-	print "Sleeping $self->{'recheck'}s\n";
+	print STDERR "Sleeping $self->{'recheck'}s\n";
     }
     ::debug("recheck in $self->{'recheck'}s\n");
     ::usleep(1); # For some reason this gets interrupted
@@ -616,7 +616,7 @@ sub sleep_while_running {
     ::debug("check in $self->{'runtime'}s\n");
     if($self->verbose()) {
 	$self->{'runtime'} = int($self->{'runtime'}*100)/100;
-	print "Running $self->{'runtime'}s\n";
+	print STDERR "Running $self->{'runtime'}s\n";
     }
     ::usleep(1); # For some reason this gets interrupted
     ::usleep(1000*$self->{'runtime'});

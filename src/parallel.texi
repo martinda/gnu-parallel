@@ -564,11 +564,12 @@ $PARALLEL, /etc/parallel/config or similar. This is because GNU
 @strong{parallel} uses GNU @strong{parallel} to compute this, so you will get an
 infinite loop. This will likely be fixed in a later release.
 
-@item @strong{--gnu}
-@anchor{@strong{--gnu}}
+@item @strong{--gnu} 
+@anchor{@strong{--gnu} }
 
 Behave like GNU @strong{parallel}. If @strong{--tollef} and @strong{--gnu} are both set,
-@strong{--gnu} takes precedence.
+@strong{--gnu} takes precedence. @strong{--tollef} is retired, but @strong{--gnu} is
+kept for compatibility.
 
 @item @strong{--group}
 @anchor{@strong{--group}}
@@ -933,9 +934,9 @@ defaults to '\n'. To have no record separator use @strong{--recend ""}.
 @item @strong{--plain}
 @anchor{@strong{--plain}}
 
-Ignore any @strong{--profile}, $PARALLEL, ~/.parallel/config, and
-@strong{--tollef} to get full control on the command line (used by GNU
-@strong{parallel} internally when called with @strong{--sshlogin}).
+Ignore any @strong{--profile}, $PARALLEL, and ~/.parallel/config to get full
+control on the command line (used by GNU @strong{parallel} internally when
+called with @strong{--sshlogin}).
 
 @item @strong{--progress}
 @anchor{@strong{--progress}}
@@ -1575,19 +1576,6 @@ later, followed by SIGKILL 200 ms later.
 If @emph{val} is followed by a % then the timeout will dynamically be
 computed as a percentage of the median average runtime. Only values
 > 100% will make sense.
-
-@item @strong{--tollef} (obsolete - will be retired 20140222)
-@anchor{@strong{--tollef} (obsolete - will be retired 20140222)}
-
-Make GNU @strong{parallel} behave more like Tollef's parallel command. It
-activates @strong{-u}, @strong{-q}, and @strong{--arg-sep --}. It also causes @strong{-l} to
-change meaning to @strong{--load}.
-
-Not giving '--' is unsupported.
-
-@strong{Do not use --tollef unless you know what you are doing}.
-
-To override use @strong{--gnu}.
 
 @item @strong{--verbose}
 @anchor{@strong{--verbose}}
