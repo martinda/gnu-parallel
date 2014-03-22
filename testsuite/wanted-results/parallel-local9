@@ -4,6 +4,23 @@ bug #41613: --compress --line-buffer no --tagstring
 Good: --line-buffer matters
 bug #41613: --compress --line-buffer with --tagstring
 Good: --line-buffer matters
+bug #41613: --compress --line-buffer - no newline
+pipe compress tagstring
+1	OK
+pipe compress notagstring
+OK
+pipe nocompress tagstring
+1	OK
+pipe nocompress notagstring
+OK
+nopipe compress tagstring
+1	OK
+nopipe compress notagstring
+OK
+nopipe nocompress tagstring
+1	OK
+nopipe nocompress notagstring
+OK
 bug #41412: --timeout + --delay causes deadlock
 1
 2

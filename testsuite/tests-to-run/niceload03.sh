@@ -21,7 +21,7 @@ echo '### niceload with no arguments should give no output'
 echo '### Test -t and -s'
   niceload -v -t 1 -s 2 sleep 4.5
 
-echo 'bug #38908: niceload: Ctrl-C/TERM should resume jobs if using -p'
+echo 'bug #38908: niceload: Ctrl-C/TERM should resume jobs if using -p - Order may change, but not output'
   # This should take 10 seconds to run + delay from niceload
   # niceload killed after 1 sec => The delay from niceload should be no more than 1 second
   stdout /usr/bin/time -f %e perl -e 'for(1..100) { select(undef, undef, undef, 0.1); } print "done\n"' | int & 
@@ -29,7 +29,8 @@ echo 'bug #38908: niceload: Ctrl-C/TERM should resume jobs if using -p'
   export A=$!; 
   sleep 2; 
   kill -s TERM $A; 
-  wait
+  wait; 
+  echo Finished
 
 echo 'bug #38908: niceload: Ctrl-C should resume jobs if using -p'
   # This should take 10 seconds to run + delay from niceload

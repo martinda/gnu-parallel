@@ -11,25 +11,51 @@ echo 'bug #41613: --compress --line-buffer no newline';
 
 echo 'bug #41613: --compress --line-buffer no --tagstring';
   diff 
-    <(perl -e 'for("x011".."x110"){print "$_\t", (map { rand } (1..100000)),"\n"}'| 
+    <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
       parallel -N10 -L1 --pipe -j6 --block 20M --compress 
       pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
-    <(perl -e 'for("x011".."x110"){print "$_\t", (map { rand } (1..100000)),"\n"}'| 
+    <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
       parallel -N10 -L1 --pipe -j6 --block 20M --compress --line-buffer 
       pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
     >/dev/null 
-  || echo 'Good: --line-buffer matters'
+  || (echo 'Good: --line-buffer matters'; false) && echo 'Bad: --line-buffer not working'
 
 echo 'bug #41613: --compress --line-buffer with --tagstring';
   diff 
-    <(perl -e 'for("x011".."x110"){print "$_\t", (map { rand } (1..100000)),"\n"}'| 
+    <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
       parallel -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} 
       pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
-    <(perl -e 'for("x011".."x110"){print "$_\t", (map { rand } (1..100000)),"\n"}'| 
+    <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
       parallel -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} --line-buffer 
       pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
     >/dev/null 
-  || echo 'Good: --line-buffer matters'
+  || (echo 'Good: --line-buffer matters'; false) && echo 'Bad: --line-buffer not working'
+
+echo 'bug #41613: --compress --line-buffer - no newline';
+ echo 'pipe compress tagstring'
+ perl -e 'print "O"'| parallel --compress --tagstring {#} --pipe --line-buffer cat
+ echo "K"
+ echo 'pipe compress notagstring'
+ perl -e 'print "O"'| parallel --compress --pipe --line-buffer cat
+ echo "K"
+ echo 'pipe nocompress tagstring'
+ perl -e 'print "O"'| parallel --tagstring {#} --pipe --line-buffer cat
+ echo "K"
+ echo 'pipe nocompress notagstring'
+ perl -e 'print "O"'| parallel --pipe --line-buffer cat
+ echo "K"
+ echo 'nopipe compress tagstring'
+ parallel --compress --tagstring {#} --line-buffer echo {} O ::: -n
+ echo "K"
+ echo 'nopipe compress notagstring'
+ parallel --compress --line-buffer echo {} O ::: -n
+ echo "K"
+ echo 'nopipe nocompress tagstring'
+ parallel --tagstring {#} --line-buffer echo {} O ::: -n
+ echo "K"
+ echo 'nopipe nocompress notagstring'
+ parallel --line-buffer echo {} O ::: -n
+ echo "K"
 
 echo 'bug #41412: --timeout + --delay causes deadlock';
   seq 10 | parallel -j10 --timeout 1 --delay .3 echo;

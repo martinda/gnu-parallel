@@ -9,13 +9,14 @@ Sleeping 1s
 Running 2s
 Sleeping 1s
 Running 2s
-bug #38908: niceload: Ctrl-C/TERM should resume jobs if using -p
-Sleeping 1s
-Running 10s
+bug #38908: niceload: Ctrl-C/TERM should resume jobs if using -p - Order may change, but not output
 done
 10
+Finished
+Sleeping 1s
+Running 10s
 bug #38908: niceload: Ctrl-C should resume jobs if using -p
-Sleeping 1s
-Running 10s
 done
 10
+Sleeping 1s
+Running 10s

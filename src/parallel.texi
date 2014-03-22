@@ -3328,7 +3328,7 @@ this. To see this in action try:
   parallel -kP4 -n1 grep 1 > out.par ::: a b c d e f
   echo a b c d e f | xargs -P4 -n1 grep 1 > out.xargs-unbuf
   echo a b c d e f | xargs -P4 -n1 grep --line-buffered 1 > out.xargs-linebuf
-  echo a b c d e f | xargs -n1 grep --line-buffered 1 > out.xargs-serial
+  echo a b c d e f | xargs -n1 grep 1 > out.xargs-serial
   ls -l out*
   md5sum out*
 @end verbatim
