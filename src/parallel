@@ -3238,7 +3238,7 @@ sub simultaneous_sshlogin_limit {
         ::warning("ssh to $serverlogin only allows ",
 		  "for $ssh_limit simultaneous logins.\n",
 		  "You may raise this by changing ",
-		  "/etc/ssh/sshd_config:MaxStartup on $serverlogin.\n",
+		  "/etc/ssh/sshd_config:MaxStartups on $serverlogin.\n",
 		  "Using only ",$ssh_limit-1," connections ",
 		  "to avoid race conditions.\n");
     }
