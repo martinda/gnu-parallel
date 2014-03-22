@@ -1,5 +1,43 @@
 20140222
 
+* Offical package for Alpine Linux now exists:
+  http://alpinelinux.org/apk/main/x86/parallel
+
+* GNU Parallel was cited in: Estimating uncertainties in statistics
+  computed from direct numerical simulation
+  http://dx.doi.org/10.1063/1.4866813
+
+* GNU Parallel was cited in: Vehicle routing problems with time
+  windows and multiple service workers: a systematic comparison
+  between ACO and GRASP
+  http://link.springer.com/article/10.1007/s10100-014-0341-z
+
+* GNU Parallel, quick and easy
+  http://www.reganmian.net/blog/2014/03/09/gnu-parallel-quick-and-easy/
+
+* Using Multiple CPU Cores With Command Line Tools
+  http://prateekvjoshi.com/2014/03/07/using-multiple-cpu-cores-with-command-line-tools/
+
+* Batch convert mp3 CBR to VBR
+  http://blogs.zercle.com/bouroo/2013/03/batch-convert-mp3-cbr-to-vbr/
+
+* Running Behat in parallel with Selenium grid
+  http://zalas.eu/running-behat-in-parallel-with-selenium-grid/
+
+* Git-Mirror per cronjob aktuell halten
+  https://www.schtobia.de/2013/git-mirror-per-cronjob-aktuell-halten/
+
+* Пишем многопоточный скрипт на bash
+  http://dafter.ru/duf/howto/130.html
+
+* 如何利用多核CPU来加速你的Linux命令
+  http://www.chinadmd.com/file/xpcr6wpctzwtuu3ivwiaatcs_1.html
+
+* Bug fixes and man page updates.
+
+
+20140222
+
 New in this release:
 
 * --tollef has been retired.

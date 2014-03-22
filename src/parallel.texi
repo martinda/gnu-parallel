@@ -434,8 +434,8 @@ separating the columns. The n'th column can be access using
 @emph{regexp} is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
-@item @strong{--compress} (alpha testing)
-@anchor{@strong{--compress} (alpha testing)}
+@item @strong{--compress} (beta testing)
+@anchor{@strong{--compress} (beta testing)}
 
 Compress temporary files. If the output is big and very compressible
 this will take up less disk space in $TMPDIR and possibly be faster due to less
@@ -445,11 +445,11 @@ GNU @strong{parallel} will try @strong{lzop}, @strong{pigz}, @strong{gzip}, @str
 @strong{plzip}, @strong{bzip2}, @strong{lzma}, @strong{lzip}, @strong{xz} in that order, and use the
 first available.
 
-@item @strong{--compress-program} @emph{prg} (alpha testing)
-@anchor{@strong{--compress-program} @emph{prg} (alpha testing)}
+@item @strong{--compress-program} @emph{prg} (beta testing)
+@anchor{@strong{--compress-program} @emph{prg} (beta testing)}
 
-@item @strong{--decompress-program} @emph{prg} (alpha testing)
-@anchor{@strong{--decompress-program} @emph{prg} (alpha testing)}
+@item @strong{--decompress-program} @emph{prg} (beta testing)
+@anchor{@strong{--decompress-program} @emph{prg} (beta testing)}
 
 Use @emph{prg} for (de)compressing temporary files. It is assumed that @emph{prg
 -dc} will decompress stdin (standard input) to stdout (standard
@@ -798,8 +798,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--line-buffer} (alpha testing)
-@anchor{@strong{--line-buffer} (alpha testing)}
+@item @strong{--line-buffer} (beta testing)
+@anchor{@strong{--line-buffer} (beta testing)}
 
 Buffer output on line basis. @strong{--group} will keep the output together
 for a whole job. @strong{--ungroup} allows output to mixup with half a line
