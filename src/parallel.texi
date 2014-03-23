@@ -571,6 +571,8 @@ data to the program on stdin (standard input). With @strong{--fifo} GNU
 @strong{parallel} will create a temporary fifo with the name in @{@}, so you
 can do: @strong{parallel --pipe --fifo wc @{@}}.
 
+Beware: If data is not read from the fifo, the job will block forever.
+
 See also @strong{--cat}.
 
 @item @strong{--filter-hosts}

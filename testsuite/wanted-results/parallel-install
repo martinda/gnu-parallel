@@ -1,0 +1,94 @@
+### Test installation missing pod2*
+make[1]: Entering directory `/home/tange/privat/parallel'
+if test -d "parallel-00000000"; then find "parallel-00000000" -type d ! -perm -200 -exec chmod u+w {} ';' && rm -rf "parallel-00000000" || { sleep 5 && rm -rf "parallel-00000000"; }; else :; fi
+test -d "parallel-00000000" || mkdir "parallel-00000000"
+ (cd src && make  top_distdir=../parallel-00000000 distdir=../parallel-00000000/src \
+     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)
+make[2]: Entering directory `/home/tange/privat/parallel/src'
+make[2]: Leaving directory `/home/tange/privat/parallel/src'
+test -n "" \
+	|| find "parallel-00000000" -type d ! -perm -755 \
+		-exec chmod u+rwx,go+rx {} \; -o \
+	  ! -type d ! -perm -444 -links 1 -exec chmod a+r {} \; -o \
+	  ! -type d ! -perm -400 -exec chmod a+r {} \; -o \
+	  ! -type d ! -perm -444 -exec /bin/bash /home/tange/privat/parallel/install-sh -c -m a+r {} {} \; \
+	|| chmod -R a+r "parallel-00000000"
+tardir=parallel-00000000 && ${TAR-tar} chof - "$tardir" | GZIP=--best gzip -c >parallel-00000000.tar.gz
+if test -d "parallel-00000000"; then find "parallel-00000000" -type d ! -perm -200 -exec chmod u+w {} ';' && rm -rf "parallel-00000000" || { sleep 5 && rm -rf "parallel-00000000"; }; else :; fi
+make[1]: Leaving directory `/home/tange/privat/parallel'
+checking for a BSD-compatible install... /usr/bin/install -c
+checking whether build environment is sane... yes
+checking for a thread-safe mkdir -p... /bin/mkdir -p
+checking for gawk... gawk
+checking whether make sets $(MAKE)... yes
+configure: creating ./config.status
+config.status: creating Makefile
+config.status: creating src/Makefile
+config.status: creating config.h
+Making install in src
+make[1]: Entering directory `/tmp/parallel-00000000/src'
+pod2man --release='00000000' --center='parallel' \
+		--section=1 ./parallel.pod > ./parallel.1 \
+	|| echo "Warning: pod2man not found. Using old parallel.1"
+/bin/bash: pod2man: command not found
+Warning: pod2man not found. Using old parallel.1
+pod2man --release='00000000' --center='parallel' \
+		--section=1 ./sem.pod > ./sem.1 \
+	|| echo "Warning: pod2man not found. Using old sem.1"
+/bin/bash: pod2man: command not found
+Warning: pod2man not found. Using old sem.1
+pod2man --release='00000000' --center='parallel' \
+		--section=1 ./sql > ./sql.1 \
+	|| echo "Warning: pod2man not found. Using old sql.1"
+/bin/bash: pod2man: command not found
+Warning: pod2man not found. Using old sql.1
+pod2man --release='00000000' --center='parallel' \
+		--section=1 ./niceload.pod > ./niceload.1 \
+	|| echo "Warning: pod2man not found. Using old niceload.1"
+/bin/bash: pod2man: command not found
+Warning: pod2man not found. Using old niceload.1
+pod2man --release='00000000' --center='parallel' \
+		--section=1 ./parallel_tutorial.pod > ./parallel_tutorial.1 \
+	|| echo "Warning: pod2man not found. Using old parallel_tutorial.1"
+/bin/bash: pod2man: command not found
+Warning: pod2man not found. Using old parallel_tutorial.1
+pod2html ./parallel.pod > ./parallel.html \
+	|| echo "Warning: pod2html not found. Using old parallel.html"
+/bin/bash: pod2html: command not found
+Warning: pod2html not found. Using old parallel.html
+rm -f ./pod2htm*
+pod2html ./parallel_tutorial.pod > ./parallel_tutorial.html \
+	|| echo "Warning: pod2html not found. Using old parallel_tutorial.html"
+/bin/bash: pod2html: command not found
+Warning: pod2html not found. Using old parallel_tutorial.html
+rm -f ./pod2htm*
+pod2html ./sem.pod > ./sem.html \
+	|| echo "Warning: pod2html not found. Using old sem.html"
+/bin/bash: pod2html: command not found
+Warning: pod2html not found. Using old sem.html
+rm -f ./pod2htm*
+pod2html ./sql > ./sql.html \
+	|| echo "Warning: pod2html not found. Using old sql.html"
+/bin/bash: pod2html: command not found
+Warning: pod2html not found. Using old sql.html
+rm -f ./pod2htm*
+pod2html ./niceload.pod > ./niceload.html \
+	|| echo "Warning: pod2html not found. Using old niceload.html"
+/bin/bash: pod2html: command not found
+Warning: pod2html not found. Using old niceload.html
+rm -f ./pod2htm*
+make[2]: Entering directory `/tmp/parallel-00000000/src'
+ /bin/mkdir -p '/usr/local/bin'
+ /usr/bin/install -c parallel sem sql niceload '/usr/local/bin'
+ /bin/mkdir -p '/usr/local/share/doc/parallel'
+ /usr/bin/install -c -m 644 parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf '/usr/local/share/doc/parallel'
+ /bin/mkdir -p '/usr/local/share/man/man1'
+ /usr/bin/install -c -m 644 parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 '/usr/local/share/man/man1'
+make[2]: Leaving directory `/tmp/parallel-00000000/src'
+make[1]: Leaving directory `/tmp/parallel-00000000/src'
+make[1]: Entering directory `/tmp/parallel-00000000'
+make[2]: Entering directory `/tmp/parallel-00000000'
+make[2]: Nothing to be done for `install-exec-am'.
+make[2]: Nothing to be done for `install-data-am'.
+make[2]: Leaving directory `/tmp/parallel-00000000'
+make[1]: Leaving directory `/tmp/parallel-00000000'
