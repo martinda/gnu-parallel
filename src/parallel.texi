@@ -397,6 +397,16 @@ than a single record.
 
 See @strong{--pipe} for use of this.
 
+@item @strong{--cat} (alpha testing)
+@anchor{@strong{--cat} (alpha testing)}
+
+Create a temporary file with content. Normally @strong{--pipe} will give
+data to the program on stdin (standard input). With @strong{--cat} GNU
+@strong{parallel} will create a temporary file with the name in @{@}, so you
+can do: @strong{parallel --pipe --cat wc @{@}}.
+
+See also @strong{--fifo}.
+
 @item @strong{--cleanup}
 @anchor{@strong{--cleanup}}
 
@@ -552,6 +562,16 @@ completion of the command before exiting.
 See also @strong{--bg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
+
+@item @strong{--fifo} (alpha testing)
+@anchor{@strong{--fifo} (alpha testing)}
+
+Create a temporary fifo with content. Normally @strong{--pipe} will give
+data to the program on stdin (standard input). With @strong{--fifo} GNU
+@strong{parallel} will create a temporary fifo with the name in @{@}, so you
+can do: @strong{parallel --pipe --fifo wc @{@}}.
+
+See also @strong{--cat}.
 
 @item @strong{--filter-hosts}
 @anchor{@strong{--filter-hosts}}

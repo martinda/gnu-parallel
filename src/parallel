@@ -588,6 +588,8 @@ sub options_hash {
 	 "Y" => \$opt::retired,
          "skip-first-line" => \$opt::skip_first_line,
 	 "header=s" => \$opt::header,
+	 "cat" => \$opt::cat,
+	 "fifo" => \$opt::fifo,
 	);
 }
 
@@ -628,7 +630,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140322;
+    $Global::version = 20140323;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -5252,6 +5254,16 @@ sub populate {
     my $self = shift;
     my $next_arg;
     my $max_len = $Global::minimal_command_line_length || Limits::Command::max_length();
+    
+    if($opt::cat or $opt::fifo) {
+	# Get a tempfile name
+	my($outfh,$name) = ::tempfile(SUFFIX => ".pip");
+	close $outfh;
+	# Unlink is needed if: ssh otheruser@localhost
+	unlink $name;
+	$Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->unget([Arg->new($name)]);
+    }
+
     while (not $self->{'arg_queue'}->empty()) {
 	$next_arg = $self->{'arg_queue'}->get();
 	if(not defined $next_arg) {
@@ -5577,7 +5589,25 @@ sub number_of_replacements {
 sub replaced {
     my $self = shift;
     if(not defined $self->{'replaced'}) {
-	$self->{'replaced'} = $self->replace_placeholders($self->{'command'},$Global::JobQueue->quote_args());
+	if($opt::cat) {
+	    # Prepend 'cat > {};'
+	    # Append '_EXIT=$?;(rm {};exit $_EXIT)'
+	    $self->{'replaced'} = 
+		$self->replace_placeholders("cat > $Global::replace{'{}'}; ". $self->{'command'}. 
+					    "; _EXIT=\$?; rm $Global::replace{'{}'}; exit \$_EXIT",
+					    $Global::JobQueue->quote_args());
+	} elsif($opt::fifo) {
+	    # Prepend 'mkfifo {}; ('
+	    # Append ') & _PID=$!; cat > {}; wait $_PID; _EXIT=$?;(rm {};exit $_EXIT)'
+	    $self->{'replaced'} = 
+		$self->replace_placeholders("mkfifo $Global::replace{'{}'}; (".
+					    $self->{'command'}. 
+					    ") & _PID=\$!; cat > $Global::replace{'{}'}; ". 
+					    "wait \$_PID; _EXIT=\$?; rm $Global::replace{'{}'}; exit \$_EXIT",
+					    $Global::JobQueue->quote_args());
+	} else {
+	    $self->{'replaced'} = $self->replace_placeholders($self->{'command'},$Global::JobQueue->quote_args());
+	}
 	if($self->{'replaced'} =~ /^\s*(-\S+)/) {
 	    # Is this really a command in $PATH starting with '-'?
 	    my $cmd = $1;

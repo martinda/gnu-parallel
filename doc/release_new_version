@@ -156,6 +156,9 @@ git diff
 
 git commit -a
 
+Released as 20140X22 ('').
+
+
 == Update Savannah ==
 
 Content from release mail:
@@ -191,8 +194,7 @@ file:///home/tange/privat/parallel/doc/release_new_version
 
 from:tange@gnu.org
 to:parallel@gnu.org, bug-parallel@gnu.org
-cc:Sandro Cazzaniga <kharec@mandriva.org>,
-   Tim Cuthbertson <tim3d.junk@gmail.com>,
+cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ludovic Courtès <ludo@gnu.org>, Markus Ammer <mkmm@gmx-topmail.de>,
    Pavel Nuzhdin <pnzhdin@gmail.com>, Phil Sung <psung@alum.mit.edu>,
    Michael Shigorin <mike@altlinux.org>,
@@ -215,25 +217,9 @@ No new functionality was introduced so this is a good candidate for a stable rel
 
 New in this release:
 
-* Offical package for Alpine Linux now exists: http://alpinelinux.org/apk/main/x86/parallel
+* How to run tbss_2_reg in parallel http://tadpolebrainimaging.blogspot.dk/2014/03/how-to-run-tbss2reg-in-parallel.html
 
-* GNU Parallel was cited in: Estimating uncertainties in statistics computed from direct numerical simulation http://dx.doi.org/10.1063/1.4866813
-
-* GNU Parallel was cited in: Vehicle routing problems with time windows and multiple service workers: a systematic comparison between ACO and GRASP http://link.springer.com/article/10.1007/s10100-014-0341-z
-
-* GNU Parallel, quick and easy http://www.reganmian.net/blog/2014/03/09/gnu-parallel-quick-and-easy/
-
-* Using Multiple CPU Cores With Command Line Tools http://prateekvjoshi.com/2014/03/07/using-multiple-cpu-cores-with-command-line-tools/
-
-* Batch convert mp3 CBR to VBR http://blogs.zercle.com/bouroo/2013/03/batch-convert-mp3-cbr-to-vbr/
-
-* Running Behat in parallel with Selenium grid http://zalas.eu/running-behat-in-parallel-with-selenium-grid/
-
-* Git-Mirror per cronjob aktuell halten https://www.schtobia.de/2013/git-mirror-per-cronjob-aktuell-halten/
-
-* Пишем многопоточный скрипт на bash http://dafter.ru/duf/howto/130.html
-
-* 如何利用多核CPU来加速你的Linux命令 http://www.chinadmd.com/file/xpcr6wpctzwtuu3ivwiaatcs_1.html
+* Iterative DNS Brute Forcing http://www.room362.com/blog/2014/02/19/iterative-dns-brute-forcing/
 
 * Bug fixes and man page updates.
 

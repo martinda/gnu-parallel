@@ -378,6 +378,16 @@ I<size> defaults to 1M.
 See B<--pipe> for use of this.
 
 
+=item B<--cat> (alpha testing)
+
+Create a temporary file with content. Normally B<--pipe> will give
+data to the program on stdin (standard input). With B<--cat> GNU
+B<parallel> will create a temporary file with the name in {}, so you
+can do: B<parallel --pipe --cat wc {}>.
+
+See also B<--fifo>.
+
+
 =item B<--cleanup>
 
 Remove transferred files. B<--cleanup> will remove the transferred files
@@ -524,6 +534,18 @@ completion of the command before exiting.
 See also B<--bg>, B<man sem>.
 
 Implies B<--semaphore>.
+
+
+=item B<--fifo> (alpha testing)
+
+Create a temporary fifo with content. Normally B<--pipe> will give
+data to the program on stdin (standard input). With B<--fifo> GNU
+B<parallel> will create a temporary fifo with the name in {}, so you
+can do: B<parallel --pipe --fifo wc {}>.
+
+Beware: If data is not read from the fifo, the job will block forever.
+
+See also B<--cat>.
 
 
 =item B<--filter-hosts>
