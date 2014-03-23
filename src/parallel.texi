@@ -3220,7 +3220,7 @@ Remote execution
  R4. Result files can be transferred
  R5. Cleanup of transferred files
  R6. No config files needed
- R7. Do not run more than SSHD's MaxStartup can handle
+ R7. Do not run more than SSHD's MaxStartups can handle
  R8. Configurable SSH command
  R9. Retry if connection breaks occasionally
 
@@ -3611,7 +3611,7 @@ parallel mogrify -flip ::: *.jpg
 @strong{dxargs} is also a tool for running jobs in parallel.
 
 @strong{dxargs} does not deal well with more simultaneous jobs than SSHD's
-MaxStartup. @strong{dxargs} is only built for remote run jobs, but does not
+MaxStartups. @strong{dxargs} is only built for remote run jobs, but does not
 support transferring of files.
 
 @section DIFFERENCES BETWEEN mdm/middleman AND GNU Parallel
@@ -3898,7 +3898,7 @@ Using @strong{--ungroup} the 3 ms can be lowered to around 2 ms.
 
 When using multiple computers GNU @strong{parallel} opens @strong{ssh} connections
 to them to figure out how many connections can be used reliably
-simultaneously (Namely SSHD's MaxStartup). This test is done for each
+simultaneously (Namely SSHD's MaxStartups). This test is done for each
 host in serial, so if your @strong{--sshloginfile} contains many hosts it may
 be slow.
 
