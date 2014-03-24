@@ -15,9 +15,11 @@
 }
 \examples{
 library(gnuparallel)
-system(paste("parallel --header : --results foobar",
+if(system(paste("parallel --header : --results foobar",
    "printf out{let}\\\\\\\\\\\\\\\\tout{num}\\\\\\\\\\\\\\\\nline2{let}\\\\\\\\\\\\\\\\t{num}\\\\\\\\\\\\\\\\n",
-   "::: let a b c ::: num 4 5 6"))
+   "::: let a b c ::: num 4 5 6"))) {
+  stop("GNU Parallel must be installed. 10 seconds installation: wget -O - pi.dk/3/| bash");
+}
 fn <- gnu.parallel.filenames("foobar")
 gnu.parallel.load(fn)
 gnu.parallel.load.lines(fn)

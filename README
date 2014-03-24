@@ -86,6 +86,12 @@ https://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
 Walk through the tutorial (man parallel_tutorial). You command line
 with love you for it.
 
+When using programs that use GNU Parallel to process data for
+publication please cite:
+
+O. Tange (2011): GNU Parallel - The Command-Line Power Tool, 
+;login: The USENIX Magazine, February 2011:42-47.
+
 
 = New versions =
 

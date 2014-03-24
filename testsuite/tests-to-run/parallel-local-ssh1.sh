@@ -5,6 +5,12 @@ mkdir tmp
 cd tmp
 
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -j8 -k -L1
+echo '### bug #41805: Idea: propagate --env for parallel --number-of-cores'
+  FOO=test_csh_filter parallel --filter-hosts --env FOO,PATH -S csh@lo env ::: "" |egrep 'FOO|PATH'
+  FOO=test_csh parallel --env FOO,PATH -S csh@lo env ::: "" |egrep 'FOO|PATH'
+  FOO=test_zsh_filter parallel --filter-hosts --env FOO,PATH -S zsh@lo env ::: "" |egrep 'FOO|PATH'
+  FOO=test_zsh parallel --env FOO,PATH -S zsh@lo env ::: "" |egrep 'FOO|PATH'
+
 echo '### Deal with long command lines on remote servers'
   perl -e 'print((("\""x10000)."\n")x10)' | parallel -j1 -S lo -N 10000 echo {} |wc
 

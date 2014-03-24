@@ -1,3 +1,12 @@
+### bug #41805: Idea: propagate --env for parallel --number-of-cores
+FOO=test_csh_filter
+PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin
+FOO=test_csh
+PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin
+PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin
+FOO=test_zsh_filter
+PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin
+FOO=test_zsh
 ### Deal with long command lines on remote servers
       4      10  100010
 ### Test bug #34241: --pipe should not spawn unneeded processes

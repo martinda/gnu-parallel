@@ -1968,9 +1968,9 @@ sub filter_hosts {
     while (my ($host, $sshlogin) = each %Global::host) {
 	# The 'true' is used to get the $host out later
 	my $sshcmd = "true $host;" . $sshlogin->sshcommand()." ".$sshlogin->serverlogin();
-	push(@cores, $host."\t".$sshcmd." parallel --number-of-cores\n");
-	push(@cpus, $host."\t".$sshcmd." parallel --number-of-cpus\n");
-	push(@maxline, $host."\t".$sshcmd." parallel --max-line-length-allowed\n");
+	push(@cores, $host."\t".$sshcmd." ".$Global::envvar." parallel --number-of-cores\n");
+	push(@cpus, $host."\t".$sshcmd." ".$Global::envvar." parallel --number-of-cpus\n");
+	push(@maxline, $host."\t".$sshcmd." ".$Global::envvar." parallel --max-line-length-allowed\n");
 	# 'echo' is used to get the best possible value for an ssh login time
 	push(@echo, $host."\t".$sshcmd." echo\n");
     }
@@ -3341,9 +3341,9 @@ sub ncpus {
         } else {
             my $ncpu;
             if($opt::use_cpus_instead_of_cores) {
-                $ncpu = qx(echo|$sshcmd $serverlogin parallel --number-of-cpus);
+                $ncpu = qx(echo|$sshcmd $serverlogin $Global::envvar parallel --number-of-cpus);
             } else {
-                $ncpu = qx(echo|$sshcmd $serverlogin parallel --number-of-cores);
+                $ncpu = qx(echo|$sshcmd $serverlogin $Global::envvar parallel --number-of-cores);
             }
 	    chomp $ncpu;
             if($ncpu =~ /^\s*[0-9]+\s*$/s) {

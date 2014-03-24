@@ -208,14 +208,18 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140322 ('昆明 MH370') released
+Subject: GNU Parallel 20140422 ('') released
 
-GNU Parallel 20140322 ('昆明 MH370') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
-
-No new functionality was introduced so this is a good candidate for a stable release. 
+GNU Parallel 20140422 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 
 New in this release:
+
+* GNU Parallel was cited in: Beyond MAP estimation with the track-oriented multiple hypothesis tracker http://ieeexplore.ieee.org/xpl/abstractReferences.jsp?tp=&arnumber=6766651&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D6766651
+
+* GNU Parallel was cited in: Prokka: rapid prokaryotic genome annotation http://bioinformatics.oxfordjournals.org/content/early/2014/03/18/bioinformatics.btu153.short
+
+* GNU Parallel was used (unfortunately with improper citation) in: Perspectives in magnetic resonance: NMR in the post-FFT era http://www.sciencedirect.com/science/article/pii/S1090780713003054
 
 * How to run tbss_2_reg in parallel http://tadpolebrainimaging.blogspot.dk/2014/03/how-to-run-tbss2reg-in-parallel.html
 
