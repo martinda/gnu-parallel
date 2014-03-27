@@ -1,4 +1,4 @@
-### bug #41964: --controlmaster not sems to reuse OpenSSH connections to the same host
+### bug #41964: --controlmaster not seems to reuse OpenSSH connections to the same host
 With --controlmaster - finish first
 No --controlmaster - finish last
 ### bug #41805: Idea: propagate --env for parallel --number-of-cores
