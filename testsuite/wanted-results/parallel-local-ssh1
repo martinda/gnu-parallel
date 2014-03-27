@@ -1,3 +1,6 @@
+### bug #41964: --controlmaster not sems to reuse OpenSSH connections to the same host
+With --controlmaster - finish first
+No --controlmaster - finish last
 ### bug #41805: Idea: propagate --env for parallel --number-of-cores
 FOO=test_csh_filter
 PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin

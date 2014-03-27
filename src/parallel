@@ -185,6 +185,9 @@ cleanup();
 if($Global::semaphore) {
     $sem->release();
 }
+for(keys %Global::sshmaster) {
+    kill 9, $_;
+}
 ::debug("Halt\n");
 if($opt::halt_on_error) {
     wait_and_exit($Global::halt_on_error_exitstatus);
@@ -630,7 +633,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140323;
+    $Global::version = 20140326;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3825,7 +3828,7 @@ sub sshcommand_of_sshlogin {
             $serverlogin = $self->{'string'};
 	    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
 	    # 2>/dev/null to ignore "process_mux_new_session: tcgetattr: Invalid argument"
-            my $master = "ssh -MTS $control_path $serverlogin sleep 1 2>/dev/null";
+            my $master = "ssh -MTS $control_path $serverlogin sleep 1000000000 2>/dev/null";
             if(not $self->{'control_path'}{$control_path}++) {
                 # Master is not running for this control_path
                 # Start it

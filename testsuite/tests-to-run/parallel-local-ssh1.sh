@@ -4,7 +4,12 @@ rm -rf tmp
 mkdir tmp
 cd tmp
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -j8 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -j6 -k -L1
+echo '### bug #41964: --controlmaster not sems to reuse OpenSSH connections to the same host'
+  (parallel -S redhat9.tange.dk true ::: {1..20}; echo No --controlmaster - finish last) & 
+  (parallel -M -S redhat9.tange.dk true ::: {1..20}; echo With --controlmaster - finish first) & 
+  wait
+
 echo '### bug #41805: Idea: propagate --env for parallel --number-of-cores'
   FOO=test_csh_filter parallel --filter-hosts --env FOO,PATH -S csh@lo env ::: "" |egrep 'FOO|PATH'
   FOO=test_csh parallel --env FOO,PATH -S csh@lo env ::: "" |egrep 'FOO|PATH'
