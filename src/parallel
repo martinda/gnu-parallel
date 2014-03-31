@@ -1969,6 +1969,7 @@ sub cleanup_basefile {
 sub filter_hosts {
     my(@cores, @cpus, @maxline, @echo);
     while (my ($host, $sshlogin) = each %Global::host) {
+	if($host eq ":") { next }
 	# The 'true' is used to get the $host out later
 	my $sshcmd = "true $host;" . $sshlogin->sshcommand()." ".$sshlogin->serverlogin();
 	push(@cores, $host."\t".$sshcmd." ".$Global::envvar." parallel --number-of-cores\n");
@@ -2063,6 +2064,7 @@ sub filter_hosts {
     @down_hosts and ::warning("Removed @down_hosts\n");
     $Global::minimal_command_line_length = 8_000_000;
     while (my ($sshlogin, $obj) = each %Global::host) {
+	if($sshlogin eq ":") { next }
 	$ncpus{$sshlogin} or ::die_bug("ncpus missing: ".$obj->serverlogin());
 	$ncores{$sshlogin} or ::die_bug("ncores missing: ".$obj->serverlogin());
 	$time_to_login{$sshlogin} or ::die_bug("time_to_login missing: ".$obj->serverlogin());
@@ -3828,7 +3830,7 @@ sub sshcommand_of_sshlogin {
             $serverlogin = $self->{'string'};
 	    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
 	    # 2>/dev/null to ignore "process_mux_new_session: tcgetattr: Invalid argument"
-            my $master = "ssh -MTS $control_path $serverlogin sleep 1000000000 2>/dev/null";
+            my $master = "ssh -tt -MTS $control_path $serverlogin sleep 1000000000 2>/dev/null";
             if(not $self->{'control_path'}{$control_path}++) {
                 # Master is not running for this control_path
                 # Start it

@@ -221,6 +221,8 @@ New in this release:
 
 * GNU Parallel was used (unfortunately with improper citation) in: Perspectives in magnetic resonance: NMR in the post-FFT era http://www.sciencedirect.com/science/article/pii/S1090780713003054
 
+* Speeding Up Grep Log Queries with GNU Parallel http://www.cybersecurity.io/speeding-grep-queries-gnu-parallel/
+
 * How to run tbss_2_reg in parallel http://tadpolebrainimaging.blogspot.dk/2014/03/how-to-run-tbss2reg-in-parallel.html
 
 * Iterative DNS Brute Forcing http://www.room362.com/blog/2014/02/19/iterative-dns-brute-forcing/

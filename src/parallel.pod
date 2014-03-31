@@ -72,9 +72,26 @@ B<xargs>. If I<command> is not given GNU B<parallel> will behave
 similar to B<cat | sh>.
 
 The I<command> must be an executable, a script, a composed command, or
-a function. If it is a Bash function you need to B<export -f> the
+a function.
+
+If it is a Bash function you need to B<export -f> the
 function first. An alias will, however, not work (see why
 http://www.perlmonks.org/index.pl?node_id=484296).
+
+If it is a zsh function you will need to use this helper function
+B<exportf> to export and to set $SHELL to bash:
+
+  function exportf (){
+    export $(echo $1)="`whence -f $1 | sed -e "s/$1 //" `"
+  }
+
+  function my_func(){
+    echo $1;
+    echo "hello";
+  }
+
+  exportf my_func
+  SHELL=/bin/bash parallel "my_func {}" :::  1 2
 
 
 =item B<{}>
@@ -510,7 +527,7 @@ environment that the command is run in. This is especially useful for
 remote execution.
 
 In Bash I<var> can also be a Bash function - just remember to B<export
--f> the function.
+-f> the function, see B<command>.
 
 The variable '_' is special. It will copy all enviroment variables
 except for the ones mentioned in ~/.parallel/ignored_vars.
