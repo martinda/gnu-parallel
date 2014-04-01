@@ -3839,7 +3839,7 @@ sub sshcommand_of_sshlogin {
 		    open(STDIN,"<","/dev/null");
 		    # Run a sleep that outputs data, so it will discover if the ssh connection closes.
 		    my $sleep = ::shell_quote_scalar('$|=1;while(1){sleep 1;print "foo\n"}');
-		    my @master = ("ssh", "-MTS", $control_path, $serverlogin, "perl", "-e", $sleep);
+		    my @master = ("ssh", "-tt", "-MTS", $control_path, $serverlogin, "perl", "-e", $sleep);
                     ::debug("@master\n");
                     exec(@master);
                 }
@@ -5019,7 +5019,7 @@ sub print {
 		    if($fdno == 2 and not $self->{'printed_first_line',$fdno}++) {
 			# OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
 			# This is a crappy way of ignoring it.
-			$$partial =~ s/^tcgetattr: Invalid argument\n//;
+			$$partial =~ s/^(client_process_control: )?tcgetattr: Invalid argument\n//;
 			# Length of partial line has changed: Find the last \n again
 			$i = rindex($$partial,"\n");
 		    }
@@ -5064,7 +5064,9 @@ sub print {
 		    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
 		    # This is a crappy way of ignoring it.
 		    while(<$in_fh>) {
-			if($_ ne "tcgetattr: Invalid argument\n") {
+			if(/^(client_process_control: )?tcgetattr: Invalid argument\n/) {
+			    # Skip
+			} else {
 			    print $out_fd $tag,$_;
 			}
 			# At most run the loop once
@@ -5080,7 +5082,7 @@ sub print {
 		    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
 		    # This is a crappy way of ignoring it.
 		    sysread($in_fh,$buf,1_000);
-		    $buf =~ s/^tcgetattr: Invalid argument\n//;
+		    $buf =~ s/^(client_process_control: )?tcgetattr: Invalid argument\n//;
 		    print $out_fd $buf;
 		}
 		while(sysread($in_fh,$buf,32768)) {
