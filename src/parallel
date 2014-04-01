@@ -186,7 +186,7 @@ if($Global::semaphore) {
     $sem->release();
 }
 for(keys %Global::sshmaster) {
-    kill 9, $_;
+    kill "TERM", $_;
 }
 ::debug("Halt\n");
 if($opt::halt_on_error) {
@@ -359,9 +359,7 @@ sub nindex {
     # See if string is in buffer N times
     # Returns:
     #   the position where the Nth copy is found
-    my $buf_ref = shift;
-    my $str = shift;
-    my $n = shift;
+    my ($buf_ref, $str, $n) = @_;
     my $i = 0;
     for(1..$n) {
 	$i = index($$buf_ref,$str,$i+1);
@@ -602,8 +600,7 @@ sub get_options_from_array {
     #   true if parsing worked
     #   false if parsing failed
     #   @array is changed
-    my $array_ref = shift;
-    my @keep_only = @_;
+    my ($array_ref, @keep_only) = @_;
     # A bit of shuffling of @ARGV needed as GetOptionsFromArray is not
     # supported everywhere
     my @save_argv;
@@ -633,7 +630,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140326;
+    $Global::version = 20140401;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -877,7 +874,7 @@ sub parse_options {
 }
 
 sub env_quote {
-    my $v = shift;
+    my $v = $_[0];
     $v =~ s/([\\])/\\$1/g;
     $v =~ s/([\[\] \#\'\&\<\>\(\)\;\{\}\t\"\$\`\*\174\!\?\~])/\\$1/g;
     $v =~ s/\n/"\n"/g;
@@ -3828,9 +3825,6 @@ sub sshcommand_of_sshlogin {
             my $control_path = $self->control_path_dir()."/ssh-%r@%h:%p";
             $sshcmd = "ssh -S ".$control_path;
             $serverlogin = $self->{'string'};
-	    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
-	    # 2>/dev/null to ignore "process_mux_new_session: tcgetattr: Invalid argument"
-            my $master = "ssh -tt -MTS $control_path $serverlogin sleep 1000000000 2>/dev/null";
             if(not $self->{'control_path'}{$control_path}++) {
                 # Master is not running for this control_path
                 # Start it
@@ -3838,9 +3832,16 @@ sub sshcommand_of_sshlogin {
                 if($pid) {
                     $Global::sshmaster{$pid} ||= 1;
                 } else {
-                    ::debug($master,"\n");
-                    `$master </dev/null`;
-                    ::wait_and_exit(0);
+		    $SIG{'TERM'} = undef;
+		    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
+		    # STDERR >/dev/null to ignore "process_mux_new_session: tcgetattr: Invalid argument"
+		    open(STDERR,">","/dev/null");
+		    open(STDIN,"<","/dev/null");
+		    # Run a sleep that outputs data, so it will discover if the ssh connection closes.
+		    my $sleep = ::shell_quote_scalar('$|=1;while(1){sleep 1;print "foo\n"}');
+		    my @master = ("ssh", "-MTS", $control_path, $serverlogin, "perl", "-e", $sleep);
+                    ::debug("@master\n");
+                    exec(@master);
                 }
             }
         } else {
@@ -4075,7 +4076,7 @@ sub cattail {
         # clear EOF
         seek(IN,0,1);
         my $writer_running = kill 0, $writerpid;
-        $read = sysread(IN,$buf,1_000_000);
+        $read = sysread(IN,$buf,32768);
         if($read) {
             # We can unlink the file now: The writer has written something
             -e $unlink_file and unlink $unlink_file;
@@ -5082,7 +5083,7 @@ sub print {
 		    $buf =~ s/^tcgetattr: Invalid argument\n//;
 		    print $out_fd $buf;
 		}
-		while(sysread($in_fh,$buf,1_000_000)) {
+		while(sysread($in_fh,$buf,32768)) {
 		    print $out_fd $buf;
 		}
 	    }
