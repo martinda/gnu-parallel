@@ -8,6 +8,4 @@ echo '### --wd no-such-dir'
   stdout parallel --wd /no-such-dir -S csh@localhost echo ::: 1; echo Exit code $?
   stdout parallel --wd /no-such-dir -S tcsh@localhost echo ::: 1; echo Exit code $?
   stdout parallel --wd /no-such-dir -S parallel@localhost echo ::: 1; echo Exit code $?
-
-
 EOF

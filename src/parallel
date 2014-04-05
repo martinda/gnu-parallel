@@ -3833,13 +3833,15 @@ sub sshcommand_of_sshlogin {
                     $Global::sshmaster{$pid} ||= 1;
                 } else {
 		    $SIG{'TERM'} = undef;
-		    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
-		    # STDERR >/dev/null to ignore "process_mux_new_session: tcgetattr: Invalid argument"
-		    open(STDERR,">","/dev/null");
-		    open(STDIN,"<","/dev/null");
-		    # Run a sleep that outputs data, so it will discover if the ssh connection closes.
-		    my $sleep = ::shell_quote_scalar('$|=1;while(1){sleep 1;print "foo\n"}');
-		    my @master = ("ssh", "-tt", "-MTS", $control_path, $serverlogin, "perl", "-e", $sleep);
+                    # Ignore the 'foo' being printed
+                    open(STDOUT,">","/dev/null");
+                    # OpenSSH_3.6.1p2 gives 'tcgetattr: Invalid argument' with -tt
+                    # STDERR >/dev/null to ignore "process_mux_new_session: tcgetattr: Invalid argument"
+                    open(STDERR,">","/dev/null");
+                    open(STDIN,"<","/dev/null");
+                    # Run a sleep that outputs data, so it will discover if the ssh connection closes.
+                    my $sleep = ::shell_quote_scalar('$|=1;while(1){sleep 1;print "foo\n"}');
+                    my @master = ("ssh", "-tt", "-MTS", $control_path, $serverlogin, "perl", "-e", $sleep);
                     ::debug("@master\n");
                     exec(@master);
                 }
