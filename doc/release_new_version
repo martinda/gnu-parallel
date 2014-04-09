@@ -158,6 +158,11 @@ git commit -a
 
 Released as 20140X22 ('').
 
+TAG=MyTag
+YYYYMMDD=`yyyymmdd`
+git tag -s -m "Released as $YYYYMMDD ('$TAG')" $TAG
+git tag -s -m "Released as $YYYYMMDD ('$TAG')" $YYYYMMDD
+
 
 == Update Savannah ==
 
