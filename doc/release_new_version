@@ -220,17 +220,25 @@ GNU Parallel 20140422 ('') has been released. It is available for download at: h
 
 New in this release:
 
+* GNU Parallel was cited in: Proactive System for Digital Forensic Investigation http://dspace.library.uvic.ca:8080/bitstream/handle/1828/5237/Alharbi_Soltan_PhD_2014.pdf
+
 * GNU Parallel was cited in: Beyond MAP estimation with the track-oriented multiple hypothesis tracker http://ieeexplore.ieee.org/xpl/abstractReferences.jsp?tp=&arnumber=6766651&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D6766651
 
 * GNU Parallel was cited in: Prokka: rapid prokaryotic genome annotation http://bioinformatics.oxfordjournals.org/content/early/2014/03/18/bioinformatics.btu153.short
 
 * GNU Parallel was used (unfortunately with improper citation) in: Perspectives in magnetic resonance: NMR in the post-FFT era http://www.sciencedirect.com/science/article/pii/S1090780713003054
 
+* GNU Parallel is used in https://github.com/cc2qe/speedseq
+
+* Batch XML validation at the command line. http://horothesia.blogspot.dk/2014/04/batch-xml-validation-at-command-line.html
+
 * Org-mode with Parallel Babel http://draketo.de/english/emacs/parallel-babel#sec-2
 
 * Speeding Up Grep Log Queries with GNU Parallel http://www.cybersecurity.io/speeding-grep-queries-gnu-parallel/
 
 * How to run tbss_2_reg in parallel http://tadpolebrainimaging.blogspot.dk/2014/03/how-to-run-tbss2reg-in-parallel.html
+
+* GNU parallel example: blastn https://asciinema.org/a/8775
 
 * Iterative DNS Brute Forcing http://www.room362.com/blog/2014/02/19/iterative-dns-brute-forcing/
 

@@ -4309,7 +4309,17 @@ sub openoutputfiles {
 	my $args_as_dirname = $self->{'commandline'}->args_as_dirname();
 	# prefix/name1/val1/name2/val2/
 	my $dir = $opt::results."/".$args_as_dirname;
-	File::Path::mkpath($dir);
+	if(eval{ File::Path::mkpath($dir); }) {
+	    # OK
+	} else {
+	    # mkpath failed: Argument probably too long.
+	    # Set $Global::max_file_length
+	    max_file_name_length($opt::results);
+	    $args_as_dirname = $self->{'commandline'}->args_as_dirname();
+	    # prefix/name1/val1/name2/val2/
+	    $dir = $opt::results."/".$args_as_dirname;
+	    File::Path::mkpath($dir);
+	}
 	# prefix/name1/val1/name2/val2/stdout
 	$outname = "$dir/stdout";
 	if(not open($outfhw, "+>", $outname)) {
@@ -4397,6 +4407,36 @@ sub openoutputfiles {
 	    fcntl($fdr, &F_SETFL, $flags) || die $!; # Set the flags on the filehandle
 	}
     }
+}
+
+sub max_file_name_length {
+    # Figure out the max length of a subdir and the max total length
+    # Ext4 = 255,130816
+    my $testdir = shift;
+
+    my $upper = 8_000_000;
+    my $len = 8;
+    my $dir="x"x$len;
+    do {
+	rmdir($testdir."/".$dir);
+	$len *= 16;
+	$dir="x"x$len;
+    } while (mkdir $testdir."/".$dir);
+    # Then search for the actual max length between $len/16 and $len                                                              
+    my $min = $len/16;
+    my $max = $len;
+    while($max-$min > 5) {
+	my $test = int(($min+$max)/2);
+	$dir="x"x$test;
+	if(mkdir $testdir."/".$dir) {
+	    rmdir($testdir."/".$dir);
+	    $min = $test;
+	} else {
+	    $max = $test;
+	}
+    }
+    $Global::max_file_length = $min;
+    return $min;
 }
 
 sub set_fh {
@@ -5625,6 +5665,7 @@ sub args_as_dirname {
     # Returns:
     #  all unmodified arguments joined with '/' (similar to {})
     #  \t \0 \\ and / are quoted
+    # If $Global::max_file_length: Keep labels < $Global::max_file_length
     my $self = shift;
     my @res = ();
 
@@ -5637,7 +5678,11 @@ sub args_as_dirname {
 		       $s =~ s/\\/\\\\/g;
 		       $s =~ s/\t/\\t/g;
 		       $s =~ s/\0/\\0/g;
-		       $s =~ s:/:\\_:g; $s; }
+		       $s =~ s:/:\\_:g;
+		       if($Global::max_file_length) {
+			   $s = substr($s,0,$Global::max_file_length);
+		       }
+		       $s; }
 		 $rec_ref->[$n-1]->orig());
 	}
     }

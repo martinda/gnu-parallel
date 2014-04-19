@@ -1122,12 +1122,12 @@ E.g:
 will generate the files:
 
   foo/a/I/b/III/stderr
-  foo/a/I/b/IIII/stderr
-  foo/a/II/b/III/stderr
-  foo/a/II/b/IIII/stderr
   foo/a/I/b/III/stdout
+  foo/a/I/b/IIII/stderr
   foo/a/I/b/IIII/stdout
+  foo/a/II/b/III/stderr
   foo/a/II/b/III/stdout
+  foo/a/II/b/IIII/stderr
   foo/a/II/b/IIII/stdout
 
 and
@@ -1137,12 +1137,12 @@ and
 will generate the files:
 
   foo/1/I/2/III/stderr
-  foo/1/I/2/IIII/stderr
-  foo/1/II/2/III/stderr
-  foo/1/II/2/IIII/stderr
   foo/1/I/2/III/stdout
+  foo/1/I/2/IIII/stderr
   foo/1/I/2/IIII/stdout
+  foo/1/II/2/III/stderr
   foo/1/II/2/III/stdout
+  foo/1/II/2/IIII/stderr
   foo/1/II/2/IIII/stdout
 
 See also B<--files>, B<--header>, B<--joblog>.

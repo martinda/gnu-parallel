@@ -4,6 +4,13 @@
 # Each should be taking 3-10s and be possible to run in parallel
 # I.e.: No race conditions, no logins
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -k -j4 -L1
+echo '### bug #42089: --results with arg > 256 chars (should be 1 char shorter)'
+  parallel --results parallel_test_dir echo ::: 1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456; 
+  ls parallel_test_dir/1/
+  rm -rf parallel_test_dir
+
+echo '**'
+
 echo '### Test --halt-on-error 0'; 
   (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true") | parallel -j10 --halt-on-error 0; 
   echo $?; 
