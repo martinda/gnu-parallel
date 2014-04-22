@@ -8,13 +8,74 @@
 @node Top
 @top parallel
 
+@menu
+* NAME::
+* SYNOPSIS::
+* DESCRIPTION::
+* OPTIONS::
+* EXAMPLE@asis{:} Working as xargs -n1. Argument appending::
+* EXAMPLE@asis{:} Reading arguments from command line::
+* EXAMPLE@asis{:} Inserting multiple arguments::
+* EXAMPLE@asis{:} Context replace::
+* EXAMPLE@asis{:} Compute intensive jobs and substitution::
+* EXAMPLE@asis{:} Substitution and redirection::
+* EXAMPLE@asis{:} Composed commands::
+* EXAMPLE@asis{:} Calling Bash functions::
+* EXAMPLE@asis{:} Removing file extension when processing files::
+* EXAMPLE@asis{:} Removing two file extensions when processing files and calling GNU Parallel from itself::
+* EXAMPLE@asis{:} Download 10 images for each of the past 30 days::
+* EXAMPLE@asis{:} Breadth first parallel web crawler/mirrorer::
+* EXAMPLE@asis{:} Process files from a tar file while unpacking::
+* EXAMPLE@asis{:} Rewriting a for-loop and a while-read-loop::
+* EXAMPLE@asis{:} Rewriting nested for-loops::
+* EXAMPLE@asis{:} Finding the lowest difference between files::
+* EXAMPLE@asis{:} for-loops with column names::
+* EXAMPLE@asis{:} Count the differences between all files in a dir::
+* EXAMPLE@asis{:} Speeding up fast jobs::
+* EXAMPLE@asis{:} Using shell variables::
+* EXAMPLE@asis{:} Group output lines::
+* EXAMPLE@asis{:} Tag output lines::
+* EXAMPLE@asis{:} Keep order of output same as order of input::
+* EXAMPLE@asis{:} Parallel grep::
+* EXAMPLE@asis{:} Using remote computers::
+* EXAMPLE@asis{:} Transferring of files::
+* EXAMPLE@asis{:} Distributing work to local and remote computers::
+* EXAMPLE@asis{:} Running the same command on remote computers::
+* EXAMPLE@asis{:} Parallelizing rsync::
+* EXAMPLE@asis{:} Use multiple inputs in one command::
+* EXAMPLE@asis{:} Use a table as input::
+* EXAMPLE@asis{:} Run the same command 10 times::
+* EXAMPLE@asis{:} Working as cat | sh. Resource inexpensive jobs and evaluation::
+* EXAMPLE@asis{:} Processing a big file using more cores::
+* EXAMPLE@asis{:} Running more than 500 jobs workaround::
+* EXAMPLE@asis{:} Working as mutex and counting semaphore::
+* EXAMPLE@asis{:} Start editor with filenames from stdin (standard input)::
+* EXAMPLE@asis{:} Running sudo::
+* EXAMPLE@asis{:} GNU Parallel as queue system/batch manager::
+* EXAMPLE@asis{:} GNU Parallel as dir processor::
+* QUOTING::
+* LIST RUNNING JOBS::
+* COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS::
+* ENVIRONMENT VARIABLES::
+* DEFAULT PROFILE (CONFIG FILE)::
+* PROFILE FILES::
+* EXIT STATUS::
+* DIFFERENCES BETWEEN GNU Parallel AND ALTERNATIVES::
+* BUGS::
+* REPORTING BUGS::
+* AUTHOR::
+* LICENSE::
+* DEPENDENCIES::
+* SEE ALSO::
+@end menu
+
+@node NAME
 @chapter NAME
-@anchor{NAME}
 
 parallel - build and execute shell command lines from standard input in parallel
 
+@node SYNOPSIS
 @chapter SYNOPSIS
-@anchor{SYNOPSIS}
 
 @strong{parallel} [options] [@emph{command} [arguments]] < list_of_arguments
 
@@ -25,8 +86,8 @@ parallel - build and execute shell command lines from standard input in parallel
 
 @strong{#!/usr/bin/parallel} --shebang [options] [@emph{command} [arguments]]
 
+@node DESCRIPTION
 @chapter DESCRIPTION
-@anchor{DESCRIPTION}
 
 GNU @strong{parallel} is a shell tool for executing jobs in parallel using
 one or more computers. A job can be a single command or a small
@@ -51,8 +112,12 @@ the line as arguments. If no @emph{command} is given, the line of input is
 executed. Several lines will be run in parallel. GNU @strong{parallel} can
 often be used as a substitute for @strong{xargs} or @strong{cat | bash}.
 
+@menu
+* Reader's guide::
+@end menu
+
+@node Reader's guide
 @section Reader's guide
-@anchor{Reader's guide}
 
 Start by watching the intro videos for a quick introduction:
 http://www.youtube.com/playlist?list=PL284C9FF2488BC6D1
@@ -66,8 +131,8 @@ parallel_tutorial}). Your command line will love you for it.
 Finally you may want to look at the rest of this manual if you have
 special needs not already covered.
 
+@node OPTIONS
 @chapter OPTIONS
-@anchor{OPTIONS}
 
 @table @asis
 @item @emph{command}
@@ -82,9 +147,28 @@ If @emph{command} is given, GNU @strong{parallel} solve the same tasks as
 similar to @strong{cat | sh}.
 
 The @emph{command} must be an executable, a script, a composed command, or
-a function. If it is a Bash function you need to @strong{export -f} the
+a function.
+
+If it is a Bash function you need to @strong{export -f} the
 function first. An alias will, however, not work (see why
 http://www.perlmonks.org/index.pl?node_id=484296).
+
+If it is a zsh function you will need to use this helper function
+@strong{exportf} to export and to set $SHELL to bash:
+
+@verbatim
+  function exportf (){
+    export $(echo $1)="`whence -f $1 | sed -e "s/$1 //" `"
+  }
+
+  function my_func(){
+    echo $1;
+    echo "hello";
+  }
+
+  exportf my_func
+  SHELL=/bin/bash parallel "my_func {}" :::  1 2
+@end verbatim
 
 @item @strong{@{@}}
 @anchor{@strong{@{@}}}
@@ -444,8 +528,8 @@ separating the columns. The n'th column can be access using
 @emph{regexp} is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
-@item @strong{--compress} (beta testing)
-@anchor{@strong{--compress} (beta testing)}
+@item @strong{--compress}
+@anchor{@strong{--compress}}
 
 Compress temporary files. If the output is big and very compressible
 this will take up less disk space in $TMPDIR and possibly be faster due to less
@@ -455,11 +539,11 @@ GNU @strong{parallel} will try @strong{lzop}, @strong{pigz}, @strong{gzip}, @str
 @strong{plzip}, @strong{bzip2}, @strong{lzma}, @strong{lzip}, @strong{xz} in that order, and use the
 first available.
 
-@item @strong{--compress-program} @emph{prg} (beta testing)
-@anchor{@strong{--compress-program} @emph{prg} (beta testing)}
+@item @strong{--compress-program} @emph{prg}
+@anchor{@strong{--compress-program} @emph{prg}}
 
-@item @strong{--decompress-program} @emph{prg} (beta testing)
-@anchor{@strong{--decompress-program} @emph{prg} (beta testing)}
+@item @strong{--decompress-program} @emph{prg}
+@anchor{@strong{--decompress-program} @emph{prg}}
 
 Use @emph{prg} for (de)compressing temporary files. It is assumed that @emph{prg
 -dc} will decompress stdin (standard input) to stdout (standard
@@ -538,7 +622,7 @@ environment that the command is run in. This is especially useful for
 remote execution.
 
 In Bash @emph{var} can also be a Bash function - just remember to @strong{export
--f} the function.
+-f} the function, see @strong{command}.
 
 The variable '_' is special. It will copy all enviroment variables
 except for the ones mentioned in ~/.parallel/ignored_vars.
@@ -586,8 +670,8 @@ $PARALLEL, /etc/parallel/config or similar. This is because GNU
 @strong{parallel} uses GNU @strong{parallel} to compute this, so you will get an
 infinite loop. This will likely be fixed in a later release.
 
-@item @strong{--gnu} 
-@anchor{@strong{--gnu} }
+@item @strong{--gnu}
+@anchor{@strong{--gnu}}
 
 Behave like GNU @strong{parallel}. If @strong{--tollef} and @strong{--gnu} are both set,
 @strong{--gnu} takes precedence. @strong{--tollef} is retired, but @strong{--gnu} is
@@ -820,8 +904,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--line-buffer} (beta testing)
-@anchor{@strong{--line-buffer} (beta testing)}
+@item @strong{--line-buffer}
+@anchor{@strong{--line-buffer}}
 
 Buffer output on line basis. @strong{--group} will keep the output together
 for a whole job. @strong{--ungroup} allows output to mixup with half a line
@@ -952,6 +1036,27 @@ If neither @strong{--recstart} nor @strong{--recend} are given @strong{--recend}
 defaults to '\n'. To have no record separator use @strong{--recend ""}.
 
 @strong{--files} is often used with @strong{--pipe}.
+
+See also: @strong{--recstart}, @strong{--recend}, @strong{--fifo}, @strong{--cat}, @strong{--pipepart}.
+
+@item @strong{--pipepart} (alpha testing)
+@anchor{@strong{--pipepart} (alpha testing)}
+
+Pipe parts of a physical file. @strong{--pipepart} works similar to
+@strong{--pipe}, but is much faster. It has a few limitations:
+
+@table @asis
+@item *
+@anchor{*}
+
+The file must be a physical (seekable) file and must be given using @strong{-a} or @strong{::::}.
+
+@item *
+@anchor{* 1}
+
+Record counting (@strong{-N}) and line counting (@strong{-L}) do not work.
+
+@end table
 
 @item @strong{--plain}
 @anchor{@strong{--plain}}
@@ -1174,12 +1279,12 @@ will generate the files:
 
 @verbatim
   foo/a/I/b/III/stderr
-  foo/a/I/b/IIII/stderr
-  foo/a/II/b/III/stderr
-  foo/a/II/b/IIII/stderr
   foo/a/I/b/III/stdout
+  foo/a/I/b/IIII/stderr
   foo/a/I/b/IIII/stdout
+  foo/a/II/b/III/stderr
   foo/a/II/b/III/stdout
+  foo/a/II/b/IIII/stderr
   foo/a/II/b/IIII/stdout
 @end verbatim
 
@@ -1193,12 +1298,12 @@ will generate the files:
 
 @verbatim
   foo/1/I/2/III/stderr
-  foo/1/I/2/IIII/stderr
-  foo/1/II/2/III/stderr
-  foo/1/II/2/IIII/stderr
   foo/1/I/2/III/stdout
+  foo/1/I/2/IIII/stderr
   foo/1/I/2/IIII/stdout
+  foo/1/II/2/III/stderr
   foo/1/II/2/III/stdout
+  foo/1/II/2/IIII/stderr
   foo/1/II/2/IIII/stdout
 @end verbatim
 
@@ -1825,8 +1930,8 @@ See also @strong{--header}.
 
 @end table
 
+@node EXAMPLE: Working as xargs -n1. Argument appending
 @chapter EXAMPLE: Working as xargs -n1. Argument appending
-@anchor{EXAMPLE: Working as xargs -n1. Argument appending}
 
 GNU @strong{parallel} can work similar to @strong{xargs -n1}.
 
@@ -1841,8 +1946,8 @@ FUBAR in all files in this dir and subdirs:
 
 Note @strong{-q} is needed because of the space in 'FOO BAR'.
 
+@node EXAMPLE: Reading arguments from command line
 @chapter EXAMPLE: Reading arguments from command line
-@anchor{EXAMPLE: Reading arguments from command line}
 
 GNU @strong{parallel} can take the arguments from command line instead of
 stdin (standard input). To compress all html files in the current dir
@@ -1855,8 +1960,8 @@ run:
 
 @strong{parallel lame @{@} -o @{.@}.mp3 ::: *.wav}
 
+@node EXAMPLE: Inserting multiple arguments
 @chapter EXAMPLE: Inserting multiple arguments
-@anchor{EXAMPLE: Inserting multiple arguments}
 
 When moving a lot of files like this: @strong{mv *.log destdir} you will
 sometimes get the error:
@@ -1872,8 +1977,8 @@ as many arguments that will fit on the line:
 
 @strong{ls | grep -E '\.log$' | parallel -m mv @{@} destdir}
 
+@node EXAMPLE: Context replace
 @chapter EXAMPLE: Context replace
-@anchor{EXAMPLE: Context replace}
 
 To remove the files @emph{pict0000.jpg} .. @emph{pict9999.jpg} you could do:
 
@@ -1894,8 +1999,8 @@ You could also run:
 This will also only run @strong{rm} as many times needed to keep the command
 line length short enough.
 
+@node EXAMPLE: Compute intensive jobs and substitution
 @chapter EXAMPLE: Compute intensive jobs and substitution
-@anchor{EXAMPLE: Compute intensive jobs and substitution}
 
 If ImageMagick is installed this will generate a thumbnail of a jpg
 file:
@@ -1921,8 +2026,8 @@ make files like ./foo/bar_thumb.jpg:
 
 @strong{find . -name '*.jpg' | parallel convert -geometry 120 @{@} @{.@}_thumb.jpg}
 
+@node EXAMPLE: Substitution and redirection
 @chapter EXAMPLE: Substitution and redirection
-@anchor{EXAMPLE: Substitution and redirection}
 
 This will generate an uncompressed version of .gz-files next to the .gz-file:
 
@@ -1937,8 +2042,8 @@ Other special shell characters (such as * ; $ > < | >> <<) also need
 to be put in quotes, as they may otherwise be interpreted by the shell
 and not given to GNU @strong{parallel}.
 
+@node EXAMPLE: Composed commands
 @chapter EXAMPLE: Composed commands
-@anchor{EXAMPLE: Composed commands}
 
 A job can consist of several commands. This will print the number of
 files in each directory:
@@ -1969,8 +2074,8 @@ Find the files in a list that do not exist
 
 @strong{cat file_list | parallel 'if [ ! -e @{@} ] ; then echo @{@}; fi'}
 
+@node EXAMPLE: Calling Bash functions
 @chapter EXAMPLE: Calling Bash functions
-@anchor{EXAMPLE: Calling Bash functions}
 
 If the composed command is longer than a line, it becomes hard to
 read. In Bash you can use functions. Just remember to @strong{export -f} the
@@ -2002,8 +2107,8 @@ To do this on remote servers you need to transfer the function using
   parallel --env doubleit -S server doubleit ::: 1 2 3 ::: a b
 @end verbatim
 
+@node EXAMPLE: Removing file extension when processing files
 @chapter EXAMPLE: Removing file extension when processing files
-@anchor{EXAMPLE: Removing file extension when processing files}
 
 When processing files removing the file extension using @strong{@{.@}} is
 often useful.
@@ -2025,8 +2130,8 @@ Put all converted in the same directory:
 
 @strong{find sounddir -type f -name '*.wav' | parallel lame @{@} -o mydir/@{/.@}.mp3}
 
+@node EXAMPLE: Removing two file extensions when processing files and calling GNU Parallel from itself
 @chapter EXAMPLE: Removing two file extensions when processing files and calling GNU Parallel from itself
-@anchor{EXAMPLE: Removing two file extensions when processing files and calling GNU Parallel from itself}
 
 If you have directory with tar.gz files and want these extracted in
 the corresponding dir (e.g foo.tar.gz will be extracted in the dir
@@ -2034,8 +2139,8 @@ foo) you can do:
 
 @strong{ls *.tar.gz| parallel --er @{tar@} 'echo @{tar@}|parallel "mkdir -p @{.@} ; tar -C @{.@} -xf @{.@}.tar.gz"'}
 
+@node EXAMPLE: Download 10 images for each of the past 30 days
 @chapter EXAMPLE: Download 10 images for each of the past 30 days
-@anchor{EXAMPLE: Download 10 images for each of the past 30 days}
 
 Let us assume a website stores images like:
 
@@ -2051,8 +2156,8 @@ download images for the past 30 days:
 @strong{$(date -d "today -@{1@} days" +%Y%m%d)} will give the dates in
 YYYYMMDD with @{1@} days subtracted.
 
+@node EXAMPLE: Breadth first parallel web crawler/mirrorer
 @chapter EXAMPLE: Breadth first parallel web crawler/mirrorer
-@anchor{EXAMPLE: Breadth first parallel web crawler/mirrorer}
 
 This script below will crawl and mirror a URL in parallel.  It
 downloads first pages that are 1 click down, then 2 clicks down, then
@@ -2098,8 +2203,8 @@ URLs and the process is started over until no unseen links are found.
   rm -f $URLLIST $URLLIST2 $SEEN
 @end verbatim
 
+@node EXAMPLE: Process files from a tar file while unpacking
 @chapter EXAMPLE: Process files from a tar file while unpacking
-@anchor{EXAMPLE: Process files from a tar file while unpacking}
 
 If the files to be processed are in a tar file then unpacking one file
 and processing it immediately may be faster than first unpacking all
@@ -2110,8 +2215,8 @@ parallel echo}
 
 The Perl one-liner is needed to avoid race condition.
 
+@node EXAMPLE: Rewriting a for-loop and a while-read-loop
 @chapter EXAMPLE: Rewriting a for-loop and a while-read-loop
-@anchor{EXAMPLE: Rewriting a for-loop and a while-read-loop}
 
 for-loops like this:
 
@@ -2161,8 +2266,8 @@ can be written like this:
 
 @strong{cat list | parallel "do_something @{@} scale @{.@}.jpg ; do_step2 <@{@} @{.@}" | process_output}
 
+@node EXAMPLE: Rewriting nested for-loops
 @chapter EXAMPLE: Rewriting nested for-loops
-@anchor{EXAMPLE: Rewriting nested for-loops}
 
 Nested for-loops like this:
 
@@ -2192,8 +2297,8 @@ can be written like this:
 
 @strong{parallel echo @{1@} @{2@} ::: M F ::: S M L XL XXL | sort}
 
+@node EXAMPLE: Finding the lowest difference between files
 @chapter EXAMPLE: Finding the lowest difference between files
-@anchor{EXAMPLE: Finding the lowest difference between files}
 
 @strong{diff} is good for finding differences in text files. @strong{diff | wc -l}
 gives an indication of the size of the difference. To find the
@@ -2204,8 +2309,8 @@ differences between all files in the current dir do:
 This way it is possible to see if some files are closer to other
 files.
 
+@node EXAMPLE: for-loops with column names
 @chapter EXAMPLE: for-loops with column names
-@anchor{EXAMPLE: for-loops with column names}
 
 When doing multiple nested for-loops it can be easier to keep track of
 the loop variable if is is named instead of just having a number. Use
@@ -2222,8 +2327,8 @@ This also works if the input file is a file with columns:
   cat addressbook.tsv | parallel --colsep '\t' --header : echo {Name} {E-mail address}
 @end verbatim
 
+@node EXAMPLE: Count the differences between all files in a dir
 @chapter EXAMPLE: Count the differences between all files in a dir
-@anchor{EXAMPLE: Count the differences between all files in a dir}
 
 Using @strong{--results} the results are saved in /tmp/diffcount*.
 
@@ -2234,8 +2339,8 @@ Using @strong{--results} the results are saved in /tmp/diffcount*.
 To see the difference between file A and file B look at the file
 '/tmp/diffcount 1 A 2 B' where spaces are TABs (\t).
 
+@node EXAMPLE: Speeding up fast jobs
 @chapter EXAMPLE: Speeding up fast jobs
-@anchor{EXAMPLE: Speeding up fast jobs}
 
 Starting a job on the local machine takes around 3 ms. This can be a
 big overhead if the job takes very few ms to run. Often you can group
@@ -2260,8 +2365,8 @@ If @strong{-j0} normally spawns 506 jobs, then the above will try to spawn
 of processes and/or filehandles. Look at 'ulimit -n' and 'ulimit -u'
 to raise these limits.
 
+@node EXAMPLE: Using shell variables
 @chapter EXAMPLE: Using shell variables
-@anchor{EXAMPLE: Using shell variables}
 
 When using shell variables you need to quote them correctly as they
 may otherwise be split on spaces.
@@ -2290,8 +2395,8 @@ characters (e.g. space) you can quote them using @strong{'"$VAR"'} or using
  parallel -q echo "$V" ::: spaces
 @end verbatim
 
+@node EXAMPLE: Group output lines
 @chapter EXAMPLE: Group output lines
-@anchor{EXAMPLE: Group output lines}
 
 When running jobs that output data, you often do not want the output
 of multiple jobs to run together. GNU @strong{parallel} defaults to grouping the
@@ -2307,8 +2412,8 @@ to the output of:
 
 @strong{parallel -u traceroute ::: foss.org.my debian.org freenetproject.org}
 
+@node EXAMPLE: Tag output lines
 @chapter EXAMPLE: Tag output lines
-@anchor{EXAMPLE: Tag output lines}
 
 GNU @strong{parallel} groups the output lines, but it can be hard to see
 where the different jobs begin. @strong{--tag} prepends the argument to make
@@ -2320,8 +2425,8 @@ Check the uptime of the servers in @emph{~/.parallel/sshloginfile}:
 
 @strong{parallel --tag -S .. --nonall uptime}
 
+@node EXAMPLE: Keep order of output same as order of input
 @chapter EXAMPLE: Keep order of output same as order of input
-@anchor{EXAMPLE: Keep order of output same as order of input}
 
 Normally the output of a job will be printed as soon as it
 completes. Sometimes you want the order of the output to remain the
@@ -2368,8 +2473,8 @@ combined in the correct order.
 @strong{seq 0 99 | parallel -k curl -r \
     @{@}0000000-@{@}9999999 http://example.com/the/big/file} > @strong{file}
 
+@node EXAMPLE: Parallel grep
 @chapter EXAMPLE: Parallel grep
-@anchor{EXAMPLE: Parallel grep}
 
 @strong{grep -r} greps recursively through directories. On multicore CPUs
 GNU @strong{parallel} can often speed this up.
@@ -2378,8 +2483,8 @@ GNU @strong{parallel} can often speed this up.
 
 This will run 1.5 job per core, and give 1000 arguments to @strong{grep}.
 
+@node EXAMPLE: Using remote computers
 @chapter EXAMPLE: Using remote computers
-@anchor{EXAMPLE: Using remote computers}
 
 To run commands on a remote computer SSH needs to be set up and you
 must be able to login without entering a password (The commands
@@ -2466,8 +2571,8 @@ computer has 8 CPU cores.
   seq 10 | parallel --sshlogin 8/server.example.com echo
 @end verbatim
 
+@node EXAMPLE: Transferring of files
 @chapter EXAMPLE: Transferring of files
-@anchor{EXAMPLE: Transferring of files}
 
 To recompress gzipped files with @strong{bzip2} using a remote computer run:
 
@@ -2553,8 +2658,8 @@ the special short hand @emph{-S ..} can be used:
     --trc {.}.bz2 "zcat {} | bzip2 -9 >{.}.bz2"
 @end verbatim
 
+@node EXAMPLE: Distributing work to local and remote computers
 @chapter EXAMPLE: Distributing work to local and remote computers
-@anchor{EXAMPLE: Distributing work to local and remote computers}
 
 Convert *.mp3 to *.ogg running one process per CPU core on local computer and server2:
 
@@ -2563,8 +2668,8 @@ Convert *.mp3 to *.ogg running one process per CPU core on local computer and se
   'mpg321 -w - {} | oggenc -q0 - -o {.}.ogg' ::: *.mp3
 @end verbatim
 
+@node EXAMPLE: Running the same command on remote computers
 @chapter EXAMPLE: Running the same command on remote computers
-@anchor{EXAMPLE: Running the same command on remote computers}
 
 To run the command @strong{uptime} on remote computers you can do:
 
@@ -2580,8 +2685,8 @@ output.
 
 If you have a lot of hosts use '-j0' to access more hosts in parallel.
 
+@node EXAMPLE: Parallelizing rsync
 @chapter EXAMPLE: Parallelizing rsync
-@anchor{EXAMPLE: Parallelizing rsync}
 
 @strong{rsync} is a great tool, but sometimes it will not fill up the
 available bandwidth. This is often a problem when copying several big
@@ -2603,8 +2708,8 @@ are called digits.png (e.g. 000000.png) you might be able to do:
 
 @strong{seq -w 0 99 | parallel rsync -Havessh fooserver:src-path/*@{@}.png destdir/}
 
+@node EXAMPLE: Use multiple inputs in one command
 @chapter EXAMPLE: Use multiple inputs in one command
-@anchor{EXAMPLE: Use multiple inputs in one command}
 
 Copy files like foo.es.ext to foo.ext:
 
@@ -2632,8 +2737,8 @@ Alternative version:
 
 @strong{find . -type f | sort | parallel convert @{@} @{#@}.png}
 
+@node EXAMPLE: Use a table as input
 @chapter EXAMPLE: Use a table as input
-@anchor{EXAMPLE: Use a table as input}
 
 Content of table_file.tsv:
 
@@ -2657,16 +2762,16 @@ Note: The default for GNU @strong{parallel} is to remove the spaces around the c
 
 @strong{parallel -a table_file.tsv --trim n --colsep '\t' cmd -o @{2@} -i @{1@}}
 
+@node EXAMPLE: Run the same command 10 times
 @chapter EXAMPLE: Run the same command 10 times
-@anchor{EXAMPLE: Run the same command 10 times}
 
 If you want to run the same command with the same arguments 10 times
 in parallel you can do:
 
 @strong{seq 10 | parallel -n0 my_command my_args}
 
+@node EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation
 @chapter EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation
-@anchor{EXAMPLE: Working as cat | sh. Resource inexpensive jobs and evaluation}
 
 GNU @strong{parallel} can work similar to @strong{cat | sh}.
 
@@ -2692,8 +2797,8 @@ To run 100 processes simultaneously do:
 
 As there is not a @emph{command} the jobs will be evaluated by the shell.
 
+@node EXAMPLE: Processing a big file using more cores
 @chapter EXAMPLE: Processing a big file using more cores
-@anchor{EXAMPLE: Processing a big file using more cores}
 
 To process a big file or some output you can use @strong{--pipe} to split up
 the data into blocks and pipe the blocks into the processing program.
@@ -2720,8 +2825,8 @@ files are passed to the second @strong{parallel} that runs @strong{sort -m} on t
 files before it removes the files. The output is saved to
 @strong{bigfile.sort}.
 
+@node EXAMPLE: Running more than 500 jobs workaround
 @chapter EXAMPLE: Running more than 500 jobs workaround
-@anchor{EXAMPLE: Running more than 500 jobs workaround}
 
 If you need to run a massive amount of jobs in parallel, then you will
 likely hit the filehandle limit which is often around 500 jobs. If you
@@ -2736,8 +2841,8 @@ This will spawn up to 250000 jobs (use with caution - you need 250 GB RAM to do 
 
 @strong{cat myinput | parallel --pipe -N 500 --round-robin -j500 parallel -j500 your_prg}
 
+@node EXAMPLE: Working as mutex and counting semaphore
 @chapter EXAMPLE: Working as mutex and counting semaphore
-@anchor{EXAMPLE: Working as mutex and counting semaphore}
 
 The command @strong{sem} is an alias for @strong{parallel --semaphore}.
 
@@ -2775,8 +2880,8 @@ same time:
   seq 3 | parallel sem --id mymutex sed -i -e 'i{}' myfile
 @end verbatim
 
+@node EXAMPLE: Start editor with filenames from stdin (standard input)
 @chapter EXAMPLE: Start editor with filenames from stdin (standard input)
-@anchor{EXAMPLE: Start editor with filenames from stdin (standard input)}
 
 You can use GNU @strong{parallel} to start interactive programs like emacs or vi:
 
@@ -2787,8 +2892,8 @@ You can use GNU @strong{parallel} to start interactive programs like emacs or vi
 If there are more files than will fit on a single command line, the
 editor will be started again with the remaining files.
 
+@node EXAMPLE: Running sudo
 @chapter EXAMPLE: Running sudo
-@anchor{EXAMPLE: Running sudo}
 
 @strong{sudo} requires a password to run a command as root. It caches the
 access, so you only need to enter the password again if you have not
@@ -2816,8 +2921,8 @@ or:
 
 This way you only have to enter the sudo password once.
 
+@node EXAMPLE: GNU Parallel as queue system/batch manager
 @chapter EXAMPLE: GNU Parallel as queue system/batch manager
-@anchor{EXAMPLE: GNU Parallel as queue system/batch manager}
 
 GNU @strong{parallel} can work as a simple job queue system or batch manager.
 The idea is to put the jobs into a file and have GNU @strong{parallel} read
@@ -2846,8 +2951,8 @@ E.g. if you have 10 jobslots then the output from the first completed
 job will only be printed when job 11 has started, and the output of
 second completed job will only be printed when job 12 has started.
 
+@node EXAMPLE: GNU Parallel as dir processor
 @chapter EXAMPLE: GNU Parallel as dir processor
-@anchor{EXAMPLE: GNU Parallel as dir processor}
 
 If you have a dir in which users drop files that needs to be processed
 you can do this on GNU/Linux (If you know what @strong{inotifywait} is
@@ -2872,8 +2977,8 @@ files. Set up the dir processor as above and unpack into the dir.
 Using GNU Parallel as dir processor has the same limitations as using
 GNU Parallel as queue system/batch manager.
 
+@node QUOTING
 @chapter QUOTING
-@anchor{QUOTING}
 
 GNU @strong{parallel} is very liberal in quoting. You only need to quote
 characters that have special meaning in shell:
@@ -3008,8 +3113,8 @@ Or for substituting output:
 easier just to write a small script or a function (remember to
 @strong{export -f} the function) and have GNU @strong{parallel} call that.
 
+@node LIST RUNNING JOBS
 @chapter LIST RUNNING JOBS
-@anchor{LIST RUNNING JOBS}
 
 If you want a list of the jobs currently running you can run:
 
@@ -3018,8 +3123,8 @@ If you want a list of the jobs currently running you can run:
 GNU @strong{parallel} will then print the currently running jobs on stderr
 (standard error).
 
+@node COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
 @chapter COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
-@anchor{COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS}
 
 If you regret starting a lot of jobs you can simply break GNU @strong{parallel},
 but if you want to make sure you do not have half-completed jobs you
@@ -3030,8 +3135,8 @@ should send the signal @strong{SIGTERM} to GNU @strong{parallel}:
 This will tell GNU @strong{parallel} to not start any new jobs, but wait until
 the currently running jobs are finished before exiting.
 
+@node ENVIRONMENT VARIABLES
 @chapter ENVIRONMENT VARIABLES
-@anchor{ENVIRONMENT VARIABLES}
 
 @table @asis
 @item $PARALLEL_PID
@@ -3090,8 +3195,8 @@ must be one argument.
 
 @end table
 
+@node DEFAULT PROFILE (CONFIG FILE)
 @chapter DEFAULT PROFILE (CONFIG FILE)
-@anchor{DEFAULT PROFILE (CONFIG FILE)}
 
 The file ~/.parallel/config (formerly known as .parallelrc) will be
 read if it exists.  Lines starting with '#' will be ignored. It can be
@@ -3102,8 +3207,8 @@ Options on the command line takes precedence over the environment
 variable $PARALLEL which takes precedence over the file
 ~/.parallel/config.
 
+@node PROFILE FILES
 @chapter PROFILE FILES
-@anchor{PROFILE FILES}
 
 If @strong{--profile} set, GNU @strong{parallel} will read the profile from that file instead of
 ~/.parallel/config. You can have multiple @strong{--profiles}.
@@ -3140,8 +3245,8 @@ remote computers:
   parallel -J dist --trc {.}.bz2 bzip2 -9 ::: *
 @end verbatim
 
+@node EXIT STATUS
 @chapter EXIT STATUS
-@anchor{EXIT STATUS}
 
 If @strong{--halt-on-error} 0 or not specified:
 
@@ -3170,15 +3275,32 @@ Other error.
 
 If @strong{--halt-on-error} 1 or 2: Exit status of the failing job.
 
+@node DIFFERENCES BETWEEN GNU Parallel AND ALTERNATIVES
 @chapter DIFFERENCES BETWEEN GNU Parallel AND ALTERNATIVES
-@anchor{DIFFERENCES BETWEEN GNU Parallel AND ALTERNATIVES}
 
 There are a lot programs with some of the functionality of GNU
 @strong{parallel}. GNU @strong{parallel} strives to include the best of the
 functionality without sacrificing ease of use.
 
+@menu
+* SUMMARY TABLE::
+* DIFFERENCES BETWEEN xargs AND GNU Parallel::
+* DIFFERENCES BETWEEN find -exec AND GNU Parallel::
+* DIFFERENCES BETWEEN make -j AND GNU Parallel::
+* DIFFERENCES BETWEEN ppss AND GNU Parallel::
+* DIFFERENCES BETWEEN pexec AND GNU Parallel::
+* DIFFERENCES BETWEEN xjobs AND GNU Parallel::
+* DIFFERENCES BETWEEN prll AND GNU Parallel::
+* DIFFERENCES BETWEEN dxargs AND GNU Parallel::
+* DIFFERENCES BETWEEN mdm/middleman AND GNU Parallel::
+* DIFFERENCES BETWEEN xapply AND GNU Parallel::
+* DIFFERENCES BETWEEN paexec AND GNU Parallel::
+* DIFFERENCES BETWEEN map AND GNU Parallel::
+* DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel::
+@end menu
+
+@node SUMMARY TABLE
 @section SUMMARY TABLE
-@anchor{SUMMARY TABLE}
 
 The following features are in some of the comparable tools:
 
@@ -3308,8 +3430,8 @@ supports (See REPORTING BUGS).
 ClusterSSH: TODO - Please file a bug-report if you know what features ClusterSSH
 supports (See REPORTING BUGS).
 
+@node DIFFERENCES BETWEEN xargs AND GNU Parallel
 @section DIFFERENCES BETWEEN xargs AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN xargs AND GNU Parallel}
 
 @strong{xargs} offer some of the same possibilities as GNU @strong{parallel}.
 
@@ -3384,8 +3506,8 @@ becomes (assuming you have 8 cores)
 
 @strong{ls | xargs -d "\n" -P8 -I @{@} bash -c "echo @{@}; ls @{@}|wc"}
 
+@node DIFFERENCES BETWEEN find -exec AND GNU Parallel
 @section DIFFERENCES BETWEEN find -exec AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN find -exec AND GNU Parallel}
 
 @strong{find -exec} offer some of the same possibilities as GNU @strong{parallel}.
 
@@ -3393,8 +3515,8 @@ becomes (assuming you have 8 cores)
 hosts or URLs) will require creating these inputs as files. @strong{find
 -exec} has no support for running commands in parallel.
 
+@node DIFFERENCES BETWEEN make -j AND GNU Parallel
 @section DIFFERENCES BETWEEN make -j AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN make -j AND GNU Parallel}
 
 @strong{make -j} can run jobs in parallel, but requires a crafted Makefile
 to do this. That results in extra quoting to get filename containing
@@ -3409,8 +3531,8 @@ this.
 (Very early versions of GNU @strong{parallel} were coincidently implemented
 using @strong{make -j}).
 
+@node DIFFERENCES BETWEEN ppss AND GNU Parallel
 @section DIFFERENCES BETWEEN ppss AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN ppss AND GNU Parallel}
 
 @strong{ppss} is also a tool for running jobs in parallel.
 
@@ -3437,8 +3559,12 @@ postprocessing if written using @strong{ppss}.
 For remote systems PPSS requires 3 steps: config, deploy, and
 start. GNU @strong{parallel} only requires one step.
 
+@menu
+* EXAMPLES FROM ppss MANUAL::
+@end menu
+
+@node EXAMPLES FROM ppss MANUAL
 @subsection EXAMPLES FROM ppss MANUAL
-@anchor{EXAMPLES FROM ppss MANUAL}
 
 Here are the examples from @strong{ppss}'s manual page with the equivalent
 using GNU @strong{parallel}:
@@ -3484,8 +3610,8 @@ using GNU @strong{parallel}:
 
 @strong{9} killall -SIGUSR2 parallel
 
+@node DIFFERENCES BETWEEN pexec AND GNU Parallel
 @section DIFFERENCES BETWEEN pexec AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN pexec AND GNU Parallel}
 
 @strong{pexec} is also a tool for running jobs in parallel.
 
@@ -3542,8 +3668,8 @@ faster as only one process will be either reading or writing:
 @strong{8} ls *jpg | parallel -j8 'sem --id diskio cat @{@} | jpegtopnm |' \
   'pnmscale 0.5 | pnmtojpeg | sem --id diskio cat > th_@{@}'
 
+@node DIFFERENCES BETWEEN xjobs AND GNU Parallel
 @section DIFFERENCES BETWEEN xjobs AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN xjobs AND GNU Parallel}
 
 @strong{xjobs} is also a tool for running jobs in parallel. It only supports
 running jobs on your local computer.
@@ -3584,8 +3710,8 @@ cat /var/run/my_named_pipe | parallel &
 echo unzip 1.zip >> /var/run/my_named_pipe;
 echo tar cf /backup/myhome.tar /home/me >> /var/run/my_named_pipe
 
+@node DIFFERENCES BETWEEN prll AND GNU Parallel
 @section DIFFERENCES BETWEEN prll AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN prll AND GNU Parallel}
 
 @strong{prll} is also a tool for running jobs in parallel. It does not
 support running jobs on remote computers.
@@ -3607,8 +3733,8 @@ prll -s 'mogrify -flip $1' *.jpg
 
 parallel mogrify -flip ::: *.jpg
 
+@node DIFFERENCES BETWEEN dxargs AND GNU Parallel
 @section DIFFERENCES BETWEEN dxargs AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN dxargs AND GNU Parallel}
 
 @strong{dxargs} is also a tool for running jobs in parallel.
 
@@ -3616,8 +3742,8 @@ parallel mogrify -flip ::: *.jpg
 MaxStartups. @strong{dxargs} is only built for remote run jobs, but does not
 support transferring of files.
 
+@node DIFFERENCES BETWEEN mdm/middleman AND GNU Parallel
 @section DIFFERENCES BETWEEN mdm/middleman AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN mdm/middleman AND GNU Parallel}
 
 middleman(mdm) is also a tool for running jobs in parallel.
 
@@ -3630,8 +3756,8 @@ to GNU @strong{parallel}:
 
 @strong{find dir -execdir sem cmd @{@} \;}
 
+@node DIFFERENCES BETWEEN xapply AND GNU Parallel
 @section DIFFERENCES BETWEEN xapply AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN xapply AND GNU Parallel}
 
 @strong{xapply} can run jobs in parallel on the local computer.
 
@@ -3686,8 +3812,8 @@ using GNU @strong{parallel}:
 
 @strong{11} parallel '[ -f @{@} ] && echo @{@}' < List | ...
 
+@node DIFFERENCES BETWEEN paexec AND GNU Parallel
 @section DIFFERENCES BETWEEN paexec AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN paexec AND GNU Parallel}
 
 @strong{paexec} can run jobs in parallel on both the local and remote computers.
 
@@ -3743,8 +3869,8 @@ using GNU @strong{parallel}:
 
 @end table
 
+@node DIFFERENCES BETWEEN map AND GNU Parallel
 @section DIFFERENCES BETWEEN map AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN map AND GNU Parallel}
 
 @strong{map} sees it as a feature to have less features and in doing so it
 also handles corner cases incorrectly. A lot of GNU @strong{parallel}'s code
@@ -3837,8 +3963,8 @@ delimiter (only field delimiter), logging of jobs run with possibility
 to resume, keeping the output in the same order as input, --pipe
 processing, and dynamically timeouts.
 
+@node DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel
 @section DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel
-@anchor{DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel}
 
 ClusterSSH solves a different problem than GNU @strong{parallel}.
 
@@ -3857,11 +3983,18 @@ GNU @strong{parallel} can be used as a poor-man's version of ClusterSSH:
 
 @strong{parallel --nonall -S server-a,server-b do_stuff foo bar}
 
+@node BUGS
 @chapter BUGS
-@anchor{BUGS}
 
+@menu
+* Quoting of newline::
+* Speed::
+* --nice limits command length::
+* Aliases and functions do not work::
+@end menu
+
+@node Quoting of newline
 @section Quoting of newline
-@anchor{Quoting of newline}
 
 Because of the way newline is quoted this will not work:
 
@@ -3875,18 +4008,25 @@ echo 1,2,3 | parallel -vkd, "echo 'a'@{@}'b'"
 
 echo 1,2,3 | parallel -vkd, "echo 'a'"@{@}"'b'"
 
+@node Speed
 @section Speed
-@anchor{Speed}
 
+@menu
+* Startup::
+* Job startup::
+* SSH::
+* Disk access::
+@end menu
+
+@node Startup
 @subsection Startup
-@anchor{Startup}
 
 GNU @strong{parallel} is slow at starting up - around 250 ms. Half of the
 startup time is spent finding the maximal length of a command
 line. Setting @strong{-s} will remove this part of the startup time.
 
+@node Job startup
 @subsection Job startup
-@anchor{Job startup}
 
 Starting a job on the local machine takes around 3 ms. This can be a
 big overhead if the job takes very few ms to run. Often you can group
@@ -3895,8 +4035,8 @@ significant.
 
 Using @strong{--ungroup} the 3 ms can be lowered to around 2 ms.
 
+@node SSH
 @subsection SSH
-@anchor{SSH}
 
 When using multiple computers GNU @strong{parallel} opens @strong{ssh} connections
 to them to figure out how many connections can be used reliably
@@ -3908,8 +4048,8 @@ If your jobs are short you may see that there are fewer jobs running
 on the remove systems than expected. This is due to time spent logging
 in and out. @strong{-M} may help here.
 
+@node Disk access
 @subsection Disk access
-@anchor{Disk access}
 
 A single disk can normally read data faster if it reads one file at a
 time instead of reading a lot of files in parallel, as this will avoid
@@ -3936,16 +4076,16 @@ If the jobs are of the form read-compute-read-compute, it may be
 faster to run more jobs in parallel than the system has CPUs, as some
 of the jobs will be stuck waiting for disk access.
 
+@node --nice limits command length
 @section --nice limits command length
-@anchor{--nice limits command length}
 
 The current implementation of @strong{--nice} is too pessimistic in the max
 allowed command length. It only uses a little more than half of what
 it could. This affects @strong{-X} and @strong{-m}. If this becomes a real problem for
 you file a bug-report.
 
+@node Aliases and functions do not work
 @section Aliases and functions do not work
-@anchor{Aliases and functions do not work}
 
 If you get:
 
@@ -3961,8 +4101,8 @@ need to @strong{export -f} the function first. An alias will, however, not
 work (see why http://www.perlmonks.org/index.pl?node_id=484296), so
 change your alias to a script.
 
+@node REPORTING BUGS
 @chapter REPORTING BUGS
-@anchor{REPORTING BUGS}
 
 Report bugs to <bug-parallel@@gnu.org> or
 https://savannah.gnu.org/bugs/?func=additem&group=parallel
@@ -4008,8 +4148,8 @@ will put more burden on you and it is extra important you give any
 information that help. In general the problem will be fixed faster and
 with less work for you if you can reproduce the error on a VirtualBox.
 
+@node AUTHOR
 @chapter AUTHOR
-@anchor{AUTHOR}
 
 When using GNU @strong{parallel} for a publication please cite:
 
@@ -4026,8 +4166,8 @@ and Free Software Foundation, Inc.
 Parts of the manual concerning @strong{xargs} compatibility is inspired by
 the manual of @strong{xargs} from GNU findutils 4.4.2.
 
+@node LICENSE
 @chapter LICENSE
-@anchor{LICENSE}
 
 Copyright (C) 2007,2008,2009,2010,2011,2012,2013 Free Software Foundation,
 Inc.
@@ -4045,8 +4185,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+@menu
+* Documentation license I::
+* Documentation license II::
+@end menu
+
+@node Documentation license I
 @section Documentation license I
-@anchor{Documentation license I}
 
 Permission is granted to copy, distribute and/or modify this documentation
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -4054,8 +4199,8 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
 Texts.  A copy of the license is included in the file fdl.txt.
 
+@node Documentation license II
 @section Documentation license II
-@anchor{Documentation license II}
 
 You are free:
 
@@ -4135,15 +4280,15 @@ license terms of this work.
 
 A copy of the full license is included in the file as cc-by-sa.txt.
 
+@node DEPENDENCIES
 @chapter DEPENDENCIES
-@anchor{DEPENDENCIES}
 
 GNU @strong{parallel} uses Perl, and the Perl modules Getopt::Long,
 IPC::Open3, Symbol, IO::File, POSIX, and File::Temp. For remote usage
 it also uses rsync with ssh.
 
+@node SEE ALSO
 @chapter SEE ALSO
-@anchor{SEE ALSO}
 
 @strong{ssh}(1), @strong{rsync}(1), @strong{find}(1), @strong{xargs}(1), @strong{dirname}(1),
 @strong{make}(1), @strong{pexec}(1), @strong{ppss}(1), @strong{xjobs}(1), @strong{prll}(1),

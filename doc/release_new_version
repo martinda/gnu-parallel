@@ -213,12 +213,26 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140422 ('') released
+Subject: GNU Parallel 20140422 ('세월호') released
 
-GNU Parallel 20140422 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140422 ('세월호') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 
 New in this release:
+
+* --pipepart is a highly efficient alternative to --pipe if the input is a real file and not a pipe.
+
+* If using --cat or --fifo with --pipe the {} in the command will be replaced with the name of a physical file and a fifo respectively containing the block from --pipe. Useful for commands that cannot read from standard input (stdin).
+
+* --controlmaster has gotten an overhaul and is no longer experimental.
+
+* --env is now copied when determining CPUs on remote system. Useful for copying $PATH if parallel is not in the normal path.
+
+* --results now chops the argument if the argument is longer than the allowed path length.
+
+* Build now survives if pod2* are not installed.
+
+* The git repository now contains tags of releases.
 
 * GNU Parallel was cited in: Proactive System for Digital Forensic Investigation http://dspace.library.uvic.ca:8080/bitstream/handle/1828/5237/Alharbi_Soltan_PhD_2014.pdf
 
@@ -232,6 +246,8 @@ New in this release:
 
 * Batch XML validation at the command line. http://horothesia.blogspot.dk/2014/04/batch-xml-validation-at-command-line.html
 
+* freebayes-parallel uses GNU Parallel https://github.com/ekg/freebayes/commit/31ee997984cebe8a196381c3de57e618e34a2281
+
 * Org-mode with Parallel Babel http://draketo.de/english/emacs/parallel-babel#sec-2
 
 * Speeding Up Grep Log Queries with GNU Parallel http://www.cybersecurity.io/speeding-grep-queries-gnu-parallel/
@@ -243,6 +259,8 @@ New in this release:
 * Iterative DNS Brute Forcing http://www.room362.com/blog/2014/02/19/iterative-dns-brute-forcing/
 
 * Ejecutando comandos en paralelo http://jesusmercado.com/guias/ejecutando-comandos-en-paralelo/
+
+* Ejecutando en paralelo en bash (ejemplo con rsync) http://eithel-inside.blogspot.dk/2014/04/ejecutando-en-paralelo-en-bash-ejemplo.html
 
 * Bug fixes and man page updates.
 

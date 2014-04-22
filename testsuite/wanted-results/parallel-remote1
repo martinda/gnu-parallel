@@ -105,16 +105,11 @@ aspire
 ### test --workdir . in $HOME
 OK
 ### test --timeout --retries
-n
-m
-o
-c
-f
-w
-### test --filter-hosts with server w/o ssh, non-existing server, and 5 proxied through the same
-c	
-f	
-m	
-n	
-o	
-w	
+parallel@parallel-server3
+parallel@lo
+parallel@parallel-server2
+### test --filter-hosts with server w/o ssh, non-existing server
+parallel@lo	
+parallel@parallel-server2	
+parallel@parallel-server3	
+### Missing: test --filter-hosts proxied through the one host

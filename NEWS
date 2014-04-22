@@ -1,3 +1,72 @@
+20140422
+
+* --pipepart is a highly efficient alternative to --pipe if the input
+  is a real file and not a pipe.
+
+* If using --cat or --fifo with --pipe the {} in the command will be
+  replaced with the name of a physical file and a fifo respectively
+  containing the block from --pipe. Useful for commands that cannot
+  read from standard input (stdin).
+
+* --controlmaster has gotten an overhaul and is no longer
+  experimental.
+
+* --env is now copied when determining CPUs on remote system. Useful
+  for copying $PATH if parallel is not in the normal path.
+
+* --results now chops the argument if the argument is longer than the
+  allowed path length.
+
+* Build now survives if pod2* are not installed.
+
+* The git repository now contains tags of releases.
+
+* GNU Parallel was cited in: Proactive System for Digital Forensic
+  Investigation
+  http://dspace.library.uvic.ca:8080/bitstream/handle/1828/5237/Alharbi_Soltan_PhD_2014.pdf
+
+* GNU Parallel was cited in: Beyond MAP estimation with the
+  track-oriented multiple hypothesis tracker
+  http://ieeexplore.ieee.org/xpl/abstractReferences.jsp?tp=&arnumber=6766651&url=http%3A%2F%2Fieeexplore.ieee.org%2Fxpls%2Fabs_all.jsp%3Farnumber%3D6766651
+
+* GNU Parallel was cited in: Prokka: rapid prokaryotic genome
+  annotation
+  http://bioinformatics.oxfordjournals.org/content/early/2014/03/18/bioinformatics.btu153.short
+
+* GNU Parallel was used (unfortunately with improper citation) in:
+  Perspectives in magnetic resonance: NMR in the post-FFT era
+  http://www.sciencedirect.com/science/article/pii/S1090780713003054
+
+* GNU Parallel is used in https://github.com/cc2qe/speedseq
+
+* Batch XML validation at the command line.
+  http://horothesia.blogspot.dk/2014/04/batch-xml-validation-at-command-line.html
+
+* freebayes-parallel uses GNU Parallel
+  https://github.com/ekg/freebayes/commit/31ee997984cebe8a196381c3de57e618e34a2281
+
+* Org-mode with Parallel Babel http://draketo.de/english/emacs/parallel-babel#sec-2
+
+* Speeding Up Grep Log Queries with GNU Parallel
+  http://www.cybersecurity.io/speeding-grep-queries-gnu-parallel/
+
+* How to run tbss_2_reg in parallel
+  http://tadpolebrainimaging.blogspot.dk/2014/03/how-to-run-tbss2reg-in-parallel.html
+
+* GNU parallel example: blastn https://asciinema.org/a/8775
+
+* Iterative DNS Brute Forcing
+  http://www.room362.com/blog/2014/02/19/iterative-dns-brute-forcing/
+
+* Ejecutando comandos en paralelo
+  http://jesusmercado.com/guias/ejecutando-comandos-en-paralelo/
+
+* Ejecutando en paralelo en bash (ejemplo con rsync)
+  http://eithel-inside.blogspot.dk/2014/04/ejecutando-en-paralelo-en-bash-ejemplo.html
+
+* Bug fixes and man page updates.
+
+
 20140322
 
 * Offical package for Alpine Linux now exists:
@@ -37,8 +106,6 @@
 
 
 20140222
-
-New in this release:
 
 * --tollef has been retired.
 

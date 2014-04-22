@@ -273,7 +273,7 @@ parallel -k -a <(printf 'def\tabc\njkl\tghi') --colsep '\t' echo {2} {1}
 
 EOF
 
-echo '### Test of -j filename with file content changing'; 
+echo '### Test of -j filename with file content changing (missing -k is correct)'; 
   echo 1 >/tmp/jobs_to_run2; 
   (sleep 3; echo 10 >/tmp/jobs_to_run2) &
   parallel -j /tmp/jobs_to_run2 -v sleep {} ::: 3.3 1.5 1.5 1.5 1.5 1 1 1 1 1 1 1 1 1 1 1

@@ -439,7 +439,7 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
-=item B<--compress> (beta testing)
+=item B<--compress>
 
 Compress temporary files. If the output is big and very compressible
 this will take up less disk space in $TMPDIR and possibly be faster due to less
@@ -450,9 +450,9 @@ B<plzip>, B<bzip2>, B<lzma>, B<lzip>, B<xz> in that order, and use the
 first available.
 
 
-=item B<--compress-program> I<prg> (beta testing)
+=item B<--compress-program> I<prg>
 
-=item B<--decompress-program> I<prg> (beta testing)
+=item B<--decompress-program> I<prg>
 
 Use I<prg> for (de)compressing temporary files. It is assumed that I<prg
 -dc> will decompress stdin (standard input) to stdout (standard
@@ -786,7 +786,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--line-buffer> (beta testing)
+=item B<--line-buffer>
 
 Buffer output on line basis. B<--group> will keep the output together
 for a whole job. B<--ungroup> allows output to mixup with half a line
@@ -913,6 +913,26 @@ If neither B<--recstart> nor B<--recend> are given B<--recend>
 defaults to '\n'. To have no record separator use B<--recend "">.
 
 B<--files> is often used with B<--pipe>.
+
+See also: B<--recstart>, B<--recend>, B<--fifo>, B<--cat>, B<--pipepart>.
+
+
+=item B<--pipepart> (alpha testing)
+
+Pipe parts of a physical file. B<--pipepart> works similar to
+B<--pipe>, but is much faster. It has a few limitations:
+
+=over 3
+
+=item Z<>*
+
+The file must be a physical (seekable) file and must be given using B<-a> or B<::::>.
+
+=item Z<>*
+
+Record counting (B<-N>) and line counting (B<-L>) do not work.
+
+=back
 
 
 =item B<--plain>

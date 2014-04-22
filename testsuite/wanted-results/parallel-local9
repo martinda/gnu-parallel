@@ -354,7 +354,7 @@ abc def
 ghi jkl
 abc def
 ghi jkl
-### Test of -j filename with file content changing
+### Test of -j filename with file content changing (missing -k is correct)
 sleep 3.3
 sleep 1
 sleep 1
