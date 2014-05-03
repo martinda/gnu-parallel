@@ -4,6 +4,10 @@ rm -rf tmp 2>/dev/null
 cp -a input-files/testdir2 tmp
 
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+echo '### Test \0 as recend'; 
+  printf "a\0b\0c\0" | parallel --recend   '\0' -k -N1 --pipe cat -v  \; echo; 
+  printf "\0a\0b\0c" | parallel --recstart '\0' -k -N1 --pipe cat -v  \; echo
+
 echo '### Test filenames containing UTF-8'; 
   cd tmp; 
   find . -name '*.jpg' | nice nice parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}; 

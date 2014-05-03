@@ -537,8 +537,8 @@ sub recstartrecend {
 	$recend = "(?:".$recend.")";
     } else {
 	# $recstart/$recend = printf strings (\n)
-	$recstart =~ s/\\([rnt\'\"\\])/"qq|\\$1|"/gee;
-	$recend =~ s/\\([rnt\'\"\\])/"qq|\\$1|"/gee;
+	$recstart =~ s/\\([0rnt\'\"\\])/"qq|\\$1|"/gee;
+	$recend =~ s/\\([0rnt\'\"\\])/"qq|\\$1|"/gee;
     }
     return ($recstart,$recend);
 }

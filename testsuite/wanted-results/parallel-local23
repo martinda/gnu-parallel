@@ -1,3 +1,10 @@
+### Test \0 as recend
+a^@
+b^@
+c^@
+^@a
+^@b
+^@c
 ### Test filenames containing UTF-8
 .
 ./1-col.txt
