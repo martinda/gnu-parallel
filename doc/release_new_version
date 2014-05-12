@@ -214,9 +214,9 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140522 ('Nej') released
+Subject: GNU Parallel 20140522 ('Boko Haram') released
 
-GNU Parallel 20140522 ('Nej') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140522 ('Boko Haram') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 
 New in this release:
@@ -227,7 +227,11 @@ New in this release:
 
 * BioLite uses GNU Parallel: https://bitbucket.org/caseywdunn/biolite
 
+* Isitdown uses GNU Parallel: http://www.isi.edu/~calvin/isitdown.md
+
 * Convert FLAC to MP3 with GNU parallel http://www.blogobramje.nl/posts/Convert_FLAC_to_MP3_with_GNU_parallel/
+
+* No:The-Me GNU Parallel http://adityalaghate.in/gnu-parallel.html
 
 * Bug fixes and man page updates.
 

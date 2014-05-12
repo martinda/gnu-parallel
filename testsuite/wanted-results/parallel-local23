@@ -1,3 +1,6 @@
+### bug #42329: --line-buffer gives wrong output
+168888897
+78888897
 ### Test \0 as recend
 a^@
 b^@

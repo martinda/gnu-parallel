@@ -4,6 +4,10 @@ rm -rf tmp 2>/dev/null
 cp -a input-files/testdir2 tmp
 
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+echo '### bug #42329: --line-buffer gives wrong output'; 
+  parallel  --line-buffer --tag seq ::: 10000000 | wc -c;
+  parallel  --line-buffer seq ::: 10000000 | wc -c
+
 echo '### Test \0 as recend'; 
   printf "a\0b\0c\0" | parallel --recend   '\0' -k -N1 --pipe cat -v  \; echo; 
   printf "\0a\0b\0c" | parallel --recstart '\0' -k -N1 --pipe cat -v  \; echo
