@@ -168,6 +168,16 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
+=item B<{%}> (experimental)
+
+Job slot number. This replacement string will be replaced by the job's
+sequence number modulo the number of jobs to run in parallel.
+
+The replacement string B<{%}> can be changed with B<--slotreplace>.
+
+To understand replacement strings see B<{}>.
+
+
 =item B<{>I<n>B<}>
 
 Argument from input source I<n> or the I<n>'th argument. This
@@ -395,7 +405,7 @@ I<size> defaults to 1M.
 See B<--pipe> for use of this.
 
 
-=item B<--cat> (alpha testing)
+=item B<--cat> (beta testing)
 
 Create a temporary file with content. Normally B<--pipe> will give
 data to the program on stdin (standard input). With B<--cat> GNU
@@ -553,7 +563,7 @@ See also B<--bg>, B<man sem>.
 Implies B<--semaphore>.
 
 
-=item B<--fifo> (alpha testing)
+=item B<--fifo> (beta testing)
 
 Create a temporary fifo with content. Normally B<--pipe> will give
 data to the program on stdin (standard input). With B<--fifo> GNU
@@ -594,6 +604,8 @@ together, then disabling grouping with B<-u> can speedup GNU
 B<parallel> by a factor of 10.
 
 B<--group> is the default. Can be reversed with B<-u>.
+
+See also: B<--line-buffer> B<--ungroup>
 
 
 =item B<--help>
@@ -786,7 +798,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--line-buffer>
+=item B<--line-buffer> (alpha testing)
 
 Buffer output on line basis. B<--group> will keep the output together
 for a whole job. B<--ungroup> allows output to mixup with half a line
@@ -794,7 +806,11 @@ coming from one job and half a line coming from another
 job. B<--line-buffer> fits between these two: GNU B<parallel> will
 print a full line, but will allow for mixing lines of different jobs.
 
-B<--line-buffer> is slower than both B<--group> and B<--ungroup>.
+B<--line-buffer> takes more CPU power than than both B<--group> and
+B<--ungroup>, but can be faster than B<--group> if the CPU is not the
+limiting factor.
+
+See also: B<--group> B<--ungroup>
 
 
 =item B<--load> I<max-load>
@@ -1076,6 +1092,19 @@ If the stdin (standard input) only contains whitespace, do not run the command.
 If used with B<--pipe> this is slow.
 
 
+=item B<--noswap>
+
+Do not start new jobs on a given computer if there is both swap-in and
+swap-out activity.
+
+The swap activity is only sampled every 10 seconds as the sampling
+takes 1 second to do.
+
+Swap activity is computed as (swap-in)*(swap-out) which in practice is
+a good value: swapping out is not a problem, swapping in is not a
+problem, but both swapping in and out usually indicates a problem.
+
+
 =item B<--record-env>
 
 Record current environment variables in ~/.parallel/ignored_vars. This
@@ -1270,7 +1299,7 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
-=item B<--semaphore>
+=item B<--semaphore> (alpha testing)
 
 Work as a counting semaphore. B<--semaphore> will cause GNU
 B<parallel> to start I<command> in the background. When the number of
@@ -1307,7 +1336,7 @@ Implies B<--semaphore>.
 See also B<man sem>.
 
 
-=item B<--semaphoretimeout> I<secs> (not implemented)
+=item B<--semaphoretimeout> I<secs> (alpha testing)
 
 If the semaphore is not released within secs seconds, take it anyway.
 
@@ -1468,17 +1497,10 @@ The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
 
 
-=item B<--noswap>
+=item B<--slotreplace> I<replace-str>
 
-Do not start new jobs on a given computer if there is both swap-in and
-swap-out activity.
-
-The swap activity is only sampled every 10 seconds as the sampling
-takes 1 second to do.
-
-Swap activity is computed as (swap-in)*(swap-out) which in practice is
-a good value: swapping out is not a problem, swapping in is not a
-problem, but both swapping in and out usually indicates a problem.
+Use the replacement string I<replace-str> instead of B<{%}> for
+job slot number.
 
 
 =item B<--silent>
@@ -1619,6 +1641,8 @@ B<parallel -u -j0 'sleep {};echo -n start{};sleep {};echo {}end' ::: 1 2 3 4>
 
 It also disables B<--tag>. GNU B<parallel> runs faster with B<-u>. Can
 be reversed with B<--group>.
+
+See also: B<--line-buffer> B<--group>
 
 
 =item B<--extensionreplace> I<replace-str>

@@ -190,6 +190,14 @@ when called with @strong{--shebang}).
 
 Size of tables. Show the size of the tables in the database.
 
+@item @strong{--verbose}
+@anchor{@strong{--verbose}}
+
+@item @strong{-v}
+@anchor{@strong{-v}}
+
+Print which command is sent.
+
 @item @strong{--version}
 @anchor{@strong{--version}}
 

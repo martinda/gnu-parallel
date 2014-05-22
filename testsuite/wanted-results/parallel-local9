@@ -110,9 +110,9 @@ cat ... | parallel --pipe [options] [command [arguments]]
 -j n           Run n jobs in parallel
 -k             Keep same order
 -X             Multiple arguments with context replace
---colsep regexp      Split input on regexp for positional replacements
-{} {.} {/} {/.} {#}  Replacement strings
-{3} {3.} {3/} {3/.}  Positional replacement strings
+--colsep regexp         Split input on regexp for positional replacements
+{} {.} {/} {/.} {#} {%} Replacement strings
+{3} {3.} {3/} {3/.}     Positional replacement strings
 
 -S sshlogin    Example: foo@server.example.com
 --slf ..       Use ~/.parallel/sshloginfile as the list of sshlogins

@@ -733,7 +733,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140422;
+    $Global::version = 20140522;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -5167,10 +5167,10 @@ sub print {
 	    # The read is non-blocking: The $in_fh is set to non-blocking.
 	    # 32768 --tag = 5.1s
 	    # 327680 --tag = 4.4s
-	    # 1024000  --tag = 4.4s
+	    # 1024000 --tag = 4.4s
 	    # 3276800 --tag = 4.3s
 	    # 32768000 --tag = 4.7s
-	    # 10240000  --tag = 4.3s
+	    # 10240000 --tag = 4.3s
 	    while(read($in_fh,substr($$partial,length $$partial),3276800)) {
 		# Append to $$partial
 		# Find the last \n

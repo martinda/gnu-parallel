@@ -1,3 +1,40 @@
+20140522
+
+* Use --semaphoretimeout to ignore the semaphore lock after a while.
+
+* {%} introduced as job slot replacement string. It has known bugs.
+
+* --slotreplace changes slot replacement string.
+
+* GNU Parallel officially in Solaris 11.2beta
+  https://blogs.oracle.com/alanc/entry/solaris_11_2_changes_to
+
+* GNU Parallel was cited in: A Comparison of Antenna Placement
+  Algorithms http://abhinavjauhri.com/publications/eap.pdf
+
+* Using GNU Parallel on a PBS cluster (nice use of --shebang-wrap)
+  https://docs.it4i.cz/anselm-cluster-documentation/resource-allocation-and-job-execution/capacity-computing
+
+* BioLite uses GNU Parallel: https://bitbucket.org/caseywdunn/biolite
+
+* Isitdown uses GNU Parallel: http://www.isi.edu/~calvin/isitdown.md
+
+* Convert FLAC to MP3 with GNU parallel
+  http://www.blogobramje.nl/posts/Convert_FLAC_to_MP3_with_GNU_parallel/
+
+* JD Edwards Business Function Documentation
+  http://www.azertech.net/content/jd-edwards-business-function-documentation
+
+* Tools of the trade http://blog.eikeland.se/2014/05/01/tools-of-the-trade/
+
+* How I start a bioinformatics project
+  http://nickloman.github.io/2014/05/14/how-i-start-a-bioinformatics-project/
+
+* No:The-Me GNU Parallel http://adityalaghate.in/gnu-parallel.html
+
+* Bug fixes and man page updates.
+
+
 20140422
 
 * --pipepart is a highly efficient alternative to --pipe if the input
