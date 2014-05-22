@@ -152,6 +152,13 @@ when called with B<--shebang>).
 Size of tables. Show the size of the tables in the database.
 
 
+=item B<--verbose>
+
+=item B<-v>
+
+Print which command is sent.
+
+
 =item B<--version>
 
 =item B<-V>
@@ -533,6 +540,7 @@ if($dburl{'query'}) {
 do {
     if(@ARGV) {
 	$::opt_debug and print "$batch_command\n";
+	$::opt_verbose and print "$batch_command\n";
 	open(M,"| $batch_command") || die("mysql/psql/sqlplus not in path");
 	for(@ARGV) {
 	    s/\\n/\n/g;
@@ -542,9 +550,11 @@ do {
 	close M;
     } elsif (is_stdin_terminal()) {
 	$::opt_debug and print "$interactive_command\n";
+	$::opt_verbose and print "$interactive_command\n";
 	system("$interactive_command");
     } else {
 	$::opt_debug and print "$batch_command\n";
+	$::opt_verbose and print "$batch_command\n";
 	system("$batch_command");
     }
     $err = $?>>8;
@@ -593,6 +603,7 @@ sub parse_options {
 	       # GNU requirements
 	       "help|h" => \$::opt_help,
 	       "version|V" => \$::opt_version,
+	       "verbose|v" => \$::opt_verbose,
 	) || die_usage();
 
     if(defined $::opt_help) { die_usage(); }
