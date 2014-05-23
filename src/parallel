@@ -3599,7 +3599,7 @@ sub no_of_cpus_gnu_linux {
         $no_of_cpus = 0;
         $no_of_cores = 0;
         my %seen;
-        open(my $in_fh, "-|", "cat /proc/cpuinfo") || return undef;
+        open(my $in_fh, "<", "/proc/cpuinfo") || return undef;
         while(<$in_fh>) {
             if(/^physical id.*[:](.*)/ and not $seen{$1}++) {
                 $no_of_cpus++;
@@ -3618,7 +3618,7 @@ sub no_of_cores_gnu_linux {
     my $no_of_cores;
     if(-e "/proc/cpuinfo") {
         $no_of_cores = 0;
-        open(my $in_fh, "-|", "cat /proc/cpuinfo") || return undef;
+        open(my $in_fh, "<", "/proc/cpuinfo") || return undef;
         while(<$in_fh>) {
             /^processor.*[:]/i and $no_of_cores++;
         }

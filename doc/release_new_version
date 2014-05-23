@@ -14,6 +14,7 @@ Modified => alpha
 configure.ac: AC_INIT([parallel], [20100422], [bug-parallel@gnu.org])
 src/parallel: $Global::version = 20100422;
 README: parallel-20130222
+
 YYYYMMDD=`yyyymmdd`
 perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" configure.ac
 perl -i -pe "/version/ and s/20\d\d\d\d\d\d/$YYYYMMDD/" src/parallel
@@ -214,42 +215,25 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140522 ('Boko Haram') released
+Subject: GNU Parallel 20140622 ('Nej') released
 
-GNU Parallel 20140522 ('Boko Haram') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140622 ('Nej') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
+Haiku of the month:
+
+  goodbye to xargs
+  quoting is still a black art
+  welcome parallel
+    -- Malcolm Cook
 
 New in this release:
 
-* Use --semaphoretimeout to ignore the semaphore lock after a while.
-
-* {%} introduced as job slot replacement string. It has known bugs.
-
-* --slotreplace changes slot replacement string.
-
-* GNU Parallel officially in Solaris 11.2beta https://blogs.oracle.com/alanc/entry/solaris_11_2_changes_to
-
-* GNU Parallel was cited in: A Comparison of Antenna Placement Algorithms http://abhinavjauhri.com/publications/eap.pdf
-
-* Using GNU Parallel on a PBS cluster (nice use of --shebang-wrap) https://docs.it4i.cz/anselm-cluster-documentation/resource-allocation-and-job-execution/capacity-computing
-
-* BioLite uses GNU Parallel: https://bitbucket.org/caseywdunn/biolite
-
-* Isitdown uses GNU Parallel: http://www.isi.edu/~calvin/isitdown.md
-
-* Convert FLAC to MP3 with GNU parallel http://www.blogobramje.nl/posts/Convert_FLAC_to_MP3_with_GNU_parallel/
-
-* JD Edwards Business Function Documentation http://www.azertech.net/content/jd-edwards-business-function-documentation
-
-* Tools of the trade http://blog.eikeland.se/2014/05/01/tools-of-the-trade/
-
-* How I start a bioinformatics project http://nickloman.github.io/2014/05/14/how-i-start-a-bioinformatics-project/
-
-* No:The-Me GNU Parallel http://adityalaghate.in/gnu-parallel.html
+* Speeding up grep log queries with GNU Parallel http://www.tripwire.com/state-of-security/incident-detection/speeding-grep-queries-gnu-parallel/
 
 * Bug fixes and man page updates.
 
 GNU Parallel - For people who live life in the parallel lane.
+
 
 = About GNU Parallel =
 
