@@ -228,6 +228,10 @@ Haiku of the month:
 
 New in this release:
 
+* GNU Parallel was cited in: Ferroelectric contributions to anomalous hysteresis in hybrid perovskite solar cells http://arxiv.org/pdf/1405.5810.pdf
+
+* Processes Paralleling to Speed up Computing and Tasks Execution in Linux http://kukuruku.co/hub/nix/processes-paralleling-to-speed-up-computing-and-tasks-execution-in-linux
+
 * Speeding up grep log queries with GNU Parallel http://www.tripwire.com/state-of-security/incident-detection/speeding-grep-queries-gnu-parallel/
 
 * Bug fixes and man page updates.

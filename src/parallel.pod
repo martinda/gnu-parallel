@@ -2583,6 +2583,13 @@ files are passed to the second B<parallel> that runs B<sort -m> on the
 files before it removes the files. The output is saved to
 B<bigfile.sort>.
 
+GNU B<parallel>'s B<--pipe> maxes out at around 100 MB/s because every
+byte has to be copied through GNU B<parallel>. But if B<bigfile> is a
+real (seekable) file GNU B<parallel> can by-pass the copying and send
+the parts directly to the program:
+
+B<parallel --pipepart --block 100m -a bigfile --files sort | parallel -Xj1 sort -m {} ';' rm {} >>B<bigfile.sort>
+
 
 =head1 EXAMPLE: Running more than 500 jobs workaround
 

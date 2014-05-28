@@ -211,14 +211,11 @@ if($opt::halt_on_error) {
 
 sub __PIPE_MODE__ {}
 
-# parallel --part-pipe -a bigfile cat
-# =>
-# (dd 1) | cat
-# (dd 2) | cat
-# (dd 3) | cat
-
-
 sub pipe_part_files {
+    # Input:
+    #   $file = the file to read
+    # Returns:
+    #   @commands to run to pipe the blocks of the file to the command given
     my ($file) = @_;
     # find positions
     my @pos = find_split_positions($file,$opt::blocksize);
@@ -258,13 +255,24 @@ sub find_split_positions {
 	my $buf;
 	seek($fh, $pos, 0) || die;
 	while(read($fh,substr($buf,length $buf,0),$dd_block_size)) {
-	    # If match $recend$recstart => Record position
-	    my $i = index($buf,$recendrecstart);
-	    if($i != -1) {
-		push(@pos,$pos+$i);
-		# Start looking for next record _after_ this match
-		$pos += $i;
-		last;
+	    if($opt::regexp) {
+		# If match /$recend$recstart/ => Record position
+		if($buf =~ /(.*$recend)$recstart/os) {
+		    my $i = length($1);
+		    push(@pos,$pos+$i);
+		    # Start looking for next record _after_ this match
+		    $pos += $i;
+		    last;
+		}
+	    } else {
+		# If match $recend$recstart => Record position
+		my $i = index($buf,$recendrecstart);
+		if($i != -1) {
+		    push(@pos,$pos+$i);
+		    # Start looking for next record _after_ this match
+		    $pos += $i;
+		    last;
+		}
 	    }
 	}
     }
@@ -1303,6 +1311,10 @@ sub shell_quote {
 }
 
 sub shell_quote_empty {
+    # Inputs:
+    #   @strings = strings to be quoted
+    # Returns:
+    #   @quoted_strings = empty strings quoted as ''.
     my @strings = shell_quote(@_);
     for my $a (@strings) {
 	if($a eq "") {
@@ -1344,7 +1356,6 @@ sub shell_quote_file {
     return $a;
 }
 
-
 sub maybe_quote {
     # If $Global::quoting is set then quote the string so shell will not expand any special chars
     # Else do not quote
@@ -1385,9 +1396,13 @@ sub shell_unquote {
         if(not defined $arg) {
             $arg = "";
         }
-        $arg =~ s/'\n'/\n/g; # filenames with '\n' is quoted using \'
+	# filenames with '\n' is quoted using \'\n\'
+        $arg =~ s/'\n'/\n/g;
+	# Non-printables
         $arg =~ s/\\([\002-\011\013-\032])/$1/g;
+	# Shell special chars
         $arg =~ s/\\([\#\?\`\(\)\{\}\*\>\<\~\|\; \"\!\$\&\'])/$1/g;
+	# Backslash
         $arg =~ s/\\\\/\\/g;
     }
     return wantarray ? @strings : "@strings";
@@ -1416,7 +1431,7 @@ sub save_stdin_stdout_stderr {
 }
 
 sub enough_file_handles {
-    # check that we have enough filehandles available for starting
+    # Check that we have enough filehandles available for starting
     # another job
     # Returns:
     #   1 if ungrouped (thus not needing extra filehandles)
@@ -1441,7 +1456,7 @@ sub enough_file_handles {
 }
 
 sub open_or_exit {
-    # Open a file name or exit if the fille cannot be opened
+    # Open a file name or exit if the file cannot be opened
     # Inputs:
     #   $file = filehandle or filename to open
     # Returns:
@@ -1497,8 +1512,10 @@ sub start_more_jobs {
 	return $jobs_started;
     }
     if($Global::max_procs_file) {
+	# --jobs filename
 	my $mtime = (stat($Global::max_procs_file))[9];
 	if($mtime > $Global::max_procs_file_last_mod) {
+	    # file changed: Force re-computing max_jobs_running
 	    $Global::max_procs_file_last_mod = $mtime;
 	    for my $sshlogin (values %Global::host) {
 		$sshlogin->set_max_jobs_running(undef);
@@ -1511,6 +1528,7 @@ sub start_more_jobs {
 	# thus distribute the jobs on the --sshlogins round robin
 	for my $sshlogin (values %Global::host) {
 	    if($Global::JobQueue->empty() and not $opt::pipe) {
+		# No more jobs in the queue
 		last;
 	    }
 	    debug("Running jobs before on ".$sshlogin->string().": ".$sshlogin->jobs_running()."\n");
@@ -1528,7 +1546,7 @@ sub start_more_jobs {
 		    next;
 		}
 		if($opt::delay and $opt::delay > ::now() - $Global::newest_starttime) {
-		    # It has been too short since
+		    # It has been too short since last start
 		    next;
 		}
 		debug($sshlogin->string()." has ".$sshlogin->jobs_running()
