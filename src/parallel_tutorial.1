@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL_TUTORIAL 1"
-.TH PARALLEL_TUTORIAL 1 "2014-01-25" "20140522" "parallel"
+.TH PARALLEL_TUTORIAL 1 "2014-05-31" "20140522" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -483,8 +483,8 @@ Output (the order may be different):
 .Ve
 .SS "Replacement strings"
 .IX Subsection "Replacement strings"
-\fIThe 5 replacement strings\fR
-.IX Subsection "The 5 replacement strings"
+\fIThe 6 replacement strings\fR
+.IX Subsection "The 6 replacement strings"
 .PP
 \&\s-1GNU\s0 Parallel has several replacement strings. If no replacement
 strings are used the default is to append {}:
@@ -572,6 +572,21 @@ Output (the order may be different):
 \&  2
 \&  3
 .Ve
+.PP
+The replacement string {%} gives the job slot number (between 1 and
+number of jobs to run in parallel):
+.PP
+.Vb 1
+\&  parallel \-j 2 echo {%} ::: A B C
+.Ve
+.PP
+Output (the order may be different):
+.PP
+.Vb 3
+\&  1
+\&  2
+\&  1
+.Ve
 .SS "Changing the replacement strings"
 .IX Subsection "Changing the replacement strings"
 The replacement string {} can be changed with \-I:
@@ -646,6 +661,20 @@ Output (the order may be different):
 \&  1
 \&  2
 \&  3
+.Ve
+.PP
+The replacement string {%} can be changed with \-\-slotreplace:
+.PP
+.Vb 1
+\&  parallel \-j2 \-\-slotreplace ,, echo ,, ::: A B C
+.Ve
+.PP
+Output (the order may be different):
+.PP
+.Vb 3
+\&  1
+\&  2
+\&  1
 .Ve
 .SS "Positional replacement strings"
 .IX Subsection "Positional replacement strings"

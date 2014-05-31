@@ -41,7 +41,7 @@
 		<li><a href="#replacement_strings">Replacement strings</a></li>
 		<ul>
 
-			<li><a href="#the_5_replacement_strings">The 5 replacement strings</a></li>
+			<li><a href="#the_6_replacement_strings">The 6 replacement strings</a></li>
 		</ul>
 
 		<li><a href="#changing_the_replacement_strings">Changing the replacement strings</a></li>
@@ -390,7 +390,7 @@ exported using 'export -f':</p>
 <h2><a name="replacement_strings">Replacement strings</a></h2>
 <p>
 </p>
-<h3><a name="the_5_replacement_strings">The 5 replacement strings</a></h3>
+<h3><a name="the_6_replacement_strings">The 6 replacement strings</a></h3>
 <p>GNU Parallel has several replacement strings. If no replacement
 strings are used the default is to append {}:</p>
 <pre>
@@ -436,6 +436,15 @@ strings are used the default is to append {}:</p>
   1
   2
   3</pre>
+<p>The replacement string {%} gives the job slot number (between 1 and
+number of jobs to run in parallel):</p>
+<pre>
+  parallel -j 2 echo {%} ::: A B C</pre>
+<p>Output (the order may be different):</p>
+<pre>
+  1
+  2
+  1</pre>
 <p>
 </p>
 <h2><a name="changing_the_replacement_strings">Changing the replacement strings</a></h2>
@@ -477,6 +486,14 @@ strings are used the default is to append {}:</p>
   1
   2
   3</pre>
+<p>The replacement string {%} can be changed with --slotreplace:</p>
+<pre>
+  parallel -j2 --slotreplace ,, echo ,, ::: A B C</pre>
+<p>Output (the order may be different):</p>
+<pre>
+  1
+  2
+  1</pre>
 <p>
 </p>
 <h2><a name="positional_replacement_strings">Positional replacement strings</a></h2>

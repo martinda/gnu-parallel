@@ -2352,13 +2352,16 @@ sub reaper {
         }
 
         if(not $job->should_be_retried()) {
+	    # The job is done
+	    # Free the jobslot
+	    push @Global::slots, $job->slot();
 	    if($opt::timeout) {
 		# Update average runtime for timeout
 		$Global::timeoutq->update_delta_time($job->runtime());
 	    }
             # Force printing now if the job failed and we are going to exit
-            my $print_now = ($job->exitstatus() and
-                             $opt::halt_on_error and $opt::halt_on_error == 2);
+            my $print_now = ($opt::halt_on_error and $opt::halt_on_error == 2
+			     and $job->exitstatus());
             if($Global::keeporder and not $print_now) {
                 $Private::print_later{$job->seq()} = $job;
                 $Private::job_end_sequence ||= 1;
@@ -4182,6 +4185,11 @@ sub seq {
     return $self->{'commandline'}->seq();
 }
 
+sub slot {
+    my $self = shift;
+    return $self->{'commandline'}->slot();
+}
+
 sub cattail {
     # Returns:
     #   $cattail = perl program for: cattail "decompress program" writerpid [file_to_decompress or stdin] [file_to_unlink]
@@ -5445,11 +5453,14 @@ sub seq {
 
 sub slot {
     my $self = shift;
-    # $Global::max_jobs_running is 0 while computing $Global::max_jobs_running
-    # So assume it is huge
-    my $mod = ($Global::max_jobs_running || 1000000);
-    my $add = $Global::max_jobs_running ? 1 : 0;
-    return ($self->{'seq'} - $add) % $mod + $add;
+    if(not $self->{'slot'}) {
+	if(not @Global::slots) {
+	    # $Global::max_slot_number will typically be $Global::max_jobs_running
+	    push @Global::slots, ++$Global::max_slot_number;
+	}
+	$self->{'slot'} = shift @Global::slots;
+    }
+    return $self->{'slot'};
 }
 
 sub populate {

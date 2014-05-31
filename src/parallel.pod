@@ -168,10 +168,12 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}> (experimental)
+=item B<{%}> (alpha)
 
 Job slot number. This replacement string will be replaced by the job's
-sequence number modulo the number of jobs to run in parallel.
+slot number between 1 and number of jobs to run in parallel. There
+will never be 2 jobs running at the same time with the same job slot
+number.
 
 The replacement string B<{%}> can be changed with B<--slotreplace>.
 
@@ -1224,10 +1226,11 @@ See also B<--joblog>, B<--resume>.
 
 =item B<--retries> I<n>
 
-If a job fails, retry it on another computer. Do this I<n> times. If
-there are fewer than I<n> computers in B<--sshlogin> GNU B<parallel> will
-re-use the computers. This is useful if some jobs fail for no apparent
-reason (such as network failure).
+If a job fails, retry it on another computer on which it has not
+failed. Do this I<n> times. If there are fewer than I<n> computers in
+B<--sshlogin> GNU B<parallel> will re-use all the computers. This is
+useful if some jobs fail for no apparent reason (such as network
+failure).
 
 
 =item B<--return> I<filename>

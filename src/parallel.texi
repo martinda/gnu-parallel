@@ -244,11 +244,13 @@ The replacement string @strong{@{#@}} can be changed with @strong{--seqreplace}.
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{%@}} (experimental)
-@anchor{@strong{@{%@}} (experimental)}
+@item @strong{@{%@}} (alpha)
+@anchor{@strong{@{%@}} (alpha)}
 
 Job slot number. This replacement string will be replaced by the job's
-sequence number modulo the number of jobs to run in parallel.
+slot number between 1 and number of jobs to run in parallel. There
+will never be 2 jobs running at the same time with the same job slot
+number.
 
 The replacement string @strong{@{%@}} can be changed with @strong{--slotreplace}.
 
@@ -1366,10 +1368,11 @@ See also @strong{--joblog}, @strong{--resume}.
 @item @strong{--retries} @emph{n}
 @anchor{@strong{--retries} @emph{n}}
 
-If a job fails, retry it on another computer. Do this @emph{n} times. If
-there are fewer than @emph{n} computers in @strong{--sshlogin} GNU @strong{parallel} will
-re-use the computers. This is useful if some jobs fail for no apparent
-reason (such as network failure).
+If a job fails, retry it on another computer on which it has not
+failed. Do this @emph{n} times. If there are fewer than @emph{n} computers in
+@strong{--sshlogin} GNU @strong{parallel} will re-use all the computers. This is
+useful if some jobs fail for no apparent reason (such as network
+failure).
 
 @item @strong{--return} @emph{filename}
 @anchor{@strong{--return} @emph{filename}}
@@ -2848,6 +2851,13 @@ to @strong{sort} and the output from @strong{sort} is saved into files. These
 files are passed to the second @strong{parallel} that runs @strong{sort -m} on the
 files before it removes the files. The output is saved to
 @strong{bigfile.sort}.
+
+GNU @strong{parallel}'s @strong{--pipe} maxes out at around 100 MB/s because every
+byte has to be copied through GNU @strong{parallel}. But if @strong{bigfile} is a
+real (seekable) file GNU @strong{parallel} can by-pass the copying and send
+the parts directly to the program:
+
+@strong{parallel --pipepart --block 100m -a bigfile --files sort | parallel -Xj1 sort -m @{@} ';' rm @{@} }>@strong{bigfile.sort}
 
 @node EXAMPLE: Running more than 500 jobs workaround
 @chapter EXAMPLE: Running more than 500 jobs workaround
