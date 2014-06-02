@@ -236,6 +236,10 @@ New in this release:
 
 * Speeding up grep log queries with GNU Parallel http://www.tripwire.com/state-of-security/incident-detection/speeding-grep-queries-gnu-parallel/
 
+* Export quicklooks with vector overlay using TuiView http://spectraldifferences.wordpress.com/2014/03/08/export-quicklooks-with-vector-overlay-using-tuiview/
+
+* GNU parallelで違和感 http://jarp.does.notwork.org/diary/201405c.html#201405301
+
 * Bug fixes and man page updates.
 
 GNU Parallel - For people who live life in the parallel lane.
