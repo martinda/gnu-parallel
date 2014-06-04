@@ -38,13 +38,13 @@ parallel -S tcsh@localhost --env SPC echo 'a"$SPC"b' ::: 5
 echo '### Test --env for \n and \\ - single and double (bash only) - no output is good'
 perl -e 'for(10,92) { printf "%c%c %c%d\0",$_,$_,$_,$_ }' | stdout parallel --nice 19 -j4 -k -I // --arg-sep _ -0 V=// V2=V2=// parallel -k -j1 -S 2/:,2/lo --env V,V2 echo \''"{}$V$V2"'\' ::: {#} {#} {#} {#} | sort | uniq -c | grep -v '   4 '|grep -v xauth |grep -v X11
 
-echo '### Test --env for \n and \\ - single and double (*csh only) - no output is good'
+echo '### Test --env for \n and \\ - single and double (*csh only) - no output is good but csh fails'
 perl -e 'for(10,92) { printf "%c%c %c%d\0",$_,$_,$_,$_ }' | stdout parallel --nice 19 -j4 -k -I // --arg-sep _ -0 V=// V2=V2=// parallel -k -j1 -S 2/tcsh@lo,2/csh@lo --env V,V2 echo \''"{}$V$V2"'\' ::: {#} {#} {#} {#} | sort | uniq -c | grep -v '   4 '|grep -v xauth |grep -v X11
 
 echo '### Test --env for \n and \\ - single and double --onall (bash only) - no output is good'
 perl -e 'for(10,92) { printf "%c%c %c%d\0",$_,$_,$_,$_ }' | stdout parallel --nice 19 -j4 -k -I // --arg-sep _ -0 V=// V2=V2=// parallel -k -j1 -S :,lo --onall --env V,V2 echo \''"{}$V$V2"'\' ::: {#} | sort | uniq -c | grep -v '   4 '|grep -v xauth |grep -v X11
 
-echo '### Test --env for \n and \\ - single and double --onall (*csh only) - no output is good'
+echo '### Test --env for \n and \\ - single and double --onall (*csh only) - no output is good but csh fails'
 perl -e 'for(10,92) { printf "%c%c %c%d\0",$_,$_,$_,$_ }' | stdout parallel --nice 19 -j4 -k -I // --arg-sep _ -0 V=// V2=V2=// parallel -k -j1 -S 1/tcsh@lo,1/csh@lo --onall --env V,V2 echo \''"{}$V$V2"'\' ::: {#} | sort | uniq -c | grep -v '   2 '|grep -v xauth |grep -v X11
 
 echo '### Test --env for \160 - which kills csh - single and double - no output is good'

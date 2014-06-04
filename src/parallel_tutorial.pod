@@ -923,7 +923,7 @@ GNU Parallel can base it on the number of CPUs:
 
   parallel --use-cpus-instead-of-cores -N0 sleep 1 ::: {1..128}
 
-=head2 Interactiveness
+=head2 Interactivity
 
 GNU Parallel can ask the user if a command should be run using --interactive:
 
