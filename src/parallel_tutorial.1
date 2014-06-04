@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL_TUTORIAL 1"
-.TH PARALLEL_TUTORIAL 1 "2014-05-31" "20140522" "parallel"
+.TH PARALLEL_TUTORIAL 1 "2014-06-04" "20140522" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -140,8 +140,8 @@ love you for it.
 .SH "Prerequisites"
 .IX Header "Prerequisites"
 To run this tutorial you must have the following:
-.IP "parallel >= version 20130814" 9
-.IX Item "parallel >= version 20130814"
+.IP "parallel >= version 20140622" 9
+.IX Item "parallel >= version 20140622"
 Install the newest version with:
 .Sp
 .Vb 1
@@ -483,8 +483,8 @@ Output (the order may be different):
 .Ve
 .SS "Replacement strings"
 .IX Subsection "Replacement strings"
-\fIThe 6 replacement strings\fR
-.IX Subsection "The 6 replacement strings"
+\fIThe 7 replacement strings\fR
+.IX Subsection "The 7 replacement strings"
 .PP
 \&\s-1GNU\s0 Parallel has several replacement strings. If no replacement
 strings are used the default is to append {}:
@@ -1137,7 +1137,7 @@ Output:
 with half a line of another job. That has happend in the second line,
 where the line '4\-middle' is mixed with '2\-start'.
 .PP
-To avoid this use \-\-linebuffer (which, however, is much slower):
+To avoid this use \-\-linebuffer:
 .PP
 .Vb 1
 \&  parallel \-j2 \-\-linebuffer \*(Aqprintf "%s\-start\en%s" {} {};sleep {};printf "%s\en" \-middle;echo {}\-end\*(Aq ::: 4 2 1
@@ -2675,4 +2675,4 @@ If \s-1GNU\s0 Parallel saves you money:
 .IP "\(bu" 2
 (Have your company) donate to \s-1FSF\s0 https://my.fsf.org/donate/
 .PP
-(C) 20130822 Ole Tange GPLv3
+(C) 20140622 Ole Tange GPLv3

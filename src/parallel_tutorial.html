@@ -41,7 +41,7 @@
 		<li><a href="#replacement_strings">Replacement strings</a></li>
 		<ul>
 
-			<li><a href="#the_6_replacement_strings">The 6 replacement strings</a></li>
+			<li><a href="#the_7_replacement_strings">The 7 replacement strings</a></li>
 		</ul>
 
 		<li><a href="#changing_the_replacement_strings">Changing the replacement strings</a></li>
@@ -128,7 +128,7 @@ love you for it.</p>
 <h1><a name="prerequisites">Prerequisites</a></h1>
 <p>To run this tutorial you must have the following:</p>
 <dl>
-<dt><strong><a name="parallel_version_20130814" class="item">parallel &gt;= version 20130814</a></strong></dt>
+<dt><strong><a name="parallel_version_20140622" class="item">parallel &gt;= version 20140622</a></strong></dt>
 
 <dd>
 <p>Install the newest version with:</p>
@@ -390,7 +390,7 @@ exported using 'export -f':</p>
 <h2><a name="replacement_strings">Replacement strings</a></h2>
 <p>
 </p>
-<h3><a name="the_6_replacement_strings">The 6 replacement strings</a></h3>
+<h3><a name="the_7_replacement_strings">The 7 replacement strings</a></h3>
 <p>GNU Parallel has several replacement strings. If no replacement
 strings are used the default is to append {}:</p>
 <pre>
@@ -785,7 +785,7 @@ total of 5 jobs:</p>
 <p>--ungroup is fast, but can cause half a line from one job to be mixed
 with half a line of another job. That has happend in the second line,
 where the line '4-middle' is mixed with '2-start'.</p>
-<p>To avoid this use --linebuffer (which, however, is much slower):</p>
+<p>To avoid this use --linebuffer:</p>
 <pre>
   parallel -j2 --linebuffer 'printf &quot;%s-start\n%s&quot; {} {};sleep {};printf &quot;%s\n&quot; -middle;echo {}-end' ::: 4 2 1</pre>
 <p>Output:</p>
@@ -1903,7 +1903,7 @@ mailing lists</p>
 <p>(Have your company) donate to FSF <a href="https://my.fsf.org/donate/">https://my.fsf.org/donate/</a></p>
 </li>
 </ul>
-<p>(C) 20130822 Ole Tange GPLv3</p>
+<p>(C) 20140622 Ole Tange GPLv3</p>
 
 </body>
 

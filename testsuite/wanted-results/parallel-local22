@@ -23,3 +23,8 @@ d7fb96d6a56d4347bc24930a395c431a  -
 ### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL
 tcsh 1
 tcsh 2
+### bug #42041: Implement $PARALLEL_JOBSLOT
+1
+2
+1
+2

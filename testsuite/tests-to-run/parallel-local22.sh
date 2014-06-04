@@ -43,4 +43,7 @@ echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop (I
 echo '### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL'; 
   seq 1 2 | SHELL=tcsh MANPATH=. stdout parallel -k --nice 8 setenv a b\;echo \$SHELL
 
+echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
+  parallel -k --slotreplace ,, -j2 echo ,, ::: {1..4}
+
 EOF

@@ -168,7 +168,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}> (alpha)
+=item B<{%}> (alpha testing)
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -1500,7 +1500,7 @@ The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
 
 
-=item B<--slotreplace> I<replace-str>
+=item B<--slotreplace> I<replace-str> (alpha testing)
 
 Use the replacement string I<replace-str> instead of B<{%}> for
 job slot number.

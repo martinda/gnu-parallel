@@ -244,8 +244,8 @@ The replacement string @strong{@{#@}} can be changed with @strong{--seqreplace}.
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{%@}} (alpha)
-@anchor{@strong{@{%@}} (alpha)}
+@item @strong{@{%@}} (alpha testing)
+@anchor{@strong{@{%@}} (alpha testing)}
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -1671,8 +1671,8 @@ The sshloginfile '.' is special, it read sshlogins from
 The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
 
-@item @strong{--slotreplace} @emph{replace-str}
-@anchor{@strong{--slotreplace} @emph{replace-str}}
+@item @strong{--slotreplace} @emph{replace-str} (alpha testing)
+@anchor{@strong{--slotreplace} @emph{replace-str} (alpha testing)}
 
 Use the replacement string @emph{replace-str} instead of @strong{@{%@}} for
 job slot number.
