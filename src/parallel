@@ -5521,12 +5521,12 @@ sub new {
     if($sum == 0) {
 	if($command eq "") {
 	    $command = $Global::replace{'{}'};
-	} elsif($opt::pipe) {
+	} elsif($opt::pipe and not $opt::fifo and not $opt::cat) {
 	    # With --pipe you can have ::: or not
 #	    if(@opt::a) {
 #		$command .=" ".$Global::replace{'{}'};
 #	    }
-	} elsif($opt::pipepart) {
+	} elsif($opt::pipepart and not $opt::fifo and not $opt::cat) {
 	    # With --pipe-part you can have nothing
         } else {
 	    # Add {} to the command if there are no {...}'s
