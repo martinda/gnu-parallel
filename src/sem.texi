@@ -8,18 +8,33 @@
 @node Top
 @top sem
 
+@menu
+* NAME::
+* SYNOPSIS::
+* DESCRIPTION::
+* OPTIONS::
+* EXAMPLE@asis{:} Gzipping *.log::
+* EXAMPLE@asis{:} Protecting pod2html from itself::
+* BUGS::
+* REPORTING BUGS::
+* AUTHOR::
+* LICENSE::
+* DEPENDENCIES::
+* SEE ALSO::
+@end menu
+
+@node NAME
 @chapter NAME
-@anchor{NAME}
 
 sem - semaphore for executing shell command lines in parallel
 
+@node SYNOPSIS
 @chapter SYNOPSIS
-@anchor{SYNOPSIS}
 
 @strong{sem} [--fg] [--id <id>] [--timeout <secs>] [-j <num>] [--wait] command
 
+@node DESCRIPTION
 @chapter DESCRIPTION
-@anchor{DESCRIPTION}
 
 GNU @strong{sem} is an alias for GNU @strong{parallel --semaphore}.
 
@@ -33,8 +48,8 @@ Before looking at the options you may want to check out the examples
 after the list of options. That will give you an idea of what GNU
 @strong{sem} is capable of.
 
+@node OPTIONS
 @chapter OPTIONS
-@anchor{OPTIONS}
 
 @table @asis
 @item @emph{command}
@@ -173,8 +188,8 @@ Wait for all commands to complete.
 
 @end table
 
+@node EXAMPLE: Gzipping *.log
 @chapter EXAMPLE: Gzipping *.log
-@anchor{EXAMPLE: Gzipping *.log}
 
 Run one gzip process per CPU core. Block until a CPU core becomes
 available.
@@ -187,8 +202,8 @@ available.
   sem --wait
 @end verbatim
 
+@node EXAMPLE: Protecting pod2html from itself
 @chapter EXAMPLE: Protecting pod2html from itself
-@anchor{EXAMPLE: Protecting pod2html from itself}
 
 pod2html creates two files: pod2htmd.tmp and pod2htmi.tmp which it
 does not clean up. It uses these two files for a short time. But if
@@ -201,24 +216,24 @@ time. @strong{sem} running as a mutex will do just that:
   sem --fg --id pod2html rm -f pod2htmd.tmp pod2htmi.tmp
 @end verbatim
 
+@node BUGS
 @chapter BUGS
-@anchor{BUGS}
 
 None known.
 
+@node REPORTING BUGS
 @chapter REPORTING BUGS
-@anchor{REPORTING BUGS}
 
 Report bugs to <bug-parallel@@gnu.org>.
 
+@node AUTHOR
 @chapter AUTHOR
-@anchor{AUTHOR}
 
 Copyright (C) 2010,2011,2012,2013 Ole Tange, http://ole.tange.dk and Free
 Software Foundation, Inc.
 
+@node LICENSE
 @chapter LICENSE
-@anchor{LICENSE}
 
 Copyright (C) 2010,2011,2012,2013 Free Software Foundation, Inc.
 
@@ -235,8 +250,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+@menu
+* Documentation license I::
+* Documentation license II::
+@end menu
+
+@node Documentation license I
 @section Documentation license I
-@anchor{Documentation license I}
 
 Permission is granted to copy, distribute and/or modify this documentation
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -244,8 +264,8 @@ any later version published by the Free Software Foundation; with no
 Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
 Texts.  A copy of the license is included in the file fdl.txt.
 
+@node Documentation license II
 @section Documentation license II
-@anchor{Documentation license II}
 
 You are free:
 
@@ -325,14 +345,14 @@ license terms of this work.
 
 A copy of the full license is included in the file as cc-by-sa.txt.
 
+@node DEPENDENCIES
 @chapter DEPENDENCIES
-@anchor{DEPENDENCIES}
 
 GNU @strong{sem} uses Perl, and the Perl modules Getopt::Long,
 Symbol, Fcntl.
 
+@node SEE ALSO
 @chapter SEE ALSO
-@anchor{SEE ALSO}
 
 @strong{parallel}(1)
 

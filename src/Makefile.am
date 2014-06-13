@@ -111,7 +111,11 @@ niceload.pdf: niceload.pod
 sem: parallel
 	ln -fs parallel sem
 
-DISTCLEANFILES =
+DISTCLEANFILES = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 \
+	parallel.html sem.html sql.html niceload.html parallel_tutorial.html \
+	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi \
+	parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
+
 EXTRA_DIST = parallel sem sql niceload \
 	parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 \
 	parallel.html sem.html sql.html niceload.html parallel_tutorial.html \
