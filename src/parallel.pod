@@ -2328,6 +2328,10 @@ If the login username is I<foo> on I<server2.example.net> use:
   seq 10 | parallel --sshlogin server.example.com \
     --sshlogin foo@server2.example.net echo
 
+If your list of hosts is I<server1-88.example.net> with login I<foo>:
+
+  seq 10 | parallel -Sfoo@server{1..88}.example.net echo
+
 To distribute the commands to a list of computers, make a file
 I<mycomputers> with all the computers:
 

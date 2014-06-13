@@ -2562,6 +2562,12 @@ If the login username is @emph{foo} on @emph{server2.example.net} use:
     --sshlogin foo@server2.example.net echo
 @end verbatim
 
+If your list of hosts is @emph{server1-88.example.net} with login @emph{foo}:
+
+@verbatim
+  seq 10 | parallel -Sfoo@server{1..88}.example.net echo
+@end verbatim
+
 To distribute the commands to a list of computers, make a file
 @emph{mycomputers} with all the computers:
 

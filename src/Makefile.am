@@ -2,57 +2,69 @@ bin_SCRIPTS = parallel sem sql niceload
 man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1
 doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
 
-parallel.1: parallel.pod Makefile
+# Build documentation file if the tool to build exists.
+# Otherwise: Use the distributed version
+parallel.1: parallel.pod
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 $(srcdir)/parallel.pod > $(srcdir)/parallel.1 \
+		--section=1 $(srcdir)/parallel.pod > $(srcdir)/parallel.1n \
+	&& mv $(srcdir)/parallel.1n $(srcdir)/parallel.1 \
 	|| echo "Warning: pod2man not found. Using old parallel.1"
 
-parallel_tutorial.1: parallel_tutorial.pod Makefile
+parallel_tutorial.1: parallel_tutorial.pod
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.1 \
+		--section=1 $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.1n \
+	&& mv $(srcdir)/parallel_tutorial.1n $(srcdir)/parallel_tutorial.1 \
 	|| echo "Warning: pod2man not found. Using old parallel_tutorial.1"
 
-sem.1: sem.pod Makefile
+sem.1: sem.pod
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 $(srcdir)/sem.pod > $(srcdir)/sem.1 \
+		--section=1 $(srcdir)/sem.pod > $(srcdir)/sem.1n \
+	&& mv $(srcdir)/sem.1n $(srcdir)/sem.1 \
 	|| echo "Warning: pod2man not found. Using old sem.1"
 
-sql.1: sql Makefile
+sql.1: sql
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 $(srcdir)/sql > $(srcdir)/sql.1 \
+		--section=1 $(srcdir)/sql > $(srcdir)/sql.1n \
+	&& mv $(srcdir)/sql.1n $(srcdir)/sql.1 \
 	|| echo "Warning: pod2man not found. Using old sql.1"
 
-niceload.1: niceload.pod Makefile
+niceload.1: niceload.pod
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 $(srcdir)/niceload.pod > $(srcdir)/niceload.1 \
+		--section=1 $(srcdir)/niceload.pod > $(srcdir)/niceload.1n \
+	&& mv $(srcdir)/niceload.1n $(srcdir)/niceload.1 \
 	|| echo "Warning: pod2man not found. Using old niceload.1"
 
-parallel.html: parallel.pod Makefile
-	pod2html $(srcdir)/parallel.pod > $(srcdir)/parallel.html \
+parallel.html: parallel.pod
+	pod2html $(srcdir)/parallel.pod > $(srcdir)/parallel.htmln \
+	&& mv $(srcdir)/parallel.htmln $(srcdir)/parallel.html \
 	|| echo "Warning: pod2html not found. Using old parallel.html"
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on parallel.html to avoid stupid pod2html race condition
-parallel_tutorial.html: parallel_tutorial.pod Makefile parallel.html
-	pod2html $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.html \
+parallel_tutorial.html: parallel_tutorial.pod parallel.html
+	pod2html $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.htmln \
+	&& mv $(srcdir)/parallel_tutorial.htmln $(srcdir)/parallel_tutorial.html \
 	|| echo "Warning: pod2html not found. Using old parallel_tutorial.html"
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on parallel_tutorial.html to avoid stupid pod2html race condition
-sem.html: sem.pod Makefile parallel_tutorial.html
-	pod2html $(srcdir)/sem.pod > $(srcdir)/sem.html \
+sem.html: sem.pod parallel_tutorial.html
+	pod2html $(srcdir)/sem.pod > $(srcdir)/sem.htmln \
+	&& mv $(srcdir)/sem.htmln $(srcdir)/sem.html \
 	|| echo "Warning: pod2html not found. Using old sem.html"
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on sem.html to avoid stupid pod2html race condition
-sql.html: sql Makefile sem.html
-	pod2html $(srcdir)/sql > $(srcdir)/sql.html \
+sql.html: sql sem.html
+	pod2html $(srcdir)/sql > $(srcdir)/sql.htmln \
+	&& mv $(srcdir)/sql.htmln $(srcdir)/sql.html \
 	|| echo "Warning: pod2html not found. Using old sql.html"
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on sql.html to avoid stupid pod2html race condition
-niceload.html: niceload.pod Makefile sql.html
-	pod2html $(srcdir)/niceload.pod > $(srcdir)/niceload.html \
+niceload.html: niceload.pod sql.html
+	pod2html $(srcdir)/niceload.pod > $(srcdir)/niceload.htmln \
+	&& mv $(srcdir)/niceload.htmln $(srcdir)/niceload.html \
 	|| echo "Warning: pod2html not found. Using old niceload.html"
 	rm -f $(srcdir)/pod2htm*
 
@@ -99,7 +111,7 @@ niceload.pdf: niceload.pod
 sem: parallel
 	ln -fs parallel sem
 
-DISTCLEANFILES = parallel.html sem.html sql.html niceload.html parallel_tutorial.html
+DISTCLEANFILES =
 EXTRA_DIST = parallel sem sql niceload \
 	parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 \
 	parallel.html sem.html sql.html niceload.html parallel_tutorial.html \
