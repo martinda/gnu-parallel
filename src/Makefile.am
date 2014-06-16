@@ -1,6 +1,9 @@
 bin_SCRIPTS = parallel sem sql niceload
+
+if DOCUMENTATION
 man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1
 doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
+endif
 
 # Build documentation file if the tool to build exists.
 # Otherwise: Use the distributed version

@@ -5,4 +5,11 @@ AC_CONFIG_FILES([
   Makefile
   src/Makefile
 ])
+
+AC_ARG_ENABLE(documentation,
+  AC_HELP_STRING([--disable-documentation],
+		 [Omit building and installing the documentation. (default=no)]),,
+		 [enable_documentation=yes])
+AM_CONDITIONAL([DOCUMENTATION], [test x$enable_documentation = xyes])
+
 AC_OUTPUT
