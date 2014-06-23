@@ -1526,6 +1526,16 @@ Like this:
 
 @strong{--shebang} must be set as the first option.
 
+On FreeBSD @strong{env} is needed:
+
+@verbatim
+  #!/usr/bin/env -S parallel --shebang -r traceroute
+
+  foss.org.my
+  debian.org
+  freenetproject.org
+@end verbatim
+
 @item @strong{--shebang-wrap}
 @anchor{@strong{--shebang-wrap}}
 
@@ -2426,16 +2436,21 @@ characters (e.g. space) you can quote them using @strong{'"$VAR"'} or using
 @chapter EXAMPLE: Group output lines
 
 When running jobs that output data, you often do not want the output
-of multiple jobs to run together. GNU @strong{parallel} defaults to grouping the
-output of each job, so the output is printed when the job finishes. If
-you want the output to be printed while the job is running you can use
-@strong{-u}.
+of multiple jobs to run together. GNU @strong{parallel} defaults to grouping
+the output of each job, so the output is printed when the job
+finishes. If you want full lines to be printed while the job is
+running you can use @strong{--line-buffer}. If you want output to be
+printed as soon as possible you can use @strong{-u}.
 
 Compare the output of:
 
 @strong{parallel traceroute ::: foss.org.my debian.org freenetproject.org}
 
 to the output of:
+
+@strong{parallel --line-buffer traceroute ::: foss.org.my debian.org freenetproject.org}
+
+and:
 
 @strong{parallel -u traceroute ::: foss.org.my debian.org freenetproject.org}
 
@@ -2447,6 +2462,10 @@ where the different jobs begin. @strong{--tag} prepends the argument to make
 that more visible:
 
 @strong{parallel --tag traceroute ::: foss.org.my debian.org freenetproject.org}
+
+@strong{--tag} works with @strong{--line-buffer} but not with @strong{-u}:
+
+@strong{parallel --tag --line-buffer traceroute ::: foss.org.my debian.org freenetproject.org}
 
 Check the uptime of the servers in @emph{~/.parallel/sshloginfile}:
 

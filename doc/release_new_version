@@ -234,7 +234,11 @@ New in this release:
 
 * Processes Paralleling to Speed up Computing and Tasks Execution in Linux http://kukuruku.co/hub/nix/processes-paralleling-to-speed-up-computing-and-tasks-execution-in-linux
 
+* Moving / Copying lots of s3 files quickly using gnu parallel http://blog.aclarke.eu/moving-copying-lots-of-s3-files-quickly-using-gnu-parallel/
+
 * Speeding up grep log queries with GNU Parallel http://www.tripwire.com/state-of-security/incident-detection/speeding-grep-queries-gnu-parallel/
+
+* Ubuntu - Gnu parallel - It's awesome http://kasunweranga.blogspot.dk/2014/06/ubuntu-gnu-parallel-its-awesome.html
 
 * Export quicklooks with vector overlay using TuiView http://spectraldifferences.wordpress.com/2014/03/08/export-quicklooks-with-vector-overlay-using-tuiview/
 

@@ -1372,6 +1372,14 @@ Like this:
 
 B<--shebang> must be set as the first option.
 
+On FreeBSD B<env> is needed:
+
+  #!/usr/bin/env -S parallel --shebang -r traceroute
+
+  foss.org.my
+  debian.org
+  freenetproject.org
+
 
 =item B<--shebang-wrap>
 
@@ -2202,16 +2210,21 @@ characters (e.g. space) you can quote them using B<'"$VAR"'> or using
 =head1 EXAMPLE: Group output lines
 
 When running jobs that output data, you often do not want the output
-of multiple jobs to run together. GNU B<parallel> defaults to grouping the
-output of each job, so the output is printed when the job finishes. If
-you want the output to be printed while the job is running you can use
-B<-u>.
+of multiple jobs to run together. GNU B<parallel> defaults to grouping
+the output of each job, so the output is printed when the job
+finishes. If you want full lines to be printed while the job is
+running you can use B<--line-buffer>. If you want output to be
+printed as soon as possible you can use B<-u>.
 
 Compare the output of:
 
 B<parallel traceroute ::: foss.org.my debian.org freenetproject.org>
 
 to the output of:
+
+B<parallel --line-buffer traceroute ::: foss.org.my debian.org freenetproject.org>
+
+and:
 
 B<parallel -u traceroute ::: foss.org.my debian.org freenetproject.org>
 
@@ -2223,6 +2236,10 @@ where the different jobs begin. B<--tag> prepends the argument to make
 that more visible:
 
 B<parallel --tag traceroute ::: foss.org.my debian.org freenetproject.org>
+
+B<--tag> works with B<--line-buffer> but not with B<-u>:
+
+B<parallel --tag --line-buffer traceroute ::: foss.org.my debian.org freenetproject.org>
 
 Check the uptime of the servers in I<~/.parallel/sshloginfile>:
 
@@ -3963,3 +3980,4 @@ B<make>(1), B<pexec>(1), B<ppss>(1), B<xjobs>(1), B<prll>(1),
 B<dxargs>(1), B<mdm>(1)
 
 =cut
+

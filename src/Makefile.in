@@ -175,8 +175,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 bin_SCRIPTS = parallel sem sql niceload
-man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1
-doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
+@DOCUMENTATION_TRUE@man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1
+@DOCUMENTATION_TRUE@doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
 DISTCLEANFILES = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 \
 	parallel.html sem.html sql.html niceload.html parallel_tutorial.html \
 	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi \
