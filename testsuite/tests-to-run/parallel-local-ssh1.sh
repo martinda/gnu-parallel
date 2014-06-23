@@ -11,10 +11,15 @@ echo '### bug #41964: --controlmaster not seems to reuse OpenSSH connections to 
   wait
 
 echo '### bug #41805: Idea: propagate --env for parallel --number-of-cores'
-  FOO=test_csh_filter parallel --filter-hosts --env FOO,PATH -S csh@lo env ::: "" |egrep 'FOO|PATH'
-  FOO=test_csh parallel --env FOO,PATH -S csh@lo env ::: "" |egrep 'FOO|PATH'
-  FOO=test_zsh_filter parallel --filter-hosts --env FOO,PATH -S zsh@lo env ::: "" |egrep 'FOO|PATH'
-  FOO=test_zsh parallel --env FOO,PATH -S zsh@lo env ::: "" |egrep 'FOO|PATH'
+  echo '** test_zsh'
+  FOO=test_zsh parallel --env FOO,PATH -S zsh@lo env ::: "" |sort|egrep 'FOO|PATH'
+  echo '** test_zsh_filter'
+  FOO=test_zsh_filter parallel --filter-hosts --env FOO,PATH -S zsh@lo env ::: "" |sort|egrep 'FOO|PATH'
+  echo '** test_csh'
+  FOO=test_csh parallel --env FOO,PATH -S csh@lo env ::: "" |sort|egrep 'FOO|PATH'
+  echo '** test_csh_filter'
+  FOO=test_csh_filter parallel --filter-hosts --env FOO,PATH -S csh@lo env ::: "" |sort|egrep 'FOO|PATH'
+  echo '** bug #41805 done'
 
 echo '### Deal with long command lines on remote servers'
   perl -e 'print((("\""x10000)."\n")x10)' | parallel -j1 -S lo -N 10000 echo {} |wc
@@ -23,8 +28,10 @@ echo '### Test bug #34241: --pipe should not spawn unneeded processes'
   seq 5 | ssh csh@lo parallel -k --block 5 --pipe -j10 cat\\\;echo Block_end
 
 echo '### --env _'
+  fUbAr="OK FUBAR" parallel -S parallel@lo --env _ echo '$fUbAr $DEBEMAIL' ::: test
   fUbAr="OK FUBAR" parallel -S csh@lo --env _ echo '$fUbAr $DEBEMAIL' ::: test
 echo '### --env _ with explicit mentioning of normally ignored var $DEBEMAIL'
+  fUbAr="OK FUBAR" parallel -S parallel@lo --env DEBEMAIL,_ echo '$fUbAr $DEBEMAIL' ::: test
   fUbAr="OK FUBAR" parallel -S csh@lo --env DEBEMAIL,_ echo '$fUbAr $DEBEMAIL' ::: test
 
 echo 'bug #40137: SHELL not bash: Warning when exporting funcs'

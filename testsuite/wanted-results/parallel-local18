@@ -3,31 +3,26 @@ a  2  spaces  b 1
 a  2  spaces  b 1
 a  2  spaces  b 1
 a  2  spaces  b 1
-MANPATH: Undefined variable.
 a  2  spaces  b 1
 a  2  spaces  b a >  My brother's 12" records  < b 2
 a  2  spaces  b a >  My brother's 12" records  < b 2
 a  2  spaces  b a >  My brother's 12" records  < b 2
 a  2  spaces  b a >  My brother's 12" records  < b 2
-MANPATH: Undefined variable.
 a  2  spaces  b a >  My brother's 12" records  < b 2
 a  2  spaces  b a >  My brother's 12" records  < b 3
 a  2  spaces  b a >  My brother's 12" records  < b 3
 a  2  spaces  b a >  My brother's 12" records  < b 3
 a  2  spaces  b a >  My brother's 12" records  < b 3
-MANPATH: Undefined variable.
 a  2  spaces  b a >  My brother's 12" records  < b 3
 a  \'"b 4
 a  \'"b 4
 a  \'"b 4
 a  \'"b 4
-MANPATH: Undefined variable.
 a  \'"b 4
 a'   * ? >o  <i*? ][\!#Â¤%=( ) | }b 5
 a'   * ? >o  <i*? ][\!#Â¤%=( ) | }b 5
 a'   * ? >o  <i*? ][\!#Â¤%=( ) | }b 5
 a'   * ? >o  <i*? ][\!#Â¤%=( ) | }b 5
-MANPATH: Undefined variable.
 a'   * ? >o  <i*? ][\!#Â¤%=( ) | }b 5
 ### Test --env for \n and \\ - single and double (bash only) - no output is good
       8 
@@ -50,10 +45,4 @@ a'   * ? >o  <i*? ][\!#Â¤%=( ) | }b 5
       4 Unmatched ".
       8 \ : Command not found.
 ### Test --env for \160 - which kills csh - single and double - no output is good
-      2 1    160V2=    160
-      1 MANPATH: Undefined variable.
-      1 1    160V2=    160
 ### Test --env for \160  - which kills csh - single and double --onall - no output is good
-      2 1    160V2=    160
-      1 MANPATH: Undefined variable.
-      1 1    160V2=    160

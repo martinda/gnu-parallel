@@ -1,12 +1,14 @@
 ### --filter-hosts --slf <()
 OK
-### --wd no-such-dir
+### --wd no-such-dir - csh
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
-bash: line 0: cd: /no-such-dir: No such file or directory
+/no-such-dir: No such file or directory.
 Exit code 1
+### --wd no-such-dir - tcsh
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
-bash: line 0: cd: /no-such-dir: No such file or directory
+/no-such-dir: No such file or directory.
 Exit code 1
+### --wd no-such-dir - bash
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
 bash: line 0: cd: /no-such-dir: No such file or directory
 Exit code 1

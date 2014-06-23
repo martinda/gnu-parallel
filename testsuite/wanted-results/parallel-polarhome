@@ -2,6 +2,7 @@
 Setup on polarhome machines
 copy_and_test minix.polarhome.com
 minix.polarhome.com	### Run the test on minix.polarhome.com
+minix.polarhome.com	Works on minix.polarhome.com
 copy_and_test freebsd.polarhome.com
 freebsd.polarhome.com	### Run the test on freebsd.polarhome.com
 freebsd.polarhome.com	Works on freebsd.polarhome.com

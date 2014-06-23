@@ -54,7 +54,7 @@ echo '### --header num --round-robin'
   (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header 2  echo JOB{#}\;wc | sort
 
 echo '### shebang-wrap'
-  nice nice parallel -k {} A B C ::: ./input-files/shebang/shebangwrap.*[^~]
+  nice nice parallel -k {} {} A B C ::: ./input-files/shebang/shebangwrap.*[^~]
 
 EOF
 

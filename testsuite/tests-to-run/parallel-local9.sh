@@ -13,10 +13,10 @@ echo 'bug #41613: --compress --line-buffer no --tagstring';
   diff 
     <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
       parallel -N10 -L1 --pipe -j6 --block 20M --compress 
-      pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
+      pv -qL 1000000 | perl -pe 's/(....).*/$1/') 
     <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
       parallel -N10 -L1 --pipe -j6 --block 20M --compress --line-buffer 
-      pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
+      pv -qL 1000000 | perl -pe 's/(....).*/$1/') 
     >/dev/null 
   || (echo 'Good: --line-buffer matters'; false) && echo 'Bad: --line-buffer not working'
 
@@ -24,10 +24,10 @@ echo 'bug #41613: --compress --line-buffer with --tagstring';
   diff 
     <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
       parallel -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} 
-      pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
+      pv -qL 1000000 | perl -pe 's/(....).*/$1/') 
     <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
       parallel -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} --line-buffer 
-      pv -qL 3000000 | perl -pe 's/(....).*/$1/') 
+      pv -qL 1000000 | perl -pe 's/(....).*/$1/') 
     >/dev/null 
   || (echo 'Good: --line-buffer matters'; false) && echo 'Bad: --line-buffer not working'
 

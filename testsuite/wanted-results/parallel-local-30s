@@ -12,5 +12,5 @@
 **
 ### Test --tmpdir running full. bug #40733 was caused by this
 parallel: Error: Output is incomplete. Cannot append to buffer file in $TMPDIR. Is the disk full?
-parallel: Error: Change $TMPDIR with --tmpdir.
+parallel: Error: Change $TMPDIR with --tmpdir or use --compress.
 **

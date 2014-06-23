@@ -23,3 +23,18 @@ bug #40133: FreeBSD: --round-robin gives no output
   235145  235145 1646016
   299593  299593 2097151
   315465  315465 2097150
+bug #40134: FreeBSD: --shebang not working
+It
+worked
+bug #40134: FreeBSD: --shebang(-wrap) not working
+wrap
+works
+bug #40134: FreeBSD: --shebang(-wrap) with options not working
+/usr/bin/perl -w ./shebang-wrap wrap
+wrap
+/usr/bin/perl -w ./shebang-wrap works
+works
+/usr/bin/perl -w ./shebang-wrap with
+with
+/usr/bin/perl -w ./shebang-wrap options
+options

@@ -105,24 +105,31 @@ JOB
 JOB1
 JOB2
 ### shebang-wrap
+./input-files/shebang/shebangwrap.oct
 A
 B
 C
+./input-files/shebang/shebangwrap.pl
 A
 B
 C
+./input-files/shebang/shebangwrap.py
 A
 B
 C
+[1] "./input-files/shebang/shebangwrap.r"
 [1] "A"
 [1] "B"
 [1] "C"
+["./input-files/shebang/shebangwrap.rb"]
 ["A"]
 ["B"]
 ["C"]
+./input-files/shebang/shebangwrap.sh
 A
 B
 C
+./input-files/shebang/shebangwrap.gp
 A
 B
 C

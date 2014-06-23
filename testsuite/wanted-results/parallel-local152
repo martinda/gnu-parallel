@@ -15,4 +15,20 @@ parallel: Error: -W has been retired. Use --wd.
 parallel: Error: -Y has been retired. Use --shebang.
 parallel: Error: -H has been retired. Use --halt.
 parallel: Error: --tollef has been retired. Use -u -q --arg-sep -- and --load for -l.
+parallel: Error: -g has been retired. Use --group.
+parallel: Error: -B has been retired. Use --bf.
+parallel: Error: -T has been retired. Use --tty.
+parallel: Error: -U has been retired. Use --er.
+parallel: Error: -W has been retired. Use --wd.
+parallel: Error: -Y has been retired. Use --shebang.
+parallel: Error: -H has been retired. Use --halt.
+parallel: Error: --tollef has been retired. Use -u -q --arg-sep -- and --load for -l.
+parallel: Error: -g has been retired. Use --group.
+parallel: Error: -B has been retired. Use --bf.
+parallel: Error: -T has been retired. Use --tty.
+parallel: Error: -U has been retired. Use --er.
+parallel: Error: -W has been retired. Use --wd.
+parallel: Error: -Y has been retired. Use --shebang.
+parallel: Error: -H has been retired. Use --halt.
+parallel: Error: --tollef has been retired. Use -u -q --arg-sep -- and --load for -l.
 <<< End test global config - must run alone so the global config does not confuse others

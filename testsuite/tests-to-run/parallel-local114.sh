@@ -73,10 +73,11 @@ echo "### bug #36659: --sshlogin strips leading slash from ssh command";
   parallel --sshlogin '/usr/bin/ssh localhost' echo ::: OK
 
 echo "### bug #36660: --workdir mkdir does not use --sshlogin custom ssh"; 
+  rm -rf /tmp/foo36660; 
   cd /tmp; echo OK > parallel_test.txt; 
   ssh () { echo Failed; }; 
   export -f ssh; 
-  parallel --workdir /tmp/foo/bar --transfer --sshlogin '/usr/bin/ssh localhost' cat ::: parallel_test.txt; 
+  parallel --workdir /tmp/foo36660/bar --transfer --sshlogin '/usr/bin/ssh localhost' cat ::: parallel_test.txt; 
 
 echo "bug #36657: --load does not work with custom ssh"; 
   cd /tmp; echo OK > parallel_test.txt; 
