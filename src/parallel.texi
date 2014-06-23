@@ -493,8 +493,8 @@ than a single record.
 
 See @strong{--pipe} for use of this.
 
-@item @strong{--cat} (beta testing)
-@anchor{@strong{--cat} (beta testing)}
+@item @strong{--cat}
+@anchor{@strong{--cat}}
 
 Create a temporary file with content. Normally @strong{--pipe} will give
 data to the program on stdin (standard input). With @strong{--cat} GNU
@@ -659,8 +659,8 @@ See also @strong{--bg}, @strong{man sem}.
 
 Implies @strong{--semaphore}.
 
-@item @strong{--fifo} (beta testing)
-@anchor{@strong{--fifo} (beta testing)}
+@item @strong{--fifo}
+@anchor{@strong{--fifo}}
 
 Create a temporary fifo with content. Normally @strong{--pipe} will give
 data to the program on stdin (standard input). With @strong{--fifo} GNU
@@ -918,8 +918,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--line-buffer} (alpha testing)
-@anchor{@strong{--line-buffer} (alpha testing)}
+@item @strong{--line-buffer} (beta testing)
+@anchor{@strong{--line-buffer} (beta testing)}
 
 Buffer output on line basis. @strong{--group} will keep the output together
 for a whole job. @strong{--ungroup} allows output to mixup with half a line
@@ -1451,8 +1451,8 @@ operating system and the @strong{-s} option.  Pipe the input from /dev/null
 (and perhaps specify --no-run-if-empty) if you don't want GNU @strong{parallel}
 to do anything.
 
-@item @strong{--semaphore} (alpha testing)
-@anchor{@strong{--semaphore} (alpha testing)}
+@item @strong{--semaphore} (beta testing)
+@anchor{@strong{--semaphore} (beta testing)}
 
 Work as a counting semaphore. @strong{--semaphore} will cause GNU
 @strong{parallel} to start @emph{command} in the background. When the number of
@@ -1489,8 +1489,8 @@ Implies @strong{--semaphore}.
 
 See also @strong{man sem}.
 
-@item @strong{--semaphoretimeout} @emph{secs} (alpha testing)
-@anchor{@strong{--semaphoretimeout} @emph{secs} (alpha testing)}
+@item @strong{--semaphoretimeout} @emph{secs} (beta testing)
+@anchor{@strong{--semaphoretimeout} @emph{secs} (beta testing)}
 
 If the semaphore is not released within secs seconds, take it anyway.
 
@@ -1504,11 +1504,11 @@ See also @strong{man sem}.
 Use the replacement string @emph{replace-str} instead of @strong{@{#@}} for
 job sequence number.
 
-@item @strong{--shebang}
-@anchor{@strong{--shebang}}
+@item @strong{--shebang} (alpha testing)
+@anchor{@strong{--shebang} (alpha testing)}
 
-@item @strong{--hashbang}
-@anchor{@strong{--hashbang}}
+@item @strong{--hashbang} (alpha testing)
+@anchor{@strong{--hashbang} (alpha testing)}
 
 GNU @strong{parallel} can be called as a shebang (#!) command as the first
 line of a script. The content of the file will be treated as
@@ -1536,8 +1536,8 @@ On FreeBSD @strong{env} is needed:
   freenetproject.org
 @end verbatim
 
-@item @strong{--shebang-wrap}
-@anchor{@strong{--shebang-wrap}}
+@item @strong{--shebang-wrap} (alpha testing)
+@anchor{@strong{--shebang-wrap} (alpha testing)}
 
 GNU @strong{parallel} can parallelize scripts by wrapping the shebang
 line. If the program can be run like this:
@@ -1681,8 +1681,8 @@ The sshloginfile '.' is special, it read sshlogins from
 The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
 
-@item @strong{--slotreplace} @emph{replace-str} (alpha testing)
-@anchor{@strong{--slotreplace} @emph{replace-str} (alpha testing)}
+@item @strong{--slotreplace} @emph{replace-str} (beta testing)
+@anchor{@strong{--slotreplace} @emph{replace-str} (beta testing)}
 
 Use the replacement string @emph{replace-str} instead of @strong{@{%@}} for
 job slot number.

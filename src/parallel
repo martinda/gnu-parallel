@@ -748,7 +748,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140613;
+    $Global::version = 20140622;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4880,6 +4880,10 @@ sub sshlogin_wrap {
 		    # but that fails on tcsh
 		    ::shell_quote_scalar(qq{ || exec false;});
 	    }
+	    # This script is to solve the problem of
+	    # * not mixing STDERR and STDOUT
+	    # * terminating with ctrl-c
+	    # It works on Linux but not Solaris
 	    my $signal_script = "perl -e '".
 	    q{
 		use IO::Poll; 
@@ -4891,16 +4895,6 @@ sub sshlogin_wrap {
 		kill SIGHUP, -$pid unless $done; 
 		wait; exit ($?&127 ? 128+($?&127) : 1+$?>>8) 
             } . "' ";
-#	    q{
-#		use IO::Poll; 
-#		$SIG{CHLD} = sub {$done = 1}; 
-#		$p = IO::Poll->new; 
-#		$p->mask(STDOUT, POLLHUP); 
-#		$pid=fork; unless($pid) {setpgrp; exec $ENV{SHELL}, "-c", @ARGV; die "exec: $!\n"} 
-#		$p->poll; 
-#		kill SIGHUP, -$pid unless $done; 
-#		wait; exit ($?&127 ? 128+($?&127) : 1+$?>>8) 
-#            } . "' ";
 	    $signal_script =~ s/\s+/ /g;
 
 	    $self->{'sshlogin_wrap'} =

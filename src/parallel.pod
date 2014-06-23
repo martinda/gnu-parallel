@@ -407,7 +407,7 @@ I<size> defaults to 1M.
 See B<--pipe> for use of this.
 
 
-=item B<--cat> (beta testing)
+=item B<--cat>
 
 Create a temporary file with content. Normally B<--pipe> will give
 data to the program on stdin (standard input). With B<--cat> GNU
@@ -565,7 +565,7 @@ See also B<--bg>, B<man sem>.
 Implies B<--semaphore>.
 
 
-=item B<--fifo> (beta testing)
+=item B<--fifo>
 
 Create a temporary fifo with content. Normally B<--pipe> will give
 data to the program on stdin (standard input). With B<--fifo> GNU
@@ -800,7 +800,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--line-buffer> (alpha testing)
+=item B<--line-buffer> (beta testing)
 
 Buffer output on line basis. B<--group> will keep the output together
 for a whole job. B<--ungroup> allows output to mixup with half a line
@@ -1302,7 +1302,7 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
-=item B<--semaphore> (alpha testing)
+=item B<--semaphore> (beta testing)
 
 Work as a counting semaphore. B<--semaphore> will cause GNU
 B<parallel> to start I<command> in the background. When the number of
@@ -1339,7 +1339,7 @@ Implies B<--semaphore>.
 See also B<man sem>.
 
 
-=item B<--semaphoretimeout> I<secs> (alpha testing)
+=item B<--semaphoretimeout> I<secs> (beta testing)
 
 If the semaphore is not released within secs seconds, take it anyway.
 
@@ -1354,9 +1354,9 @@ Use the replacement string I<replace-str> instead of B<{#}> for
 job sequence number.
 
 
-=item B<--shebang>
+=item B<--shebang> (alpha testing)
 
-=item B<--hashbang>
+=item B<--hashbang> (alpha testing)
 
 GNU B<parallel> can be called as a shebang (#!) command as the first
 line of a script. The content of the file will be treated as
@@ -1381,7 +1381,7 @@ On FreeBSD B<env> is needed:
   freenetproject.org
 
 
-=item B<--shebang-wrap>
+=item B<--shebang-wrap> (alpha testing)
 
 GNU B<parallel> can parallelize scripts by wrapping the shebang
 line. If the program can be run like this:
@@ -1508,7 +1508,7 @@ The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
 
 
-=item B<--slotreplace> I<replace-str> (alpha testing)
+=item B<--slotreplace> I<replace-str> (beta testing)
 
 Use the replacement string I<replace-str> instead of B<{%}> for
 job slot number.
