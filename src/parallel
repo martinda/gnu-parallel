@@ -600,6 +600,7 @@ sub options_hash {
 	 "linebuffer|linebuffered|line-buffer|line-buffered" => \$opt::linebuffer,
 	 "null|0" => \$opt::0,
 	 "quote|q" => \$opt::q,
+	 # Replacement strings
 	 "I=s" => \$opt::I,
 	 "extensionreplace|er=s" => \$opt::U,
 	 "U=s" => \$opt::retired,
@@ -748,7 +749,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140622;
+    $Global::version = 20140623;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4471,7 +4472,7 @@ sub openoutputfiles {
     if($opt::compress) {
 	# Send stdout to stdin for $opt::compress_program(1)
 	# Send stderr to stdin for $opt::compress_program(2)
-	# cattail get pid i  $pid = $self->fh($fdno,'rpid');
+	# cattail get pid:  $pid = $self->fh($fdno,'rpid');
 	my $cattail = cattail();
 	for my $fdno (1,2) {
 	    my $wpid = open(my $fdw,"|-","$opt::compress_program >>".
@@ -4483,10 +4484,6 @@ sub openoutputfiles {
 			    $self->fh($fdno,'name'),$self->fh($fdno,'unlink')) || die $?;
 	    $self->set_fh($fdno,'r',$fdr);
 	    $self->set_fh($fdno,'rpid',$rpid);
-	    # Unlink if required but only when cattail and compress_program has started.
-	    # How do we know when cattail and compress have opened the files?
-	    # Disabled for now.
-	    # unlink $self->fh($fdno,"unlink");
 	}
     } elsif($Global::grouped) {
 	# Set reading FD if using --group (--ungroup does not need)
@@ -5576,8 +5573,10 @@ sub new {
 	} elsif($opt::pipepart and not $opt::fifo and not $opt::cat) {
 	    # With --pipe-part you can have nothing
         } else {
-	    # Add {} to the command if there are no {...}'s
-	    $command .=" ".$Global::replace{'{}'};
+	    # Add {} to the command if there are no {...}'s and no {{...}}
+	    if($command !~ /\{\{.*?\}\}/) {
+		$command .=" ".$Global::replace{'{}'};
+	    }
 	}
 	($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},
 	 %replacecount) = number_of_replacements($command,$context_replace);
@@ -6184,6 +6183,15 @@ sub simple_replace_placeholders {
 	CORE::push @args, @$record;
     }
     my $n = $#args+1;
+    if($target =~ /\{\{.*?\}\}/) {
+	# Replace {{perlexp}} with value
+	for my $a (@args) {
+	    $_ = $a->replace('{}',$quote);
+	    $target =~ s/(\{\{(.*?)\}\})/eval("$2")." ".$1/eg;
+	}
+	$target =~ s/(\{\{(.*?)\}\})//g;
+    }
+
     # Which replace strings are used?
     # {#} {%} {} {/} {//} {.} {/.} {n} {n/} {n//} {n.} {n/.}
     for my $used (keys %{$self->{'replacecount'}}) {

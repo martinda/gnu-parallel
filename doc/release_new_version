@@ -157,7 +157,7 @@ git diff
 
 git commit -a
 
-Released as 20140X22 ('').
+Released as 20140x22 ('').
 
 TAG=MyTag
 YYYYMMDD=`yyyymmdd`
@@ -176,6 +176,7 @@ https://savannah.gnu.org/news/approve.php?group=parallel
 
 == Update Freshmeat ==
 
+// FreeCode is dying
 http://freshmeat.net/projects/parallel/releases/new
 
 == Update Diaspora Twitter ==
@@ -215,44 +216,20 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140622 ('Brazil') released
+Subject: GNU Parallel 20140722 ('') released
 
-GNU Parallel 20140622 ('Brazil') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140722 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 Haiku of the month:
 
-  goodbye to xargs
-  quoting is still a black art
-  welcome parallel
-    -- Malcolm Cook
+  Programs very slow.
+  Multiple can run at once.
+  Use GNU Parallel.
+         -- Ole Tange
 
 New in this release:
 
-* --shebang and --shebang-wrap now works on FreeBSD.
-
-* --pipepart works with --header, --regexp, --cat and --fifo.
-
-* ./configure --disable-documentation will not build documentation.
-
-* {%} works as job slot.
-
-* GNU Parallel was cited in: Energy Efficient, High-speed Communication in WSNs https://gupea.ub.gu.se/bitstream/2077/35801/1/gupea_2077_35801_1.pdf
-
-* GNU Parallel was cited in: Ferroelectric contributions to anomalous hysteresis in hybrid perovskite solar cells http://arxiv.org/pdf/1405.5810.pdf
-
-* Processes Paralleling to Speed up Computing and Tasks Execution in Linux http://kukuruku.co/hub/nix/processes-paralleling-to-speed-up-computing-and-tasks-execution-in-linux
-
-* Moving / Copying lots of s3 files quickly using gnu parallel http://blog.aclarke.eu/moving-copying-lots-of-s3-files-quickly-using-gnu-parallel/
-
-* Speeding up grep log queries with GNU Parallel http://www.tripwire.com/state-of-security/incident-detection/speeding-grep-queries-gnu-parallel/
-
-* Ubuntu - Gnu parallel - It's awesome http://kasunweranga.blogspot.dk/2014/06/ubuntu-gnu-parallel-its-awesome.html
-
-* Export quicklooks with vector overlay using TuiView http://spectraldifferences.wordpress.com/2014/03/08/export-quicklooks-with-vector-overlay-using-tuiview/
-
-* GNU Parallel指南 http://my.oschina.net/enyo/blog/271612
-
-* GNU parallelで違和感 http://jarp.does.notwork.org/diary/201405c.html#201405301
+* GNU Parallel was cited in: Web-scale Content Reuse Detection www.isi.edu/~johnh/PAPERS/Ardi14a.pdf
 
 * Bug fixes and man page updates.
 

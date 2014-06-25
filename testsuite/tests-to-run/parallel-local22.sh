@@ -47,4 +47,9 @@ echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
   parallel -k --slotreplace ,, -j2 echo ,, ::: {1..4}
   parallel -k -j2 echo {%} ::: {1..4}
 
+echo '### bug #42363: --pipepart and --fifo/--cat does not work'
+  seq 100 > /tmp/bug42363; 
+  parallel --pipepart --block 31 -a /tmp/bug42363 -k --fifo wc | perl -pe s:/tmp/...........pip:/tmp/XXXX: ;
+  parallel --pipepart --block 31 -a /tmp/bug42363 -k --cat  wc | perl -pe s:/tmp/...........pip:/tmp/XXXX: ;
+
 EOF

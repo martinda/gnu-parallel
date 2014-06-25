@@ -32,3 +32,22 @@ tcsh 2
 2
 1
 2
+### bug #42363: --pipepart and --fifo/--cat does not work
+     13      14      32 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     10       9      29 /tmp/XXXX
+13 14 32 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+10  9 29 /tmp/XXXX
