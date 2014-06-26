@@ -6185,11 +6185,12 @@ sub simple_replace_placeholders {
     my $n = $#args+1;
     if($target =~ /\{\{.*?\}\}/) {
 	# Replace {{perlexp}} with value
-	for my $a (@args) {
-	    $_ = $a->replace('{}',$quote);
-	    $target =~ s/(\{\{(.*?)\}\})/eval("$2")." ".$1/eg;
+	@_ = map { $_->replace('{}',$quote) } @args;
+	for(@_) {
+	    $target =~ s/(\{\{(.*?)\}\})/eval("$2");$_." ".$1/eg;
+#	    $target =~ s/(\{\{(.*?)\}\})/eval("$2")." ".$1/eg;
 	}
-	$target =~ s/(\{\{(.*?)\}\})//g;
+	$target =~ s/( \{\{(.*?)\}\})//g;
     }
 
     # Which replace strings are used?

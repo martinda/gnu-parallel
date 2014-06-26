@@ -4080,9 +4080,8 @@ echo 1,2,3 | parallel -vkd, "echo 'a'"@{@}"'b'"
 @node Startup
 @subsection Startup
 
-GNU @strong{parallel} is slow at starting up - around 250 ms. Half of the
-startup time is spent finding the maximal length of a command
-line. Setting @strong{-s} will remove this part of the startup time.
+GNU @strong{parallel} is slow at starting up - around 250 ms the first time
+and 150 ms after that.
 
 @node Job startup
 @subsection Job startup
@@ -4090,7 +4089,8 @@ line. Setting @strong{-s} will remove this part of the startup time.
 Starting a job on the local machine takes around 3 ms. This can be a
 big overhead if the job takes very few ms to run. Often you can group
 small jobs together using @strong{-X} which will make the overhead less
-significant.
+significant. Or you can run multiple GNU @strong{parallel}s as described in
+@strong{EXAMPLE: Speeding up fast jobs}.
 
 Using @strong{--ungroup} the 3 ms can be lowered to around 2 ms.
 
