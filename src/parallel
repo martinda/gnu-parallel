@@ -58,14 +58,15 @@ if($Global::max_number_of_args) {
     $number_of_args = 1;
 }
 
-my $command = "";
-if(@ARGV) {
-    if($Global::quoting) {
-	$command = shell_quote_empty(@ARGV);
-    } else {
-	$command = join(" ", @ARGV);
-    }
-}
+my @command;
+@command = @ARGV;
+# if(@ARGV) {
+#     if($Global::quoting) {
+# 	$command = shell_quote_empty(@ARGV);
+#     } else {
+# 	$command = join(" ", @ARGV);
+#     }
+# }
 
 my @fhlist;
 if($opt::pipepart) {
@@ -94,7 +95,12 @@ if($opt::header and not $opt::pipe) {
 	::debug("Delimiter: '$delimiter'");
 	for my $s (split /$delimiter/o, $line) {
 	    ::debug("Colname: '$s'");
-	    $command =~ s:\{$s(|/|//|\.|/\.)\}:\{$id$1\}:g;
+	    # Replace {colname} with {2}
+	    # TODO accept configurable short hands
+	    # TODO how to deal with headers in {{...}}
+	    for(@command) {
+	      s:\{$s(|/|//|\.|/\.)\}:\{$id$1\}:g;
+	    }
 	    $Global::input_source_header{$id} = $s;
 	    $id++;
 	}
@@ -124,34 +130,34 @@ if($opt::nonall or $opt::onall) {
 # multiple --transfer and --basefile with different /./
 
 $Global::JobQueue = JobQueue->new(
-    $command,\@fhlist,$Global::ContextReplace,$number_of_args,\@Global::ret_files);
-if(0 and $opt::pipe and @opt::a) {
-    # ... | parallel --pipe cmd ::: arg1 arg2
-    # The command to run is:
-    # tee >((cmd arg1) >/tmp/tmp1 2>/tmp/err1) >((cmd arg2) >/tmp/tmp2 2>/tmp/err2) >/dev/null
-    my @jobs;
-    # Get all jobs
-    my $sshlogin = SSHLogin->new(":");
-    while(not $Global::JobQueue->empty()) {
-	my $job = $Global::JobQueue->get();
-	$job->openoutputfiles(); # Do not delete
-	$job->set_virgin(0);
-	$job->set_sshlogin($sshlogin);
-	push @jobs, $job;
-    }
-    @Global::tee_jobs = @jobs;
-    $command = "tee".join("",map {" >((".$_->replaced().")".
-				       " >".$_->fh(1,"name").
-				       " 2>".$_->fh(2,"name").")" } @jobs)
-	." >/dev/null";
-    $Global::JobQueue = JobQueue->new(
-	$command,\@fhlist,$Global::ContextReplace,$number_of_args,\@Global::ret_files);
-    #print ::my_dump($jobs[0]);
-    #print ::my_dump($Global::JobQueue);
-    $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->unget([Arg->new("")]);
-    #my $cmd = $Global::JobQueue->get();
-    #print ::my_dump($cmd);
-}
+    \@command,\@fhlist,$Global::ContextReplace,$number_of_args,\@Global::ret_files);
+# if(0 and $opt::pipe and @opt::a) {
+#     # ... | parallel --pipe cmd ::: arg1 arg2
+#     # The command to run is:
+#     # tee >((cmd arg1) >/tmp/tmp1 2>/tmp/err1) >((cmd arg2) >/tmp/tmp2 2>/tmp/err2) >/dev/null
+#     my @jobs;
+#     # Get all jobs
+#     my $sshlogin = SSHLogin->new(":");
+#     while(not $Global::JobQueue->empty()) {
+# 	my $job = $Global::JobQueue->get();
+# 	$job->openoutputfiles(); # Do not delete
+# 	$job->set_virgin(0);
+# 	$job->set_sshlogin($sshlogin);
+# 	push @jobs, $job;
+#     }
+#     @Global::tee_jobs = @jobs;
+#     $command = "tee".join("",map {" >((".$_->replaced().")".
+# 				       " >".$_->fh(1,"name").
+# 				       " 2>".$_->fh(2,"name").")" } @jobs)
+# 	." >/dev/null";
+#     $Global::JobQueue = JobQueue->new(
+# 	$command,\@fhlist,$Global::ContextReplace,$number_of_args,\@Global::ret_files);
+#     #print ::my_dump($jobs[0]);
+#     #print ::my_dump($Global::JobQueue);
+#     $Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->unget([Arg->new("")]);
+#     #my $cmd = $Global::JobQueue->get();
+#     #print ::my_dump($cmd);
+# }
 
 if($opt::eta or $opt::bar) {
     # Count the number of jobs before starting any
@@ -757,13 +763,23 @@ sub parse_options {
     $Global::grouped = 1;
     $Global::keeporder = 0;
     $Global::quoting = 0;
-    $Global::replace{'{}'} = '{}';
-    $Global::replace{'{.}'} = '{.}';
-    $Global::replace{'{/}'} = '{/}';
-    $Global::replace{'{//}'} = '{//}';
-    $Global::replace{'{/.}'} = '{/.}';
-    $Global::replace{'{#}'} = '{#}';
-    $Global::replace{'{%}'} = '{%}';
+    #$Global::replace{'{}'} = '{}';
+    #$Global::replace{'{.}'} = '{.}';
+    #$Global::replace{'{/}'} = '{/}';
+    #$Global::replace{'{//}'} = '{//}';
+    #$Global::replace{'{/.}'} = '{/.}';
+    #$Global::replace{'{#}'} = '{#}';
+    #$Global::replace{'{%}'} = '{%}';
+    %Global::replace =
+	(
+	 '{}' => '{{ $_=$_ }}',
+	 '{#}' => '{{ $_=$self->seq() }}',
+	 '{%}' => '{{ $_=$self->slot() }}',
+	 '{/}' => '{{ s:.*/:: }}',
+	 '{//}' => '{{ s:/[^/]+$:: }}',
+	 '{/.}' => '{{ s:.*/::; s:\.[^/.]+$::; }}',
+	 '{.}' => '{{ s:\.[^/.]+$:: }}',
+	);
     $/="\n";
     $Global::ignore_empty = 0;
     $Global::interactive = 0;
@@ -792,7 +808,7 @@ sub parse_options {
     if(defined $opt::q) { $Global::quoting = 1; }
     if(defined $opt::r) { $Global::ignore_empty = 1; }
     if(defined $opt::verbose) { $Global::stderr_verbose = 1; }
-    if(defined $opt::I) { $Global::replace{'{}'} = $opt::I; }
+    if(defined $opt::I) { @Global::replace{$opt::I} = ($Global::replace{'{}'}) }
     if(defined $opt::U) { $Global::replace{'{.}'} = $opt::U; }
     if(defined $opt::i) {
 	$Global::replace{'{}'} = $opt::i eq "" ? "{}" : $opt::i;
@@ -805,8 +821,10 @@ sub parse_options {
     if(defined $opt::seqreplace) {
         $Global::replace{'{#}'} = $opt::seqreplace;
     }
+    if(defined $opt::I) { @Global::replace{$opt::I} = ($Global::replace{'{}'}) }
     if(defined $opt::slotreplace) {
-        $Global::replace{'{%}'} = $opt::slotreplace;
+      	$Global::replace{$opt::slotreplace} = $Global::replace{'%'}; 
+	# TODO $Global::replace{'%'} = undef unless $opt::slotreplace == %
     }
     if(defined $opt::E) { $Global::end_of_file_string = $opt::E; }
     if(defined $opt::max_args) { $Global::max_number_of_args = $opt::max_args; }
@@ -921,9 +939,9 @@ sub parse_options {
 	$Global::ContextReplace = 1;
     }
 
-    for (keys %Global::replace) {
-	$Global::replace{$_} = ::maybe_quote($Global::replace{$_});
-    }
+#    for (keys %Global::replace) {
+#	$Global::replace{$_} = ::maybe_quote($Global::replace{$_});
+#    }
     %Global::replace_rev = reverse %Global::replace;
     if(defined $opt::tag and not defined $opt::tagstring) {
 	$opt::tagstring = $Global::replace{'{}'};
@@ -1941,6 +1959,7 @@ sub get_job_with_sshlogin {
     }
 
     my $clean_command = $job->replaced();
+#    warn $clean_command;
     if($clean_command =~ /^\s*$/) {
         # Do not run empty lines
         if(not $Global::JobQueue->empty()) {
@@ -2285,6 +2304,7 @@ sub onall {
     open(my $parallel_fh, "|-", "$0 --no-notice -j0 $options") ||
 	::die_bug("This does not run GNU Parallel: $0 $options");
     my @joblogs;
+    warn("Command should be given as arguemnt to onall()");
     for my $host (sort keys %Global::host) {
 	my $sshlogin = $Global::host{$host};
 	my $joblog = tmp_joblog($opt::joblog);
@@ -2296,7 +2316,7 @@ sub onall {
 	    ((defined $opt::tag) ?
 	     "--tagstring ".shell_quote_scalar($sshlogin->string()) : "").
 	     " -S ". shell_quote_scalar($sshlogin->string())." ".
-	     shell_quote_scalar($command)." :::: @argfiles\n";
+	     shell_quote(@command)." :::: @argfiles\n";
     }
     close $parallel_fh;
     $Global::exitstatus = $? >> 8;
@@ -4218,13 +4238,13 @@ package JobQueue;
 
 sub new {
     my $class = shift;
-    my $command = shift;
+    my $commandref = shift;
     my $read_from = shift;
     my $context_replace = shift;
     my $max_number_of_args = shift;
     my $return_files = shift;
     my $commandlinequeue = CommandLineQueue->new(
-        $command,$read_from,$context_replace,$max_number_of_args,$return_files);
+        $commandref,$read_from,$context_replace,$max_number_of_args,$return_files);
     my @unget = ();
     return bless {
         'unget' => \@unget,
@@ -4293,9 +4313,9 @@ package Job;
 
 sub new {
     my $class = shift;
-    my $commandline = shift;
+    my $commandlineref = shift;
     return bless {
-        'commandline' => $commandline, # The commandline with no args
+        'commandline' => $commandlineref, # CommandLine object
         'workdir' => undef, # --workdir
         'stdin' => undef, # filehandle for stdin (used for --pipe)
 	# filename for writing stdout to (used for --files)
@@ -4953,12 +4973,14 @@ sub return {
     # Returns:
     #   @non_quoted_filenames
     my $self = shift;
-    my @return = ();
-    for my $return (@{$self->{'commandline'}{'return_files'}}) {
-	CORE::push @return,
-	$self->{'commandline'}->replace_placeholders($return,0);
-    }
-    return @return;
+#    my @return = ();
+#    for my $return (@{$self->{'commandline'}{'return_files'}}) {
+#	CORE::push @return,
+#	$self->{'commandline'}->replace_placeholders($return,0);
+#    }
+#    return @return;
+    return $self->{'commandline'}->
+	replace_placeholders($self->{'commandline'}{'return_files'},0);
 }
 
 sub returnsize {
@@ -5456,7 +5478,7 @@ sub print {
 	}
 	flush $out_fd;
     }
-    ::debug("<<joboutput $command\n");
+    ::debug("<<joboutput @command\n");
 }
 
 sub print_joblog {
@@ -5466,7 +5488,7 @@ sub print_joblog {
 	$cmd = $self->replaced();
     } else {
 	# Verbose level > 1: Print the rsync and stuff
-	$cmd = $command;
+	$cmd = "@command";
     }
     print $Global::joblog
 	join("\t", $self->seq(), $self->sshlogin()->string(),
@@ -5482,7 +5504,7 @@ sub tag {
     my $self = shift;
     if(not defined $self->{'tag'}) {
 	$self->{'tag'} = $self->{'commandline'}->
-	    replace_placeholders($opt::tagstring,0)."\t";
+	    replace_placeholders([$opt::tagstring],0)."\t";
     }
     return $self->{'tag'};
 }
@@ -5545,64 +5567,65 @@ package CommandLine;
 sub new {
     my $class = shift;
     my $seq = shift;
-    my $command = ::undef_as_empty(shift);
+    my $commandref = shift;
+    $commandref || die;
     my $arg_queue = shift;
     my $context_replace = shift;
-    my $max_number_of_args = shift; # for -N and normal (-N1)
+    my $max_number_of_args = shift; # for -N and normal (-n1)
     my $return_files = shift;
+    my $replacecount_ref = shift;
+    my %replacecount = %$replacecount_ref;
     my $len = {
-	'{}' => 0, # Total length of all {} replaced with all args
-	'{/}' => 0, # Total length of all {/} replaced with all args
-	'{//}' => 0, # Total length of all {//} replaced with all args
-	'{.}' => 0, # Total length of all {.} replaced with all args
-	'{/.}' => 0, # Total length of all {/.} replaced with all args
+	# Total length of this replacement string {} replaced with all args
+	(map { $_ => 0 } keys %$replacecount_ref),
 	'no_args' => undef, # Length of command w/ all replacement args removed
 	'context' => undef, # Length of context of an additional arg
     };
-    my($sum,%replacecount);
-    ($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},
-     %replacecount) = number_of_replacements($command,$context_replace);
-    if($sum == 0) {
-	if($command eq "") {
-	    $command = $Global::replace{'{}'};
-	} elsif($opt::pipe and not $opt::fifo and not $opt::cat) {
-	    # With --pipe you can have ::: or not
-#	    if(@opt::a) {
-#		$command .=" ".$Global::replace{'{}'};
-#	    }
-	} elsif($opt::pipepart and not $opt::fifo and not $opt::cat) {
-	    # With --pipe-part you can have nothing
-        } else {
-	    # Add {} to the command if there are no {...}'s and no {{...}}
-	    if($command !~ /\{\{.*?\}\}/) {
-		$command .=" ".$Global::replace{'{}'};
-	    }
-	}
-	($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},
-	 %replacecount) = number_of_replacements($command,$context_replace);
-    }
-    if(defined $opt::tagstring) {
-	my ($dummy1,$dummy2,$dummy3,$dummy4,%repcount) =
-	    number_of_replacements($opt::tagstring,$context_replace);
-	# Merge %repcount with %replacecount to get the keys
-	# for replacing replacement strings in $opt::tagstring
-	# The number, however, does not matter.
-	for (keys %repcount) {
-	    $replacecount{$_} ||= 0;
-	}
-    }
+#    my($sum);
+#    ($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},
+#     %replacecount) = number_of_replacements($command,$context_replace);
+#    if($sum == 0) {
 
-    my %positional_replace;
-    my %multi_replace;
-    for my $used (keys %replacecount) {
-	if($used =~ /^{(\d+)(\D*)}$/) {
-	    $positional_replace{$1} = '\{'.$2.'\}';
-	} else {
-	    $multi_replace{$used} = $used;
-	}
-    }
+#    if(not %replacecount) {
+#	if($command eq "") {
+#	    $command = $Global::replace{'{}'};
+#	} elsif($opt::pipe and not $opt::fifo and not $opt::cat) {
+#	    # With --pipe you can have ::: or not
+##	    if(@opt::a) {
+##		$command .=" ".$Global::replace{'{}'};
+##	    }
+#	} elsif($opt::pipepart and not $opt::fifo and not $opt::cat) {
+#	    # With --pipe-part you can have nothing
+#        } else {
+#	    # Add {} to the command if there are no {...}'s and no {{...}}
+#	    $command .=" ".$Global::replace{'{}'};
+#	}
+##	($sum,$len->{'no_args'},$len->{'context'},$len->{'contextgroups'},
+##	 %replacecount) = number_of_replacements($command,$context_replace);
+#    }
+#    die $command;
+#    if(defined $opt::tagstring) {
+#	my ($dummy1,$dummy2,$dummy3,$dummy4,%repcount) =
+#	    number_of_replacements($opt::tagstring,$context_replace);
+#	# Merge %repcount with %replacecount to get the keys
+#	# for replacing replacement strings in $opt::tagstring
+#	# The number, however, does not matter.
+#	for (keys %repcount) {
+#	    $replacecount{$_} ||= 0;
+#	}
+#    }
+#
+#    my %positional_replace;
+#    my %multi_replace;
+#    for my $used (keys %replacecount) {
+#	if($used =~ /^{(\d+)(\D*)}$/) {
+#	    $positional_replace{$1} = '\{'.$2.'\}';
+#	} else {
+#	    $multi_replace{$used} = $used;
+#	}
+#    }
     return bless {
-	'command' => $command,
+	'command' => $commandref,
 	'seq' => $seq,
 	'len' => $len,
 	'arg_list' => [],
@@ -5611,8 +5634,8 @@ sub new {
 	'replacecount' => \%replacecount,
 	'context_replace' => $context_replace,
 	'return_files' => $return_files,
-	'positional_replace' => \%positional_replace,
-	'multi_replace' => \%multi_replace,
+	#'positional_replace' => \%positional_replace,
+	#'multi_replace' => \%multi_replace,
 	'replaced' => undef,
     }, ref($class) || $class;
 }
@@ -5986,24 +6009,26 @@ sub number_of_replacements {
 sub replaced {
     my $self = shift;
     if(not defined $self->{'replaced'}) {
+	my $cmdstring = $self->replace_placeholders($self->{'command'},$Global::quoting);
 	if($opt::cat) {
 	    # Prepend 'cat > {};'
 	    # Append '_EXIT=$?;(rm {};exit $_EXIT)'
 	    $self->{'replaced'} = 
-		$self->replace_placeholders("cat > $Global::replace{'{}'}; ". $self->{'command'}. 
-					    "; _EXIT=\$?; rm $Global::replace{'{}'}; exit \$_EXIT",
-					    $Global::JobQueue->quote_args());
+		$self->replace_placeholders(["cat > $Global::replace{'{}'}; ", $cmdstring, 
+					    "; _EXIT=\$?; rm $Global::replace{'{}'}; exit \$_EXIT"],
+					    0);
 	} elsif($opt::fifo) {
 	    # Prepend 'mkfifo {}; ('
 	    # Append ') & _PID=$!; cat > {}; wait $_PID; _EXIT=$?;(rm {};exit $_EXIT)'
 	    $self->{'replaced'} = 
-		$self->replace_placeholders("mkfifo $Global::replace{'{}'}; (".
-					    $self->{'command'}. 
-					    ") & _PID=\$!; cat > $Global::replace{'{}'}; ". 
-					    "wait \$_PID; _EXIT=\$?; rm $Global::replace{'{}'}; exit \$_EXIT",
-					    $Global::JobQueue->quote_args());
+		$self->replace_placeholders(["mkfifo $Global::replace{'{}'}; (",
+					    $cmdstring,
+					    ") & _PID=\$!; cat > $Global::replace{'{}'}; ", 
+					    "wait \$_PID; _EXIT=\$?; ",
+					    "rm $Global::replace{'{}'}; exit \$_EXIT"],
+					    0);
 	} else {
-	    $self->{'replaced'} = $self->replace_placeholders($self->{'command'},$Global::JobQueue->quote_args());
+	    $self->{'replaced'} = $cmdstring;
 	}
 	if($self->{'replaced'} =~ /^\s*(-\S+)/) {
 	    # Is this really a command in $PATH starting with '-'?
@@ -6031,225 +6056,417 @@ sub replaced {
     return $self->{'replaced'};
 }
 
-sub replace_placeholders {
-    my $self = shift;
-    my $target = shift;
-    my $quote = shift;
-    my $context_replace = $self->{'context_replace'};
-    my $replaced;
-    if($self->{'context_replace'}) {
-	$replaced = $self->context_replace_placeholders($target,$quote);
-    } else {
-	$replaced = $self->simple_replace_placeholders($target,$quote);
-    }
-    return $replaced;
-}
+# sub _replace_placeholders {
+#     my $self = shift;
+#     my $targetref = shift;
+#     my $quote = shift;
+#     my $context_replace = $self->{'context_replace'};
+#     my $replaced;
+#     if($self->{'context_replace'}) {
+# 	$replaced = $self->context_replace_placeholders($targetref,$quote,1);
+#     } else {
+# 	$replaced = $self->context_replace_placeholders($targetref,$quote,0);
+# #	$replaced = $self->simple_replace_placeholders($targetref,$quote);
+#     }
+#     return $replaced;
+# }
 
-sub context_replace_placeholders {
+# sub _context_replace_placeholders {
+#     # Replace foo{}bar with fooargbar 
+#     # Input:
+#     #   target = foo{}bar
+#     #   quote = should this be quoted?
+#     # Returns: $target
+#     my $self = shift;
+#     my $target = shift;
+#     my $quote = shift;
+#     # -X = context replace
+#     # maybe multiple input sources
+#     # maybe --xapply
+#     # $self->{'arg_list'} = [ [Arg11, Arg12], [Arg21, Arg22], [Arg31, Arg32] ]
+# 
+#     my @args=();
+#     my @used_multi;
+#     my %replace;
+# 
+#     for my $record (@{$self->{'arg_list'}}) {
+# 	# Merge arguments from records into args for easy access
+# 	CORE::push @args, @$record;
+#     }
+# 
+#     # Replacement functions
+#     my @rep = qw({} {/} {//} {.} {/.});
+#     # Inner part of replacement functions
+#     my @rep_inner = ('', '/', '//', '.', '/.');
+#     # Regexp for replacement functions
+#     my $rep_regexp = "(?:". join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } @rep) . ")";
+#     # Regexp for inner replacement functions
+#     my $rep_inner_regexp = "(?:". join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } @rep_inner) . ")";
+#     # Seq replace string: {#}
+#     my $rep_seq_regexp = '(?:'.::maybe_quote('\{\#\}').")";
+#     # Slot replace string: {%}
+#     my $rep_slot_regexp = '(?:'.::maybe_quote('\{\%\}').")";
+#     # Normal replace strings
+#     my $rep_str_regexp = multi_regexp();
+#     # Positional replace strings
+#     my $rep_str_pos_regexp = ::maybe_quote('\{').'-?\d+'.$rep_inner_regexp.::maybe_quote('\}');
+# 
+#     # Fish out the words that have replacement strings in them
+#     my $tt = $target;
+#     my %word;
+#     while($tt =~ s/(\S*(?:$rep_str_regexp|$rep_str_pos_regexp|$rep_seq_regexp|$rep_slot_regexp)\S*)/\0/o) {
+# 	$word{$1} ||= 1;
+#     }
+#     if(not %word) {
+# 	# The line did no contain any replacement strings => return unchanged
+# 	return $target;	
+#     }
+#     # For each word: Generate the replacement string for that word.
+#     for my $origword (keys %word) {
+# 	my @pos_replacements=();
+# 	my @replacements=();
+# 	my $w;
+# 	my $word = $origword; # Make a local modifyable copy
+# 
+# 	# replace {#} if it exists
+# 	$word =~ s/$rep_seq_regexp/$self->seq()/geo;
+# 	# replace {%} if it exists
+# 	$word =~ s/$rep_slot_regexp/$self->slot()/geo;
+# 	if($word =~ /$rep_str_pos_regexp/o) {
+# 	    # There are positional replacement strings
+# 	    my @argset;
+# 	    if($#{$self->{'arg_list'}->[0]} == 0) {
+# 		# Only one input source: Treat it as a set
+# 		@argset = [ @args ];
+# 	    } else {
+# 		# Multiple input sources
+# 		@argset = @{$self->{'arg_list'}};
+# 	    }
+# 	    # Match -n..-1,1..n where n = max args in a argset
+# 	    my $n = $#{$argset[0]}+1;
+# 	    my $pos_regexp = "(?:".join("|", -$n..-1, 1..$n).")";
+# 	    my $pos_inner_regexp = ::maybe_quote('\{') .
+# 		"($pos_regexp)($rep_inner_regexp)" .
+# 		::maybe_quote('\}');
+# 	    for my $argset (@argset) {
+# 		# Replace all positional arguments - e.g. {7/.}
+# 		# with the replacement function - e.g. {/.}
+# 		# of that argument
+# 		if(defined $self->{'max_number_of_args'}) {
+# 		    # Fill up if we have a half completed line, so {n} will be empty
+# 		    while($#$argset < $self->{'max_number_of_args'}) {
+# 			CORE::push @$argset, Arg->new("");
+# 		    }
+# 		}
+# 		$w = $word;
+# 		# Replace positive replacement strings with arg[$1-1]
+# 		# Replace negative replacement strings with arg[$n+$1]
+# 		$w =~ s/$pos_inner_regexp/$argset->[$1 > 0 ? $1-1 : $n+$1]->replace('{'.$2.'}',$quote)/geo;
+# 		CORE::push @pos_replacements, $w;
+# 	    }
+# 	}
+# 	if(not @pos_replacements) {
+# 	    @pos_replacements = ($word);
+# 	}
+# 
+# 	if($word =~ m:$rep_str_regexp:) {
+# 	    # There are normal replacement strings
+# 	    for my $w (@pos_replacements) {
+# 		for my $arg (@args) {
+# 		    my $wmulti = $w;
+# 		    $wmulti =~ s/($rep_str_regexp)/$arg->replace($Global::replace_rev{$1},$quote)/geo;
+# 		    CORE::push @replacements, $wmulti;
+# 		}
+# 	    }
+# 	}
+# 	if(@replacements) {
+# 	    CORE::push @{$replace{$origword}}, @replacements;
+# 	} else {
+# 	    CORE::push @{$replace{$origword}}, @pos_replacements;
+# 	}
+#     }
+#     # Substitute the replace strings with the replacement values
+#     # Must be sorted by length if a short word is a substring of a long word
+#     my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s }
+# 		      sort { length $b <=> length $a } keys %word);
+#     $target =~ s/($regexp)/join(" ",@{$replace{$1}})/ge;
+#     return $target;
+# }
+
+sub replace_placeholders {
     # Replace foo{}bar with fooargbar 
     # Input:
     #   target = foo{}bar
     #   quote = should this be quoted?
     # Returns: $target
     my $self = shift;
-    my $target = shift;
+    my $targetref = shift;
     my $quote = shift;
+    my $context_replace = $self->{'context_replace'};
+    my @target = @$targetref;
+#    warn("Replace @target");
     # -X = context replace
     # maybe multiple input sources
     # maybe --xapply
     # $self->{'arg_list'} = [ [Arg11, Arg12], [Arg21, Arg22], [Arg31, Arg32] ]
 
-    my @args=();
-    my @used_multi;
-    my %replace;
-
-    for my $record (@{$self->{'arg_list'}}) {
-	# Merge arguments from records into args for easy access
-	CORE::push @args, @$record;
-    }
-
-    # Replacement functions
-    my @rep = qw({} {/} {//} {.} {/.});
-    # Inner part of replacement functions
-    my @rep_inner = ('', '/', '//', '.', '/.');
-    # Regexp for replacement functions
-    my $rep_regexp = "(?:". join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } @rep) . ")";
-    # Regexp for inner replacement functions
-    my $rep_inner_regexp = "(?:". join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } @rep_inner) . ")";
-    # Seq replace string: {#}
-    my $rep_seq_regexp = '(?:'.::maybe_quote('\{\#\}').")";
-    # Slot replace string: {%}
-    my $rep_slot_regexp = '(?:'.::maybe_quote('\{\%\}').")";
-    # Normal replace strings
-    my $rep_str_regexp = multi_regexp();
-    # Positional replace strings
-    my $rep_str_pos_regexp = ::maybe_quote('\{').'-?\d+'.$rep_inner_regexp.::maybe_quote('\}');
-
     # Fish out the words that have replacement strings in them
-    my $tt = $target;
     my %word;
-    while($tt =~ s/(\S*(?:$rep_str_regexp|$rep_str_pos_regexp|$rep_seq_regexp|$rep_slot_regexp)\S*)/\0/o) {
-	$word{$1} ||= 1;
-    }
-    if(not %word) {
-	# The line did no contain any replacement strings => return unchanged
-	return $target;	
-    }
-    # For each word: Generate the replacement string for that word.
-    for my $origword (keys %word) {
-	my @pos_replacements=();
-	my @replacements=();
-	my $w;
-	my $word = $origword; # Make a local modifyable copy
-
-	# replace {#} if it exists
-	$word =~ s/$rep_seq_regexp/$self->seq()/geo;
-	# replace {%} if it exists
-	$word =~ s/$rep_slot_regexp/$self->slot()/geo;
-	if($word =~ /$rep_str_pos_regexp/o) {
-	    # There are positional replacement strings
-	    my @argset;
-	    if($#{$self->{'arg_list'}->[0]} == 0) {
-		# Only one input source: Treat it as a set
-		@argset = [ @args ];
-	    } else {
-		# Multiple input sources
-		@argset = @{$self->{'arg_list'}};
+    for (@target) {
+	my $tt = $_;
+#	warn $tt;
+	if($context_replace) {
+	    while($tt =~ s/( (?:\S* \{\{([^{].*?|)\}\})+ \S*)/\0/ox) {
+		$word{$1} ||= 1;
 	    }
-	    # Match -n..-1,1..n where n = max args in a argset
-	    my $n = $#{$argset[0]}+1;
-	    my $pos_regexp = "(?:".join("|", -$n..-1, 1..$n).")";
-	    my $pos_inner_regexp = ::maybe_quote('\{') .
-		"($pos_regexp)($rep_inner_regexp)" .
-		::maybe_quote('\}');
-	    for my $argset (@argset) {
-		# Replace all positional arguments - e.g. {7/.}
-		# with the replacement function - e.g. {/.}
-		# of that argument
-		if(defined $self->{'max_number_of_args'}) {
-		    # Fill up if we have a half completed line, so {n} will be empty
-		    while($#$argset < $self->{'max_number_of_args'}) {
-			CORE::push @$argset, Arg->new("");
-		    }
-		}
-		$w = $word;
-		# Replace positive replacement strings with arg[$1-1]
-		# Replace negative replacement strings with arg[$n+$1]
-		$w =~ s/$pos_inner_regexp/$argset->[$1 > 0 ? $1-1 : $n+$1]->replace('{'.$2.'}',$quote)/geo;
-		CORE::push @pos_replacements, $w;
-	    }
-	}
-	if(not @pos_replacements) {
-	    @pos_replacements = ($word);
-	}
-
-	if($word =~ m:$rep_str_regexp:) {
-	    # There are normal replacement strings
-	    for my $w (@pos_replacements) {
-		for my $arg (@args) {
-		    my $wmulti = $w;
-		    $wmulti =~ s/($rep_str_regexp)/$arg->replace($Global::replace_rev{$1},$quote)/geo;
-		    CORE::push @replacements, $wmulti;
-		}
-	    }
-	}
-	if(@replacements) {
-	    CORE::push @{$replace{$origword}}, @replacements;
 	} else {
-	    CORE::push @{$replace{$origword}}, @pos_replacements;
+	    while($tt =~ s/( (?: \{\{([^{].*?|)\}\})+ )/\0/ox) {
+		$word{$1} ||= 1;
+	    }
 	}
     }
-    # Substitute the replace strings with the replacement values
-    # Must be sorted by length if a short word is a substring of a long word
-    my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s }
-		      sort { length $b <=> length $a } keys %word);
-    $target =~ s/($regexp)/join(" ",@{$replace{$1}})/ge;
-    return $target;
-}
-
-sub simple_replace_placeholders {
-    # no context (no -X)
-    # maybe multiple input sources
-    # maybe --xapply
-    my $self = shift;
-    my $target = shift;
-    my $quote = shift;
-    my @args=();
-    my @used_multi;
+    my @word = keys %word;
     my %replace;
-
+    my $quote_arg = $Global::noquote ? 0 : not $Global::quoting;
     for my $record (@{$self->{'arg_list'}}) {
-	# Merge arguments from records into args for easy access
-	CORE::push @args, @$record;
+	# Merge arguments from records into @_ for easy access
+	# If $Global::quoting is set, quoting will be done later
+	CORE::push @_, map { $_->replace('{}',$quote_arg) } @$record;
     }
-    my $n = $#args+1;
-    if($target =~ /\{\{.*?\}\}/) {
-	# Replace {{perlexp}} with value
-	@_ = map { $_->replace('{}',$quote) } @args;
-	for(@_) {
-	    $target =~ s/(\{\{(.*?)\}\})/eval("$2");$_." ".$1/eg;
-#	    $target =~ s/(\{\{(.*?)\}\})/eval("$2")." ".$1/eg;
-	}
-	$target =~ s/( \{\{(.*?)\}\})//g;
-    }
+    # Number of arguments - used for positional arguments
+    my $n = $#_+1;
+    for my $word (@word) {
+	# word = ab{{}}cd{{}}ef
+	my $w = $word;
+#	warn($w);
 
-    # Which replace strings are used?
-    # {#} {%} {} {/} {//} {.} {/.} {n} {n/} {n//} {n.} {n/.}
-    for my $used (keys %{$self->{'replacecount'}}) {
-	# What are the replacement values for the replace strings?
-	if(grep { $used eq $_ } qw({} {/} {//} {.} {/.})) {
-	    # {} {/} {//} {.} {/.}
-	    $replace{$Global::replace{$used}} =
-		join(" ", map { $_->replace($used,$quote) } @args);
-	} elsif($used =~ /^\{(-?\d+)(|\/|\/\/|\.|\/\.)\}$/) {
-	    # {n} {n/} {n//} {n.} {n/.} {-n} {-n/} {-n//} {-n.} {-n/.}
-	    my $positional = $1 > 0 ? $1 : $n+$1+1;
-	    my $replacementfunction = "{".::undef_as_empty($2)."}"; # {} {/} {//} {.} or {/.}
-	    # If -q then the replacementstrings will be quoted, too
-	    # {1.} -> \{1.\}
-	    $Global::replace{$used} ||= ::maybe_quote($used);
-	    if(defined $args[$positional-1]) {
-		# we have a matching argument for {n}
-		$replace{$Global::replace{$used}} =
-		    $args[$positional-1]->replace($replacementfunction,$quote);
-	    } else {
-		if($positional <= $self->{'max_number_of_args'}) {
-		    # Fill up if we have a half completed line
-		    $replace{$Global::replace{$used}} = "";
-		}
+	# Replace positional arguments
+	# \000 makes it easier to see where a {{...}} starts and ends
+	$w =~ s/\{\{/\000\{/g;
+	$w =~ s/\}\}/\000\}/g;
+	$w =~ s/ ([^\s\000]*)  # before {{
+                 \000\{        # {{
+                 (-?\d+)       # Position (eg. -2 or 3)
+                 ([^\000]*?)   # The perl expression
+                 \000\}        # }}
+                 ([^\s\000]*)  # after }}
+               / $_=$_[$2 > 0 ? $2-1 : $n+$2]; # Set $_ to the argument at the position
+                 eval("$3");   # evaluate the perl expression
+                 $1.$_.$4 /egx;# Prepend and append context
+	$w =~ s/\000\{/\{\{/g;
+	$w =~ s/\000\}/\}\}/g;
+	# for each arg:
+	#   compute replacement for each string
+	#   replace replacement strings with replacement in the word value
+	#   push to replace word value
+	for my $arg (@_) {
+	    my $val = $w;
+	    for my $rplstr (keys %{$self->{'replacecount'}}) {
+		# Replace {{perlexp}} with value for each arg
+		$val =~ s/\Q{{$rplstr}}\E/$_=$arg;eval("$rplstr");$_/eg;
+#		warn($val," ; ",$rplstr);
 	    }
-	} elsif($used eq "{#}") {
-	    # {#}
-	    $replace{$Global::replace{$used}} = $self->seq();
-	} elsif($used eq "{%}") {
-	    # {%}
-	    $replace{$Global::replace{$used}} = $self->slot();
-	} else {
-	    ::die_bug('simple_replace_placeholders_20110530');
+	    my $ww = $word;
+	    if($quote) {
+		$ww = ::shell_quote_scalar($word);
+		$val = ::shell_quote_scalar($val);
+	    }
+	    CORE::push(@{$replace{$ww}}, $val); 
+	}
+	if(not @_) {
+	    my $val = $w;
+	    for my $rplstr (keys %{$self->{'replacecount'}}) {
+		# Replace {{perlexp}} with value for each arg
+		$val =~ s/\Q{{$rplstr}}\E/$_="";eval("$rplstr");$_/eg;
+#		warn($val," ; ",$rplstr);
+	    }
+	    my $ww = $word;
+	    if($quote) {
+		$ww = ::shell_quote_scalar($word);
+		$val = ::shell_quote_scalar($val);
+	    }
+	    CORE::push(@{$replace{$ww}}, $val); 
 	}
     }
-    # Substitute the replace strings with the replacement values
-    my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } keys %replace);
-    if($regexp) {
-	$target =~ s/($regexp)/$replace{$1}/g;
+    if($quote) {
+	@target = ::shell_quote(@target);
     }
-    return $target;
+    if(%replace) {
+	# Substitute the replace strings with the replacement values
+	# Must be sorted by length if a short word is a substring of a long word
+#    warn(join"\n",keys %replace);
+	my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s }
+			  sort { length $b <=> length $a } keys %replace);
+	for(@target) {
+	    s/($regexp)/join(" ",@{$replace{$1}})/ge;
+	}
+    }
+    return ("@target");
 }
 
+# sub __simple_replace_placeholders {
+#     # no context (no -X)
+#     # maybe multiple input sources
+#     # maybe --xapply
+#     my $self = shift;
+#     my $targetref = shift;
+#     my $quote = shift;
+#     my @target = @$targetref;
+# 
+#     for my $record (@{$self->{'arg_list'}}) {
+# 	# Merge arguments from records into @_ for easy access
+# 	CORE::push @_, map { $_->replace('{}',$quote) } @$record;
+#     }
+#     die @_;
+#     my $n = $#_+1;
+#     # Replace positional {{-n perlexp}} with value for {-n}
+#     for (@target) {
+# 	s/ (\{\{ (-?\d+)(.*?) \}\}) / $_=$_[$2 > 0 ? $2-1 : $n+$2]; eval("$3"); $_ /egx;
+#     }
+#     for my $arg (@_) {
+# 	# Replace {{perlexp}} with value for each arg
+# 	for my $t (@target) {
+# 	    $t =~ s/(\{\{([^{].*?|)\}\})/$_=$arg;eval("$2");$_." ".$1/eg;
+# 	    warn($t);
+# 	}
+#     }
+# 
+#     for(@target) {
+# 	s/( \{\{(.*?)\}\})//g;
+#     }
+#      die"".::shell_quote(@target);
+#     return @target;
+# }
+# 
+# sub _simple_replace_placeholders {
+#     # no context (no -X)
+#     # maybe multiple input sources
+#     # maybe --xapply
+#     my $self = shift;
+#     my $target = shift;
+#     my $quote = shift;
+#     my @args=();
+#     my @used_multi;
+#     my %replace;
+# 
+#     for my $record (@{$self->{'arg_list'}}) {
+# 	# Merge arguments from records into args for easy access
+# 	CORE::push @args, @$record;
+#     }
+#     my $n = $#args+1;
+#     # Which replace strings are used?
+#     # {#} {%} {} {/} {//} {.} {/.} {n} {n/} {n//} {n.} {n/.}
+#     for my $used (keys %{$self->{'replacecount'}}) {
+# 	# What are the replacement values for the replace strings?
+# 	if(grep { $used eq $_ } qw({} {/} {//} {.} {/.})) {
+# 	    # {} {/} {//} {.} {/.}
+# 	    $replace{$Global::replace{$used}} =
+# 		join(" ", map { $_->replace($used,$quote) } @args);
+# 	} elsif($used =~ /^\{(-?\d+)(|\/|\/\/|\.|\/\.)\}$/) {
+# 	    # {n} {n/} {n//} {n.} {n/.} {-n} {-n/} {-n//} {-n.} {-n/.}
+# 	    my $positional = $1 > 0 ? $1 : $n+$1+1;
+# 	    my $replacementfunction = "{".::undef_as_empty($2)."}"; # {} {/} {//} {.} or {/.}
+# 	    # If -q then the replacementstrings will be quoted, too
+# 	    # {1.} -> \{1.\}
+# 	    $Global::replace{$used} ||= ::maybe_quote($used);
+# 	    if(defined $args[$positional-1]) {
+# 		# we have a matching argument for {n}
+# 		$replace{$Global::replace{$used}} =
+# 		    $args[$positional-1]->replace($replacementfunction,$quote);
+# 	    } else {
+# 		if($positional <= $self->{'max_number_of_args'}) {
+# 		    # Fill up if we have a half completed line
+# 		    $replace{$Global::replace{$used}} = "";
+# 		}
+# 	    }
+# 	} elsif($used eq "{#}") {
+# 	    # {#}
+# 	    $replace{$Global::replace{$used}} = $self->seq();
+# 	} elsif($used eq "{%}") {
+# 	    # {%}
+# 	    $replace{$Global::replace{$used}} = $self->slot();
+# 	} else {
+# 	    ::die_bug('simple_replace_placeholders_20110530');
+# 	}
+#     }
+#     # Substitute the replace strings with the replacement values
+#     my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s } keys %replace);
+#     if($regexp) {
+# 	$target =~ s/($regexp)/$replace{$1}/g;
+#     }
+#     return $target;
+# }
 
 package CommandLineQueue;
 
 sub new {
     my $class = shift;
-    my $command = shift;
+    my $commandref = shift;
     my $read_from = shift;
     my $context_replace = shift;
     my $max_number_of_args = shift;
     my $return_files = shift;
     my @unget = ();
+    my ($count,%replacecount,$posrpl,$perlexpr);
+    my @command = @$commandref;
+    # Replace replacement strings with {{perl expr}}
+    # Protect matching inside {{...}} by replacing {{ and }} with forbidden chars
+    for(@command) {
+	s/ \{\{([^{].*?|)\}\} / \000\001$1\000\002 /gx;
+    }
+    for my $rpl (keys %Global::replace) {
+	# Replace the short hand string with the {{perl expr}} in $command
+	for(@command) {
+	    s/\Q$rpl\E/$Global::replace{$rpl}/g;
+	}
+	# Do the same for the positional replacement strings
+	# A bit harder as we have to put in a number
+	$posrpl = $rpl;
+	$posrpl =~ s/^\{//; # Remove the first {
+	$perlexpr = $Global::replace{$rpl};
+	$perlexpr =~ s/^\{\{//; # Remove the first {{
+	for(@command) {
+	    s/\{(-?\d+)\Q$posrpl\E/{{$1 $perlexpr/g;
+	}
+    }
+    # Get the {{ and }} back
+    for(@command) {
+	s/ \000\001(.*?)\000\002 / \{\{$1\}\} /gx;
+    }
+    my $sum = 0;
+    while($sum == 0) {
+	# Count how many times each replacement string is used
+	my @cmd = @command;
+	for my $c (@cmd) {
+	    while($c =~ s/ \{\{([^{].*?|)\}\} / \000 /x) {
+		# %replacecount = { "perlexpr" => number of times seen }
+		# e.g { "$_++" => 2 }
+		$replacecount{$1} ++;
+		$sum++;
+	    }
+	}
+
+	if($sum == 0) {
+	    # Default command = {}
+	    # If not replacement string: append {}
+	    if(not @command) {
+		@command = ($Global::replace{'{}'});
+		$Global::noquote = 1;
+	    } elsif(($opt::pipe or $opt::pipepart)
+		    and not $opt::fifo and not $opt::cat) {
+		# With --pipe / --pipe-part you can have no replacement
+		last;
+	    } else {
+		# Append {} to the command if there are no {...}'s and no {{...}}
+		push @command, $Global::replace{'{}'};
+	    }
+	}
+    }
+
     return bless {
 	'unget' => \@unget,
-	'command' => $command,
+	'command' => \@command,
+	'replacecount' => \%replacecount,
 	'arg_queue' => RecordQueue->new($read_from,$opt::colsep),
 	'context_replace' => $context_replace,
 	'max_number_of_args' => $max_number_of_args,
@@ -6272,6 +6489,7 @@ sub get {
 				     $self->{'context_replace'},
 				     $self->{'max_number_of_args'},
 				     $self->{'return_files'},
+				     $self->{'replacecount'},
 	    );
 	$cmd_line->populate();
 	::debug("cmd_line->number_of_args ".$cmd_line->number_of_args()."\n");
