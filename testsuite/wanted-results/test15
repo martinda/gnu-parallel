@@ -29,6 +29,10 @@ sleep 0.1; echo opt--interactive 3 ?...y
 opt--interactive 1
 opt--interactive 3
 
+### Test killing children with --timeout and exit value (failed if timed out)
+      0       0       0
+2
+      0       0       0
 ### Test -L -l and --max-lines
 a_b
 c
@@ -101,14 +105,14 @@ a_b c
 d
 e
 ### test too long args
-parallel: Error: Command line too long (1000005 >= 131071) at number 1: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Error: Command line too long (1000005 >= 131071) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 xargs: argument line too long
 1 2
 3 4
 5 6
 7 8
 9 10
-parallel: Error: Command line too long (1000007 >= 10) at number 5: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Error: Command line too long (1000007 >= 10) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 1 2
 3 4
 5 6
@@ -120,20 +124,20 @@ xargs: argument line too long
 5 6
 7 8
 9 10
-parallel: Error: Command line too long (1000007 >= 10) at number 5: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Error: Command line too long (1000007 >= 10) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 ### Test -x
 1 2
 3 4
 5 6
 7 8
 9 10
-parallel: Error: Command line too long (10 >= 10) at number 5: 12345...
+parallel: Error: Command line too long (10 >= 10) at number 0: 12345...
 1 2
 3 4
 5 6
 7 8
 9 10
-parallel: Error: Command line too long (10 >= 10) at number 5: 12345...
+parallel: Error: Command line too long (10 >= 10) at number 0: 12345...
 1 2
 3 4
 5 6
@@ -190,10 +194,6 @@ xargs: argument line too long
 8
 9
 10
-### Test killing children with --timeout and exit value (failed if timed out)
-      0       0       0
-2
-      0       0       0
 xargs Expect: 3 1 2
 3
 1

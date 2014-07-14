@@ -18,3 +18,5 @@ EOF
 chmod 755 /tmp/parallel-script-for-script2
 echo via pseudotty | script -q -f -c /tmp/parallel-script-for-script2 /dev/null
 sleep 2
+
+touch ~/.parallel/will-cite

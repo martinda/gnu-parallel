@@ -83,14 +83,14 @@ foo ole
 foo ole 
 ### Test of --colsep
 a b c
-a b c {4}
+a b c
 a b c d
 a b c
 d e f
 a b c
 d e f
 a b c
-a b c {4}
+a b c
 a b c d
 ### Test of tab as colsep
 abc def
@@ -106,25 +106,25 @@ jkl	mno pqr
 ### Test of quoting after colsplit
 >/tmp/null >/dev/null
 ### Test of --colsep as regexp
-a b c {4}
+a b c
 a b c d
-a b c {4}
+a b c
 a b c d
-a b c {4}
+a b c
 a b c d
-a_b_c_{4}
+a_b_c_
 a_b_c_d
 ### Test of -C
-a_b_c_{4}
+a_b_c_
 a_b_c_d
 ### Test of --trim n
-a_b_\ c\ _{4}
+a_b_\ c\ _
 a_\ b\ _c_d
-a_b_c_{4}
+a_b_c_
 a_b_c_d
 ### Test of bug: If input is empty string
-echo {2}
-{2}
+echo 
+
 echo ac
 ac
 echo ac
@@ -257,8 +257,9 @@ o
 9
 10
 ### Test --seqreplace and line too long
-      1       1  130001
-parallel: Error: Command line too long (260009 >= 131071) at number 9: 10...
+      9       1       1     101
+     90       1       1     201
+      1 parallel: Error: Command line too long (309 >= 210) at number 0: 100...
 ### bug #37042: -J foo is taken from the whole command line - not just the part before the command
 foo	tag_with_foo
 a	tag_with_a

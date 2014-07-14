@@ -30,4 +30,15 @@ echo '### How do we deal with missing $HOME'
 
 echo '### How do we deal with missing $SHELL'
    unset SHELL; stdout perl -w $(which parallel) -k echo ::: 1 2 3
+
+echo '### Test if length is computed correctly - first should give one line, second 2 lines each'
+  seq 4 | parallel -s 29 -X -kj1 echo a{}b{}c 
+  seq 4 | parallel -s 28 -X -kj1 echo a{}b{}c
+  seq 4 | parallel -s 21 -X -kj1 echo {} {}
+  seq 4 | parallel -s 20 -X -kj1 echo {} {}
+  seq 4 | parallel -s 23 -m -kj1 echo a{}b{}c 
+  seq 4 | parallel -s 22 -m -kj1 echo a{}b{}c 
+  seq 4 | parallel -s 21 -m -kj1 echo {} {}
+  seq 4 | parallel -s 20 -m -kj1 echo {} {}
+
 EOF

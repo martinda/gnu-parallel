@@ -93,8 +93,9 @@ B<exportf> to export and to set $SHELL to bash:
   exportf my_func
   SHELL=/bin/bash parallel "my_func {}" :::  1 2
 
+The command cannot contain the character \257 (¯).
 
-=item B<{}>
+=item B<{}> (alpha testing)
 
 Input line. This replacement string will be replaced by a full line
 read from the input source. The input source is normally stdin
@@ -107,7 +108,7 @@ If the command line contains no replacement strings then B<{}> will be
 appended to the command line.
 
 
-=item B<{.}>
+=item B<{.}> (alpha testing)
 
 Input line without extension. This replacement string will be replaced
 by the input with the extension removed. If the input line contains
@@ -123,7 +124,7 @@ The replacement string B<{.}> can be changed with B<--er>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/}>
+=item B<{/}> (alpha testing)
 
 Basename of input line. This replacement string will be replaced by
 the input with the directory part removed.
@@ -134,7 +135,7 @@ B<--basenamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{//}>
+=item B<{//}> (alpha testing)
 
 Dirname of input line. This replacement string will be replaced by the
 dir of the input line. See B<dirname>(1).
@@ -145,7 +146,7 @@ B<--dirnamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/.}>
+=item B<{/.}> (alpha testing)
 
 Basename of input line without extension. This replacement string will
 be replaced by the input with the directory and extension part
@@ -157,7 +158,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}>
+=item B<{#}> (alpha testing)
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -241,6 +242,27 @@ I<n>'th argument (when used with B<-N>). The input will have the
 directory (if any) and extension removed.
 
 To understand positional replacement strings see B<{>I<n>B<}>.
+
+
+=item B<{=>I<perl expression>B<=}>
+
+Replace with calculated I<perl expression>. B<$_> will contain the
+same as B<{}>. After evaluating I<perl expression> B<$_> will be used
+as the value. It is recommended to only change $_ but you have full
+access to all of GNU B<parallel>'s internal functions and data
+structures.
+
+The B<{=>I<perl expression>B<=}> must be given as a single string.
+
+See also: B<--rpl> B<--parens>
+
+
+=item B<{=>I<n> I<perl expression>B<=}>
+
+Positional equivalent to B<{= perl expression =}>. To understand
+positional replacement strings see B<{>I<n>B<}>.
+
+See also: B<{= perl expression =}> B<{>I<n>B<}>.
 
 
 =item B<:::> I<arguments>
@@ -800,7 +822,7 @@ B<-l 0> is an alias for B<-l 1>.
 Implies B<-X> unless B<-m>, B<--xargs>, or B<--pipe> is set.
 
 
-=item B<--line-buffer> (beta testing)
+=item B<--line-buffer>
 
 Buffer output on line basis. B<--group> will keep the output together
 for a whole job. B<--ungroup> allows output to mixup with half a line
@@ -935,7 +957,7 @@ B<--files> is often used with B<--pipe>.
 See also: B<--recstart>, B<--recend>, B<--fifo>, B<--cat>, B<--pipepart>.
 
 
-=item B<--pipepart> (alpha testing)
+=item B<--pipepart> (beta testing)
 
 Pipe parts of a physical file. B<--pipepart> works similar to
 B<--pipe>, but is much faster. It has a few limitations:
@@ -1056,6 +1078,21 @@ work. B<--nice> will make sure all sub commands are niced.
 Prompt the user about whether to run each command line and read a line
 from the terminal.  Only run the command line if the response starts
 with 'y' or 'Y'.  Implies B<-t>.
+
+
+=item B<--parens> I<parensstring> (alpha testing)
+
+Use to define start and end parenthesis for B<{= perl expression =}>. The
+left and the right parenthesis can be multiple characters and are
+assumed to be the same length. The default is B<{==}> giving 
+B<{=> as the start parenthesis and B<=}> as the end parenthesis.
+
+Another useful setting is B<,,,,> which would make both parenthesis
+B<,,>:
+
+  parallel --parens ,,,, echo foo is ,,s/I/O/g,, ::: FII
+
+See also: B<--rpl> B<{= perl expression =}>
 
 
 =item B<--profile> I<profilename>
@@ -1281,6 +1318,29 @@ B<--keep-order> will not work with B<--round-robin> as it is
 impossible to track which input block corresponds to which output.
 
 
+=item B<--rpl> 'I<tag> I<perl expression>' (alpha testing)
+
+Use I<tag> as a replacement string for I<perl expression>. This makes
+it possible to define your own replacement strings. GNU B<parallel>'s
+7 replacement strings are implemented as:
+
+  --rpl '{} '
+  --rpl '{#} $_=$job->seq()'
+  --rpl '{%} $_=$job->slot()'
+  --rpl '{/} s:.*/::'
+  --rpl '{//} $Global::use{"File::Basename"} ||= eval "use File::Basename; 1;"; $_ = dirname($_);'
+  --rpl '{/.} s:.*/::; s:\.[^/.]+$::;'
+  --rpl '{.} s:\.[^/.]+$::'
+
+If the user defined replacement string starts with '{' it can also be
+used as a positional replacement string (like B<{2.}>).
+
+It is recommended to only change $_ but you have full access to all
+of GNU B<parallel>'s internal functions and data structures.
+
+See also: B<{= perl expression =}> B<--parens>
+
+
 =item B<--max-chars>=I<max-chars>
 
 =item B<-s> I<max-chars>
@@ -1302,7 +1362,7 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
-=item B<--semaphore> (beta testing)
+=item B<--semaphore>
 
 Work as a counting semaphore. B<--semaphore> will cause GNU
 B<parallel> to start I<command> in the background. When the number of
@@ -1339,7 +1399,7 @@ Implies B<--semaphore>.
 See also B<man sem>.
 
 
-=item B<--semaphoretimeout> I<secs> (beta testing)
+=item B<--semaphoretimeout> I<secs>
 
 If the semaphore is not released within secs seconds, take it anyway.
 
@@ -1508,7 +1568,7 @@ The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
 
 
-=item B<--slotreplace> I<replace-str> (beta testing)
+=item B<--slotreplace> I<replace-str>
 
 Use the replacement string I<replace-str> instead of B<{%}> for
 job slot number.
@@ -1996,6 +2056,15 @@ B<parallel wget http://www.example.com/path/to/'$(date -d "today -{1} days" +%Y%
 
 B<$(date -d "today -{1} days" +%Y%m%d)> will give the dates in
 YYYYMMDD with {1} days subtracted.
+
+
+=head1 EXAMPLE: Digtal clock with "blinking" :
+
+The : in a digital clock blinks. To make every other line have a ':'
+and the rest a ' ' a perl expression is used to look at the 3rd input
+source. If the value modudo 2 is 1: Use ":" otherwise use " ":
+
+B<parallel -k echo {1}'{=3 $_=$_%2?":":" "=}'{2}{3} ::: {0..12} ::: {0..5} ::: {0..9}>
 
 
 =head1 EXAMPLE: Breadth first parallel web crawler/mirrorer
@@ -2715,7 +2784,7 @@ B<echo my_command my_arg >>>B< jobqueue>
 You can of course use B<-S> to distribute the jobs to remote
 computers:
 
-B<echo >>B<jobqueue>; B<tail -f jobqueue | parallel -S ..>
+B<true >>B<jobqueue>; B<tail -f jobqueue | parallel -S ..>
 
 There is a a small issue when using GNU B<parallel> as queue
 system/batch manager: You have to submit JobSlot number of jobs before

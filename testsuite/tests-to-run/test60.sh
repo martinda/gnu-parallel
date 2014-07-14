@@ -8,13 +8,13 @@ SSHLOGIN2=parallel@$SERVER2
 # -L1 will join lines ending in ' '
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/\;s/\$SSHLOGIN1/$SSHLOGIN1/\;s/\$SSHLOGIN2/$SSHLOGIN2/ | parallel -j0 -k -L1
 echo '### Test --onall'; 
-  parallel --onall -S $SSHLOGIN1,$SSHLOGIN2 '(echo {3} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2
+  parallel --onall -S $SSHLOGIN1,$SSHLOGIN2 '(echo {1} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2
 
 echo '### Test | --onall'; 
-  seq 3 | parallel --onall -S $SSHLOGIN1,$SSHLOGIN2 '(echo {3} {2}) | awk \{print\ \$2}' ::: a b c :::: -
+  seq 3 | parallel --onall -S $SSHLOGIN1,$SSHLOGIN2 '(echo {1} {2}) | awk \{print\ \$2}' ::: a b c :::: -
 
 echo '### Test --onall -u'; 
-  parallel --onall -S $SSHLOGIN1,$SSHLOGIN2 -u '(echo {3} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2 3 | sort
+  parallel --onall -S $SSHLOGIN1,$SSHLOGIN2 -u '(echo {1} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2 3 | sort
 
 echo '### Test --nonall'; 
   parallel --nonall -k -S $SSHLOGIN1,$SSHLOGIN2 'hostname' | sort

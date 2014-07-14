@@ -34,6 +34,11 @@ expect "opt--interactive 3"
 _EOF
 echo
 cat <<'EOF' | parallel -j0 -k -L1
+echo '### Test killing children with --timeout and exit value (failed if timed out)'
+  pstree | grep sleep | grep -v anacron | grep -v screensave | wc; 
+  parallel --timeout 3 'true {} ; for i in `seq 100 120`; do bash -c "(sleep $i)" & sleep $i & done; wait; echo No good' ::: 1000000000 1000000001 ; 
+  echo $?; sleep 7; pstree | grep sleep | grep -v anacron | grep -v screensave | wc
+
 echo '### Test -L -l and --max-lines'
 (echo a_b;echo c) | parallel -km -L2 echo
 (echo a_b;echo c) | parallel -k -L2 echo
@@ -90,10 +95,6 @@ echo '### Test -a and --arg-file: Read input from file instead of stdin'
 seq 1 10 >/tmp/$$-1; parallel -k -a /tmp/$$-1 echo
 seq 1 10 >/tmp/$$-2; parallel -k --arg-file /tmp/$$-2 echo
 
-echo '### Test killing children with --timeout and exit value (failed if timed out)'
-  pstree | grep sleep | grep -v anacron | grep -v screensave | wc; 
-  parallel --timeout 3 'true {} ; for i in `seq 100 120`; do bash -c "(sleep $i)" & sleep $i & done; wait; echo No good' ::: 1000000000 1000000001 ; 
-  echo $?; pstree | grep sleep | grep -v anacron | grep -v screensave | wc
 EOF
 
 #echo '### Test bugfix if no command given'
@@ -264,3 +265,5 @@ seq 19 | parallel -k -N 10  echo a{}b
 echo '### Test -L context replace'
 seq 19 | parallel -k -L 10  echo a{}b
 EOF
+
+touch ~/.parallel/will-cite

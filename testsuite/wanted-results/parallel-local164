@@ -45,9 +45,9 @@ bug #37694: Empty string argument skipped when using --quote
 11 1
 12 2
 11 3
-a_b_c_{4}
+a_b_c_
 a_b_c_d
-{4}
+
 ### test08
 b
 d

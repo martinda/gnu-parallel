@@ -1,6 +1,9 @@
 ### bug #41964: --controlmaster not seems to reuse OpenSSH connections to the same host
 With --controlmaster - finish first
 No --controlmaster - finish last
+### Stop if all hosts are filtered and there are no hosts left to run on
+parallel: Warning: Removed no-such.host
+parallel: Error: There are no hosts left to run on.
 ### bug #41805: Idea: propagate --env for parallel --number-of-cores
 ** test_zsh
 FOO=test_zsh

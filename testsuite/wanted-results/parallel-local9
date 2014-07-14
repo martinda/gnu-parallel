@@ -330,7 +330,7 @@ echo 999999999
 ### Test eof string after :::
 foo
 ### Test -C and --trim rl
-a_b_c_{4}
+a_b_c_
 a_b_c_d
 ### Test empty input
 ### Test -m

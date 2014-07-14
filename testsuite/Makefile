@@ -3,11 +3,13 @@ testsuite: 3
 
 3: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
 	TRIES=3 time sh Start.sh || true
+	touch ~/.parallel/will-cite
 	date
 	make stopvm
 
 1: ../src/parallel tests-to-run/* wanted-results/* prereqlocal startdb prereqremote
 	time sh Start.sh || true
+	touch ~/.parallel/will-cite
 	date
 	make stopvm
 
@@ -37,7 +39,7 @@ prereqlocal: installparallel
 	which timeout || (echo timeout is required for testsuite; /bin/false)
 
 prereqremote: installparallel startvm
-	parallel ssh parallel@parallel-server{} parallel --minversion 20121021 ::: 1 2 3 || (echo parallel on remote required for testsuite; /bin/true)
+	parallel --tag ssh parallel@parallel-server{} parallel --minversion 20121021 ::: 1 2 3 || (echo parallel on remote required for testsuite; /bin/true)
 
 startvm:
 	# Make sure we can reach the virtual machines

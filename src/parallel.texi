@@ -24,6 +24,7 @@
 * EXAMPLE@asis{:} Removing file extension when processing files::
 * EXAMPLE@asis{:} Removing two file extensions when processing files and calling GNU Parallel from itself::
 * EXAMPLE@asis{:} Download 10 images for each of the past 30 days::
+* EXAMPLE@asis{:} Digtal clock with "blinking" @asis{:}::
 * EXAMPLE@asis{:} Breadth first parallel web crawler/mirrorer::
 * EXAMPLE@asis{:} Process files from a tar file while unpacking::
 * EXAMPLE@asis{:} Rewriting a for-loop and a while-read-loop::
@@ -170,8 +171,10 @@ If it is a zsh function you will need to use this helper function
   SHELL=/bin/bash parallel "my_func {}" :::  1 2
 @end verbatim
 
-@item @strong{@{@}}
-@anchor{@strong{@{@}}}
+The command cannot contain the character \257 (Â¯).
+
+@item @strong{@{@}} (alpha testing)
+@anchor{@strong{@{@}} (alpha testing)}
 
 Input line. This replacement string will be replaced by a full line
 read from the input source. The input source is normally stdin
@@ -183,8 +186,8 @@ The replacement string @strong{@{@}} can be changed with @strong{-I}.
 If the command line contains no replacement strings then @strong{@{@}} will be
 appended to the command line.
 
-@item @strong{@{.@}}
-@anchor{@strong{@{.@}}}
+@item @strong{@{.@}} (alpha testing)
+@anchor{@strong{@{.@}} (alpha testing)}
 
 Input line without extension. This replacement string will be replaced
 by the input with the extension removed. If the input line contains
@@ -199,8 +202,8 @@ The replacement string @strong{@{.@}} can be changed with @strong{--er}.
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{/@}}
-@anchor{@strong{@{/@}}}
+@item @strong{@{/@}} (alpha testing)
+@anchor{@strong{@{/@}} (alpha testing)}
 
 Basename of input line. This replacement string will be replaced by
 the input with the directory part removed.
@@ -210,8 +213,8 @@ The replacement string @strong{@{/@}} can be changed with
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{//@}}
-@anchor{@strong{@{//@}}}
+@item @strong{@{//@}} (alpha testing)
+@anchor{@strong{@{//@}} (alpha testing)}
 
 Dirname of input line. This replacement string will be replaced by the
 dir of the input line. See @strong{dirname}(1).
@@ -221,8 +224,8 @@ The replacement string @strong{@{//@}} can be changed with
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{/.@}}
-@anchor{@strong{@{/.@}}}
+@item @strong{@{/.@}} (alpha testing)
+@anchor{@strong{@{/.@}} (alpha testing)}
 
 Basename of input line without extension. This replacement string will
 be replaced by the input with the directory and extension part
@@ -233,8 +236,8 @@ The replacement string @strong{@{/.@}} can be changed with
 
 To understand replacement strings see @strong{@{@}}.
 
-@item @strong{@{#@}}
-@anchor{@strong{@{#@}}}
+@item @strong{@{#@}} (alpha testing)
+@anchor{@strong{@{#@}} (alpha testing)}
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -318,6 +321,27 @@ input source @emph{n} (when used with @strong{-a} or @strong{::::}) or with the
 directory (if any) and extension removed.
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
+
+@item @strong{@{=}@emph{perl expression}@strong{=@}}
+@anchor{@strong{@{=}@emph{perl expression}@strong{=@}}}
+
+Replace with calculated @emph{perl expression}. @strong{$_} will contain the
+same as @strong{@{@}}. After evaluating @emph{perl expression} @strong{$_} will be used
+as the value. It is recommended to only change $_ but you have full
+access to all of GNU @strong{parallel}'s internal functions and data
+structures.
+
+The @strong{@{=}@emph{perl expression}@strong{=@}} must be given as a single string.
+
+See also: @strong{--rpl} @strong{--parens}
+
+@item @strong{@{=}@emph{n} @emph{perl expression}@strong{=@}}
+@anchor{@strong{@{=}@emph{n} @emph{perl expression}@strong{=@}}}
+
+Positional equivalent to @strong{@{= perl expression =@}}. To understand
+positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
+
+See also: @strong{@{= perl expression =@}} @strong{@{}@emph{n}@strong{@}}.
 
 @item @strong{:::} @emph{arguments}
 @anchor{@strong{:::} @emph{arguments}}
@@ -918,8 +942,8 @@ standard specifies @strong{-L} instead.
 
 Implies @strong{-X} unless @strong{-m}, @strong{--xargs}, or @strong{--pipe} is set.
 
-@item @strong{--line-buffer} (beta testing)
-@anchor{@strong{--line-buffer} (beta testing)}
+@item @strong{--line-buffer}
+@anchor{@strong{--line-buffer}}
 
 Buffer output on line basis. @strong{--group} will keep the output together
 for a whole job. @strong{--ungroup} allows output to mixup with half a line
@@ -1057,8 +1081,8 @@ defaults to '\n'. To have no record separator use @strong{--recend ""}.
 
 See also: @strong{--recstart}, @strong{--recend}, @strong{--fifo}, @strong{--cat}, @strong{--pipepart}.
 
-@item @strong{--pipepart} (alpha testing)
-@anchor{@strong{--pipepart} (alpha testing)}
+@item @strong{--pipepart} (beta testing)
+@anchor{@strong{--pipepart} (beta testing)}
 
 Pipe parts of a physical file. @strong{--pipepart} works similar to
 @strong{--pipe}, but is much faster. It has a few limitations:
@@ -1183,6 +1207,23 @@ work. @strong{--nice} will make sure all sub commands are niced.
 Prompt the user about whether to run each command line and read a line
 from the terminal.  Only run the command line if the response starts
 with 'y' or 'Y'.  Implies @strong{-t}.
+
+@item @strong{--parens} @emph{parensstring} (alpha testing)
+@anchor{@strong{--parens} @emph{parensstring} (alpha testing)}
+
+Use to define start and end parenthesis for @strong{@{= perl expression =@}}. The
+left and the right parenthesis can be multiple characters and are
+assumed to be the same length. The default is @strong{@{==@}} giving 
+@strong{@{=} as the start parenthesis and @strong{=@}} as the end parenthesis.
+
+Another useful setting is @strong{,,,,} which would make both parenthesis
+@strong{,,}:
+
+@verbatim
+  parallel --parens ,,,, echo foo is ,,s/I/O/g,, ::: FII
+@end verbatim
+
+See also: @strong{--rpl} @strong{@{= perl expression =@}}
 
 @item @strong{--profile} @emph{profilename}
 @anchor{@strong{--profile} @emph{profilename}}
@@ -1429,6 +1470,31 @@ time to initialize.
 @strong{--keep-order} will not work with @strong{--round-robin} as it is
 impossible to track which input block corresponds to which output.
 
+@item @strong{--rpl} '@emph{tag} @emph{perl expression}' (alpha testing)
+@anchor{@strong{--rpl} '@emph{tag} @emph{perl expression}' (alpha testing)}
+
+Use @emph{tag} as a replacement string for @emph{perl expression}. This makes
+it possible to define your own replacement strings. GNU @strong{parallel}'s
+7 replacement strings are implemented as:
+
+@verbatim
+  --rpl '{} '
+  --rpl '{#} $_=$job->seq()'
+  --rpl '{%} $_=$job->slot()'
+  --rpl '{/} s:.*/::'
+  --rpl '{//} $Global::use{"File::Basename"} ||= eval "use File::Basename; 1;"; $_ = dirname($_);'
+  --rpl '{/.} s:.*/::; s:\.[^/.]+$::;'
+  --rpl '{.} s:\.[^/.]+$::'
+@end verbatim
+
+If the user defined replacement string starts with '@{' it can also be
+used as a positional replacement string (like @strong{@{2.@}}).
+
+It is recommended to only change $_ but you have full access to all
+of GNU @strong{parallel}'s internal functions and data structures.
+
+See also: @strong{@{= perl expression =@}} @strong{--parens}
+
 @item @strong{--max-chars}=@emph{max-chars}
 @anchor{@strong{--max-chars}=@emph{max-chars}}
 
@@ -1451,8 +1517,8 @@ operating system and the @strong{-s} option.  Pipe the input from /dev/null
 (and perhaps specify --no-run-if-empty) if you don't want GNU @strong{parallel}
 to do anything.
 
-@item @strong{--semaphore} (beta testing)
-@anchor{@strong{--semaphore} (beta testing)}
+@item @strong{--semaphore}
+@anchor{@strong{--semaphore}}
 
 Work as a counting semaphore. @strong{--semaphore} will cause GNU
 @strong{parallel} to start @emph{command} in the background. When the number of
@@ -1489,8 +1555,8 @@ Implies @strong{--semaphore}.
 
 See also @strong{man sem}.
 
-@item @strong{--semaphoretimeout} @emph{secs} (beta testing)
-@anchor{@strong{--semaphoretimeout} @emph{secs} (beta testing)}
+@item @strong{--semaphoretimeout} @emph{secs}
+@anchor{@strong{--semaphoretimeout} @emph{secs}}
 
 If the semaphore is not released within secs seconds, take it anyway.
 
@@ -1681,8 +1747,8 @@ The sshloginfile '.' is special, it read sshlogins from
 The sshloginfile '-' is special, too, it read sshlogins from stdin
 (standard input).
 
-@item @strong{--slotreplace} @emph{replace-str} (beta testing)
-@anchor{@strong{--slotreplace} @emph{replace-str} (beta testing)}
+@item @strong{--slotreplace} @emph{replace-str}
+@anchor{@strong{--slotreplace} @emph{replace-str}}
 
 Use the replacement string @emph{replace-str} instead of @strong{@{%@}} for
 job slot number.
@@ -2192,6 +2258,15 @@ download images for the past 30 days:
 
 @strong{$(date -d "today -@{1@} days" +%Y%m%d)} will give the dates in
 YYYYMMDD with @{1@} days subtracted.
+
+@node EXAMPLE: Digtal clock with "blinking" :
+@chapter EXAMPLE: Digtal clock with "blinking" :
+
+The : in a digital clock blinks. To make every other line have a ':'
+and the rest a ' ' a perl expression is used to look at the 3rd input
+source. If the value modudo 2 is 1: Use ":" otherwise use " ":
+
+@strong{parallel -k echo @{1@}'@{=3 $_=$_%2?":":" "=@}'@{2@}@{3@} ::: @{0..12@} ::: @{0..5@} ::: @{0..9@}}
 
 @node EXAMPLE: Breadth first parallel web crawler/mirrorer
 @chapter EXAMPLE: Breadth first parallel web crawler/mirrorer
@@ -2997,7 +3072,7 @@ To submit your jobs to the queue:
 You can of course use @strong{-S} to distribute the jobs to remote
 computers:
 
-@strong{echo }>@strong{jobqueue}; @strong{tail -f jobqueue | parallel -S ..}
+@strong{true }>@strong{jobqueue}; @strong{tail -f jobqueue | parallel -S ..}
 
 There is a a small issue when using GNU @strong{parallel} as queue
 system/batch manager: You have to submit JobSlot number of jobs before

@@ -44,8 +44,8 @@ echo '### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL'
   seq 1 2 | SHELL=tcsh MANPATH=. stdout parallel -k --nice 8 setenv a b\;echo \$SHELL
 
 echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
-  parallel -k --slotreplace ,, -j2 echo ,, ::: {1..4}
-  parallel -k -j2 echo {%} ::: {1..4}
+  parallel -k --slotreplace // -j2 sleep 1\;echo // ::: {1..4}
+  parallel -k -j2 sleep 1\;echo {%} ::: {1..4}
 
 echo '### bug #42363: --pipepart and --fifo/--cat does not work'
   seq 100 > /tmp/bug42363; 
