@@ -29,120 +29,170 @@ sleep 0.1; echo opt--interactive 3 ?...y
 opt--interactive 1
 opt--interactive 3
 
+echo '### Test killing children with --timeout and exit value (failed if timed out)'
 ### Test killing children with --timeout and exit value (failed if timed out)
+  pstree | grep sleep | grep -v anacron | grep -v screensave | wc;   parallel --timeout 3 'true {} ; for i in `seq 100 120`; do bash -c "(sleep $i)" & sleep $i & done; wait; echo No good' ::: 1000000000 1000000001 ;   echo $?; sleep 7; pstree | grep sleep | grep -v anacron | grep -v screensave | wc
       0       0       0
 2
       0       0       0
+echo '### Test -L -l and --max-lines'
 ### Test -L -l and --max-lines
+(echo a_b;echo c) | parallel -km -L2 echo
 a_b
 c
+(echo a_b;echo c) | parallel -k -L2 echo
 a_b c
+(echo a_b;echo c) | xargs -L2 echo
 a_b c
+echo '### xargs -L1 echo'
 ### xargs -L1 echo
+(echo a_b;echo c) | parallel -km -L1 echo
 a_b
 c
+(echo a_b;echo c) | parallel -k -L1 echo
 a_b
 c
+(echo a_b;echo c) | xargs -L1 echo
 a_b
 c
+echo 'Lines ending in space should continue on next line'
 Lines ending in space should continue on next line
+echo '### xargs -L1 echo'
 ### xargs -L1 echo
+(echo a_b' ';echo c;echo d) | parallel -km -L1 echo
 a_b c
 d
+(echo a_b' ';echo c;echo d) | parallel -k -L1 echo
 a_b c
 d
+(echo a_b' ';echo c;echo d) | xargs -L1 echo
 a_b c
 d
+echo '### xargs -L2 echo'
 ### xargs -L2 echo
+(echo a_b' ';echo c;echo d;echo e) | parallel -km -L2 echo
 a_b c d
 e
+(echo a_b' ';echo c;echo d;echo e) | parallel -k -L2 echo
 a_b c d
 e
+(echo a_b' ';echo c;echo d;echo e) | xargs -L2 echo
 a_b c d
 e
+echo '### xargs -l echo'
 ### xargs -l echo
+(echo a_b' ';echo c;echo d;echo e) | parallel -l -km echo # This behaves wrong
 a_b c
 d
 e
+(echo a_b' ';echo c;echo d;echo e) | parallel -l -k echo # This behaves wrong
 a_b c
 d
 e
+(echo a_b' ';echo c;echo d;echo e) | xargs -l echo
 a_b c
 d
 e
+echo '### xargs -l2 echo'
 ### xargs -l2 echo
+(echo a_b' ';echo c;echo d;echo e) | parallel -km -l2 echo
 a_b c d
 e
+(echo a_b' ';echo c;echo d;echo e) | parallel -k -l2 echo
 a_b c d
 e
+(echo a_b' ';echo c;echo d;echo e) | xargs -l2 echo
 a_b c d
 e
+echo '### xargs -l1 echo'
 ### xargs -l1 echo
+(echo a_b' ';echo c;echo d;echo e) | parallel -km -l1 echo
 a_b c
 d
 e
+(echo a_b' ';echo c;echo d;echo e) | parallel -k -l1 echo
 a_b c
 d
 e
+(echo a_b' ';echo c;echo d;echo e) | xargs -l1 echo
 a_b c
 d
 e
+echo '### xargs --max-lines=2 echo'
 ### xargs --max-lines=2 echo
+(echo a_b' ';echo c;echo d;echo e) | parallel -km --max-lines 2 echo
 a_b c d
 e
+(echo a_b' ';echo c;echo d;echo e) | parallel -k --max-lines 2 echo
 a_b c d
 e
+(echo a_b' ';echo c;echo d;echo e) | xargs --max-lines=2 echo
 a_b c d
 e
+echo '### xargs --max-lines echo'
 ### xargs --max-lines echo
+(echo a_b' ';echo c;echo d;echo e) | parallel --max-lines -km echo # This behaves wrong
 a_b c
 d
 e
+(echo a_b' ';echo c;echo d;echo e) | parallel --max-lines -k echo # This behaves wrong
 a_b c
 d
 e
+(echo a_b' ';echo c;echo d;echo e) | xargs --max-lines echo
 a_b c
 d
 e
+echo '### test too long args'
 ### test too long args
+perl -e 'print "z"x1000000' | parallel echo 2>&1
 parallel: Error: Command line too long (1000005 >= 131071) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+perl -e 'print "z"x1000000' | xargs echo 2>&1
 xargs: argument line too long
+(seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -km -s 10 echo
 1 2
 3 4
 5 6
 7 8
 9 10
 parallel: Error: Command line too long (1000007 >= 10) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+(seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout xargs -s 10 echo
 1 2
 3 4
 5 6
 7 8
 xargs: argument line too long
 9 10
+(seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -kX -s 10 echo
 1 2
 3 4
 5 6
 7 8
 9 10
 parallel: Error: Command line too long (1000007 >= 10) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+echo '### Test -x'
 ### Test -x
+(seq 1 10; echo 12345; seq 12 15) | stdout parallel -j1 -km -s 10 -x echo
 1 2
 3 4
 5 6
 7 8
 9 10
 parallel: Error: Command line too long (10 >= 10) at number 0: 12345...
+(seq 1 10; echo 12345; seq 12 15) | stdout parallel -j1 -kX -s 10 -x echo
 1 2
 3 4
 5 6
 7 8
 9 10
 parallel: Error: Command line too long (10 >= 10) at number 0: 12345...
+(seq 1 10; echo 12345; seq 12 15) | stdout xargs -s 10 -x echo
 1 2
 3 4
 5 6
 xargs: argument line too long
 7 8
+(seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -km -s 10 -x echo
 1 2
 3 4
 5 6
@@ -153,6 +203,7 @@ xargs: argument line too long
 13
 14
 15
+(seq 1 10; echo 1234; seq 12 15) | stdout parallel -j1 -kX -s 10 -x echo
 1 2
 3 4
 5 6
@@ -163,6 +214,7 @@ xargs: argument line too long
 13
 14
 15
+(seq 1 10; echo 1234; seq 12 15) | stdout xargs -s 10 -x echo
 1 2
 3 4
 5 6
@@ -173,7 +225,9 @@ xargs: argument line too long
 13
 14
 15
+echo '### Test -a and --arg-file: Read input from file instead of stdin'
 ### Test -a and --arg-file: Read input from file instead of stdin
+seq 1 10 >/tmp/$$-1; parallel -k -a /tmp/$$-1 echo
 1
 2
 3
@@ -184,6 +238,7 @@ xargs: argument line too long
 8
 9
 10
+seq 1 10 >/tmp/$$-2; parallel -k --arg-file /tmp/$$-2 echo
 1
 2
 3

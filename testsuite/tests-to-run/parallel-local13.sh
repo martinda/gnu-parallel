@@ -5,7 +5,7 @@ echo '### Tests from xargs'
 rsync -Ha --delete input-files/xargs-inputs/ tmp/
 cd tmp
 
-cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k -L1
 echo '### -0 -n3 echo < files0.xi'
 stdout xargs -0 -n3 echo < files0.xi
 stdout parallel -k -0 -n3 echo < files0.xi

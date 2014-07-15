@@ -33,7 +33,7 @@ send "y\n"
 expect "opt--interactive 3"
 _EOF
 echo
-cat <<'EOF' | parallel -j0 -k -L1
+cat <<'EOF' | parallel -vj0 -k -L1
 echo '### Test killing children with --timeout and exit value (failed if timed out)'
   pstree | grep sleep | grep -v anacron | grep -v screensave | wc; 
   parallel --timeout 3 'true {} ; for i in `seq 100 120`; do bash -c "(sleep $i)" & sleep $i & done; wait; echo No good' ::: 1000000000 1000000001 ; 

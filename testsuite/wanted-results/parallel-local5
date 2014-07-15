@@ -1,25 +1,32 @@
 ### Test --pipe
+echo '### Test 200M records with too small block';   (    echo start;    seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;    echo start;    seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;    echo start;    seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;   ) | stdout parallel -k --block 200m -j2 --pipe --recend 'end\n' wc -c |   egrep -v '^0$'
 ### Test 200M records with too small block
 parallel: Warning: A record was longer than 200000000. Increasing to --blocksize 260000001
 303111434
 303111434
 303111434
+echo '### Test -N with multiple jobslots and multiple args'
 ### Test -N with multiple jobslots and multiple args
+seq 1 1 | parallel -j2 -k -N 3 --pipe 'cat;echo a'
 1
 a
+seq 1 2 | parallel -j2 -k -N 3 --pipe 'cat;echo bb'
 1
 2
 bb
+seq 1 3 | parallel -j2 -k -N 3 --pipe 'cat;echo ccc'
 1
 2
 3
 ccc
+seq 1 4 | parallel -j2 -k -N 3 --pipe 'cat;echo dddd'
 1
 2
 3
 dddd
 4
 dddd
+seq 1 5 | parallel -j2 -k -N 3 --pipe 'cat;echo eeeee'
 1
 2
 3
@@ -27,6 +34,7 @@ eeeee
 4
 5
 eeeee
+seq 1 6 | parallel -j2 -k -N 3 --pipe 'cat;echo ffffff'
 1
 2
 3
@@ -35,6 +43,7 @@ ffffff
 5
 6
 ffffff
+seq 1 7 | parallel -j2 -k -N 3 --pipe 'cat;echo ggggggg'
 1
 2
 3
@@ -45,6 +54,7 @@ ggggggg
 ggggggg
 7
 ggggggg
+seq 1 8 | parallel -j2 -k -N 3 --pipe 'cat;echo hhhhhhhh'
 1
 2
 3
@@ -56,6 +66,7 @@ hhhhhhhh
 7
 8
 hhhhhhhh
+seq 1 9 | parallel -j2 -k -N 3 --pipe 'cat;echo iiiiiiiii'
 1
 2
 3
@@ -68,6 +79,7 @@ iiiiiiiii
 8
 9
 iiiiiiiii
+seq 1 10 | parallel -j2 -k -N 3 --pipe 'cat;echo jjjjjjjjjj'
 1
 2
 3
@@ -82,7 +94,9 @@ jjjjjjjjjj
 jjjjjjjjjj
 10
 jjjjjjjjjj
+echo '### Test -l -N -L and -n with multiple jobslots and multiple args'
 ### Test -l -N -L and -n with multiple jobslots and multiple args
+seq 1 12 | parallel -kj20 -l 2 --block 8 --pipe "cat; echo a"
 1
 2
 3
@@ -99,6 +113,7 @@ a
 11
 12
 a
+seq 1 5 | parallel -kj2 -N 2 --pipe "cat; echo b"
 1
 2
 b
@@ -107,6 +122,7 @@ b
 b
 5
 b
+seq 1 5 | parallel -kj2 -n 2 --pipe "cat; echo d"
 1
 2
 d
@@ -115,7 +131,9 @@ d
 d
 5
 d
+echo '### Test -L --pipe'
 ### Test -L --pipe
+seq 1 5 | parallel -kj2 -L 2 --pipe "cat; echo c"
 1
 2
 3
@@ -123,48 +141,59 @@ d
 c
 5
 c
+echo '### Test output is the same for different block size'
 ### Test output is the same for different block size
+echo -n 01a02a0a0a12a34a45a6a |   parallel -k -j1 --blocksize 100 --pipe --recend a  -N 3  'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 1>01a02a0a
 2>0a12a34a
 3>45a6a
+echo -n 01a02a0a0a12a34a45a6a |   stdout parallel -k -j1 --blocksize 1 --pipe --recend a  -N 3  'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 parallel: Warning: A record was longer than 1. Increasing to --blocksize 3
 parallel: Warning: A record was longer than 3. Increasing to --blocksize 5
 1>01a02a0a
 parallel: Warning: A record was longer than 5. Increasing to --blocksize 8
 2>0a12a34a
 3>45a6a
+echo '### Test 10M records with too big block';   (    echo start;    seq 1 1 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;    echo start;    seq 1 1 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;    echo start;    seq 1 1 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;   ) | stdout parallel -k --block 10M -j2 --pipe --recstart 'start\n' wc -c |   egrep -v '^0$'
 ### Test 10M records with too big block
 6888906
 6888906
 6888906
+echo '### Test --rrs -N1 --recend single';   echo 12a34a45a6 |   parallel -k --pipe --recend a -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 ### Test --rrs -N1 --recend single
 1>12
 2>34
 3>45
 4>6
 
+echo '### Test --rrs -N1 --regexp --recend alternate';   echo 12a34b45a6 |   parallel -k --pipe --regexp --recend 'a|b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 ### Test --rrs -N1 --regexp --recend alternate
 1>12
 2>34
 3>45
 4>6
 
+echo '### Test --rrs -N1 --recend single';   echo 12a34b45a6 |   parallel -k --pipe --recend 'b' -N1 --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 ### Test --rrs -N1 --recend single
 1>12a34
 2>45a6
 
+echo '### Test --rrs --recend single';   echo 12a34a45a6 |   parallel -k --pipe --recend a --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 ### Test --rrs --recend single
 1>123445
 2>6
 
+echo '### Test --rrs --regexp --recend alternate';   echo 12a34b45a6 |   parallel -k --pipe --regexp --recend 'a|b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 ### Test --rrs --regexp --recend alternate
 1>123445
 2>6
 
+echo '### Test --rrs --recend single';   echo 12a34b45a6 |   parallel -k --pipe --recend 'b' --rrs 'echo -n "$PARALLEL_SEQ>"; cat; echo; sleep 0.1'
 ### Test --rrs --recend single
 1>12a34
 2>45a6
 
+echo '### Test -N even';   seq 1 10 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.\$PARALLEL_SEQ"
 ### Test -N even
 1
 2
@@ -181,6 +210,7 @@ ole
 9
 10
 ole
+echo '### Test -N odd';   seq 1 11 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 0.\$PARALLEL_SEQ"
 ### Test -N odd
 1
 2
@@ -199,6 +229,7 @@ ole
 ole
 11
 ole
+echo '### Test -N even+2';   seq 1 12 | parallel -j2 -k -N 2 --pipe cat";echo ole;sleep 1.\$PARALLEL_SEQ"
 ### Test -N even+2
 1
 2
@@ -218,10 +249,14 @@ ole
 11
 12
 ole
+echo '### Test --recstart + --recend';   cat /tmp/blocktest | parallel --block 1M -k --recstart 44 --recend "44" -j10 --pipe sort -n |md5sum
 ### Test --recstart + --recend
 3c20e43c58152da30261c5827a1f9084  -
+echo '### Race condition bug - 1 - would block';   seq 1 80  | nice parallel -j0 'seq 1 10| parallel --block 1 --recend "" --pipe cat;true' >/dev/null
 ### Race condition bug - 1 - would block
+echo '### Race condition bug - 2 - would block';   seq 1 100 | nice parallel -j100 --block 1 --recend "" --pipe cat >/dev/null
 ### Race condition bug - 2 - would block
+echo '### Test --block size=1';   seq 1 10| parallel --block 1 --files --recend ""  --pipe sort -n | parallel -Xj1 sort -nm {} ";"rm {}
 ### Test --block size=1
 
 
@@ -244,12 +279,16 @@ ole
 7
 8
 9
+echo '### Test --block size=1M -j10 --files - more jobs than data';   sort -n < /tmp/blocktest | md5sum;   cat /tmp/blocktest | parallel --files --recend "\n" -j10 --pipe sort -n | parallel -Xj1 sort -nm {} ";"rm {} | md5sum
 ### Test --block size=1M -j10 --files - more jobs than data
 8a7095c1c23bfadc311fe6b16d950582  -
 8a7095c1c23bfadc311fe6b16d950582  -
+echo '### Test --block size=1M -j1 - more data than cpu';   cat /tmp/blocktest | parallel --files --recend "\n" -j1 --pipe sort -n | parallel -Xj1 sort -nm {} ";"rm {} | md5sum
 ### Test --block size=1M -j1 - more data than cpu
 8a7095c1c23bfadc311fe6b16d950582  -
+echo '### Test --block size=1M -j1 - more data than cpu';   cat /tmp/blocktest | parallel --files --recend "\n" -j2 --pipe sort -n | parallel -Xj1 sort -nm {} ";"rm {} | md5sum
 ### Test --block size=1M -j1 - more data than cpu
 8a7095c1c23bfadc311fe6b16d950582  -
+echo '### Test --pipe default settings';   cat /tmp/blocktest | parallel --pipe sort | sort -n | md5sum
 ### Test --pipe default settings
 8a7095c1c23bfadc311fe6b16d950582  -

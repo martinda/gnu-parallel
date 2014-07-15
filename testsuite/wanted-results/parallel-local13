@@ -1,5 +1,7 @@
 ### Tests from xargs
+echo '### -0 -n3 echo < files0.xi'
 ### -0 -n3 echo < files0.xi
+stdout xargs -0 -n3 echo < files0.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in
 /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING
 /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h
@@ -8,6 +10,7 @@
 /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
 /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+stdout parallel -k -0 -n3 echo < files0.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in
 /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING
 /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h
@@ -16,18 +19,26 @@
 /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
 /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+echo '###  -d o -n1 echo < helloworld.xi'
 ###  -d o -n1 echo < helloworld.xi
+stdout xargs -d o -n1 echo < helloworld.xi
 hell
  w
 rld
+stdout parallel -k -d o -n1 echo < helloworld.xi
 hell
  w
 rld
+echo '###  -E_ -0 echo < eof_-0.xi'
 ###  -E_ -0 echo < eof_-0.xi
+stdout xargs -E_ -0 echo < eof_-0.xi
 one two _ three four
+stdout parallel -X -k -E_ -0 echo < eof_-0.xi
 one
 two
+echo '###  -i -0 echo from \{\} to x{}y < items-0.xi'
 ###  -i -0 echo from \{\} to x{}y < items-0.xi
+stdout xargs -i -0 echo from \{\} to x{}y < items-0.xi
 from one to xoney
 from  	
  to x 	
@@ -48,6 +59,7 @@ n
 
 n
 y
+stdout parallel -k -i -0 echo from \{\} to x{}y < items-0.xi
 from one to xoney
 from  	
  to x 	
@@ -68,12 +80,17 @@ n
 
 n
 y
+echo '###  -i -s26 -0 echo from \{\} to x{}y < items-0.xi'
 ###  -i -s26 -0 echo from \{\} to x{}y < items-0.xi
+stdout xargs -i -s26 -0 echo from \{\} to x{}y < items-0.xi
 xargs: argument list too long
 from one to xoney
+stdout parallel -k -i -s26 -0 echo from \{\} to x{}y < items-0.xi
 parallel: Error: Command line too long (42 >= 26) at number 0:  	
 ...
+echo '###  -l -0 echo < ldata-0.xi'
 ###  -l -0 echo < ldata-0.xi
+stdout xargs -l -0 echo < ldata-0.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -83,6 +100,7 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 666666 7777777
 88888888
 999999999
+stdout parallel -l -k -0 echo < ldata-0.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -92,7 +110,9 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 666666 7777777
 88888888
 999999999
+echo '###  -l -0 echo < ldatab-0.xi'
 ###  -l -0 echo < ldatab-0.xi
+stdout xargs -l -0 echo < ldatab-0.xi
  	
 1 22 333 4444 
 55555 666666
@@ -103,6 +123,7 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 666666 7777777
 88888888
 999999999 
+stdout parallel -l -k -0 echo < ldatab-0.xi
  	
 1 22 333 4444 55555 666666
 7777777 88888888 999999999 1 22
@@ -110,35 +131,46 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 666666 7777777
 88888888
 999999999 
+echo '###  -L2 -0 echo < ldata-0.xi'
 ###  -L2 -0 echo < ldata-0.xi
+stdout xargs -L2 -0 echo < ldata-0.xi
 1 22 333 4444 55555 666666
 7777777 88888888
 999999999 1 22 333 4444 55555
 666666 7777777 88888888
 999999999
+stdout parallel -k -L2 -0 echo < ldata-0.xi
 1 22 333 4444 55555 666666
 7777777 88888888
 999999999 1 22 333 4444 55555
 666666 7777777 88888888
 999999999
+echo '###  -L2 -0 echo < ldatab-0.xi'
 ###  -L2 -0 echo < ldatab-0.xi
+stdout xargs -L2 -0 echo < ldatab-0.xi
  	 1 22 333 4444 
 55555 666666 7777777 
 88888888  999999999 1 22
 333 4444 55555 666666 7777777
 88888888 999999999 
+stdout parallel -k -L2 -0 echo < ldatab-0.xi
  	 1 22 333 4444 55555 666666
 7777777 88888888 999999999 1 22 333 4444 55555
 666666 7777777 88888888
 999999999 
+echo '###  -L3 -0 echo < ldata-0.xi'
 ###  -L3 -0 echo < ldata-0.xi
+stdout xargs -L3 -0 echo < ldata-0.xi
 1 22 333 4444 55555 666666 7777777
 88888888 999999999 1 22 333 4444 55555
 666666 7777777 88888888 999999999
+stdout parallel -k -L3 -0 echo < ldata-0.xi
 1 22 333 4444 55555 666666 7777777
 88888888 999999999 1 22 333 4444 55555
 666666 7777777 88888888 999999999
+echo '###  -n1 -0 echo < stairs-0.xi'
 ###  -n1 -0 echo < stairs-0.xi
+stdout xargs -n1 -0 echo < stairs-0.xi
 1
 22
 333
@@ -157,6 +189,7 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 7777777
 88888888
 999999999
+stdout parallel -k -n1 -0 echo < stairs-0.xi
 1
 22
 333
@@ -175,7 +208,9 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 7777777
 88888888
 999999999
+echo '###  -n2 -0 echo < stairs-0.xi'
 ###  -n2 -0 echo < stairs-0.xi
+stdout xargs -n2 -0 echo < stairs-0.xi
 1 22
 333 4444
 55555 666666
@@ -185,6 +220,7 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 4444 55555
 666666 7777777
 88888888 999999999
+stdout parallel -k -n2 -0 echo < stairs-0.xi
 1 22
 333 4444
 55555 666666
@@ -194,7 +230,9 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 4444 55555
 666666 7777777
 88888888 999999999
+echo '###  -n2 -s26 -0 echo < stairs-0.xi'
 ###  -n2 -s26 -0 echo < stairs-0.xi
+stdout xargs -n2 -s26 -0 echo < stairs-0.xi
 1 22
 333 4444
 55555 666666
@@ -204,6 +242,7 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 4444 55555
 666666 7777777
 88888888 999999999
+stdout parallel -k -n2 -s26 -0 echo < stairs-0.xi
 1 22
 333 4444
 55555 666666
@@ -213,7 +252,9 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 4444 55555
 666666 7777777
 88888888 999999999
+echo '###  -n2 -s26 -x -0 echo < stairs-0.xi'
 ###  -n2 -s26 -x -0 echo < stairs-0.xi
+stdout xargs -n2 -s26 -x -0 echo < stairs-0.xi
 1 22
 333 4444
 55555 666666
@@ -223,6 +264,7 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 4444 55555
 666666 7777777
 88888888 999999999
+stdout parallel -k -n2 -s26 -x -0 echo < stairs-0.xi
 1 22
 333 4444
 55555 666666
@@ -232,52 +274,71 @@ parallel: Error: Command line too long (42 >= 26) at number 0:  	
 4444 55555
 666666 7777777
 88888888 999999999
+echo '###  -n3 -0 echo < stairs2-0.xi'
 ###  -n3 -0 echo < stairs2-0.xi
+stdout xargs -n3 -0 echo < stairs2-0.xi
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
+stdout parallel -k -n3 -0 echo < stairs2-0.xi
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
+stdout xargs -n3 -s36 -0 echo < stairs2-0.xi
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
+stdout parallel -k -n3 -s36 -0 echo < stairs2-0.xi
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
+echo '###  -0 echo < noeof-0.xi'
 ###  -0 echo < noeof-0.xi
+stdout xargs -0 echo < noeof-0.xi
 first second
+stdout parallel -k -0 echo < noeof-0.xi
 first
 second
+echo '###  -P3 -n1 -IARG sh -c ARG < Pdata.xi'
 ###  -P3 -n1 -IARG sh -c ARG < Pdata.xi
+stdout xargs -P3 -n1 -IARG sh -c ARG < Pdata.xi
 three
 two
 one
+stdout parallel -k -P3 -n1 -IARG sh -c ARG < Pdata.xi
 one
 two
 three
+echo '###  -r echo this plus that < blank.xi'
 ###  -r echo this plus that < blank.xi
+stdout xargs -r echo this plus that < blank.xi
+stdout parallel -k -r echo this plus that < blank.xi
+echo '###  -0 -s118 echo < stairs-0.xi'
 ###  -0 -s118 echo < stairs-0.xi
+stdout xargs -0 -s118 echo < stairs-0.xi
 1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22 333 4444 55555 666666 7777777 88888888 999999999
+stdout parallel -k -X -0 -s118 echo < stairs-0.xi
 1 22 333
 4444 55555 666666
 7777777 88888888 999999999
 1 22 333
 4444 55555 666666
 7777777 88888888 999999999
+echo '###  -0 -s19 echo < stairs-0.xi'
 ###  -0 -s19 echo < stairs-0.xi
+stdout xargs -0 -s19 echo < stairs-0.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -288,6 +349,7 @@ three
 7777777
 88888888
 999999999
+stdout parallel -k -X -0 -s19 echo < stairs-0.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -298,7 +360,9 @@ three
 7777777
 88888888
 999999999
+echo '###  -0 -s19 echo < stairs2-0.xi'
 ###  -0 -s19 echo < stairs2-0.xi
+stdout xargs -0 -s19 echo < stairs2-0.xi
 999999999
 88888888
 7777777
@@ -309,6 +373,7 @@ three
 7777777
 666666 55555
 4444 333 22 1
+stdout parallel -k -X -0 -s19 echo < stairs2-0.xi
 999999999
 88888888
 7777777
@@ -322,7 +387,9 @@ three
 333
 22
 1
+echo '###  -0 -s20 echo < stairs-0.xi'
 ###  -0 -s20 echo < stairs-0.xi
+stdout xargs -0 -s20 echo < stairs-0.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -332,6 +399,7 @@ three
 666666 7777777
 88888888
 999999999
+stdout parallel -k -X -0 -s20 echo < stairs-0.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -341,99 +409,141 @@ three
 666666 7777777
 88888888
 999999999
+echo '###  -0 -s30 echo < stairs-0.xi'
 ###  -0 -s30 echo < stairs-0.xi
+stdout xargs -0 -s30 echo < stairs-0.xi
 1 22 333 4444 55555
 666666 7777777 88888888
 999999999 1 22 333 4444
 55555 666666 7777777
 88888888 999999999
+stdout parallel -k -X -0 -s30 echo < stairs-0.xi
 1 22 333 4444 55555
 666666 7777777 88888888
 999999999 1 22 333 4444
 55555 666666 7777777
 88888888
 999999999
+echo '###  -0 echo this plus that < space.xi'
 ###  -0 echo this plus that < space.xi
+stdout xargs -0 echo this plus that < space.xi
 this plus that 
  	
 
+stdout parallel -k -0 echo this plus that < space.xi
 this plus that 
  	
 
+echo '###  -r echo this plus that < space.xi'
 ###  -r echo this plus that < space.xi
+stdout xargs -r echo this plus that < space.xi
+stdout parallel -k -r echo this plus that < space.xi
 this plus that  	
+echo '###  -t -0 echo this plus that < space.xi'
 ###  -t -0 echo this plus that < space.xi
+stdout xargs -t -0 echo this plus that < space.xi
 echo this plus that 
  	
  
 this plus that 
  	
 
+stdout parallel -k -t -0 echo this plus that < space.xi
 echo this plus that '
 '\ \\\	\'
 '
 this plus that 
  	
 
+echo '###  true < 32767-ys.xi'
 ###  true < 32767-ys.xi
+stdout xargs true < 32767-ys.xi
+stdout parallel -k true < 32767-ys.xi
+echo '###  true < 16383-ys.xi'
 ###  true < 16383-ys.xi
+stdout xargs true < 16383-ys.xi
+stdout parallel -k true < 16383-ys.xi
+echo '###  -E EOF echo < EOFb.xi'
 ###  -E EOF echo < EOFb.xi
+stdout xargs -E EOF echo < EOFb.xi
 one two bEOF three four
+stdout parallel -k -E EOF echo < EOFb.xi
 one
 two
  bEOF	
 three
 four
+echo '###  -E EOF echo < EOFe.xi'
 ###  -E EOF echo < EOFe.xi
+stdout xargs -E EOF echo < EOFe.xi
 one two EOFe three four
+stdout parallel -k -E EOF echo < EOFe.xi
 one
 two
  EOFe	
 three
 four
+echo '###  -E EOF echo < EOF.xi'
 ###  -E EOF echo < EOF.xi
+stdout xargs -E EOF echo < EOF.xi
 one two
+stdout parallel -k -E EOF echo < EOF.xi
 one
 two
  EOF	
 three
 four
+echo '###  -E_ echo < eof_.xi'
 ###  -E_ echo < eof_.xi
+stdout xargs -E_ echo < eof_.xi
 one two
+stdout parallel -k -E_ echo < eof_.xi
 one
 two
+echo '###  -E_ -IARG echo from ARG to xARGy < eof_.xi'
 ###  -E_ -IARG echo from ARG to xARGy < eof_.xi
+stdout xargs -E_ -IARG echo from ARG to xARGy < eof_.xi
 from one to xoney
 from two to xtwoy
+stdout parallel -k -E_ -IARG echo from ARG to xARGy < eof_.xi
 from one to xoney
 from two to xtwoy
+echo '###  -s470 echo hi there < files.xi'
 ###  -s470 echo hi there < files.xi
+stdout xargs -s470 echo hi there < files.xi
 hi there /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4 /src/gnu/autoconf-1.11/configure
 hi there /src/gnu/autoconf-1.11/configure.in /src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
+stdout parallel -k -s470 -X echo hi there < files.xi
 hi there /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4 /src/gnu/autoconf-1.11/configure
 hi there /src/gnu/autoconf-1.11/configure.in /src/gnu/autoconf-1.11/autoheader.sh
 hi there /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh
 hi there /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi
 hi there /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info
 hi there /src/gnu/autoconf-1.11/texinfo.tex
+echo '###  -IARG echo from ARG to xARGy -E_ < eof_.xi'
 ###  -IARG echo from ARG to xARGy -E_ < eof_.xi
+stdout xargs -IARG echo from ARG to xARGy -E_ < eof_.xi
 from one to xoney -E_
 from two to xtwoy -E_
 from _ to x_y -E_
 from three to xthreey -E_
 from four to xfoury -E_
+stdout parallel -k -IARG echo from ARG to xARGy -E_ < eof_.xi
 from one to xoney -E_
 from two to xtwoy -E_
 from _ to x_y -E_
 from three to xthreey -E_
 from four to xfoury -E_
+echo '###  -IARG echo from ARG to xARGy < items.xi'
 ###  -IARG echo from ARG to xARGy < items.xi
+stdout xargs -IARG echo from ARG to xARGy < items.xi
 from dumb to xdumby
 from s  s  to xs  s y
 from ff to xffy
 from rr to xrry
 from t		t	 to xt		t	y
 from vv to xvvy
+stdout parallel -k -IARG echo from ARG to xARGy < items.xi
 from  	 to x 	y
 from dumb to xdumby
 from  s  s  to x s  s y
@@ -442,7 +552,9 @@ from rr to xrry
 from 	t		t	 to x	t		t	y
 from vv to xvvy
 from  	 to x 	y
+echo '###  -IARG -s15 echo ARG < stairs.xi'
 ###  -IARG -s15 echo ARG < stairs.xi
+stdout xargs -IARG -s15 echo ARG < stairs.xi
 1
 22
 333
@@ -461,6 +573,7 @@ from  	 to x 	y
 7777777
 88888888
 999999999
+stdout parallel -k -IARG -X -s15 echo ARG < stairs.xi
 1 22 333
 4444
 55555
@@ -475,15 +588,20 @@ from  	 to x 	y
 7777777
 88888888
 999999999
+echo '###  -L2 echo < ldatab.xi'
 ###  -L2 echo < ldatab.xi
+stdout xargs -L2 echo < ldatab.xi
 1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22
 333 4444 55555 666666 7777777
 88888888 999999999
+stdout parallel -k -L2 echo < ldatab.xi
  	 1 22 333 4444 55555 666666
 7777777 88888888 999999999 1 22 333 4444 55555
 666666 7777777 88888888
 999999999 
+echo '###  -L2 -n2 echo < ldata.xi'
 ###  -L2 -n2 echo < ldata.xi
+stdout xargs -L2 -n2 echo < ldata.xi
 1 22
 333 4444
 55555 666666
@@ -493,19 +611,25 @@ from  	 to x 	y
 4444 55555
 666666 7777777
 88888888 999999999
+stdout parallel -k -L2 -n2 echo < ldata.xi
 1 22 333 4444 55555 666666
 7777777 88888888
 999999999 1 22 333 4444 55555
 666666 7777777 88888888
 999999999
+echo '###  -L3 echo < ldata.xi'
 ###  -L3 echo < ldata.xi
+stdout xargs -L3 echo < ldata.xi
 1 22 333 4444 55555 666666 7777777
 88888888 999999999 1 22 333 4444 55555
 666666 7777777 88888888 999999999
+stdout parallel -k -L3 echo < ldata.xi
 1 22 333 4444 55555 666666 7777777
 88888888 999999999 1 22 333 4444 55555
 666666 7777777 88888888 999999999
+echo '###  -n1 echo < stairs.xi'
 ###  -n1 echo < stairs.xi
+stdout xargs -n1 echo < stairs.xi
 1
 22
 333
@@ -524,6 +648,7 @@ from  	 to x 	y
 7777777
 88888888
 999999999
+stdout parallel -k -n1 echo < stairs.xi
 1
 22
 333
@@ -542,7 +667,9 @@ from  	 to x 	y
 7777777
 88888888
 999999999
+echo '###  -n2 echo < stairs.xi'
 ###  -n2 echo < stairs.xi
+stdout xargs -n2 echo < stairs.xi
 1 22
 333 4444
 55555 666666
@@ -552,6 +679,7 @@ from  	 to x 	y
 4444 55555
 666666 7777777
 88888888 999999999
+stdout parallel -k -n2 echo < stairs.xi
 1 22
 333 4444
 55555 666666
@@ -561,7 +689,9 @@ from  	 to x 	y
 4444 55555
 666666 7777777
 88888888 999999999
+echo '###  -n2 -s26 echo < stairs.xi'
 ###  -n2 -s26 echo < stairs.xi
+stdout xargs -n2 -s26 echo < stairs.xi
 1 22
 333 4444
 55555 666666
@@ -571,6 +701,7 @@ from  	 to x 	y
 4444 55555
 666666 7777777
 88888888 999999999
+stdout parallel -k -n2 -s26 echo < stairs.xi
 1 22
 333 4444
 55555 666666
@@ -580,7 +711,9 @@ from  	 to x 	y
 4444 55555
 666666 7777777
 88888888 999999999
+echo '###  -n2 -s26 -x echo < stairs.xi'
 ###  -n2 -s26 -x echo < stairs.xi
+stdout xargs -n2 -s26 -x echo < stairs.xi
 1 22
 333 4444
 55555 666666
@@ -590,6 +723,7 @@ from  	 to x 	y
 4444 55555
 666666 7777777
 88888888 999999999
+stdout parallel -k -n2 -s26 -x echo < stairs.xi
 1 22
 333 4444
 55555 666666
@@ -599,7 +733,9 @@ from  	 to x 	y
 4444 55555
 666666 7777777
 88888888 999999999
+echo '###  -n3 echo < files.xi'
 ###  -n3 echo < files.xi
+stdout xargs -n3 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in
 /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING
 /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h
@@ -608,6 +744,7 @@ from  	 to x 	y
 /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
 /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+stdout parallel -k -n3 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in
 /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING
 /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h
@@ -616,40 +753,54 @@ from  	 to x 	y
 /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
 /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+echo '###  -n3 -s36 echo < stairs2.xi'
 ###  -n3 -s36 echo < stairs2.xi
+stdout xargs -n3 -s36 echo < stairs2.xi
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
+stdout parallel -k -n3 -s36 echo < stairs2.xi
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
 999999999 88888888 7777777
 666666 55555 4444
 333 22 1
+echo '###  echo < noeof.xi'
 ###  echo < noeof.xi
+stdout xargs echo < noeof.xi
 first second
+stdout parallel -k echo < noeof.xi
 first
 second
+echo '###  echo < quotes.xi'
 ###  echo < quotes.xi
+stdout xargs echo < quotes.xi
 this is quoted 	stuff and 
 an embedded newline with single	quotes as well.
+stdout parallel -k echo < quotes.xi
    this is
 "quoted 	stuff"  
 and \
 an embedded   newline
 with 'single	quotes' as well.
+echo '###  -s118 echo < stairs.xi'
 ###  -s118 echo < stairs.xi
+stdout xargs -s118 echo < stairs.xi
 1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22 333 4444 55555 666666 7777777 88888888 999999999
+stdout parallel -k -X -s118 echo < stairs.xi
 1 22 333
 4444 55555 666666
 7777777 88888888 999999999
 1 22 333
 4444 55555 666666
 7777777 88888888 999999999
+echo '###  -s19 echo < stairs2.xi'
 ###  -s19 echo < stairs2.xi
+stdout xargs -s19 echo < stairs2.xi
 999999999
 88888888
 7777777
@@ -660,6 +811,7 @@ with 'single	quotes' as well.
 7777777
 666666 55555
 4444 333 22 1
+stdout parallel -k -X -s19 echo < stairs2.xi
 999999999
 88888888
 7777777
@@ -673,7 +825,9 @@ with 'single	quotes' as well.
 333
 22
 1
+echo '###  -s19 echo < stairs.xi'
 ###  -s19 echo < stairs.xi
+stdout xargs -s19 echo < stairs.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -684,6 +838,7 @@ with 'single	quotes' as well.
 7777777
 88888888
 999999999
+stdout parallel -k -X -s19 echo < stairs.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -694,7 +849,9 @@ with 'single	quotes' as well.
 7777777
 88888888
 999999999
+echo '###  -s20 echo < stairs.xi'
 ###  -s20 echo < stairs.xi
+stdout xargs -s20 echo < stairs.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -704,6 +861,7 @@ with 'single	quotes' as well.
 666666 7777777
 88888888
 999999999
+stdout parallel -k -X -s20 echo < stairs.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -713,21 +871,27 @@ with 'single	quotes' as well.
 666666 7777777
 88888888
 999999999
+echo '###  -s30 echo < stairs.xi'
 ###  -s30 echo < stairs.xi
+stdout xargs -s30 echo < stairs.xi
 1 22 333 4444 55555
 666666 7777777 88888888
 999999999 1 22 333 4444
 55555 666666 7777777
 88888888 999999999
+stdout parallel -k -X -s30 echo < stairs.xi
 1 22 333 4444 55555
 666666 7777777 88888888
 999999999 1 22 333 4444
 55555 666666 7777777
 88888888
 999999999
+echo '###  -s470 echo < files.xi'
 ###  -s470 echo < files.xi
+stdout xargs -s470 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4 /src/gnu/autoconf-1.11/configure /src/gnu/autoconf-1.11/configure.in
 /src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
+stdout parallel -k -X -s470 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4 /src/gnu/autoconf-1.11/configure /src/gnu/autoconf-1.11/configure.in
 /src/gnu/autoconf-1.11/autoheader.sh
 /src/gnu/autoconf-1.11/mkinstalldirs
@@ -737,7 +901,9 @@ with 'single	quotes' as well.
 /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+echo '###  -s47 echo < files.xi'
 ###  -s47 echo < files.xi
+stdout xargs -s47 echo < files.xi
 /src/gnu/autoconf-1.11
 /src/gnu/autoconf-1.11/README
 /src/gnu/autoconf-1.11/Makefile.in
@@ -760,6 +926,7 @@ with 'single	quotes' as well.
 /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+stdout parallel -k -X -s47 echo < files.xi
 /src/gnu/autoconf-1.11
 /src/gnu/autoconf-1.11/README
 /src/gnu/autoconf-1.11/Makefile.in
@@ -782,7 +949,9 @@ with 'single	quotes' as well.
 /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+echo '###  -s48 echo < files.xi'
 ###  -s48 echo < files.xi
+stdout xargs -s48 echo < files.xi
 /src/gnu/autoconf-1.11
 /src/gnu/autoconf-1.11/README
 /src/gnu/autoconf-1.11/Makefile.in
@@ -805,6 +974,7 @@ with 'single	quotes' as well.
 /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+stdout parallel -k -X -s48 echo < files.xi
 /src/gnu/autoconf-1.11
 /src/gnu/autoconf-1.11/README
 /src/gnu/autoconf-1.11/Makefile.in
@@ -827,10 +997,15 @@ with 'single	quotes' as well.
 /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info
 /src/gnu/autoconf-1.11/texinfo.tex
+echo '###  -s6 echo < files.xi'
 ###  -s6 echo < files.xi
+stdout xargs -s6 echo < files.xi
 xargs: argument line too long
+stdout parallel -k -X -s6 echo < files.xi
 parallel: Error: Command line too long (27 >= 6) at number -7: /src/gnu/autoconf-1.11...
+echo '###  -iARG -s86 echo ARG is xARGx < files.xi'
 ###  -iARG -s86 echo ARG is xARGx < files.xi
+stdout xargs -iARG -s86 echo ARG is xARGx < files.xi
 /src/gnu/autoconf-1.11 is x/src/gnu/autoconf-1.11x
 /src/gnu/autoconf-1.11/README is x/src/gnu/autoconf-1.11/READMEx
 /src/gnu/autoconf-1.11/Makefile.in is x/src/gnu/autoconf-1.11/Makefile.inx
@@ -853,6 +1028,7 @@ parallel: Error: Command line too long (27 >= 6) at number -7: /src/gnu/autoconf
 /src/gnu/autoconf-1.11/make-stds.texi is x/src/gnu/autoconf-1.11/make-stds.texix
 /src/gnu/autoconf-1.11/standards.info is x/src/gnu/autoconf-1.11/standards.infox
 /src/gnu/autoconf-1.11/texinfo.tex is x/src/gnu/autoconf-1.11/texinfo.texx
+stdout parallel -k -iARG -s86 echo ARG is xARGx < files.xi
 /src/gnu/autoconf-1.11 is x/src/gnu/autoconf-1.11x
 /src/gnu/autoconf-1.11/README is x/src/gnu/autoconf-1.11/READMEx
 /src/gnu/autoconf-1.11/Makefile.in is x/src/gnu/autoconf-1.11/Makefile.inx
@@ -875,64 +1051,99 @@ parallel: Error: Command line too long (27 >= 6) at number -7: /src/gnu/autoconf
 /src/gnu/autoconf-1.11/make-stds.texi is x/src/gnu/autoconf-1.11/make-stds.texix
 /src/gnu/autoconf-1.11/standards.info is x/src/gnu/autoconf-1.11/standards.infox
 /src/gnu/autoconf-1.11/texinfo.tex is x/src/gnu/autoconf-1.11/texinfo.texx
+echo '###  echo this plus that < space.xi'
 ###  echo this plus that < space.xi
+stdout xargs echo this plus that < space.xi
 this plus that
+stdout parallel -k echo this plus that < space.xi
 this plus that
 this plus that  	
+echo '###  -IARG echo from ARG to xARGy < space.xi'
 ###  -IARG echo from ARG to xARGy < space.xi
+stdout xargs -IARG echo from ARG to xARGy < space.xi
+stdout parallel -k -IARG echo from ARG to xARGy < space.xi
 from to xy
 from  	 to x 	y
+echo '###  printf "\[%s\]\n" < verticaltabs.xi'
 ###  printf "\[%s\]\n" < verticaltabs.xi
+stdout xargs printf "\[%s\]\n" < verticaltabs.xi
 \[qwer\]
 \[6789\]
-[qwer 6789]n###  printf "\[%s\]\n" < formfeeds.xi
+stdout parallel -k printf "\[%s\]\n" < verticaltabs.xi
+[qwer 6789]necho '###  printf "\[%s\]\n" < formfeeds.xi'
+###  printf "\[%s\]\n" < formfeeds.xi
+stdout xargs printf "\[%s\]\n" < formfeeds.xi
 \[1234\]
 \[abcd\]
-[1234]n[abcd]n###  -L2 echo < ldata.xi
+stdout parallel -k printf "\[%s\]\n" < formfeeds.xi
+[1234]n[abcd]necho '###  -L2 echo < ldata.xi'
+###  -L2 echo < ldata.xi
+stdout xargs -L2 echo < ldata.xi
 1 22 333 4444 55555 666666
 7777777 88888888
 999999999 1 22 333 4444 55555
 666666 7777777 88888888
 999999999
+stdout parallel -k -L2 echo < ldata.xi
 1 22 333 4444 55555 666666
 7777777 88888888
 999999999 1 22 333 4444 55555
 666666 7777777 88888888
 999999999
+echo '###  echo < unmatched2.xi'
 ###  echo < unmatched2.xi
+stdout xargs echo < unmatched2.xi
 xargs: unmatched double quote; by default quotes are special to xargs unless you use the -0 option
 one
+stdout parallel -k echo < unmatched2.xi
 one
 "two
+echo '###  echo < unmatched.xi'
 ###  echo < unmatched.xi
+stdout xargs echo < unmatched.xi
 xargs: unmatched double quote; by default quotes are special to xargs unless you use the -0 option
 one
+stdout parallel -k echo < unmatched.xi
 one
 "two
 three
+echo '###  -n2 -x echo < unmatched.xi'
 ###  -n2 -x echo < unmatched.xi
+stdout xargs -n2 -x echo < unmatched.xi
 xargs: unmatched double quote; by default quotes are special to xargs unless you use the -0 option
+stdout parallel -k -n2 -x echo < unmatched.xi
 one "two
 three
+echo '###  -eEOF echo < eofstr.xi'
 ###  -eEOF echo < eofstr.xi
+stdout xargs -eEOF echo < eofstr.xi
 firstline secondline
+stdout parallel -k -eEOF echo < eofstr.xi
 firstline
 secondline
+echo '###  -e echo < eof_.xi'
 ###  -e echo < eof_.xi
+stdout xargs -e echo < eof_.xi
 one two _ three four
+stdout parallel -e -k echo < eof_.xi
 one
 two
 _
 three
 four
+echo '###  -E_ echo < eof1.xi'
 ###  -E_ echo < eof1.xi
+stdout xargs -E_ echo < eof1.xi
 firstline secondline
+stdout parallel -k -E_ echo < eof1.xi
 firstline
 secondline
   _
 thirdline
 fourthline
+echo '###  -iARG echo ARG is xARGx < files.xi'
 ###  -iARG echo ARG is xARGx < files.xi
+stdout xargs -iARG echo ARG is xARGx < files.xi
 /src/gnu/autoconf-1.11 is x/src/gnu/autoconf-1.11x
 /src/gnu/autoconf-1.11/README is x/src/gnu/autoconf-1.11/READMEx
 /src/gnu/autoconf-1.11/Makefile.in is x/src/gnu/autoconf-1.11/Makefile.inx
@@ -955,6 +1166,7 @@ fourthline
 /src/gnu/autoconf-1.11/make-stds.texi is x/src/gnu/autoconf-1.11/make-stds.texix
 /src/gnu/autoconf-1.11/standards.info is x/src/gnu/autoconf-1.11/standards.infox
 /src/gnu/autoconf-1.11/texinfo.tex is x/src/gnu/autoconf-1.11/texinfo.texx
+stdout parallel -k -iARG echo ARG is xARGx < files.xi
 /src/gnu/autoconf-1.11 is x/src/gnu/autoconf-1.11x
 /src/gnu/autoconf-1.11/README is x/src/gnu/autoconf-1.11/READMEx
 /src/gnu/autoconf-1.11/Makefile.in is x/src/gnu/autoconf-1.11/Makefile.inx
@@ -977,13 +1189,16 @@ fourthline
 /src/gnu/autoconf-1.11/make-stds.texi is x/src/gnu/autoconf-1.11/make-stds.texix
 /src/gnu/autoconf-1.11/standards.info is x/src/gnu/autoconf-1.11/standards.infox
 /src/gnu/autoconf-1.11/texinfo.tex is x/src/gnu/autoconf-1.11/texinfo.texx
+echo '###  -i echo from \{\} to x{}y < items.xi'
 ###  -i echo from \{\} to x{}y < items.xi
+stdout xargs -i echo from \{\} to x{}y < items.xi
 from dumb to xdumby
 from s  s  to xs  s y
 from ff to xffy
 from rr to xrry
 from t		t	 to xt		t	y
 from vv to xvvy
+stdout parallel -k -i echo from \{\} to x{}y < items.xi
 from: can't read /var/mail/{}
 from: can't read /var/mail/{}
 from: can't read /var/mail/{}
@@ -992,28 +1207,37 @@ from: can't read /var/mail/{}
 from: can't read /var/mail/{}
 from: can't read /var/mail/{}
 from: can't read /var/mail/{}
+echo '###  -i -s26 echo from \{\} to x{}y < items.xi'
 ###  -i -s26 echo from \{\} to x{}y < items.xi
+stdout xargs -i -s26 echo from \{\} to x{}y < items.xi
 xargs: argument list too long
 from dumb to xdumby
+stdout parallel -k -i -s26 echo from \{\} to x{}y < items.xi
 parallel: Error: Command line too long (36 >= 26) at number 0:  	...
+echo '###  -i__ echo FIRST __ IS OK < quotes.xi'
 ###  -i__ echo FIRST __ IS OK < quotes.xi
+stdout xargs -i__ echo FIRST __ IS OK < quotes.xi
 FIRST this is IS OK
 FIRST quoted 	stuff   IS OK
 FIRST and 
 an embedded   newline IS OK
 FIRST with single	quotes as well. IS OK
+stdout parallel -k -i__ echo FIRST __ IS OK < quotes.xi
 FIRST    this is IS OK
 FIRST "quoted 	stuff"   IS OK
 FIRST and \ IS OK
 FIRST an embedded   newline IS OK
 FIRST with 'single	quotes' as well. IS OK
+echo '###  -l echo < ldatab.xi'
 ###  -l echo < ldatab.xi
+stdout xargs -l echo < ldatab.xi
 1 22 333 4444 55555 666666
 7777777 88888888 999999999 1 22
 333 4444 55555
 666666 7777777
 88888888
 999999999
+stdout parallel -l -k echo < ldatab.xi
  	
 1 22 333 4444 55555 666666
 7777777 88888888 999999999 1 22
@@ -1021,7 +1245,9 @@ FIRST with 'single	quotes' as well. IS OK
 666666 7777777
 88888888
 999999999 
+echo '###  -l echo < ldata.xi'
 ###  -l echo < ldata.xi
+stdout xargs -l echo < ldata.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -1031,6 +1257,7 @@ FIRST with 'single	quotes' as well. IS OK
 666666 7777777
 88888888
 999999999
+stdout parallel -l -k echo < ldata.xi
 1 22 333 4444
 55555 666666
 7777777
@@ -1040,20 +1267,25 @@ FIRST with 'single	quotes' as well. IS OK
 666666 7777777
 88888888
 999999999
+echo '###  -l1 -n4 echo < files.xi'
 ###  -l1 -n4 echo < files.xi
+stdout xargs -l1 -n4 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL
 /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi
 /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4
 /src/gnu/autoconf-1.11/configure /src/gnu/autoconf-1.11/configure.in /src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs
 /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
+stdout parallel -k -l1 -n4 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL
 /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING /src/gnu/autoconf-1.11/ChangeLog /src/gnu/autoconf-1.11/autoconf.texi
 /src/gnu/autoconf-1.11/acconfig.h /src/gnu/autoconf-1.11/autoconf.sh /src/gnu/autoconf-1.11/acgeneral.m4 /src/gnu/autoconf-1.11/acspecific.m4
 /src/gnu/autoconf-1.11/configure /src/gnu/autoconf-1.11/configure.in /src/gnu/autoconf-1.11/autoheader.sh /src/gnu/autoconf-1.11/mkinstalldirs
 /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
+echo '###  -l2 echo < files.xi'
 ###  -l2 echo < files.xi
+stdout xargs -l2 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README
 /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL
 /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING
@@ -1065,6 +1297,7 @@ FIRST with 'single	quotes' as well. IS OK
 /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
 /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
+stdout parallel -k -l2 echo < files.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README
 /src/gnu/autoconf-1.11/Makefile.in /src/gnu/autoconf-1.11/INSTALL
 /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING
@@ -1076,7 +1309,9 @@ FIRST with 'single	quotes' as well. IS OK
 /src/gnu/autoconf-1.11/install.sh /src/gnu/autoconf-1.11/autoconf.info
 /src/gnu/autoconf-1.11/standards.texi /src/gnu/autoconf-1.11/make-stds.texi
 /src/gnu/autoconf-1.11/standards.info /src/gnu/autoconf-1.11/texinfo.tex
+echo '###  -s30 -t echo < stairs.xi - xargs'
 ###  -s30 -t echo < stairs.xi - xargs
+stdout xargs -s30 -t echo < stairs.xi
 echo 1 22 333 4444 55555 
 1 22 333 4444 55555
 echo 666666 7777777 88888888 
@@ -1087,8 +1322,11 @@ echo 55555 666666 7777777
 55555 666666 7777777
 echo 88888888 999999999 
 88888888 999999999
+echo '###  -s30 -t echo < stairs.xi - parallel'
 ###  -s30 -t echo < stairs.xi - parallel
+echo 'Because of -t these lines can be flipped around therefore sort'
 Because of -t these lines can be flipped around therefore sort
+stdout parallel -k -X -s30 -t echo < stairs.xi | sort
 1 22 333 4444 55555
 55555 666666 7777777
 666666 7777777 88888888
@@ -1101,14 +1339,19 @@ echo 666666 7777777 88888888
 echo 88888888
 echo 999999999
 echo 999999999 1 22 333 4444
+echo '###  -t echo this plus that < space.xi'
 ###  -t echo this plus that < space.xi
+stdout xargs -t echo this plus that < space.xi
 echo this plus that 
 this plus that
+stdout parallel -k -t echo this plus that < space.xi
 echo this plus that 
 echo this plus that \ \\\	\
 this plus that
 this plus that  	
+echo '###  -n1 printf "@%s@\n" < empty.xi'
 ###  -n1 printf "@%s@\n" < empty.xi
+stdout xargs -n1 printf "@%s@\n" < empty.xi
 @foo@
 @@
 @bar@
@@ -1116,11 +1359,15 @@ this plus that  	
 @@
 @@
 @fnord@
-@foo '' bar@n@baz ''@n@'' fnord@n###  -n2 -t echo < foobar.xi
+stdout parallel -k -n1 printf "@%s@\n" < empty.xi
+@foo '' bar@n@baz ''@n@'' fnord@necho '###  -n2 -t echo < foobar.xi'
+###  -n2 -t echo < foobar.xi
+stdout xargs -n2 -t echo < foobar.xi
 echo foo bar 
 foo bar
 echo baz ugh 
 baz ugh
+stdout parallel -k -n2 -t echo < foobar.xi
 echo foo\ bar baz\ 
 echo ugh
 foo bar baz 

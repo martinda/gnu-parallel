@@ -62,6 +62,7 @@ touch more_than_5000-9997
 touch more_than_5000-9998
 touch more_than_5000-9999
 ### rm
+ls | parallel -j500 'sleep 1; find {} -type f | perl -ne "END{print $..\" {}\n\"}"' | sort
 1 1-col.txt
 1 1-col.txt.diff
 1 2-col.txt
@@ -170,6 +171,7 @@ touch more_than_5000-9999
 4  ab
 4 b
 6 a
+ls | parallel --group -j500 'sleep 1; find {} -type f | perl -ne "END{print $..\" {}\n\"}"' | sort
 1 1-col.txt
 1 1-col.txt.diff
 1 2-col.txt
@@ -278,6 +280,7 @@ touch more_than_5000-9999
 4  ab
 4 b
 6 a
+find . -type f | parallel --group  "perl -ne '/^\\S+\\s+\\S+$/ and print \$ARGV,\"\\n\"'" | sort
 ./ ab /c' d/ ef"g.diff
 ./ ab /c' d/ ef"g.diff
 ./ ab/c"d/ef g.diff
@@ -296,6 +299,7 @@ touch more_than_5000-9999
 ./a/bar.diff
 ./b/bar.diff
 ./b/bar.diff
+find . -type f | parallel -v --group "perl -ne '/^\\S+\\s+\\S+$/ and print \$ARGV,\"\\n\"'" | sort
 ./ ab /c' d/ ef"g.diff
 ./ ab /c' d/ ef"g.diff
 ./ ab/c"d/ef g.diff
@@ -435,6 +439,7 @@ perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' ./more_than_5000-9996
 perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' ./more_than_5000-9997
 perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' ./more_than_5000-9998
 perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' ./more_than_5000-9999
+find . -type f | parallel -q --group  perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' | sort
 ./ ab /c' d/ ef"g.diff
 ./ ab /c' d/ ef"g.diff
 ./ ab/c"d/ef g.diff
@@ -453,6 +458,7 @@ perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' ./more_than_5000-9999
 ./a/bar.diff
 ./b/bar.diff
 ./b/bar.diff
+find . -type f | parallel -qv --group perl -ne '/^\S+\s+\S+$/ and print $ARGV,"\n"' | sort
 ./ ab /c' d/ ef"g.diff
 ./ ab /c' d/ ef"g.diff
 ./ ab/c"d/ef g.diff

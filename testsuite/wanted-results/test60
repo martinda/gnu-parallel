@@ -1,3 +1,4 @@
+echo '### Test --onall';   parallel --onall -S parallel@parallel-server1,parallel@parallel-server2 '(echo {1} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2
 ### Test --onall
 1
 2
@@ -11,6 +12,7 @@
 2
 1
 2
+echo '### Test | --onall';   seq 3 | parallel --onall -S parallel@parallel-server1,parallel@parallel-server2 '(echo {1} {2}) | awk \{print\ \$2}' ::: a b c :::: -
 ### Test | --onall
 1
 2
@@ -30,6 +32,7 @@
 1
 2
 3
+echo '### Test --onall -u';   parallel --onall -S parallel@parallel-server1,parallel@parallel-server2 -u '(echo {1} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2 3 | sort
 ### Test --onall -u
 1
 1
@@ -49,24 +52,31 @@
 3
 3
 3
+echo '### Test --nonall';   parallel --nonall -k -S parallel@parallel-server1,parallel@parallel-server2 'hostname' | sort
 ### Test --nonall
 centos3.tange.dk
 redhat9.tange.dk
+echo '### Test --nonall -u - should be interleaved x y x y';   parallel --nonall -S parallel@parallel-server1,parallel@parallel-server2 -u 'hostname|grep -q redhat9 && sleep 3; hostname;sleep 12;hostname;'
 ### Test --nonall -u - should be interleaved x y x y
 centos3.tange.dk
 redhat9.tange.dk
 centos3.tange.dk
 redhat9.tange.dk
+echo '### Test read sshloginfile from STDIN';   echo parallel@parallel-server1 | parallel -S - --nonall hostname;   echo parallel@parallel-server1 | parallel --sshloginfile - --nonall hostname
 ### Test read sshloginfile from STDIN
 redhat9.tange.dk
 redhat9.tange.dk
+echo '### Test --nonall --basefile';   touch /tmp/nonall--basefile;   parallel --nonall --basefile /tmp/nonall--basefile -S parallel@parallel-server1,parallel@parallel-server2 ls /tmp/nonall--basefile
 ### Test --nonall --basefile
 /tmp/nonall--basefile
 /tmp/nonall--basefile
+echo '### Test --onall --basefile';   touch /tmp/onall--basefile;   parallel --onall --basefile /tmp/onall--basefile -S parallel@parallel-server1,parallel@parallel-server2 ls ::: /tmp/onall--basefile
 ### Test --onall --basefile
 /tmp/onall--basefile
 /tmp/onall--basefile
+echo '### Test --workdir .';   ssh parallel@parallel-server1 mkdir -p mydir;   mkdir -p $HOME/mydir; cd $HOME/mydir;   parallel --workdir . -S parallel@parallel-server1 ::: pwd
 ### Test --workdir .
 /home/parallel/mydir
+echo '### Test --wd .';   ssh parallel@parallel-server2 mkdir -p mydir;   mkdir -p $HOME/mydir; cd $HOME/mydir;   parallel --workdir . -S parallel@parallel-server2 ::: pwd
 ### Test --wd .
 /home/parallel/mydir

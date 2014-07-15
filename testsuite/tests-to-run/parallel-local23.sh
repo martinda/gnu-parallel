@@ -3,7 +3,7 @@
 rm -rf tmp 2>/dev/null
 cp -a input-files/testdir2 tmp
 
-cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k -L1
 echo '### bug #42329: --line-buffer gives wrong output'; 
   parallel  --line-buffer --tag seq ::: 10000000 | wc -c;
   parallel  --line-buffer seq ::: 10000000 | wc -c

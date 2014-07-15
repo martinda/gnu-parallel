@@ -1,38 +1,53 @@
+echo '### Test of xargs -m command lines > 130k';   seq 1 60000 | parallel -m -j1 echo a{}b{}c | tee >(wc >/tmp/awc$$) >(sort | md5sum) >/tmp/a$$;   wait;   CHAR=$(cat /tmp/a$$ | wc -c);   LINES=$(cat /tmp/a$$ | wc -l);   echo "Chars per line:" $(echo "$CHAR/$LINES" | bc);   cat /tmp/awc$$;   rm /tmp/a$$ /tmp/awc$$
 ### Test of xargs -m command lines > 130k
 31d9274be5fdc2de59487cb05ba57776  -
 Chars per line: 116300
       6  119994  697800
+echo '### Test of xargs -X command lines > 130k';   seq 1 60000 | parallel -X -j1 echo a{}b{}c | tee >(wc >/tmp/bwc$$) >(sort | (sleep 1; md5sum)) >/tmp/b$$;   wait;   CHAR=$(cat /tmp/b$$ | wc -c);   LINES=$(cat /tmp/b$$ | wc -l);   echo "Chars per line:" $(echo "$CHAR/$LINES" | bc);   cat /tmp/bwc$$;   rm /tmp/b$$ /tmp/bwc$$
 ### Test of xargs -X command lines > 130k
 22074f9acada52462defb18ba912d744  -
 Chars per line: 116826
       7   60000  817788
+echo '### Test of xargs -m command lines > 130k';   seq 1 60000 | parallel -k -j1 -m echo | md5sum
 ### Test of xargs -m command lines > 130k
 b35d8e49be8d94899b719c40d3f1f4bb  -
+echo '### This causes problems if we kill child processes';   seq 2 40 | parallel -j 0 seq 1 10  | sort | md5sum
 ### This causes problems if we kill child processes
 437c0d47a99b9a7c5bcb1d132f94c2e6  -
+echo '### This causes problems if we kill child processes (II)';   seq 1 40 | parallel -j 0 seq 1 10 '| parallel -j 3 echo' | sort | md5sum
 ### This causes problems if we kill child processes (II)
 d7fb96d6a56d4347bc24930a395c431a  -
+echo '### Test -m';   (echo foo;echo bar) | parallel -j1 -m echo 1{}2{}3 A{}B{}C
 ### Test -m
 1foo bar2foo bar3 Afoo barBfoo barC
+echo '### Test -X';   (echo foo;echo bar) | parallel -j1 -X echo 1{}2{}3 A{}B{}C
 ### Test -X
 1foo2foo3 1bar2bar3 AfooBfooC AbarBbarC
+echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop';   echo a | parallel -qX echo  "'"{}"' "
 ### Bug before 2009-08-26 causing regexp compile error or infinite loop
 'a' 
+echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop (II)';   echo a | parallel -qX echo  "'{}'"
 ### Bug before 2009-08-26 causing regexp compile error or infinite loop (II)
 'a'
+echo '### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL';   seq 1 2 | SHELL=tcsh MANPATH=. stdout parallel -k --nice 8 setenv a b\;echo \$SHELL
 ### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL
 tcsh 1
 tcsh 2
+echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
 ### bug #42041: Implement $PARALLEL_JOBSLOT
+  parallel -k --slotreplace // -j2 sleep 1\;echo // ::: {1..4}
 1
 2
 1
 2
+  parallel -k -j2 sleep 1\;echo {%} ::: {1..4}
 1
 2
 1
 2
+echo '### bug #42363: --pipepart and --fifo/--cat does not work'
 ### bug #42363: --pipepart and --fifo/--cat does not work
+  seq 100 > /tmp/bug42363;   parallel --pipepart --block 31 -a /tmp/bug42363 -k --fifo wc | perl -pe s:/tmp/...........pip:/tmp/XXXX: ;   parallel --pipepart --block 31 -a /tmp/bug42363 -k --cat  wc | perl -pe s:/tmp/...........pip:/tmp/XXXX: ; 
      13      14      32 /tmp/XXXX
      11      11      33 /tmp/XXXX
      11      11      33 /tmp/XXXX

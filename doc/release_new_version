@@ -216,9 +216,11 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140722 ('') released
+Subject: GNU Parallel 20140722 ('Eyal Gilad Naftali') released
 
-GNU Parallel 20140722 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140722 ('Eyal Gilad Naftali') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+
+This release contains a major change in central parts of the code and should be considered alpha quality. As always it passes the testsuite, so most functionality clearly works.
 
 Haiku of the month:
 
@@ -229,7 +231,27 @@ Haiku of the month:
 
 New in this release:
 
+* {= perl expression =} can be used as replacement string. The expression should modify $_. E.g. {= s/\.gz$// =} to remove .gz from the string. This makes replacement strings extremely flexible.
+
+* Positional perl expressions (similar to {2}) are given as {=2 perl expression=} where 2 is the position.
+
+* Replacement strings can be defined using --rpl. E.g. parallel --rpl {.gz} 's/\.gz$//' echo {.gz} ::: *.gz
+
+* The parenthesis around {= perl expression =} can be changed with --parens.
+
+* GNU Parallel was cited in: bammds: A tool for assessing the ancestry of low depth whole genome data using multidimensional scaling (MDS) http://bioinformatics.oxfordjournals.org/content/early/2014/06/28/bioinformatics.btu410.abstract
+
+* GNU Parallel was cited in: Molecular ferroelectric contributions to anomalous hysteresis in hybrid perovskite solar cells http://people.bath.ac.uk/aw558/publications/2014/arxiv_hysteresis_14.pdf
+
+* GNU Parallel was cited in: Energy Sorghum-a genetic model for the design of C4 grass bioenergy crops http://jxb.oxfordjournals.org/content/early/2014/06/20/jxb.eru229.short
+
 * GNU Parallel was cited in: Web-scale Content Reuse Detection www.isi.edu/~johnh/PAPERS/Ardi14a.pdf
+
+* Webcast at 2014-08-20 covering GNU Parallel: Data Science at the Command Line http://www.oreilly.com/pub/e/3115
+
+* Paralelizace běžných činností v konzoli pomocí GNU Parallel http://www.abclinuxu.cz/clanky/paralelizace-beznych-cinnosti-v-konzoli-pomoci-gnu-parallel
+
+* [原] Ubuntu 下使用 parallel 命令的注意事项 http://blog.ailms.me/2014/06/28/ubuntu-with-parallel.html
 
 * Bug fixes and man page updates.
 

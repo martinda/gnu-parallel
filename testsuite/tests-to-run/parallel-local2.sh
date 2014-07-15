@@ -16,7 +16,7 @@ highload ()
 highload 2>/dev/null &
 sleep 1
 
-cat <<'EOF' | parallel -j0 -k -L1
+cat <<'EOF' | parallel -vj0 -k -L1
 echo "bug #38441: CPU usage goes to 100% if load is higher than --load at first job"
 /usr/bin/time -f %e parallel --load 100% true ::: a 2>&1 | 
   perl -ne '$_ > 1 and print "More than 1 secs wall clock: OK\n"'

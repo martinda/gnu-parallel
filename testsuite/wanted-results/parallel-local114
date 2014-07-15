@@ -1,14 +1,23 @@
+echo "### --line-buffer"
 ### --line-buffer
+  seq 10 | parallel -j20 --line-buffer  'seq {} 10 | pv -qL 10' > /tmp/parallel_l$$;   seq 10 | parallel -j20                'seq {} 10 | pv -qL 10' > /tmp/parallel_$$;   cat /tmp/parallel_l$$ | wc;   diff /tmp/parallel_$$ /tmp/parallel_l$$ >/dev/null ; echo These must diff: $?
      55      55     120
 These must diff: 1
+echo "### --pipe --line-buffer"
 ### --pipe --line-buffer
+  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --tagstring {#} pv -qL 10 > /tmp/parallel_pl$$;   seq 200| parallel -N10 -L1 --pipe  -j20               --tagstring {#} pv -qL 10 > /tmp/parallel_p$$;   cat /tmp/parallel_pl$$ | wc;   diff /tmp/parallel_p$$ /tmp/parallel_pl$$ >/dev/null ; echo These must diff: $?
     200     400    1202
 These must diff: 1
+echo "### --pipe --line-buffer --compress"
 ### --pipe --line-buffer --compress
+  seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --compress --tagstring {#} pv -qL 10 | wc
     200     400    1202
+echo "### bug #41482: --pipe --compress blocks at different -j/seq combinations"
 ### bug #41482: --pipe --compress blocks at different -j/seq combinations
+  seq 1 | parallel -k -j2 --compress -N1 -L1 --pipe cat;   echo echo 1-4 + 1-4
 1
 echo 1-4 + 1-4
+    seq 4 | parallel -k -j3 --compress -N1 -L1 -vv echo;   echo 4 times wc to stderr to stdout
 echo 1
 1
 echo 2
@@ -18,37 +27,52 @@ echo 3
 echo 4
 4
 4 times wc to stderr to stdout
+    (seq 4 | parallel -k -j3 --compress -N1 -L1 --pipe wc '>&2') 2>&1 >/dev/null
       1       1       2
       1       1       2
       1       1       2
       1       1       2
+  echo 1 2 3 4
 1 2 3 4
+    seq 4 | parallel -k -j3 --compress echo;   echo 1 2 3 4
 1
 2
 3
 4
 1 2 3 4
+    seq 4 | parallel -k -j1 --compress echo;   echo 1 2
 1
 2
 3
 4
 1 2
+    seq 2 | parallel -k -j1 --compress echo;   echo 1 2 3
 1
 2
 1 2 3
+    seq 3 | parallel -k -j2 --compress -N1 -L1 --pipe cat; echo "### bug #41609: --compress fails"
 1
 2
 3
 ### bug #41609: --compress fails
+  seq 12 | parallel --compress --compress-program bzip2 -k seq {} 1000000 | md5sum
 24812dd0f24a26d08a780f988b9d5ad2  -
+  seq 12 | parallel --compress -k seq {} 1000000 | md5sum
 24812dd0f24a26d08a780f988b9d5ad2  -
+echo "### --compress race condition (use nice): Fewer than 400 would run"
 ### --compress race condition (use nice): Fewer than 400 would run
+  seq 400| nice parallel -j200 --compress echo | wc
     400     400    1492
+echo "### -v --pipe: Dont spawn too many - 1 is enough"
 ### -v --pipe: Dont spawn too many - 1 is enough
+  seq 1 | parallel -j10 -v --pipe cat
 cat
 1
+echo "### Test -N0 and --tagstring (fails)"
 ### Test -N0 and --tagstring (fails)
+  echo tagstring arg | parallel --tag -N0 echo foo
 	foo
+echo "### Test -I";   seq 1 10 | parallel -k 'seq 1 {} | parallel -k -I :: echo {} ::'
 ### Test -I
 1 1
 2 1
@@ -105,6 +129,7 @@ cat
 10 8
 10 9
 10 10
+echo "### Test -X -I";   seq 1 10 | parallel -k 'seq 1 {} | parallel -j1 -X -k -I :: echo a{} b::'
 ### Test -X -I
 a1 b1
 a2 b1 b2
@@ -116,6 +141,7 @@ a7 b1 b2 b3 b4 b5 b6 b7
 a8 b1 b2 b3 b4 b5 b6 b7 b8
 a9 b1 b2 b3 b4 b5 b6 b7 b8 b9
 a10 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10
+echo "### Test -m -I";   seq 1 10 | parallel -k 'seq 1 {} | parallel -j1 -m -k -I :: echo a{} b::'
 ### Test -m -I
 a1 b1
 a2 b1 2
@@ -127,18 +153,23 @@ a7 b1 2 3 4 5 6 7
 a8 b1 2 3 4 5 6 7 8
 a9 b1 2 3 4 5 6 7 8 9
 a10 b1 2 3 4 5 6 7 8 9 10
+echo "### Test max line length -m -I";   seq 1 60000 | parallel -I :: -m -j1 echo a::b::c |   tee >(sort |md5sum) >/tmp/114-a$$;   export CHAR=$(cat /tmp/114-a$$ | wc -c);   export LINES=$(cat /tmp/114-a$$ | wc -l);   echo "Chars per line ($CHAR/$LINES): "$(echo "$CHAR/$LINES" | bc);   rm /tmp/114-a$$
 ### Test max line length -m -I
 31d9274be5fdc2de59487cb05ba57776  -
 Chars per line (697800/6): 116300
+echo "### Test max line length -X -I";   seq 1 60000 | parallel -I :: -X -j1 echo a::b::c |   tee >(sort |md5sum) >/tmp/114-b$$;   export CHAR=$(cat /tmp/114-b$$ | wc -c);   export LINES=$(cat /tmp/114-b$$ | wc -l);   echo "Chars per line ($CHAR/$LINES): "$(echo "$CHAR/$LINES" | bc);   rm /tmp/114-b$$
 ### Test max line length -X -I
 22074f9acada52462defb18ba912d744  -
 Chars per line (817788/7): 116826
+echo "### bug #36659: --sshlogin strips leading slash from ssh command";   parallel --sshlogin '/usr/bin/ssh localhost' echo ::: OK
 ### bug #36659: --sshlogin strips leading slash from ssh command
 OK
+echo "### bug #36660: --workdir mkdir does not use --sshlogin custom ssh";   rm -rf /tmp/foo36660;   cd /tmp; echo OK > parallel_test.txt;   ssh () { echo Failed; };   export -f ssh;   parallel --workdir /tmp/foo36660/bar --transfer --sshlogin '/usr/bin/ssh localhost' cat ::: parallel_test.txt; echo "bug #36657: --load does not work with custom ssh";   cd /tmp; echo OK > parallel_test.txt;   ssh () { echo Failed; };   export -f ssh;   parallel --load=1000% -S "/usr/bin/ssh localhost" echo ::: OK
 ### bug #36660: --workdir mkdir does not use --sshlogin custom ssh
 OK
 bug #36657: --load does not work with custom ssh
 OK
+echo "bug #34958: --pipe with record size measured in lines";   seq 10 | parallel -k --pipe -L 4 cat\;echo bug 34958-1
 bug #34958: --pipe with record size measured in lines
 1
 2
@@ -152,6 +183,7 @@ bug 34958-1
 9
 10
 bug 34958-1
+echo "bug #37325: Inefficiency of --pipe -L";   seq 2000 | parallel -k --pipe --block 1k -L 4 wc\;echo FOO | uniq
 bug #37325: Inefficiency of --pipe -L
     276     276     996
 FOO
@@ -171,6 +203,7 @@ FOO
 FOO
     180     180     900
 FOO
+echo "bug #34958: --pipe with record size measured in lines";   seq 10 | parallel -k --pipe -l 4 cat\;echo bug 34958-2
 bug #34958: --pipe with record size measured in lines
 1
 2
@@ -184,6 +217,7 @@ bug 34958-2
 9
 10
 bug 34958-2
+echo "### Test --results";   mkdir -p /tmp/parallel_results_test;   parallel -k --results /tmp/parallel_results_test/testA echo {1} {2} ::: I II ::: III IIII;   ls /tmp/parallel_results_test/testA/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testA*
 ### Test --results
 I III
 I IIII
@@ -197,6 +231,7 @@ II IIII
 /tmp/parallel_results_test/testA/1/II/2/III/stdout
 /tmp/parallel_results_test/testA/1/II/2/IIII/stderr
 /tmp/parallel_results_test/testA/1/II/2/IIII/stdout
+echo "### Test --res";   mkdir -p /tmp/parallel_results_test;   parallel -k --res /tmp/parallel_results_test/testD echo {1} {2} ::: I II ::: III IIII;   ls /tmp/parallel_results_test/testD/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testD*
 ### Test --res
 I III
 I IIII
@@ -210,6 +245,7 @@ II IIII
 /tmp/parallel_results_test/testD/1/II/2/III/stdout
 /tmp/parallel_results_test/testD/1/II/2/IIII/stderr
 /tmp/parallel_results_test/testD/1/II/2/IIII/stdout
+echo "### Test --result";   mkdir -p /tmp/parallel_results_test;   parallel -k --result /tmp/parallel_results_test/testE echo {1} {2} ::: I II ::: III IIII;   ls /tmp/parallel_results_test/testE/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testE*
 ### Test --result
 I III
 I IIII
@@ -223,6 +259,7 @@ II IIII
 /tmp/parallel_results_test/testE/1/II/2/III/stdout
 /tmp/parallel_results_test/testE/1/II/2/IIII/stderr
 /tmp/parallel_results_test/testE/1/II/2/IIII/stdout
+echo "### Test --results --header :";   mkdir -p /tmp/parallel_results_test;   parallel -k --header : --results /tmp/parallel_results_test/testB echo {1} {2} ::: a I II ::: b III IIII;   ls /tmp/parallel_results_test/testB/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testB*
 ### Test --results --header :
 I III
 I IIII
@@ -236,6 +273,7 @@ II IIII
 /tmp/parallel_results_test/testB/a/II/b/III/stdout
 /tmp/parallel_results_test/testB/a/II/b/IIII/stderr
 /tmp/parallel_results_test/testB/a/II/b/IIII/stdout
+echo "### Test --results --header : named - a/b swapped";   mkdir -p /tmp/parallel_results_test;   parallel -k --header : --results /tmp/parallel_results_test/testC echo {a} {b} ::: b III IIII ::: a I II;   ls /tmp/parallel_results_test/testC/*/*/*/*/*; rm -rf /tmp/parallel_results_test/testC*
 ### Test --results --header : named - a/b swapped
 I III
 II III
@@ -249,11 +287,13 @@ II IIII
 /tmp/parallel_results_test/testC/a/II/b/III/stdout
 /tmp/parallel_results_test/testC/a/II/b/IIII/stderr
 /tmp/parallel_results_test/testC/a/II/b/IIII/stdout
+echo "### Test --results --header : piped";   mkdir -p /tmp/parallel_results_test;   (echo Col; perl -e 'print "backslash\\tab\tslash/null\0eof\n"') | parallel  --header : --result /tmp/parallel_results_test/testF true;   find /tmp/parallel_results_test/testF/*/*/* | sort; rm -rf /tmp/parallel_results_test/testF*
 ### Test --results --header : piped
 /tmp/parallel_results_test/testF/Col/backslash\\tab/2
 /tmp/parallel_results_test/testF/Col/backslash\\tab/2/slash\_null\0eof
 /tmp/parallel_results_test/testF/Col/backslash\\tab/2/slash\_null\0eof/stderr
 /tmp/parallel_results_test/testF/Col/backslash\\tab/2/slash\_null\0eof/stdout
+echo "### Test --results --header : piped - non-existing column header";   mkdir -p /tmp/parallel_results_test;   (printf "Col1\t\n"; printf "v1\tv2\tv3\n"; perl -e 'print "backslash\\tab\tslash/null\0eof\n"') | parallel --header : --result /tmp/parallel_results_test/testG true; find /tmp/parallel_results_test/testG/ | sort; rm -rf /tmp/parallel_results_test/testG*
 ### Test --results --header : piped - non-existing column header
 /tmp/parallel_results_test/testG/
 /tmp/parallel_results_test/testG/Col1

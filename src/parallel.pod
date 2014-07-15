@@ -2373,6 +2373,48 @@ B<find . -type f | parallel -k -j150% -n 1000 -m grep -H -n STRING {}>
 This will run 1.5 job per core, and give 1000 arguments to B<grep>.
 
 
+=head1 EXAMPLE: Grepping n lines for m regular expressions.
+
+The simplest solution to grep a big file for a lot of regexps is:
+
+    grep -f regexps.txt bigfile
+
+Or if the regexps are fixed strings:
+
+    grep -F -f regexps.txt bigfile
+
+There are 2 limiting factors: CPU and disk I/O. CPU is easy to
+measure: If the grep takes >90% CPU (e.g. when running top), then the
+CPU is a limiting factor, and parallelization will speed this up. If
+not, then disk I/O is the limiting factor, and depending on the disk
+system it may be faster or slower to parallelize. The only way to know
+for certain is to measure.
+
+If the CPU is the limiting factor parallelization should be done on the regexps:
+
+    cat regexp.txt | parallel --pipe -L1000 --round-robin grep -f - bigfile
+
+This will start one grep per CPU and read bigfile one time per CPU,
+but as that is done in parallel, all reads except the first will be
+cached in RAM. Depending on the size of regexp.txt it may be faster to
+use --block 10m instead of -L1000. If regexp.txt is too big to fit in
+RAM, remove --round-robin and adjust -L1000. This will cause bigfile
+to be read more times.
+
+Some storage systems perform better when reading multiple chunks in
+parallel. This is true for some RAID systems and for some network file
+systems. To parallelize the reading of bigfile:
+
+    parallel --pipepart --block 100M -a bigfile grep -f regexp.txt
+
+This will split bigfile into 100MB chunks and run grep on each of
+these chunks. To parallelize both reading of bigfile and regexp.txt
+combine the two using --fifo:
+
+    parallel --pipepart --block 100M -a bigfile --fifo cat regexp.txt \
+    \| parallel --pipe -L1000 --round-robin grep -f - {}
+
+
 =head1 EXAMPLE: Using remote computers
 
 To run commands on a remote computer SSH needs to be set up and you

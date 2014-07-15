@@ -1,4 +1,6 @@
+echo "### Test memory consumption stays (almost) the same for 30 and 300 jobs"
 ### Test memory consumption stays (almost) the same for 30 and 300 jobs
+  out30=$( stdout memusg parallel -j2 true :::: <(perl -e '$a="x"x100000;for(1..30){print $a,"\n"}') );   out300=$( stdout memusg parallel -j2 true :::: <(perl -e '$a="x"x100000;for(1..300){print $a,"\n"}') );   mem30=$(echo $out30 | tr -cd 0-9);   mem300=$(echo $out300 | tr -cd 0-9);   echo "Test if memory consumption(300 jobs) < memory consumption(30 jobs) * 150% ";   echo $(($mem300*100 < $mem30 * 150))
 Test if memory consumption(300 jobs) < memory consumption(30 jobs) * 150% 
 1
 ### Test --shellquote

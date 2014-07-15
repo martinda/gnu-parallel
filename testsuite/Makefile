@@ -51,13 +51,15 @@ startvm:
 stopvm:
 	VBoxManage controlvm CentOS3-root:centos3 savestate
 	VBoxManage controlvm RedHat9-root:redhat9 savestate
+	VBoxManage controlvm OracleXE savestate
 
 installparallel: ../src/parallel
 	cd .. && make -j && sudo make -j install
 
 startdb:
-	echo shutdown abort | sudo su - oracle -c "sqlplus / as sysdba"
+	#echo shutdown abort | sudo su - oracle -c "sqlplus / as sysdba"
 	sudo parallel /etc/init.d/{} restart ::: postgresql mysql oracle-xe
+	VBoxManage startvm OracleXE || true
 
 clean:
 	rm -rf input-files/random_dirs_no_newline

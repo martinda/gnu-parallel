@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat <<'EOF' | parallel -j0 -k
+cat <<'EOF' | parallel -vj0 -k
 echo '### Test of --eta'
   seq 1 10 | stdout parallel --eta "sleep 1; echo {}" | wc -l
 

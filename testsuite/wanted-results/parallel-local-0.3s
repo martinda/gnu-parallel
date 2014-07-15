@@ -1,6 +1,10 @@
+echo '### Test exit val - true';   echo true | parallel;   echo $?
 ### Test exit val - true
 0
+echo '**'
 **
+echo '### Test exit val - false';   echo false | parallel;   echo $?
 ### Test exit val - false
 1
+echo '**'
 **

@@ -100,16 +100,25 @@ TODO test ssh with > 9 simultaneous
 98
 99
 100
+echo '### --filter-hosts - OK, non-such-user, connection refused, wrong host'
 ### --filter-hosts - OK, non-such-user, connection refused, wrong host
+  parallel --nonall --filter-hosts -S localhost,NoUser@localhost,154.54.72.206,"ssh 5.5.5.5" hostname
 aspire
+echo '### test --workdir . in $HOME'
 ### test --workdir . in $HOME
+  cd && mkdir -p parallel-test && cd parallel-test &&     echo OK > testfile && parallel --workdir . --transfer -S parallel@parallel-server3 cat {} ::: testfile
 OK
+echo '### test --timeout --retries'
 ### test --timeout --retries
+  parallel -j0 --timeout 5 --retries 3 -k ssh {} echo {} ::: 192.168.1.197 8.8.8.8 parallel@parallel-server3 parallel@lo parallel@parallel-server2
 parallel@parallel-server3
 parallel@lo
 parallel@parallel-server2
+echo '### test --filter-hosts with server w/o ssh, non-existing server'
 ### test --filter-hosts with server w/o ssh, non-existing server
+  parallel -S 192.168.1.197,8.8.8.8,parallel@parallel-server3,parallel@lo,parallel@parallel-server2 --filter-hosts --nonall -k --tag echo
 parallel@lo	
 parallel@parallel-server2	
 parallel@parallel-server3	
+echo '### Missing: test --filter-hosts proxied through the one host'
 ### Missing: test --filter-hosts proxied through the one host

@@ -8,7 +8,7 @@ int() {
 }
 export -f int
 
-cat <<'EOF' | stdout parallel -kj0 -L1
+cat <<'EOF' | stdout parallel -k -vj0 -L1
 # The seq 10000000 should take > 1 cpu sec to run.
 echo '### --soft -f and test if child is actually suspended and thus takes longer'
   niceload --soft -f 0.5 'seq 20000000 | wc;echo This should finish last' & 

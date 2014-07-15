@@ -1,5 +1,8 @@
+echo '### bug #41565: Print happens in blocks - not after each job complete'
 ### bug #41565: Print happens in blocks - not after each job complete
+echo 'The timing here is important: 2 3 4 5 6'
 The timing here is important: 2 3 4 5 6
+  ping -c 7 lo  | parallel -j3  'echo {#}' | timestamp -dd | perl -pe '$_=int($_+0.2)."\n"'
 2
 1
 1
@@ -12,7 +15,9 @@ The timing here is important: 2 3 4 5 6
 0
 0
 0
+echo '300 ms jobs:'
 300 ms jobs:
+  ping -i .3 -c 10 lo | parallel -j3 --delay 0.3 echo | timestamp -d -d | perl -pe 's/(...).*/int($1*10+0.2)/e' | tail -n +2
 3
 3
 3
@@ -27,31 +32,39 @@ The timing here is important: 2 3 4 5 6
 3
 3
 3
+echo '### Test --tagstring'
 ### Test --tagstring
+  nice parallel -j1 -X -v --tagstring a{}b echo  ::: 3 4
 echo 3 4
 a3b a4b	3 4
+  nice parallel -j1 -k -v --tagstring a{}b echo  ::: 3 4
 echo 3
 a3b	3
 echo 4
 a4b	4
+  nice parallel -j1 -k -v --tagstring a{}b echo job{#} ::: 3 4
 echo job1
 a3b	job1
 echo job2
 a4b	job2
+  nice parallel -j1 -k -v --tagstring ajob{#}b echo job{#} ::: 3 4
 echo job1
 ajob1b	job1
 echo job2
 ajob2b	job2
+echo '### Bug in --load';   nice parallel -k --load 30 sleep 0.1\;echo ::: 1 2 3
 ### Bug in --load
 1
 2
 3
+echo '### Test --timeout';   nice parallel -j0 -k --timeout 1 echo {}\; sleep {}\; echo {} ::: 1.1 7.7 8.8 9.9
 ### Test --timeout
 1.1
 1.1
 7.7
 8.8
 9.9
+echo '### Test retired';   stdout parallel -B foo;   stdout parallel -g;   stdout parallel -H 1;   stdout parallel -T;   stdout parallel -U foo;   stdout parallel -W foo;   stdout parallel -Y;
 ### Test retired
 parallel: Error: -g has been retired. Use --group.
 parallel: Error: -B has been retired. Use --bf.
@@ -109,32 +122,44 @@ parallel: Error: -W has been retired. Use --wd.
 parallel: Error: -Y has been retired. Use --shebang.
 parallel: Error: -H has been retired. Use --halt.
 parallel: Error: --tollef has been retired. Use -u -q --arg-sep -- and --load for -l.
+echo '### Test --joblog followed by --resume --joblog'
 ### Test --joblog followed by --resume --joblog
+  rm -f /tmp/joblog;   timeout -k 1 1 parallel -j2 --joblog /tmp/joblog sleep {} ::: 1.1 2.2 3.3 4.4 2>/dev/null;   parallel -j2 --resume --joblog /tmp/joblog sleep {} ::: 1.1 2.2 3.3 4.4;   cat /tmp/joblog | wc -lw;   rm -f /tmp/joblog;
       5      49
+echo '### Test --resume --joblog followed by --resume --joblog';   rm -f /tmp/joblog2;   timeout -k 1 1 parallel -j2 --resume --joblog /tmp/joblog2 sleep {} ::: 1.1 2.2 3.3 4.4 2>/dev/null;   parallel -j2 --resume --joblog /tmp/joblog2 sleep {} ::: 1.1 2.2 3.3 4.4;   cat /tmp/joblog2 | wc -lw;   rm -f /tmp/joblog2;
 ### Test --resume --joblog followed by --resume --joblog
       5      49
+echo '### Test --header';   printf "a\tb\n1.2\t3/4.5" | parallel --colsep "\t" --header "\n" echo {b} {a} {b.} {b/} {b//} {b/.}; echo '### 64-bit wierdness - this did not complete on a 64-bit machine';   seq 1 2 | parallel -j1 'seq 1 1 | parallel true'
 ### Test --header
 3/4.5 1.2 3/4 4.5 3 4
 ### 64-bit wierdness - this did not complete on a 64-bit machine
+echo "### BUG-fix: bash -c 'parallel -a <(seq 1 3) echo'";   stdout bash -c 'parallel -k -a <(seq 1 3)  echo'
 ### BUG-fix: bash -c 'parallel -a <(seq 1 3) echo'
 1
 2
 3
+echo "### bug #35268: shell_quote doesn't treats [] brackets correctly";   touch /tmp/foo1;   stdout parallel echo ::: '/tmp/foo[123]'
 ### bug #35268: shell_quote doesn't treats [] brackets correctly
 /tmp/foo[123]
+echo '### Test make .deb package';   cd ~/privat/parallel/packager/debian;   stdout make | grep 'To install the GNU Parallel Debian package, run:'
 ### Test make .deb package
 To install the GNU Parallel Debian package, run:
+echo '### Test of segfaulting issue'
 ### Test of segfaulting issue
+  echo 'This gave /home/tange/bin/stdout: line 3: 20374 Segmentation fault      "$@" 2>&1';   echo 'before adding wait() before exit';   seq 1 300 | stdout parallel ./trysegfault
 This gave /home/tange/bin/stdout: line 3: 20374 Segmentation fault      "$@" 2>&1
 before adding wait() before exit
+echo '### Test basic --arg-sep';   parallel -k echo ::: a b
 ### Test basic --arg-sep
 a
 b
+echo '### Run commands using --arg-sep';   parallel -kv ::: 'echo a' 'echo b'
 ### Run commands using --arg-sep
 echo a
 a
 echo b
 b
+echo '### Change --arg-sep';   parallel --arg-sep ::: -kv ::: 'echo a' 'echo b';   parallel --arg-sep .--- -kv .--- 'echo a' 'echo b';   parallel --argsep ::: -kv ::: 'echo a' 'echo b';   parallel --argsep .--- -kv .--- 'echo a' 'echo b'
 ### Change --arg-sep
 echo a
 a
@@ -152,25 +177,31 @@ echo a
 a
 echo b
 b
+echo '### Test stdin goes to first command only'
 ### Test stdin goes to first command only
+  echo via cat |parallel --arg-sep .--- -kv .--- 'cat' 'echo b'
 cat
 via cat
 echo b
 b
+  echo via cat |parallel -kv ::: 'cat' 'echo b'
 cat
 via cat
 echo b
 b
+echo '### Bug made 4 5 go before 1 2 3';   parallel -k ::: "sleep 1; echo 1" "echo 2" "echo 3" "echo 4" "echo 5"
 ### Bug made 4 5 go before 1 2 3
 1
 2
 3
 4
 5
+echo '### Bug made 3 go before 1 2';   parallel -kj 1 ::: "sleep 1; echo 1" "echo 2" "echo 3"
 ### Bug made 3 go before 1 2
 1
 2
 3
+echo '### Bug did not quote';   echo '>' | parallel -v echo;   parallel -v echo ::: '>';   (echo '>'; echo  2) | parallel -j1 -vX echo;   parallel -X -j1 echo ::: '>' 2
 ### Bug did not quote
 echo \>
 >
@@ -179,6 +210,7 @@ echo \>
 echo \> 2
 > 2
 > 2
+echo '### Must not quote';   echo 'echo | wc -l' | parallel -v;   parallel -v ::: 'echo | wc -l';   echo 'echo a b c | wc -w' | parallel -v;   parallel -kv ::: 'echo a b c | wc -w' 'echo a b | wc -w'
 ### Must not quote
 echo | wc -l
 1
@@ -190,7 +222,9 @@ echo a b c | wc -w
 3
 echo a b | wc -w
 2
+echo '### Test bug #35820: sem breaks if $HOME is not writable'
 ### Test bug #35820: sem breaks if $HOME is not writable
+  echo 'Workaround: use another writable dir';   rm -rf /tmp/.parallel;   HOME=/tmp sem echo OK;   HOME=/tmp sem --wait;   HOME=/usr/this/should/fail stdout sem echo should fail
 Workaround: use another writable dir
 OK
 parallel: Error: Cannot write to /usr/this/should/fail/.parallel: No such file or directory

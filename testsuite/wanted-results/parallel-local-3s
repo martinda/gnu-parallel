@@ -1,12 +1,19 @@
+echo '### bug #42089: --results with arg > 256 chars (should be 1 char shorter)'
 ### bug #42089: --results with arg > 256 chars (should be 1 char shorter)
+  parallel --results parallel_test_dir echo ::: 1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456;   ls parallel_test_dir/1/
 1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456
 123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345
+  rm -rf parallel_test_dir
+echo '**'
 **
+echo '### Test --halt-on-error 0';   (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true") | parallel -j10 --halt-on-error 0;   echo $?;   (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true";echo "sleep 4; non_exist") | parallel -j10 --halt 0;   echo $?
 ### Test --halt-on-error 0
 1
 2
 /bin/bash: non_exist: command not found
+echo '**'
 **
+echo '### Test --halt-on-error 1';   (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true") | parallel -j10 --halt-on-error 1;   echo $?;   (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true";echo "sleep 4; non_exist") | parallel -j10 --halt 1;   echo $?
 ### Test --halt-on-error 1
 1
 127
@@ -17,7 +24,9 @@ parallel: Starting no more jobs. Waiting for 3 jobs to finish. This job failed:
 sleep 2;false
 parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
 sleep 4; non_exist
+echo '**'
 **
+echo '### Test --halt-on-error 2';   (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true") | parallel -j10 --halt-on-error 2;   echo $?;   (echo "sleep 1;true"; echo "sleep 2;false";echo "sleep 3;true";echo "sleep 4; non_exist") | parallel -j10 --halt 2;   echo $?
 ### Test --halt-on-error 2
 1
 1
@@ -25,7 +34,9 @@ parallel: This job failed:
 sleep 2;false
 parallel: This job failed:
 sleep 2;false
+echo '**'
 **
+echo '### Test last dying print --halt-on-error 1';   (seq 0 8;echo 0; echo 9) | parallel -j10 -kq --halt 1 perl -e 'sleep $ARGV[0];print STDERR @ARGV,"\n"; exit shift';   echo exit code $?
 ### Test last dying print --halt-on-error 1
 exit code 9
 0
@@ -57,13 +68,16 @@ parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
 perl -e sleep\ \$ARGV\[0\]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 8
 parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
 perl -e sleep\ \$ARGV\[0\]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 9
+echo '### Test last dying print --halt-on-error 2';   (seq 0 8;echo 0; echo 9) | parallel -j10 -kq --halt 2 perl -e 'sleep $ARGV[0];print STDERR @ARGV,"\n"; exit shift';   echo exit code $?
 ### Test last dying print --halt-on-error 2
 exit code 1
 0
 1
 parallel: This job failed:
 perl -e sleep\ \$ARGV\[0\]\;print\ STDERR\ @ARGV,\"\\n\"\;\ exit\ shift 1
+echo '**'
 **
+echo '### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834';   seq 1 3 | parallel -j1 "sleep 2; echo {}" | parallel -kj2 echo
 ### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834
 1
 2

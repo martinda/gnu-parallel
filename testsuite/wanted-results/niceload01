@@ -1,15 +1,27 @@
 ### Test niceload -q
 This works
 
+echo '### --rm and --runmem'
 ### --rm and --runmem
+  niceload  -H --rm 1g free -g | perl -ane '/buffers.cache:/ and print $F[3],"\n"' | grep '[1-9]' >/dev/null && echo OK--rm
 OK--rm
+  niceload  -H --runmem 1g free -g | perl -ane '/buffers.cache:/ and print $F[3],"\n"' | grep '[1-9]' >/dev/null && echo OK--runmem
 OK--runmem
+echo '### -N and --noswap. Must give 0'
 ### -N and --noswap. Must give 0
+  niceload -H -N vmstat 1 2 | tail -n1 | awk '{print "-N " $7*$8}'
 -N 0
+  niceload -H --noswap vmstat 1 2 | tail -n1 | awk '{print "--noswap " $7*$8}'
 --noswap 0
+echo '### -H and --hard'
 ### -H and --hard
+  niceload  -H -l 9.9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK-l9.9
 OK-l9.9
+  niceload  --hard -l 9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK-l9
 OK-l9
+echo '### -f and --factor'
 ### -f and --factor
+  niceload -H -f 0.01 -l6 echo f 0.1 finish first
 f 0.1 finish first
+  niceload -H --factor 10 -l6 echo factor 10 finish last
 factor 10 finish last

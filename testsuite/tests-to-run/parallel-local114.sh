@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | parallel -vj0 -k -L1
 echo "### --line-buffer"
   seq 10 | parallel -j20 --line-buffer  'seq {} 10 | pv -qL 10' > /tmp/parallel_l$$; 
   seq 10 | parallel -j20                'seq {} 10 | pv -qL 10' > /tmp/parallel_$$; 

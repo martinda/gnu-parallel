@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # -L1 will join lines ending in ' '
-cat <<'EOF' | parallel -j10 -k -L1
+cat <<'EOF' | parallel -vj10 -k -L1
 echo '### bug #38354: -J profile_name should read from `pwd`/profile_name before ~/.parallel/profile_name'
   echo "echo echo from ./local_test_profile" > local_test_profile; 
   parallel --profile local_test_profile echo ::: 1; 

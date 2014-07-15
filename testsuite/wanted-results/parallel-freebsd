@@ -1,6 +1,9 @@
 ### These tests requires VirtualBox running with the following images
 tange@freebsd7
+echo 'bug #40136: FreeBSD: No more processes'
 bug #40136: FreeBSD: No more processes
+# Long line due to FreeBSD's /bin/sh stupidity
+  sem --jobs 3 --id my_id -u 'echo First started; sleep 5; echo The first finished' &&   sem --jobs 3 --id my_id -u 'echo Second started; sleep 6; echo The second finished' &&   sem --jobs 3 --id my_id -u 'echo Third started; sleep 7; echo The third finished' &&   sem --jobs 3 --id my_id -u 'echo Fourth started; sleep 8; echo The fourth finished' &&   sem --wait --id my_id
 First started
 Second started
 Third started
@@ -9,27 +12,45 @@ Fourth started
 The second finished
 The third finished
 The fourth finished
+echo 'Test --compress --pipe'
 Test --compress --pipe
+  jot 1000 | parallel --compress --pipe cat | wc
     1000    1000    3893
+echo 'bug #41613: --compress --line-buffer no newline';
 bug #41613: --compress --line-buffer no newline
+  perl -e 'print "It worked"'| parallel --pipe --compress --line-buffer cat; echo
 It worked
+echo 'bug #40135: FreeBSD: sem --fg does not finish under /bin/sh'
 bug #40135: FreeBSD: sem --fg does not finish under /bin/sh
+  sem --fg 'sleep 1; echo The job finished' 
 The job finished
+echo 'bug #40133: FreeBSD: --round-robin gives no output'
 bug #40133: FreeBSD: --round-robin gives no output
+  jot 1000000 | parallel --round-robin --pipe -kj3 wc | sort
   299592  299592 2097144
   299594  299594 2097158
   400814  400814 2694594
+  jot 1000000 | parallel --round-robin --pipe -kj4 wc | sort
   149797  149797 1048579
   235145  235145 1646016
   299593  299593 2097151
   315465  315465 2097150
+echo 'bug #40134: FreeBSD: --shebang not working'
 bug #40134: FreeBSD: --shebang not working
+  (echo '#!/usr/bin/env -S parallel --shebang -rk echo'; echo It; echo worked) > shebang; 
+  chmod 755 ./shebang; ./shebang
 It
 worked
+echo 'bug #40134: FreeBSD: --shebang(-wrap) not working'
 bug #40134: FreeBSD: --shebang(-wrap) not working
+  (echo '#!/usr/bin/env -S parallel --shebang-wrap /usr/bin/perl :::'; echo 'print @ARGV,"\n";') > shebang-wrap; 
+  chmod 755 ./shebang-wrap; ./shebang-wrap wrap works
 wrap
 works
+echo 'bug #40134: FreeBSD: --shebang(-wrap) with options not working'
 bug #40134: FreeBSD: --shebang(-wrap) with options not working
+  (echo '#!/usr/bin/env -S parallel --shebang-wrap -v -k -j 0 /usr/bin/perl -w :::'; echo 'print @ARGV,"\n";') > shebang-wrap; 
+  chmod 755 ./shebang-wrap; ./shebang-wrap wrap works with options
 /usr/bin/perl -w ./shebang-wrap wrap
 wrap
 /usr/bin/perl -w ./shebang-wrap works

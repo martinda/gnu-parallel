@@ -3,7 +3,7 @@
 SERVER1=parallel-server3
 SERVER2=parallel-server2
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j0 -k
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj0 -k
 echo '### Test --return of weirdly named file'
 stdout parallel --return {} -vv -S parallel\@$SERVER1 echo '>'{} ::: 'aa<${#}" b'; rm 'aa<${#}" b'
 

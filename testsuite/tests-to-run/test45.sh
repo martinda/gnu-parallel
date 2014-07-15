@@ -4,7 +4,7 @@ SERVER1=parallel-server3
 SERVER2=parallel-server1
 
 # -L1 will join lines ending in ' '
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j0 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj0 -k -L1
 echo "### BUG: The length for -X is not close to max (131072)"; 
   seq 1 60000 | nice parallel -X echo {.} aa {}{.} {}{}d{} {}dd{}d{.} |head -n 1 |wc
   seq 1 60000 | nice parallel -X echo a{}b{}c |head -n 1 |wc

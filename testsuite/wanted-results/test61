@@ -1,22 +1,33 @@
+echo '### Test --return of weirdly named file'
 ### Test --return of weirdly named file
+stdout parallel --return {} -vv -S parallel\@parallel-server3 echo '>'{} ::: 'aa<${#}" b'; rm 'aa<${#}" b'
 ssh -tt -oLogLevel=quiet parallel@parallel-server3  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \>aa\\\<\\\$\\\{\\\#\\\}\\\"\\\ b;_EXIT_status=$?; mkdir -p ./.; rsync --rsync-path=cd\ ././.\;\ rsync -rlDzR -essh parallel@parallel-server3:./aa\\\<\\\$\\\{\\\#\\\}\\\"\\\ b ./.; exit $_EXIT_status;
+echo '### Test if remote login shell is csh'
 ### Test if remote login shell is csh
+stdout parallel -k -vv -S csh@localhost 'echo $PARALLEL_PID $PARALLEL_SEQ {}| wc -w' ::: a b c
 ssh -tt -oLogLevel=quiet csh@localhost  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$PARALLEL_PID\ \$PARALLEL_SEQ\ a\|\ wc\ -w;
 3
 ssh -tt -oLogLevel=quiet csh@localhost  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$PARALLEL_PID\ \$PARALLEL_SEQ\ b\|\ wc\ -w;
 3
 ssh -tt -oLogLevel=quiet csh@localhost  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$PARALLEL_PID\ \$PARALLEL_SEQ\ c\|\ wc\ -w;
 3
+echo '### Test {} multiple times in different commands'
 ### Test {} multiple times in different commands
+seq 10 | parallel -v -Xj1 echo {} \; echo {}
 echo 1 2 3 4 5 6 7 8 9 10 ; echo 1 2 3 4 5 6 7 8 9 10
 1 2 3 4 5 6 7 8 9 10
 1 2 3 4 5 6 7 8 9 10
+echo '### Test of -X {1}-{2} with multiple input sources'
 ### Test of -X {1}-{2} with multiple input sources
+parallel -j1 -kX  echo {1}-{2} ::: a ::: b
 a-b
+parallel -j2 -kX  echo {1}-{2} ::: a b ::: c d
 a-c
 b-c
+parallel -j2 -kX  echo {1}-{2} ::: a b c ::: d e f
 a-d
 b-f
+parallel -j0 -kX  echo {1}-{2} ::: a b c ::: d e f
 a-d
 a-e
 a-f
@@ -26,12 +37,17 @@ b-f
 c-d
 c-e
 c-f
+echo '### Test of -X {}-{.} with multiple input sources'
 ### Test of -X {}-{.} with multiple input sources
+parallel -j1 -kX  echo {}-{.} ::: a ::: b
 a-a b-b
+parallel -j2 -kX  echo {}-{.} ::: a b ::: c d
 a-a c-c a-a d-d
 b-b c-c b-b d-d
+parallel -j2 -kX  echo {}-{.} ::: a b c ::: d e f
 a-a d-d a-a e-e a-a f-f b-b d-d b-b e-e
 b-b f-f c-c d-d c-c e-e c-c f-f
+parallel -j0 -kX  echo {}-{.} ::: a b c ::: d e f
 a-a d-d
 a-a e-e
 a-a f-f
@@ -41,10 +57,15 @@ b-b f-f
 c-c d-d
 c-c e-e
 c-c f-f
+echo '### Test of -r with --pipe - the first should give an empty line. The second should not.'
 ### Test of -r with --pipe - the first should give an empty line. The second should not.
+echo | parallel  -j2 -N1 --pipe cat | wc -l
 1
+echo | parallel -r -j2 -N1 --pipe cat | wc -l
 0
+echo '### Test --tty'
 ### Test --tty
+seq 0.1 0.1 0.5 | parallel -j1 --tty tty\;sleep 
 /dev/tty
 /dev/tty
 /dev/tty

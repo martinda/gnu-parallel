@@ -5,7 +5,7 @@ export PAR
 XAP="nice nice parallel --xapply"
 export XAP
 
-cat <<'EOF' | sed -e 's/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j0 -k -L1
+cat <<'EOF' | sed -e 's/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k -L1
 echo 'bug #41613: --compress --line-buffer no newline';
   perl -e 'print "It worked"'| parallel --pipe --compress --line-buffer cat; echo
 

@@ -1,14 +1,22 @@
+echo '### --filter-hosts --slf <()'
 ### --filter-hosts --slf <()
+  parallel --nonall --filter-hosts --slf <(echo localhost) echo OK
 OK
+echo '### --wd no-such-dir - csh'
 ### --wd no-such-dir - csh
+  stdout parallel --wd /no-such-dir -S csh@localhost echo ::: "ERROR IF PRINTED"; echo Exit code $?
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
 /no-such-dir: No such file or directory.
 Exit code 1
+echo '### --wd no-such-dir - tcsh'
 ### --wd no-such-dir - tcsh
+  stdout parallel --wd /no-such-dir -S tcsh@localhost echo ::: "ERROR IF PRINTED"; echo Exit code $?
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
 /no-such-dir: No such file or directory.
 Exit code 1
+echo '### --wd no-such-dir - bash'
 ### --wd no-such-dir - bash
+  stdout parallel --wd /no-such-dir -S parallel@localhost echo ::: "ERROR IF PRINTED"; echo Exit code $?
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
 bash: line 0: cd: /no-such-dir: No such file or directory
 Exit code 1

@@ -1,3 +1,4 @@
+echo '### Test race condition on 8 CPU (my laptop)';   seq 1 5000000 > /tmp/parallel_test;   seq 1 10 | parallel -k "cat /tmp/parallel_test | parallel --pipe --recend '' -k gzip >/dev/null; echo {}"
 ### Test race condition on 8 CPU (my laptop)
 1
 2
@@ -9,8 +10,12 @@
 8
 9
 10
+echo '**'
 **
+echo "### Test --tmpdir running full. bug #40733 was caused by this"
 ### Test --tmpdir running full. bug #40733 was caused by this
+  stdout parallel -j1 --tmpdir $SHM cat /dev/zero ::: dummy
 parallel: Error: Output is incomplete. Cannot append to buffer file in $TMPDIR. Is the disk full?
 parallel: Error: Change $TMPDIR with --tmpdir or use --compress.
+echo '**'
 **

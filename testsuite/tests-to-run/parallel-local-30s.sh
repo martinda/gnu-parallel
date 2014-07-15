@@ -10,7 +10,7 @@ mkdir -p $SHM
 sudo umount -l $SHM
 sudo mount -t tmpfs -o size=10% none $SHM
 
-cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -k -j4 -L1
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -k -vj4 -L1
 echo '### Test race condition on 8 CPU (my laptop)'; 
   seq 1 5000000 > /tmp/parallel_test; 
   seq 1 10 | parallel -k "cat /tmp/parallel_test | parallel --pipe --recend '' -k gzip >/dev/null; echo {}"

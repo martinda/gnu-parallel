@@ -28,7 +28,7 @@ ls | parallel -kv rm -- {.}/abc-{.}-{} 2>&1
 #test05.sh:find . -type d -print0 |  perl -0 -pe 's:^./::' | parallel -0 -v rmdir -- {} 2>&1 \
 
 # -L1 will join lines ending in ' '
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | nice parallel -j0 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | nice parallel -vj0 -k -L1
 echo '### Test compress'
   seq 5 | parallel -j2 --tag --compress 'seq {} | pv -q -L 10'
 

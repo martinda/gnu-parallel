@@ -4,7 +4,7 @@ rsync -Ha --delete input-files/segfault/ tmp/
 cd tmp
 
 # -L1 will join lines ending in ' '
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -j+0 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj0 -k -L1
 echo '### bug #41565: Print happens in blocks - not after each job complete'
 echo 'The timing here is important: 2 3 4 5 6'
   ping -c 7 lo  | parallel -j3  'echo {#}' | timestamp -dd | perl -pe '$_=int($_+0.2)."\n"'
