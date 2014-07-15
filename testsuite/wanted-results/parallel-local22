@@ -47,7 +47,7 @@ echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
 2
 echo '### bug #42363: --pipepart and --fifo/--cat does not work'
 ### bug #42363: --pipepart and --fifo/--cat does not work
-  seq 100 > /tmp/bug42363;   parallel --pipepart --block 31 -a /tmp/bug42363 -k --fifo wc | perl -pe s:/tmp/...........pip:/tmp/XXXX: ;   parallel --pipepart --block 31 -a /tmp/bug42363 -k --cat  wc | perl -pe s:/tmp/...........pip:/tmp/XXXX: ; 
+  seq 100 > /tmp/bug42363;   parallel --pipepart --block 31 -a /tmp/bug42363 -k --fifo wc | perl -pe s:/tmp/...........pip:/tmp/XXXX: ;   parallel --pipepart --block 31 -a /tmp/bug42363 -k --cat  wc | perl -pe s:/tmp/...........pip:/tmp/XXXX: ; echo '### bug #42055: --pipe -a bigfile should not require sequential reading of bigfile'
      13      14      32 /tmp/XXXX
      11      11      33 /tmp/XXXX
      11      11      33 /tmp/XXXX
@@ -66,3 +66,10 @@ echo '### bug #42363: --pipepart and --fifo/--cat does not work'
 11 11 33 /tmp/XXXX
 11 11 33 /tmp/XXXX
 10  9 29 /tmp/XXXX
+### bug #42055: --pipe -a bigfile should not require sequential reading of bigfile
+  parallel --pipepart -a /etc/passwd -L 1 should not be run
+parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines, and -L.
+  parallel --pipepart -a /etc/passwd -N 1 should not be run
+parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines, and -L.
+  parallel --pipepart -a /etc/passwd -l 1 should not be run
+parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines, and -L.

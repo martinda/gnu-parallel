@@ -970,7 +970,7 @@ The file must be a physical (seekable) file and must be given using B<-a> or B<:
 
 =item Z<>*
 
-Record counting (B<-N>) and line counting (B<-L>) do not work.
+Record counting (B<-N>) and line counting (B<-L>/B<-l>) do not work.
 
 =back
 

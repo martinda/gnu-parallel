@@ -680,7 +680,7 @@ sub options_hash {
 	 "header=s" => \$opt::header,
 	 "cat" => \$opt::cat,
 	 "fifo" => \$opt::fifo,
-	 "pipepart" => \$opt::pipepart,
+	 "pipepart|pipe-part" => \$opt::pipepart,
 	);
 }
 
@@ -914,6 +914,13 @@ sub parse_options {
     }
     if(defined $opt::tag and not defined $opt::tagstring) {
 	$opt::tagstring = "\257<\257>"; # Default = {}
+    }
+    if(defined $opt::pipepart and
+       (defined $opt::L or defined $opt::max_lines
+	or defined $opt::max_replace_args)) {
+	::error("--pipepart is incompatible with --max-replace-args, ",
+		"--max-lines, and -L.\n");
+	wait_and_exit(255);
     }
     if(grep /^$Global::arg_sep$|^$Global::arg_file_sep$/o, @ARGV) {
         # Deal with ::: and ::::
