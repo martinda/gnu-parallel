@@ -1338,6 +1338,15 @@ used as a positional replacement string (like B<{2.}>).
 It is recommended to only change $_ but you have full access to all
 of GNU B<parallel>'s internal functions and data structures.
 
+Here are a few examples:
+
+  Remove 2 extensions (e.g. .tar.gz)
+  --rpl '{..} s:\.[^/.]+$::;s:\.[^/.]+$::;'
+  Keep only the extension
+  --rpl '{ext} s:.*\.::'
+  Is the job sequence even or odd?
+  --rpl '{odd} $_=$job->seq()%2?"odd":"even"'
+
 See also: B<{= perl expression =}> B<--parens>
 
 

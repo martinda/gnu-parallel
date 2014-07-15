@@ -1494,6 +1494,17 @@ used as a positional replacement string (like @strong{@{2.@}}).
 It is recommended to only change $_ but you have full access to all
 of GNU @strong{parallel}'s internal functions and data structures.
 
+Here are a few examples:
+
+@verbatim
+  Remove 2 extensions (e.g. .tar.gz)
+  --rpl '{..} s:\.[^/.]+$::;s:\.[^/.]+$::;'
+  Keep only the extension
+  --rpl '{ext} s:.*\.::'
+  Is the job sequence even or odd?
+  --rpl '{odd} $_=$job->seq()%2?"odd":"even"'
+@end verbatim
+
 See also: @strong{@{= perl expression =@}} @strong{--parens}
 
 @item @strong{--max-chars}=@emph{max-chars}
@@ -2653,7 +2664,8 @@ these chunks. To parallelize both reading of bigfile and regexp.txt
 combine the two using --fifo:
 
 @verbatim
-    parallel --pipepart --block 100M -a bigfile --fifo cat regexp.txt \| parallel --pipe -L1000 --round-robin grep -f - {}
+    parallel --pipepart --block 100M -a bigfile --fifo cat regexp.txt \
+    \| parallel --pipe -L1000 --round-robin grep -f - {}
 @end verbatim
 
 @node EXAMPLE: Using remote computers

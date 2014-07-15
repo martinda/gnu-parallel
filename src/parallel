@@ -1006,6 +1006,7 @@ sub parse_env_var {
     # Parse --env and set $Global::envvar
     # Returns: N/A
     $Global::envvar = "";
+    $Global::envwarn = "";
     my @vars = ();
     for my $varstring (@opt::env) {
         # Split up --env VAR1,VAR2
@@ -1039,10 +1040,16 @@ sub parse_env_var {
     }
     push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_functions;
 
+    # Check if any variables contain \n
+    if(grep /\n/, @ENV{@vars}) {
+	# \n is bad for csh and will cause it to fail.
+	$Global::envwarn .= ::shell_quote_scalar(q{echo $SHELL | egrep "/t?csh" > /dev/null && echo CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS && exec false;}."\n");
+    }
+
     # Create lines like:
     # echo $SHELL | grep "/t\\{0,1\\}csh" >/dev/null && setenv V1 val1 && setenv V2 val2 || export V1=val1 && export V2=val2 ; echo "$V1$V2"
     if(@vars) {
-	$Global::envvar = 
+	$Global::envvar .= 
 	    join"", 
 	    (q{echo $SHELL | grep "/t\\{0,1\\}csh" > /dev/null && }
 	     . join(" && ", @qcsh)
@@ -1787,7 +1794,8 @@ sub progress {
 		my $rev = '[7m';
 		my $reset = '[0m';
 		my $terminal_width = terminal_columns();
-		my $s = sprintf("%-${terminal_width}s",$bar_text);
+		my $s = sprintf("%-${terminal_width}s",
+				substr($bar_text,0,$terminal_width));
 		my $width = int($terminal_width * $pctcomplete);
 		$s =~ s/^(.{$width})/$1$reset/;
 		$s = "\r#   ".int($this_eta)." sec $arg" . "\r". $pctcomplete*100 # Prefix with zenity header
@@ -4880,7 +4888,8 @@ sub sshlogin_wrap {
 	    # We cannot use parse_env_var(), as PARALLEL_SEQ changes
 	    # for each command
 	    my $parallel_env =
-		(q{ 'eval `echo $SHELL | grep "/t\\{0,1\\}csh" > /dev/null }
+		($Global::envwarn
+		 . q{ 'eval `echo $SHELL | grep "/t\\{0,1\\}csh" > /dev/null }
 		 . q{ && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\; }
 		 . q{ setenv PARALLEL_PID '$PARALLEL_PID' }
 		 . q{ || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\; }

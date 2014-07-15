@@ -220,13 +220,15 @@ Subject: GNU Parallel 20140722 ('Eyal Gilad Naftali') released
 
 GNU Parallel 20140722 ('Eyal Gilad Naftali') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
-This release contains a major change in central parts of the code and should be considered alpha quality. As always it passes the testsuite, so most functionality clearly works.
+This release contains a major change in central parts of the code and should be considered beta quality. As always it passes the testsuite, so most functionality clearly works.
+
+Thanks to Malcolm Cook for the brilliant idea to use a general perl expression as a replacement string.
 
 Haiku of the month:
 
-  Programs very slow.
-  Multiple can run at once.
-  Use GNU Parallel.
+  Are you tired of
+  inflexible replacements?
+  Use Perl expressions.
          -- Ole Tange
 
 New in this release:
