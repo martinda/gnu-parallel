@@ -1781,7 +1781,7 @@ sub progress {
 	    $eta = sprintf("ETA: %ds Left: %d AVG: %.2fs  ", $this_eta, $left, $avgtime);
 	    if($opt::bar) {
 		my $arg = $Global::newest_job ? 
-		    $Global::newest_job->{'commandline'}->replace_placeholders([""],0,0) : "";
+		    $Global::newest_job->{'commandline'}->replace_placeholders(["\257<\257>"],0,0) : "";
 		my $bar_text = sprintf("%d%% %d:%d=%ds %s", 
 				  $pctcomplete*100, $completed, $left, $this_eta, $arg);
 		my $rev = '[7m';
