@@ -1624,6 +1624,12 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
+=item B<--tmux> (alpha testing)
+
+Use B<tmux> for output. Start a B<tmux> session and run each job in a
+window in that session. No other output will be produced.
+
+
 =item B<--timeout> I<val>
 
 Time out for command. If the command runs for longer than I<val>

@@ -1097,7 +1097,7 @@ The file must be a physical (seekable) file and must be given using @strong{-a} 
 @item *
 @anchor{* 1}
 
-Record counting (@strong{-N}) and line counting (@strong{-L}) do not work.
+Record counting (@strong{-N}) and line counting (@strong{-L}/@strong{-l}) do not work.
 
 @end table
 
@@ -1805,6 +1805,12 @@ Directory for temporary files. GNU @strong{parallel} normally buffers output
 into temporary files in /tmp. By setting @strong{--tmpdir} you can use a
 different dir for the files. Setting @strong{--tmpdir} is equivalent to
 setting $TMPDIR.
+
+@item @strong{--tmux} (alpha testing)
+@anchor{@strong{--tmux} (alpha testing)}
+
+Use @strong{tmux} for output. Start a @strong{tmux} session and run each job in a
+window in that session. No other output will be produced.
 
 @item @strong{--timeout} @emph{val}
 @anchor{@strong{--timeout} @emph{val}}

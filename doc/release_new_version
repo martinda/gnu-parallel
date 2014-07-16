@@ -237,7 +237,7 @@ New in this release:
 
 * Positional perl expressions (similar to {2}) are given as {=2 perl expression=} where 2 is the position.
 
-* Replacement strings can be defined using --rpl. E.g. parallel --rpl {.gz} 's/\.gz$//' echo {.gz} ::: *.gz
+* Replacement strings can be defined using --rpl. E.g. parallel --rpl '{.gz} s/\.gz$//' echo {.gz} ::: *.gz
 
 * The parenthesis around {= perl expression =} can be changed with --parens.
 
@@ -250,6 +250,10 @@ New in this release:
 * GNU Parallel was cited in: Web-scale Content Reuse Detection www.isi.edu/~johnh/PAPERS/Ardi14a.pdf
 
 * Webcast at 2014-08-20 covering GNU Parallel: Data Science at the Command Line http://www.oreilly.com/pub/e/3115
+
+* Shell command composition and dispatch http://lukeluo.blogspot.dk/2014/07/linux-virtual-console6-shell-command.html
+
+* Parallelising plink (or anything else) the easy way http://chrisladroue.com/2012/03/parallelising-plink-or-anything-else-the-easy-way/
 
 * Paralelizace běžných činností v konzoli pomocí GNU Parallel http://www.abclinuxu.cz/clanky/paralelizace-beznych-cinnosti-v-konzoli-pomoci-gnu-parallel
 

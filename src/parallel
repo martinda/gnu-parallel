@@ -106,7 +106,6 @@ if($opt::header and not $opt::pipe) {
     }
 }
 
-
 if($opt::filter_hosts and (@opt::sshlogin or @opt::sshloginfile)) {
     # Parallel check all hosts are up. Remove hosts that are down
     filter_hosts();
@@ -567,6 +566,7 @@ sub options_hash {
 	 "g" => \$opt::retired,
 	 "ungroup|u" => \$opt::u,
 	 "linebuffer|linebuffered|line-buffer|line-buffered" => \$opt::linebuffer,
+	 "tmux" => \$opt::tmux,
 	 "null|0" => \$opt::0,
 	 "quote|q" => \$opt::q,
 	 # Replacement strings
@@ -2352,6 +2352,8 @@ sub save_original_signal_handler {
     # Remember the original signal handler
     # Returns: N/A
     $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
+    $SIG{INT} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; } exit -1  };
+    $SIG{TERM} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; } exit -1  };
     %Global::original_sig = %SIG;
     $SIG{TERM} = sub {}; # Dummy until jobs really start
 }
@@ -4910,6 +4912,7 @@ sub sshlogin_wrap {
 		# Propagating CTRL-C to kill remote jobs requires
 		# remote jobs to be run with a terminal.
 		$ssh_options = "-tt -oLogLevel=quiet";
+#		$ssh_options = "";
 		# tty - check if we have a tty.
 		# stty:
 		#   -onlcr - make output 8-bit clean
@@ -4937,7 +4940,7 @@ sub sshlogin_wrap {
 		$p->mask(STDOUT, POLLHUP); 
 		$pid=fork; unless($pid) {setpgrp; exec $ENV{SHELL}, "-c", @ARGV; die "exec: $!\n"} 
 		$p->poll; 
-		kill SIGHUP, -$pid unless $done; 
+		kill SIGHUP, -${pid} unless $done; 
 		wait; exit ($?&127 ? 128+($?&127) : 1+$?>>8) 
             } . "' ";
 	    $signal_script =~ s/\s+/ /g;
@@ -5216,6 +5219,9 @@ sub start {
              test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true;
              (cat $tmpfile; rm $tmpfile; cat - ) | } .
 		 "($command);";
+	if($opt::tmux) {
+	    $command = tmux_wrap($command);
+	}
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3($stdin_fh, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5229,6 +5235,9 @@ sub start {
 	# locally - otherwise CTRL-C does not work for other jobs Bug#36585)
 	*IN = *STDIN;
 	# The eval is needed to catch exception from open3
+	if($opt::tmux) {
+	    $command = tmux_wrap($command);
+	}
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 		::die_bug("open3-a");
@@ -5242,6 +5251,9 @@ sub start {
 	# Give /dev/tty to the command if no one else is using it
 	*IN = $devtty_fh;
 	# The eval is needed to catch exception from open3
+	if($opt::tmux) {
+	    $command = tmux_wrap($command);
+	}
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 		::die_bug("open3-/dev/tty");
@@ -5250,6 +5262,9 @@ sub start {
 	    1;
 	};
     } else {
+	if($opt::tmux) {
+	    $command = tmux_wrap($command);
+	}
 	eval {
 	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
 		::die_bug("open3-gensym");
@@ -5274,6 +5289,24 @@ sub start {
 	::debug("run", "Cannot spawn more jobs.\n");
 	return undef;
     }
+}
+
+sub tmux_wrap {
+    my $command = shift;
+    # Start tmux seesion as pPID
+    my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".tmx");
+    close $fh;
+    unlink $tmpfile;
+    my $tmux;
+    if($Global::total_running == 0) {
+	$tmux = "tmux new-session -s p$$ -d";
+	print $Global::original_stderr "See output with: tmux attach -t p$$\n";
+    } else {
+	$tmux = "tmux new-window -t p$$";
+    }
+    return "mkfifo $tmpfile; $tmux ".
+	::shell_quote_scalar("(".$command.');echo $?$status >'.$tmpfile).
+	"; ( exit `cat < $tmpfile;rm $tmpfile` )";
 }
 
 sub is_already_in_results {
