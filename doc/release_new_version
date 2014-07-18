@@ -216,9 +216,9 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20140722 ('Eyal Gilad Naftali') released
+Subject: GNU Parallel 20140722 ('MH17') released
 
-GNU Parallel 20140722 ('Eyal Gilad Naftali') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20140722 ('MH17') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 This release contains a major change in central parts of the code and should be considered beta quality. As always it passes the testsuite, so most functionality clearly works.
 

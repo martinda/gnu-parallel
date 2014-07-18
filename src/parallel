@@ -5220,7 +5220,7 @@ sub start {
              (cat $tmpfile; rm $tmpfile; cat - ) | } .
 		 "($command);";
 	if($opt::tmux) {
-	    $command = tmux_wrap($command,$job->replaced());
+	    $command = $job->tmux_wrap($command);
 	}
 
 	# The eval is needed to catch exception from open3
@@ -5237,7 +5237,8 @@ sub start {
 	*IN = *STDIN;
 	# The eval is needed to catch exception from open3
 	if($opt::tmux) {
-	    $command = tmux_wrap($command,$job->replaced());
+	    $command = $job->tmux_wrap($command);
+#	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5253,7 +5254,8 @@ sub start {
 	*IN = $devtty_fh;
 	# The eval is needed to catch exception from open3
 	if($opt::tmux) {
-	    $command = tmux_wrap($command,$job->replaced());
+	    $command = $job->tmux_wrap($command);
+#	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5264,7 +5266,8 @@ sub start {
 	};
     } else {
 	if($opt::tmux) {
-	    $command = tmux_wrap($command,$job->replaced());
+	    $command = $job->tmux_wrap($command);
+#	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5296,30 +5299,35 @@ sub tmux_wrap {
     # Wrap command with tmux for session pPID
     # Input:
     #   $actual_command = the actual command being run (incl ssh wrap)
-    #   $visual_command = the command the user wants run (= -v)
+    my $self = shift;
     my $actual_command = shift;
-    my $visual_command = shift;
     # Temporary file name. Used for fifo to communicate exit val
     my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".tmx");
+    $Global::unlink{$tmpfile}=1;
     close $fh;
     unlink $tmpfile;
-    my $c = $visual_command;
-    # tmux does not like some chars (e.g. ;).
-    $c =~ s/[^-<>(),:_+=#a-z0-9 `\\\$\|]//g;
+    my $visual_command = $self->replaced();
+    my $c = ::undef_as_empty($self->{'commandline'}->replace_placeholders(["\257<\257>"],0,0))."";
+    # ascii 194-224 annoys tmux
+    $c =~ s/[\011-\016;\302-\340]//g;
+
     my $tmux;
-     if($Global::total_running == 0) {
+    if($Global::total_running == 0) {
 	$tmux = "tmux new-session -s p$$ -d -n ".
 	    ::shell_quote_scalar($c);
 	print $Global::original_stderr "See output with: tmux attach -t p$$\n";
     } else {
 	$tmux = "tmux new-window -t p$$ -n ".::shell_quote_scalar($c);
-
     }
+#    $tmux = "tmux new-session -s p$$ -d true >/dev/null; ".
+#	"tmux new-window -t p$$ -n ".::shell_quote_scalar($c);
     return "mkfifo $tmpfile; $tmux ".
-	::shell_quote_scalar("(".$actual_command.');echo $?$status >'.$tmpfile.";".
+	# Run in tmux
+	::shell_quote_scalar("(".$actual_command.');(echo $?$status;echo 255) >'.$tmpfile.";".
 			     "echo ".::shell_quote_scalar($visual_command).";".
-			     "echo \007Job finished at: `date`;sleep 60").
-			     "; ( exit `cat < $tmpfile;rm $tmpfile` )";
+			     "echo \007Job finished at: `date`;sleep 10").
+			     # Run outside tmux
+			     ";  exit `perl -ne '1..1 and print' $tmpfile;rm $tmpfile` ";
 }
 
 sub is_already_in_results {
