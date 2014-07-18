@@ -5220,8 +5220,9 @@ sub start {
              (cat $tmpfile; rm $tmpfile; cat - ) | } .
 		 "($command);";
 	if($opt::tmux) {
-	    $command = tmux_wrap($command);
+	    $command = tmux_wrap($command,$job->replaced());
 	}
+
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3($stdin_fh, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5236,7 +5237,7 @@ sub start {
 	*IN = *STDIN;
 	# The eval is needed to catch exception from open3
 	if($opt::tmux) {
-	    $command = tmux_wrap($command);
+	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5252,7 +5253,7 @@ sub start {
 	*IN = $devtty_fh;
 	# The eval is needed to catch exception from open3
 	if($opt::tmux) {
-	    $command = tmux_wrap($command);
+	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5263,7 +5264,7 @@ sub start {
 	};
     } else {
 	if($opt::tmux) {
-	    $command = tmux_wrap($command);
+	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5292,21 +5293,33 @@ sub start {
 }
 
 sub tmux_wrap {
-    my $command = shift;
-    # Start tmux seesion as pPID
+    # Wrap command with tmux for session pPID
+    # Input:
+    #   $actual_command = the actual command being run (incl ssh wrap)
+    #   $visual_command = the command the user wants run (= -v)
+    my $actual_command = shift;
+    my $visual_command = shift;
+    # Temporary file name. Used for fifo to communicate exit val
     my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".tmx");
     close $fh;
     unlink $tmpfile;
+    my $c = $visual_command;
+    # tmux does not like some chars (e.g. ;).
+    $c =~ s/[^-<>(),:_+=#a-z0-9 `\\\$\|]//g;
     my $tmux;
-    if($Global::total_running == 0) {
-	$tmux = "tmux new-session -s p$$ -d";
+     if($Global::total_running == 0) {
+	$tmux = "tmux new-session -s p$$ -d -n ".
+	    ::shell_quote_scalar($c);
 	print $Global::original_stderr "See output with: tmux attach -t p$$\n";
     } else {
-	$tmux = "tmux new-window -t p$$";
+	$tmux = "tmux new-window -t p$$ -n ".::shell_quote_scalar($c);
+
     }
     return "mkfifo $tmpfile; $tmux ".
-	::shell_quote_scalar("(".$command.');echo $?$status >'.$tmpfile).
-	"; ( exit `cat < $tmpfile;rm $tmpfile` )";
+	::shell_quote_scalar("(".$actual_command.');echo $?$status >'.$tmpfile.";".
+			     "echo ".::shell_quote_scalar($visual_command).";".
+			     "echo \007Job finished at: `date`;sleep 60").
+			     "; ( exit `cat < $tmpfile;rm $tmpfile` )";
 }
 
 sub is_already_in_results {

@@ -300,7 +300,7 @@ Output (the order may be different):
 
 =head2 Replacement strings
 
-=head3 The 7 replacement strings
+=head3 The 7 predefined replacement strings
 
 GNU Parallel has several replacement strings. If no replacement
 strings are used the default is to append {}:
@@ -372,7 +372,7 @@ Output (the order may be different):
   2
   1
 
-=head2 Changing the replacement strings
+=head3 Changing the replacement strings
 
 The replacement string {} can be changed with -I:
 
@@ -434,7 +434,48 @@ Output (the order may be different):
   2
   1
 
-=head2 Positional replacement strings
+=head3 Perl expression replacement string
+
+When predefined replacement strings are not flexible enough a perl
+expression can be used instead. One example is to remove two
+extensions: foo.tar.gz -> foo
+
+   parallel echo '{= s:\.[^.]+$::;s:\.[^.]+$::; =}' ::: foo.tar.gz
+
+Output:
+
+   foo
+
+If the strings B<{=> and B<=}> cause problems they can be replaced with --parens:
+
+   parallel --parens ,,,, echo ',, s:\.[^.]+$::;s:\.[^.]+$::; ,,' ::: foo.tar.gz
+
+Output: Same as above.
+
+To define a short hand replacement string use B<--rpl>:
+
+   parallel --rpl '.. s:\.[^.]+$::;s:\.[^.]+$::;' echo '..' ::: foo.tar.gz
+
+Output: Same as above.
+
+If the short hand starts with '{' it can be used as a positional
+replacement string, too:
+
+   parallel --rpl '{..} s:\.[^.]+$::;s:\.[^.]+$::;' echo '{..}' ::: foo.tar.gz
+
+Output: Same as above.
+
+GNU B<parallel>'s 7 replacement strings are implemented as:
+
+  --rpl '{} '
+  --rpl '{#} $_=$job->seq()'
+  --rpl '{%} $_=$job->slot()'
+  --rpl '{/} s:.*/::'
+  --rpl '{//} $Global::use{"File::Basename"} ||= eval "use File::Basename; 1;"; $_ = dirname($_);'
+  --rpl '{/.} s:.*/::; s:\.[^/.]+$::;'
+  --rpl '{.} s:\.[^/.]+$::'
+
+=head3 Positional replacement strings
 
 With multiple input sources the argument from the individual input
 sources can be access with {number}:
@@ -473,7 +514,27 @@ Output (the order may be different):
   1=B 2=D 3=E -1=E -2=D -3=B
   1=B 2=D 3=F -1=F -2=D -3=B
 
-=head2 Input from columns
+
+=head3 Positional perl expression replacement string
+
+To use a perl expression as a positional replacement string simply
+prepend the perl expression with number and space:
+
+   parallel echo '{=2 s:\.[^.]+$::;s:\.[^.]+$::; =} {1}' ::: bar ::: foo.tar.gz
+
+Output:
+
+   foo bar
+
+If a defined short hand starts with '{' it can be used as a positional
+replacement string, too:
+
+   parallel --rpl '{..} s:\.[^.]+$::;s:\.[^.]+$::;' echo '{2..} {1}' ::: bar ::: foo.tar.gz
+
+Output: Same as above.
+
+
+=head3 Input from columns
 
 The columns in a file can be bound to positional replacement strings
 using --colsep. Here the columns are separated with TAB (\t):
@@ -486,7 +547,7 @@ Output (the order may be different):
   1=A 2=B
   1=C 2=D
 
-=head2 Header defined replacement strings
+=head3 Header defined replacement strings
 
 With --header GNU Parallel will use the first value of the input
 source as the name of the replacement string. Only the non-modified

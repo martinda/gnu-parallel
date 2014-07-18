@@ -241,6 +241,8 @@ New in this release:
 
 * The parenthesis around {= perl expression =} can be changed with --parens.
 
+* --tmux will direct the output to a tmux session instead of files.
+
 * GNU Parallel was cited in: bammds: A tool for assessing the ancestry of low depth whole genome data using multidimensional scaling (MDS) http://bioinformatics.oxfordjournals.org/content/early/2014/06/28/bioinformatics.btu410.abstract
 
 * GNU Parallel was cited in: Molecular ferroelectric contributions to anomalous hysteresis in hybrid perovskite solar cells http://people.bath.ac.uk/aw558/publications/2014/arxiv_hysteresis_14.pdf
@@ -251,9 +253,13 @@ New in this release:
 
 * Webcast at 2014-08-20 covering GNU Parallel: Data Science at the Command Line http://www.oreilly.com/pub/e/3115
 
+* GNU Parallel all the things! http://longwayaround.org.uk/notes/gnu-parallel-all-the-things/
+
 * Shell command composition and dispatch http://lukeluo.blogspot.dk/2014/07/linux-virtual-console6-shell-command.html
 
 * Parallelising plink (or anything else) the easy way http://chrisladroue.com/2012/03/parallelising-plink-or-anything-else-the-easy-way/
+
+* Easy and cheap cluster building on AWS https://grapeot.me/easy-and-cheap-cluster-building-on-aws.html
 
 * Paralelizace běžných činností v konzoli pomocí GNU Parallel http://www.abclinuxu.cz/clanky/paralelizace-beznych-cinnosti-v-konzoli-pomoci-gnu-parallel
 

@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL_TUTORIAL 1"
-.TH PARALLEL_TUTORIAL 1 "2014-07-15" "20140711" "parallel"
+.TH PARALLEL_TUTORIAL 1 "2014-07-18" "20140711" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -483,8 +483,8 @@ Output (the order may be different):
 .Ve
 .SS "Replacement strings"
 .IX Subsection "Replacement strings"
-\fIThe 7 replacement strings\fR
-.IX Subsection "The 7 replacement strings"
+\fIThe 7 predefined replacement strings\fR
+.IX Subsection "The 7 predefined replacement strings"
 .PP
 \&\s-1GNU\s0 Parallel has several replacement strings. If no replacement
 strings are used the default is to append {}:
@@ -587,8 +587,10 @@ Output (the order may be different):
 \&  2
 \&  1
 .Ve
-.SS "Changing the replacement strings"
+.PP
+\fIChanging the replacement strings\fR
 .IX Subsection "Changing the replacement strings"
+.PP
 The replacement string {} can be changed with \-I:
 .PP
 .Vb 1
@@ -676,8 +678,64 @@ Output (the order may be different):
 \&  2
 \&  1
 .Ve
-.SS "Positional replacement strings"
+.PP
+\fIPerl expression replacement string\fR
+.IX Subsection "Perl expression replacement string"
+.PP
+When predefined replacement strings are not flexible enough a perl
+expression can be used instead. One example is to remove two
+extensions: foo.tar.gz \-> foo
+.PP
+.Vb 1
+\&   parallel echo \*(Aq{= s:\e.[^.]+$::;s:\e.[^.]+$::; =}\*(Aq ::: foo.tar.gz
+.Ve
+.PP
+Output:
+.PP
+.Vb 1
+\&   foo
+.Ve
+.PP
+If the strings \fB{=\fR and \fB=}\fR cause problems they can be replaced with \-\-parens:
+.PP
+.Vb 1
+\&   parallel \-\-parens ,,,, echo \*(Aq,, s:\e.[^.]+$::;s:\e.[^.]+$::; ,,\*(Aq ::: foo.tar.gz
+.Ve
+.PP
+Output: Same as above.
+.PP
+To define a short hand replacement string use \fB\-\-rpl\fR:
+.PP
+.Vb 1
+\&   parallel \-\-rpl \*(Aq.. s:\e.[^.]+$::;s:\e.[^.]+$::;\*(Aq echo \*(Aq..\*(Aq ::: foo.tar.gz
+.Ve
+.PP
+Output: Same as above.
+.PP
+If the short hand starts with '{' it can be used as a positional
+replacement string, too:
+.PP
+.Vb 1
+\&   parallel \-\-rpl \*(Aq{..} s:\e.[^.]+$::;s:\e.[^.]+$::;\*(Aq echo \*(Aq{..}\*(Aq ::: foo.tar.gz
+.Ve
+.PP
+Output: Same as above.
+.PP
+\&\s-1GNU\s0 \fBparallel\fR's 7 replacement strings are implemented as:
+.PP
+.Vb 7
+\&  \-\-rpl \*(Aq{} \*(Aq
+\&  \-\-rpl \*(Aq{#} $_=$job\->seq()\*(Aq
+\&  \-\-rpl \*(Aq{%} $_=$job\->slot()\*(Aq
+\&  \-\-rpl \*(Aq{/} s:.*/::\*(Aq
+\&  \-\-rpl \*(Aq{//} $Global::use{"File::Basename"} ||= eval "use File::Basename; 1;"; $_ = dirname($_);\*(Aq
+\&  \-\-rpl \*(Aq{/.} s:.*/::; s:\e.[^/.]+$::;\*(Aq
+\&  \-\-rpl \*(Aq{.} s:\e.[^/.]+$::\*(Aq
+.Ve
+.PP
+\fIPositional replacement strings\fR
 .IX Subsection "Positional replacement strings"
+.PP
 With multiple input sources the argument from the individual input
 sources can be access with {number}:
 .PP
@@ -726,8 +784,35 @@ Output (the order may be different):
 \&  1=B 2=D 3=E \-1=E \-2=D \-3=B
 \&  1=B 2=D 3=F \-1=F \-2=D \-3=B
 .Ve
-.SS "Input from columns"
+.PP
+\fIPositional perl expression replacement string\fR
+.IX Subsection "Positional perl expression replacement string"
+.PP
+To use a perl expression as a positional replacement string simply
+prepend the perl expression with number and space:
+.PP
+.Vb 1
+\&   parallel echo \*(Aq{=2 s:\e.[^.]+$::;s:\e.[^.]+$::; =} {1}\*(Aq ::: bar ::: foo.tar.gz
+.Ve
+.PP
+Output:
+.PP
+.Vb 1
+\&   foo bar
+.Ve
+.PP
+If a defined short hand starts with '{' it can be used as a positional
+replacement string, too:
+.PP
+.Vb 1
+\&   parallel \-\-rpl \*(Aq{..} s:\e.[^.]+$::;s:\e.[^.]+$::;\*(Aq echo \*(Aq{2..} {1}\*(Aq ::: bar ::: foo.tar.gz
+.Ve
+.PP
+Output: Same as above.
+.PP
+\fIInput from columns\fR
 .IX Subsection "Input from columns"
+.PP
 The columns in a file can be bound to positional replacement strings
 using \-\-colsep. Here the columns are separated with \s-1TAB\s0 (\et):
 .PP
@@ -742,8 +827,10 @@ Output (the order may be different):
 \&  1=A 2=B
 \&  1=C 2=D
 .Ve
-.SS "Header defined replacement strings"
+.PP
+\fIHeader defined replacement strings\fR
 .IX Subsection "Header defined replacement strings"
+.PP
 With \-\-header \s-1GNU\s0 Parallel will use the first value of the input
 source as the name of the replacement string. Only the non-modified
 version {} is supported:

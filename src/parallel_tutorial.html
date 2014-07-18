@@ -41,13 +41,15 @@
 		<li><a href="#replacement_strings">Replacement strings</a></li>
 		<ul>
 
-			<li><a href="#the_7_replacement_strings">The 7 replacement strings</a></li>
+			<li><a href="#the_7_predefined_replacement_strings">The 7 predefined replacement strings</a></li>
+			<li><a href="#changing_the_replacement_strings">Changing the replacement strings</a></li>
+			<li><a href="#perl_expression_replacement_string">Perl expression replacement string</a></li>
+			<li><a href="#positional_replacement_strings">Positional replacement strings</a></li>
+			<li><a href="#positional_perl_expression_replacement_string">Positional perl expression replacement string</a></li>
+			<li><a href="#input_from_columns">Input from columns</a></li>
+			<li><a href="#header_defined_replacement_strings">Header defined replacement strings</a></li>
 		</ul>
 
-		<li><a href="#changing_the_replacement_strings">Changing the replacement strings</a></li>
-		<li><a href="#positional_replacement_strings">Positional replacement strings</a></li>
-		<li><a href="#input_from_columns">Input from columns</a></li>
-		<li><a href="#header_defined_replacement_strings">Header defined replacement strings</a></li>
 		<li><a href="#more_than_one_argument">More than one argument</a></li>
 		<li><a href="#quoting">Quoting</a></li>
 		<li><a href="#trimming_space">Trimming space</a></li>
@@ -390,7 +392,7 @@ exported using 'export -f':</p>
 <h2><a name="replacement_strings">Replacement strings</a></h2>
 <p>
 </p>
-<h3><a name="the_7_replacement_strings">The 7 replacement strings</a></h3>
+<h3><a name="the_7_predefined_replacement_strings">The 7 predefined replacement strings</a></h3>
 <p>GNU Parallel has several replacement strings. If no replacement
 strings are used the default is to append {}:</p>
 <pre>
@@ -447,7 +449,7 @@ number of jobs to run in parallel):</p>
   1</pre>
 <p>
 </p>
-<h2><a name="changing_the_replacement_strings">Changing the replacement strings</a></h2>
+<h3><a name="changing_the_replacement_strings">Changing the replacement strings</a></h3>
 <p>The replacement string {} can be changed with -I:</p>
 <pre>
   parallel -I ,, echo ,, ::: A/B.C</pre>
@@ -496,7 +498,40 @@ number of jobs to run in parallel):</p>
   1</pre>
 <p>
 </p>
-<h2><a name="positional_replacement_strings">Positional replacement strings</a></h2>
+<h3><a name="perl_expression_replacement_string">Perl expression replacement string</a></h3>
+<p>When predefined replacement strings are not flexible enough a perl
+expression can be used instead. One example is to remove two
+extensions: foo.tar.gz -&gt; foo</p>
+<pre>
+   parallel echo '{= s:\.[^.]+$::;s:\.[^.]+$::; =}' ::: foo.tar.gz</pre>
+<p>Output:</p>
+<pre>
+   foo</pre>
+<p>If the strings <strong>{=</strong> and <strong>=}</strong> cause problems they can be replaced with --parens:</p>
+<pre>
+   parallel --parens ,,,, echo ',, s:\.[^.]+$::;s:\.[^.]+$::; ,,' ::: foo.tar.gz</pre>
+<p>Output: Same as above.</p>
+<p>To define a short hand replacement string use <strong>--rpl</strong>:</p>
+<pre>
+   parallel --rpl '.. s:\.[^.]+$::;s:\.[^.]+$::;' echo '..' ::: foo.tar.gz</pre>
+<p>Output: Same as above.</p>
+<p>If the short hand starts with '{' it can be used as a positional
+replacement string, too:</p>
+<pre>
+   parallel --rpl '{..} s:\.[^.]+$::;s:\.[^.]+$::;' echo '{..}' ::: foo.tar.gz</pre>
+<p>Output: Same as above.</p>
+<p>GNU <strong>parallel</strong>'s 7 replacement strings are implemented as:</p>
+<pre>
+  --rpl '{} '
+  --rpl '{#} $_=$job-&gt;seq()'
+  --rpl '{%} $_=$job-&gt;slot()'
+  --rpl '{/} s:.*/::'
+  --rpl '{//} $Global::use{&quot;File::Basename&quot;} ||= eval &quot;use File::Basename; 1;&quot;; $_ = dirname($_);'
+  --rpl '{/.} s:.*/::; s:\.[^/.]+$::;'
+  --rpl '{.} s:\.[^/.]+$::'</pre>
+<p>
+</p>
+<h3><a name="positional_replacement_strings">Positional replacement strings</a></h3>
 <p>With multiple input sources the argument from the individual input
 sources can be access with {number}:</p>
 <pre>
@@ -530,7 +565,22 @@ from behind:</p>
   1=B 2=D 3=F -1=F -2=D -3=B</pre>
 <p>
 </p>
-<h2><a name="input_from_columns">Input from columns</a></h2>
+<h3><a name="positional_perl_expression_replacement_string">Positional perl expression replacement string</a></h3>
+<p>To use a perl expression as a positional replacement string simply
+prepend the perl expression with number and space:</p>
+<pre>
+   parallel echo '{=2 s:\.[^.]+$::;s:\.[^.]+$::; =} {1}' ::: bar ::: foo.tar.gz</pre>
+<p>Output:</p>
+<pre>
+   foo bar</pre>
+<p>If a defined short hand starts with '{' it can be used as a positional
+replacement string, too:</p>
+<pre>
+   parallel --rpl '{..} s:\.[^.]+$::;s:\.[^.]+$::;' echo '{2..} {1}' ::: bar ::: foo.tar.gz</pre>
+<p>Output: Same as above.</p>
+<p>
+</p>
+<h3><a name="input_from_columns">Input from columns</a></h3>
 <p>The columns in a file can be bound to positional replacement strings
 using --colsep. Here the columns are separated with TAB (\t):</p>
 <pre>
@@ -542,7 +592,7 @@ using --colsep. Here the columns are separated with TAB (\t):</p>
   1=C 2=D</pre>
 <p>
 </p>
-<h2><a name="header_defined_replacement_strings">Header defined replacement strings</a></h2>
+<h3><a name="header_defined_replacement_strings">Header defined replacement strings</a></h3>
 <p>With --header GNU Parallel will use the first value of the input
 source as the name of the replacement string. Only the non-modified
 version {} is supported:</p>
