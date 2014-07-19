@@ -617,7 +617,7 @@ sub options_hash {
 	 "compress" => \$opt::compress,
 	 "tty" => \$opt::tty,
 	 "T" => \$opt::retired,
-	 "halt-on-error|halt=i" => \$opt::halt_on_error,
+	 "halt-on-error|halt=s" => \$opt::halt_on_error,
 	 "H=i" => \$opt::retired,
 	 "retries=i" => \$opt::retries,
 	 "dry-run|dryrun" => \$opt::dryrun,
@@ -720,7 +720,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140714;
+    $Global::version = 20140719;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -834,6 +834,7 @@ sub parse_options {
     if(defined $opt::fg) { $Global::semaphore = 1; }
     if(defined $opt::bg) { $Global::semaphore = 1; }
     if(defined $opt::wait) { $Global::semaphore = 1; }
+    if(defined $opt::halt_on_error and $opt::halt_on_error=~/%/) { $opt::halt_on_error /= 100; }
     if(defined $opt::timeout and $opt::timeout !~ /^\d+(\.\d+)?%?$/) {
 	::error("--timeout must be seconds or percentage\n");
 	wait_and_exit(255);
@@ -2434,9 +2435,15 @@ sub reaper {
             if($job->exitstatus()) {
                 # The jobs had a exit status <> 0, so error
                 $Global::exitstatus++;
+		$Global::total_failed++;
                 if($opt::halt_on_error) {
-                    if($opt::halt_on_error == 1) {
-                        # If halt on error == 1 we should gracefully exit
+                    if($opt::halt_on_error == 1
+			or
+		       ($opt::halt_on_error < 1 and $Global::total_failed > 1 
+			and
+			$Global::total_failed / $Global::total_started > $opt::halt_on_error)) {
+                        # If halt on error == 1 or --halt 10%
+			# we should gracefully exit
                         print $Global::original_stderr
                             ("$Global::progname: Starting no more jobs. ",
                              "Waiting for ", scalar(keys %Global::running),
