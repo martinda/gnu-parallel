@@ -1,6 +1,6 @@
 #!/bin/bash
 
-P_ALL="vax freebsd solaris openbsd netbsd debian alpha aix redhat hpux ultrix qnx irix tru64 openindiana suse solaris-x86 mandriva ubuntu scosysv unixware dragonfly centos miros hurd raspberrypi"
+P_ALL="vax freebsd solaris openbsd netbsd debian alpha aix redhat hpux ultrix minix qnx irix tru64 openindiana suse solaris-x86 mandriva ubuntu scosysv unixware dragonfly centos miros hurd raspberrypi"
 P_NOTWORKING="vax alpha openstep"
 P_NOTWORKING_YET="ultrix irix"
 

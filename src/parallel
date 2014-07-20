@@ -2439,7 +2439,7 @@ sub reaper {
                 if($opt::halt_on_error) {
                     if($opt::halt_on_error == 1
 			or
-		       ($opt::halt_on_error < 1 and $Global::total_failed > 1 
+		       ($opt::halt_on_error < 1 and $Global::total_failed > 3 
 			and
 			$Global::total_failed / $Global::total_started > $opt::halt_on_error)) {
                         # If halt on error == 1 or --halt 10%
@@ -4771,36 +4771,55 @@ sub kill {
     }
 }
 
-sub family_pids {
-    # Find the pids with this->pid as (grand)*parent
-    # TODO test this on different OS as 'ps' is known to be different
-    my $self = shift;
-    my $pid = $self->pid();
-    my (@pidtable,%children_of,@pids);
-    if ($^O eq 'linux' or $^O eq 'solaris' or $^O eq 'cygwin') {
-	# Table with pid parentpid (SysV + GNU)
-	@pidtable = `ps -ef | awk '{print \$2" "\$3}'`;
-    } else {
-	# Table with pid parentpid (BSD)
-	@pidtable = `ps -o pid,ppid -ax`;
-    }
-    for (@pidtable) {
-	/(\S+)\s+(\S+)/ or ::die_bug("pidtable format");
-	push(@{$children_of{$2}},$1);
-    }
-    my @more = ($pid);
-    while(@more) {
-	my @m;
-	push @pids,@more;
-	for my $parent (@more) {
-	    if($children_of{$parent}) {
-		push @m, @{$children_of{$parent}};
-	    }
-	}
-	@more = @m;
-    }
+{
+    my %pid_parentpid_cmd;
 
-    return (@pids);
+    sub family_pids {
+	# Find the pids with this->pid as (grand)*parent
+	my $self = shift;
+	my $pid = $self->pid();
+
+       	%pid_parentpid_cmd or %pid_parentpid_cmd = 
+	    (
+	     'aix' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'cygwin' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'dec_osf' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'darwin' => q( ps -o pid,ppid -ax ),
+	     'dragonfly' => q( ps -o pid,ppid -ax ),
+	     'freebsd' => q( ps -o pid,ppid -ax ),
+	     'gnu' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'hpux' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'linux' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'mirbsd' => q( ps -o pid,ppid -ax ),
+	     'netbsd' => q( ps -o pid,ppid -ax ),
+	     'nto' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'openbsd' => q( ps -o pid,ppid -ax ),
+	     'solaris' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'svr5' => q( ps -ef | awk '{print $2" "$3}' ),
+	    );
+	$pid_parentpid_cmd{$^O} or ::die_bug("pid_parentpid_cmd for $^O missing");
+
+	my (@pidtable,%children_of,@pids);
+	# Table with pid parentpid
+	@pidtable = `$pid_parentpid_cmd{$^O}`;
+	for (@pidtable) {
+	    /(\S+)\s+(\S+)/ or ::die_bug("pidtable format");
+	    push(@{$children_of{$2}},$1);
+	}
+	my @more = ($pid);
+	while(@more) {
+	    my @m;
+	    push @pids,@more;
+	    for my $parent (@more) {
+		if($children_of{$parent}) {
+		    push @m, @{$children_of{$parent}};
+		}
+	    }
+	    @more = @m;
+	}
+
+	return (@pids);
+    }
 }
 
 sub failed {

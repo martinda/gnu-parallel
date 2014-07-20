@@ -639,11 +639,13 @@ See also: B<--line-buffer> B<--ungroup>
 Print a summary of the options to GNU B<parallel> and exit.
 
 
-=item B<--halt-on-error> <0|1|2>
+=item B<--halt-on-error> I<val> (alpha testing)
 
-=item B<--halt> <0|1|2>
+=item B<--halt> I<val> (alpha testing)
 
-=over 3
+How should GNU B<parallel> terminate if one of more jobs fail?
+
+=over 7
 
 =item Z<>0
 
@@ -660,6 +662,12 @@ last failing job.
 
 Kill off all jobs immediately and exit without cleanup. The exit
 status will be the exit status from the failing job.
+
+=item Z<>1-99%
+
+If I<val>% of the jobs fail and minimum 3: Do not start new jobs, but
+complete the running jobs including cleanup. The exit status will be
+the exit status from the last failing job.
 
 =back
 
@@ -845,9 +853,9 @@ the same syntax as B<--jobs>, so I<100%> for one per CPU is a valid
 setting. Only difference is 0 which is interpreted as 0.01.
 
 
-=item B<--controlmaster> (experimental)
+=item B<--controlmaster>
 
-=item B<-M> (experimental)
+=item B<-M>
 
 Use ssh's ControlMaster to make ssh connections faster. Useful if jobs
 run remote and are very fast to run. This is disabled for sshlogins
