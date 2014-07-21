@@ -1116,6 +1116,23 @@ with --halt 1:</p>
   1
   parallel: This job failed:
   echo 1; exit 1</pre>
+<p>If --halt is given a percentage this percentage of the jobs must fail
+(though minimum 3) before GNU Parallel stops spawning more jobs:</p>
+<pre>
+  parallel -j2 --halt 20% echo {}\; exit {} ::: 0 0 1 2 3 4 5 6 7</pre>
+<p>Output:</p>
+<pre>
+  0
+  0
+  1
+  2
+  3
+  4
+  parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
+      echo 4; exit 4
+  5
+  parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
+      echo 5; exit 5</pre>
 <p>GNU Parallel can retry the command with --retries. This is useful if a
 command fails for unkown reasons now and then.</p>
 <pre>

@@ -75,50 +75,42 @@ echo "### Test --wd \"'\""
   cat ~/"'"/uNiQuE_sTrInG.9; 
   stdout rm ~/"'"/uNiQuE_sTrInG.9
 
-echo '### Test --trc --/--foo1'
+echo '### Test --trc ./--/--foo1'
   mkdir -p ./--; echo 'Content --/--foo1' > ./--/--foo1; 
   stdout parallel --trc {}.1 -S lo '(cat {}; echo remote1) > {}.1' ::: ./--/--foo1; cat ./--/--foo1.1; 
   stdout parallel --trc {}.2 -S lo '(cat ./{}; echo remote2) > {}.2' ::: --/--foo1; cat ./--/--foo1.2
 
-echo '### Test --trc :dir/:foo2'
+echo '### Test --trc ./:dir/:foo2'
   mkdir -p ./:dir; echo 'Content :dir/:foo2' > ./:dir/:foo2; 
   stdout parallel --trc {}.1 -S lo '(cat {}; echo remote1) > {}.1' ::: ./:dir/:foo2; cat ./:dir/:foo2.1; 
   stdout parallel --trc {}.2 -S lo '(cat ./{}; echo remote2) > {}.2' ::: :dir/:foo2; cat ./:dir/:foo2.2
 
-echo '### Test --trc " "/" "foo3'
+echo '### Test --trc ./" "/" "foo3'
   mkdir -p ./" "; echo 'Content _/_foo3' > ./" "/" "foo3; 
   stdout parallel --trc {}.1 -S lo '(cat {}; echo remote1) > {}.1' ::: ./" "/" "foo3; cat ./" "/" "foo3.1; 
   stdout parallel --trc {}.2 -S lo '(cat ./{}; echo remote2) > {}.2' ::: " "/" "foo3; cat ./" "/" "foo3.2
 
-#echo '### Test --trc --/./--foo4'
-#  mkdir -p ./--; echo 'Content --/./--foo4' > ./--/./--foo4; 
-#  stdout parallel --trc {}.1 -S lo '(cat ./--foo4; echo remote{}) > --foo4.1' ::: --/./--foo4; cat ./--/./--foo4.1
-#
-#echo '### Test --trc :/:foo2'
-#  mkdir -p ./:; echo 'Content :/:foo2' > ./:/:foo2; 
-#  stdout parallel --trc {}.1 -S lo '(cat {}; echo remote) > {}.1' ::: ./:/:foo2; cat ./:/:foo2.1
-#
-#echo '### Test --trc " "/" "foo3'
-#  mkdir -p ./" "; echo 'Content _/_foo2' > ./" "/" "foo3; 
-#  stdout parallel --trc {}.1 -S lo '(cat {}; echo remote) > {}.1' ::: ./" "/" "foo3; cat ./" "/" "foo3.1
-#
-#
-#
-#
-#
-#
-#echo '### Test --trc --/./--foo4 :/./:foo5 " "/./" "foo6 ./foo10/./foo10'
-#  mkdir ./--; echo 'Content --/--foo4' > ./--/--foo4; 
-#  mkdir ./:; echo 'Content :/:foo5' > ./:/:foo5; 
-#  mkdir ./" "; echo 'Content _/_foo2' > ./" "/" "foo3; 
+echo '### Test --trc ./--/./--foo4'
+  mkdir -p ./--; echo 'Content --/./--foo4' > ./--/./--foo4; 
+  stdout parallel --trc {}.1 -S lo '(cat ./--foo4; echo remote{}) > --foo4.1' ::: --/./--foo4; cat ./--/./--foo4.1
 
-### echo '### Test --trc --basefile --/./--foo7 :/./:foo8 " "/./" "foo9 ./foo11/./foo11'
-### echo missing
-### echo '### Test --trc "-- "'
-### echo missing
-### echo '### Test --trc " --"'
-### echo missing
-### 
+echo '### Test --trc ./:/./:foo5'
+  mkdir -p ./:; echo 'Content :/./:foo5' > ./:/./:foo5; 
+  stdout parallel --trc {}.1 -S lo '(cat ./:foo5; echo remote{}) > ./:foo5.1' ::: ./:/./:foo5; cat ./:/./:foo5.1
+
+echo '### Test --trc ./" "/./" "foo6'
+  mkdir -p ./" "; echo 'Content _/./_foo6' > ./" "/./" "foo6; 
+  stdout parallel --trc {}.1 -S lo '(cat ./" "foo6; echo remote{}) > ./" "foo6.1' ::: ./" "/./" "foo6; cat ./" "/./" "foo6.1
+
+echo TODO
+
+## echo '### Test --trc --basefile --/./--foo7 :/./:foo8 " "/./" "foo9 ./foo11/./foo11'
+## echo missing
+## echo '### Test --trc "-- "'
+## echo missing
+## echo '### Test --trc " --"'
+## echo missing
+## 
 EOF
 
 rm -rf tmp

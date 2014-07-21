@@ -1,11 +1,11 @@
 ### Test installation missing pod2*
-make[1]: Entering directory `/home/tange/privat/parallel'
+make[0]: Entering directory `/home/tange/privat/parallel'
 if test -d "parallel-00000000"; then find "parallel-00000000" -type d ! -perm -200 -exec chmod u+w {} ';' && rm -rf "parallel-00000000" || { sleep 5 && rm -rf "parallel-00000000"; }; else :; fi
 test -d "parallel-00000000" || mkdir "parallel-00000000"
  (cd src && make  top_distdir=../parallel-00000000 distdir=../parallel-00000000/src \
      am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)
-make[2]: Entering directory `/home/tange/privat/parallel/src'
-make[2]: Leaving directory `/home/tange/privat/parallel/src'
+make[0]: Entering directory `/home/tange/privat/parallel/src'
+make[0]: Leaving directory `/home/tange/privat/parallel/src'
 test -n "" \
 	|| find "parallel-00000000" -type d ! -perm -755 \
 		-exec chmod u+rwx,go+rx {} \; -o \
@@ -15,7 +15,7 @@ test -n "" \
 	|| chmod -R a+r "parallel-00000000"
 tardir=parallel-00000000 && ${TAR-tar} chof - "$tardir" | GZIP=--best gzip -c >parallel-00000000.tar.gz
 if test -d "parallel-00000000"; then find "parallel-00000000" -type d ! -perm -200 -exec chmod u+w {} ';' && rm -rf "parallel-00000000" || { sleep 5 && rm -rf "parallel-00000000"; }; else :; fi
-make[1]: Leaving directory `/home/tange/privat/parallel'
+make[0]: Leaving directory `/home/tange/privat/parallel'
 checking for a BSD-compatible install... /usr/bin/install -c
 checking whether build environment is sane... yes
 checking for a thread-safe mkdir -p... /bin/mkdir -p
@@ -26,7 +26,7 @@ config.status: creating Makefile
 config.status: creating src/Makefile
 config.status: creating config.h
 Making install in src
-make[1]: Entering directory `/tmp/parallel-00000000/src'
+make[0]: Entering directory `/tmp/parallel-00000000/src'
 pod2man --release='00000000' --center='parallel' \
 		--section=1 ./parallel.pod > ./parallel.1n \
 	&& mv ./parallel.1n ./parallel.1 \
@@ -127,7 +127,7 @@ pod2pdf --output-file ./parallel_tutorial.pdf ./parallel_tutorial.pod --title "G
 	|| echo "Warning: pod2pdf not found. Using old parallel_tutorial.pdf"
 /bin/bash: pod2pdf: command not found
 Warning: pod2pdf not found. Using old parallel_tutorial.pdf
-make[2]: Entering directory `/tmp/parallel-00000000/src'
+make[0]: Entering directory `/tmp/parallel-00000000/src'
  /bin/mkdir -p '/usr/local/bin'
  /usr/bin/install -c parallel sem sql niceload '/usr/local/bin'
 pod2html ./parallel.pod > ./parallel.htmln \
@@ -234,11 +234,11 @@ pod2man --release='00000000' --center='parallel' \
 Warning: pod2man not found. Using old parallel_tutorial.1
  /bin/mkdir -p '/usr/local/share/man/man1'
  /usr/bin/install -c -m 644 parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 '/usr/local/share/man/man1'
-make[2]: Leaving directory `/tmp/parallel-00000000/src'
-make[1]: Leaving directory `/tmp/parallel-00000000/src'
-make[1]: Entering directory `/tmp/parallel-00000000'
-make[2]: Entering directory `/tmp/parallel-00000000'
-make[2]: Nothing to be done for `install-exec-am'.
-make[2]: Nothing to be done for `install-data-am'.
-make[2]: Leaving directory `/tmp/parallel-00000000'
-make[1]: Leaving directory `/tmp/parallel-00000000'
+make[0]: Leaving directory `/tmp/parallel-00000000/src'
+make[0]: Leaving directory `/tmp/parallel-00000000/src'
+make[0]: Entering directory `/tmp/parallel-00000000'
+make[0]: Entering directory `/tmp/parallel-00000000'
+make[0]: Nothing to be done for `install-exec-am'.
+make[0]: Nothing to be done for `install-data-am'.
+make[0]: Leaving directory `/tmp/parallel-00000000'
+make[0]: Leaving directory `/tmp/parallel-00000000'

@@ -768,9 +768,9 @@ status will be the exit status from the failing job.
 @item 1-99%
 @anchor{1-99%}
 
-If @emph{val}% of the jobs fail: Do not start new jobs, but complete the
-running jobs including cleanup. The exit status will be the exit
-status from the last failing job.
+If @emph{val}% of the jobs fail and minimum 3: Do not start new jobs, but
+complete the running jobs including cleanup. The exit status will be
+the exit status from the last failing job.
 
 @end table
 
@@ -975,11 +975,11 @@ processes on the computer is less than @emph{max-load}. @emph{max-load} uses
 the same syntax as @strong{--jobs}, so @emph{100%} for one per CPU is a valid
 setting. Only difference is 0 which is interpreted as 0.01.
 
-@item @strong{--controlmaster} (experimental)
-@anchor{@strong{--controlmaster} (experimental)}
+@item @strong{--controlmaster}
+@anchor{@strong{--controlmaster}}
 
-@item @strong{-M} (experimental)
-@anchor{@strong{-M} (experimental)}
+@item @strong{-M}
+@anchor{@strong{-M}}
 
 Use ssh's ControlMaster to make ssh connections faster. Useful if jobs
 run remote and are very fast to run. This is disabled for sshlogins

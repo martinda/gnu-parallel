@@ -31,7 +31,7 @@ opt--interactive 3
 
 echo '### Test killing children with --timeout and exit value (failed if timed out)'
 ### Test killing children with --timeout and exit value (failed if timed out)
-  pstree | grep sleep | grep -v anacron | grep -v screensave | wc;   parallel --timeout 3 'true {} ; for i in `seq 100 120`; do bash -c "(sleep $i)" & sleep $i & done; wait; echo No good' ::: 1000000000 1000000001 ;   echo $?; sleep 7; pstree | grep sleep | grep -v anacron | grep -v screensave | wc
+  pstree $$ | grep sleep | grep -v anacron | grep -v screensave | wc;   parallel --timeout 3 'true {} ; for i in `seq 100 120`; do bash -c "(sleep $i)" & sleep $i & done; wait; echo No good' ::: 1000000000 1000000001 ;   echo $?; sleep 2; pstree $$ | grep sleep | grep -v anacron | grep -v screensave | wc
       0       0       0
 2
       0       0       0

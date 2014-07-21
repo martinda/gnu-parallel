@@ -30,9 +30,6 @@ a'   * ? >o  <i*? ][\!#¤%=( ) | }b 5
 ### Test --env for \n and \\ - single and double (*csh only) - no output is good but csh fails
       2 2\ \92V2=\ \92
       2 2\\ \92V2=\\ \92
-     16 : Command not found.
-      8 Unmatched ".
-     16 \ : Command not found.
 ### Test --env for \n and \\ - single and double --onall (bash only) - no output is good
       2 1
       2 10
@@ -41,8 +38,5 @@ a'   * ? >o  <i*? ][\!#¤%=( ) | }b 5
 ### Test --env for \n and \\ - single and double --onall (*csh only) - no output is good but csh fails
       1 2\ \92V2=\ \92
       1 2\\ \92V2=\\ \92
-      8 : Command not found.
-      4 Unmatched ".
-      8 \ : Command not found.
 ### Test --env for \160 - which kills csh - single and double - no output is good
 ### Test --env for \160  - which kills csh - single and double --onall - no output is good

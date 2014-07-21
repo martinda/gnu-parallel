@@ -14,44 +14,36 @@ echo 'bug #41613: --compress --line-buffer - no newline';
 bug #41613: --compress --line-buffer - no newline
  echo 'pipe compress tagstring'
 pipe compress tagstring
- perl -e 'print "O"'| parallel --compress --tagstring {#} --pipe --line-buffer cat
-1	O echo "K"
-K
+ perl -e 'print "O"'| parallel --compress --tagstring {#} --pipe --line-buffer cat;  echo "K"
+1	OK
  echo 'pipe compress notagstring'
 pipe compress notagstring
- perl -e 'print "O"'| parallel --compress --pipe --line-buffer cat
-O echo "K"
-K
+ perl -e 'print "O"'| parallel --compress --pipe --line-buffer cat;  echo "K"
+OK
  echo 'pipe nocompress tagstring'
 pipe nocompress tagstring
- perl -e 'print "O"'| parallel --tagstring {#} --pipe --line-buffer cat
-1	O echo "K"
-K
+ perl -e 'print "O"'| parallel --tagstring {#} --pipe --line-buffer cat;  echo "K"
+1	OK
  echo 'pipe nocompress notagstring'
 pipe nocompress notagstring
- perl -e 'print "O"'| parallel --pipe --line-buffer cat
-O echo "K"
-K
+ perl -e 'print "O"'| parallel --pipe --line-buffer cat;  echo "K"
+OK
  echo 'nopipe compress tagstring'
 nopipe compress tagstring
- parallel --compress --tagstring {#} --line-buffer echo {} O ::: -n
-1	O echo "K"
-K
+ parallel --compress --tagstring {#} --line-buffer echo {} O ::: -n;  echo "K"
+1	OK
  echo 'nopipe compress notagstring'
 nopipe compress notagstring
- parallel --compress --line-buffer echo {} O ::: -n
-O echo "K"
-K
+ parallel --compress --line-buffer echo {} O ::: -n;  echo "K"
+OK
  echo 'nopipe nocompress tagstring'
 nopipe nocompress tagstring
- parallel --tagstring {#} --line-buffer echo {} O ::: -n
-1	O echo "K"
-K
+ parallel --tagstring {#} --line-buffer echo {} O ::: -n;  echo "K"
+1	OK
  echo 'nopipe nocompress notagstring'
 nopipe nocompress notagstring
- parallel --line-buffer echo {} O ::: -n
-O echo "K"
-K
+ parallel --line-buffer echo {} O ::: -n;  echo "K"
+OK
 echo 'bug #41412: --timeout + --delay causes deadlock';
 bug #41412: --timeout + --delay causes deadlock
   seq 10 | parallel -j10 --timeout 1 --delay .3 echo;

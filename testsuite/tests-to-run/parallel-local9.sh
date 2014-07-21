@@ -33,29 +33,21 @@ echo 'bug #41613: --compress --line-buffer with --tagstring';
 
 echo 'bug #41613: --compress --line-buffer - no newline';
  echo 'pipe compress tagstring'
- perl -e 'print "O"'| parallel --compress --tagstring {#} --pipe --line-buffer cat
- echo "K"
+ perl -e 'print "O"'| parallel --compress --tagstring {#} --pipe --line-buffer cat;  echo "K"
  echo 'pipe compress notagstring'
- perl -e 'print "O"'| parallel --compress --pipe --line-buffer cat
- echo "K"
+ perl -e 'print "O"'| parallel --compress --pipe --line-buffer cat;  echo "K"
  echo 'pipe nocompress tagstring'
- perl -e 'print "O"'| parallel --tagstring {#} --pipe --line-buffer cat
- echo "K"
+ perl -e 'print "O"'| parallel --tagstring {#} --pipe --line-buffer cat;  echo "K"
  echo 'pipe nocompress notagstring'
- perl -e 'print "O"'| parallel --pipe --line-buffer cat
- echo "K"
+ perl -e 'print "O"'| parallel --pipe --line-buffer cat;  echo "K"
  echo 'nopipe compress tagstring'
- parallel --compress --tagstring {#} --line-buffer echo {} O ::: -n
- echo "K"
+ parallel --compress --tagstring {#} --line-buffer echo {} O ::: -n;  echo "K"
  echo 'nopipe compress notagstring'
- parallel --compress --line-buffer echo {} O ::: -n
- echo "K"
+ parallel --compress --line-buffer echo {} O ::: -n;  echo "K"
  echo 'nopipe nocompress tagstring'
- parallel --tagstring {#} --line-buffer echo {} O ::: -n
- echo "K"
+ parallel --tagstring {#} --line-buffer echo {} O ::: -n;  echo "K"
  echo 'nopipe nocompress notagstring'
- parallel --line-buffer echo {} O ::: -n
- echo "K"
+ parallel --line-buffer echo {} O ::: -n;  echo "K"
 
 echo 'bug #41412: --timeout + --delay causes deadlock';
   seq 10 | parallel -j10 --timeout 1 --delay .3 echo;

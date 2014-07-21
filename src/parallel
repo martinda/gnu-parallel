@@ -2353,8 +2353,10 @@ sub save_original_signal_handler {
     # Remember the original signal handler
     # Returns: N/A
     $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
-    $SIG{INT} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; } exit -1  };
-    $SIG{TERM} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; } exit -1  };
+    $SIG{INT} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; } 
+		      unlink keys %Global::unlink; exit -1  };
+    $SIG{TERM} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; } 
+		      unlink keys %Global::unlink; exit -1  };
     %Global::original_sig = %SIG;
     $SIG{TERM} = sub {}; # Dummy until jobs really start
 }
@@ -3070,128 +3072,135 @@ sub swap_activity {
     return $self->{'swap_activity'};
 }
 
-sub swapactivityscript {
-    # Returns:
-    #   shellscript for detecting swap activity
-    #
-    # arguments for vmstat are OS dependant
-    # swap_in and swap_out are in different columns depending on OS
-    #
-    my %vmstat = (
-	# linux: $7*$8
-	# $ vmstat 1 2
-	# procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
-	#  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
-	#  5  0  51208 1701096 198012 18857888    0    0    37   153   28   19 56 11 33  1
-	#  3  0  51208 1701288 198012 18857972    0    0     0     0 3638 10412 15  3 82  0
-	'linux' => ['vmstat 1 2 | tail -n1', '$7*$8'],
+{
+    my $script;
 
-	# solaris: $6*$7
-	# $ vmstat -S 1 2
-	#  kthr      memory            page            disk          faults      cpu
-	#  r b w   swap  free  si  so pi po fr de sr s3 s4 -- --   in   sy   cs us sy id
-	#  0 0 0 4628952 3208408 0  0  3  1  1  0  0 -0  2  0  0  263  613  246  1  2 97
-	#  0 0 0 4552504 3166360 0  0  0  0  0  0  0  0  0  0  0  246  213  240  1  1 98
-	'solaris' => ['vmstat -S 1 2 | tail -1', '$6*$7'],
-
-	# darwin (macosx): $21*$22
-	# $ vm_stat -c 2 1
-	# Mach Virtual Memory Statistics: (page size of 4096 bytes)
-	#     free   active   specul inactive throttle    wired  prgable   faults     copy    0fill reactive   purged file-backed anonymous cmprssed cmprssor  dcomprs   comprs  pageins  pageout  swapins swapouts
-	#   346306   829050    74871   606027        0   240231    90367  544858K 62343596  270837K    14178   415070      570102    939846      356      370      116      922  4019813        4        0        0 
-	#   345740   830383    74875   606031        0   239234    90369     2696      359      553        0        0      570110    941179      356      370        0        0        0        0        0        0 
-	'darwin' => ['vm_stat -c 2 1 | tail -n1', '$21*$22'],
-
-	# ultrix: $12*$13
-	# $ vmstat -S 1 2
-	#  procs      faults    cpu      memory              page             disk  
-	#  r b w   in  sy  cs us sy id  avm  fre  si so  pi  po  fr  de  sr s0 
-	#  1 0 0    4  23   2  3  0 97 7743 217k   0  0   0   0   0   0   0  0
-	#  1 0 0    6  40   8  0  1 99 7743 217k   0  0   3   0   0   0   0  0
-	'ultrix' => ['vmstat -S 1 2 | tail -1', '$12*$13'],
-
-	# aix: $6*$7
-	# $ vmstat 1 2
-	# System configuration: lcpu=1 mem=2048MB
-	# 
-	# kthr    memory              page              faults        cpu    
-	# ----- ----------- ------------------------ ------------ -----------
-	#  r  b   avm   fre  re  pi  po  fr   sr  cy  in   sy  cs us sy id wa
-	#  0  0 333933 241803   0   0   0   0    0   0  10  143  90  0  0 99  0
-	#  0  0 334125 241569   0   0   0   0    0   0  37 5368 184  0  9 86  5
-	'aix' => ['vmstat 1 2 | tail -n1', '$6*$7'],
-
-	# freebsd: $8*$9
-	# $ vmstat -H 1 2
-	#  procs      memory      page                    disks     faults         cpu
-	#  r b w     avm    fre   flt  re  pi  po    fr  sr ad0 ad1   in   sy   cs us sy id
-	#  1 0 0  596716   19560    32   0   0   0    33   8   0   0   11  220  277  0  0 99
-	#  0 0 0  596716   19560     2   0   0   0     0   0   0   0   11  144  263  0  1 99
-	'freebsd' => ['vmstat -H 1 2 | tail -n1', '$8*$9'],
-
-	# mirbsd: $8*$9
-	# $ vmstat 1 2
-	#  procs   memory        page                    disks     traps         cpu
-	#  r b w    avm    fre   flt  re  pi  po  fr  sr wd0 cd0  int   sys   cs us sy id
-	#  0 0 0  25776 164968    34   0   0   0   0   0   0   0  230   259   38  4  0 96
-	#  0 0 0  25776 164968    24   0   0   0   0   0   0   0  237   275   37  0  0 100
-	'mirbsd' => ['vmstat 1 2 | tail -n1', '$8*$9'],
-
-	# netbsd: $7*$8
-	# $ vmstat 1 2
-	#  procs    memory      page                       disks   faults      cpu
-	#  r b      avm    fre  flt  re  pi   po   fr   sr w0 w1   in   sy  cs us sy id
-	#  0 0   138452   6012   54   0   0    0    1    2  3  0    4  100  23  0  0 100
-	#  0 0   138456   6008    1   0   0    0    0    0  0  0    7   26  19  0 0 100
-	'netbsd' => ['vmstat 1 2 | tail -n1', '$7*$8'],
-
-	# openbsd: $8*$9
-	# $ vmstat 1 2
-	#  procs    memory       page                    disks    traps          cpu
-	#  r b w    avm     fre  flt  re  pi  po  fr  sr wd0 wd1  int   sys   cs us sy id
-	#  0 0 0  76596  109944   73   0   0   0   0   0   0   1    5   259   22  0  1 99
-	#  0 0 0  76604  109936   24   0   0   0   0   0   0   0    7   114   20  0  1 99
-	'openbsd' => ['vmstat 1 2 | tail -n1', '$8*$9'],
-
-	# hpux: $8*$9
-	# $ vmstat 1 2
-	#          procs           memory                   page                              faults       cpu
-	#     r     b     w      avm    free   re   at    pi   po    fr   de    sr     in     sy    cs  us sy id
-	#     1     0     0   247211  216476    4    1     0    0     0    0     0    102  73005    54   6 11 83
-	#     1     0     0   247211  216421   43    9     0    0     0    0     0    144   1675    96  25269512791222387000 25269512791222387000 105
-	'hpux' => ['vmstat 1 2 | tail -n1', '$8*$9'],
-
-	# dec_osf (tru64): $11*$12
-	# $ vmstat  1 2
-	# Virtual Memory Statistics: (pagesize = 8192)
-	#   procs      memory        pages                            intr       cpu
-	#   r   w   u  act free wire fault  cow zero react  pin pout  in  sy  cs us sy id
-	#   3 181  36  51K 1895 8696  348M  59M 122M   259  79M    0   5 218 302  4  1 94
-	#   3 181  36  51K 1893 8696     3   15   21     0   28    0   4  81 321  1  1 98
-	'dec_osf' => ['vmstat 1 2 | tail -n1', '$11*$12'],
-
-	# gnu (hurd): $7*$8
-	# $ vmstat -k 1 2
-	# (pagesize: 4, size: 512288, swap size: 894972)
-	#   free   actv  inact  wired   zeroed  react    pgins   pgouts  pfaults  cowpfs hrat    caobj  cache swfree
-	# 371940  30844  89228  20276   298348      0    48192    19016   756105   99808  98%      876  20628 894972
-	# 371940  30844  89228  20276       +0     +0       +0       +0      +42      +2  98%      876  20628 894972
-	'gnu' => ['vmstat -k 1 2 | tail -n1', '$7*$8'],
-
-	# -nto (qnx has no swap)
-	#-irix
-	#-svr5 (scosysv)
-	);
-    my $perlscript = "";
-    for my $os (keys %vmstat) {
-	#q[ { vmstat 1 2 2> /dev/null || vmstat -c 1 2; } | ].
-	#   q[ awk 'NR!=4{next} NF==17||NF==16{print $7*$8} NF==22{print $21*$22} {exit}' ];
-	$vmstat{$os}[1] =~ s/\$/\\\\\\\$/g; # $ => \\\$
-	$perlscript .= 'if($^O eq "'.$os.'") { print `'.$vmstat{$os}[0].' | awk "{print ' . 
-	    $vmstat{$os}[1] . '}"` }';
+    sub swapactivityscript {
+	# Returns:
+	#   shellscript for detecting swap activity
+	#
+	# arguments for vmstat are OS dependant
+	# swap_in and swap_out are in different columns depending on OS
+	#
+	if(not $script) {
+	    my %vmstat = (
+		# linux: $7*$8
+		# $ vmstat 1 2
+		# procs -----------memory---------- ---swap-- -----io---- -system-- ----cpu----
+		#  r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa
+		#  5  0  51208 1701096 198012 18857888    0    0    37   153   28   19 56 11 33  1
+		#  3  0  51208 1701288 198012 18857972    0    0     0     0 3638 10412 15  3 82  0
+		'linux' => ['vmstat 1 2 | tail -n1', '$7*$8'],
+		
+		# solaris: $6*$7
+		# $ vmstat -S 1 2
+		#  kthr      memory            page            disk          faults      cpu
+		#  r b w   swap  free  si  so pi po fr de sr s3 s4 -- --   in   sy   cs us sy id
+		#  0 0 0 4628952 3208408 0  0  3  1  1  0  0 -0  2  0  0  263  613  246  1  2 97
+		#  0 0 0 4552504 3166360 0  0  0  0  0  0  0  0  0  0  0  246  213  240  1  1 98
+		'solaris' => ['vmstat -S 1 2 | tail -1', '$6*$7'],
+		
+		# darwin (macosx): $21*$22
+		# $ vm_stat -c 2 1
+		# Mach Virtual Memory Statistics: (page size of 4096 bytes)
+		#     free   active   specul inactive throttle    wired  prgable   faults     copy    0fill reactive   purged file-backed anonymous cmprssed cmprssor  dcomprs   comprs  pageins  pageout  swapins swapouts
+		#   346306   829050    74871   606027        0   240231    90367  544858K 62343596  270837K    14178   415070      570102    939846      356      370      116      922  4019813        4        0        0 
+		#   345740   830383    74875   606031        0   239234    90369     2696      359      553        0        0      570110    941179      356      370        0        0        0        0        0        0 
+		'darwin' => ['vm_stat -c 2 1 | tail -n1', '$21*$22'],
+		
+		# ultrix: $12*$13
+		# $ vmstat -S 1 2
+		#  procs      faults    cpu      memory              page             disk  
+		#  r b w   in  sy  cs us sy id  avm  fre  si so  pi  po  fr  de  sr s0 
+		#  1 0 0    4  23   2  3  0 97 7743 217k   0  0   0   0   0   0   0  0
+		#  1 0 0    6  40   8  0  1 99 7743 217k   0  0   3   0   0   0   0  0
+		'ultrix' => ['vmstat -S 1 2 | tail -1', '$12*$13'],
+		
+		# aix: $6*$7
+		# $ vmstat 1 2
+		# System configuration: lcpu=1 mem=2048MB
+		# 
+		# kthr    memory              page              faults        cpu    
+		# ----- ----------- ------------------------ ------------ -----------
+		#  r  b   avm   fre  re  pi  po  fr   sr  cy  in   sy  cs us sy id wa
+		#  0  0 333933 241803   0   0   0   0    0   0  10  143  90  0  0 99  0
+		#  0  0 334125 241569   0   0   0   0    0   0  37 5368 184  0  9 86  5
+		'aix' => ['vmstat 1 2 | tail -n1', '$6*$7'],
+		
+		# freebsd: $8*$9
+		# $ vmstat -H 1 2
+		#  procs      memory      page                    disks     faults         cpu
+		#  r b w     avm    fre   flt  re  pi  po    fr  sr ad0 ad1   in   sy   cs us sy id
+		#  1 0 0  596716   19560    32   0   0   0    33   8   0   0   11  220  277  0  0 99
+		#  0 0 0  596716   19560     2   0   0   0     0   0   0   0   11  144  263  0  1 99
+		'freebsd' => ['vmstat -H 1 2 | tail -n1', '$8*$9'],
+		
+		# mirbsd: $8*$9
+		# $ vmstat 1 2
+		#  procs   memory        page                    disks     traps         cpu
+		#  r b w    avm    fre   flt  re  pi  po  fr  sr wd0 cd0  int   sys   cs us sy id
+		#  0 0 0  25776 164968    34   0   0   0   0   0   0   0  230   259   38  4  0 96
+		#  0 0 0  25776 164968    24   0   0   0   0   0   0   0  237   275   37  0  0 100
+		'mirbsd' => ['vmstat 1 2 | tail -n1', '$8*$9'],
+		
+		# netbsd: $7*$8
+		# $ vmstat 1 2
+		#  procs    memory      page                       disks   faults      cpu
+		#  r b      avm    fre  flt  re  pi   po   fr   sr w0 w1   in   sy  cs us sy id
+		#  0 0   138452   6012   54   0   0    0    1    2  3  0    4  100  23  0  0 100
+		#  0 0   138456   6008    1   0   0    0    0    0  0  0    7   26  19  0 0 100
+		'netbsd' => ['vmstat 1 2 | tail -n1', '$7*$8'],
+		
+		# openbsd: $8*$9
+		# $ vmstat 1 2
+		#  procs    memory       page                    disks    traps          cpu
+		#  r b w    avm     fre  flt  re  pi  po  fr  sr wd0 wd1  int   sys   cs us sy id
+		#  0 0 0  76596  109944   73   0   0   0   0   0   0   1    5   259   22  0  1 99
+		#  0 0 0  76604  109936   24   0   0   0   0   0   0   0    7   114   20  0  1 99
+		'openbsd' => ['vmstat 1 2 | tail -n1', '$8*$9'],
+		
+		# hpux: $8*$9
+		# $ vmstat 1 2
+		#          procs           memory                   page                              faults       cpu
+		#     r     b     w      avm    free   re   at    pi   po    fr   de    sr     in     sy    cs  us sy id
+		#     1     0     0   247211  216476    4    1     0    0     0    0     0    102  73005    54   6 11 83
+		#     1     0     0   247211  216421   43    9     0    0     0    0     0    144   1675    96  25269512791222387000 25269512791222387000 105
+		'hpux' => ['vmstat 1 2 | tail -n1', '$8*$9'],
+		
+		# dec_osf (tru64): $11*$12
+		# $ vmstat  1 2
+		# Virtual Memory Statistics: (pagesize = 8192)
+		#   procs      memory        pages                            intr       cpu
+		#   r   w   u  act free wire fault  cow zero react  pin pout  in  sy  cs us sy id
+		#   3 181  36  51K 1895 8696  348M  59M 122M   259  79M    0   5 218 302  4  1 94
+		#   3 181  36  51K 1893 8696     3   15   21     0   28    0   4  81 321  1  1 98
+		'dec_osf' => ['vmstat 1 2 | tail -n1', '$11*$12'],
+		
+		# gnu (hurd): $7*$8
+		# $ vmstat -k 1 2
+		# (pagesize: 4, size: 512288, swap size: 894972)
+		#   free   actv  inact  wired   zeroed  react    pgins   pgouts  pfaults  cowpfs hrat    caobj  cache swfree
+		# 371940  30844  89228  20276   298348      0    48192    19016   756105   99808  98%      876  20628 894972
+		# 371940  30844  89228  20276       +0     +0       +0       +0      +42      +2  98%      876  20628 894972
+		'gnu' => ['vmstat -k 1 2 | tail -n1', '$7*$8'],
+		
+		# -nto (qnx has no swap)
+		#-irix
+		#-svr5 (scosysv)
+		);
+	    my $perlscript = "";
+	    for my $os (keys %vmstat) {
+		#q[ { vmstat 1 2 2> /dev/null || vmstat -c 1 2; } | ].
+		#   q[ awk 'NR!=4{next} NF==17||NF==16{print $7*$8} NF==22{print $21*$22} {exit}' ];
+		$vmstat{$os}[1] =~ s/\$/\\\\\\\$/g; # $ => \\\$
+		$perlscript .= 'if($^O eq "'.$os.'") { print `'.$vmstat{$os}[0].' | awk "{print ' . 
+		    $vmstat{$os}[1] . '}"` }';
+	    }
+	    $perlscript = "perl -e " . ::shell_quote_scalar($perlscript);
+	    $script = $Global::envvar. " " .$perlscript;
+	}
+	return $script;
     }
-    $perlscript = "perl -e " . ::shell_quote_scalar($perlscript);
-    return $Global::envvar. " " .$perlscript;
 }
 
 sub too_fast_remote_login {
@@ -4804,14 +4813,16 @@ sub kill {
 	@pidtable = `$pid_parentpid_cmd{$^O}`;
 	for (@pidtable) {
 	    /(\S+)\s+(\S+)/ or ::die_bug("pidtable format");
-	    push(@{$children_of{$2}},$1);
+	    push @{$children_of{$2}}, $1;
 	}
 	my @more = ($pid);
+	# While more (grand)*children
 	while(@more) {
 	    my @m;
-	    push @pids,@more;
+	    push @pids, @more;
 	    for my $parent (@more) {
 		if($children_of{$parent}) {
+		    # add the children of this parent
 		    push @m, @{$children_of{$parent}};
 		}
 	    }
@@ -5057,7 +5068,6 @@ sub sshreturn {
     my $rsync_opt = "-rlDzR -e".::shell_quote_scalar($sshcmd);
     my $pre = "";
     for my $file ($self->return()) {
-	$file =~ s:/\./:/:g; # Rsync treats /./ special. We dont want that
 	$file =~ s:^\./::g; # Remove ./ if any
 	my $relpath = ($file !~ m:^/:); # Is the path relative?
 	my $cd = "";
@@ -5070,15 +5080,20 @@ sub sshreturn {
 	}
 	# Only load File::Basename if actually needed
 	$Global::use{"File::Basename"} ||= eval "use File::Basename; 1;";
-	$cd = ::shell_quote_file(::dirname($file));
+	# dir/./file means relative to dir, so remove dir on remote 
+	$file =~ m:(.*)/\./:;
+	my $basedir = $1 ? ::shell_quote_file($1."/") : "";
+	my $nobasedir = $file;
+	$nobasedir =~ s:.*/\./::;
+	$cd = ::shell_quote_file(::dirname($nobasedir));
 	my $rsync_cd = '--rsync-path='.::shell_quote_scalar("cd $wd$cd; rsync");
 	my $basename = ::shell_quote_scalar(::shell_quote_file(basename($file)));
 	# --return
 	#   mkdir -p /home/tange/dir/subdir/; 
         #   rsync -rlDzR --rsync-path="cd /home/tange/dir/subdir/; rsync" 
         #   server:file.gz /home/tange/dir/subdir/
-	$pre .= "mkdir -p $cd; rsync $rsync_cd $rsync_opt $serverlogin:".
-	     $basename . " ".$cd.";";
+	$pre .= "mkdir -p $basedir$cd; rsync $rsync_cd $rsync_opt $serverlogin:".
+	     $basename . " ".$basedir.$cd.";";
     }
     return $pre;
 }
