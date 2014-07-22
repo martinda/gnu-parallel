@@ -73,3 +73,7 @@ parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines
 parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines, and -L.
   parallel --pipepart -a /etc/passwd -l 1 should not be run
 parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines, and -L.
+echo '### --tmux test - check termination'
+### --tmux test - check termination
+  perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' | parallel --tmux echo {} :::: - ::: a b
+See output with: tmux attach -t p6522

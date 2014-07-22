@@ -245,6 +245,8 @@ New in this release:
 
 * --tmux will direct the output to a tmux session instead of files. Each running jobs will be in its own window.
 
+* --halt 10% will stop spawning new jobs if 10% failed so far.
+
 * GNU Parallel was cited in: bammds: A tool for assessing the ancestry of low depth whole genome data using multidimensional scaling (MDS) http://bioinformatics.oxfordjournals.org/content/early/2014/06/28/bioinformatics.btu410.abstract
 
 * GNU Parallel was cited in: Molecular ferroelectric contributions to anomalous hysteresis in hybrid perovskite solar cells http://people.bath.ac.uk/aw558/publications/2014/arxiv_hysteresis_14.pdf

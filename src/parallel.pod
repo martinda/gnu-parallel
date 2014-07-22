@@ -244,7 +244,7 @@ directory (if any) and extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{=>I<perl expression>B<=}>
+=item B<{=>I<perl expression>B<=}> (alpha testing)
 
 Replace with calculated I<perl expression>. B<$_> will contain the
 same as B<{}>. After evaluating I<perl expression> B<$_> will be used
@@ -257,7 +257,7 @@ The B<{=>I<perl expression>B<=}> must be given as a single string.
 See also: B<--rpl> B<--parens>
 
 
-=item B<{=>I<n> I<perl expression>B<=}>
+=item B<{=>I<n> I<perl expression>B<=}> (alpha testing)
 
 Positional equivalent to B<{= perl expression =}>. To understand
 positional replacement strings see B<{>I<n>B<}>.

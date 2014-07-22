@@ -720,7 +720,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140719;
+    $Global::version = 20140722;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -5279,7 +5279,6 @@ sub start {
 	# The eval is needed to catch exception from open3
 	if($opt::tmux) {
 	    $command = $job->tmux_wrap($command);
-#	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5296,7 +5295,6 @@ sub start {
 	# The eval is needed to catch exception from open3
 	if($opt::tmux) {
 	    $command = $job->tmux_wrap($command);
-#	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5308,7 +5306,6 @@ sub start {
     } else {
 	if($opt::tmux) {
 	    $command = $job->tmux_wrap($command);
-#	    $command = tmux_wrap($command,$job->replaced());
 	}
 	eval {
 	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
@@ -5348,20 +5345,18 @@ sub tmux_wrap {
     close $fh;
     unlink $tmpfile;
     my $visual_command = $self->replaced();
-    my $c = ::undef_as_empty($self->{'commandline'}->replace_placeholders(["\257<\257>"],0,0))."";
+    my $title = ::undef_as_empty($self->{'commandline'}->replace_placeholders(["\257<\257>"],0,0))."";
     # ascii 194-224 annoys tmux
-    $c =~ s/[\011-\016;\302-\340]//g;
+    $title =~ s/[\011-\016;\302-\340]//g;
 
     my $tmux;
     if($Global::total_running == 0) {
 	$tmux = "tmux new-session -s p$$ -d -n ".
-	    ::shell_quote_scalar($c);
+	    ::shell_quote_scalar($title);
 	print $Global::original_stderr "See output with: tmux attach -t p$$\n";
     } else {
-	$tmux = "tmux new-window -t p$$ -n ".::shell_quote_scalar($c);
+	$tmux = "tmux new-window -t p$$ -n ".::shell_quote_scalar($title);
     }
-#    $tmux = "tmux new-session -s p$$ -d true >/dev/null; ".
-#	"tmux new-window -t p$$ -n ".::shell_quote_scalar($c);
     return "mkfifo $tmpfile; $tmux ".
 	# Run in tmux
 	::shell_quote_scalar("(".$actual_command.');(echo $?$status;echo 255) >'.$tmpfile.";".

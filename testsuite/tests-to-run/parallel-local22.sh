@@ -57,4 +57,7 @@ echo '### bug #42055: --pipe -a bigfile should not require sequential reading of
   parallel --pipepart -a /etc/passwd -N 1 should not be run
   parallel --pipepart -a /etc/passwd -l 1 should not be run
 
+echo '### --tmux test - check termination'
+  perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' | parallel --tmux echo {} :::: - ::: a b
+
 EOF

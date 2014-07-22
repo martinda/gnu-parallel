@@ -323,8 +323,8 @@ directory (if any) and extension removed.
 
 To understand positional replacement strings see @strong{@{}@emph{n}@strong{@}}.
 
-@item @strong{@{=}@emph{perl expression}@strong{=@}}
-@anchor{@strong{@{=}@emph{perl expression}@strong{=@}}}
+@item @strong{@{=}@emph{perl expression}@strong{=@}} (alpha testing)
+@anchor{@strong{@{=}@emph{perl expression}@strong{=@}} (alpha testing)}
 
 Replace with calculated @emph{perl expression}. @strong{$_} will contain the
 same as @strong{@{@}}. After evaluating @emph{perl expression} @strong{$_} will be used
@@ -336,8 +336,8 @@ The @strong{@{=}@emph{perl expression}@strong{=@}} must be given as a single str
 
 See also: @strong{--rpl} @strong{--parens}
 
-@item @strong{@{=}@emph{n} @emph{perl expression}@strong{=@}}
-@anchor{@strong{@{=}@emph{n} @emph{perl expression}@strong{=@}}}
+@item @strong{@{=}@emph{n} @emph{perl expression}@strong{=@}} (alpha testing)
+@anchor{@strong{@{=}@emph{n} @emph{perl expression}@strong{=@}} (alpha testing)}
 
 Positional equivalent to @strong{@{= perl expression =@}}. To understand
 positional replacement strings see @strong{@{}@emph{n}@strong{@}}.

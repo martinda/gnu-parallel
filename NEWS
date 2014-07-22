@@ -1,3 +1,70 @@
+20140722
+
+* {= perl expression =} can be used as replacement string. The
+  expression should modify $_. E.g. {= s/\.gz$// =} to remove .gz from
+  the string. This makes replacement strings extremely flexible.
+
+* Positional perl expressions (similar to {2}) are given as {=2 perl
+  expression=} where 2 is the position.
+
+* One small backwards incompatability: {1}_{2} will replace {2} with
+  the empty string if there is only one argument. Previously {2} would
+  have been left untouched.
+
+* Replacement strings can be defined using --rpl. E.g. parallel --rpl
+  '{.gz} s/\.gz$//' echo {.gz} ::: *.gz
+
+* The parenthesis around {= perl expression =} can be changed with
+  --parens.
+
+* --tmux will direct the output to a tmux session instead of
+  files. Each running jobs will be in its own window.
+
+* --halt 10% will stop spawning new jobs if 10% failed so far.
+
+* GNU Parallel was cited in: bammds: A tool for assessing the ancestry
+  of low depth whole genome data using multidimensional scaling (MDS)
+  http://bioinformatics.oxfordjournals.org/content/early/2014/06/28/bioinformatics.btu410.abstract
+
+* GNU Parallel was cited in: Molecular ferroelectric contributions to
+  anomalous hysteresis in hybrid perovskite solar cells
+  http://people.bath.ac.uk/aw558/publications/2014/arxiv_hysteresis_14.pdf
+
+* GNU Parallel was cited in: Energy Sorghum-a genetic model for the
+  design of C4 grass bioenergy crops
+  http://jxb.oxfordjournals.org/content/early/2014/06/20/jxb.eru229.short
+
+* GNU Parallel was cited in: Web-scale Content Reuse Detection
+  www.isi.edu/~johnh/PAPERS/Ardi14a.pdf
+
+* Tell your friends to sign up for the Webcast at 2014-08-20 covering
+  GNU Parallel: Data Science at the Command Line
+  http://www.oreilly.com/pub/e/3115
+
+* GNU Parallel all the things!
+  http://longwayaround.org.uk/notes/gnu-parallel-all-the-things/
+
+* Shell command composition and dispatch
+  http://lukeluo.blogspot.dk/2014/07/linux-virtual-console6-shell-command.html
+
+* Parallelising plink (or anything else) the easy way
+  http://chrisladroue.com/2012/03/parallelising-plink-or-anything-else-the-easy-way/
+
+* Easy and cheap cluster building on AWS
+  https://grapeot.me/easy-and-cheap-cluster-building-on-aws.html
+
+* Paralelizace běžných činností v konzoli pomocí GNU Parallel
+  http://www.abclinuxu.cz/clanky/paralelizace-beznych-cinnosti-v-konzoli-pomoci-gnu-parallel
+
+* [原] Ubuntu 下使用 parallel 命令的注意事项
+  http://blog.ailms.me/2014/06/28/ubuntu-with-parallel.html
+
+* 简单的并行, 可使用GNU parallel
+  http://jerkwin.github.io/2014/06/10/GNU-parallel/
+
+* Bug fixes and man page updates.
+
+
 20140622
 
 * --shebang and --shebang-wrap now works on FreeBSD.

@@ -5,6 +5,26 @@ test -d "parallel-00000000" || mkdir "parallel-00000000"
  (cd src && make  top_distdir=../parallel-00000000 distdir=../parallel-00000000/src \
      am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)
 make[0]: Entering directory `/home/tange/privat/parallel/src'
+pod2man --release='00000000' --center='parallel' \
+		--section=1 ./parallel.pod > ./parallel.1n \
+	&& mv ./parallel.1n ./parallel.1 \
+	|| echo "Warning: pod2man not found. Using old parallel.1"
+/bin/bash: pod2man: command not found
+Warning: pod2man not found. Using old parallel.1
+pod2html ./parallel.pod > ./parallel.htmln \
+	&& mv ./parallel.htmln ./parallel.html \
+	|| echo "Warning: pod2html not found. Using old parallel.html"
+/bin/bash: pod2html: command not found
+Warning: pod2html not found. Using old parallel.html
+rm -f ./pod2htm*
+pod2texi --output=./parallel.texi ./parallel.pod \
+	|| echo "Warning: pod2texi not found. Using old parallel.texi"
+/bin/bash: pod2texi: command not found
+Warning: pod2texi not found. Using old parallel.texi
+pod2pdf --output-file ./parallel.pdf ./parallel.pod --title "GNU Parallel" \
+	|| echo "Warning: pod2pdf not found. Using old parallel.pdf"
+/bin/bash: pod2pdf: command not found
+Warning: pod2pdf not found. Using old parallel.pdf
 make[0]: Leaving directory `/home/tange/privat/parallel/src'
 test -n "" \
 	|| find "parallel-00000000" -type d ! -perm -755 \
