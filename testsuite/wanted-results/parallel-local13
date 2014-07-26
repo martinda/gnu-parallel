@@ -124,8 +124,7 @@ stdout xargs -l -0 echo < ldatab-0.xi
 88888888
 999999999 
 stdout parallel -l -k -0 echo < ldatab-0.xi
- 	
-1 22 333 4444 55555 666666
+ 	1 22 333 4444 55555 666666
 7777777 88888888 999999999 1 22
 333 4444 55555
 666666 7777777
@@ -154,10 +153,9 @@ stdout xargs -L2 -0 echo < ldatab-0.xi
 333 4444 55555 666666 7777777
 88888888 999999999 
 stdout parallel -k -L2 -0 echo < ldatab-0.xi
- 	 1 22 333 4444 55555 666666
-7777777 88888888 999999999 1 22 333 4444 55555
-666666 7777777 88888888
-999999999 
+ 	1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22
+333 4444 55555 666666 7777777
+88888888 999999999 
 echo '###  -L3 -0 echo < ldata-0.xi'
 ###  -L3 -0 echo < ldata-0.xi
 stdout xargs -L3 -0 echo < ldata-0.xi
@@ -438,7 +436,6 @@ echo '###  -r echo this plus that < space.xi'
 ###  -r echo this plus that < space.xi
 stdout xargs -r echo this plus that < space.xi
 stdout parallel -k -r echo this plus that < space.xi
-this plus that  	
 echo '###  -t -0 echo this plus that < space.xi'
 ###  -t -0 echo this plus that < space.xi
 stdout xargs -t -0 echo this plus that < space.xi
@@ -595,10 +592,9 @@ stdout xargs -L2 echo < ldatab.xi
 333 4444 55555 666666 7777777
 88888888 999999999
 stdout parallel -k -L2 echo < ldatab.xi
- 	 1 22 333 4444 55555 666666
-7777777 88888888 999999999 1 22 333 4444 55555
-666666 7777777 88888888
-999999999 
+ 	1 22 333 4444 55555 666666 7777777 88888888 999999999 1 22
+333 4444 55555 666666 7777777
+88888888 999999999 
 echo '###  -L2 -n2 echo < ldata.xi'
 ###  -L2 -n2 echo < ldata.xi
 stdout xargs -L2 -n2 echo < ldata.xi
@@ -1238,8 +1234,7 @@ stdout xargs -l echo < ldatab.xi
 88888888
 999999999
 stdout parallel -l -k echo < ldatab.xi
- 	
-1 22 333 4444 55555 666666
+ 	1 22 333 4444 55555 666666
 7777777 88888888 999999999 1 22
 333 4444 55555
 666666 7777777
