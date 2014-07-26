@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+=encoding utf8
+
 =head1 NAME
 
 parallel - build and execute shell command lines from standard input in parallel

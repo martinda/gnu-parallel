@@ -58,7 +58,7 @@ installparallel: ../src/parallel
 
 startdb:
 	#echo shutdown abort | sudo su - oracle -c "sqlplus / as sysdba"
-	sudo parallel /etc/init.d/{} restart ::: postgresql mysql # oracle-xe
+	sudo parallel /etc/init.d/{} status '||' /etc/init.d/{} restart ::: postgresql mysql # oracle-xe
 	VBoxManage startvm OracleXE || true
 
 clean:

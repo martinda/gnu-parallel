@@ -192,7 +192,7 @@ sub pipe_part_files {
     my @cmdlines;
     for(my $i=0; $i<$#pos; $i++) {
 	my $cmd = $Global::JobQueue->{'commandlinequeue'}->get();
-	$cmd->{'replaced'} = 
+	$cmd->{'replaced'} =
 	    cat_partial($file, 0, length($header), $pos[$i], $pos[$i+1]) . "|" .
 	    "(".$cmd->{'replaced'}.")";
 	::debug("init", "Unget ", $cmd->{'replaced'}, "\n");
@@ -210,7 +210,7 @@ sub find_header {
 	$opt::header =~ s/^(\d+)$/"(.*\n)"x$1/e;
 	while(read($fh,substr($$buf_ref,length $$buf_ref,0),$opt::blocksize)) {
 	    if($$buf_ref=~s/^($opt::header)//) {
-		$header = $1; 
+		$header = $1;
 		last;
 	    }
 	}
@@ -310,7 +310,7 @@ sub spreadstdin {
 	  }
       }
       if($Global::max_lines and not $Global::max_number_of_args) {
-	  # Read n-line records 
+	  # Read n-line records
 	  my $n_lines = $buf=~tr/\n/\n/;
 	  my $last_newline_pos = rindex($buf,"\n");
 	  while($n_lines % $Global::max_lines) {
@@ -572,6 +572,7 @@ sub options_hash {
 	 # Replacement strings
 	 "parens=s" => \$opt::parens,
 	 "rpl=s" => \@opt::rpl,
+	 "plus" => \$opt::plus,
 	 "I=s" => \$opt::I,
 	 "extensionreplace|er=s" => \$opt::U,
 	 "U=s" => \$opt::retired,
@@ -739,6 +740,21 @@ sub parse_options {
 	 '{/.}' => 's:.*/::; s:\.[^/.]+$::;',
 	 '{.}'  => 's:\.[^/.]+$::',
 	);
+    %Global::plus =
+	(
+	 # {} = {+/}/{/}
+	 #    = {.}.{+.}     = {+/}/{/.}.{+.}
+	 #    = {..}.{+..}   = {+/}/{/..}.{+..}
+	 #    = {...}.{+...} = {+/}/{/...}.{+...}
+	 '{+/}' => 's:/[^/]*$::',
+	 '{+.}' => 's:.*\.::',
+	 '{+..}' => 's:.*\.([^.]*\.):$1:',
+	 '{+...}' => 's:.*\.([^.]*\.[^.]*\.):$1:',
+	 '{..}' => 's:\.[^/.]+$::; s:\.[^/.]+$::',
+	 '{...}' => 's:\.[^/.]+$::; s:\.[^/.]+$::; s:\.[^/.]+$::',
+	 '{/..}' => 's:.*/::; s:\.[^/.]+$::; s:\.[^/.]+$::',
+	 '{/...}' => 's:.*/::; s:\.[^/.]+$::; s:\.[^/.]+$::; s:\.[^/.]+$::',
+	);
     # Modifiable copy of %Global::replace
     %Global::rpl = %Global::replace;
     $Global::parens = "{==}";
@@ -784,6 +800,7 @@ sub parse_options {
     my $parenslen = 0.5*length $Global::parens;
     $Global::parensleft = substr($Global::parens,0,$parenslen);
     $Global::parensright = substr($Global::parens,$parenslen);
+    if(defined $opt::plus) { %Global::rpl = (%Global::plus,%Global::rpl); }
     if(defined $opt::I) { rpl('{}',$opt::I); }
     if(defined $opt::U) { rpl('{.}',$opt::U); }
     if(defined $opt::i and $opt::i) { rpl('{}',$opt::i); }
@@ -828,6 +845,7 @@ sub parse_options {
        not defined $opt::recend) { $opt::recend = "\n"; }
     if(not defined $opt::blocksize) { $opt::blocksize = "1M"; }
     $opt::blocksize = multiply_binary_prefix($opt::blocksize);
+    if(defined $opt::controlmaster) { $opt::noctrlc = 1; }
     if(defined $opt::semaphore) { $Global::semaphore = 1; }
     if(defined $opt::semaphoretimeout) { $Global::semaphore = 1; }
     if(defined $opt::semaphorename) { $Global::semaphore = 1; }
@@ -1057,8 +1075,8 @@ sub parse_env_var {
     # Create lines like:
     # echo $SHELL | grep "/t\\{0,1\\}csh" >/dev/null && setenv V1 val1 && setenv V2 val2 || export V1=val1 && export V2=val2 ; echo "$V1$V2"
     if(@vars) {
-	$Global::envvar .= 
-	    join"", 
+	$Global::envvar .=
+	    join"",
 	    (q{echo $SHELL | grep "/t\\{0,1\\}csh" > /dev/null && }
 	     . join(" && ", @qcsh)
 	     . q{ || }
@@ -1148,7 +1166,7 @@ sub which {
     # Returns:
     #   $full_path = full path to $program. undef if not found
     my $program = $_[0];
-    
+
     return (grep { -e $_."/".$program } split(":",$ENV{'PATH'}))[0];
 }
 
@@ -1358,8 +1376,10 @@ sub shell_quote_scalar {
     #   $shell_quoted = string quoted with \ as needed by the shell
     my $a = $_[0];
     if(defined $a) {
-	$a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
-	$a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
+	# $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
+	# This is 1% faster than the above
+	$a =~ s/[\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377]/\\$&/go;
+	$a =~ s/[\n]/'\n'/go; # filenames with '\n' is quoted using \'
     }
     return $a;
 }
@@ -1443,7 +1463,7 @@ sub save_stdin_stdout_stderr {
     # Returns: N/A
 
     # Find file descriptors that are already opened (by the shell)
-    for my $fdno (1..61) { 
+    for my $fdno (1..61) {
 	# /dev/fd/62 and above are used by bash for <(cmd)
 	my $fh;
 	if(open($fh,">&=",$fdno)) {
@@ -1468,7 +1488,7 @@ sub enough_file_handles {
         my $enough_filehandles = 1;
   	# perl uses 7 filehandles for something?
         # open3 uses 2 extra filehandles temporarily
-        # We need a filehandle for each redirected file descriptor 
+        # We need a filehandle for each redirected file descriptor
 	# (normally just STDOUT and STDERR)
 	for my $i (1..(7+2+keys %Global::fd)) {
             $enough_filehandles &&= open($fh{$i}, "<", "/dev/null");
@@ -1569,7 +1589,7 @@ sub start_more_jobs {
 		    next;
 		}
 		if($sshlogin->too_fast_remote_login()) {
-		    # It has been too short since 
+		    # It has been too short since
 		    next;
 		}
 		if($opt::delay and $opt::delay > ::now() - $Global::newest_starttime) {
@@ -1795,9 +1815,9 @@ sub progress {
 	    }
 	    $eta = sprintf("ETA: %ds Left: %d AVG: %.2fs  ", $this_eta, $left, $avgtime);
 	    if($opt::bar) {
-		my $arg = $Global::newest_job ? 
+		my $arg = $Global::newest_job ?
 		    $Global::newest_job->{'commandline'}->replace_placeholders(["\257<\257>"],0,0) : "";
-		my $bar_text = sprintf("%d%% %d:%d=%ds %s", 
+		my $bar_text = sprintf("%d%% %d:%d=%ds %s",
 				  $pctcomplete*100, $completed, $left, $this_eta, $arg);
 		my $rev = '[7m';
 		my $reset = '[0m';
@@ -1807,7 +1827,7 @@ sub progress {
 		my $width = int($terminal_width * $pctcomplete);
 		$s =~ s/^(.{$width})/$1$reset/;
 		$s = "\r#   ".int($this_eta)." sec $arg" . "\r". $pctcomplete*100 # Prefix with zenity header
-		    . "\r" . $rev . $s . $reset;  
+		    . "\r" . $rev . $s . $reset;
 		$status = $s;
 	    }
         }
@@ -2064,7 +2084,7 @@ sub parse_sshlogin {
     }
 
 
-    debug("start", "sshlogin: ", my_dump(%Global::host),"\n");
+    # debug("start", "sshlogin: ", my_dump(%Global::host),"\n");
     if($opt::transfer or @opt::return or $opt::cleanup or @opt::basefile) {
         if(not remote_hosts()) {
             # There are no remote hosts
@@ -2262,7 +2282,7 @@ sub onall {
 	return $tmpfile;
     }
     my @command = @_;
-    if($Global::quoting) {   
+    if($Global::quoting) {
        @command = shell_quote_empty(@command);
     }
 
@@ -2353,9 +2373,9 @@ sub save_original_signal_handler {
     # Remember the original signal handler
     # Returns: N/A
     $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
-    $SIG{INT} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; } 
+    $SIG{INT} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; }
 		      unlink keys %Global::unlink; exit -1  };
-    $SIG{TERM} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; } 
+    $SIG{TERM} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; }
 		      unlink keys %Global::unlink; exit -1  };
     %Global::original_sig = %SIG;
     $SIG{TERM} = sub {}; # Dummy until jobs really start
@@ -2426,11 +2446,11 @@ sub reaper {
                     $Private::job_end_sequence++,
 		    $j = $Private::print_later{$Private::job_end_sequence}) {
                     debug("run", "Found job end $Private::job_end_sequence");
-                    if($j) { 
+                    if($j) {
 			$j->print();
 			delete $Private::print_later{$Private::job_end_sequence};
 		    }
-		}		    
+		}
             } else {
                 $job->print();
             }
@@ -2441,7 +2461,7 @@ sub reaper {
                 if($opt::halt_on_error) {
                     if($opt::halt_on_error == 1
 			or
-		       ($opt::halt_on_error < 1 and $Global::total_failed > 3 
+		       ($opt::halt_on_error < 1 and $Global::total_failed > 3
 			and
 			$Global::total_failed / $Global::total_started > $opt::halt_on_error)) {
                         # If halt on error == 1 or --halt 10%
@@ -2507,26 +2527,29 @@ sub usage {
     print join
 	("\n",
 	 "Usage:",
+	 "",
 	 "$Global::progname [options] [command [arguments]] < list_of_arguments",
 	 "$Global::progname [options] [command [arguments]] (::: arguments|:::: argfile(s))...",
 	 "cat ... | $Global::progname --pipe [options] [command [arguments]]",
 	 "",
-	 "-j n           Run n jobs in parallel",
-	 "-k             Keep same order",
-	 "-X             Multiple arguments with context replace",
-	 "--colsep regexp         Split input on regexp for positional replacements",
-	 "{} {.} {/} {/.} {#} {%} Replacement strings",
-	 "{3} {3.} {3/} {3/.}     Positional replacement strings",
+	 "-j n            Run n jobs in parallel",
+	 "-k              Keep same order",
+	 "-X              Multiple arguments with context replace",
+	 "--colsep regexp Split input on regexp for positional replacements",
+	 "{} {.} {/} {/.} {#} {%} {= perl code =} Replacement strings",
+	 "{3} {3.} {3/} {3/.} {=3 perl code =}    Positional replacement strings",
+	 "With --plus:    {} = {+/}/{/} = {.}.{+.} = {+/}/{/.}.{+.} = {..}.{+..} =",
+	 "                {+/}/{/..}.{+..} = {...}.{+...} = {+/}/{/...}.{+...}",
 	 "",
-	 "-S sshlogin    Example: foo\@server.example.com",
-	 "--slf ..       Use ~/.parallel/sshloginfile as the list of sshlogins",
-	 "--trc {}.bar   Shorthand for --transfer --return {}.bar --cleanup",
-	 "--onall        Run the given command with argument on all sshlogins",
-	 "--nonall       Run the given command with no arguments on all sshlogins",
+	 "-S sshlogin     Example: foo\@server.example.com",
+	 "--slf ..        Use ~/.parallel/sshloginfile as the list of sshlogins",
+	 "--trc {}.bar    Shorthand for --transfer --return {}.bar --cleanup",
+	 "--onall         Run the given command with argument on all sshlogins",
+	 "--nonall        Run the given command with no arguments on all sshlogins",
 	 "",
-	 "--pipe         Split stdin (standard input) to multiple jobs.",
-	 "--recend str   Record end separator for --pipe.",
-	 "--recstart str Record start separator for --pipe.",
+	 "--pipe          Split stdin (standard input) to multiple jobs.",
+	 "--recend str    Record end separator for --pipe.",
+	 "--recstart str  Record start separator for --pipe.",
 	 "",
 	 "See 'man $Global::progname' for details",
 	 "",
@@ -2552,7 +2575,7 @@ sub citation_notice {
        -e $ENV{'HOME'}."/.parallel/will-cite") {
 	# skip
     } else {
-	print $Global::original_stderr 
+	print $Global::original_stderr
 	    ("When using programs that use GNU Parallel to process data for publication please cite:\n",
 	     "\n",
 	     "  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,\n",
@@ -2647,7 +2670,7 @@ sub bibtex {
 	my $input = <STDIN>;
 	if($input =~ /will cite/i) {
 	    mkdir $ENV{'HOME'}."/.parallel";
-	    open (my $fh, ">", $ENV{'HOME'}."/.parallel/will-cite") 
+	    open (my $fh, ">", $ENV{'HOME'}."/.parallel/will-cite")
 		|| ::die_bug("Cannot write: ".$ENV{'HOME'}."/.parallel/will-cite");
 	    close $fh;
 	    print "\nThank you for your support. It is much appreciated. The citation\n",
@@ -3104,14 +3127,14 @@ sub swap_activity {
 		# $ vm_stat -c 2 1
 		# Mach Virtual Memory Statistics: (page size of 4096 bytes)
 		#     free   active   specul inactive throttle    wired  prgable   faults     copy    0fill reactive   purged file-backed anonymous cmprssed cmprssor  dcomprs   comprs  pageins  pageout  swapins swapouts
-		#   346306   829050    74871   606027        0   240231    90367  544858K 62343596  270837K    14178   415070      570102    939846      356      370      116      922  4019813        4        0        0 
-		#   345740   830383    74875   606031        0   239234    90369     2696      359      553        0        0      570110    941179      356      370        0        0        0        0        0        0 
+		#   346306   829050    74871   606027        0   240231    90367  544858K 62343596  270837K    14178   415070      570102    939846      356      370      116      922  4019813        4        0        0
+		#   345740   830383    74875   606031        0   239234    90369     2696      359      553        0        0      570110    941179      356      370        0        0        0        0        0        0
 		'darwin' => ['vm_stat -c 2 1 | tail -n1', '$21*$22'],
 		
 		# ultrix: $12*$13
 		# $ vmstat -S 1 2
-		#  procs      faults    cpu      memory              page             disk  
-		#  r b w   in  sy  cs us sy id  avm  fre  si so  pi  po  fr  de  sr s0 
+		#  procs      faults    cpu      memory              page             disk
+		#  r b w   in  sy  cs us sy id  avm  fre  si so  pi  po  fr  de  sr s0
 		#  1 0 0    4  23   2  3  0 97 7743 217k   0  0   0   0   0   0   0  0
 		#  1 0 0    6  40   8  0  1 99 7743 217k   0  0   3   0   0   0   0  0
 		'ultrix' => ['vmstat -S 1 2 | tail -1', '$12*$13'],
@@ -3119,8 +3142,8 @@ sub swap_activity {
 		# aix: $6*$7
 		# $ vmstat 1 2
 		# System configuration: lcpu=1 mem=2048MB
-		# 
-		# kthr    memory              page              faults        cpu    
+		#
+		# kthr    memory              page              faults        cpu
 		# ----- ----------- ------------------------ ------------ -----------
 		#  r  b   avm   fre  re  pi  po  fr   sr  cy  in   sy  cs us sy id wa
 		#  0  0 333933 241803   0   0   0   0    0   0  10  143  90  0  0 99  0
@@ -3193,7 +3216,7 @@ sub swap_activity {
 		#q[ { vmstat 1 2 2> /dev/null || vmstat -c 1 2; } | ].
 		#   q[ awk 'NR!=4{next} NF==17||NF==16{print $7*$8} NF==22{print $21*$22} {exit}' ];
 		$vmstat{$os}[1] =~ s/\$/\\\\\\\$/g; # $ => \\\$
-		$perlscript .= 'if($^O eq "'.$os.'") { print `'.$vmstat{$os}[0].' | awk "{print ' . 
+		$perlscript .= 'if($^O eq "'.$os.'") { print `'.$vmstat{$os}[0].' | awk "{print ' .
 		    $vmstat{$os}[1] . '}"` }';
 	    }
 	    $perlscript = "perl -e " . ::shell_quote_scalar($perlscript);
@@ -3822,7 +3845,7 @@ sub nproc {
     #   Number of cores using `nproc`
     my $no_of_cores = `nproc 2>/dev/null`;
     return $no_of_cores;
-}    
+}
 
 sub no_of_cpus_gnu_linux {
     # Returns:
@@ -4098,8 +4121,7 @@ sub no_of_cpus_irix {
     # Returns:
     #   Number of physical CPUs on IRIX
     #   undef if not IRIX
-    my $no_of_cpus =
-        (`hinv | grep HZ | grep Processor | awk '{print \$1}'`);
+    my $no_of_cpus = `hinv | grep HZ | grep Processor | awk '{print \$1}'`;
     return $no_of_cpus;
 }
 
@@ -4107,8 +4129,7 @@ sub no_of_cores_irix {
     # Returns:
     #   Number of CPU cores on IRIX
     #   undef if not IRIX
-    my $no_of_cores = 
-        (`hinv | grep HZ | grep Processor | awk '{print \$1}'`);
+    my $no_of_cores = `hinv | grep HZ | grep Processor | awk '{print \$1}'`;
     return $no_of_cores;
 }
 
@@ -4116,8 +4137,7 @@ sub no_of_cpus_tru64 {
     # Returns:
     #   Number of physical CPUs on Tru64
     #   undef if not Tru64
-    my $no_of_cpus =
-        (`sizer -pr`);
+    my $no_of_cpus = `sizer -pr`;
     return $no_of_cpus;
 }
 
@@ -4125,8 +4145,7 @@ sub no_of_cores_tru64 {
     # Returns:
     #   Number of CPU cores on Tru64
     #   undef if not Tru64
-    my $no_of_cores = 
-        (`sizer -pr`);
+    my $no_of_cores = `sizer -pr`;
     return $no_of_cores;
 }
 
@@ -4544,7 +4563,7 @@ sub openoutputfiles {
 			    $self->fh($fdno,'name')) || die $?;
 	    $self->set_fh($fdno,'w',$fdw);
 	    $self->set_fh($fdno,'wpid',$wpid);
-	    my $rpid = open(my $fdr, "-|", "perl", "-e", $cattail, 
+	    my $rpid = open(my $fdr, "-|", "perl", "-e", $cattail,
 			    $opt::decompress_program, $wpid,
 			    $self->fh($fdno,'name'),$self->fh($fdno,'unlink')) || die $?;
 	    $self->set_fh($fdno,'r',$fdr);
@@ -4556,7 +4575,7 @@ sub openoutputfiles {
 	    # Re-open the file for reading
 	    # so fdw can be closed seperately
 	    # and fdr can be seeked seperately (for --line-buffer)
-	    open(my $fdr,"<", $self->fh($fdno,'name')) || 
+	    open(my $fdr,"<", $self->fh($fdno,'name')) ||
 		::die_bug("fdr: Cannot open ".$self->fh($fdno,'name'));
 	    $self->set_fh($fdno,'r',$fdr);
             # Unlink if required
@@ -4788,7 +4807,7 @@ sub kill {
 	my $self = shift;
 	my $pid = $self->pid();
 
-       	%pid_parentpid_cmd or %pid_parentpid_cmd = 
+       	%pid_parentpid_cmd or %pid_parentpid_cmd =
 	    (
 	     'aix' => q( ps -ef | awk '{print $2" "$3}' ),
 	     'cygwin' => q( ps -ef | awk '{print $2" "$3}' ),
@@ -4960,7 +4979,7 @@ sub sshlogin_wrap {
 	    if($opt::workdir) {
 		my $wd = ::shell_quote_file($self->workdir());
 		$remote_pre .= ::shell_quote_scalar("mkdir -p ") . $wd .
-		    ::shell_quote_scalar("; cd ") . $wd . 
+		    ::shell_quote_scalar("; cd ") . $wd .
 		    # exit 255 (instead of exec false) would be the correct thing,
 		    # but that fails on tcsh
 		    ::shell_quote_scalar(qq{ || exec false;});
@@ -4971,14 +4990,14 @@ sub sshlogin_wrap {
 	    # It works on Linux but not Solaris
 	    my $signal_script = "perl -e '".
 	    q{
-		use IO::Poll; 
-		$SIG{CHLD} = sub {exit ($?&127 ? 128+($?&127) : 1+$?>>8)}; 
-		$p = IO::Poll->new; 
-		$p->mask(STDOUT, POLLHUP); 
-		$pid=fork; unless($pid) {setpgrp; exec $ENV{SHELL}, "-c", @ARGV; die "exec: $!\n"} 
-		$p->poll; 
-		kill SIGHUP, -${pid} unless $done; 
-		wait; exit ($?&127 ? 128+($?&127) : 1+$?>>8) 
+		use IO::Poll;
+		$SIG{CHLD} = sub {exit ($?&127 ? 128+($?&127) : 1+$?>>8)};
+		$p = IO::Poll->new;
+		$p->mask(STDOUT, POLLHUP);
+		$pid=fork; unless($pid) {setpgrp; exec $ENV{SHELL}, "-c", @ARGV; die "exec: $!\n"}
+		$p->poll;
+		kill SIGHUP, -${pid} unless $done;
+		wait; exit ($?&127 ? 128+($?&127) : 1+$?>>8)
             } . "' ";
 	    $signal_script =~ s/\s+/ /g;
 
@@ -4988,7 +5007,7 @@ sub sshlogin_wrap {
 		 . $remote_pre
 #		 . ::shell_quote_scalar($signal_script . ::shell_quote_scalar($next_command_line))
 		 . ::shell_quote_scalar($next_command_line)
-		 . ";" 
+		 . ";"
 		 . $post);
 	}
     }
@@ -5080,7 +5099,7 @@ sub sshreturn {
 	}
 	# Only load File::Basename if actually needed
 	$Global::use{"File::Basename"} ||= eval "use File::Basename; 1;";
-	# dir/./file means relative to dir, so remove dir on remote 
+	# dir/./file means relative to dir, so remove dir on remote
 	$file =~ m:(.*)/\./:;
 	my $basedir = $1 ? ::shell_quote_file($1."/") : "";
 	my $nobasedir = $file;
@@ -5089,8 +5108,8 @@ sub sshreturn {
 	my $rsync_cd = '--rsync-path='.::shell_quote_scalar("cd $wd$cd; rsync");
 	my $basename = ::shell_quote_scalar(::shell_quote_file(basename($file)));
 	# --return
-	#   mkdir -p /home/tange/dir/subdir/; 
-        #   rsync -rlDzR --rsync-path="cd /home/tange/dir/subdir/; rsync" 
+	#   mkdir -p /home/tange/dir/subdir/;
+        #   rsync -rlDzR --rsync-path="cd /home/tange/dir/subdir/; rsync"
         #   server:file.gz /home/tange/dir/subdir/
 	$pre .= "mkdir -p $basedir$cd; rsync $rsync_cd $rsync_opt $serverlogin:".
 	     $basename . " ".$basedir.$cd.";";
@@ -5246,7 +5265,7 @@ sub start {
 	    $job->seq(), "): $command\n");
     if($opt::pipe) {
 	my ($stdin_fh);
-	# Wrap command with end-of-file detector, 
+	# Wrap command with end-of-file detector,
 	# so we do not spawn a program if there is no input.
 	# Exit value:
 	#   empty input = true
@@ -5586,7 +5605,7 @@ sub print {
 		    print $out_fd $buf;
 		}
 	    }
-	    close $in_fh;   
+	    close $in_fh;
 	}
 	flush $out_fd;
     }
@@ -5731,7 +5750,7 @@ sub populate {
     my $self = shift;
     my $next_arg;
     my $max_len = $Global::minimal_command_line_length || Limits::Command::max_length();
-    
+
     if($opt::cat or $opt::fifo) {
 	# Get a tempfile name
 	my($outfh,$name) = ::tempfile(SUFFIX => ".pip");
@@ -5758,7 +5777,7 @@ sub populate {
 		last;
 	    } else {
 		my $args = join(" ", map { $_->orig() } @$next_arg);
-		::error("Command line too long (", 
+		::error("Command line too long (",
 			$self->len(), " >= ",
 			Limits::Command::max_length(),
 			") at number ",
@@ -5800,18 +5819,18 @@ sub push {
     my $self = shift;
     my $record = shift;
     push @{$self->{'arg_list'}}, $record;
-    my $arg_no = ($self->number_of_args()-1) * ($#$record+1);
 
     my $quote_arg = $Global::noquote ? 0 : not $Global::quoting;
     my $rep;
     for my $arg (@$record) {
-	$arg_no++;
 	if(defined $arg) {
 	    for my $perlexpr (keys %{$self->{'replacecount'}}) {
-		$rep = $arg->replace($perlexpr,$quote_arg,$self);
-		$self->{'len'}{$perlexpr} += length $rep;
-		::debug("length", "Length: ", length $rep, 
-			"(", $perlexpr, "=>", $rep, ")\n");
+		# 50% faster than below
+		$self->{'len'}{$perlexpr} += length $arg->replace($perlexpr,$quote_arg,$self);
+		# $rep = $arg->replace($perlexpr,$quote_arg,$self);
+		# $self->{'len'}{$perlexpr} += length $rep;
+		# ::debug("length", "Length: ", length $rep,
+		# "(", $perlexpr, "=>", $rep, ")\n");
 	    }
 	}
     }
@@ -5857,12 +5876,12 @@ sub number_of_args {
     # Mdzrvadp Nvmdymeaz az 2011-04-10. Ftue oaawuq dqxqmeqp az
     # 2013-08-18 ue m nuf tmdpqd me kag tmhq fa geq daf14. Bxqmeq
     # qymux oaawuq@fmzsq.pw itqz kag dqmp ftue.
-    # 
+    #
     # U my ftq ymuzfmuzqd ar m buqoq ar rdqq earfimdq omxxqp SZG
     # Bmdmxxqx. Rdqq earfimdq sgmdmzfqqe kag mooqee fa ftq eagdoq
     # oapq, ngf U tmhq nqqz iazpqduzs tai ymzk mofgmxxk _dqmp_ ftq
     # eagdoq oapq.
-    # 
+    #
     # Fa fqef ftue U bgf uz m oayyqzf fqxxuzs bqabxq fa qymux yq itqz
     # ftqk dqmp ftue. Ftq oayyqzf ime bgf uz m eqofuaz ar ftq oapq
     # ftmf za azq iagxp xaaw fa ruj ad uybdahq ftq earfimdq - ea ftq
@@ -5870,11 +5889,11 @@ sub number_of_args {
     # oayyqzf iagxp zaf etai gb ur eayq azq vgef sdqbbqp ftdagst ftq
     # eagdoq oapq U daf13'qp ftq eagdoq oapq
     # tffb://qz.iuwubqpum.ads/iuwu/DAF13
-    # 
+    #
     # 2.5 yazfte xmfqd U dqoquhqp mz qymux rday eayqazq ita zaf azxk
     # ymzmsqp fa ruzp ftq oayyqzf, ngf mxea ymzmsqp fa sgqee ftq oapq
     # tmp fa nq daf13'qp.
-    # 
+    #
     # Ftue nduzse yq fa ftq oazoxgeuaz ftmf ftqdq _mdq_ bqabxq, ita
     # mdq zaf mrruxumfqp iuft ftq bdavqof, ftmf iuxx dqmp ftq eagdoq
     # oapq - ftagst uf ymk zaf tmbbqz hqdk arfqz.
@@ -5943,7 +5962,7 @@ sub header_indexes_sorted {
     # Returns:
     #  Indexes of %Global::input_source_header sorted
     my $max_col = shift;
-    
+
     no warnings 'numeric';
     for my $col (1 .. $max_col) {
 	# Make sure the header is defined. If it is not: use column number
@@ -6033,17 +6052,17 @@ sub replaced {
 	if($opt::cat) {
 	    # Prepend 'cat > {};'
 	    # Append '_EXIT=$?;(rm {};exit $_EXIT)'
-	    $self->{'replaced'} = 
-		$self->replace_placeholders(["cat > \257<\257>; ", $cmdstring, 
+	    $self->{'replaced'} =
+		$self->replace_placeholders(["cat > \257<\257>; ", $cmdstring,
 					    "; _EXIT=\$?; rm \257<\257>; exit \$_EXIT"],
 					    0,0);
 	} elsif($opt::fifo) {
 	    # Prepend 'mkfifo {}; ('
 	    # Append ') & _PID=$!; cat > {}; wait $_PID; _EXIT=$?;(rm {};exit $_EXIT)'
-	    $self->{'replaced'} = 
+	    $self->{'replaced'} =
 		$self->replace_placeholders(["mkfifo \257<\257>; (",
 					    $cmdstring,
-					    ") & _PID=\$!; cat > \257<\257>; ", 
+					    ") & _PID=\$!; cat > \257<\257>; ",
 					    "wait \$_PID; _EXIT=\$?; ",
 					    "rm \257<\257>; exit \$_EXIT"],
 					    0,0);
@@ -6077,7 +6096,7 @@ sub replaced {
 }
 
 sub replace_placeholders {
-    # Replace foo{}bar with fooargbar 
+    # Replace foo{}bar with fooargbar
     # Input:
     #   target = foo{}bar
     #   quote = should this be quoted?
@@ -6163,7 +6182,7 @@ sub replace_placeholders {
 	
 	if($w !~ /\257/) {
 	    # No more replacement strings in $w: No need to do more
-	    CORE::push(@{$replace{$word}}, $w); 
+	    CORE::push(@{$replace{$word}}, $w);
 	    next;
 	}
 	# for each arg:
@@ -6200,14 +6219,14 @@ sub replace_placeholders {
 	    if($quote) {
 		$val = ::shell_quote_scalar($val);
 	    }
-	    CORE::push(@{$replace{$ww}}, $val); 
+	    CORE::push(@{$replace{$ww}}, $val);
 	}
     }
     if($quote) {
 	@target = ::shell_quote(@target);
     }
 
-    ::debug("replace", "%replace=".(::my_dump(%replace))."\n");
+    # ::debug("replace", "%replace=",::my_dump(%replace),"\n");
     if(%replace) {
 	# Substitute the replace strings with the replacement values
 	# Must be sorted by length if a short word is a substring of a long word
@@ -6295,7 +6314,7 @@ sub new {
 		$contextgroups++;
 	    }
 	    # All {= perl expr =} have been removed: The rest is non-context
-	    $noncontextlen += length $c; 
+	    $noncontextlen += length $c;
 	}
 	if($opt::tagstring) {
 	    my $t = $opt::tagstring;
@@ -6437,7 +6456,7 @@ sub max_length {
     # Returns:
     #   number of chars on the longest command line allowed
     if(not $Limits::Command::line_max_len) {
-	# Disk cache of max command line length 
+	# Disk cache of max command line length
 	my $len_cache = $ENV{'HOME'} . "/.parallel/tmp/linelen-" . ::hostname();
 	my $cached_limit;
 	if(-e $len_cache) {
@@ -6795,22 +6814,22 @@ sub read_arg_from_fh {
     my $prepend = undef;
     my $arg;
     do {{
-	if(eof($fh)) {
+	# This makes 10% faster
+	if(not ($arg = <$fh>)) {
 	    if(defined $prepend) {
 		return Arg->new($prepend);
 	    } else {
 		return undef;
 	    }
 	}
-	$arg = <$fh>;
-	::debug("run", "read $arg\n");
+#	::debug("run", "read $arg\n");
 	# Remove delimiter
 	$arg =~ s:$/$::;
 	if($Global::end_of_file_string and
 	   $arg eq $Global::end_of_file_string) {
 	    # Ignore the rest of input file
 	    while (<$fh>) {}
-	    ::debug("run", "EOF-string $arg\n");
+#	    ::debug("run", "EOF-string $arg\n");
 	    if(defined $prepend) {
 		return Arg->new($prepend);
 	    } else {
@@ -6878,7 +6897,7 @@ sub new {
 sub replace {
     # Calculates the corresponding value for a given perl expression
     # Returns:
-    #   The calculated string unquoted
+    #   The calculated string (quoted if asked for)
     my $self = shift;
     my $perlexpr = shift; # E.g. $_=$_ or s/.gz//
     my $quote = (shift) ? 1 : 0; # should the string be quoted?
@@ -6887,15 +6906,26 @@ sub replace {
     my $job = shift;
     $perlexpr =~ s/^-?\d+ //; # Positional replace treated as normal replace
     if(not defined $self->{"rpl",0,$perlexpr}) {
-	my $s;
+	local $_;
 	if($Global::trim eq "n") {
-	    $s = $self->{'orig'};
+	    $_ = $self->{'orig'};
 	} else {
-	    $s = trim_of($self->{'orig'});
+	    $_ = trim_of($self->{'orig'});
 	}
-	local $_ = $s;
 	::debug("replace", "eval ", $perlexpr, " ", $_, "\n");
-	eval $perlexpr;
+	if(not $Global::perleval{$perlexpr}) {
+	    # Make an anonymous function of the $perlexpr
+	    # And more importantly: Compile it only once
+	    if($Global::perleval{$perlexpr} = eval('sub { my $job = shift; '.$perlexpr.' }')) {
+		# All is good
+	    } else {
+		# The eval failed. Maybe $perlexpr is invalid perl?
+		::error("Cannot use $perlexpr\n");
+		::wait_and_exit(255);
+	    }
+	}
+	# Execute the function
+	$Global::perleval{$perlexpr}->($job);
 	$self->{"rpl",0,$perlexpr} = $_;
     }
     if(not defined $self->{"rpl",$quote,$perlexpr}) {
@@ -6972,7 +7002,7 @@ sub remedian {
 }
 
 sub set_remedian {
-    # Set median of the last 999^3 (=997002999) values using Remedian 
+    # Set median of the last 999^3 (=997002999) values using Remedian
     #
     # Rousseeuw, Peter J., and Gilbert W. Bassett Jr. "The remedian: A
     # robust averaging method for large data sets." Journal of the

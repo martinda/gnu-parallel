@@ -172,7 +172,7 @@ If it is a zsh function you will need to use this helper function
   SHELL=/bin/bash parallel "my_func {}" :::  1 2
 @end verbatim
 
-The command cannot contain the character \257 (Â¯).
+The command cannot contain the character \257 (¯).
 
 @item @strong{@{@}} (alpha testing)
 @anchor{@strong{@{@}} (alpha testing)}

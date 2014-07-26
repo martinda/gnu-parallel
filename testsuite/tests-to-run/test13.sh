@@ -12,7 +12,7 @@ echo '### Test --keeporder'
 (seq 0 2) | parallel --keeporder -j100% -S 1/:,2/parallel@parallel-server2 -q perl -e 'sleep 1;print "job{}\n";exit({})'
 
 echo '### Test SIGTERM'
-parallel -k -j9 sleep 3';' echo ::: {1..99} >/tmp/$$ 2>&1 &
+parallel -k -j20 sleep 3';' echo ::: {1..99} >/tmp/$$ 2>&1 &
 A=$!
 sleep 5; kill -TERM $A
 wait

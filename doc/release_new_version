@@ -164,6 +164,7 @@ YYYYMMDD=`yyyymmdd`
 git tag -s -m "Released as $YYYYMMDD ('$TAG')" $TAG
 git tag -s -m "Released as $YYYYMMDD ('$TAG')" $YYYYMMDD
 
+git push
 
 == Update Savannah ==
 

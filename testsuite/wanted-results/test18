@@ -79,6 +79,18 @@ parallel: Warning: --cleanup ignored as there are no remote --sshlogin.
 10
 ### Check forced number of CPUs being respected
 aspire
+aspire
+aspire
+aspire
+aspire
+aspire
+aspire
+aspire
+aspire
+aspire
+aspire
+aspire
+aspire
 redhat9.tange.dk
 redhat9.tange.dk
 redhat9.tange.dk
@@ -86,18 +98,6 @@ redhat9.tange.dk
 redhat9.tange.dk
 redhat9.tange.dk
 redhat9.tange.dk
-aspire
-aspire
-aspire
-aspire
-aspire
-aspire
-aspire
-aspire
-aspire
-aspire
-aspire
-aspire
 ### Check more than 9 simultaneous sshlogins
 1
 2

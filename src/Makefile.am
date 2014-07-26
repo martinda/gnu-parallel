@@ -38,35 +38,35 @@ niceload.1: niceload.pod
 	|| echo "Warning: pod2man not found. Using old niceload.1"
 
 parallel.html: parallel.pod
-	pod2html $(srcdir)/parallel.pod > $(srcdir)/parallel.htmln \
+	pod2html --title "GNU Parallel" $(srcdir)/parallel.pod > $(srcdir)/parallel.htmln \
 	&& mv $(srcdir)/parallel.htmln $(srcdir)/parallel.html \
 	|| echo "Warning: pod2html not found. Using old parallel.html"
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on parallel.html to avoid stupid pod2html race condition
 parallel_tutorial.html: parallel_tutorial.pod parallel.html
-	pod2html $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.htmln \
+	pod2html --title "GNU Parallel tutorial" $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.htmln \
 	&& mv $(srcdir)/parallel_tutorial.htmln $(srcdir)/parallel_tutorial.html \
 	|| echo "Warning: pod2html not found. Using old parallel_tutorial.html"
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on parallel_tutorial.html to avoid stupid pod2html race condition
 sem.html: sem.pod parallel_tutorial.html
-	pod2html $(srcdir)/sem.pod > $(srcdir)/sem.htmln \
+	pod2html --title "sem (GNU Parallel)" $(srcdir)/sem.pod > $(srcdir)/sem.htmln \
 	&& mv $(srcdir)/sem.htmln $(srcdir)/sem.html \
 	|| echo "Warning: pod2html not found. Using old sem.html"
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on sem.html to avoid stupid pod2html race condition
 sql.html: sql sem.html
-	pod2html $(srcdir)/sql > $(srcdir)/sql.htmln \
+	pod2html --title "GNU SQL" $(srcdir)/sql > $(srcdir)/sql.htmln \
 	&& mv $(srcdir)/sql.htmln $(srcdir)/sql.html \
 	|| echo "Warning: pod2html not found. Using old sql.html"
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on sql.html to avoid stupid pod2html race condition
 niceload.html: niceload.pod sql.html
-	pod2html $(srcdir)/niceload.pod > $(srcdir)/niceload.htmln \
+	pod2html --title "GNU niceload" $(srcdir)/niceload.pod > $(srcdir)/niceload.htmln \
 	&& mv $(srcdir)/niceload.htmln $(srcdir)/niceload.html \
 	|| echo "Warning: pod2html not found. Using old niceload.html"
 	rm -f $(srcdir)/pod2htm*
