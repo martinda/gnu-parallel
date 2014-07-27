@@ -95,7 +95,7 @@ B<exportf> to export and to set $SHELL to bash:
   exportf my_func
   SHELL=/bin/bash parallel "my_func {}" :::  1 2
 
-The command cannot contain the character \257 (¯).
+The command cannot contain the character \257 (macron: ¯).
 
 =item B<{}> (alpha testing)
 
@@ -568,6 +568,26 @@ In Bash I<var> can also be a Bash function - just remember to B<export
 The variable '_' is special. It will copy all enviroment variables
 except for the ones mentioned in ~/.parallel/ignored_vars.
 
+To copy Bash arrays you need an importer function, as Bash arrays
+cannot be exported:
+
+    import_array () {
+      local func=$1; shift;
+      export $func='() {
+        '"$(for arr in $@; do
+              declare -p $arr|sed '1s/declare -./&g/'
+            done)"'
+      }'
+    }
+
+    declare -A assoc='([one]="1" [two]="2")'
+    declare -a indexed='([0]="one" [1]="two")'
+
+    import_array my_importer assoc indexed
+
+    parallel --env my_importer \
+      'my_importer; echo "{}" "${indexed[{}]}" "${assoc[${indexed[{}]}]}"' ::: "${!indexed[@]}"
+
 See also: B<--record-env>.
 
 
@@ -612,7 +632,7 @@ B<parallel> uses GNU B<parallel> to compute this, so you will get an
 infinite loop. This will likely be fixed in a later release.
 
 
-=item B<--gnu> 
+=item B<--gnu>
 
 Behave like GNU B<parallel>. If B<--tollef> and B<--gnu> are both set,
 B<--gnu> takes precedence. B<--tollef> is retired, but B<--gnu> is
@@ -1094,7 +1114,7 @@ with 'y' or 'Y'.  Implies B<-t>.
 
 Use to define start and end parenthesis for B<{= perl expression =}>. The
 left and the right parenthesis can be multiple characters and are
-assumed to be the same length. The default is B<{==}> giving 
+assumed to be the same length. The default is B<{==}> giving
 B<{=> as the start parenthesis and B<=}> as the end parenthesis.
 
 Another useful setting is B<,,,,> which would make both parenthesis
@@ -1855,7 +1875,7 @@ Compare these two:
 
 Arguments will be recycled if one input source has more arguments than the others:
 
-  parallel --xapply echo {1} {2} {3} ::: 1 2 ::: I II III ::: a b c d e f g 
+  parallel --xapply echo {1} {2} {3} ::: 1 2 ::: I II III ::: a b c d e f g
 
 See also B<--header>.
 
@@ -2459,7 +2479,7 @@ time and be warned if they are ever changed. To do that:
   (echo 'Host *'; echo StrictHostKeyChecking no) >> .ssh/config
   parallel --slf my_cluster --nonall true
   # Remove the disabling of StrictHostKeyChecking
-  mv .ssh/config.backup .ssh/config 
+  mv .ssh/config.backup .ssh/config
 
 The servers in B<.parallel/my_cluster> are now added in B<.ssh/known_hosts>.
 

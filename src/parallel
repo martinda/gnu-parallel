@@ -852,7 +852,8 @@ sub parse_options {
     if(defined $opt::fg) { $Global::semaphore = 1; }
     if(defined $opt::bg) { $Global::semaphore = 1; }
     if(defined $opt::wait) { $Global::semaphore = 1; }
-    if(defined $opt::halt_on_error and $opt::halt_on_error=~/%/) { $opt::halt_on_error /= 100; }
+    if(defined $opt::halt_on_error and
+       $opt::halt_on_error=~/%/) { $opt::halt_on_error /= 100; }
     if(defined $opt::timeout and $opt::timeout !~ /^\d+(\.\d+)?%?$/) {
 	::error("--timeout must be seconds or percentage\n");
 	wait_and_exit(255);
@@ -1817,6 +1818,8 @@ sub progress {
 	    if($opt::bar) {
 		my $arg = $Global::newest_job ?
 		    $Global::newest_job->{'commandline'}->replace_placeholders(["\257<\257>"],0,0) : "";
+		# [\011\013\014] messes up display in the terminal
+		$arg =~ s/[\011\013\014]//g;
 		my $bar_text = sprintf("%d%% %d:%d=%ds %s",
 				  $pctcomplete*100, $completed, $left, $this_eta, $arg);
 		my $rev = '[7m';
@@ -4229,73 +4232,97 @@ sub control_path_dir {
     return $self->{'control_path_dir'};
 }
 
-
 sub rsync_transfer_cmd {
-  # Command to run to transfer a file
-  # Input:
-  #   $file = filename of file to transfer
-  #   $workdir = destination dir
-  # Returns:
-  #   $cmd = rsync command to run to transfer $file ("" if unreadable)
-  my $self = shift;
-  my $file = shift;
-  my $workdir = shift;
-  if(not -r $file) {
-    ::warning($file, " is not readable and will not be transferred.\n");
-    return "true";
-  }
-  my $rsync_destdir;
-  if($file =~ m:^/:) {
-    # rsync /foo/bar /
-    $rsync_destdir = "/";
-  } else {
-    $rsync_destdir = ::shell_quote_file($workdir);
-  }
-  $file = ::shell_quote_file($file);
-  my $sshcmd = $self->sshcommand();
-  my $rsync_opt = "-rlDzR -e" . ::shell_quote_scalar($sshcmd);
-  my $serverlogin = $self->serverlogin();
-  # Make dir if it does not exist
-  return "( $sshcmd $serverlogin mkdir -p $rsync_destdir;" .
-    "rsync $rsync_opt $file $serverlogin:$rsync_destdir )";
+    # Command to run to transfer a file
+    # Input:
+    #   $file = filename of file to transfer
+    #   $workdir = destination dir
+    # Returns:
+    #   $cmd = rsync command to run to transfer $file ("" if unreadable)
+    my $self = shift;
+    my $file = shift;
+    my $workdir = shift;
+    if(not -r $file) {
+	::warning($file, " is not readable and will not be transferred.\n");
+	return "true";
+    }
+    my $rsync_destdir;
+    if($file =~ m:^/:) {
+	# rsync /foo/bar /
+	$rsync_destdir = "/";
+    } else {
+	$rsync_destdir = ::shell_quote_file($workdir);
+    }
+    $file = ::shell_quote_file($file);
+    my $sshcmd = $self->sshcommand();
+    my $rsync_opt = "-rlDzR -e" . ::shell_quote_scalar($sshcmd);
+    my $serverlogin = $self->serverlogin();
+    # Make dir if it does not exist
+    return "( $sshcmd $serverlogin mkdir -p $rsync_destdir;" .
+	rsync()." $rsync_opt $file $serverlogin:$rsync_destdir )";
 }
 
 sub cleanup_cmd {
-  # Command to run to remove the remote file
-  # Input:
-  #   $file = filename to remove
-  #   $workdir = destination dir
-  # Returns:
-  #   $cmd = ssh command to run to remove $file and empty parent dirs
-  my $self = shift;
-  my $file = shift;
-  my $workdir = shift;
-  my $f = $file;
-  if($f =~ m:/\./:) {
-      # foo/bar/./baz/quux => workdir/baz/quux
-      # /foo/bar/./baz/quux => workdir/baz/quux
-      $f =~ s:.*/\./:$workdir/:;
-  } elsif($f =~ m:^[^/]:) {
-      # foo/bar => workdir/foo/bar
-      $f = $workdir."/".$f;
-  }
-  my @subdirs = split m:/:, ::dirname($f);
-  my @rmdir;
-  my $dir = "";
-  for(@subdirs) {
-    $dir .= $_."/";
-    unshift @rmdir, ::shell_quote_file($dir);
-  }
-  my $rmdir = @rmdir ? "rmdir @rmdir 2>/dev/null;" : "";
-  if(defined $opt::workdir and $opt::workdir eq "...") {
-    $rmdir .= "rm -rf " . ::shell_quote_file($workdir).';';
-  }
+    # Command to run to remove the remote file
+    # Input:
+    #   $file = filename to remove
+    #   $workdir = destination dir
+    # Returns:
+    #   $cmd = ssh command to run to remove $file and empty parent dirs
+    my $self = shift;
+    my $file = shift;
+    my $workdir = shift;
+    my $f = $file;
+    if($f =~ m:/\./:) {
+	# foo/bar/./baz/quux => workdir/baz/quux
+	# /foo/bar/./baz/quux => workdir/baz/quux
+	$f =~ s:.*/\./:$workdir/:;
+    } elsif($f =~ m:^[^/]:) {
+	# foo/bar => workdir/foo/bar
+	$f = $workdir."/".$f;
+    }
+    my @subdirs = split m:/:, ::dirname($f);
+    my @rmdir;
+    my $dir = "";
+    for(@subdirs) {
+	$dir .= $_."/";
+	unshift @rmdir, ::shell_quote_file($dir);
+    }
+    my $rmdir = @rmdir ? "rmdir @rmdir 2>/dev/null;" : "";
+    if(defined $opt::workdir and $opt::workdir eq "...") {
+	$rmdir .= "rm -rf " . ::shell_quote_file($workdir).';';
+    }
 
-  $f = ::shell_quote_file($f);
-  my $sshcmd = $self->sshcommand();
-  my $serverlogin = $self->serverlogin();
-  return "$sshcmd $serverlogin ".::shell_quote_scalar("(rm -f $f; $rmdir)");
+    $f = ::shell_quote_file($f);
+    my $sshcmd = $self->sshcommand();
+    my $serverlogin = $self->serverlogin();
+    return "$sshcmd $serverlogin ".::shell_quote_scalar("(rm -f $f; $rmdir)");
 }
+
+{
+    my $rsync;
+
+    sub rsync {
+	# rsync 3.1.x uses protocol 31 which is unsupported by 2.5.7.
+	# If the version >= 3.1.0: downgrade to protocol 30
+	if(not $rsync) {
+	    my @out = `rsync --version`;
+	    for (@out) {
+		if(/version (\d+.\d+)(.\d+)?/) {
+		    if($1 >= 3.1) {
+			# Version 3.1.0 or later: Downgrade to protocol 30
+			$rsync = "rsync --protocol 30";
+		    } else {
+			$rsync = "rsync";
+		    }
+		}
+	    }
+	    $rsync or ::die_bug("Cannot figure out version of rsync: @out");
+	}
+	return $rsync;
+    }
+}
+
 
 package JobQueue;
 
@@ -4352,9 +4379,20 @@ sub total_jobs {
     if(not defined $self->{'total_jobs'}) {
         my $job;
         my @queue;
+	my $start = time;
+        while($job = $self->get()) {
+	    if(time - $start > 30) {
+		::warning("Reading all arguments takes longer than 30 seconds.\n");
+		$opt::eta && ::warning("Consider removing --eta.\n");
+		$opt::bar && ::warning("Consider removing --bar.\n");
+		last;
+	    }
+            push @queue, $job;
+        }
         while($job = $self->get()) {
             push @queue, $job;
         }
+
         $self->unget(@queue);
         $self->{'total_jobs'} = $#queue+1;
     }
@@ -5042,8 +5080,8 @@ sub transfersize {
 }
 
 sub sshtransfer {
-  # Returns for each transfer file:
-  #   rsync $file remote:$workdir
+    # Returns for each transfer file:
+    #   rsync $file remote:$workdir
     my $self = shift;
     my @pre;
     my $sshlogin = $self->sshlogin();
@@ -5109,9 +5147,9 @@ sub sshreturn {
 	my $basename = ::shell_quote_scalar(::shell_quote_file(basename($file)));
 	# --return
 	#   mkdir -p /home/tange/dir/subdir/;
-        #   rsync -rlDzR --rsync-path="cd /home/tange/dir/subdir/; rsync"
+        #   rsync (--protocol 30) -rlDzR --rsync-path="cd /home/tange/dir/subdir/; rsync"
         #   server:file.gz /home/tange/dir/subdir/
-	$pre .= "mkdir -p $basedir$cd; rsync $rsync_cd $rsync_opt $serverlogin:".
+	$pre .= "mkdir -p $basedir$cd; ".$sshlogin->rsync()." $rsync_cd $rsync_opt $serverlogin:".
 	     $basename . " ".$basedir.$cd.";";
     }
     return $pre;
@@ -5365,8 +5403,9 @@ sub tmux_wrap {
     unlink $tmpfile;
     my $visual_command = $self->replaced();
     my $title = ::undef_as_empty($self->{'commandline'}->replace_placeholders(["\257<\257>"],0,0))."";
-    # ascii 194-224 annoys tmux
-    $title =~ s/[\011-\016;\302-\340]//g;
+    # ; causes problems
+    # ascii 194-245 annoys tmux
+    $title =~ s/[\011-\016;\302-\365]//g;
 
     my $tmux;
     if($Global::total_running == 0) {
@@ -5378,11 +5417,12 @@ sub tmux_wrap {
     }
     return "mkfifo $tmpfile; $tmux ".
 	# Run in tmux
-	::shell_quote_scalar("(".$actual_command.');(echo $?$status;echo 255) >'.$tmpfile.";".
-			     "echo ".::shell_quote_scalar($visual_command).";".
-			     "echo \007Job finished at: `date`;sleep 10").
-			     # Run outside tmux
-			     ";  exit `perl -ne '1..1 and print' $tmpfile;rm $tmpfile` ";
+	::shell_quote_scalar(
+	"(".$actual_command.');(echo $?$status;echo 255) >'.$tmpfile.";".
+	"echo ".::shell_quote_scalar($visual_command).";".
+	"echo \007Job finished at: `date`;sleep 10").
+	# Run outside tmux
+	";  exit `perl -ne 'unlink $ARGV; 1..1 and print' $tmpfile;rm $tmpfile` ";
 }
 
 sub is_already_in_results {
