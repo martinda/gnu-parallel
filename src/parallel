@@ -1819,18 +1819,23 @@ sub progress {
 		my $arg = $Global::newest_job ?
 		    $Global::newest_job->{'commandline'}->replace_placeholders(["\257<\257>"],0,0) : "";
 		# [\011\013\014] messes up display in the terminal
-		$arg =~ s/[\011\013\014]//g;
-		my $bar_text = sprintf("%d%% %d:%d=%ds %s",
-				  $pctcomplete*100, $completed, $left, $this_eta, $arg);
-		my $rev = '[7m';
-		my $reset = '[0m';
+		$arg =~ tr/[\011-\016\033\302-\365]//d;
+		my $bar_text = 
+		    sprintf("%d%% %d:%d=%ds %s",
+			    $pctcomplete*100, $completed, $left, $this_eta, $arg);
+		my $rev = "\033[7m";
+		my $reset = "\033[0m";
 		my $terminal_width = terminal_columns();
 		my $s = sprintf("%-${terminal_width}s",
-				substr($bar_text,0,$terminal_width));
+				substr($bar_text." "x$terminal_width,
+				       0,$terminal_width));
 		my $width = int($terminal_width * $pctcomplete);
-		$s =~ s/^(.{$width})/$1$reset/;
-		$s = "\r#   ".int($this_eta)." sec $arg" . "\r". $pctcomplete*100 # Prefix with zenity header
-		    . "\r" . $rev . $s . $reset;
+		substr($s,$width,0) = $reset;
+		my $zenity = sprintf("%-${terminal_width}s",
+				     substr("#   " . int($this_eta) . " sec $arg",
+					    0,$terminal_width));
+		$s = "\r" . $zenity . "\r" . $pctcomplete*100 . # Prefix with zenity header
+		    "\r" . $rev . $s . $reset;
 		$status = $s;
 	    }
         }
@@ -1952,19 +1957,23 @@ sub progress {
     return ("workerlist" => $workerlist, "header" => $header, "status" => $status);
 }
 
-sub terminal_columns {
-    # Get the number of columns of the display
-    # Returns:
-    #   number of columns of the screen
-    if(not $Private::columns) {
-        $Private::columns = $ENV{'COLUMNS'};
-        if(not $Private::columns) {
-            my $resize = qx{ resize 2>/dev/null };
-            $resize =~ /COLUMNS=(\d+);/ and do { $Private::columns = $1; };
-        }
-        $Private::columns ||= 80;
+{
+    my $columns;
+
+    sub terminal_columns {
+	# Get the number of columns of the display
+	# Returns:
+	#   number of columns of the screen
+	if(not $columns) {
+	    $columns = $ENV{'COLUMNS'};
+	    if(not $columns) {
+		my $resize = qx{ resize 2>/dev/null };
+		$resize =~ /COLUMNS=(\d+);/ and do { $columns = $1; };
+	    }
+	    $columns ||= 80;
+	}
+	return $columns;
     }
-    return $Private::columns;
 }
 
 sub get_job_with_sshlogin {
@@ -2192,7 +2201,7 @@ sub filter_hosts {
 	    # Get server from: eval true server\;
 	    $col[8] =~ /eval true..([^;]+).;/ or ::die_bug("col8 does not contain host: $col[8]");
 	    my $host = $1;
-	    $host =~ s/\\//g;
+	    $host =~ tr/\\//d;
 	    $Global::host{$host} or next;
 	    if($col[6] eq "255" or $col[7] eq "15") {
 		# exit == 255 or signal == 15: ssh failed
@@ -4381,8 +4390,8 @@ sub total_jobs {
         my @queue;
 	my $start = time;
         while($job = $self->get()) {
-	    if(time - $start > 30) {
-		::warning("Reading all arguments takes longer than 30 seconds.\n");
+	    if(time - $start > 10) {
+		::warning("Reading all arguments takes longer than 10 seconds.\n");
 		$opt::eta && ::warning("Consider removing --eta.\n");
 		$opt::bar && ::warning("Consider removing --bar.\n");
 		last;
@@ -5405,7 +5414,7 @@ sub tmux_wrap {
     my $title = ::undef_as_empty($self->{'commandline'}->replace_placeholders(["\257<\257>"],0,0))."";
     # ; causes problems
     # ascii 194-245 annoys tmux
-    $title =~ s/[\011-\016;\302-\365]//g;
+    $title =~ tr/[\011-\016;\302-\365]//d;
 
     my $tmux;
     if($Global::total_running == 0) {
@@ -6349,7 +6358,7 @@ sub new {
 	    # So there is no need to deal with \257<
 	    while($c =~ s/ (\S*\000\S*) //x) {
 		my $w = $1;
-		$w =~ s/\000//g; # Remove all \000's
+		$w =~ tr/\000//d; # Remove all \000's
 		$contextlen += length($w);
 		$contextgroups++;
 	    }
