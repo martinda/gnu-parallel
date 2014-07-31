@@ -230,6 +230,7 @@ sub find_split_positions {
     #   @positions of block start/end
     my($file, $block, $headerlen) = @_;
     my $size = -s $file;
+    $block = int $block;
     # The optimal dd blocksize for mint, redhat, solaris, openbsd = 2^17..2^20
     # The optimal dd blocksize for freebsd = 2^15..2^17
     my $dd_block_size = 131072; # 2^17
@@ -770,6 +771,7 @@ sub parse_options {
     $Global::trim = 'n';
     $Global::max_jobs_running = 0;
     $Global::job_already_run = '';
+    $ENV{'TMPDIR'} ||= "/tmp";
 
     @ARGV=read_options();
 
@@ -1315,7 +1317,7 @@ sub read_args_from_command_line {
 		# Group of arguments on the command line.
 		# Put them into a file.
 		# Create argfile
-		my ($outfh,$name) = ::tempfile(SUFFIX => ".arg");
+		my ($outfh,$name) = ::tmpfile(SUFFIX => ".arg");
 		unlink($name);
 		# Put args into argfile
 		print $outfh map { $_,$/ } @group;
@@ -1820,7 +1822,7 @@ sub progress {
 		    $Global::newest_job->{'commandline'}->replace_placeholders(["\257<\257>"],0,0) : "";
 		# [\011\013\014] messes up display in the terminal
 		$arg =~ tr/[\011-\016\033\302-\365]//d;
-		my $bar_text = 
+		my $bar_text =
 		    sprintf("%d%% %d:%d=%ds %s",
 			    $pctcomplete*100, $completed, $left, $this_eta, $arg);
 		my $rev = "\033[7m";
@@ -2173,7 +2175,7 @@ sub filter_hosts {
 	# 'echo' is used to get the best possible value for an ssh login time
 	push(@echo, $host."\t".$sshcmd." echo\n");
     }
-    my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".ssh");
+    my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".ssh");
     print $fh @cores, @cpus, @maxline, @echo;
     close $fh;
     # --timeout 5: Setting up an SSH connection and running a simple
@@ -2289,7 +2291,7 @@ sub onall {
 	if(not defined $joblog) {
 	    return undef;
 	}
-	my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".log");
+	my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".log");
 	close $fh;
 	return $tmpfile;
     }
@@ -2301,7 +2303,7 @@ sub onall {
     # Copy all @fhlist into tempfiles
     my @argfiles = ();
     for my $fh (@fhlist) {
-	my ($outfh, $name) = ::tempfile(SUFFIX => ".all", UNLINK => 1);
+	my ($outfh, $name) = ::tmpfile(SUFFIX => ".all", UNLINK => 1);
 	print $outfh (<$fh>);
 	close $outfh;
 	push @argfiles, $name;
@@ -2857,6 +2859,9 @@ sub multiply_binary_prefix {
     return $s;
 }
 
+sub tmpfile {
+    return ::tempfile(DIR=>$ENV{'TMPDIR'}, TEMPLATE => 'parXXXXX', @_);
+}
 sub __DEBUGGING__ {}
 
 sub debug {
@@ -3100,7 +3105,7 @@ sub swap_activity {
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'swap_activity_file'};
-        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".swp");
+        my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".swp");
 	::debug("swap", "\n", $swap_activity, "\n");
         qx{ ($swap_activity > $tmpfile && mv $tmpfile $file || rm $tmpfile) & };
     }
@@ -3322,7 +3327,7 @@ sub loadavg {
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         my $file = $self->{'loadavg_file'};
-        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".loa");
+        my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".loa");
         qx{ ($cmd > $tmpfile && mv $tmpfile $file || rm $tmpfile) & };
     }
     return $self->{'loadavg'};
@@ -4574,14 +4579,14 @@ sub openoutputfiles {
 	if(@Global::tee_jobs) {
 	    # files must be removed when the tee is done
 	} elsif($opt::files) {
-	    ($outfhw, $outname) = ::tempfile(SUFFIX => ".par");
-	    ($errfhw, $errname) = ::tempfile(SUFFIX => ".par");
+	    ($outfhw, $outname) = ::tmpfile(SUFFIX => ".par");
+	    ($errfhw, $errname) = ::tmpfile(SUFFIX => ".par");
 	    # --files => only remove stderr
 	    $self->set_fh(1,"unlink","");
 	    $self->set_fh(2,"unlink",$errname);
 	} else {
-	    ($outfhw, $outname) = ::tempfile(SUFFIX => ".par");
-	    ($errfhw, $errname) = ::tempfile(SUFFIX => ".par");
+	    ($outfhw, $outname) = ::tmpfile(SUFFIX => ".par");
+	    ($errfhw, $errname) = ::tmpfile(SUFFIX => ".par");
 	    $self->set_fh(1,"unlink",$outname);
 	    $self->set_fh(2,"unlink",$errname);
 	}
@@ -5320,7 +5325,7 @@ sub start {
 	# Bug:
 	#   If the command does not read the first char, the temp file
 	#   is not deleted.
-        my ($dummy_fh, $tmpfile) = ::tempfile(SUFFIX => ".chr");
+        my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".chr");
 	$command = qq{
              sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null';
              test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true;
@@ -5406,7 +5411,7 @@ sub tmux_wrap {
     my $self = shift;
     my $actual_command = shift;
     # Temporary file name. Used for fifo to communicate exit val
-    my ($fh, $tmpfile) = ::tempfile(SUFFIX => ".tmx");
+    my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".tmx");
     $Global::unlink{$tmpfile}=1;
     close $fh;
     unlink $tmpfile;
@@ -5719,25 +5724,42 @@ sub set_exitsignal {
 }
 
 {
-    my ($disk_full_fh,$error_printed);
+    my ($disk_full_fh,$b8193);
     sub exit_if_disk_full {
 	# Checks if $TMPDIR is full by writing 8kb to a tmpfile
 	# If the disk is full: Exit immediately.
 	# Returns:
 	#   N/A
 	if(not $disk_full_fh) {
-	    $disk_full_fh = ::tempfile();
+	    $disk_full_fh = ::tmpfile(SUFFIX => ".df");
+	    $b8193 = "x"x8193;
 	}
 	my $pos = tell $disk_full_fh;
-	print $disk_full_fh "x"x8193;
+	# Linux does not discover if a disk is full if writing <= 8192
+	# Tested on:
+	# bfs btrfs cramfs ext2 ext3 ext4 ext4dev jffs2 jfs minix msdos
+	# ntfs reiserfs tmpfs ubifs vfat xfs
+	# TODO this should be tested on different OS similar to this:
+	#
+	# doit() {
+	#   sudo mount /dev/ram0 /mnt/loop; sudo chmod 1777 /mnt/loop
+	#   seq 100000 | parallel --tmpdir /mnt/loop/ true &
+	#   seq 6900000 > /mnt/loop/i && echo seq OK
+	#   seq 6980868 > /mnt/loop/i
+	#   seq 10000 > /mnt/loop/ii
+	#   sleep 3
+	#   sudo umount /mnt/loop/ || sudo umount -l /mnt/loop/
+	#   echo >&2
+	# }
+	print $disk_full_fh $b8193;
 	if(not $disk_full_fh
 	   or
 	   tell $disk_full_fh == $pos) {
-	    ::error("Output is incomplete. Cannot append to buffer file in \$TMPDIR. Is the disk full?\n");
+	    ::error("Output is incomplete. Cannot append to buffer file in $ENV{'TMPDIR'}. Is the disk full?\n");
 	    ::error("Change \$TMPDIR with --tmpdir or use --compress.\n");
 	    ::wait_and_exit(255);
 	}
-	truncate $disk_full_fh, $pos;
+	truncate $disk_full_fh, 0;
     }
 }
 
@@ -5802,7 +5824,7 @@ sub populate {
 
     if($opt::cat or $opt::fifo) {
 	# Get a tempfile name
-	my($outfh,$name) = ::tempfile(SUFFIX => ".pip");
+	my($outfh,$name) = ::tmpfile(SUFFIX => ".pip");
 	close $outfh;
 	# Unlink is needed if: ssh otheruser@localhost
 	unlink $name;
