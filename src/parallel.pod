@@ -3823,6 +3823,50 @@ to resume, keeping the output in the same order as input, --pipe
 processing, and dynamically timeouts.
 
 
+=head2 DIFFERENCES BETWEEN ladon AND GNU Parallel
+
+B<ladon> https://www.npmjs.org/package/ladon can run multiple jobs on files in parallel.
+
+B<ladon> only works on files and the only way to specify files is
+using a quoted glob string (such as \*.jpg). It is not possible to
+list the files manually.
+
+As replacement strings it uses FULLPATH DIRNAME BASENAME EXT RELDIR RELPATH
+
+These can be simulated using GNU B<parallel> by putting this in B<~/.parallel/config>:
+
+    --rpl 'FULLPATH $_=::shell_quote($_);chomp($_=qx{readlink -f $_});'
+    --rpl 'DIRNAME $_=::dirname($_); $_=::shell_quote($_);chomp($_=qx{readlink -f $_});'
+    --rpl 'BASENAME s:.*/::; s:\.[^/.]+$::;'
+    --rpl 'EXT s:.*\.::'
+    --rpl 'RELDIR $_=::shell_quote($_);chomp(($_,$c)=qx{readlink -f $_;pwd});s:\Q$c/\E::;$_ = ::dirname($_);'
+    --rpl 'RELPATH $_=::shell_quote($_);chomp(($_,$c)=qx{readlink -f $_;pwd});s:\Q$c/\E::;'
+
+B<ladon> deals badly with filenames containing " and newline, and it fails for output larger than 200k:
+
+    ladon '*' -- seq 36000 | wc
+
+=head3 EXAMPLES FROM ladon MANUAL
+
+It is assumed that the '--rpl's above are put in B<~/.parallel/config>
+and that it is run under a shell that support '**' globbing (such as B<zsh>):
+
+B<1> ladon "**/*.txt" -- echo RELPATH
+
+B<1> parallel echo RELPATH ::: **/*.txt
+
+B<2> ladon "~/Documents/**/*.pdf" -- shasum FULLPATH >hashes.txt
+
+B<2> parallel shasum FULLPATH ::: ~/Documents/**/*.pdf >hashes.txt
+
+B<3> ladon -m thumbs/RELDIR "**/*.jpg" -- convert FULLPATH -thumbnail 100x100^ -gravity center -extent 100x100 thumbs/RELPATH
+
+B<3> parallel mkdir -p thumbs/RELDIR\; convert FULLPATH -thumbnail 100x100^ -gravity center -extent 100x100 thumbs/RELPATH ::: **/*.jpg
+
+B<4> ladon "~/Music/*.wav" -- lame -V 2 FULLPATH DIRNAME/BASENAME.mp3
+
+B<4> parallel lame -V 2 FULLPATH DIRNAME/BASENAME.mp3 ::: ~/Music/*.wav 
+
 =head2 DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel
 
 ClusterSSH solves a different problem than GNU B<parallel>.
