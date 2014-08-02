@@ -1248,7 +1248,7 @@ sub read_options {
 		while(<$in_fh>) {
 		    /^\s*\#/ and next;
 		    chomp;
-		    push @ARGV_profile, shell_unquote(split/(?<![\\])\s/, $_);
+		    push @ARGV_profile, shellwords($_);
 		}
 		close $in_fh;
 	    } else {
@@ -1262,8 +1262,7 @@ sub read_options {
 	}
 	# Add options from shell variable $PARALLEL
 	if($ENV{'PARALLEL'}) {
-	    # Split options on space, but ignore empty options
-	    @ARGV_env = grep { /./ } shell_unquote(split/(?<![\\])\s/, $ENV{'PARALLEL'});
+	    @ARGV_env = shellwords($ENV{'PARALLEL'});
 	}
     }
     Getopt::Long::Configure("bundling","require_order");
@@ -1405,7 +1404,7 @@ sub shell_quote_file {
     return $a;
 }
 
-sub maybe_quote {
+sub _maybe_quote {
     # If $Global::quoting is set then quote the string so shell will not expand any special chars
     # Else do not quote
     # Inputs:
@@ -1419,7 +1418,7 @@ sub maybe_quote {
     }
 }
 
-sub maybe_unquote {
+sub _maybe_unquote {
     # If $Global::quoting then unquote the string as shell would
     # Else do not unquote
     # Inputs:
@@ -1433,7 +1432,71 @@ sub maybe_unquote {
     }
 }
 
-sub shell_unquote {
+sub _shellwords {
+    # '"'"'\""'"'  foo\ bar\"   '\" '\ quux => (q("'""), 'foo bar"', '\"  quux');
+    my $s = shift;
+    my (@words);
+    while($s =~ s{^
+          (
+           (
+            [^\\'"\s]+ | # Not quoted
+            '[^']*' | # '....' - inside '
+            \\. | # \? - quote single char
+            "( # Begin "
+              [^"\\]* | # Not quoted
+              (\\.)* # \? - quote single char
+            )*" # End "
+           )+
+          )
+          (\s+|$)
+          }{}xs
+	) {
+	# split into words
+	push @words, $1;
+    }
+    for my $w (@words) {
+	my @wordpart;
+	while($w =~ s{^
+          (
+           [^\\'"\s]+ | # Not quoted
+           '[^']*' | # '....' - inside '
+           \\. | # \? - quote single char
+           "( # Begin "
+             [^"\\]* | # Not quoted
+             (\\.)* # \? - quote single char
+           )*" # End "
+          ) }{}xs) {
+	    my $wp = $1;
+	    while($wp =~ s{^
+              ([^\\'"\s]+) | # Not quoted
+              '([^']*)' | # '....' - inside '
+              \\(.) | # \? - quote single char
+              "( # Begin "
+                [^"\\]* | # Not quoted
+                (\\.)* # \? - quote single char
+              )*" # End "
+              }{}xs) {
+		push @wordpart, $1, $2, $3;
+		my $doubleq = $4;
+		while($doubleq =~ s{^
+                  ([^"\\]+) | # Not quoted
+                  \\(.) # \? - quote single char
+                  }{}x) {
+		    push @wordpart, $1, $2;
+		}
+	    }
+	}
+	$w = join("",@wordpart);
+    }
+    return @words;
+}
+
+sub shellwords {
+    $Global::use{"Text::ParseWords"} ||= eval "use Text::ParseWords; 1;";
+    return Text::ParseWords::shellwords(@_);
+}
+
+sub _shell_unquote {
     # Unquote strings from shell_quote
     # Inputs:
     #   @strings = strings to be unquoted
@@ -6978,6 +7041,7 @@ sub replace {
     $perlexpr =~ s/^-?\d+ //; # Positional replace treated as normal replace
     if(not defined $self->{"rpl",0,$perlexpr}) {
 	local $_;
+	# TODO disable warnings
 	if($Global::trim eq "n") {
 	    $_ = $self->{'orig'};
 	} else {
@@ -6987,11 +7051,13 @@ sub replace {
 	if(not $Global::perleval{$perlexpr}) {
 	    # Make an anonymous function of the $perlexpr
 	    # And more importantly: Compile it only once
-	    if($Global::perleval{$perlexpr} = eval('sub { my $job = shift; '.$perlexpr.' }')) {
+	    if($Global::perleval{$perlexpr} =
+	       eval('sub { no strict; no warnings; my $job = shift; '.
+		    $perlexpr.' }')) {
 		# All is good
 	    } else {
 		# The eval failed. Maybe $perlexpr is invalid perl?
-		::error("Cannot use $perlexpr\n");
+		::error("Cannot use $perlexpr: $@\n");
 		::wait_and_exit(255);
 	    }
 	}
@@ -7000,7 +7066,8 @@ sub replace {
 	$self->{"rpl",0,$perlexpr} = $_;
     }
     if(not defined $self->{"rpl",$quote,$perlexpr}) {
-	$self->{"rpl",1,$perlexpr} = ::shell_quote_scalar($self->{"rpl",0,$perlexpr});
+	$self->{"rpl",1,$perlexpr} =
+	    ::shell_quote_scalar($self->{"rpl",0,$perlexpr});
     }
     return $self->{"rpl",$quote,$perlexpr};
 }
