@@ -184,8 +184,7 @@ sub pipe_part_files {
     #   @commands to run to pipe the blocks of the file to the command given
     my ($file) = @_;
     my $buf = "";
-    open(my $fh, "<", $file) || die;
-    my $header = find_header(\$buf,$fh);
+    my $header = find_header(\$buf,open_or_exit($file));
     # find positions
     my @pos = find_split_positions($file,$opt::blocksize,length $header);
     # unshift job with cat_partial
@@ -693,6 +692,10 @@ sub get_options_from_array {
     #   false if parsing failed
     #   @array is changed
     my ($array_ref, @keep_only) = @_;
+    if(not @$array_ref) {
+	# Empty array: No need to look more at that
+	return 1;
+    }
     # A bit of shuffling of @ARGV needed as GetOptionsFromArray is not
     # supported everywhere
     my @save_argv;
@@ -818,7 +821,7 @@ sub parse_options {
 	# E.g: "{..} s:\.[^.]+$:;s:\.[^.]+$:;"
 	my ($shorthand,$long) = split/ /,$_,2;
 	$Global::rpl{$shorthand} = $long;
-    }	
+    }
     if(defined $opt::E) { $Global::end_of_file_string = $opt::E; }
     if(defined $opt::max_args) { $Global::max_number_of_args = $opt::max_args; }
     if(defined $opt::timeout) { $Global::timeoutq = TimeoutQueue->new($opt::timeout); }
@@ -1110,7 +1113,7 @@ sub open_joblog {
 		} else {
 		    # Just match the job number
 		    $joblog_regexp='^(\d+)';
-		}			
+		}
 		while(<$joblog_fh>) {
 		    if(/$joblog_regexp/o) {
 			# This is 30% faster than set_job_already_run($1);
@@ -3194,7 +3197,7 @@ sub swap_activity {
 		#  5  0  51208 1701096 198012 18857888    0    0    37   153   28   19 56 11 33  1
 		#  3  0  51208 1701288 198012 18857972    0    0     0     0 3638 10412 15  3 82  0
 		'linux' => ['vmstat 1 2 | tail -n1', '$7*$8'],
-		
+
 		# solaris: $6*$7
 		# $ vmstat -S 1 2
 		#  kthr      memory            page            disk          faults      cpu
@@ -3202,7 +3205,7 @@ sub swap_activity {
 		#  0 0 0 4628952 3208408 0  0  3  1  1  0  0 -0  2  0  0  263  613  246  1  2 97
 		#  0 0 0 4552504 3166360 0  0  0  0  0  0  0  0  0  0  0  246  213  240  1  1 98
 		'solaris' => ['vmstat -S 1 2 | tail -1', '$6*$7'],
-		
+
 		# darwin (macosx): $21*$22
 		# $ vm_stat -c 2 1
 		# Mach Virtual Memory Statistics: (page size of 4096 bytes)
@@ -3210,7 +3213,7 @@ sub swap_activity {
 		#   346306   829050    74871   606027        0   240231    90367  544858K 62343596  270837K    14178   415070      570102    939846      356      370      116      922  4019813        4        0        0
 		#   345740   830383    74875   606031        0   239234    90369     2696      359      553        0        0      570110    941179      356      370        0        0        0        0        0        0
 		'darwin' => ['vm_stat -c 2 1 | tail -n1', '$21*$22'],
-		
+
 		# ultrix: $12*$13
 		# $ vmstat -S 1 2
 		#  procs      faults    cpu      memory              page             disk
@@ -3218,7 +3221,7 @@ sub swap_activity {
 		#  1 0 0    4  23   2  3  0 97 7743 217k   0  0   0   0   0   0   0  0
 		#  1 0 0    6  40   8  0  1 99 7743 217k   0  0   3   0   0   0   0  0
 		'ultrix' => ['vmstat -S 1 2 | tail -1', '$12*$13'],
-		
+
 		# aix: $6*$7
 		# $ vmstat 1 2
 		# System configuration: lcpu=1 mem=2048MB
@@ -3229,7 +3232,7 @@ sub swap_activity {
 		#  0  0 333933 241803   0   0   0   0    0   0  10  143  90  0  0 99  0
 		#  0  0 334125 241569   0   0   0   0    0   0  37 5368 184  0  9 86  5
 		'aix' => ['vmstat 1 2 | tail -n1', '$6*$7'],
-		
+
 		# freebsd: $8*$9
 		# $ vmstat -H 1 2
 		#  procs      memory      page                    disks     faults         cpu
@@ -3237,7 +3240,7 @@ sub swap_activity {
 		#  1 0 0  596716   19560    32   0   0   0    33   8   0   0   11  220  277  0  0 99
 		#  0 0 0  596716   19560     2   0   0   0     0   0   0   0   11  144  263  0  1 99
 		'freebsd' => ['vmstat -H 1 2 | tail -n1', '$8*$9'],
-		
+
 		# mirbsd: $8*$9
 		# $ vmstat 1 2
 		#  procs   memory        page                    disks     traps         cpu
@@ -3245,7 +3248,7 @@ sub swap_activity {
 		#  0 0 0  25776 164968    34   0   0   0   0   0   0   0  230   259   38  4  0 96
 		#  0 0 0  25776 164968    24   0   0   0   0   0   0   0  237   275   37  0  0 100
 		'mirbsd' => ['vmstat 1 2 | tail -n1', '$8*$9'],
-		
+
 		# netbsd: $7*$8
 		# $ vmstat 1 2
 		#  procs    memory      page                       disks   faults      cpu
@@ -3253,7 +3256,7 @@ sub swap_activity {
 		#  0 0   138452   6012   54   0   0    0    1    2  3  0    4  100  23  0  0 100
 		#  0 0   138456   6008    1   0   0    0    0    0  0  0    7   26  19  0 0 100
 		'netbsd' => ['vmstat 1 2 | tail -n1', '$7*$8'],
-		
+
 		# openbsd: $8*$9
 		# $ vmstat 1 2
 		#  procs    memory       page                    disks    traps          cpu
@@ -3261,7 +3264,7 @@ sub swap_activity {
 		#  0 0 0  76596  109944   73   0   0   0   0   0   0   1    5   259   22  0  1 99
 		#  0 0 0  76604  109936   24   0   0   0   0   0   0   0    7   114   20  0  1 99
 		'openbsd' => ['vmstat 1 2 | tail -n1', '$8*$9'],
-		
+
 		# hpux: $8*$9
 		# $ vmstat 1 2
 		#          procs           memory                   page                              faults       cpu
@@ -3269,7 +3272,7 @@ sub swap_activity {
 		#     1     0     0   247211  216476    4    1     0    0     0    0     0    102  73005    54   6 11 83
 		#     1     0     0   247211  216421   43    9     0    0     0    0     0    144   1675    96  25269512791222387000 25269512791222387000 105
 		'hpux' => ['vmstat 1 2 | tail -n1', '$8*$9'],
-		
+
 		# dec_osf (tru64): $11*$12
 		# $ vmstat  1 2
 		# Virtual Memory Statistics: (pagesize = 8192)
@@ -3278,7 +3281,7 @@ sub swap_activity {
 		#   3 181  36  51K 1895 8696  348M  59M 122M   259  79M    0   5 218 302  4  1 94
 		#   3 181  36  51K 1893 8696     3   15   21     0   28    0   4  81 321  1  1 98
 		'dec_osf' => ['vmstat 1 2 | tail -n1', '$11*$12'],
-		
+
 		# gnu (hurd): $7*$8
 		# $ vmstat -k 1 2
 		# (pagesize: 4, size: 512288, swap size: 894972)
@@ -3286,7 +3289,7 @@ sub swap_activity {
 		# 371940  30844  89228  20276   298348      0    48192    19016   756105   99808  98%      876  20628 894972
 		# 371940  30844  89228  20276       +0     +0       +0       +0      +42      +2  98%      876  20628 894972
 		'gnu' => ['vmstat -k 1 2 | tail -n1', '$7*$8'],
-		
+
 		# -nto (qnx has no swap)
 		#-irix
 		#-svr5 (scosysv)
@@ -3742,7 +3745,8 @@ sub user_requested_processes {
             my $j = $1;
             $processes =
                 $self->ncpus() - $j;
-        } elsif ($opt_P =~ /^(\d+)\%$/) {
+        } elsif ($opt_P =~ /^(\d+(\.\d+)?)\%$/) {
+            # E.g. -P 10.5%
             my $j = $1;
             $processes =
                 $self->ncpus() * $j / 100;
@@ -4543,22 +4547,22 @@ sub slot {
 		# cat followed by tail.
 		# If $writerpid dead: finish after this round
 		use Fcntl;
-		
+
 		$|=1;
-		
+
 		my ($cmd, $writerpid, $read_file, $unlink_file) = @ARGV;
 		if($read_file) {
 		    open(IN,"<",$read_file) || die("cattail: Cannot open $read_file");
 		} else {
 		    *IN = *STDIN;
 		}
-		
+
 		my $flags;
 		fcntl(IN, F_GETFL, $flags) || die $!; # Get the current flags on the filehandle
 		$flags |= O_NONBLOCK; # Add non-blocking to the flags
 		fcntl(IN, F_SETFL, $flags) || die $!; # Set the flags on the filehandle
 		open(OUT,"|-",$cmd) || die("cattail: Cannot run $cmd");
-		
+
 		while(1) {
 		    # clear EOF
 		    seek(IN,0,1);
@@ -4587,7 +4591,7 @@ sub slot {
 			usleep($sleep);
 		    }
 		}
-		
+
 		sub usleep {
 		    # Sleep this many milliseconds.
 		    my $secs = shift;
@@ -4917,10 +4921,10 @@ sub kill {
 {
     my %pid_parentpid_cmd;
 
-    sub family_pids {
-	# Find the pids with this->pid as (grand)*parent
-	my $self = shift;
-	my $pid = $self->pid();
+    sub pid_table {
+	# return two tables:
+	# pid -> children of pid
+	# pid -> commandname
 
        	%pid_parentpid_cmd or %pid_parentpid_cmd =
 	    (
@@ -4932,7 +4936,7 @@ sub kill {
 	     'freebsd' => q( ps -o pid,ppid -ax ),
 	     'gnu' => q( ps -ef | awk '{print $2" "$3}' ),
 	     'hpux' => q( ps -ef | awk '{print $2" "$3}' ),
-	     'linux' => q( ps -ef | awk '{print $2" "$3}' ),
+	     'linux' => q( ps -ef | grep tange | awk '{print $2" "$3" "$8}' ),
 	     'mirbsd' => q( ps -o pid,ppid -ax ),
 	     'netbsd' => q( ps -o pid,ppid -ax ),
 	     'nto' => q( ps -ef | awk '{print $2" "$3}' ),
@@ -4942,29 +4946,40 @@ sub kill {
 	    );
 	$pid_parentpid_cmd{$^O} or ::die_bug("pid_parentpid_cmd for $^O missing");
 
-	my (@pidtable,%children_of,@pids);
-	# Table with pid parentpid
+	my (@pidtable,%children_of,%name_of);
+	# Table with pid -> children of pid
 	@pidtable = `$pid_parentpid_cmd{$^O}`;
 	for (@pidtable) {
-	    /(\S+)\s+(\S+)/ or ::die_bug("pidtable format");
+	    /(\S+)\s+(\S+)\s+(\S+)/ or ::die_bug("pidtable format: $_");
 	    push @{$children_of{$2}}, $1;
+	    $name_of{$2} = $3;
 	}
-	my @more = ($pid);
-	# While more (grand)*children
-	while(@more) {
-	    my @m;
-	    push @pids, @more;
-	    for my $parent (@more) {
-		if($children_of{$parent}) {
-		    # add the children of this parent
-		    push @m, @{$children_of{$parent}};
-		}
-	    }
-	    @more = @m;
-	}
-
-	return (@pids);
+	return(\%children_of, \%name_of);
     }
+}
+
+sub family_pids {
+    # Find the pids with this->pid as (grand)*parent
+    my $self = shift;
+    my $pid = $self->pid();
+    my @pids;
+
+    my ($children_of_ref,$name_of_ref) = pid_table();
+
+    my @more = ($pid);
+    # While more (grand)*children
+    while(@more) {
+	my @m;
+	push @pids, @more;
+	for my $parent (@more) {
+	    if($children_of_ref->{$parent}) {
+		# add the children of this parent
+		push @m, @{$children_of_ref->{$parent}};
+	    }
+	}
+	@more = @m;
+    }
+    return (@pids);
 }
 
 sub failed {
@@ -5574,7 +5589,7 @@ sub print {
 	# Check for disk full
 	exit_if_disk_full();
 	my $command = $self->sshlogin_wrap();
-	
+
 	if(($opt::dryrun or $Global::verbose) and $Global::grouped
 	   and
 	   not $self->{'verbose_printed'}) {
@@ -6313,7 +6328,7 @@ sub replace_placeholders {
 		 : "")
 		 .$4 }egx;# Context (post)
 	::debug("replace", "Positional replaced $word with: $w\n");
-	
+
 	if($w !~ /\257/) {
 	    # No more replacement strings in $w: No need to do more
 	    CORE::push(@{$replace{$word}}, $w);

@@ -3198,6 +3198,7 @@ There are a lot programs with some of the functionality of GNU
 B<parallel>. GNU B<parallel> strives to include the best of the
 functionality without sacrificing ease of use.
 
+
 =head2 SUMMARY TABLE
 
 The following features are in some of the comparable tools:
@@ -3323,6 +3324,9 @@ xapply: TODO - Please file a bug-report if you know what features xapply
 supports (See REPORTING BUGS).
 
 paexec: TODO - Please file a bug-report if you know what features paexec
+supports (See REPORTING BUGS).
+
+ladon: TODO - Please file a bug-report if you know what features ladon
 supports (See REPORTING BUGS).
 
 ClusterSSH: TODO - Please file a bug-report if you know what features ClusterSSH
@@ -3504,6 +3508,8 @@ B<9> killall -SIGUSR2 parallel
 
 B<pexec> is also a tool for running jobs in parallel.
 
+=head3 EXAMPLES FROM pexec MANUAL
+
 Here are the examples from B<pexec>'s info page with the equivalent
 using GNU B<parallel>:
 
@@ -3556,6 +3562,7 @@ faster as only one process will be either reading or writing:
 
 B<8> ls *jpg | parallel -j8 'sem --id diskio cat {} | jpegtopnm |' \
   'pnmscale 0.5 | pnmtojpeg | sem --id diskio cat > th_{}'
+
 
 =head2 DIFFERENCES BETWEEN xjobs AND GNU Parallel
 
@@ -3643,6 +3650,7 @@ B<seq 19 | parallel buffon -o - | sort -n >>B< result>
 B<cat files | parallel cmd>
 
 B<find dir -execdir sem cmd {} \;>
+
 
 =head2 DIFFERENCES BETWEEN xapply AND GNU Parallel
 
@@ -3745,6 +3753,7 @@ using GNU B<parallel>:
 
 =back
 
+
 =head2 DIFFERENCES BETWEEN map AND GNU Parallel
 
 B<map> sees it as a feature to have less features and in doing so it
@@ -3825,7 +3834,7 @@ processing, and dynamically timeouts.
 
 =head2 DIFFERENCES BETWEEN ladon AND GNU Parallel
 
-B<ladon> https://www.npmjs.org/package/ladon can run multiple jobs on files in parallel.
+B<ladon> can run multiple jobs on files in parallel.
 
 B<ladon> only works on files and the only way to specify files is
 using a quoted glob string (such as \*.jpg). It is not possible to
@@ -3836,10 +3845,10 @@ As replacement strings it uses FULLPATH DIRNAME BASENAME EXT RELDIR RELPATH
 These can be simulated using GNU B<parallel> by putting this in B<~/.parallel/config>:
 
     --rpl 'FULLPATH $_=::shell_quote($_);chomp($_=qx{readlink -f $_});'
-    --rpl 'DIRNAME $_=::dirname($_); $_=::shell_quote($_);chomp($_=qx{readlink -f $_});'
-    --rpl 'BASENAME s:.*/::; s:\.[^/.]+$::;'
+    --rpl 'DIRNAME $_=::shell_quote(::dirname($_));chomp($_=qx{readlink -f $_});'
+    --rpl 'BASENAME s:.*/::;s:\.[^/.]+$::;'
     --rpl 'EXT s:.*\.::'
-    --rpl 'RELDIR $_=::shell_quote($_);chomp(($_,$c)=qx{readlink -f $_;pwd});s:\Q$c/\E::;$_ = ::dirname($_);'
+    --rpl 'RELDIR $_=::shell_quote($_);chomp(($_,$c)=qx{readlink -f $_;pwd});s:\Q$c/\E::;$_=::dirname($_);'
     --rpl 'RELPATH $_=::shell_quote($_);chomp(($_,$c)=qx{readlink -f $_;pwd});s:\Q$c/\E::;'
 
 B<ladon> deals badly with filenames containing " and newline, and it fails for output larger than 200k:
@@ -3866,6 +3875,7 @@ B<3> parallel mkdir -p thumbs/RELDIR\; convert FULLPATH -thumbnail 100x100^ -gra
 B<4> ladon "~/Music/*.wav" -- lame -V 2 FULLPATH DIRNAME/BASENAME.mp3
 
 B<4> parallel lame -V 2 FULLPATH DIRNAME/BASENAME.mp3 ::: ~/Music/*.wav 
+
 
 =head2 DIFFERENCES BETWEEN ClusterSSH AND GNU Parallel
 
