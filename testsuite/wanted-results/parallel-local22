@@ -81,7 +81,11 @@ echo '### bug #42893: --block should not cause decimals in cat_partial'
 </tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 258899 129450|(true)
 </tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 388349 129450|(true)
 </tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 517799 71096|(true)
-echo '###bug #42902: profiles containing arguments with space'
-###bug #42902: profiles containing arguments with space
+echo '### bug #42902: profiles containing arguments with space'
+### bug #42902: profiles containing arguments with space
   echo "--rpl 'FULLPATH chomp(\$_=\"/bin/bash=\".\`readlink -f \$_\`);' " > ~/.parallel/FULLPATH;   parallel -JFULLPATH echo FULLPATH ::: $0
 /bin/bash=/bin/bash
+echo '### bug #42892: parallel -a nonexiting --pipepart'
+### bug #42892: parallel -a nonexiting --pipepart
+  parallel --pipepart -a nonexisting wc
+parallel: Error: Cannot open input file `nonexisting': No such file or directory.
