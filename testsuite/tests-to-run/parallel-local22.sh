@@ -57,13 +57,17 @@ echo '### bug #42055: --pipe -a bigfile should not require sequential reading of
   parallel --pipepart -a /etc/passwd -N 1 should not be run
   parallel --pipepart -a /etc/passwd -l 1 should not be run
 
-# TODO This is too unstable
-# echo '### --tmux test - check termination'
-#  perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' | stdout parallel --tmux echo {} :::: - ::: a b | perl -pe 's/\d/0/g'
-
 echo '### bug #42893: --block should not cause decimals in cat_partial'
   seq 100000 >/tmp/parallel-decimal; 
   parallel --dry-run -kvv --pipepart --block 0.12345M -a /tmp/parallel-decimal true; 
   rm /tmp/parallel-decimal
 
+echo '###bug #42902: profiles containing arguments with space'
+  echo "--rpl 'FULLPATH chomp(\$_=\"/bin/bash=\".\`readlink -f \$_\`);' " > ~/.parallel/FULLPATH; 
+  parallel -JFULLPATH echo FULLPATH ::: $0
+
 EOF
+
+# TODO This is too unstable
+# echo '### --tmux test - check termination'
+#  perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' | stdout parallel --tmux echo {} :::: - ::: a b | perl -pe 's/\d/0/g'

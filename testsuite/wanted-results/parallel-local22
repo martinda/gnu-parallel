@@ -73,9 +73,6 @@ parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines
 parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines, and -L.
   parallel --pipepart -a /etc/passwd -l 1 should not be run
 parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines, and -L.
-# TODO This is too unstable
-# echo '### --tmux test - check termination'
-#  perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' | stdout parallel --tmux echo {} :::: - ::: a b | perl -pe 's/\d/0/g'
 echo '### bug #42893: --block should not cause decimals in cat_partial'
 ### bug #42893: --block should not cause decimals in cat_partial
   seq 100000 >/tmp/parallel-decimal;   parallel --dry-run -kvv --pipepart --block 0.12345M -a /tmp/parallel-decimal true;   rm /tmp/parallel-decimal
@@ -84,3 +81,7 @@ echo '### bug #42893: --block should not cause decimals in cat_partial'
 </tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 258899 129450|(true)
 </tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 388349 129450|(true)
 </tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 517799 71096|(true)
+echo '###bug #42902: profiles containing arguments with space'
+###bug #42902: profiles containing arguments with space
+  echo "--rpl 'FULLPATH chomp(\$_=\"/bin/bash=\".\`readlink -f \$_\`);' " > ~/.parallel/FULLPATH;   parallel -JFULLPATH echo FULLPATH ::: $0
+/bin/bash=/bin/bash
