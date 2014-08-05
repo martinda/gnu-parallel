@@ -29,10 +29,6 @@ echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop'; 
 echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop (II)';   echo a | parallel -qX echo  "'{}'"
 ### Bug before 2009-08-26 causing regexp compile error or infinite loop (II)
 'a'
-echo '### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL';   seq 1 2 | SHELL=tcsh MANPATH=. stdout parallel -k --nice 8 setenv a b\;echo \$SHELL
-### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL
-tcsh 1
-tcsh 2
 echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
 ### bug #42041: Implement $PARALLEL_JOBSLOT
   parallel -k --slotreplace // -j2 sleep 1\;echo // ::: {1..4}
@@ -89,3 +85,121 @@ echo '### bug #42892: parallel -a nonexiting --pipepart'
 ### bug #42892: parallel -a nonexiting --pipepart
   parallel --pipepart -a nonexisting wc
 parallel: Error: Cannot open input file `nonexisting': No such file or directory.
+echo '### bug #42913: Dont use $SHELL but the shell currently running'
+### bug #42913: Dont use $SHELL but the shell currently running
+  echo '## Unknown shell => $SHELL (bash)'
+## Unknown shell => $SHELL (bash)
+  parallel -j1 "cp \`which {}\` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+shell? /bin/bash -c cp `which ash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which bash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which csh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which dash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which fish` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+which zsh => shell path /usr/bin/zsh
+shell? /bin/bash -c cp `which ksh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which ksh93` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which mksh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which pdksh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which posh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which rbash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which rzsh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which sash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which sh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which tcsh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which yash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c cp `which zsh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+MANPATH: Undefined variable.
+/tmp/SHELL: -c: bad option(s)
+Local configuration error occurred.
+Contact the systems administrator for further assistance.
+SHELL: applet not found
+MANPATH: Undefined variable.
+  echo '## Known shells -c'
+## Known shells -c
+  parallel -k "\`which {}\` -c 'parallel -Dinit echo ::: 1' | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+which ash => shell path /bin/ash
+shell? /bin/bash -c `which bash` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+which csh => shell path /bin/csh
+which dash => shell path /bin/dash
+which fdsh => shell path /usr/bin/fdsh
+which fish => shell path /usr/bin/fish
+which zsh => shell path /usr/bin/zsh
+shell? /bin/bash -c `which ksh` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c `which ksh93` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c `which mksh` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c `which pdksh` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+which posh => shell path /bin/posh
+shell? /bin/bash -c `which rbash` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c `which rzsh` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+which sash => shell path /bin/sash
+which sh => shell path /bin/sh
+which static-sh => shell path /bin/static-sh
+which tcsh => shell path /usr/bin/tcsh
+shell? /bin/bash -c `which yash` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+shell? /bin/bash -c `which zsh` -c 'parallel -Dinit echo ::: 1' | grep which;
+which bash => shell path /bin/bash
+MANPATH: Undefined variable.
+MANPATH: Undefined variable.
+Local configuration error occurred.
+Contact the systems administrator for further assistance.
+MANPATH: Undefined variable.
+MANPATH: Undefined variable.
+  echo '## Known shells |'
+## Known shells |
+  parallel -k "echo 'parallel -Dinit echo ::: 1' | \`which {}\` | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+which ash => shell path /bin/ash
+which bash => shell path /bin/bash
+which csh => shell path /bin/csh
+which dash => shell path /bin/dash
+which fdsh => shell path /usr/bin/fdsh
+which fish => shell path /usr/bin/fish
+which zsh => shell path /usr/bin/zsh
+which ksh => shell path /usr/bin/ksh
+which ksh93 => shell path /bin/ksh93
+which mksh => shell path /bin/mksh
+which pdksh => shell path /bin/pdksh
+which posh => shell path /bin/posh
+which rbash => shell path /bin/rbash
+which rzsh => shell path /bin/rzsh
+which sash => shell path /bin/sash
+which sh => shell path /bin/sh
+which static-sh => shell path /bin/static-sh
+which tcsh => shell path /usr/bin/tcsh
+which yash => shell path /usr/bin/yash
+which zsh => shell path /usr/bin/zsh
+MANPATH: Undefined variable.
+MANPATH: Undefined variable.
+Local configuration error occurred.
+Contact the systems administrator for further assistance.
+MANPATH: Undefined variable.
+MANPATH: Undefined variable.
+  echo '## Started directly from perl'
+## Started directly from perl
+  perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which
+shell? /bin/bash -c   perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which
+which bash => shell path /bin/bash

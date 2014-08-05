@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Create a boxplot of running 1000 jobs 10 times on all released
+# versions of GNU Parallel
+
+# test
+#  --cpus-as-cores (virker ikke)
+#  hvor stor forskel mlm 2 run
+#  hvor stor forskel mlm 1000/3000/10000
+#  hvor stor forskel mlm 10/30/100
+
+# Non-fixed cpu-speed: 50% spread=1-2 ms
+# Fixed cpu-speed: 50% spread=0.7-1.5 ms
+# 4-cpu: 30% faster: 9 ms -> 6 ms
+
+
+if ! /tmp/bin/parallel-20140722 --version; then
+  wget -c ftp://ftp.uni-kl.de/pub/gnu/parallel/p*
+  parallel 'gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve {}' ::: *.sig
+  parallel --plus 'tar xvf {.} && cd {...} && ./configure --prefix /tmp/{.}-bin && make && make install' ::: *sig
+  perl -i -pe 's/qw\(keys/(keys/' parallel*/src/parallel
+  mkdir /tmp/bin
+  parallel cp {} /tmp/bin/'{=s:/.*::=}' ::: parallel*/src/parallel
+fi
+
+measure() {
+    # 100: Much jumping
+    # 300: Same sort order every time
+    # 1000: Same sort order every time
+    OUTER=$1
+    INNER=$2
+    CORES=$3
+    VERSION=$4
+
+    # Force cpuspeed at 1.7GHz
+    forever 'parallel sudo cpufreq-set -f 1700MHz -c{} ::: {0..7}' &
+
+    PATH=/tmp/bin:$PATH
+    cd /tmp/bin
+    ls parallel-* | shuf | parallel -j$CORES --joblog /tmp/joblog.csv 'seq '$INNER' | {2} true' :::: <(seq $OUTER) - 
+
+    killall forever
+
+    Rscript - <<_
+      jl<-read.csv("/tmp/joblog.csv",sep="\t");
+      jl\$Command <- as.factor(substr(jl\$Command, 13, nchar(as.character(jl\$Command))-5))
+      pdf("/tmp/boxplot.pdf");
+      par(cex.axis=0.5);
+      boxplot(JobRuntime/$INNER*1000~Command,data=jl,las=2,outline=F,
+              ylab="milliseconds/job",main="GNU Parallel performance\n$OUTER trials each running $INNER");
+_
+    cp /tmp/boxplot.pdf /tmp/boxplot-j$CORES-1.7ghz-$OUTER-${INNER}v$VERSION.pdf
+    evince /tmp/boxplot.pdf
+}
+
+measure 300 1000 8 1

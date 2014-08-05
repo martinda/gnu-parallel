@@ -34,11 +34,6 @@ use Getopt::Long;
 use strict;
 use File::Basename;
 
-if(not $ENV{SHELL}) {
-    # $ENV{SHELL} is sometimes not set on Mac OS X and Windows
-    ::warning("\$SHELL not set. Using /bin/sh.\n");
-    $ENV{SHELL} = "/bin/sh";
-}
 if(not $ENV{HOME}) {
     # $ENV{HOME} is sometimes not set if called from PHP
     ::warning("\$HOME not set. Using /tmp\n");
@@ -780,6 +775,7 @@ sub parse_options {
 
     if(@opt::v) { $Global::verbose = $#opt::v+1; } # Convert -v -v to v=2
     $Global::debug = $opt::D;
+    $Global::shell = parent_shell($$) || $ENV{'SHELL'} || "/bin/sh";
     if(defined $opt::X) { $Global::ContextReplace = 1; }
     if(defined $opt::silent) { $Global::verbose = 0; }
     if(defined $opt::keeporder) { $Global::keeporder = 1; }
@@ -1066,8 +1062,8 @@ sub parse_env_var {
     my @bash_functions = grep { substr($ENV{$_},0,4) eq "() {" } @vars;
     if(@bash_functions) {
 	# Functions are not supported for all shells
-	if($ENV{'SHELL'} !~ m:/(bash|rbash|zsh|rzsh|dash|ksh):) {
-	    ::warning("Shell functions may not be supported in $ENV{'SHELL'}\n");
+	if($Global::shell !~ m:/(bash|rbash|zsh|rzsh|dash|ksh):) {
+	    ::warning("Shell functions may not be supported in $Global::shell\n");
 	}
     }
     push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_functions;
@@ -1166,15 +1162,6 @@ sub find_compression_program {
     return ("cat","cat");
 }
 
-sub which {
-    # Input:
-    #   $program = program to find the path to
-    # Returns:
-    #   $full_path = full path to $program. undef if not found
-    my $program = $_[0];
-
-    return (grep { -e $_."/".$program } split(":",$ENV{'PATH'}))[0];
-}
 
 sub read_options {
     # Read options from command line, profile and $PARALLEL
@@ -2831,6 +2818,116 @@ sub hostname {
         $Private::hostname = $hostname || "nohostname";
     }
     return $Private::hostname;
+}
+
+sub which {
+    # Input:
+    #   @programs = programs to find the path to
+    # Returns:
+    #   @full_path = full paths to @programs. Nothing if not found
+    my @which;
+    for my $prg (@_) {
+	push @which, map { $_."/".$prg } grep { -x $_."/".$prg } split(":",$ENV{'PATH'});
+    }
+    return @which;
+}
+
+{
+    my ($regexp,%fakename);
+
+    sub parent_shell {
+	# Input:
+	#   $pid = pid to see if (grand)*parent is a shell
+	# Returns:
+	#   $shellpath = path to shell - undef if no shell found
+	my $pid = shift;
+	if(not $regexp) {
+	    # All shells known to mankind
+	    #
+	    # ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh
+	    # posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+	    my @shells = qw(ash bash csh dash fdsh fish fizsh ksh
+                            ksh93 mksh pdksh posh rbash rush rzsh
+                            sash sh static-sh tcsh yash zsh -sh -csh);
+	    # Can be formatted as:
+	    #   [sh]  -sh  sh  busybox sh
+	    #   /bin/sh /sbin/sh /opt/csw/sh
+	    # NOT: foo.sh sshd crash flush pdflush scosh fsflush ssh
+	    my $shell = "(?:".join("|",@shells).")";
+	    $regexp = '^((\[)('. $shell. ')(\])|(|\S+/|busybox )('. $shell. '))($| )';
+	    %fakename = (
+		# csh and tcsh disguise themselves as -sh/-csh
+		"-sh" => ["csh", "tcsh"],
+		"-csh" => ["tcsh", "csh"],
+		);
+	}
+	my ($children_of_ref, $parent_of_ref, $name_of_ref) = pid_table();
+	my $shellpath;
+	my $testpid = $pid;
+	while($testpid) {
+	    ::debug("init", "shell? ". $name_of_ref->{$testpid}."\n");
+	    if($name_of_ref->{$testpid} =~ /$regexp/o) {
+		::debug("init", "which $3$6 => ");
+		$shellpath = (which($3.$6,@{$fakename{$3.$6}}))[0];
+		::debug("init", "shell path $shellpath\n");
+		$shellpath and last;
+	    }
+	    $testpid = $parent_of_ref->{$testpid};
+	}
+	return $shellpath;
+    }
+}
+
+{
+    my %pid_parentpid_cmd;
+
+    sub pid_table {
+	# return two tables:
+	# pid -> children of pid
+	# pid -> pid of parent
+	# pid -> commandname
+
+       	if(not %pid_parentpid_cmd) {
+	    # Filter for SysV-style `ps`
+	    my $sysv = q( ps -ef | perl -ane '1..1 and /^(.*)CO?MM?A?N?D/ and $s=length $1;).
+		q(s/^.{$s}//; print "@F[1,2] $_"' );
+	    # BSD-style `ps`
+	    my $bsd = q(ps -o pid,ppid,command -ax);
+	    # TODO test these on Cygwin, darwin
+	    %pid_parentpid_cmd =
+	    (
+	     'aix' => $sysv,
+	     'cygwin' => $sysv,
+	     'dec_osf' => $sysv,
+	     'darwin' => $bsd,
+	     'dragonfly' => $bsd,
+	     'freebsd' => $bsd,
+	     'gnu' => $sysv,
+	     'hpux' => $sysv,
+	     'linux' => $sysv,
+	     'mirbsd' => $bsd,
+	     'netbsd' => $bsd,
+	     'nto' => $sysv,
+	     'openbsd' => $bsd,
+	     'solaris' => $sysv,
+	     'svr5' => $sysv,
+	    );
+	}
+	$pid_parentpid_cmd{$^O} or ::die_bug("pid_parentpid_cmd for $^O missing");
+
+	my (@pidtable,%parent_of,%children_of,%name_of);
+	# Table with pid -> children of pid
+	@pidtable = `$pid_parentpid_cmd{$^O}`;
+	my $p=$$;
+	for (@pidtable) {
+	    # must match: 24436 21224 busybox ash
+	    /(\S+)\s+(\S+)\s+(\S+.*)/ or ::die_bug("pidtable format: $_");
+	    $parent_of{$1} = $2;
+	    push @{$children_of{$2}}, $1;
+	    $name_of{$1} = $3;
+	}
+	return(\%children_of, \%parent_of, \%name_of);
+    }
 }
 
 sub reap_usleep {
@@ -4918,45 +5015,7 @@ sub kill {
     }
 }
 
-{
-    my %pid_parentpid_cmd;
 
-    sub pid_table {
-	# return two tables:
-	# pid -> children of pid
-	# pid -> commandname
-
-       	%pid_parentpid_cmd or %pid_parentpid_cmd =
-	    (
-	     'aix' => q( ps -ef | awk '{print $2" "$3}' ),
-	     'cygwin' => q( ps -ef | awk '{print $2" "$3}' ),
-	     'dec_osf' => q( ps -ef | awk '{print $2" "$3}' ),
-	     'darwin' => q( ps -o pid,ppid -ax ),
-	     'dragonfly' => q( ps -o pid,ppid -ax ),
-	     'freebsd' => q( ps -o pid,ppid -ax ),
-	     'gnu' => q( ps -ef | awk '{print $2" "$3}' ),
-	     'hpux' => q( ps -ef | awk '{print $2" "$3}' ),
-	     'linux' => q( ps -ef | grep tange | awk '{print $2" "$3" "$8}' ),
-	     'mirbsd' => q( ps -o pid,ppid -ax ),
-	     'netbsd' => q( ps -o pid,ppid -ax ),
-	     'nto' => q( ps -ef | awk '{print $2" "$3}' ),
-	     'openbsd' => q( ps -o pid,ppid -ax ),
-	     'solaris' => q( ps -ef | awk '{print $2" "$3}' ),
-	     'svr5' => q( ps -ef | awk '{print $2" "$3}' ),
-	    );
-	$pid_parentpid_cmd{$^O} or ::die_bug("pid_parentpid_cmd for $^O missing");
-
-	my (@pidtable,%children_of,%name_of);
-	# Table with pid -> children of pid
-	@pidtable = `$pid_parentpid_cmd{$^O}`;
-	for (@pidtable) {
-	    /(\S+)\s+(\S+)\s+(\S+)/ or ::die_bug("pidtable format: $_");
-	    push @{$children_of{$2}}, $1;
-	    $name_of{$2} = $3;
-	}
-	return(\%children_of, \%name_of);
-    }
-}
 
 sub family_pids {
     # Find the pids with this->pid as (grand)*parent
@@ -4964,7 +5023,7 @@ sub family_pids {
     my $pid = $self->pid();
     my @pids;
 
-    my ($children_of_ref,$name_of_ref) = pid_table();
+    my ($children_of_ref, $parent_of_ref, $name_of_ref) = ::pid_table();
 
     my @more = ($pid);
     # While more (grand)*children
@@ -5415,7 +5474,7 @@ sub start {
 
 	# The eval is needed to catch exception from open3
 	eval {
-	    $pid = ::open3($stdin_fh, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+	    $pid = ::open3($stdin_fh, ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
 		::die_bug("open3-pipe");
 	    1;
 	};
@@ -5430,7 +5489,7 @@ sub start {
 	    $command = $job->tmux_wrap($command);
 	}
 	eval {
-	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
 		::die_bug("open3-a");
 	    1;
 	};
@@ -5446,7 +5505,7 @@ sub start {
 	    $command = $job->tmux_wrap($command);
 	}
 	eval {
-	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
 		::die_bug("open3-/dev/tty");
 	    $Global::tty_taken = $pid;
 	    close $devtty_fh;
@@ -5457,7 +5516,7 @@ sub start {
 	    $command = $job->tmux_wrap($command);
 	}
 	eval {
-	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $ENV{SHELL}, "-c", $command) ||
+	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
 		::die_bug("open3-gensym");
 	    1;
 	};
@@ -6230,9 +6289,9 @@ sub replaced {
 	    # Prepend \nice -n19 $SHELL -c
 	    # and quote
 	    # \ before nice is needed to avoid tcsh's built-in
-	    $self->{'replaced'} = '\nice' ." -n" . $opt::nice . " "
-		. $ENV{SHELL}." -c "
-		. ::shell_quote_scalar($self->{'replaced'});
+	    $self->{'replaced'} = '\nice'. " -n". $opt::nice. " ".
+		$Global::shell. " -c ".
+		::shell_quote_scalar($self->{'replaced'});
 	}
 	if($opt::shellquote) {
 	    # Prepend echo

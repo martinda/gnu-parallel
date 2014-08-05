@@ -40,9 +40,6 @@ echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop';
 echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop (II)'; 
   echo a | parallel -qX echo  "'{}'"
 
-echo '### nice and tcsh and Bug #33995: Jobs executed with sh instead of $SHELL'; 
-  seq 1 2 | SHELL=tcsh MANPATH=. stdout parallel -k --nice 8 setenv a b\;echo \$SHELL
-
 echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
   parallel -k --slotreplace // -j2 sleep 1\;echo // ::: {1..4}
   parallel -k -j2 sleep 1\;echo {%} ::: {1..4}
@@ -68,6 +65,19 @@ echo '### bug #42902: profiles containing arguments with space'
 
 echo '### bug #42892: parallel -a nonexiting --pipepart'
   parallel --pipepart -a nonexisting wc
+
+echo '### bug #42913: Dont use $SHELL but the shell currently running'
+  echo '## Unknown shell => $SHELL (bash)'
+  parallel -j1 "cp \`which {}\` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;" 
+  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+  echo '## Known shells -c'
+  parallel -k "\`which {}\` -c 'parallel -Dinit echo ::: 1' | grep which;" 
+  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+  echo '## Known shells |'
+  parallel -k "echo 'parallel -Dinit echo ::: 1' | \`which {}\` | grep which;" 
+  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+  echo '## Started directly from perl'
+  perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which
 
 EOF
 
