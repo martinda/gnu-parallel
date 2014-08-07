@@ -647,8 +647,8 @@ sub options_hash {
 	 "arg-file|a=s" => \@opt::a,
 	 "no-run-if-empty|r" => \$opt::r,
 	 "replace|i:s" => \$opt::i,
-	 "E=s" => \$opt::E,
-	 "eof|e:s" => \$opt::E,
+	 "E=s" => \$opt::eof,
+	 "eof|e:s" => \$opt::eof,
 	 "max-args|n=i" => \$opt::max_args,
 	 "max-replace-args|N=i" => \$opt::max_replace_args,
 	 "colsep|col-sep|C=s" => \$opt::colsep,
@@ -818,7 +818,7 @@ sub parse_options {
 	my ($shorthand,$long) = split/ /,$_,2;
 	$Global::rpl{$shorthand} = $long;
     }
-    if(defined $opt::E) { $Global::end_of_file_string = $opt::E; }
+    if(defined $opt::eof) { $Global::end_of_file_string = $opt::eof; }
     if(defined $opt::max_args) { $Global::max_number_of_args = $opt::max_args; }
     if(defined $opt::timeout) { $Global::timeoutq = TimeoutQueue->new($opt::timeout); }
     if(defined $opt::tmpdir) { $ENV{'TMPDIR'} = $opt::tmpdir; }
@@ -6902,7 +6902,7 @@ sub empty {
     for my $fh (@{$self->{'fhs'}}) {
 	$empty &&= eof($fh);
     }
-    ::debug("run", "MultifileQueue->empty $empty");
+    ::debug("run", "MultifileQueue->empty $empty ");
     return $empty;
 }
 
@@ -7036,8 +7036,8 @@ sub read_arg_from_fh {
 	if($Global::end_of_file_string and
 	   $arg eq $Global::end_of_file_string) {
 	    # Ignore the rest of input file
-	    while (<$fh>) {}
-#	    ::debug("run", "EOF-string $arg\n");
+	    close $fh;
+	    ::debug("run", "EOF-string ($arg) met\n");
 	    if(defined $prepend) {
 		return Arg->new($prepend);
 	    } else {

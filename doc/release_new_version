@@ -223,14 +223,18 @@ GNU Parallel 20140822 ('Argentina/Gaza') has been released. It is available for 
 
 Haiku of the month:
 
-  >>>Are you tired of
-  inflexible replacements?
-  Use Perl expressions.
-         -- Ole Tange
+  code fork headache blues?
+  option P is your new friend
+  `man parallel` now!
+         -- Malcolm Cook
 
 New in this release:
 
+* GNU Parallel now uses the same shell it was started from as the command shell for local jobs. So if GNU Parallel is started from tcsh it will use tcsh as its shell even if the login $SHELL is different. For remote jobs the login $SHELL will be used.
+
 * GNU Parallel was cited in: A Web Service for Scholarly Big Data Information Extraction http://patshih.ist.psu.edu/publications/Williams-CiteSeerExtractor-ICWS14.pdf
+
+* --plus adds the replacement strings {+/} {+.} {+..} {+...} {..} {...} {/..} {/...}. The idea being that '+foo' matches the opposite of 'foo' and {} = {+/}/{/} = {.}.{+.} = {+/}/{/.}.{+.} = {..}.{+..} = {+/}/{/..}.{+..} = {...}.{+...} = {+/}/{/...}.{+...}
 
 * GNU Parallel was covered in the webcast 2014-08-20: Data Science at the Command Line http://www.oreilly.com/pub/e/3115
 

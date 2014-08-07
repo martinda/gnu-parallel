@@ -1012,6 +1012,14 @@ control on the command line (used by GNU B<parallel> internally when
 called with B<--sshlogin>).
 
 
+=item B<--plus> (alpha testing)
+
+Activate additional replacement strings: {+/} {+.} {+..} {+...} {..}
+{...} {/..} {/...}. The idea being that '{+foo}' matches the opposite of
+'{foo}' and {} = {+/}/{/} = {.}.{+.} = {+/}/{/.}.{+.} = {..}.{+..} =
+{+/}/{/..}.{+..} = {...}.{+...} = {+/}/{/...}.{+...}
+
+
 =item B<--progress>
 
 Show progress of computations. List the computers involved in the task
@@ -2862,7 +2870,7 @@ The idea is to put the jobs into a file and have GNU B<parallel> read
 from that continuously. As GNU B<parallel> will stop at end of file we
 use B<tail> to continue reading:
 
-B<true >>B<jobqueue>; B<tail -f jobqueue | parallel>
+B<true >>B<jobqueue>; B<tail -n+0 -f jobqueue | parallel>
 
 To submit your jobs to the queue:
 
@@ -2883,6 +2891,14 @@ in which case the output from the jobs are printed immediately).
 E.g. if you have 10 jobslots then the output from the first completed
 job will only be printed when job 11 has started, and the output of
 second completed job will only be printed when job 12 has started.
+
+To use B<--eof> to make GNU B<parallel> exit, B<tail> also needs to be
+forced to exit:
+
+    tail -n+0 -f command-list.txt |
+      (parallel --eof=EXIT {}; echo Parallel is now done;
+       (seq 1000 >> command-list.txt &);
+      echo Done appending dummy data forcing tail to exit)
 
 
 =head1 EXAMPLE: GNU Parallel as dir processor
