@@ -23,6 +23,14 @@ Exit code 1
 echo '### bug #42725: csh with \n in variables'
 ### bug #42725: csh with \n in variables
   not_csh() { echo This is not csh/tcsh; };   export -f not_csh;   parallel --env not_csh -S csh@lo not_csh ::: 1;   parallel --env not_csh -S tcsh@lo not_csh ::: 1;   parallel --env not_csh -S parallel@lo not_csh ::: 1; 
-CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS
-CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS
+CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
+CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
 This is not csh/tcsh
+Unmatched ".
+\} || export not_csh=\(\)\ \{\ \ echo\ This\ is\ not\ csh/tcsh: Command not found.
+Unmatched ".
+parallel: Warning: Could not figure out number of cpus on csh@lo (). Using 1.
+Unmatched ".
+\} || export not_csh=\(\)\ \{\ \ echo\ This\ is\ not\ csh/tcsh: Command not found.
+Unmatched ".
+parallel: Warning: Could not figure out number of cpus on tcsh@lo (). Using 1.

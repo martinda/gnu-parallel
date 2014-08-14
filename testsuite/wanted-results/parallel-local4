@@ -108,7 +108,6 @@ parallel: Warning: $HOME not set. Using /tmp
 echo '### How do we deal with missing $SHELL'
 ### How do we deal with missing $SHELL
    unset SHELL; stdout perl -w $(which parallel) -k echo ::: 1 2 3
-parallel: Warning: $SHELL not set. Using /bin/sh.
 1
 2
 3

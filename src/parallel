@@ -231,7 +231,7 @@ sub find_split_positions {
     my @pos;
     my ($recstart,$recend) = recstartrecend();
     my $recendrecstart = $recend.$recstart;
-    open (my $fh, "<", $file) || die;
+    my $fh = ::open_or_exit($file);
     push(@pos,$headerlen);
     for(my $pos = $block+$headerlen; $pos < $size; $pos += $block) {
 	my $buf;
@@ -720,7 +720,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140722;
+    $Global::version = 20140815;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1035,7 +1035,7 @@ sub parse_env_var {
     # Returns: N/A
     $Global::envvar = "";
     $Global::envwarn = "";
-    my @vars = ();
+    my @vars = ('parallel_bash_environment');
     for my $varstring (@opt::env) {
         # Split up --env VAR1,VAR2
 	push @vars, split /,/, $varstring;
@@ -1057,7 +1057,8 @@ sub parse_env_var {
     }
     # Keep only defined variables
     @vars = grep { defined($ENV{$_}) } @vars;
-    my @qcsh = map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  } @vars;
+    my @qcsh = (map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  }
+		grep { not /^parallel_bash_environment$/ } @vars);
     my @qbash = map { my $a=$_; "export $a=" . env_quote($ENV{$a}) } @vars;
     my @bash_functions = grep { substr($ENV{$_},0,4) eq "() {" } @vars;
     if(@bash_functions) {
@@ -1067,13 +1068,14 @@ sub parse_env_var {
 	}
     }
     push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_functions;
-
     # Check if any variables contain \n
-    if(grep /\n/, @ENV{@vars}) {
+    if(my @v = grep { $ENV{$_}=~/\n/ } @vars) {
 	# \n is bad for csh and will cause it to fail.
-	$Global::envwarn .= ::shell_quote_scalar(q{echo $SHELL | egrep "/t?csh" > /dev/null && echo CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS && exec false;}."\n");
+	$Global::envwarn = ::shell_quote_scalar(q{echo $SHELL | egrep "/t?csh" > /dev/null && echo CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset }."@v".q{ && exec false;}."\n\n") . $Global::envwarn;
     }
 
+    if(not @qcsh) { push @qcsh, "true"; }
+    if(not @qbash) { push @qbash, "true"; }
     # Create lines like:
     # echo $SHELL | grep "/t\\{0,1\\}csh" >/dev/null && setenv V1 val1 && setenv V2 val2 || export V1=val1 && export V2=val2 ; echo "$V1$V2"
     if(@vars) {
@@ -1084,6 +1086,9 @@ sub parse_env_var {
 	     . q{ || }
 	     . join(" && ", @qbash)
 	     .q{;});
+	if($ENV{'parallel_bash_environment'}) {
+	    $Global::envvar .= "parallel_bash_environment;\n";
+	}
     }
     $Global::envvarlen = length $Global::envvar;
 }
@@ -1425,6 +1430,7 @@ sub _maybe_unquote {
 sub _shellwords {
     # '"'"'\""'"'  foo\ bar\"   '\" '\ quux => (q("'""), 'foo bar"', '\"  quux');
     my $s = shift;
+    # TODO: fails on " -v"
     my (@words);
     while($s =~ s{^
           (
@@ -2042,6 +2048,7 @@ sub get_job_with_sshlogin {
 	::debug("start", "No more jobs: JobQueue empty\n");
         return undef;
     }
+#    if(not $sshlogin->start_more()) { return undef; }
 
     my $clean_command = $job->replaced();
     if($clean_command =~ /^\s*$/) {
@@ -2867,8 +2874,8 @@ sub which {
 	while($testpid) {
 	    ::debug("init", "shell? ". $name_of_ref->{$testpid}."\n");
 	    if($name_of_ref->{$testpid} =~ /$regexp/o) {
-		::debug("init", "which $3$6 => ");
-		$shellpath = (which($3.$6,@{$fakename{$3.$6}}))[0];
+		::debug("init", "which ".($3||$6)." => ");
+		$shellpath = (which($3 || $6,@{$fakename{$3 || $6}}))[0];
 		::debug("init", "shell path $shellpath\n");
 		$shellpath and last;
 	    }
@@ -3124,8 +3131,8 @@ sub new {
     my $class = shift;
     my $sshlogin_string = shift;
     my $ncpus;
-    if($sshlogin_string =~ s:^(\d+)/:: and $1) {
-        # Override default autodetected ncpus unless zero or missing
+    if($sshlogin_string =~ s:^(\d+)/:: and defined $1) {
+        # Override default autodetected ncpus unless missing
         $ncpus = $1;
     }
     my $string = $sshlogin_string;
@@ -3868,9 +3875,7 @@ sub user_requested_processes {
             ::error("Parsing of --jobs/-j/--max-procs/-P failed.\n");
             ::die_usage();
         }
-        if($processes < 1) {
-            $processes = 1;
-        }
+	$processes = ::ceil($processes);
     }
     return $processes;
 }
@@ -3888,10 +3893,12 @@ sub ncpus {
             }
         } else {
             my $ncpu;
+	    my $sqe = ::shell_quote_scalar($Global::envvar);
             if($opt::use_cpus_instead_of_cores) {
-                $ncpu = qx(echo|$sshcmd $serverlogin $Global::envvar parallel --number-of-cpus);
+                $ncpu = qx(echo|$sshcmd $serverlogin $sqe parallel --number-of-cpus);
             } else {
-                $ncpu = qx(echo|$sshcmd $serverlogin $Global::envvar parallel --number-of-cores);
+		::debug("init",qq(echo|$sshcmd $serverlogin $sqe parallel --number-of-cores\n));
+                $ncpu = qx(echo|$sshcmd $serverlogin $sqe parallel --number-of-cores);
             }
 	    chomp $ncpu;
             if($ncpu =~ /^\s*[0-9]+\s*$/s) {
@@ -5957,7 +5964,8 @@ sub populate {
     # Returns: N/A
     my $self = shift;
     my $next_arg;
-    my $max_len = $Global::minimal_command_line_length || Limits::Command::max_length();
+#    my $max_len = $Global::minimal_command_line_length || Limits::Command::max_length();
+    my $max_len = Limits::Command::max_length();
 
     if($opt::cat or $opt::fifo) {
 	# Get a tempfile name
@@ -5987,7 +5995,7 @@ sub populate {
 		my $args = join(" ", map { $_->orig() } @$next_arg);
 		::error("Command line too long (",
 			$self->len(), " >= ",
-			Limits::Command::max_length(),
+			$max_len,
 			") at number ",
 			$self->{'arg_queue'}->arg_number(),
 			": ".

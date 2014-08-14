@@ -62,6 +62,8 @@ echo '### bug #42893: --block should not cause decimals in cat_partial'
 echo '### bug #42902: profiles containing arguments with space'
   echo "--rpl 'FULLPATH chomp(\$_=\"/bin/bash=\".\`readlink -f \$_\`);' " > ~/.parallel/FULLPATH; 
   parallel -JFULLPATH echo FULLPATH ::: $0
+  PARALLEL="--rpl 'FULLPATH chomp(\$_=\"/bin/bash=\".\`readlink -f \$_\`);' -v" parallel  echo FULLPATH ::: $0
+  PARALLEL="--rpl 'FULLPATH chomp(\$_=\"/bin/bash=\".\`readlink -f \$_\`);' perl -e \'print \\\"@ARGV\\\n\\\"\' " parallel With script in \\\$PARALLEL FULLPATH ::: .
 
 echo '### bug #42892: parallel -a nonexiting --pipepart'
   parallel --pipepart -a nonexisting wc

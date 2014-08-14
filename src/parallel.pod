@@ -97,7 +97,7 @@ B<exportf> to export and to set $SHELL to bash:
 
 The command cannot contain the character \257 (macron: ¯).
 
-=item B<{}> (alpha testing)
+=item B<{}> (beta testing)
 
 Input line. This replacement string will be replaced by a full line
 read from the input source. The input source is normally stdin
@@ -110,7 +110,7 @@ If the command line contains no replacement strings then B<{}> will be
 appended to the command line.
 
 
-=item B<{.}> (alpha testing)
+=item B<{.}> (beta testing)
 
 Input line without extension. This replacement string will be replaced
 by the input with the extension removed. If the input line contains
@@ -126,7 +126,7 @@ The replacement string B<{.}> can be changed with B<--er>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/}> (alpha testing)
+=item B<{/}> (beta testing)
 
 Basename of input line. This replacement string will be replaced by
 the input with the directory part removed.
@@ -137,7 +137,7 @@ B<--basenamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{//}> (alpha testing)
+=item B<{//}> (beta testing)
 
 Dirname of input line. This replacement string will be replaced by the
 dir of the input line. See B<dirname>(1).
@@ -148,7 +148,7 @@ B<--dirnamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/.}> (alpha testing)
+=item B<{/.}> (beta testing)
 
 Basename of input line without extension. This replacement string will
 be replaced by the input with the directory and extension part
@@ -160,7 +160,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}> (alpha testing)
+=item B<{#}> (beta testing)
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -171,7 +171,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}> (alpha testing)
+=item B<{%}> (beta testing)
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -183,7 +183,7 @@ The replacement string B<{%}> can be changed with B<--slotreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>B<}>
+=item B<{>I<n>B<}> (beta testing)
 
 Argument from input source I<n> or the I<n>'th argument. This
 positional replacement string will be replaced by the input from input
@@ -194,7 +194,7 @@ I<n>'th last argument.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>.B<}>
+=item B<{>I<n>.B<}> (beta testing)
 
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
@@ -207,7 +207,7 @@ extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}>
+=item B<{>I<n>/B<}> (beta testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.
@@ -220,7 +220,7 @@ directory (if any) removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>//B<}>
+=item B<{>I<n>//B<}> (beta testing)
 
 Dirname of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{//}>.
@@ -232,7 +232,7 @@ the I<n>'th argument (when used with B<-N>). See B<dirname>(1).
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}>
+=item B<{>I<n>/.B<}> (beta testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -246,7 +246,7 @@ directory (if any) and extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{=>I<perl expression>B<=}> (alpha testing)
+=item B<{=>I<perl expression>B<=}> (beta testing)
 
 Replace with calculated I<perl expression>. B<$_> will contain the
 same as B<{}>. After evaluating I<perl expression> B<$_> will be used
@@ -259,7 +259,7 @@ The B<{=>I<perl expression>B<=}> must be given as a single string.
 See also: B<--rpl> B<--parens>
 
 
-=item B<{=>I<n> I<perl expression>B<=}> (alpha testing)
+=item B<{=>I<n> I<perl expression>B<=}> (beta testing)
 
 Positional equivalent to B<{= perl expression =}>. To understand
 positional replacement strings see B<{>I<n>B<}>.
@@ -321,9 +321,9 @@ Use NUL as delimiter.  Normally input lines will end in \n
 for processing arguments that may contain \n (newline).
 
 
-=item B<--arg-file> I<input-file>
+=item B<--arg-file> I<input-file> (alpha testing)
 
-=item B<-a> I<input-file>
+=item B<-a> I<input-file> (alpha testing)
 
 Use I<input-file> as input source. If you use this option, stdin
 (standard input) is given to the first process run.  Otherwise, stdin
@@ -360,7 +360,7 @@ string that is not in the command line.
 See also: B<:::>.
 
 
-=item B<--bar>
+=item B<--bar> (alpha testing)
 
 Show progress as a progress bar. In the bar is shown: % of jobs
 completed, estimated seconds left, and number of jobs started.
@@ -413,9 +413,9 @@ Print the BibTeX entry for GNU B<parallel> and disable citation
 notice.
 
 
-=item B<--block> I<size>
+=item B<--block> I<size> (alpha testing)
 
-=item B<--block-size> I<size>
+=item B<--block-size> I<size> (alpha testing)
 
 Size of block in bytes. The size can be postfixed with K, M, G, T, P,
 k, m, g, t, or p which would multiply the size with 1024, 1048576,
@@ -546,9 +546,9 @@ the job may be scheduled on another computer or the local computer if
 : is in the list.
 
 
-=item B<--eof>[=I<eof-str>]
+=item B<--eof>[=I<eof-str>] (alpha testing)
 
-=item B<-e>[I<eof-str>]
+=item B<-e>[I<eof-str>] (alpha testing)
 
 This option is a synonym for the B<-E> option.  Use B<-E> instead,
 because it is POSIX compliant for B<xargs> while this option is not.
@@ -591,7 +591,7 @@ cannot be exported:
 See also: B<--record-env>.
 
 
-=item B<--eta>
+=item B<--eta> (alpha testing)
 
 Show the estimated number of seconds before finishing. This forces GNU
 B<parallel> to read all jobs before starting to find the number of
@@ -661,9 +661,9 @@ See also: B<--line-buffer> B<--ungroup>
 Print a summary of the options to GNU B<parallel> and exit.
 
 
-=item B<--halt-on-error> I<val> (alpha testing)
+=item B<--halt-on-error> I<val> (beta testing)
 
-=item B<--halt> I<val> (alpha testing)
+=item B<--halt> I<val> (beta testing)
 
 How should GNU B<parallel> terminate if one of more jobs fail?
 
@@ -776,13 +776,13 @@ If the evaluated number is less than 1 then 1 will be used.  See also
 B<--use-cpus-instead-of-cores>.
 
 
-=item B<--jobs> I<N>%
+=item B<--jobs> I<N>% (alpha testing)
 
-=item B<-j> I<N>%
+=item B<-j> I<N>% (alpha testing)
 
-=item B<--max-procs> I<N>%
+=item B<--max-procs> I<N>% (alpha testing)
 
-=item B<-P> I<N>%
+=item B<-P> I<N>% (alpha testing)
 
 Multiply N% with the number of CPU cores.  Run this many jobs in parallel.
 If the evaluated number is less than 1 then 1 will be used.  See also
@@ -987,7 +987,7 @@ B<--files> is often used with B<--pipe>.
 See also: B<--recstart>, B<--recend>, B<--fifo>, B<--cat>, B<--pipepart>.
 
 
-=item B<--pipepart> (beta testing)
+=item B<--pipepart> (alpha testing)
 
 Pipe parts of a physical file. B<--pipepart> works similar to
 B<--pipe>, but is much faster. It has a few limitations:
@@ -1118,7 +1118,7 @@ from the terminal.  Only run the command line if the response starts
 with 'y' or 'Y'.  Implies B<-t>.
 
 
-=item B<--parens> I<parensstring> (alpha testing)
+=item B<--parens> I<parensstring> (beta testing)
 
 Use to define start and end parenthesis for B<{= perl expression =}>. The
 left and the right parenthesis can be multiple characters and are
@@ -1133,9 +1133,9 @@ B<,,>:
 See also: B<--rpl> B<{= perl expression =}>
 
 
-=item B<--profile> I<profilename>
+=item B<--profile> I<profilename> (alpha testing)
 
-=item B<-J> I<profilename>
+=item B<-J> I<profilename> (alpha testing)
 
 Use profile I<profilename> for options. This is useful if you want to
 have multiple profiles. You could have one profile for running jobs in
@@ -1356,7 +1356,7 @@ B<--keep-order> will not work with B<--round-robin> as it is
 impossible to track which input block corresponds to which output.
 
 
-=item B<--rpl> 'I<tag> I<perl expression>' (alpha testing)
+=item B<--rpl> 'I<tag> I<perl expression>' (beta testing)
 
 Use I<tag> as a replacement string for I<perl expression>. This makes
 it possible to define your own replacement strings. GNU B<parallel>'s
@@ -1461,9 +1461,9 @@ Use the replacement string I<replace-str> instead of B<{#}> for
 job sequence number.
 
 
-=item B<--shebang> (alpha testing)
+=item B<--shebang> (beta testing)
 
-=item B<--hashbang> (alpha testing)
+=item B<--hashbang> (beta testing)
 
 GNU B<parallel> can be called as a shebang (#!) command as the first
 line of a script. The content of the file will be treated as
@@ -1488,7 +1488,7 @@ On FreeBSD B<env> is needed:
   freenetproject.org
 
 
-=item B<--shebang-wrap> (alpha testing)
+=item B<--shebang-wrap> (beta testing)
 
 GNU B<parallel> can parallelize scripts by wrapping the shebang
 line. If the program can be run like this:

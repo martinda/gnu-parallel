@@ -7,7 +7,7 @@
 * Positional perl expressions (similar to {2}) are given as {=2 perl
   expression=} where 2 is the position.
 
-* One small backwards incompatability: {1}_{2} will replace {2} with
+* One small backwards incompatibility: {1}_{2} will replace {2} with
   the empty string if there is only one argument. Previously {2} would
   have been left untouched.
 
