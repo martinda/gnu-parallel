@@ -9,7 +9,7 @@ echo "### Test Force outside the file handle limit, 2009-02-17 Gave fork error"
 ### Test Force outside the file handle limit, 2009-02-17 Gave fork error
   (echo echo Start; seq 1 20000 | perl -pe 's/^/true /'; echo echo end) | stdout parallel -uj 0 | egrep -v 'processes took|adjusting'
 parallel: Warning: Only enough file handles to run 252 jobs in parallel.
-Raising ulimit -n or /etc/security/limits.conf may help.
+Running 'parallel -j0 -N252 --pipe parallel -j0' or raising ulimit -n or /etc/security/limits.conf may help.
 Start
 end
 echo '**'

@@ -77,35 +77,35 @@ OK
 Input for ssh
 parallel@parallel-server1 mkdir -p ./.
 -l parallel parallel-server1 rsync --server -lDrRze.iLs . ./.
--tt -oLogLevel=quiet parallel@parallel-server1 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ 1\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=1\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
-'newline1 > tmp/parallel.file.'
-'newline1.out;cat tmp/parallel.file.'
-'newline1 > tmp/parallel.file.'
-'newline1.out2
--l parallel parallel-server1 cd ././tmp; rsync --server --sender -lDrRze.iLs . ./parallel.file.'
-'newline1.out
--l parallel parallel-server1 cd ././tmp; rsync --server --sender -lDrRze.iLs . ./parallel.file.'
-'newline1.out2
-parallel@parallel-server1 (rm -f ./tmp/parallel.file.'
-'newline1; rmdir ./tmp/ ./ 2>/dev/null;)
-parallel@parallel-server1 (rm -f ./tmp/parallel.file.'
-'newline1.out; rmdir ./tmp/ ./ 2>/dev/null;)
-parallel@parallel-server1 (rm -f ./tmp/parallel.file.'
-'newline1.out2; rmdir ./tmp/ ./ 2>/dev/null;)
-parallel@parallel-server2 mkdir -p ./.
--l parallel parallel-server2 rsync --server -lDrRze.iLs . ./.
--tt -oLogLevel=quiet parallel@parallel-server2 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ 2\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=2\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
+-tt -oLogLevel=quiet parallel@parallel-server1 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ 2\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=2\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
 'newline2 > tmp/parallel.file.'
 'newline2.out;cat tmp/parallel.file.'
 'newline2 > tmp/parallel.file.'
 'newline2.out2
--l parallel parallel-server2 cd ././tmp; rsync --server --sender -lDrRze.iLs . ./parallel.file.'
+-l parallel parallel-server1 cd ././tmp; rsync --server --sender -lDrRze.iLs . ./parallel.file.'
 'newline2.out
--l parallel parallel-server2 cd ././tmp; rsync --server --sender -lDrRze.iLs . ./parallel.file.'
+-l parallel parallel-server1 cd ././tmp; rsync --server --sender -lDrRze.iLs . ./parallel.file.'
 'newline2.out2
-parallel@parallel-server2 (rm -f ./tmp/parallel.file.'
+parallel@parallel-server1 (rm -f ./tmp/parallel.file.'
 'newline2; rmdir ./tmp/ ./ 2>/dev/null;)
-parallel@parallel-server2 (rm -f ./tmp/parallel.file.'
+parallel@parallel-server1 (rm -f ./tmp/parallel.file.'
 'newline2.out; rmdir ./tmp/ ./ 2>/dev/null;)
-parallel@parallel-server2 (rm -f ./tmp/parallel.file.'
+parallel@parallel-server1 (rm -f ./tmp/parallel.file.'
 'newline2.out2; rmdir ./tmp/ ./ 2>/dev/null;)
+parallel@parallel-server2 mkdir -p ./.
+-l parallel parallel-server2 rsync --server -lDrRze.iLs . ./.
+-tt -oLogLevel=quiet parallel@parallel-server2 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ 1\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=1\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
+'newline1 > tmp/parallel.file.'
+'newline1.out;cat tmp/parallel.file.'
+'newline1 > tmp/parallel.file.'
+'newline1.out2
+-l parallel parallel-server2 cd ././tmp; rsync --server --sender -lDrRze.iLs . ./parallel.file.'
+'newline1.out
+-l parallel parallel-server2 cd ././tmp; rsync --server --sender -lDrRze.iLs . ./parallel.file.'
+'newline1.out2
+parallel@parallel-server2 (rm -f ./tmp/parallel.file.'
+'newline1; rmdir ./tmp/ ./ 2>/dev/null;)
+parallel@parallel-server2 (rm -f ./tmp/parallel.file.'
+'newline1.out; rmdir ./tmp/ ./ 2>/dev/null;)
+parallel@parallel-server2 (rm -f ./tmp/parallel.file.'
+'newline1.out2; rmdir ./tmp/ ./ 2>/dev/null;)

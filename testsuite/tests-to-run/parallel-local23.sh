@@ -3,18 +3,21 @@
 rm -rf tmp 2>/dev/null
 cp -a input-files/testdir2 tmp
 
+NICEPAR="nice nice parallel"
+export NICEPAR
+
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k -L1
 echo '### bug #42329: --line-buffer gives wrong output'; 
-  parallel  --line-buffer --tag seq ::: 10000000 | wc -c;
-  parallel  --line-buffer seq ::: 10000000 | wc -c
+  $NICEPAR --line-buffer --tag seq ::: 10000000 | wc -c;
+  $NICEPAR --line-buffer seq ::: 10000000 | wc -c
 
 echo '### Test \0 as recend'; 
-  printf "a\0b\0c\0" | parallel --recend   '\0' -k -N1 --pipe cat -v  \; echo; 
-  printf "\0a\0b\0c" | parallel --recstart '\0' -k -N1 --pipe cat -v  \; echo
+  printf "a\0b\0c\0" | $NICEPAR --recend   '\0' -k -N1 --pipe cat -v  \; echo; 
+  printf "\0a\0b\0c" | $NICEPAR --recstart '\0' -k -N1 --pipe cat -v  \; echo
 
 echo '### Test filenames containing UTF-8'; 
   cd tmp; 
-  find . -name '*.jpg' | nice nice parallel -j +0 convert -geometry 120 {} {//}/thumb_{/}; 
+  find . -name '*.jpg' | $NICEPAR -j +0 convert -geometry 120 {} {//}/thumb_{/}; 
   find |grep -v CVS | sort; 
 
 echo '### bug #39554: Feature request: line buffered output'; 
@@ -26,35 +29,35 @@ echo '### bug #39554: Feature request: line buffered output --tag';
 echo
 
 echo '### test round-robin';
-  nice seq 1000 | parallel --block 1k --pipe --round-robin wc | sort
+  nice seq 1000 | $NICEPAR --block 1k --pipe --round-robin wc | sort
 
 echo '### --version must have higher priority than retired options'
-   parallel --version -g -Y -U -W -T | tail
+  $NICEPAR --version -g -Y -U -W -T | tail
 
 echo '### bug #39787: --xargs broken'
-  nice perl -e 'for(1..30000){print "$_\n"}' | nice parallel --xargs -k echo  | perl -ne 'print length $_,"\n"'
+  nice perl -e 'for(1..30000){print "$_\n"}' | $NICEPAR --xargs -k echo  | perl -ne 'print length $_,"\n"'
 
-echo '### --delay should grow by 2 sec per arg'
-stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 | perl -ne '$_ >= 2 and $_ <= 5 and print "OK\n"'
-stdout /usr/bin/time -f %e parallel --delay 2 true ::: 1 2 3 | perl -ne '$_ >= 4 and $_ <= 7 and print "OK\n"'
+echo '### --delay should grow by 3 sec per arg'
+  stdout /usr/bin/time -f %e parallel --delay 3 true ::: 1 2 | perl -ne '$_ >= 3 and $_ <= 8 and print "OK\n"'
+  stdout /usr/bin/time -f %e parallel --delay 3 true ::: 1 2 3 | perl -ne '$_ >= 6 and $_ <= 11 and print "OK\n"'
 
 echo '### Exit value should not be affected if an earlier job times out'
-  parallel -j2 --timeout 1 --joblog - -k  ::: "sleep 10" "exit 255" | field 7
+  $NICEPAR -j2 --timeout 1 --joblog - -k  ::: "sleep 10" "exit 255" | field 7
 
 echo '### --header regexp'
-  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --header '(%.*\n)*' echo JOB{#}\;cat
+  (echo %head1; echo %head2; seq 5) | $NICEPAR -kj2 --pipe -N2 --header '(%.*\n)*' echo JOB{#}\;cat
 
 echo '### --header num'
-  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --header 2 echo JOB{#}\;cat
+  (echo %head1; echo %head2; seq 5) | $NICEPAR -kj2 --pipe -N2 --header 2 echo JOB{#}\;cat
 
 echo '### --header regexp --round-robin'
-  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header '(%.*\n)*' echo JOB\;wc | sort
+  (echo %head1; echo %head2; seq 5) | $NICEPAR -kj2 --pipe -N2 --round --header '(%.*\n)*' echo JOB\;wc | sort
 
 echo '### --header num --round-robin'
-  (echo %head1; echo %head2; seq 5) | nice parallel -kj2 --pipe -N2 --round --header 2  echo JOB{#}\;wc | sort
+  (echo %head1; echo %head2; seq 5) | $NICEPAR -kj2 --pipe -N2 --round --header 2  echo JOB{#}\;wc | sort
 
 echo '### shebang-wrap'
-  nice nice parallel -k {} {} A B C ::: ./input-files/shebang/shebangwrap.*[^~]
+  $NICEPAR -k {} {} A B C ::: ./input-files/shebang/shebangwrap.*[^~]
 
 EOF
 

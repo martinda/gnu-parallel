@@ -4,18 +4,20 @@ PAR="nice nice parallel -j2 --pipe --keeporder --block 150000 --tmpdir=/dev/shm"
 export PAR
 XAP="nice nice parallel --xapply"
 export XAP
+NICEPAR="nice nice parallel"
+export NICEPAR
 
 cat <<'EOF' | sed -e 's/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k -L1
 echo 'bug #41613: --compress --line-buffer no newline';
-  perl -e 'print "It worked"'| parallel --pipe --compress --line-buffer cat; echo
+  perl -e 'print "It worked"'| $NICEPAR --pipe --compress --line-buffer cat; echo
 
 echo 'bug #41613: --compress --line-buffer no --tagstring';
   diff 
     <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
-      parallel -N10 -L1 --pipe -j6 --block 20M --compress 
+      $NICEPAR -N10 -L1 --pipe -j6 --block 20M --compress 
       pv -qL 1000000 | perl -pe 's/(....).*/$1/') 
     <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
-      parallel -N10 -L1 --pipe -j6 --block 20M --compress --line-buffer 
+      $NICEPAR -N10 -L1 --pipe -j6 --block 20M --compress --line-buffer 
       pv -qL 1000000 | perl -pe 's/(....).*/$1/') 
     >/dev/null 
   || (echo 'Good: --line-buffer matters'; false) && echo 'Bad: --line-buffer not working'
@@ -23,92 +25,92 @@ echo 'bug #41613: --compress --line-buffer no --tagstring';
 echo 'bug #41613: --compress --line-buffer with --tagstring';
   diff 
     <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
-      parallel -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} 
+      $NICEPAR -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} 
       pv -qL 1000000 | perl -pe 's/(....).*/$1/') 
     <(nice perl -e 'for("x011".."x110"){print "$_\t", ("\n", map { rand } (1..100000)) }'| 
-      parallel -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} --line-buffer 
+      $NICEPAR -N10 -L1 --pipe -j6 --block 20M --compress --tagstring {#} --line-buffer 
       pv -qL 1000000 | perl -pe 's/(....).*/$1/') 
     >/dev/null 
   || (echo 'Good: --line-buffer matters'; false) && echo 'Bad: --line-buffer not working'
 
 echo 'bug #41613: --compress --line-buffer - no newline';
- echo 'pipe compress tagstring'
- perl -e 'print "O"'| parallel --compress --tagstring {#} --pipe --line-buffer cat;  echo "K"
- echo 'pipe compress notagstring'
- perl -e 'print "O"'| parallel --compress --pipe --line-buffer cat;  echo "K"
- echo 'pipe nocompress tagstring'
- perl -e 'print "O"'| parallel --tagstring {#} --pipe --line-buffer cat;  echo "K"
- echo 'pipe nocompress notagstring'
- perl -e 'print "O"'| parallel --pipe --line-buffer cat;  echo "K"
- echo 'nopipe compress tagstring'
- parallel --compress --tagstring {#} --line-buffer echo {} O ::: -n;  echo "K"
- echo 'nopipe compress notagstring'
- parallel --compress --line-buffer echo {} O ::: -n;  echo "K"
- echo 'nopipe nocompress tagstring'
- parallel --tagstring {#} --line-buffer echo {} O ::: -n;  echo "K"
- echo 'nopipe nocompress notagstring'
- parallel --line-buffer echo {} O ::: -n;  echo "K"
+  echo 'pipe compress tagstring'
+  perl -e 'print "O"'| $NICEPAR --compress --tagstring {#} --pipe --line-buffer cat;  echo "K"
+  echo 'pipe compress notagstring'
+  perl -e 'print "O"'| $NICEPAR --compress --pipe --line-buffer cat;  echo "K"
+  echo 'pipe nocompress tagstring'
+  perl -e 'print "O"'| $NICEPAR --tagstring {#} --pipe --line-buffer cat;  echo "K"
+  echo 'pipe nocompress notagstring'
+  perl -e 'print "O"'| $NICEPAR --pipe --line-buffer cat;  echo "K"
+  echo 'nopipe compress tagstring'
+  $NICEPAR --compress --tagstring {#} --line-buffer echo {} O ::: -n;  echo "K"
+  echo 'nopipe compress notagstring'
+  $NICEPAR --compress --line-buffer echo {} O ::: -n;  echo "K"
+  echo 'nopipe nocompress tagstring'
+  $NICEPAR --tagstring {#} --line-buffer echo {} O ::: -n;  echo "K"
+  echo 'nopipe nocompress notagstring'
+  $NICEPAR --line-buffer echo {} O ::: -n;  echo "K"
 
 echo 'bug #41412: --timeout + --delay causes deadlock';
   seq 10 | parallel -j10 --timeout 1 --delay .3 echo;
   parallel -j3 --timeout 1 --delay 2 echo ::: 1 2 3;
-  parallel -j10 --timeout 2.2 --delay 3 "sleep {}; echo {}" ::: 1 2 4 5 6
+  parallel -j10 --timeout 2.2 --delay 3 "sleep {}; echo {}" ::: 1 2 7 8 9
 
 echo '### Test --spreadstdin - more procs than args'; 
   rm -f /tmp/parallel.ss.*; 
-  seq 1 5 | stdout parallel -j 10 --spreadstdin 'cat >/tmp/parallel.ss.$PARALLEL_SEQ' >/dev/null; 
+  seq 1 5 | stdout $NICEPAR -j 10 --spreadstdin 'cat >/tmp/parallel.ss.$PARALLEL_SEQ' >/dev/null; 
   cat /tmp/parallel.ss.*;
 
 echo '### Test --spreadstdin - more args than procs'; 
   rm -f /tmp/parallel.ss2.*; 
-  seq 1 10 | stdout parallel -j 5 --spreadstdin 'cat >/tmp/parallel.ss2.$PARALLEL_SEQ' >/dev/null; 
+  seq 1 10 | stdout $NICEPAR -j 5 --spreadstdin 'cat >/tmp/parallel.ss2.$PARALLEL_SEQ' >/dev/null; 
   cat /tmp/parallel.ss2.*
 
-nice nice seq 1 1000 | nice nice parallel -j1 --spreadstdin cat "|cat "|wc -c
-nice nice seq 1 10000 | nice nice parallel -j10 --spreadstdin cat "|cat "|wc -c
-nice nice seq 1 100000 | nice nice parallel -j1 --spreadstdin cat "|cat "|wc -c
-nice nice seq 1 1000000 | nice nice parallel -j10 --spreadstdin cat "|cat "|wc -c
+nice nice seq 1 1000 | $NICEPAR -j1 --spreadstdin cat "|cat "|wc -c
+nice nice seq 1 10000 | $NICEPAR -j10 --spreadstdin cat "|cat "|wc -c
+nice nice seq 1 100000 | $NICEPAR -j1 --spreadstdin cat "|cat "|wc -c
+nice nice seq 1 1000000 | $NICEPAR -j10 --spreadstdin cat "|cat "|wc -c
 
-seq 1 10 | parallel --recend "\n" -j1 --spreadstdin gzip -9 >/tmp/foo.gz
+seq 1 10 | $NICEPAR --recend "\n" -j1 --spreadstdin gzip -9 >/tmp/foo.gz
 
 echo '### Test --spreadstdin - similar to the failing below'; 
-  nice seq 1 100000 | nice nice parallel --recend "\n" -j10 --spreadstdin gzip -9 >/tmp/foo2.gz; 
+  nice seq 1 100000 | $NICEPAR --recend "\n" -j10 --spreadstdin gzip -9 >/tmp/foo2.gz; 
   diff <(nice seq 1 100000) <(zcat /tmp/foo2.gz |sort -n); 
   diff <(nice seq 1 100000|wc -c) <(zcat /tmp/foo2.gz |wc -c)
 
 echo '### Test --spreadstdin - this failed during devel'; 
   nice seq 1 1000000 | md5sum; 
-  nice seq 1 1000000 | nice nice parallel --recend "\n" -j10 --spreadstdin gzip -9 | zcat | sort -n | md5sum
+  nice seq 1 1000000 | $NICEPAR --recend "\n" -j10 --spreadstdin gzip -9 | zcat | sort -n | md5sum
 
 echo '### Test --spreadstdin -k'; 
-  nice seq 1 1000000 | nice nice parallel -k --recend "\n" -j10 --spreadstdin gzip -9 | zcat | md5sum
+  nice seq 1 1000000 | $NICEPAR -k --recend "\n" -j10 --spreadstdin gzip -9 | zcat | md5sum
 
 echo '### Test --spreadstdin --files'; 
-  nice seq 1 1000000 | shuf | parallel --files --recend "\n" -j10 --spreadstdin sort -n | parallel -Xj1 sort -nm {} ";"rm {} | md5sum
+  nice seq 1 1000000 | shuf | $NICEPAR --files --recend "\n" -j10 --spreadstdin sort -n | parallel -Xj1 sort -nm {} ";"rm {} | md5sum
 
 echo '### Test --number-of-cpus'; 
-  stdout parallel --number-of-cpus
+  stdout $NICEPAR --number-of-cpus
 
 echo '### Test --number-of-cores'; 
-  stdout parallel --number-of-cores
+  stdout $NICEPAR --number-of-cores
 
 echo '### Test --use-cpus-instead-of-cores'; 
-  (seq 1 4 | stdout parallel --use-cpus-instead-of-cores -j100% sleep) && echo CPUs done & 
-  (seq 1 4 | stdout parallel -j100% sleep) && echo cores done & 
-  echo 'Cores should complete first on machines with less than 4 physical CPUs'; 
+  (seq 1 8 | stdout parallel --use-cpus-instead-of-cores -j100% sleep) && echo CPUs done & 
+  (seq 1 8 | stdout parallel -j100% sleep) && echo cores done & 
+  echo 'Cores should complete first on machines with less than 8 physical CPUs'; 
   wait
 
 echo '### Test --tag ::: a ::: b'; 
-  stdout parallel -k --tag -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a ::: b
+  stdout $NICEPAR -k --tag -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a ::: b
 
 echo '### Test --tag ::: a b'; 
-  stdout parallel -k --tag -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a b
+  stdout $NICEPAR -k --tag -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a b
 
 echo '### Test --tag -X ::: a b'; 
-  stdout parallel -k --tag -X -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a b
+  stdout $NICEPAR -k --tag -X -j1  echo stderr-{.} ">&2;" echo stdout-{} ::: a b
 
 echo '### Test bash redirection <()';
-  parallel 'cat <(echo {}); echo b' ::: a
+  $NICEPAR 'cat <(echo {}); echo b' ::: a
 
 echo '### Test bug https://savannah.gnu.org/bugs/index.php?33352'
 
@@ -132,7 +134,7 @@ echo '### Test bug https://savannah.gnu.org/bugs/index.php?33352'
 # child.
 
 echo "# md5sum - directly"
-  perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | md5sum
+  nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | md5sum
 echo "# parallel | md5sum"
   nice nice perl -e '@x=1 .. 17000; for(1..100) { print "@x\n"}' | pv -qL 1000000 | 
     $PAR cat | md5sum
@@ -214,54 +216,54 @@ echo "### Tests that failed for OO-rewrite"
 parallel -u --semaphore seq 1 10 '|' pv -qL 20; sem --wait; echo done
 echo a | parallel echo {1}
 echo "echo a" | parallel
-parallel -j1 -I :: -X echo 'a::b::^c::[.}c' ::: 1
+nice parallel -j1 -I :: -X echo 'a::b::^c::[.}c' ::: 1
 
 echo "### BUG: The length for -X is not close to max (131072)"
-seq 1 4000 | parallel -k -X echo {.} aa {}{.} {}{}d{} {}dd{}d{.} |head -n 1 |wc
+seq 1 4000 | nice parallel -k -X echo {.} aa {}{.} {}{}d{} {}dd{}d{.} |head -n 1 |wc
 
 echo "### BUG: empty lines with --show-limit"
-echo | parallel  --show-limits
+echo | $NICEPAR --show-limits
 
 echo '### Test -N'
-seq 1 5 | parallel -kN3 echo {1} {2} {3}
+seq 1 5 | $NICEPAR -kN3 echo {1} {2} {3}
 
 echo '### Test --arg-file-sep with files of different lengths'
-parallel --xapply --arg-file-sep :::: -k echo {1} {2} :::: <(seq 1 1) <(seq 3 4)
+$XAP --arg-file-sep :::: -k echo {1} {2} :::: <(seq 1 1) <(seq 3 4)
 
 echo '### Test respect -s'
-parallel -kvm -IARG -s15 echo ARG ::: 1 22 333 4444 55555 666666 7777777 88888888 999999999
+$NICEPAR -kvm -IARG -s15 echo ARG ::: 1 22 333 4444 55555 666666 7777777 88888888 999999999
 
 echo '### Test eof string after :::'
-parallel -k -E ole echo ::: foo ole bar
+$NICEPAR -k -E ole echo ::: foo ole bar
 
 echo '### Test -C and --trim rl'
-parallel -k -C %+ echo '"{1}_{3}_{2}_{4}"' ::: 'a% c %%b' 'a%c% b %d'
+$NICEPAR -k -C %+ echo '"{1}_{3}_{2}_{4}"' ::: 'a% c %%b' 'a%c% b %d'
 
 echo '### Test empty input'
-</dev/null parallel -j +0 echo
+</dev/null $NICEPAR -j +0 echo
 
 echo '### Test -m'
-seq 1 2 | parallel -k -m echo
+seq 1 2 | $NICEPAR -k -m echo
 
 echo '### Test :::'
-parallel echo ::: 1
+$NICEPAR echo ::: 1
 
 echo '### Test context_replace'
-echo a | parallel -qX echo  "'"{}"' "
+echo a | $NICEPAR -qX echo  "'"{}"' "
 
 echo '### Test -N2 {2}'
-seq 1 4 | parallel -kN2 echo arg1:{1} seq:'$'PARALLEL_SEQ arg2:{2}
+seq 1 4 | $NICEPAR -kN2 echo arg1:{1} seq:'$'PARALLEL_SEQ arg2:{2}
 
 echo '### Test -E (should only output foo ole)'
-(echo foo; echo '';echo 'ole ';echo bar;echo quux) | parallel -kr -L2 -E bar echo
-parallel -kr -L2 -E bar echo ::: foo '' 'ole ' bar quux
+(echo foo; echo '';echo 'ole ';echo bar;echo quux) | $NICEPAR -kr -L2 -E bar echo
+$NICEPAR -kr -L2 -E bar echo ::: foo '' 'ole ' bar quux
 
 echo '### Test -r (should only output foo ole bar\nquux)'
-parallel -kr -L2 echo ::: foo '' 'ole ' bar quux
+$NICEPAR -kr -L2 echo ::: foo '' 'ole ' bar quux
 
 echo '### Test of tab as colsep'
-printf 'def\tabc\njkl\tghi' | parallel -k --colsep '\t' echo {2} {1}
-parallel -k -a <(printf 'def\tabc\njkl\tghi') --colsep '\t' echo {2} {1}
+printf 'def\tabc\njkl\tghi' | $NICEPAR -k --colsep '\t' echo {2} {1}
+$NICEPAR -k -a <(printf 'def\tabc\njkl\tghi') --colsep '\t' echo {2} {1}
 
 EOF
 

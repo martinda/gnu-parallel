@@ -65,6 +65,7 @@ if($opt::pipepart) {
 	@fhlist = (*STDIN);
     }
 }
+
 if($opt::skip_first_line) {
     # Skip the first line for the first file handle
     my $fh = $fhlist[0];
@@ -1605,6 +1606,10 @@ sub init_run_jobs {
     if(@opt::basefile) { setup_basefile(); }
 }
 
+{
+    my $last_time;
+    my %last_mtime;
+
 sub start_more_jobs {
     # Run start_another_job() but only if:
     #   * not $Global::start_no_new_jobs set
@@ -1619,14 +1624,43 @@ sub start_more_jobs {
     if($Global::start_no_new_jobs) {
 	return $jobs_started;
     }
-    if($Global::max_procs_file) {
-	# --jobs filename
-	my $mtime = (stat($Global::max_procs_file))[9];
-	if($mtime > $Global::max_procs_file_last_mod) {
-	    # file changed: Force re-computing max_jobs_running
-	    $Global::max_procs_file_last_mod = $mtime;
-	    for my $sshlogin (values %Global::host) {
-		$sshlogin->set_max_jobs_running(undef);
+    if(time - ($last_time||0) > 1) {
+	# At most do this every second
+	$last_time = time;
+	if($Global::max_procs_file) {
+	    # --jobs filename
+	    my $mtime = (stat($Global::max_procs_file))[9];
+	    if($mtime > $Global::max_procs_file_last_mod) {
+		# file changed: Force re-computing max_jobs_running
+		$Global::max_procs_file_last_mod = $mtime;
+		for my $sshlogin (values %Global::host) {
+		    $sshlogin->set_max_jobs_running(undef);
+		}
+	    }
+	}
+	if(@opt::sshloginfile) {
+	    # Is --sshloginfile changed?
+	    for my $slf (@opt::sshloginfile) {
+		my $actual_file = expand_slf_shorthand($slf);
+		my $mtime = (stat($actual_file))[9];
+		$last_mtime{$actual_file} ||= $mtime;
+		if($mtime - $last_mtime{$actual_file} > 1) {
+		    ::debug("run","--sshloginfile $actual_file changed. reload\n");
+		    $last_mtime{$actual_file} = $mtime;
+		    # TODO reload $slf
+		    my %sshlogin_before = %Global::host;
+		    read_sshloginfile($actual_file);
+		    parse_sshlogin();
+		    $opt::filter_hosts and filter_hosts();
+		    setup_basefile();
+		    my @added = grep { not $sshlogin_before{$_} } keys %Global::host;
+#		    my @removed = grep { not $sshlogin_before{$_} } keys sshlogin_before %Global::host;
+#wrong		    my @back = grep { $Global::host{$_}->jobslots() == 0 }
+		    keys %Global::host;
+#		    map { $Global::host{$_}->reset_jobslots() } @back;
+		
+	
+		}
 	    }
 	}
     }
@@ -1678,6 +1712,7 @@ sub start_more_jobs {
     } while($jobs_started_this_round);
 
     return $jobs_started;
+}
 }
 
 sub start_another_job {
@@ -1813,6 +1848,9 @@ sub drain_job_queue {
 	    # * because of too little time between each ssh login.
             start_more_jobs();
 	    $sleep = ::reap_usleep($sleep);
+	    if($Global::max_jobs_running == 0) {
+		::warning("There are no job slots available. Increase --jobs.\n");
+	    }
         }
     } while ($Global::total_running > 0
 	     or
@@ -2064,8 +2102,9 @@ sub get_job_with_sshlogin {
        $job->failed_here()) {
         # This command with these args failed for this sshlogin
         my ($no_of_failed_sshlogins,$min_failures) = $job->min_failed();
-        if($no_of_failed_sshlogins == keys %Global::host and
-           $job->failed_here() == $min_failures) {
+	# Only look at the Global::host that have > 0 jobslots
+        if($no_of_failed_sshlogins == grep { $_->max_jobs_running() > 0 } values %Global::host
+	   and $job->failed_here() == $min_failures) {
             # It failed the same or more times on another host:
             # run it on this host
         } else {
@@ -2090,8 +2129,28 @@ sub __REMOTE_SSH__ {}
 sub read_sshloginfiles {
     # Returns: N/A
     for my $s (@_) {
-	read_sshloginfile($s);
+	read_sshloginfile(expand_slf_shorthand($s));
     }
+}
+
+sub expand_slf_shorthand {
+    my $file = shift;
+    if($file eq "-") {
+	# skip: It is stdin
+    } elsif($file eq "..") {
+        $file = $ENV{'HOME'}."/.parallel/sshloginfile";
+    } elsif($file eq ".") {
+        $file = "/etc/parallel/sshloginfile";
+    } elsif(not -r $file) {
+	if(not -r $ENV{'HOME'}."/.parallel/".$file) {
+		# Try prepending ~/.parallel
+		::error("Cannot open $file.\n");
+		::wait_and_exit(255);
+	} else {
+	    $file = $ENV{'HOME'}."/.parallel/".$file;
+	}
+    }
+    return $file;
 }
 
 sub read_sshloginfile {
@@ -2099,23 +2158,15 @@ sub read_sshloginfile {
     my $file = shift;
     my $close = 1;
     my $in_fh;
-    if($file eq "..") {
-        $file = $ENV{'HOME'}."/.parallel/sshloginfile";
-    }
-    if($file eq ".") {
-        $file = "/etc/parallel/sshloginfile";
-    }
+    ::debug("init","--slf ",$file);
     if($file eq "-") {
 	$in_fh = *STDIN;
 	$close = 0;
     } else {
 	if(not open($in_fh, "<", $file)) {
 	    # Try the filename
-	    if(not open($in_fh, "<", $ENV{'HOME'}."/.parallel/".$file)) {
-		# Try prepending ~/.parallel
-		::error("Cannot open $file.\n");
-		::wait_and_exit(255);
-	    }
+	    ::error("Cannot open $file.\n");
+	    ::wait_and_exit(255);
 	}
     }
     while(<$in_fh>) {
@@ -2137,7 +2188,7 @@ sub parse_sshlogin {
         # Split up -S sshlogin,sshlogin
         for my $s (split /,/, $sshlogin) {
             if ($s eq ".." or $s eq "-") {
-                read_sshloginfile($s);
+		read_sshloginfile(expand_slf_shorthand($s));
             } else {
                 push (@login, $s);
             }
@@ -2145,19 +2196,21 @@ sub parse_sshlogin {
     }
     $Global::minimal_command_line_length = 8_000_000;
     for my $sshlogin_string (@login) {
+	if($Global::host{$sshlogin_string}) {
+	    # This sshlogin has already been added: next
+	    next;
+	}
         my $sshlogin = SSHLogin->new($sshlogin_string);
 	if($sshlogin_string eq ":") {
 	    $sshlogin->set_maxlength(Limits::Command::max_length());
 	} else {
 	    # If all chars needs to be quoted, every other character will be \
-	    $sshlogin->set_maxlength(Limits::Command::max_length()/2);
+	    $sshlogin->set_maxlength(int(Limits::Command::max_length()/2));
 	}
 	$Global::minimal_command_line_length =
 	    ::min($Global::minimal_command_line_length, $sshlogin->maxlength());
         $Global::host{$sshlogin->string()} = $sshlogin;
     }
-
-
     # debug("start", "sshlogin: ", my_dump(%Global::host),"\n");
     if($opt::transfer or @opt::return or $opt::cleanup or @opt::basefile) {
         if(not remote_hosts()) {
@@ -3145,6 +3198,7 @@ sub new {
         'jobs_completed' => 0,
         'maxlength' => undef,
         'max_jobs_running' => undef,
+        'orig_max_jobs_running' => undef,
         'ncpus' => $ncpus,
         'sshcommand' => undef,
         'serverlogin' => undef,
@@ -3159,6 +3213,8 @@ sub new {
         'swap_activity_file' => $ENV{'HOME'} . "/.parallel/tmp/swap_activity-" .
             $no_slash_string,
         'swap_activity' => undef,
+	# What time was this object created?
+	'added' => time,
     }, ref($class) || $class;
 }
 
@@ -3190,11 +3246,6 @@ sub dec_jobs_running {
     $self->{'jobs_running'}--;
 }
 
-#sub set_jobs_running {
-#    my $self = shift;
-#    $self->{'jobs_running'} = shift;
-#}
-
 sub set_maxlength {
     my $self = shift;
     $self->{'maxlength'} = shift;
@@ -3225,6 +3276,8 @@ sub set_max_jobs_running {
         # max_jobs_running could be resat if -j is a changed file
         $Global::max_jobs_running += $self->{'max_jobs_running'};
     }
+    # Initialize orig to the first value that comes around
+    $self->{'orig_max_jobs_running'} ||= $self->{'max_jobs_running'};
 }
 
 sub swapping {
@@ -3754,7 +3807,8 @@ sub processes_available_by_system_limit {
 	}
 	if(not $more_filehandles) {
 	    ::warning("Only enough file handles to run ", $system_limit, " jobs in parallel.\n",
-		      "Raising ulimit -n or /etc/security/limits.conf may help.\n");
+		      "Running 'parallel -j0 -N", $system_limit, " --pipe parallel -j0' or ",
+		      "raising ulimit -n or /etc/security/limits.conf may help.\n");
 	}
 	if($max_system_proc_reached) {
 	    ::warning("Only enough available processes to run ", $system_limit,
@@ -4255,7 +4309,7 @@ sub no_of_cores_hpux {
     #   Number of CPU cores on HP-UX
     #   undef if not HP-UX
     my $no_of_cores =
-        (`/usr/bin/mpsched -s 2>&1 | grep 'Processor Count' | awk '{ print \$4 }'`);
+        (`/usr/bin/mpsched -s 2>&1 | grep 'Processor Count' | awk '{ print \$3 }'`);
     return $no_of_cores;
 }
 
@@ -5093,8 +5147,7 @@ sub min_failed {
     #   the minimal number of times this command has failed
     my $self = shift;
     my $min_failures =
-	::min(map { $self->{'failed'}{$_} }
-		keys %{$self->{'failed'}});
+	::min(map { $self->{'failed'}{$_} } keys %{$self->{'failed'}});
     my $number_of_sshlogins_failed_on = scalar keys %{$self->{'failed'}};
     return ($number_of_sshlogins_failed_on,$min_failures);
 }
@@ -5466,9 +5519,6 @@ sub start {
 	# Exit value:
 	#   empty input = true
 	#   some input = exit val from command
-	# Bug:
-	#   If the command does not read the first char, the temp file
-	#   is not deleted.
         my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".chr");
 	$command = qq{
              sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null';
@@ -5491,10 +5541,10 @@ sub start {
 	# Give STDIN to the first job if using -a (but only if running
 	# locally - otherwise CTRL-C does not work for other jobs Bug#36585)
 	*IN = *STDIN;
-	# The eval is needed to catch exception from open3
 	if($opt::tmux) {
 	    $command = $job->tmux_wrap($command);
 	}
+	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
 		::die_bug("open3-a");
@@ -5507,10 +5557,10 @@ sub start {
 	     open(my $devtty_fh, "<", "/dev/tty")) {
 	# Give /dev/tty to the command if no one else is using it
 	*IN = $devtty_fh;
-	# The eval is needed to catch exception from open3
 	if($opt::tmux) {
 	    $command = $job->tmux_wrap($command);
 	}
+	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
 		::die_bug("open3-/dev/tty");
@@ -5522,6 +5572,7 @@ sub start {
 	if($opt::tmux) {
 	    $command = $job->tmux_wrap($command);
 	}
+	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
 		::die_bug("open3-gensym");
@@ -5964,8 +6015,7 @@ sub populate {
     # Returns: N/A
     my $self = shift;
     my $next_arg;
-#    my $max_len = $Global::minimal_command_line_length || Limits::Command::max_length();
-    my $max_len = Limits::Command::max_length();
+    my $max_len = $Global::minimal_command_line_length || Limits::Command::max_length();
 
     if($opt::cat or $opt::fifo) {
 	# Get a tempfile name
@@ -7123,7 +7173,6 @@ sub replace {
     $perlexpr =~ s/^-?\d+ //; # Positional replace treated as normal replace
     if(not defined $self->{"rpl",0,$perlexpr}) {
 	local $_;
-	# TODO disable warnings
 	if($Global::trim eq "n") {
 	    $_ = $self->{'orig'};
 	} else {
@@ -7321,18 +7370,18 @@ sub acquire {
     my $start_time = time;
     while(1) {
 	$self->atomic_link_if_count_less_than() and last;
-	::debug("run", "Remove dead locks");
+	::debug("sem", "Remove dead locks");
 	my $lockdir = $self->{'lockdir'};
 	for my $d (glob "$lockdir/*") {
-	    ::debug("run", "Lock $d $lockdir\n");
+	    ::debug("sem", "Lock $d $lockdir\n");
 	    $d =~ m:$lockdir/([0-9]+)\@([-\._a-z0-9]+)$:o or next;
 	    my ($pid, $host) = ($1, $2);
 	    if($host eq ::hostname()) {
 		if(not kill 0, $1) {
-		    ::debug("run", "Dead: $d");
+		    ::debug("sem", "Dead: $d");
 		    unlink $d;
 		} else {
-		    ::debug("run", "Alive: $d");
+		    ::debug("sem", "Alive: $d");
 		}
 	    }
 	}
@@ -7354,7 +7403,7 @@ sub acquire {
 	    last;
 	}
     }
-    ::debug("run", "acquired $self->{'pid'}\n");
+    ::debug("sem", "acquired $self->{'pid'}\n");
 }
 
 sub release {
@@ -7370,6 +7419,27 @@ sub release {
 	$self->unlock();
     }
     ::debug("run", "released $self->{'pid'}\n");
+}
+
+sub _release {
+    my $self = shift;
+
+    unlink $self->{'pidfile'};
+    $self->lock();
+    my $nlinks = $self->nlinks();
+    ::debug("sem", $nlinks, "<", $self->{'count'});
+    if($nlinks-- > 1) {
+       unlink $self->{'idfile'};
+       open (my $fh, ">", $self->{'idfile'}) or
+           ::die_bug("write_idfile: $self->{'idfile'}");
+       print $fh "#"x$nlinks;
+       close $fh;
+    } else {
+       unlink $self->{'idfile'};
+       rmdir $self->{'lockdir'};
+    }
+    $self->unlock();
+    ::debug("sem", "released $self->{'pid'}\n");
 }
 
 sub atomic_link_if_count_less_than {
@@ -7392,10 +7462,35 @@ sub atomic_link_if_count_less_than {
     return $retval;
 }
 
+sub _atomic_link_if_count_less_than {
+    # Link $file1 to $file2 if nlinks to $file1 < $count
+    my $self = shift;
+    my $retval = 0;
+    $self->lock();
+    my $nlinks = $self->nlinks();
+    ::debug("sem", $nlinks, "<", $self->{'count'});
+    if($nlinks++ < $self->{'count'}) {
+	-d $self->{'lockdir'} or mkdir_or_die($self->{'lockdir'});
+	if(not -e $self->{'idfile'}) {
+	    open (my $fh, ">", $self->{'idfile'}) or
+		::die_bug("write_idfile: $self->{'idfile'}");
+	    close $fh;
+	}
+	open (my $fh, ">", $self->{'idfile'}) or
+	    ::die_bug("write_idfile: $self->{'idfile'}");
+	print $fh "#"x$nlinks;
+	close $fh;
+	$retval = link $self->{'idfile'}, $self->{'pidfile'};
+    }
+    $self->unlock();
+    ::debug("sem", "atomic $retval");
+    return $retval;
+}
+
 sub nlinks {
     my $self = shift;
     if(-e $self->{'idfile'}) {
-	::debug("run", "nlinks", (stat(_))[3], "\n");
+	::debug("sem", "nlinks", (stat(_))[3], "size", (stat(_))[7], "\n");
 	return (stat(_))[3];
     } else {
 	return 0;
@@ -7481,4 +7576,3 @@ sub mkdir_or_die {
 # Keep perl -w happy
 $opt::x = $Semaphore::timeout = $Semaphore::wait = $Global::no_more_file_handles_warned =
 $Job::file_descriptor_warning_printed = $Global::max_slot_number = 0;
-

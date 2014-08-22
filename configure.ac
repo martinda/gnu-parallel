@@ -11,5 +11,5 @@ AC_ARG_ENABLE(documentation,
 		 [Omit building and installing the documentation. (default=no)]),,
 		 [enable_documentation=yes])
 AM_CONDITIONAL([DOCUMENTATION], [test x$enable_documentation = xyes])
-
+AC_PROG_LN_S
 AC_OUTPUT

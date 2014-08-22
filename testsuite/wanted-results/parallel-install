@@ -1,5 +1,7 @@
 ### Test installation missing pod2*
 make[0]: Entering directory `/home/tange/privat/parallel'
+make  dist-gzip am__post_remove_distdir='@:'
+make[0]: Entering directory `/home/tange/privat/parallel'
 if test -d "parallel-00000000"; then find "parallel-00000000" -type d ! -perm -200 -exec chmod u+w {} ';' && rm -rf "parallel-00000000" || { sleep 5 && rm -rf "parallel-00000000"; }; else :; fi
 test -d "parallel-00000000" || mkdir "parallel-00000000"
  (cd src && make  top_distdir=../parallel-00000000 distdir=../parallel-00000000/src \
@@ -14,6 +16,7 @@ test -n "" \
 	  ! -type d ! -perm -444 -exec /bin/bash /home/tange/privat/parallel/install-sh -c -m a+r {} {} \; \
 	|| chmod -R a+r "parallel-00000000"
 tardir=parallel-00000000 && ${TAR-tar} chof - "$tardir" | GZIP=--best gzip -c >parallel-00000000.tar.gz
+make[0]: Leaving directory `/home/tange/privat/parallel'
 if test -d "parallel-00000000"; then find "parallel-00000000" -type d ! -perm -200 -exec chmod u+w {} ';' && rm -rf "parallel-00000000" || { sleep 5 && rm -rf "parallel-00000000"; }; else :; fi
 make[0]: Leaving directory `/home/tange/privat/parallel'
 checking for a BSD-compatible install... /usr/bin/install -c
@@ -21,6 +24,9 @@ checking whether build environment is sane... yes
 checking for a thread-safe mkdir -p... /bin/mkdir -p
 checking for gawk... gawk
 checking whether make sets $(MAKE)... yes
+checking whether make supports nested variables... yes
+checking whether ln -s works... yes
+checking that generated files are newer than configure... done
 configure: creating ./config.status
 config.status: creating Makefile
 config.status: creating src/Makefile
@@ -57,31 +63,31 @@ pod2man --release='00000000' --center='parallel' \
 	|| echo "Warning: pod2man not found. Using old parallel_tutorial.1"
 /bin/bash: pod2man: command not found
 Warning: pod2man not found. Using old parallel_tutorial.1
-pod2html ./parallel.pod > ./parallel.htmln \
+pod2html --title "GNU Parallel" ./parallel.pod > ./parallel.htmln \
 	&& mv ./parallel.htmln ./parallel.html \
 	|| echo "Warning: pod2html not found. Using old parallel.html"
 /bin/bash: pod2html: command not found
 Warning: pod2html not found. Using old parallel.html
 rm -f ./pod2htm*
-pod2html ./parallel_tutorial.pod > ./parallel_tutorial.htmln \
+pod2html --title "GNU Parallel tutorial" ./parallel_tutorial.pod > ./parallel_tutorial.htmln \
 	&& mv ./parallel_tutorial.htmln ./parallel_tutorial.html \
 	|| echo "Warning: pod2html not found. Using old parallel_tutorial.html"
 /bin/bash: pod2html: command not found
 Warning: pod2html not found. Using old parallel_tutorial.html
 rm -f ./pod2htm*
-pod2html ./sem.pod > ./sem.htmln \
+pod2html --title "sem (GNU Parallel)" ./sem.pod > ./sem.htmln \
 	&& mv ./sem.htmln ./sem.html \
 	|| echo "Warning: pod2html not found. Using old sem.html"
 /bin/bash: pod2html: command not found
 Warning: pod2html not found. Using old sem.html
 rm -f ./pod2htm*
-pod2html ./sql > ./sql.htmln \
+pod2html --title "GNU SQL" ./sql > ./sql.htmln \
 	&& mv ./sql.htmln ./sql.html \
 	|| echo "Warning: pod2html not found. Using old sql.html"
 /bin/bash: pod2html: command not found
 Warning: pod2html not found. Using old sql.html
 rm -f ./pod2htm*
-pod2html ./niceload.pod > ./niceload.htmln \
+pod2html --title "GNU niceload" ./niceload.pod > ./niceload.htmln \
 	&& mv ./niceload.htmln ./niceload.html \
 	|| echo "Warning: pod2html not found. Using old niceload.html"
 /bin/bash: pod2html: command not found
@@ -129,32 +135,37 @@ pod2pdf --output-file ./parallel_tutorial.pdf ./parallel_tutorial.pod --title "G
 Warning: pod2pdf not found. Using old parallel_tutorial.pdf
 make[0]: Entering directory `/tmp/parallel-00000000/src'
  /bin/mkdir -p '/usr/local/bin'
- /usr/bin/install -c parallel sem sql niceload '/usr/local/bin'
-pod2html ./parallel.pod > ./parallel.htmln \
+ /usr/bin/install -c parallel sql niceload '/usr/local/bin'
+make  install-exec-hook
+make[0]: Entering directory `/tmp/parallel-00000000/src'
+rm /usr/local/bin/sem || true
+ln -s /usr/local/bin/parallel /usr/local/bin/sem
+make[0]: Leaving directory `/tmp/parallel-00000000/src'
+pod2html --title "GNU Parallel" ./parallel.pod > ./parallel.htmln \
 	&& mv ./parallel.htmln ./parallel.html \
 	|| echo "Warning: pod2html not found. Using old parallel.html"
 /bin/bash: pod2html: command not found
 Warning: pod2html not found. Using old parallel.html
 rm -f ./pod2htm*
-pod2html ./parallel_tutorial.pod > ./parallel_tutorial.htmln \
+pod2html --title "GNU Parallel tutorial" ./parallel_tutorial.pod > ./parallel_tutorial.htmln \
 	&& mv ./parallel_tutorial.htmln ./parallel_tutorial.html \
 	|| echo "Warning: pod2html not found. Using old parallel_tutorial.html"
 /bin/bash: pod2html: command not found
 Warning: pod2html not found. Using old parallel_tutorial.html
 rm -f ./pod2htm*
-pod2html ./sem.pod > ./sem.htmln \
+pod2html --title "sem (GNU Parallel)" ./sem.pod > ./sem.htmln \
 	&& mv ./sem.htmln ./sem.html \
 	|| echo "Warning: pod2html not found. Using old sem.html"
 /bin/bash: pod2html: command not found
 Warning: pod2html not found. Using old sem.html
 rm -f ./pod2htm*
-pod2html ./sql > ./sql.htmln \
+pod2html --title "GNU SQL" ./sql > ./sql.htmln \
 	&& mv ./sql.htmln ./sql.html \
 	|| echo "Warning: pod2html not found. Using old sql.html"
 /bin/bash: pod2html: command not found
 Warning: pod2html not found. Using old sql.html
 rm -f ./pod2htm*
-pod2html ./niceload.pod > ./niceload.htmln \
+pod2html --title "GNU niceload" ./niceload.pod > ./niceload.htmln \
 	&& mv ./niceload.htmln ./niceload.html \
 	|| echo "Warning: pod2html not found. Using old niceload.html"
 /bin/bash: pod2html: command not found

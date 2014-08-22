@@ -1,6 +1,6 @@
 ### Test -k
 parallel: Warning: Only enough file handles to run 9 jobs in parallel.
-Raising ulimit -n or /etc/security/limits.conf may help.
+Running 'parallel -j0 -N9 --pipe parallel -j0' or raising ulimit -n or /etc/security/limits.conf may help.
 begin
 1
 2
@@ -61,7 +61,7 @@ job2
 7
 8
 9
-Raising ulimit -n or /etc/security/limits.conf may help.
+Running 'parallel -j0 -N9 --pipe parallel -j0' or raising ulimit -n or /etc/security/limits.conf may help.
 parallel: SIGTERM received. No new jobs will be started.
 parallel: Waiting for these 9 jobs to finish. Send SIGTERM again to stop now.
 parallel: Warning: Only enough file handles to run 9 jobs in parallel.

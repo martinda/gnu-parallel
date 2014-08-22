@@ -10,8 +10,5 @@ echo '### Test slow arguments generation - https://savannah.gnu.org/bugs/?32834'
 1
 2
 3
-echo '### Test too slow spawning'
 ### Test too slow spawning
-# Let the commands below run during high load
-seq `parallel --number-of-cores` | parallel -j200% -N0 timeout -k 25 26 burnP6 &   sleep 1;   seq 1 1000 | stdout nice nice  parallel -s 100 -uj0 true |   perl -pe '/parallel: Warning: Starting \d+ processes took/ and do {close STDIN; `killall -9 burnP6`; print "OK\n"; exit }'
 OK

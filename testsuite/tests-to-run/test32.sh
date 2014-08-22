@@ -23,7 +23,8 @@ seq 1 2 | parallel --retries 2 --sshlogin 8/localhost,8/: -j-1 "hostname; false"
 seq 1 1 | parallel --retries 2 --sshlogin 1/localhost,1/: -j1 "hostname; false"	 | wc -l
 seq 1 1 | parallel --retries 2 --sshlogin 1/localhost,1/: -j9 "hostname; false"	 | wc -l
 seq 1 1 | parallel --retries 2 --sshlogin 1/localhost,1/: -j0 "hostname; false"	 | wc -l
-seq 1 1 | parallel --retries 2 --sshlogin 1/localhost,1/: -j-1 "hostname; false" | wc -l
+# Fails due to 0 jobslots
+# seq 1 1 | parallel --retries 2 --sshlogin 1/localhost,1/: -j-1 "hostname; false" | wc -l
 
 echo '### These were not affected by the bug'
 seq 1 8 | parallel --retries 2 --sshlogin 1/localhost,9/: -j-1 "hostname; false" | wc -l

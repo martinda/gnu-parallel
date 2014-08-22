@@ -16,6 +16,7 @@ ping -c 1 redhat9.tange.dk >/dev/null 2>&1
 ping -c 1 freebsd7.tange.dk >/dev/null 2>&1
 
 echo "### bug #37589: Red Hat 9 (Shrike) perl v5.8.0 built for i386-linux-thread-multi error"
+rm -rf /tmp/parallel
 cp `which parallel` /tmp/parallel
 stdout parallel -kj10 --argsep == --basefile /tmp/parallel --tag --nonall -S redhat9.tange.dk,centos3.tange.dk,centos5.tange.dk,freebsd7.tange.dk /tmp/parallel --no-notice echo ::: OK_if_no_perl_warnings | sort
 

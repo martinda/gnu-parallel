@@ -64,7 +64,6 @@ bug #40137: SHELL not bash: Warning when exporting funcs
 no_warning
   . <(printf 'myfunc() {\necho $1\n}'); export -f myfunc; SHELL=/bin/sh parallel --env myfunc -S lo myfunc ::: warning
 warning
-parallel: Warning: Shell functions may not be supported in /bin/sh
 echo '### bug #40002: --files and --nonall seem not to work together:'
 ### bug #40002: --files and --nonall seem not to work together:
   parallel --files --nonall -S localhost true | tee >(parallel rm) | wc -l
