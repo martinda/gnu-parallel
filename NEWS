@@ -1,3 +1,43 @@
+20140822
+
+* GNU Parallel now uses the same shell it was started from as the
+  command shell for local jobs. So if GNU Parallel is started from
+  tcsh it will use tcsh as its shell even if the login $SHELL is
+  different. For remote jobs the login $SHELL will be used.
+
+* The whole current environment in bash can be copied by using a shell
+  wrapper function (Search manual for env_parallel).
+
+* --plus adds the replacement strings {+/} {+.} {+..} {+...} {..}
+  {...} {/..} {/...}. The idea being that '+foo' matches the opposite
+  of 'foo' and {} = {+/}/{/} = {.}.{+.} = {+/}/{/.}.{+.} = {..}.{+..}
+  = {+/}/{/..}.{+..} = {...}.{+...} = {+/}/{/...}.{+...}
+
+* GNU Parallel now deals correctly with the combination
+  rsync-3.1.X-client and rsync-2.5.7-server
+
+* GNU Parallel was cited in: A Web Service for Scholarly Big Data
+  Information Extraction
+  http://patshih.ist.psu.edu/publications/Williams-CiteSeerExtractor-ICWS14.pdf
+
+* Comparison of the speed of different GNU Parallel versions:
+  http://lists.gnu.org/archive/html/parallel/2014-08/msg00030.html
+
+* GNU Parallel was covered in the webcast 2014-08-20: Data Science at
+  the Command Line http://www.oreilly.com/pub/e/3115
+
+* Distributed processing with GNU parallel
+  http://kazjote.eu/2014/08/11/distributed-processing-with-gnu-parallel
+
+* A Peek into GNU Parallel
+  http://blog.dataweave.in/post/94238943763/a-peek-into-gnu-parallel
+
+* Сборка GNU parallel для CentOS/RHEL
+  http://www.stableit.ru/2014/07/gnu-parallel-centosrhel.html
+
+* Bug fixes and man page updates.
+
+
 20140722
 
 * {= perl expression =} can be used as replacement string. The

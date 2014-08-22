@@ -234,9 +234,11 @@ New in this release:
 
 * The whole current environment in bash can be copied by using a shell wrapper function (Search manual for env_parallel).
 
-* GNU Parallel was cited in: A Web Service for Scholarly Big Data Information Extraction http://patshih.ist.psu.edu/publications/Williams-CiteSeerExtractor-ICWS14.pdf
-
 * --plus adds the replacement strings {+/} {+.} {+..} {+...} {..} {...} {/..} {/...}. The idea being that '+foo' matches the opposite of 'foo' and {} = {+/}/{/} = {.}.{+.} = {+/}/{/.}.{+.} = {..}.{+..} = {+/}/{/..}.{+..} = {...}.{+...} = {+/}/{/...}.{+...}
+
+* GNU Parallel now deals correctly with the combination rsync-3.1.X-client and rsync-2.5.7-server
+
+* GNU Parallel was cited in: A Web Service for Scholarly Big Data Information Extraction http://patshih.ist.psu.edu/publications/Williams-CiteSeerExtractor-ICWS14.pdf
 
 * Comparison of the speed of different GNU Parallel versions: http://lists.gnu.org/archive/html/parallel/2014-08/msg00030.html
 
