@@ -721,7 +721,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140822;
+    $Global::version = 20140823;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1647,19 +1647,19 @@ sub start_more_jobs {
 		if($mtime - $last_mtime{$actual_file} > 1) {
 		    ::debug("run","--sshloginfile $actual_file changed. reload\n");
 		    $last_mtime{$actual_file} = $mtime;
-		    # TODO reload $slf
-		    my %sshlogin_before = %Global::host;
+		    # Reload $slf
+		    # Empty sshlogins
+		    @Global::sshlogin = ();
+		    for (values %Global::host) {
+			# Don't start new jobs on any host
+			# except the ones added back later
+			$_->set_max_jobs_running(0);
+		    }
+		    # This will set max_jobs_running on the SSHlogins
 		    read_sshloginfile($actual_file);
 		    parse_sshlogin();
 		    $opt::filter_hosts and filter_hosts();
 		    setup_basefile();
-		    my @added = grep { not $sshlogin_before{$_} } keys %Global::host;
-#		    my @removed = grep { not $sshlogin_before{$_} } keys sshlogin_before %Global::host;
-#wrong		    my @back = grep { $Global::host{$_}->jobslots() == 0 }
-		    keys %Global::host;
-#		    map { $Global::host{$_}->reset_jobslots() } @back;
-		
-	
 		}
 	    }
 	}
@@ -2188,6 +2188,7 @@ sub parse_sshlogin {
         # Split up -S sshlogin,sshlogin
         for my $s (split /,/, $sshlogin) {
             if ($s eq ".." or $s eq "-") {
+		# This may add to @Global::sshlogin - possibly bug
 		read_sshloginfile(expand_slf_shorthand($s));
             } else {
                 push (@login, $s);
@@ -2195,9 +2196,13 @@ sub parse_sshlogin {
         }
     }
     $Global::minimal_command_line_length = 8_000_000;
-    for my $sshlogin_string (@login) {
+    for my $sshlogin_string (::uniq(@login)) {
 	if($Global::host{$sshlogin_string}) {
-	    # This sshlogin has already been added: next
+	    # This sshlogin has already been added:
+	    # It is probably a host that has come back
+	    # Set the max_jobs_running back to the original
+	    $Global::host{$sshlogin_string}->set_max_jobs_running(
+		$Global::host{$sshlogin_string}->orig_max_jobs_running());
 	    next;
 	}
         my $sshlogin = SSHLogin->new($sshlogin_string);
@@ -3213,8 +3218,6 @@ sub new {
         'swap_activity_file' => $ENV{'HOME'} . "/.parallel/tmp/swap_activity-" .
             $no_slash_string,
         'swap_activity' => undef,
-	# What time was this object created?
-	'added' => time,
     }, ref($class) || $class;
 }
 
@@ -3276,9 +3279,10 @@ sub set_max_jobs_running {
         # max_jobs_running could be resat if -j is a changed file
         $Global::max_jobs_running += $self->{'max_jobs_running'};
     }
-    # Initialize orig to the first value that comes around
+    # Initialize orig to the first non-zero value that comes around
     $self->{'orig_max_jobs_running'} ||= $self->{'max_jobs_running'};
 }
+
 
 sub swapping {
     my $self = shift;
@@ -3644,6 +3648,11 @@ sub max_jobs_running {
         $self->set_max_jobs_running($nproc);
     }
     return $self->{'max_jobs_running'};
+}
+
+sub orig_max_jobs_running {
+    my $self = shift;
+    return $self->{'orig_max_jobs_running'};
 }
 
 sub compute_number_of_processes {

@@ -2,7 +2,7 @@
 
 == alpha/beta/production ==
 
-Update documentation:
+Check that documentation is updated:
 
 git diff last-release-commit
 Unmodified beta since last version => production
@@ -166,6 +166,14 @@ git tag -s -m "Released as $YYYYMMDD ('$TAG')" $YYYYMMDD
 
 git push
 
+
+== Update documentation ==
+
+Update version number + 1
+Unmodified beta since last version => production
+Unmodified alpha since last version => beta
+Modified => alpha
+
 == Update Savannah ==
 
 file:///home/tange/privat/parallel/doc/release_new_version
@@ -207,7 +215,6 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ludovic Courtès <ludo@gnu.org>, Markus Ammer <mkmm@gmx-topmail.de>,
    Pavel Nuzhdin <pnzhdin@gmail.com>, Phil Sung <psung@alum.mit.edu>,
    Michael Shigorin <mike@altlinux.org>,
-   Andrew McFague <amcfague@wgen.net>,
    Chris Howey <howeyc@gmail.com>,
    Fethican Coşkuner <fethicanc@gmail.com>,
    Rogério Brito <rbrito@ime.usp.br>,

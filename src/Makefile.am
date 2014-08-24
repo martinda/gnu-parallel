@@ -2,7 +2,7 @@ bin_SCRIPTS = parallel sql niceload
 
 install-exec-hook:
 	rm $(DESTDIR)$(bindir)/sem || true
-	$(LN_S) $(DESTDIR)$(bindir)/parallel $(DESTDIR)$(bindir)/sem
+	$(LN_S) parallel $(DESTDIR)$(bindir)/sem
 
 if DOCUMENTATION
 man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1

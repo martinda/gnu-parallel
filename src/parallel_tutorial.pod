@@ -2118,6 +2118,11 @@ If you like GNU Parallel:
 
 =item *
 
+(Re-)walk through the tutorial if you have not done so in the past year
+(http://www.gnu.org/software/parallel/parallel_tutorial.html)
+
+=item *
+
 Give a demo at your local user group/team/colleagues
 
 =item *
@@ -2152,11 +2157,12 @@ If GNU Parallel saves you money:
 
 =item *
 
-(Have your company) donate to FSF https://my.fsf.org/donate/
+(Have your company) donate to FSF or become a member
+https://my.fsf.org/donate/
 
 =back
 
-(C) 20140622 Ole Tange GPLv3
+(C) 2013,2014 Ole Tange, GPLv3
 
 
 =cut
