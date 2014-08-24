@@ -1629,6 +1629,19 @@ The sshloginfile '-' is special, too, it read sshlogins from stdin
 If the sshloginfile is changed it will be re-read when a job finishes
 though at most once per second.
 
+This can be used to have a daemon that updates the sshloginfile to
+only contain servers that are up:
+
+    cp original.slf tmp2.slf
+    while [ 1 ] ; do
+      nice parallel --nonall -j0 -k --slf original.slf --tag echo | perl 's/\t$//' > tmp.slf
+      if diff tmp.slf tmp2.slf; then
+        mv tmp.slf tmp2.slf
+      fi
+      sleep 10
+    done &
+    parallel --slf tmp2.slf ...
+
 
 =item B<--slotreplace> I<replace-str>
 
