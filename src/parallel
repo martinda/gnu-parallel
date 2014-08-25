@@ -5201,8 +5201,8 @@ sub sshlogin_wrap {
 	    if(@Global::cat_partials) {
 		# Prepend:
 		# < /tmp/foo perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 11 |
-                $self->{'sshlogin_wrap'} = (pop @Global::cat_partials). "|".
-		    $next_command_line;
+                $self->{'sshlogin_wrap'} = (shift @Global::cat_partials). "|".
+		    "(". $next_command_line. ")";
             } else {
 		$self->{'sshlogin_wrap'} = $next_command_line;
             }
@@ -5210,7 +5210,7 @@ sub sshlogin_wrap {
 	    # --transfer
 	    $pre .= $self->sshtransfer();
 	    if(@Global::cat_partials) {
-		$pre .= (pop @Global::cat_partials)."|";
+		$pre .= (shift @Global::cat_partials)."|";
 	    }
 	    # --return
 	    $post .= $self->sshreturn();
