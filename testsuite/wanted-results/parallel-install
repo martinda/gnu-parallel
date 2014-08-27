@@ -139,7 +139,7 @@ make[0]: Entering directory `/tmp/parallel-00000000/src'
 make  install-exec-hook
 make[0]: Entering directory `/tmp/parallel-00000000/src'
 rm /usr/local/bin/sem || true
-ln -s /usr/local/bin/parallel /usr/local/bin/sem
+ln -s parallel /usr/local/bin/sem
 make[0]: Leaving directory `/tmp/parallel-00000000/src'
 pod2html --title "GNU Parallel" ./parallel.pod > ./parallel.htmln \
 	&& mv ./parallel.htmln ./parallel.html \

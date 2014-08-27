@@ -724,13 +724,12 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140823;
+    $Global::version = 20140826;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
     $Global::verbose = 0;
     $Global::grouped = 1;
-    $Global::keeporder = 0;
     $Global::quoting = 0;
     # Read only table with default --rpl values
     %Global::replace =
@@ -782,7 +781,6 @@ sub parse_options {
     $Global::shell = parent_shell($$) || $ENV{'SHELL'} || "/bin/sh";
     if(defined $opt::X) { $Global::ContextReplace = 1; }
     if(defined $opt::silent) { $Global::verbose = 0; }
-    if(defined $opt::keeporder) { $Global::keeporder = 1; }
     if(defined $opt::group) { $Global::grouped = 1; }
     if(defined $opt::u) { $Global::grouped = 0; }
     if(defined $opt::0) { $/ = "\0"; }
@@ -1803,7 +1801,6 @@ sub init_progress {
 
 sub drain_job_queue {
     # Returns: N/A
-    $Private::first_completed ||= time;
     if($opt::progress) {
         print $Global::original_stderr init_progress();
     }
@@ -1876,9 +1873,20 @@ sub toggle_progress {
 
 sub progress {
     # Returns:
-    #   list of workers
-    #   header that will fit on the screen
-    #   status message that will fit on the screen
+    #   $workerlist = list of workers
+    #   $header = that will fit on the screen
+    #   $status = message that will fit on the screen
+    if($opt::bar) {
+	return ("workerlist" => "", "header" => "", "status" => bar());
+    }
+    my $eta = "";
+    my ($status,$header)=("","");
+    if($opt::eta) {
+	my($total, $completed, $left, $pctcomplete, $avgtime, $this_eta) =
+	    compute_eta();
+	$eta = sprintf("ETA: %ds Left: %d AVG: %.2fs  ",
+		       $this_eta, $left, $avgtime);
+    }
     my $termcols = terminal_columns();
     my @workers = sort keys %Global::host;
     my %sshlogin = map { $_ eq ":" ? ($_=>"local") : ($_=>$_) } @workers;
@@ -1890,60 +1898,6 @@ sub progress {
         $workerno{$w}.":".$sshlogin{$w} ." / ".
             ($Global::host{$w}->ncpus() || "-")." / ".
             $Global::host{$w}->max_jobs_running()."\n";
-    }
-    my $eta = "";
-    my ($status,$header)=("","");
-    if($opt::eta or $opt::bar) {
-        my $completed = 0;
-        for(@workers) { $completed += $Global::host{$_}->jobs_completed() }
-        if($completed) {
-	    my $total = $Global::JobQueue->total_jobs();
-	    my $left = $total - $completed;
-	    my $pctcomplete = $completed / $total;
-	    my $timepassed = (time - $Private::first_completed);
-	    my $avgtime = $timepassed / $completed;
-	    $Private::smoothed_avg_time ||= $avgtime;
-	    # Smooth the eta so it does not jump wildly
-	    $Private::smoothed_avg_time = (1 - $pctcomplete) *
-		$Private::smoothed_avg_time + $pctcomplete * $avgtime;
-	    my $this_eta;
-	    $Private::last_time ||= $timepassed;
-	    if($timepassed != $Private::last_time
-	       or not defined $Private::last_eta) {
-		$Private::last_time = $timepassed;
-		$this_eta = $left * $Private::smoothed_avg_time;
-		$Private::last_eta = $this_eta;
-	    } else {
-		$this_eta = $Private::last_eta;
-	    }
-	    $eta = sprintf("ETA: %ds Left: %d AVG: %.2fs  ", $this_eta, $left, $avgtime);
-	    if($opt::bar) {
-		my $arg = $Global::newest_job ?
-		    $Global::newest_job->{'commandline'}->replace_placeholders(["\257<\257>"],0,0) : "";
-		# [\011\013\014] messes up display in the terminal
-		$arg =~ tr/[\011-\016\033\302-\365]//d;
-		my $bar_text =
-		    sprintf("%d%% %d:%d=%ds %s",
-			    $pctcomplete*100, $completed, $left, $this_eta, $arg);
-		my $rev = "\033[7m";
-		my $reset = "\033[0m";
-		my $terminal_width = terminal_columns();
-		my $s = sprintf("%-${terminal_width}s",
-				substr($bar_text." "x$terminal_width,
-				       0,$terminal_width));
-		my $width = int($terminal_width * $pctcomplete);
-		substr($s,$width,0) = $reset;
-		my $zenity = sprintf("%-${terminal_width}s",
-				     substr("#   " . int($this_eta) . " sec $arg",
-					    0,$terminal_width));
-		$s = "\r" . $zenity . "\r" . $pctcomplete*100 . # Prefix with zenity header
-		    "\r" . $rev . $s . $reset;
-		$status = $s;
-	    }
-        }
-    }
-    if($opt::bar) {
-	return ("workerlist" => "", "header" => "", "status" => $status);
     }
     $status = "x"x($termcols+1);
     if(length $status > $termcols) {
@@ -2060,13 +2014,78 @@ sub progress {
 }
 
 {
-    my $columns;
+    my ($total,$first_completed,$smoothed_avg_time);
+
+    sub compute_eta {
+	# Calculate important numbers for ETA
+	# Returns:
+	#   $total = number of jobs in total
+	#   $completed = number of jobs completed
+	#   $left = number of jobs left
+	#   $pctcomplete = percent of jobs completed
+	#   $avgtime = averaged time
+	#   $eta = smoothed eta
+	$total ||= $Global::JobQueue->total_jobs();
+	my $completed = 0;
+        for(values %Global::host) { $completed += $_->jobs_completed() }
+	my $left = $total - $completed;
+	if(not $completed) {
+	    return($total, $completed, $left, 0, 0, 0);
+	}
+	my $pctcomplete = $completed / $total;
+	$first_completed ||= time;
+	my $timepassed = (time - $first_completed);
+	my $avgtime = $timepassed / $completed;
+	$smoothed_avg_time ||= $avgtime;
+	# Smooth the eta so it does not jump wildly
+	$smoothed_avg_time = (1 - $pctcomplete) * $smoothed_avg_time +
+	    $pctcomplete * $avgtime;
+	my $eta = int($left * $smoothed_avg_time);
+	return($total, $completed, $left, $pctcomplete, $avgtime, $eta);
+    }
+}
+
+{
+    my ($rev,$reset);
+
+    sub bar {
+	# Return:
+	#   $status = bar with eta, completed jobs, arg and pct
+	$rev ||= "\033[7m";
+	$reset ||= "\033[0m";
+	my($total, $completed, $left, $pctcomplete, $avgtime, $eta) =
+	    compute_eta();
+	my $arg = $Global::newest_job ?
+	    $Global::newest_job->{'commandline'}->replace_placeholders(["\257<\257>"],0,0) : "";
+	# These chars mess up display in the terminal
+	$arg =~ tr/[\011-\016\033\302-\365]//d;
+	my $bar_text =
+	    sprintf("%d%% %d:%d=%ds %s",
+		    $pctcomplete*100, $completed, $left, $eta, $arg);
+	my $terminal_width = terminal_columns();
+	my $s = sprintf("%-${terminal_width}s",
+			substr($bar_text." "x$terminal_width,
+			       0,$terminal_width));
+	my $width = int($terminal_width * $pctcomplete);
+	substr($s,$width,0) = $reset;
+	my $zenity = sprintf("%-${terminal_width}s",
+			     substr("#   $eta sec $arg",
+				    0,$terminal_width));
+	$s = "\r" . $zenity . "\r" . $pctcomplete*100 . # Prefix with zenity header
+	    "\r" . $rev . $s . $reset;
+	return $s;
+    }
+}
+
+{
+    my ($columns,$last_column_time);
 
     sub terminal_columns {
 	# Get the number of columns of the display
 	# Returns:
 	#   number of columns of the screen
-	if(not $columns) {
+	if(not $columns or $last_column_time < time) {
+	    $last_column_time = time;
 	    $columns = $ENV{'COLUMNS'};
 	    if(not $columns) {
 		my $resize = qx{ resize 2>/dev/null };
@@ -2571,52 +2590,15 @@ sub reaper {
             # Force printing now if the job failed and we are going to exit
             my $print_now = ($opt::halt_on_error and $opt::halt_on_error == 2
 			     and $job->exitstatus());
-            if($Global::keeporder and not $print_now) {
-                $Private::print_later{$job->seq()} = $job;
-                $Private::job_end_sequence ||= 1;
-                debug("run", "Looking for: $Private::job_end_sequence ",
-                      "Current: ", $job->seq(), "\n");
-		for(my $j = $Private::print_later{$Private::job_end_sequence};
-		    $j or vec($Global::job_already_run,$Private::job_end_sequence,1);
-                    $Private::job_end_sequence++,
-		    $j = $Private::print_later{$Private::job_end_sequence}) {
-                    debug("run", "Found job end $Private::job_end_sequence");
-                    if($j) {
-			$j->print();
-			delete $Private::print_later{$Private::job_end_sequence};
-		    }
-		}
+            if($opt::keeporder and not $print_now) {
+                print_earlier_jobs($job);
             } else {
                 $job->print();
             }
             if($job->exitstatus()) {
-                # The jobs had a exit status <> 0, so error
-                $Global::exitstatus++;
-		$Global::total_failed++;
-                if($opt::halt_on_error) {
-                    if($opt::halt_on_error == 1
-			or
-		       ($opt::halt_on_error < 1 and $Global::total_failed > 3
-			and
-			$Global::total_failed / $Global::total_started > $opt::halt_on_error)) {
-                        # If halt on error == 1 or --halt 10%
-			# we should gracefully exit
-                        print $Global::original_stderr
-                            ("$Global::progname: Starting no more jobs. ",
-                             "Waiting for ", scalar(keys %Global::running),
-                             " jobs to finish. This job failed:\n",
-                             $job->replaced(),"\n");
-                        $Global::start_no_new_jobs ||= 1;
-                        $Global::halt_on_error_exitstatus = $job->exitstatus();
-                    } elsif($opt::halt_on_error == 2) {
-                        # If halt on error == 2 we should exit immediately
-                        print $Global::original_stderr
-                            ("$Global::progname: This job failed:\n",
-                             $job->replaced(),"\n");
-                        exit ($job->exitstatus());
-                    }
-                }
-            }
+		process_failed_job($job);
+	    }
+
         }
         my $sshlogin = $job->sshlogin();
         $sshlogin->dec_jobs_running();
@@ -2627,6 +2609,61 @@ sub reaper {
     }
     debug("run", "done ");
     return $children_reaped;
+}
+
+sub process_failed_job {
+    # The jobs had a exit status <> 0, so error
+    # Returns: N/A
+    my $job = shift;
+    $Global::exitstatus++;
+    $Global::total_failed++;
+    if($opt::halt_on_error) {
+	if($opt::halt_on_error == 1
+	   or
+	   ($opt::halt_on_error < 1 and $Global::total_failed > 3
+	    and
+	    $Global::total_failed / $Global::total_started > $opt::halt_on_error)) {
+	    # If halt on error == 1 or --halt 10%
+	    # we should gracefully exit
+	    print $Global::original_stderr
+		("$Global::progname: Starting no more jobs. ",
+		 "Waiting for ", scalar(keys %Global::running),
+		 " jobs to finish. This job failed:\n",
+		 $job->replaced(),"\n");
+	    $Global::start_no_new_jobs ||= 1;
+	    $Global::halt_on_error_exitstatus = $job->exitstatus();
+	} elsif($opt::halt_on_error == 2) {
+	    # If halt on error == 2 we should exit immediately
+	    print $Global::original_stderr
+		("$Global::progname: This job failed:\n",
+		 $job->replaced(),"\n");
+	    exit ($job->exitstatus());
+	}
+    }
+}
+
+{
+    my (%print_later,$job_end_sequence);
+
+    sub print_earlier_jobs {
+	# Print jobs completed earlier
+	# Returns: N/A
+	my $job = shift;
+	$print_later{$job->seq()} = $job;
+	$job_end_sequence ||= 1;
+	debug("run", "Looking for: $job_end_sequence ",
+	      "Current: ", $job->seq(), "\n");
+	for(my $j = $print_later{$job_end_sequence};
+	    $j or vec($Global::job_already_run,$job_end_sequence,1);
+	    $job_end_sequence++,
+	    $j = $print_later{$job_end_sequence}) {
+	    debug("run", "Found job end $job_end_sequence");
+	    if($j) {
+		$j->print();
+		delete $print_later{$job_end_sequence};
+	    }
+	}
+    }
 }
 
 sub __USAGE__ {}
@@ -2879,13 +2916,16 @@ sub undef_as_empty {
     return $a ? $a : "";
 }
 
-sub hostname {
-    if(not $Private::hostname) {
-        my $hostname = `hostname`;
-        chomp($hostname);
-        $Private::hostname = $hostname || "nohostname";
+{
+    my $hostname;
+    sub hostname {
+	if(not $hostname) {
+	    $hostname = `hostname`;
+	    chomp($hostname);
+	    $hostname ||= "nohostname";
+	}
+	return $hostname;
     }
-    return $Private::hostname;
 }
 
 sub which {

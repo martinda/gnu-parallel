@@ -2313,7 +2313,7 @@ To see the difference between file A and file B look at the file
 
 =head1 EXAMPLE: Speeding up fast jobs
 
-Starting a job on the local machine takes around 3 ms. This can be a
+Starting a job on the local machine takes around 10 ms. This can be a
 big overhead if the job takes very few ms to run. Often you can group
 small jobs together using B<-X> which will make the overhead less
 significant. Compare the speed of these:
@@ -2327,10 +2327,9 @@ B<parallel> to spawn multiple GNU B<parallel>s:
 
     seq -w 0 999999 | parallel -j10 --pipe parallel -j0 touch pict{}.jpg
 
-If B<-j0> normally spawns 506 jobs, then the above will try to spawn
-5060 jobs. It is likely that you this way will hit the limit of number
-of processes and/or filehandles. Look at 'ulimit -n' and 'ulimit -u'
-to raise these limits.
+If B<-j0> normally spawns 252 jobs, then the above will try to spawn
+2520 jobs. On a normal GNU/Linux system you can spawn 32000 jobs using
+this technique with no problems.
 
 
 =head1 EXAMPLE: Using shell variables

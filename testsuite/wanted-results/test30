@@ -8,7 +8,7 @@ echo '### Test of --eta with no jobs'
 
 Computers / CPU cores / Max jobs to run
 1:local / 8 / 1
-0
+ETA: 0s Left: 0 AVG: 0.00s  0
 echo '### Test of --progress'
 ### Test of --progress
   seq 1 10 | stdout parallel --progress "sleep 1; echo {}" | wc -l
@@ -29,7 +29,6 @@ Computers / CPU cores / Max jobs to run
 1:local / 8 / 1
 
 Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
-local:1/0/100%/0.0s 1 2
 echo '### --timeout --onall on remote machines: 2*slept 1, 2 jobs failed'
 ### --timeout --onall on remote machines: 2*slept 1, 2 jobs failed
   parallel -j0 --timeout 6 --onall -S localhost,parallel@parallel-server1 'sleep {}; echo slept {}' ::: 1 8 9 ; echo jobs failed: $?
