@@ -2329,7 +2329,8 @@ B<parallel> to spawn multiple GNU B<parallel>s:
 
 If B<-j0> normally spawns 252 jobs, then the above will try to spawn
 2520 jobs. On a normal GNU/Linux system you can spawn 32000 jobs using
-this technique with no problems.
+this technique with no problems. To raise the 32000 jobs limit raise
+/proc/sys/kernel/pid_max to 4194303.
 
 
 =head1 EXAMPLE: Using shell variables

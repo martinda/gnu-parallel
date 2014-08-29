@@ -724,7 +724,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140826;
+    $Global::version = 20140827;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2457,6 +2457,7 @@ sub onall {
     my $options =
 	join(" ",
 	     ((defined $opt::jobs) ? "-P $opt::jobs" : ""),
+	     ((defined $opt::linebuffer) ? "--linebuffer" : ""),
 	     ((defined $opt::u) ? "-u" : ""),
 	     ((defined $opt::group) ? "-g" : ""),
 	     ((defined $opt::keeporder) ? "--keeporder" : ""),
@@ -2467,6 +2468,7 @@ sub onall {
     my $suboptions =
 	join(" ",
 	     ((defined $opt::u) ? "-u" : ""),
+	     ((defined $opt::linebuffer) ? "--linebuffer" : ""),
 	     ((defined $opt::group) ? "-g" : ""),
 	     ((defined $opt::files) ? "--files" : ""),
 	     ((defined $opt::keeporder) ? "--keeporder" : ""),
@@ -3854,7 +3856,8 @@ sub processes_available_by_system_limit {
     if($system_limit < $wanted_processes) {
 	# The system_limit is less than the wanted_processes
 	if($system_limit < 1 and not $Global::JobQueue->empty()) {
-	    ::warning("Cannot spawn any jobs. Raising ulimit -u or /etc/security/limits.conf may help.\n");
+	    ::warning("Cannot spawn any jobs. Raising ulimit -u or /etc/security/limits.conf\n",
+		      "or /proc/sys/kernel/pid_max may help.\n");
 	    ::wait_and_exit(255);
 	}
 	if(not $more_filehandles) {
@@ -3864,7 +3867,8 @@ sub processes_available_by_system_limit {
 	}
 	if($max_system_proc_reached) {
 	    ::warning("Only enough available processes to run ", $system_limit,
-		      " jobs in parallel. Raising ulimit -u or /etc/security/limits.conf may help.\n");
+		      " jobs in parallel. Raising ulimit -u or /etc/security/limits.conf\n",
+		      "or /proc/sys/kernel/pid_max may help.\n");
 	}
     }
     if($] == 5.008008 and $system_limit > 1000) {
