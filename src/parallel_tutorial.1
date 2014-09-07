@@ -133,7 +133,7 @@
 .\" ========================================================================
 .\"
 .IX Title "PARALLEL_TUTORIAL 1"
-.TH PARALLEL_TUTORIAL 1 "2014-08-23" "20140822" "parallel"
+.TH PARALLEL_TUTORIAL 1 "2014-09-04" "20140827" "parallel"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1277,7 +1277,7 @@ Output:
 \&\s-1GNU\s0 Parallel can save the output of each job into files:
 .PP
 .Vb 1
-\&  parallel \-\-files ::: A B C
+\&  parallel \-\-files echo ::: A B C
 .Ve
 .PP
 Output will be similar to:
@@ -1292,7 +1292,7 @@ By default \s-1GNU\s0 Parallel will cache the output in files in /tmp. This
 can be changed by setting \f(CW$TMPDIR\fR or \-\-tmpdir:
 .PP
 .Vb 1
-\&  parallel \-\-tmpdir /var/tmp \-\-files ::: A B C
+\&  parallel \-\-tmpdir /var/tmp \-\-files echo ::: A B C
 .Ve
 .PP
 Output will be similar to:
@@ -1306,7 +1306,7 @@ Output will be similar to:
 Or:
 .PP
 .Vb 1
-\&  TMPDIR=/var/tmp parallel \-\-files ::: A B C
+\&  TMPDIR=/var/tmp parallel \-\-files echo ::: A B C
 .Ve
 .PP
 Output: Same as above.

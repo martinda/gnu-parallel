@@ -880,7 +880,7 @@ Output:
 
 GNU Parallel can save the output of each job into files:
 
-  parallel --files ::: A B C
+  parallel --files echo ::: A B C
 
 Output will be similar to:
 
@@ -891,7 +891,7 @@ Output will be similar to:
 By default GNU Parallel will cache the output in files in /tmp. This
 can be changed by setting $TMPDIR or --tmpdir:
 
-  parallel --tmpdir /var/tmp --files ::: A B C
+  parallel --tmpdir /var/tmp --files echo ::: A B C
 
 Output will be similar to:
 
@@ -901,7 +901,7 @@ Output will be similar to:
 
 Or:
 
-  TMPDIR=/var/tmp parallel --files ::: A B C
+  TMPDIR=/var/tmp parallel --files echo ::: A B C
 
 Output: Same as above.
 

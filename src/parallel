@@ -2992,10 +2992,10 @@ sub which {
     my %pid_parentpid_cmd;
 
     sub pid_table {
-	# return two tables:
-	# pid -> children of pid
-	# pid -> pid of parent
-	# pid -> commandname
+	# Returns:
+	#   %children_of = { pid -> children of pid }
+	#   %parent_of = { pid -> pid of parent }
+	#   %name_of = { pid -> commandname }
 
        	if(not %pid_parentpid_cmd) {
 	    # Filter for SysV-style `ps`
@@ -3595,6 +3595,7 @@ sub loadavg {
         if($self->{'string'} ne ":") {
 	    $cmd = $self->sshcommand() . " " . $self->serverlogin() . " ";
 	}
+	# TODO Is is called 'ps ax -o state,command' on other platforms?
 	$cmd .= "ps ax -o state,command";
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
@@ -5986,14 +5987,15 @@ sub set_exitsignal {
 }
 
 {
-    my ($disk_full_fh,$b8193);
+    my ($disk_full_fh, $b8193, $name);
     sub exit_if_disk_full {
 	# Checks if $TMPDIR is full by writing 8kb to a tmpfile
 	# If the disk is full: Exit immediately.
 	# Returns:
 	#   N/A
 	if(not $disk_full_fh) {
-	    $disk_full_fh = ::tmpfile(SUFFIX => ".df");
+	    ($disk_full_fh, $name) = ::tmpfile(SUFFIX => ".df");
+	    unlink $name;
 	    $b8193 = "x"x8193;
 	}
 	my $pos = tell $disk_full_fh;
