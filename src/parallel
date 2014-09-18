@@ -724,7 +724,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140827;
+    $Global::version = 20140914;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -5998,7 +5998,6 @@ sub set_exitsignal {
 	    unlink $name;
 	    $b8193 = "x"x8193;
 	}
-	my $pos = tell $disk_full_fh;
 	# Linux does not discover if a disk is full if writing <= 8192
 	# Tested on:
 	# bfs btrfs cramfs ext2 ext3 ext4 ext4dev jffs2 jfs minix msdos
@@ -6018,12 +6017,13 @@ sub set_exitsignal {
 	print $disk_full_fh $b8193;
 	if(not $disk_full_fh
 	   or
-	   tell $disk_full_fh == $pos) {
+	   tell $disk_full_fh == 0) {
 	    ::error("Output is incomplete. Cannot append to buffer file in $ENV{'TMPDIR'}. Is the disk full?\n");
 	    ::error("Change \$TMPDIR with --tmpdir or use --compress.\n");
 	    ::wait_and_exit(255);
 	}
 	truncate $disk_full_fh, 0;
+	seek($disk_full_fh, 0, 0) || die;
     }
 }
 

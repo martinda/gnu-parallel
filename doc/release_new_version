@@ -240,7 +240,11 @@ New in this release:
 
 * OCRmyPDF uses GNU Parallel https://github.com/fritz-hh/OCRmyPDF/
 
+* GNU Parallel was presented at Balti and Bioinformatics "On-Air" http://youtu.be/UtXlr19xTh8?t=2h5m0s
+
 * GNU Parallel (Sebuah Uji Coba) http://pr4ka5a.wordpress.com/2014/09/04/gnu-parallel-sebuah-uji-coba/
+
+* GNU Parallel: 并行执行Linux命令 http://blog.csdn.net/xzz_hust/article/details/39183837
 
 * Bug fixes and man page updates.
 

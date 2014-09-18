@@ -647,9 +647,9 @@ infinite loop. This will likely be fixed in a later release.
 
 =item B<--gnu>
 
-Behave like GNU B<parallel>. If B<--tollef> and B<--gnu> are both set,
-B<--gnu> takes precedence. B<--tollef> is retired, but B<--gnu> is
-kept for compatibility.
+Behave like GNU B<parallel>. This option historically took precedence
+over B<--tollef>. The B<--tollef> option is now retired, and therefore
+may not be used. B<--gnu> is kept for compatibility.
 
 
 =item B<--group>
@@ -3215,20 +3215,26 @@ must be one argument.
 
 =head1 DEFAULT PROFILE (CONFIG FILE)
 
-The file ~/.parallel/config (formerly known as .parallelrc) will be
-read if it exists.  Lines starting with '#' will be ignored. It can be
-formatted like the environment variable $PARALLEL, but it is often
-easier to simply put each option on its own line.
+The global configuration file /etc/parallel/config, followed by user
+configuration file ~/.parallel/config (formerly known as .parallelrc)
+will be read in turn if they exist.  Lines starting with '#' will be
+ignored. The format can follow that of the environment variable
+$PARALLEL, but it is often easier to simply put each option on its own
+line.
 
-Options on the command line takes precedence over the environment
-variable $PARALLEL which takes precedence over the file
-~/.parallel/config.
+Options on the command line take precedence, followed by the
+environment variable $PARALLEL, user configuration file
+~/.parallel/config, and finally the global configuration file
+/etc/parallel/config.
 
+Note that no file that is read for options, nor the environment
+variable $PARALLEL, may contain retired options such as B<--tollef>.
 
 =head1 PROFILE FILES
 
-If B<--profile> set, GNU B<parallel> will read the profile from that file instead of
-~/.parallel/config. You can have multiple B<--profiles>.
+If B<--profile> set, GNU B<parallel> will read the profile from that
+file rather than the global or user configuration files. You can have
+multiple B<--profiles>.
 
 Example: Profile for running a command on every sshlogin in
 ~/.ssh/sshlogins and prepend the output with the sshlogin:
@@ -3425,7 +3431,7 @@ supports (See REPORTING BUGS).
 
 =head2 DIFFERENCES BETWEEN xargs AND GNU Parallel
 
-B<xargs> offer some of the same possibilities as GNU B<parallel>.
+B<xargs> offers some of the same possibilities as GNU B<parallel>.
 
 B<xargs> deals badly with special characters (such as space, ' and
 "). To see the problem try this:
@@ -3948,7 +3954,7 @@ B<ladon> deals badly with filenames containing " and newline, and it fails for o
 =head3 EXAMPLES FROM ladon MANUAL
 
 It is assumed that the '--rpl's above are put in B<~/.parallel/config>
-and that it is run under a shell that support '**' globbing (such as B<zsh>):
+and that it is run under a shell that supports '**' globbing (such as B<zsh>):
 
 B<1> ladon "**/*.txt" -- echo RELPATH
 
