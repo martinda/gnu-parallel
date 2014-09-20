@@ -8,7 +8,7 @@ P_WORKING="minix freebsd solaris openbsd netbsd debian aix redhat hpux qnx tru64
 
 P="$P_WORKING"
 POLAR=`parallel -k echo {}.polarhome.com ::: $P`
-# Avoid the stupid /etc/issue.net banner at Polarhome
+# Avoid the stupid /etc/issue.net banner at Polarhome: -oLogLevel=quiet
 
 echo '### Tests on polarhome machines'
 echo 'Setup on polarhome machines'
@@ -19,8 +19,8 @@ copy_and_test() {
     # scp to each polarhome machine do not work. Use cat
     # Avoid the stupid /etc/issue.net banner with -oLogLevel=quiet
     echo '### Run the test on '$H
-    cat `which parallel` | ssh -oLogLevel=quiet $H 'cat > bin/p.tmp && chmod 755 bin/p.tmp && mv bin/p.tmp bin/parallel; bin/perl bin/parallel echo Works on {} ::: '$H
+    cat `which parallel` | ssh -oLogLevel=quiet $H 'cat > bin/p.tmp && chmod 755 bin/p.tmp && mv bin/p.tmp bin/parallel && bin/perl bin/parallel echo Works on {} ::: '$H
 }
 export -f copy_and_test
-stdout parallel -j0 -k --timeout 80 --delay 0.1 --tag  -v copy_and_test {} ::: $POLAR
+stdout parallel -j0 -k --retries 5 --timeout 80 --delay 0.1 --tag  -v copy_and_test {} ::: $POLAR
 

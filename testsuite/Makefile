@@ -45,8 +45,8 @@ startvm:
 	# Make sure we can reach the virtual machines
 	sudo ifconfig wlan0:0 192.168.1.72
 	# If they are already running: Don't fail
-	VBoxManage startvm CentOS3-root:centos3 || true
-	VBoxManage startvm RedHat9-root:redhat9 || true
+	VBoxManage startvm CentOS3-root:centos3 || VBoxManage controlvm CentOS3-root:centos3 resume || true
+	VBoxManage startvm RedHat9-root:redhat9 || VBoxManage controlvm RedHat9-root:redhat9 resume || true
 
 stopvm:
 	VBoxManage controlvm CentOS3-root:centos3 savestate

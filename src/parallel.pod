@@ -76,9 +76,9 @@ similar to B<cat | sh>.
 The I<command> must be an executable, a script, a composed command, or
 a function.
 
-If it is a Bash function you need to B<export -f> the
-function first. An alias will, however, not work (see why
-http://www.perlmonks.org/index.pl?node_id=484296).
+If it is a Bash function you need to B<export -f> the function
+first. To use aliases copy the full environment as described under
+B<--env> and use B<env_parallel> instead of B<parallel>.
 
 If it is a zsh function you will need to use this helper function
 B<exportf> to export and to set $SHELL to bash:
