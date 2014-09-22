@@ -101,17 +101,17 @@ B<--noswap> will set both B<--start-noswap> and B<run-noswap>.
 Sets niceness. See B<nice>(1).
 
 
-=item B<-p> I<PID> (alpha testing)
+=item B<-p> I<PID> (beta testing)
 
-=item B<--pid> I<PID> (alpha testing)
+=item B<--pid> I<PID> (beta testing)
 
 Process ID of process to suspend. You can specify multiple process IDs
 with multiple B<-p> I<PID>.
 
 
-=item B<--prg> I<program> (alpha testing)
+=item B<--prg> I<program> (beta testing)
 
-=item B<--program> I<program> (alpha testing)
+=item B<--program> I<program> (beta testing)
 
 Name of running program to suspend. You can specify multiple programs
 with multiple B<--prg> I<program>.
@@ -141,7 +141,7 @@ Run limit. The running program will be slowed down if the system is
 above the limit. See: B<--io>, B<--load>, B<--mem>, B<--noswap>.
 
 
-=item B<--sensor> I<sensor program> (alpha testing)
+=item B<--sensor> I<sensor program> (beta testing)
 
 Read sensor. Use I<sensor program> to read a sensor.
 

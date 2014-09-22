@@ -1,3 +1,29 @@
+20140922
+
+* If the file give as --sshloginfile is changed it will be re-read
+  when a job finishes though at most once per second. This makes it
+  possible to add and remove hosts while running.
+
+* Brutha uses GNU Parallel https://pypi.python.org/pypi/brutha/1.0.2
+
+* OCRmyPDF uses GNU Parallel https://github.com/fritz-hh/OCRmyPDF/
+
+* GNU Parallel was presented at Balti and Bioinformatics "On-Air"
+  http://youtu.be/UtXlr19xTh8?t=2h5m0s
+
+* Pleiades Plus uses GNU Parallel
+  https://github.com/ryanfb/pleiades-plus
+
+* Imagemagick and GNU Parallel
+  http://deepdish.io/2014/09/15/gnu-parallel/
+
+* GNU Parallel (Sebuah Uji Coba)
+  http://pr4ka5a.wordpress.com/2014/09/04/gnu-parallel-sebuah-uji-coba/
+
+* GNU Parallel: 并行执行Linux命令
+  http://blog.csdn.net/xzz_hust/article/details/39183837
+
+
 20140822
 
 * GNU Parallel now uses the same shell it was started from as the

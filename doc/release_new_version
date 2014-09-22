@@ -2,7 +2,7 @@
 
 == alpha/beta/production ==
 
-Check that documentation is updated:
+Check that documentation is updated (compare to web):
 
 git diff last-release-commit
 Unmodified beta since last version => production
@@ -241,6 +241,10 @@ New in this release:
 * OCRmyPDF uses GNU Parallel https://github.com/fritz-hh/OCRmyPDF/
 
 * GNU Parallel was presented at Balti and Bioinformatics "On-Air" http://youtu.be/UtXlr19xTh8?t=2h5m0s
+
+* Pleiades Plus uses GNU Parallel https://github.com/ryanfb/pleiades-plus
+
+* Imagemagick and GNU Parallel http://deepdish.io/2014/09/15/gnu-parallel/
 
 * GNU Parallel (Sebuah Uji Coba) http://pr4ka5a.wordpress.com/2014/09/04/gnu-parallel-sebuah-uji-coba/
 
