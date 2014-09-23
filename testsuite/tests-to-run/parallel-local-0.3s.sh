@@ -16,4 +16,10 @@ echo '### Test exit val - false';
 
 echo '**'
 
+echo '### Test bug #43284: {%} and {#} with --xapply'; 
+  parallel --xapply 'echo {1} {#} {%} {2}' ::: a ::: b; 
+  parallel -N2 'echo {%}' ::: a b
+
+echo '**'
+
 EOF

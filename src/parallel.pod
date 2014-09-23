@@ -1375,8 +1375,8 @@ it possible to define your own replacement strings. GNU B<parallel>'s
 7 replacement strings are implemented as:
 
   --rpl '{} '
-  --rpl '{#} $_=$job->seq()'
-  --rpl '{%} $_=$job->slot()'
+  --rpl '{#} 1 $_=$job->seq()'
+  --rpl '{%} 1 $_=$job->slot()'
   --rpl '{/} s:.*/::'
   --rpl '{//} $Global::use{"File::Basename"} ||= eval "use File::Basename; 1;"; $_ = dirname($_);'
   --rpl '{/.} s:.*/::; s:\.[^/.]+$::;'

@@ -8,3 +8,9 @@ echo '### Test exit val - false';   echo false | parallel;   echo $?
 1
 echo '**'
 **
+echo '### Test bug #43284: {%} and {#} with --xapply';   parallel --xapply 'echo {1} {#} {%} {2}' ::: a ::: b;   parallel -N2 'echo {%}' ::: a b
+### Test bug #43284: {%} and {#} with --xapply
+a 1 1 b
+1
+echo '**'
+**

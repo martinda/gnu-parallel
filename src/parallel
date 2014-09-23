@@ -735,8 +735,8 @@ sub parse_options {
     %Global::replace =
 	(
 	 '{}'   => '',
-	 '{#}'  => '$_=$job->seq()',
-	 '{%}'  => '$_=$job->slot()',
+	 '{#}'  => '1 $_=$job->seq()',
+	 '{%}'  => '1 $_=$job->slot()',
 	 '{/}'  => 's:.*/::',
 	 '{//}' => '$Global::use{"File::Basename"} ||= eval "use File::Basename; 1;"; $_ = dirname($_);',
 	 '{/.}' => 's:.*/::; s:\.[^/.]+$::;',
