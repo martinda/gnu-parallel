@@ -97,7 +97,7 @@ B<exportf> to export and to set $SHELL to bash:
 
 The command cannot contain the character \257 (macron: ¯).
 
-=item B<{}> (beta testing)
+=item B<{}>
 
 Input line. This replacement string will be replaced by a full line
 read from the input source. The input source is normally stdin
@@ -110,7 +110,7 @@ If the command line contains no replacement strings then B<{}> will be
 appended to the command line.
 
 
-=item B<{.}> (beta testing)
+=item B<{.}>
 
 Input line without extension. This replacement string will be replaced
 by the input with the extension removed. If the input line contains
@@ -126,7 +126,7 @@ The replacement string B<{.}> can be changed with B<--er>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/}> (beta testing)
+=item B<{/}>
 
 Basename of input line. This replacement string will be replaced by
 the input with the directory part removed.
@@ -137,7 +137,7 @@ B<--basenamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{//}> (beta testing)
+=item B<{//}>
 
 Dirname of input line. This replacement string will be replaced by the
 dir of the input line. See B<dirname>(1).
@@ -148,7 +148,7 @@ B<--dirnamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/.}> (beta testing)
+=item B<{/.}>
 
 Basename of input line without extension. This replacement string will
 be replaced by the input with the directory and extension part
@@ -160,7 +160,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}> (beta testing)
+=item B<{#}>
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -171,7 +171,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}> (beta testing)
+=item B<{%}>
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -183,7 +183,7 @@ The replacement string B<{%}> can be changed with B<--slotreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>B<}> (beta testing)
+=item B<{>I<n>B<}>
 
 Argument from input source I<n> or the I<n>'th argument. This
 positional replacement string will be replaced by the input from input
@@ -194,7 +194,7 @@ I<n>'th last argument.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>.B<}> (beta testing)
+=item B<{>I<n>.B<}>
 
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
@@ -207,7 +207,7 @@ extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}> (beta testing)
+=item B<{>I<n>/B<}>
 
 Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.
@@ -220,7 +220,7 @@ directory (if any) removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>//B<}> (beta testing)
+=item B<{>I<n>//B<}>
 
 Dirname of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{//}>.
@@ -232,7 +232,7 @@ the I<n>'th argument (when used with B<-N>). See B<dirname>(1).
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}> (beta testing)
+=item B<{>I<n>/.B<}>
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -246,7 +246,7 @@ directory (if any) and extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{=>I<perl expression>B<=}> (beta testing)
+=item B<{=>I<perl expression>B<=}>
 
 Replace with calculated I<perl expression>. B<$_> will contain the
 same as B<{}>. After evaluating I<perl expression> B<$_> will be used
@@ -259,7 +259,7 @@ The B<{=>I<perl expression>B<=}> must be given as a single string.
 See also: B<--rpl> B<--parens>
 
 
-=item B<{=>I<n> I<perl expression>B<=}> (beta testing)
+=item B<{=>I<n> I<perl expression>B<=}>
 
 Positional equivalent to B<{= perl expression =}>. To understand
 positional replacement strings see B<{>I<n>B<}>.
@@ -360,7 +360,7 @@ string that is not in the command line.
 See also: B<:::>.
 
 
-=item B<--bar> (beta testing)
+=item B<--bar>
 
 Show progress as a progress bar. In the bar is shown: % of jobs
 completed, estimated seconds left, and number of jobs started.
@@ -370,9 +370,9 @@ It is compatible with B<zenity>:
 seq 1000 | parallel -j30 --bar '(echo {};sleep 0.1)' 2> >(zenity --progress --auto-kill) | wc
 
 
-=item B<--basefile> I<file> (beta testing)
+=item B<--basefile> I<file>
 
-=item B<--bf> I<file> (beta testing)
+=item B<--bf> I<file>
 
 I<file> will be transferred to each sshlogin before a jobs is
 started. It will be removed if B<--cleanup> is active. The file may be
@@ -523,7 +523,7 @@ Use the replacement string I<replace-str> instead of B<{//}> for
 dirname of input line.
 
 
-=item B<-E> I<eof-str> (beta testing)
+=item B<-E> I<eof-str>
 
 Set the end of file string to eof-str.  If the end of file string
 occurs as a line of input, the rest of the input is ignored.  If
@@ -546,9 +546,9 @@ the job may be scheduled on another computer or the local computer if
 : is in the list.
 
 
-=item B<--eof>[=I<eof-str>] (beta testing)
+=item B<--eof>[=I<eof-str>]
 
-=item B<-e>[I<eof-str>] (beta testing)
+=item B<-e>[I<eof-str>]
 
 This option is a synonym for the B<-E> option.  Use B<-E> instead,
 because it is POSIX compliant for B<xargs> while this option is not.
@@ -556,7 +556,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var> (beta testing)
+=item B<--env> I<var>
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -674,9 +674,9 @@ See also: B<--line-buffer> B<--ungroup>
 Print a summary of the options to GNU B<parallel> and exit.
 
 
-=item B<--halt-on-error> I<val> (beta testing)
+=item B<--halt-on-error> I<val>
 
-=item B<--halt> I<val> (beta testing)
+=item B<--halt> I<val>
 
 How should GNU B<parallel> terminate if one of more jobs fail?
 
@@ -726,9 +726,9 @@ If I<regexp> is a number, it will match that many lines.
 Use the replacement string I<replace-str> instead of {}.
 
 
-=item B<--replace>[=I<replace-str>] (beta testing)
+=item B<--replace>[=I<replace-str>]
 
-=item B<-i>[I<replace-str>] (beta testing)
+=item B<-i>[I<replace-str>]
 
 This option is a synonym for B<-I>I<replace-str> if I<replace-str> is
 specified, and for B<-I>{} otherwise.  This option is deprecated;
@@ -789,13 +789,13 @@ If the evaluated number is less than 1 then 1 will be used.  See also
 B<--use-cpus-instead-of-cores>.
 
 
-=item B<--jobs> I<N>% (beta testing)
+=item B<--jobs> I<N>%
 
-=item B<-j> I<N>% (beta testing)
+=item B<-j> I<N>%
 
-=item B<--max-procs> I<N>% (beta testing)
+=item B<--max-procs> I<N>%
 
-=item B<-P> I<N>% (beta testing)
+=item B<-P> I<N>%
 
 Multiply N% with the number of CPU cores.  Run this many jobs in
 parallel. See also B<--use-cpus-instead-of-cores>.
@@ -887,9 +887,9 @@ the same syntax as B<--jobs>, so I<100%> for one per CPU is a valid
 setting. Only difference is 0 which is interpreted as 0.01.
 
 
-=item B<--controlmaster> (beta testing)
+=item B<--controlmaster>
 
-=item B<-M> (beta testing)
+=item B<-M>
 
 Use ssh's ControlMaster to make ssh connections faster. Useful if jobs
 run remote and are very fast to run. This is disabled for sshlogins
@@ -937,7 +937,7 @@ This is useful for scripts that depend on features only available from
 a certain version of GNU B<parallel>.
 
 
-=item B<--nonall>
+=item B<--nonall> (beta testing)
 
 B<--onall> with no arguments. Run the command on all computers given
 with B<--sshlogin> but take no arguments. GNU B<parallel> will log
@@ -948,7 +948,7 @@ This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
 
-=item B<--onall>
+=item B<--onall> (beta testing)
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
@@ -999,7 +999,7 @@ B<--files> is often used with B<--pipe>.
 See also: B<--recstart>, B<--recend>, B<--fifo>, B<--cat>, B<--pipepart>.
 
 
-=item B<--pipepart>
+=item B<--pipepart> (beta testing)
 
 Pipe parts of a physical file. B<--pipepart> works similar to
 B<--pipe>, but is much faster. It has a few limitations:
@@ -1024,7 +1024,7 @@ control on the command line (used by GNU B<parallel> internally when
 called with B<--sshlogin>).
 
 
-=item B<--plus> (beta testing)
+=item B<--plus>
 
 Activate additional replacement strings: {+/} {+.} {+..} {+...} {..}
 {...} {/..} {/...}. The idea being that '{+foo}' matches the opposite of
@@ -1145,9 +1145,9 @@ B<,,>:
 See also: B<--rpl> B<{= perl expression =}>
 
 
-=item B<--profile> I<profilename> (beta testing)
+=item B<--profile> I<profilename>
 
-=item B<-J> I<profilename> (beta testing)
+=item B<-J> I<profilename>
 
 Use profile I<profilename> for options. This is useful if you want to
 have multiple profiles. You could have one profile for running jobs in
@@ -1320,7 +1320,7 @@ useful if some jobs fail for no apparent reason (such as network
 failure).
 
 
-=item B<--return> I<filename> (beta testing)
+=item B<--return> I<filename>
 
 Transfer files from remote computers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote computers. When
@@ -1368,7 +1368,7 @@ B<--keep-order> will not work with B<--round-robin> as it is
 impossible to track which input block corresponds to which output.
 
 
-=item B<--rpl> 'I<tag> I<perl expression>' (beta testing)
+=item B<--rpl> 'I<tag> I<perl expression>'
 
 Use I<tag> as a replacement string for I<perl expression>. This makes
 it possible to define your own replacement strings. GNU B<parallel>'s
@@ -1549,9 +1549,9 @@ I<secs> seconds after starting each ssh. I<secs> can be less than 1
 seconds.
 
 
-=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
+=item B<-S> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
 
-=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]> (beta testing)
+=item B<--sshlogin> I<[ncpu/]sshlogin[,[ncpu/]sshlogin[,...]]>
 
 Distribute jobs to remote computers. The jobs will be run on a list of
 remote computers.  GNU B<parallel> will determine the number of CPU
@@ -1587,9 +1587,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename> (alpha testing)
+=item B<--sshloginfile> I<filename> (beta testing)
 
-=item B<--slf> I<filename> (alpha testing)
+=item B<--slf> I<filename> (beta testing)
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -1717,7 +1717,7 @@ Print the job to be run on stderr (standard error).
 See also B<-v>, B<-p>.
 
 
-=item B<--transfer> (beta testing)
+=item B<--transfer>
 
 Transfer files to remote computers. B<--transfer> is used with
 B<--sshlogin> when the arguments are files and should be transferred
