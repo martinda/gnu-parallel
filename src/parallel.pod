@@ -2165,6 +2165,11 @@ B<$(date -d "today -{1} days" +%Y%m%d)> will give the dates in
 YYYYMMDD with {1} days subtracted.
 
 
+=head1 EXAMPLE: Copy files as last modified date (ISO8601) with added random digits
+
+B<find . | parallel 'cp {} ../destdir/{= $a = int(10000*rand); $_ = `date -r "$_" +%FT%T"$a"`; chomp; =}'>
+
+
 =head1 EXAMPLE: Digtal clock with "blinking" :
 
 The : in a digital clock blinks. To make every other line have a ':'
@@ -2172,6 +2177,7 @@ and the rest a ' ' a perl expression is used to look at the 3rd input
 source. If the value modudo 2 is 1: Use ":" otherwise use " ":
 
 B<parallel -k echo {1}'{=3 $_=$_%2?":":" "=}'{2}{3} ::: {0..12} ::: {0..5} ::: {0..9}>
+
 
 =head1 EXAMPLE: Aggregating content of files
 
@@ -2520,7 +2526,8 @@ If the CPU is the limiting factor parallelization should be done on the regexps:
 
     cat regexp.txt | parallel --pipe -L1000 --round-robin grep -f - bigfile
 
-This will start one grep per CPU and read bigfile one time per CPU,
+If a line matches multiple regexps, the line may be duplicated. The command
+will start one grep per CPU and read bigfile one time per CPU,
 but as that is done in parallel, all reads except the first will be
 cached in RAM. Depending on the size of regexp.txt it may be faster to
 use --block 10m instead of -L1000. If regexp.txt is too big to fit in
@@ -2531,7 +2538,7 @@ Some storage systems perform better when reading multiple chunks in
 parallel. This is true for some RAID systems and for some network file
 systems. To parallelize the reading of bigfile:
 
-    parallel --pipepart --block 100M -a bigfile grep -f regexp.txt
+    parallel --pipepart --block 100M -a bigfile -k grep -f regexp.txt
 
 This will split bigfile into 100MB chunks and run grep on each of
 these chunks. To parallelize both reading of bigfile and regexp.txt
@@ -2539,6 +2546,8 @@ combine the two using --fifo:
 
     parallel --pipepart --block 100M -a bigfile --fifo cat regexp.txt \
     \| parallel --pipe -L1000 --round-robin grep -f - {}
+
+If a line matches multiple regexps, the line may be duplicated.
 
 
 =head1 EXAMPLE: Using remote computers
@@ -4148,6 +4157,9 @@ When using GNU B<parallel> for a publication please cite:
 
 O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login:
 The USENIX Magazine, February 2011:42-47.
+
+Alternatively you can get GNU Parallel without this requirement by
+paying 10000 EUR.
 
 Copyright (C) 2007-10-18 Ole Tange, http://ole.tange.dk
 

@@ -200,6 +200,14 @@ sub pipe_part_files {
 }
 
 sub find_header {
+    # Input:
+    #   $buf_ref = reference to read-in buffer
+    #   $fh = filehandle to read from
+    # Uses:
+    #   $opt::header
+    #   $opt::blocksize
+    # Returns:
+    #   $header string
     my ($buf_ref, $fh) = @_;
     my $header = "";
     if($opt::header) {
@@ -285,6 +293,17 @@ sub cat_partial {
 sub spreadstdin {
     # read a record
     # Spawn a job and print the record to it.
+    # Uses:
+    #   $opt::blocksize
+    #   STDIN
+    #   $opr::r
+    #   $Global::max_lines
+    #   $Global::max_number_of_args
+    #   $opt::regexp
+    #   $Global::start_no_new_jobs
+    #   $opt::roundrobin
+    #   %Global::running
+
     my $buf = "";
     my ($recstart,$recend) = recstartrecend();
     my $recendrecstart = $recend.$recstart;
@@ -303,14 +322,14 @@ sub spreadstdin {
       }
       if($opt::r) {
 	  # Remove empty lines
-	  $buf=~s/^\s*\n//gm;
+	  $buf =~ s/^\s*\n//gm;
 	  if(length $buf == 0) {
 	      next;
 	  }
       }
       if($Global::max_lines and not $Global::max_number_of_args) {
 	  # Read n-line records
-	  my $n_lines = $buf=~tr/\n/\n/;
+	  my $n_lines = $buf =~ tr/\n/\n/;
 	  my $last_newline_pos = rindex($buf,"\n");
 	  while($n_lines % $Global::max_lines) {
 	      $n_lines--;
@@ -453,10 +472,20 @@ sub nindex {
 }
 
 sub round_robin_write {
+    # Input:
+    #   $header_ref = ref to $header string
+    #   $block_ref = ref to $block to be written
+    #   $recstart = record start string
+    #   $recend = record end string
+    #   $endpos = end position of $block
+    # Uses:
+    #   %Global::running
     my ($header_ref,$block_ref,$recstart,$recend,$endpos) = @_;
     my $something_written = 0;
     my $block_passed = 0;
     while(not $block_passed) {
+	# Continue flushing existing buffers
+	# until one is empty and a new block is passed
 	while(my ($pid,$job) = each %Global::running) {
 	    if($job->stdin_buffer_length() > 0) {
 		$something_written += $job->non_block_write();
@@ -469,8 +498,6 @@ sub round_robin_write {
 	    }
 	}
     }
-
-    # http://docstore.mik.ua/orelly/perl/cookbook/ch07_15.htm
     start_more_jobs();
     return $something_written;
 }
@@ -479,6 +506,19 @@ sub round_robin_write {
 sub write_record_to_pipe {
     # Fork then
     # Write record from pos 0 .. $endpos to pipe
+    # Input:
+    #   $chunk_number = sequence number - to see if already run
+    #   $header_ref = reference to header string to prepend
+    #   $record_ref = reference to record to write
+    #   $recstart = start string of record
+    #   $recend = end string of record
+    #   $endpos = position in $record_ref where record ends
+    # Uses:
+    #   $Global::job_already_run
+    #   $opt::roundrobin
+    #   @Global::virgin_jobs
+    # Returns:
+    #   Number of chunks written (0 or 1)
     my ($chunk_number,$header_ref,$record_ref,$recstart,$recend,$endpos) = @_;
     if($endpos == 0) { return 0; }
     if(vec($Global::job_already_run,$chunk_number,1)) { return 1; }
@@ -520,6 +560,8 @@ sub __SEM_MODE__ {}
 
 sub acquire_semaphore {
     # Acquires semaphore. If needed: spawns to the background
+    # Uses:
+    #   @Global::host
     # Returns:
     #   The semaphore to be released when jobs is complete
     $Global::host{':'} = SSHLogin->new(":");
@@ -547,7 +589,8 @@ sub acquire_semaphore {
 sub __PARSE_OPTIONS__ {}
 
 sub options_hash {
-    # Returns a hash of the GetOptions config
+    # Returns:
+    #   %hash = the GetOptions config
     return
 	("debug|D=s" => \$opt::D,
 	 "xargs" => \$opt::xargs,
@@ -686,10 +729,15 @@ sub options_hash {
 
 sub get_options_from_array {
     # Run GetOptions on @array
+    # Input:
+    #   $array_ref = ref to @ARGV to parse
+    #   @keep_only = Keep only these options
+    # Uses:
+    #   @ARGV
     # Returns:
     #   true if parsing worked
     #   false if parsing failed
-    #   @array is changed
+    #   @$array_ref is changed
     my ($array_ref, @keep_only) = @_;
     if(not @$array_ref) {
 	# Empty array: No need to look more at that
@@ -1013,6 +1061,10 @@ sub parse_options {
 }
 
 sub env_quote {
+    # Input:
+    #   $v = value to quote
+    # Returns:
+    #   $v = value quoted as environment variable
     my $v = $_[0];
     $v =~ s/([\\])/\\$1/g;
     $v =~ s/([\[\] \#\'\&\<\>\(\)\;\{\}\t\"\$\`\*\174\!\?\~])/\\$1/g;
@@ -1033,7 +1085,14 @@ sub record_env {
 }
 
 sub parse_env_var {
-    # Parse --env and set $Global::envvar
+    # Parse --env and set $Global::envvar, $Global::envwarn and $Global::envvarlen
+    # Uses:
+    #   $Global::envvar = eval string that will set variables in both bash and csh
+    #   $Global::envwarn = If functions are used: Give warning in csh
+    #   $Global::envvarlen = length of $Global::envvar
+    #   @opt::env
+    #   $Global::shell
+    #   %ENV
     # Returns: N/A
     $Global::envvar = "";
     $Global::envwarn = "";
@@ -1043,6 +1102,7 @@ sub parse_env_var {
 	push @vars, split /,/, $varstring;
     }
     if(grep { /^_$/ } @vars) {
+	# --env _
 	# Include all vars that are not in a clean environment
 	if(open(my $vars_fh, "<", $ENV{'HOME'} . "/.parallel/ignored_vars")) {
 	    my @ignore = <$vars_fh>;
@@ -1096,6 +1156,14 @@ sub parse_env_var {
 }
 
 sub open_joblog {
+    # Open joblog as specified by --joblog
+    # Uses:
+    #   $opt::resume
+    #   $opt::resume_failed
+    #   $opt::joblog
+    #   $opt::results
+    #   $Global::job_already_run
+    #   %Global::fd
     my $append = 0;
     if(($opt::resume or $opt::resume_failed)
        and
@@ -1159,7 +1227,7 @@ sub find_compression_program {
     #   $decompress_program = decompress program with options
 
     # Search for these. Sorted by speed
-    my @prg = qw(lzop pigz gzip pbzip2 plzip bzip2 lzma lzip xz);
+    my @prg = qw(lzop pigz pxz gzip plzip pbzip2 lzma xz lzip bzip2);
     for my $p (@prg) {
 	if(which($p)) {
 	    return ("$p -c -1","$p -dc");
@@ -1172,8 +1240,17 @@ sub find_compression_program {
 
 sub read_options {
     # Read options from command line, profile and $PARALLEL
+    # Uses:
+    #   $opt::shebang_wrap
+    #   $opt::shebang
+    #   @ARGV
+    #   $opt::plain
+    #   @opt::profile
+    #   $ENV{'HOME'}
+    #   $ENV{'PARALLEL'}
     # Returns:
     #   @ARGV_no_opt = @ARGV without --options
+
     # This must be done first as this may exec myself
     if(defined $ARGV[0] and ($ARGV[0] =~ /^--shebang/ or
 			     $ARGV[0] =~ /^--shebang-?wrap/ or
@@ -1281,6 +1358,12 @@ sub read_args_from_command_line {
     # - puts arguments into files and add the files to -a
     # Input:
     #   @::ARGV = command option ::: arg arg arg :::: argfiles
+    # Uses:
+    #   $Global::arg_sep
+    #   $Global::arg_file_sep
+    #   $opt::internal_pipe_means_argfiles
+    #   $opt::pipe
+    #   @opt::a
     # Returns:
     #   @argv_no_argsep = @::ARGV without ::: and :::: and following args
     my @new_argv = ();
@@ -1345,6 +1428,10 @@ sub cleanup {
 sub __QUOTING_ARGUMENTS_FOR_SHELL__ {}
 
 sub shell_quote {
+    # Input:
+    #   @strings = strings to be quoted
+    # Output:
+    #   @shell_quoted_strings = string quoted with \ as needed by the shell
     my @strings = (@_);
     for my $a (@strings) {
         $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
@@ -1399,34 +1486,6 @@ sub shell_quote_file {
 	}
     }
     return $a;
-}
-
-sub _maybe_quote {
-    # If $Global::quoting is set then quote the string so shell will not expand any special chars
-    # Else do not quote
-    # Inputs:
-    #   $string = string to be quoted
-    # Returns:
-    #   $maybe_quoted_string = $string quoted if needed
-    if($Global::quoting) {
-	return shell_quote_scalar(@_);
-    } else {
-	return "@_";
-    }
-}
-
-sub _maybe_unquote {
-    # If $Global::quoting then unquote the string as shell would
-    # Else do not unquote
-    # Inputs:
-    #   $maybe_quoted_string = string to be maybe unquoted
-    # Returns:
-    #   $string = $maybe_quoted_string unquoted if needed
-    if($Global::quoting) {
-	return shell_unquote(@_);
-    } else {
-	return "@_";
-    }
 }
 
 sub _shellwords {
@@ -1490,33 +1549,14 @@ sub _shellwords {
 }
 
 sub shellwords {
+    # Input:
+    #   $string = shell line
+    # Returns:
+    #   @shell_words = $string split into words as shell would do
     $Global::use{"Text::ParseWords"} ||= eval "use Text::ParseWords; 1;";
     return Text::ParseWords::shellwords(@_);
 }
 
-sub _shell_unquote {
-    # Unquote strings from shell_quote
-    # Inputs:
-    #   @strings = strings to be unquoted
-    # Returns:
-    #   @unquoted_strings = @strings with shell quoting removed
-    my @strings = (@_);
-    my $arg;
-    for my $arg (@strings) {
-        if(not defined $arg) {
-            $arg = "";
-        }
-	# filenames with '\n' is quoted using \'\n\'
-        $arg =~ s/'\n'/\n/g;
-	# Non-printables
-        $arg =~ s/\\([\002-\011\013-\032])/$1/g;
-	# Shell special chars
-        $arg =~ s/\\([\#\?\`\(\)\{\}\*\>\<\~\|\; \"\!\$\&\'])/$1/g;
-	# Backslash
-        $arg =~ s/\\\\/\\/g;
-    }
-    return wantarray ? @strings : "@strings";
-}
 
 sub __FILEHANDLES__ {}
 
@@ -1524,6 +1564,10 @@ sub __FILEHANDLES__ {}
 sub save_stdin_stdout_stderr {
     # Remember the original STDIN, STDOUT and STDERR
     # and file descriptors opened by the shell (e.g. 3>/tmp/foo)
+    # Uses:
+    #   %Global::fd
+    #   $Global::original_stderr
+    #   $Global::original_stdin
     # Returns: N/A
 
     # Find file descriptors that are already opened (by the shell)
@@ -1543,6 +1587,9 @@ sub save_stdin_stdout_stderr {
 sub enough_file_handles {
     # Check that we have enough filehandles available for starting
     # another job
+    # Uses:
+    #   $Global::grouped
+    #   %Global::fd
     # Returns:
     #   1 if ungrouped (thus not needing extra filehandles)
     #   0 if too few filehandles
@@ -1569,6 +1616,9 @@ sub open_or_exit {
     # Open a file name or exit if the file cannot be opened
     # Inputs:
     #   $file = filehandle or filename to open
+    # Uses:
+    #   $Global::stdin_in_opt_a
+    #   $Global::original_stdin
     # Returns:
     #   $fh = file handle to read-opened file
     my $file = shift;
@@ -1618,6 +1668,19 @@ sub start_more_jobs {
     #   * not load on server is too high
     #   * not server swapping
     #   * not too short time since last remote login
+    # Uses:
+    #   $Global::max_procs_file
+    #   $Global::max_procs_file_last_mod
+    #   %Global::host
+    #   @opt::sshloginfile
+    #   $Global::start_no_new_jobs
+    #   $opt::filter_hosts
+    #   $Global::JobQueue
+    #   $opt::pipe
+    #   $opt::load
+    #   $opt::noswap
+    #   $opt::delay
+    #   $Global::newest_starttime
     # Returns:
     #   $jobs_started = number of jobs started
     my $jobs_started = 0;
@@ -1716,6 +1779,9 @@ sub start_more_jobs {
 }
 }
 
+{
+    my $no_more_file_handles_warned;
+
 sub start_another_job {
     # If there are enough filehandles
     #   and JobQueue not empty
@@ -1725,6 +1791,12 @@ sub start_another_job {
     #   mark it as virgin_job
     # Inputs:
     #   $sshlogin = the SSHLogin to start the job on
+    # Uses:
+    #   $Global::JobQueue
+    #   $opt::pipe
+    #   $opt::results
+    #   $opt::resume
+    #   @Global::virgin_jobs
     # Returns:
     #   1 if another jobs was started
     #   0 otherwise
@@ -1780,14 +1852,17 @@ sub start_another_job {
         }
     } else {
         # No more file handles
-	$Global::no_more_file_handles_warned++ or
+	$no_more_file_handles_warned++ or
 	    ::warning("No more file handles. ",
 		      "Raising ulimit -n or /etc/security/limits.conf may help.\n");
         return 0;
     }
 }
+}
 
 sub init_progress {
+    # Uses:
+    #   $opt::bar
     # Returns:
     #   list of computers for progress output
     $|=1;
@@ -1800,6 +1875,15 @@ sub init_progress {
 }
 
 sub drain_job_queue {
+    # Uses:
+    #   $opt::progress
+    #   $Global::original_stderr
+    #   $Global::total_running
+    #   $Global::max_jobs_running
+    #   %Global::running
+    #   $Global::JobQueue
+    #   %Global::host
+    #   $Global::start_no_new_jobs
     # Returns: N/A
     if($opt::progress) {
         print $Global::original_stderr init_progress();
@@ -1864,6 +1948,9 @@ sub drain_job_queue {
 
 sub toggle_progress {
     # Turn on/off progress view
+    # Uses:
+    #   $opt::progress
+    #   $Global::original_stderr
     # Returns: N/A
     $opt::progress = not $opt::progress;
     if($opt::progress) {
@@ -1872,6 +1959,11 @@ sub toggle_progress {
 }
 
 sub progress {
+    # Uses:
+    #   $opt::bar
+    #   $opt::eta
+    #   %Global::host
+    #   $Global::total_started
     # Returns:
     #   $workerlist = list of workers
     #   $header = that will fit on the screen
@@ -2731,6 +2823,8 @@ sub usage {
 	 "",
 	 "O. Tange (2011): GNU Parallel - The Command-Line Power Tool,",
 	 ";login: The USENIX Magazine, February 2011:42-47.",
+	 "",
+	 "Alternatively you can get GNU Parallel without this requirement by paying 10000 EUR.",
 	 "");
 }
 
@@ -2756,6 +2850,7 @@ sub citation_notice {
 	     "  ;login: The USENIX Magazine, February 2011:42-47.\n",
 	     "\n",
 	     "This helps funding further development; and it won't cost you a cent.\n",
+	     "Alternatively you can get GNU Parallel without this requirement by paying 10000 EUR.\n",
 	     "\n",
 	     "To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.\n\n",
 	    );
@@ -2810,6 +2905,7 @@ sub version {
 	       "When using programs that use GNU Parallel to process data for publication please cite:\n",
 	       "O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ",
 	       ";login: The USENIX Magazine, February 2011:42-47.\n",
+	       "Alternatively you can get GNU Parallel without this requirement by paying 10000 EUR.\n",
         );
 }
 
@@ -2837,6 +2933,8 @@ sub bibtex {
 	       "(Feel free to use \\nocite{Tange2011a})",
 	       "",
 	       "This helps funding further development.",
+	       "",
+	       "Alternatively you can get GNU Parallel without this requirement by paying 10000 EUR.",
 	       ""
         );
     while(not -e $ENV{'HOME'}."/.parallel/will-cite") {
@@ -7643,5 +7741,5 @@ sub mkdir_or_die {
 }
 
 # Keep perl -w happy
-$opt::x = $Semaphore::timeout = $Semaphore::wait = $Global::no_more_file_handles_warned =
+$opt::x = $Semaphore::timeout = $Semaphore::wait =
 $Job::file_descriptor_warning_printed = $Global::max_slot_number = 0;

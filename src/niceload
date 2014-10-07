@@ -3,8 +3,8 @@
 # Copyright (C) 2004,2005,2006,2006,2008,2009,2010 Ole Tange,
 # http://ole.tange.dk
 #
-# Copyright (C) 2010,2011 Ole Tange, http://ole.tange.dk and Free
-# Software Foundation, Inc.
+# Copyright (C) 2010,2011,2012,2013,2014 Ole Tange,
+# http://ole.tange.dk and Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -180,6 +180,9 @@ sub get_options_from_array {
 	 "rn|runnoswap|run-noswap|run-no-swap" => \$opt::run_noswap,
 	 "noswap|N" => \$opt::noswap,
 
+	 # niceload -l -1 --sensor 'cat /sys/class/power_supply/BAT0/status /proc/acpi/battery/BAT0/state 2>/dev/null |grep -i -q discharging; echo $?'
+	 "battery|B" => \$opt::battery,
+
 	 "nice|n=i" => \$opt::nice,
 	 "program|prg=s" => \@opt::prg,
 	 "process|pid|p=s" => \@opt::pid,
@@ -236,6 +239,13 @@ sub usleep {
     select(undef, undef, undef, $secs/1000);
 }
 
+sub deepusleep {
+    # Sleep this many milliseconds. Dont let children wake us up
+    my $sigchld = $SIG{'CHLD'};
+    $SIG{'CHLD'} = undef;
+    usleep(@_);
+    $SIG{'CHLD'} = $sigchld;
+}
 
 sub debug {
     if($opt::debug) {
@@ -606,8 +616,7 @@ sub sleep_for_recheck {
 	print STDERR "Sleeping $self->{'recheck'}s\n";
     }
     ::debug("recheck in $self->{'recheck'}s\n");
-    ::usleep(1); # For some reason this gets interrupted
-    ::usleep(1000*$self->{'recheck'});
+    ::deepusleep(1000*$self->{'recheck'});
 }
 
 
@@ -618,8 +627,7 @@ sub sleep_while_running {
 	$self->{'runtime'} = int($self->{'runtime'}*100)/100;
 	print STDERR "Running $self->{'runtime'}s\n";
     }
-    ::usleep(1); # For some reason this gets interrupted
-    ::usleep(1000*$self->{'runtime'});
+    ::deepusleep(1000*$self->{'runtime'});
 }
 
 

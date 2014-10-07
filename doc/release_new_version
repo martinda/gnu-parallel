@@ -235,6 +235,23 @@ Haiku of the month:
 
 New in this release:
 
+* GNU Parallel was cited in: Exclusion of cosmic rays in protoplanetary disks. II. Chemical gradients and observational signatures http://iopscience.iop.org/0004-637X/794/2/123/article
+
+* GNU Parallel was cited in: Application of Machine Learning to Algorithm Selection for TSP http://www.dbai.tuwien.ac.at/staff/musliu/art_ictai_cam.pdf
+
+* GNU Parallel was used (unfortunately without citation) in: De Novo Insertions and Deletions of Predominantly Paternal Origin Are Associated with Autism Spectrum Disorder http://www.cell.com/cms/attachment/2019079667/2039310868/mmc1.pdf
+
+* GNU Parallel is demonstrated in: Data Science at the Command Line: Facing the Future with Time-Tested Tools
+
+* GNU Parallel and how to get started with it http://www.jduck.net/blog/2014/09/30/gnu-paralell/
+
+* Comparing Golang, Scala, Elixir and Ruby for ETL http://www.dimroc.com/2014/09/29/etl-language-showdown/
+
+* Ubuntu 13.04でGNU ParallelをGNUモードで動かす http://qiita.com/YusukeSuzuki@github/items/7b96b5876bf980f21e85
+
+* Parallelizing Batch Jobs for Fun and Profit http://mikeseidle.com/tech/programming/2013/03/parallelizing-batch-jobs
+
+* Bug fixes and man page updates.
 
 GNU Parallel - For people who live life in the parallel lane.
 
@@ -258,6 +275,23 @@ Walk through the tutorial (man parallel_tutorial). Your commandline will love yo
 When using programs that use GNU Parallel to process data for publication please cite:
 
 O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ;login: The USENIX Magazine, February 2011:42-47.
+
+If you like GNU Parallel:
+
+* Give a demo at your local user group/team/colleagues
+* Post the intro videos on Reddit/Diaspora*/forums/blogs/ Identi.ca/Google+/Twitter/Facebook/Linkedin/mailing lists
+* Get the merchandise https://www.gnu.org/s/parallel/merchandise.html
+* Request or write a review for your favourite blog or magazine
+* Request or build a package for your favourite distribution (if it is not already there)
+* Invite me for your next conference
+
+If you use GNU Parallel for research:
+
+* Please cite GNU Parallel in you publications (use --bibtex)
+
+If GNU Parallel saves you money:
+
+* (Have your company) donate to FSF https://my.fsf.org/donate/
 
 
 = About GNU SQL =
