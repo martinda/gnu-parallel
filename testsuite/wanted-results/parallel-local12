@@ -5,6 +5,7 @@ When using programs that use GNU Parallel to process data for publication please
   ;login: The USENIX Magazine, February 2011:42-47.
 
 This helps funding further development; and it won't cost you a cent.
+Or you can get GNU Parallel without this requirement by paying 10000 EUR.
 
 To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.
 
@@ -19,6 +20,7 @@ When using programs that use GNU Parallel to process data for publication please
   ;login: The USENIX Magazine, February 2011:42-47.
 
 This helps funding further development; and it won't cost you a cent.
+Or you can get GNU Parallel without this requirement by paying 10000 EUR.
 
 To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.
 

@@ -26,11 +26,7 @@ echo '### bug #42725: csh with \n in variables'
 CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
 CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
 This is not csh/tcsh
-Unmatched ".
-\} || export not_csh=\(\)\ \{\ \ echo\ This\ is\ not\ csh/tcsh: Command not found.
-Unmatched ".
-parallel: Warning: Could not figure out number of cpus on csh@lo (). Using 1.
-Unmatched ".
-\} || export not_csh=\(\)\ \{\ \ echo\ This\ is\ not\ csh/tcsh: Command not found.
-Unmatched ".
-parallel: Warning: Could not figure out number of cpus on tcsh@lo (). Using 1.
+Badly placed ()'s.
+}: Command not found.
+Badly placed ()'s.
+}: Command not found.

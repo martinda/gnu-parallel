@@ -225,15 +225,24 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20141022 ('') released
+Subject: GNU Parallel 20141022 ('Shellshock') released
 
-GNU Parallel 20141022 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20141022 ('Shellshock') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+
+Shellshock has also hit GNU Parallel. It is not a security issue, per se (the security issue was in Bash), but Bash's solution affects --env when exporting a function.
 
 Haiku of the month:
+
+Shellshock pain hits us.
+Dash dash env is affected.
+Upgrade Parallel.
+  -- Ole Tange
 
 (Last month's haiku was by Malcolm Cook)
 
 New in this release:
+
+* --env was changed to deal with Bash's new way of exporting a function.
 
 * GNU Parallel was cited in: Exclusion of cosmic rays in protoplanetary disks. II. Chemical gradients and observational signatures http://iopscience.iop.org/0004-637X/794/2/123/article
 

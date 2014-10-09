@@ -160,7 +160,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}>
+=item B<{#}> (alpha testing)
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -171,7 +171,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}>
+=item B<{%}> (alpha testing)
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -556,7 +556,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var>
+=item B<--env> I<var> (alpha testing)
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -1924,7 +1924,6 @@ See also B<--header>.
 
 =back
 
-
 =head1 EXAMPLE: Working as xargs -n1. Argument appending
 
 GNU B<parallel> can work similar to B<xargs -n1>.
@@ -2116,6 +2115,25 @@ And then call as:
   env_parallel doubleit ::: 1 2 3 ::: a b
   env_parallel -S server doit ::: 1 2 3
   env_parallel -S server doubleit ::: 1 2 3 ::: a b
+
+
+=head1 EXAMPLE: Function tester
+
+To test a program with different parameters:
+
+  tester() {
+    if (eval "$@") >&/dev/null; then
+      perl -e 'printf "\033[30;102m[ OK ]\033[0m @ARGV\n"' "$@"
+    else
+      perl -e 'printf "\033[30;101m[FAIL]\033[0m @ARGV\n"' "$@"
+    fi
+  }
+  export -f tester
+  parallel tester my_program ::: arg1 arg2
+  parallel tester exit ::: 1 0 2 0
+
+If B<my_program> fails a red FAIL will be printed followed by the failing
+command; otherwise a green OK will be printed followed by the command.
 
 
 =head1 EXAMPLE: Removing file extension when processing files
