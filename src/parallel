@@ -772,7 +772,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20140923;
+    $Global::version = 20141009;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1086,6 +1086,13 @@ sub record_env {
 
 sub parse_env_var {
     # Parse --env and set $Global::envvar, $Global::envwarn and $Global::envvarlen
+    #
+    # Bash functions must be parsed to export them remotely
+    #   Pre-shellshock style bash function:
+    #     myfunc=() {...
+    #   Post-shellshock style bash function:
+    #     BASH_FUNC_myfunc()=() {...
+    #
     # Uses:
     #   $Global::envvar = eval string that will set variables in both bash and csh
     #   $Global::envwarn = If functions are used: Give warning in csh
@@ -1117,21 +1124,45 @@ sub parse_env_var {
 	    ::wait_and_exit(255);
 	}
     }
+    # Duplicate vars as BASH functions to include post-shellshock functions.
+    # So --env myfunc should also look for BASH_FUNC_myfunc()
+    @vars = map { $_, "BASH_FUNC_$_()" } @vars;
     # Keep only defined variables
     @vars = grep { defined($ENV{$_}) } @vars;
-    my @qcsh = (map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  }
-		grep { not /^parallel_bash_environment$/ } @vars);
-    my @qbash = map { my $a=$_; "export $a=" . env_quote($ENV{$a}) } @vars;
+    # Pre-shellshock style bash function:
+    #   myfunc=() {  echo myfunc
+    #   }
+    # Post-shellshock style bash function:
+    #   BASH_FUNC_myfunc()=() {  echo myfunc
+    #   }
     my @bash_functions = grep { substr($ENV{$_},0,4) eq "() {" } @vars;
+    my @non_functions = grep { substr($ENV{$_},0,4) ne "() {" } @vars;
     if(@bash_functions) {
 	# Functions are not supported for all shells
 	if($Global::shell !~ m:/(bash|rbash|zsh|rzsh|dash|ksh):) {
 	    ::warning("Shell functions may not be supported in $Global::shell\n");
 	}
     }
-    push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_functions;
+
+    # Pre-shellschock names are without ()
+    my @bash_pre_shellshock = grep { not /\(\)/ } @bash_functions;
+    # Post-shellschock names are with ()
+    my @bash_post_shellshock = grep { /\(\)/ } @bash_functions;
+
+    my @qcsh = (map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  }
+		grep { not /^parallel_bash_environment$/ } @non_functions);
+    my @qbash = (map { my $a=$_; "export $a=" . env_quote($ENV{$a}) }
+		 @non_functions, @bash_pre_shellshock);
+
+    push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_pre_shellshock;
+    push @qbash, map { /BASH_FUNC_(.*)\(\)/; "$1 $ENV{$_}" } @bash_post_shellshock;
+
+    #ssh -tt -oLogLevel=quiet lo 'eval `echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$SHELL\ \|\ grep\ \"/t\\\{0,1\\\}csh\"\ \>\ /dev/null\ \&\&\ setenv\ BASH_FUNC_myfunc\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ a\"'
+    #'\"\\\}\ \|\|\  myfunc\(\)\ \{\ \ echo\ a'
+    #'\}\ \;myfunc\ 1;
+
     # Check if any variables contain \n
-    if(my @v = grep { $ENV{$_}=~/\n/ } @vars) {
+    if(my @v = map { s/BASH_FUNC_(.*)\(\)/$1/; $_ } grep { $ENV{$_}=~/\n/ } @vars) {
 	# \n is bad for csh and will cause it to fail.
 	$Global::envwarn = ::shell_quote_scalar(q{echo $SHELL | egrep "/t?csh" > /dev/null && echo CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset }."@v".q{ && exec false;}."\n\n") . $Global::envwarn;
     }
@@ -2106,7 +2137,7 @@ sub progress {
 }
 
 {
-    my ($total,$first_completed,$smoothed_avg_time);
+    my ($total, $first_completed, $smoothed_avg_time);
 
     sub compute_eta {
 	# Calculate important numbers for ETA
@@ -2824,7 +2855,7 @@ sub usage {
 	 "O. Tange (2011): GNU Parallel - The Command-Line Power Tool,",
 	 ";login: The USENIX Magazine, February 2011:42-47.",
 	 "",
-	 "Alternatively you can get GNU Parallel without this requirement by paying 10000 EUR.",
+	 "Or you can get GNU Parallel without this requirement by paying 10000 EUR.",
 	 "");
 }
 
@@ -2850,7 +2881,7 @@ sub citation_notice {
 	     "  ;login: The USENIX Magazine, February 2011:42-47.\n",
 	     "\n",
 	     "This helps funding further development; and it won't cost you a cent.\n",
-	     "Alternatively you can get GNU Parallel without this requirement by paying 10000 EUR.\n",
+	     "Or you can get GNU Parallel without this requirement by paying 10000 EUR.\n",
 	     "\n",
 	     "To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.\n\n",
 	    );
@@ -2905,7 +2936,7 @@ sub version {
 	       "When using programs that use GNU Parallel to process data for publication please cite:\n",
 	       "O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ",
 	       ";login: The USENIX Magazine, February 2011:42-47.\n",
-	       "Alternatively you can get GNU Parallel without this requirement by paying 10000 EUR.\n",
+	       "Or you can get GNU Parallel without this requirement by paying 10000 EUR.\n",
         );
 }
 
@@ -2934,7 +2965,7 @@ sub bibtex {
 	       "",
 	       "This helps funding further development.",
 	       "",
-	       "Alternatively you can get GNU Parallel without this requirement by paying 10000 EUR.",
+	       "Or you can get GNU Parallel without this requirement by paying 10000 EUR.",
 	       ""
         );
     while(not -e $ENV{'HOME'}."/.parallel/will-cite") {
@@ -5332,6 +5363,9 @@ sub sshlogin {
 
 sub sshlogin_wrap {
     # Wrap the command with the commands needed to run remotely
+    # Uses:
+    #   @Global::cat_partials
+    #   $Global::envvar
     my $self = shift;
     if(not defined $self->{'sshlogin_wrap'}) {
 	my $sshlogin = $self->sshlogin();
@@ -6164,21 +6198,39 @@ sub seq {
     return $self->{'seq'};
 }
 
-sub slot {
-    my $self = shift;
-    if(not $self->{'slot'}) {
-	if(not @Global::slots) {
-	    # $Global::max_slot_number will typically be $Global::max_jobs_running
-	    push @Global::slots, ++$Global::max_slot_number;
+{
+    my $max_slot_number;
+
+    sub slot {
+	# Find the number of a free job slot and return it
+	# Uses:
+	#   @Global::slots
+	# Returns:
+	#   $jobslot = number of jobslot
+	my $self = shift;
+	if(not $self->{'slot'}) {
+	    if(not @Global::slots) {
+		# $Global::max_slot_number will typically be $Global::max_jobs_running
+		push @Global::slots, ++$max_slot_number;
+	    }
+	    $self->{'slot'} = shift @Global::slots;
 	}
-	$self->{'slot'} = shift @Global::slots;
+	return $self->{'slot'};
     }
-    return $self->{'slot'};
 }
 
 sub populate {
     # Add arguments from arg_queue until the number of arguments or
     # max line length is reached
+    # Uses:
+    #   $Global::minimal_command_line_length
+    #   $opt::cat
+    #   $opt::fifo
+    #   $Global::JobQueue
+    #   $opt::m
+    #   $opt::X
+    #   $CommandLine::already_spread
+    #   $Global::max_jobs_running
     # Returns: N/A
     my $self = shift;
     my $next_arg;
@@ -6472,6 +6524,15 @@ sub len {
 }
 
 sub replaced {
+    # Uses:
+    #   $Global::noquote
+    #   $Global::quoting
+    #   $opt::cat
+    #   $opt::fifo
+    #   $opt::nice
+    #   $opt::shellquote
+    # Returns:
+    #   $replaced = command with place holders replaced and prepended
     my $self = shift;
     if(not defined $self->{'replaced'}) {
 	# Don't quote arguments if the input is the full command line
@@ -6531,9 +6592,11 @@ sub replaced {
 sub replace_placeholders {
     # Replace foo{}bar with fooargbar
     # Input:
-    #   target = foo{}bar
-    #   quote = should this be quoted?
-    # Returns: $target
+    #   $targetref = command as shell words
+    #   $quote = should everything be quoted?
+    #   $quote_arg = should replaced arguments be quoted?
+    # Returns:
+    #   @target with placeholders replaced
     my $self = shift;
     my $targetref = shift;
     my $quote = shift;
@@ -6544,7 +6607,6 @@ sub replace_placeholders {
     # -X = context replace
     # maybe multiple input sources
     # maybe --xapply
-    # $self->{'arg_list'} = [ [Arg11, Arg12], [Arg21, Arg22], [Arg31, Arg32] ]
     if(not @target) {
 	# @target is empty: Return empty array
 	return @target;
@@ -6579,16 +6641,19 @@ sub replace_placeholders {
 	}
     }
     my @word = keys %word;
+
     my %replace;
     my @arg;
     for my $record (@{$self->{'arg_list'}}) {
+	# $self->{'arg_list'} = [ [Arg11, Arg12], [Arg21, Arg22], [Arg31, Arg32] ]
 	# Merge arg-objects from records into @arg for easy access
-	# If $Global::quoting is set, quoting will be done later
 	CORE::push @arg, @$record;
     }
-
+    # Add one arg if empty to allow {#} and {%} to be computed only once
+    if(not @arg) { @arg = (Arg->new("")); }
     # Number of arguments - used for positional arguments
     my $n = $#_+1;
+
     # This is actually a CommandLine-object,
     # but it looks nice to be able to say {= $job->slot() =}
     my $job = $self;
@@ -6615,7 +6680,11 @@ sub replace_placeholders {
 
 	if($w !~ /\257/) {
 	    # No more replacement strings in $w: No need to do more
-	    CORE::push(@{$replace{$word}}, $w);
+	    if($quote) {
+		CORE::push(@{$replace{::shell_quote($word)}}, $w);
+	    } else {
+		CORE::push(@{$replace{$word}}, $w);
+	    }
 	    next;
 	}
 	# for each arg:
@@ -6642,6 +6711,7 @@ sub replace_placeholders {
 	    }
 	}
 	if(not @arg) {
+	    die;
 	    # No args: We can still have {%} or {#} as replacement string.
 	    my $val = $w;
 	    for my $perlexpr (keys %{$self->{'replacecount'}}) {
@@ -6655,10 +6725,10 @@ sub replace_placeholders {
 	    CORE::push(@{$replace{$ww}}, $val);
 	}
     }
+
     if($quote) {
 	@target = ::shell_quote(@target);
     }
-
     # ::debug("replace", "%replace=",::my_dump(%replace),"\n");
     if(%replace) {
 	# Substitute the replace strings with the replacement values
@@ -7742,4 +7812,4 @@ sub mkdir_or_die {
 
 # Keep perl -w happy
 $opt::x = $Semaphore::timeout = $Semaphore::wait =
-$Job::file_descriptor_warning_printed = $Global::max_slot_number = 0;
+$Job::file_descriptor_warning_printed = 0;
