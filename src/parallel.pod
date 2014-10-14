@@ -588,7 +588,7 @@ cannot be exported:
     parallel --env my_importer \
       'my_importer; echo "{}" "${indexed[{}]}" "${assoc[${indexed[{}]}]}"' ::: "${!indexed[@]}"
 
-To copy the full environment use this function:
+To copy the full environment use this function (e.g. by putting it in .bashrc):
 
     env_parallel() {
       export parallel_bash_environment='() {
@@ -2748,7 +2748,7 @@ The following will start one B<rsync> per big file in I<src-dir> to
 I<dest-dir> on the server I<fooserver>:
 
 B<cd src-dir; find . -type f -size +100000 | parallel -v ssh fooserver
-mkdir -p /dest-dir/{//}\;rsync -Havessh {} fooserver:/dest-dir/{}>
+mkdir -p /dest-dir/{//}\;rsync -s -Havessh {} fooserver:/dest-dir/{}>
 
 The dirs created may end up with wrong permissions and smaller files
 are not being transferred. To fix those run B<rsync> a final time:

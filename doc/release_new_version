@@ -248,9 +248,13 @@ New in this release:
 
 * GNU Parallel was cited in: Application of Machine Learning to Algorithm Selection for TSP http://www.dbai.tuwien.ac.at/staff/musliu/art_ictai_cam.pdf
 
+* GNU Parallel was cited in: Performance Models for LTE-Advanced Random Access http://repository.asu.edu/attachments/137242/content/Tyagi_asu_0010E_14116.pdf
+
 * GNU Parallel was used (unfortunately without citation) in: De Novo Insertions and Deletions of Predominantly Paternal Origin Are Associated with Autism Spectrum Disorder http://www.cell.com/cms/attachment/2019079667/2039310868/mmc1.pdf
 
 * GNU Parallel is demonstrated in: Data Science at the Command Line: Facing the Future with Time-Tested Tools
+
+* GNU Parallel was covered in a talk at Sydney Perl Mongers group http://www.openfusion.net/talks/pwp/#24
 
 * GNU Parallel and how to get started with it http://www.jduck.net/blog/2014/09/30/gnu-paralell/
 

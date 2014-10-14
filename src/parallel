@@ -3137,6 +3137,7 @@ sub which {
 	    (
 	     'aix' => $sysv,
 	     'cygwin' => $sysv,
+	     'msys' => $sysv,
 	     'dec_osf' => $sysv,
 	     'darwin' => $bsd,
 	     'dragonfly' => $bsd,
@@ -3172,6 +3173,8 @@ sub which {
 sub reap_usleep {
     # Reap dead children.
     # If no dead children: Sleep specified amount with exponential backoff
+    # Input:
+    #   $ms = milliseconds to sleep
     # Returns:
     #   $ms/2+0.001 if children reaped
     #   $ms*1.1 if no children reaped
@@ -3198,14 +3201,19 @@ sub reap_usleep {
 
 sub usleep {
     # Sleep this many milliseconds.
-    my $secs = shift;
-    ::debug(int($secs),"ms ");
-    select(undef, undef, undef, $secs/1000);
+    # Input:
+    #   $ms = milliseconds to sleep
+    my $ms = shift;
+    ::debug(int($ms),"ms ");
+    select(undef, undef, undef, $ms/1000);
 }
 
 sub now {
     # Returns time since epoch as in seconds with 3 decimals
-
+    # Uses:
+    #   @Global::use
+    # Returns:
+    #   $time = time now with millisecond accuracy
     if(not $Global::use{"Time::HiRes"}) {
 	if(eval "use Time::HiRes qw ( time );") {
 	    eval "sub TimeHiRestime { return Time::HiRes::time };";
@@ -3225,6 +3233,10 @@ sub multiply_binary_prefix {
     # K =2^10, M =2^20, G =2^30, T =2^40, P =2^50, E =2^70, Z =2^80, Y =2^80
     # k =10^3, m =10^6, g =10^9, t=10^12, p=10^15, e=10^18, z=10^21, y=10^24
     # 13G = 13*1024*1024*1024 = 13958643712
+    # Input:
+    #   $s = string with prefixes
+    # Returns:
+    #   $value = int with prefixes multiplied
     my $s = shift;
     $s =~ s/ki/*1024/gi;
     $s =~ s/mi/*1024*1024/gi;
@@ -3262,11 +3274,18 @@ sub multiply_binary_prefix {
 }
 
 sub tmpfile {
+    # Create tempfile as $TMPDIR/parXXXXX
+    # Returns:
+    #   $filename = file name created
     return ::tempfile(DIR=>$ENV{'TMPDIR'}, TEMPLATE => 'parXXXXX', @_);
 }
+
 sub __DEBUGGING__ {}
 
 sub debug {
+    # Uses:
+    #   $Global::debug
+    #   %Global::fd
     # Returns: N/A
     $Global::debug or return;
     @_ = grep { defined $_ ? $_ : "" } @_;
@@ -3306,7 +3325,7 @@ sub my_memory_usage {
 
 sub my_size {
     # Returns:
-    #   size of object if Devel::Size is installed
+    #   $size = size of object if Devel::Size is installed
     #   -1 otherwise
     my @size_this = (@_);
     eval "use Devel::Size qw(size total_size)";
@@ -6709,20 +6728,6 @@ sub replace_placeholders {
 	    if($number_of_replacements) {
 		CORE::push(@{$replace{$ww}}, $val);
 	    }
-	}
-	if(not @arg) {
-	    die;
-	    # No args: We can still have {%} or {#} as replacement string.
-	    my $val = $w;
-	    for my $perlexpr (keys %{$self->{'replacecount'}}) {
-		# Replace {= perl expr =} with value for each arg
-		$val =~ s/\257<\Q$perlexpr\E\257>/$_="";eval("$perlexpr");$_/eg;
-	    }
-	    my $ww = $word;
-	    if($quote) {
-		$val = ::shell_quote_scalar($val);
-	    }
-	    CORE::push(@{$replace{$ww}}, $val);
 	}
     }
 
