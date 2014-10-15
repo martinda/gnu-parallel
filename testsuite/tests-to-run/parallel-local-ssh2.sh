@@ -16,7 +16,18 @@ echo '### bug #42725: csh with \n in variables'
   export -f not_csh; 
   parallel --env not_csh -S csh@lo not_csh ::: 1; 
   parallel --env not_csh -S tcsh@lo not_csh ::: 1; 
-  parallel --env not_csh -S parallel@lo not_csh ::: 1; 
+  parallel --env not_csh -S parallel@lo not_csh ::: 1
 
+echo '### bug #43358: shellshock breaks exporting functions using --env'
+  echo shellshock-hardened to shellshock-hardened; 
+  funky() { echo Function $1; }; 
+  export -f funky; 
+  parallel --env funky -S parallel@localhost funky ::: shellshock-hardened
+
+echo '2bug #43358: shellshock breaks exporting functions using --env'
+  echo shellshock-hardened to non-shellshock-hardened; 
+  funky() { echo Function $1; }; 
+  export -f funky; 
+  parallel --env funky -S centos3.tange.dk funky ::: non-shellshock-hardened
 
 EOF

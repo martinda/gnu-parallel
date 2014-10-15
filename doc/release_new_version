@@ -260,9 +260,13 @@ New in this release:
 
 * Comparing Golang, Scala, Elixir and Ruby for ETL http://www.dimroc.com/2014/09/29/etl-language-showdown/
 
-* Ubuntu 13.04でGNU ParallelをGNUモードで動かす http://qiita.com/YusukeSuzuki@github/items/7b96b5876bf980f21e85
-
 * Parallelizing Batch Jobs for Fun and Profit http://mikeseidle.com/tech/programming/2013/03/parallelizing-batch-jobs
+
+* Assemble a list of which of these hosts are up or down http://opsfun.wordpress.com/2014/03/31/gnu-parallel/
+
+* Running commands on many nodes simultaneously http://opsfun.wordpress.com/2014/03/31/19/ 
+
+* Ubuntu 13.04でGNU ParallelをGNUモードで動かす http://qiita.com/YusukeSuzuki@github/items/7b96b5876bf980f21e85
 
 * Bug fixes and man page updates.
 

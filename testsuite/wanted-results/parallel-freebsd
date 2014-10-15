@@ -55,3 +55,13 @@ works
 with
 /usr/bin/perl -w ./shebang-wrap-opt options
 options
+bash -c 'echo bug \#43358: shellshock breaks exporting functions using --env _;   echo Non-shellshock-hardened to non-shellshock-hardened;   funky() { echo Function $1; };   export -f funky;   parallel --env funky -S localhost funky ::: non-shellshock-hardened'
+bug #43358: shellshock breaks exporting functions using --env _
+Non-shellshock-hardened to non-shellshock-hardened
+Function non-shellshock-hardened
+tcgetattr: Inappropriate ioctl for device
+bash -c 'echo bug \#43358: shellshock breaks exporting functions using --env _;   echo Non-shellshock-hardened to shellshock-hardened;   funky() { echo Function $1; };   export -f funky;   parallel --env funky -S parallel@192.168.1.72 funky ::: shellshock-hardened'
+bug #43358: shellshock breaks exporting functions using --env _
+Non-shellshock-hardened to shellshock-hardened
+Function shellshock-hardened
+tcgetattr: Inappropriate ioctl for device

@@ -22,7 +22,7 @@ bash: line 0: cd: /no-such-dir: No such file or directory
 Exit code 1
 echo '### bug #42725: csh with \n in variables'
 ### bug #42725: csh with \n in variables
-  not_csh() { echo This is not csh/tcsh; };   export -f not_csh;   parallel --env not_csh -S csh@lo not_csh ::: 1;   parallel --env not_csh -S tcsh@lo not_csh ::: 1;   parallel --env not_csh -S parallel@lo not_csh ::: 1; 
+  not_csh() { echo This is not csh/tcsh; };   export -f not_csh;   parallel --env not_csh -S csh@lo not_csh ::: 1;   parallel --env not_csh -S tcsh@lo not_csh ::: 1;   parallel --env not_csh -S parallel@lo not_csh ::: 1
 CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
 CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
 This is not csh/tcsh
@@ -30,3 +30,13 @@ Badly placed ()'s.
 }: Command not found.
 Badly placed ()'s.
 }: Command not found.
+echo '### bug #43358: shellshock breaks exporting functions using --env'
+### bug #43358: shellshock breaks exporting functions using --env
+  echo shellshock-hardened to shellshock-hardened;   funky() { echo Function $1; };   export -f funky;   parallel --env funky -S parallel@localhost funky ::: shellshock-hardened
+shellshock-hardened to shellshock-hardened
+Function shellshock-hardened
+echo '2bug #43358: shellshock breaks exporting functions using --env'
+2bug #43358: shellshock breaks exporting functions using --env
+  echo shellshock-hardened to non-shellshock-hardened;   funky() { echo Function $1; };   export -f funky;   parallel --env funky -S centos3.tange.dk funky ::: non-shellshock-hardened
+shellshock-hardened to non-shellshock-hardened
+Function non-shellshock-hardened

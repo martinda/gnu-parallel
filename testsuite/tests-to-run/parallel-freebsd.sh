@@ -42,6 +42,20 @@ echo 'bug #40134: FreeBSD: --shebang(-wrap) with options not working'
   (echo '#!/usr/bin/env -S parallel --shebang-wrap -v -k -j 0 /usr/bin/perl -w :::'; echo 'print @ARGV,"\n";') > shebang-wrap-opt; 
   chmod 755 ./shebang-wrap-opt; ./shebang-wrap-opt wrap works with options
 
+bash -c 'echo bug \#43358: shellshock breaks exporting functions using --env _; 
+  echo Non-shellshock-hardened to non-shellshock-hardened; 
+  funky() { echo Function $1; }; 
+  export -f funky; 
+  parallel --env funky -S localhost funky ::: non-shellshock-hardened'
+
+bash -c 'echo bug \#43358: shellshock breaks exporting functions using --env _; 
+  echo Non-shellshock-hardened to shellshock-hardened; 
+  funky() { echo Function $1; }; 
+  export -f funky; 
+  parallel --env funky -S parallel@192.168.1.72 funky ::: shellshock-hardened'
+
+
+
 EOF
 
 VBoxManage controlvm FreeBSD71 savestate

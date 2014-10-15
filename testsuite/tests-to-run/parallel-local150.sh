@@ -10,9 +10,9 @@ export -f median
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj0 -k -L1
 echo '### bug #41565: Print happens in blocks - not after each job complete'
 echo 'The timing here is important: a full second between each'
-  ping -c 15 lo  | parallel -j3  'echo {#}' | timestamp -dd | perl -pe '$_=int($_+0.3)."\n"' | median
+  perl -e 'for(1..10){print("$_\n");`sleep 1`}' | parallel -j3  'echo {#}' | timestamp -dd | perl -pe '$_=int($_+0.3)."\n"' | median
 echo '300 ms jobs:'
-  ping -i .3 -c 10 lo | parallel -j3 --delay 0.3 echo | timestamp -d -d | perl -pe 's/(.....).*/int($1*10+0.2)/e' | median
+  perl -e 'for(1..10){print("$_\n");`sleep .3`}' | parallel -j3 --delay 0.3 echo | timestamp -d -d | perl -pe 's/(.....).*/int($1*10+0.2)/e' | median
 
 echo '### Test --tagstring'
   nice parallel -j1 -X -v --tagstring a{}b echo  ::: 3 4
