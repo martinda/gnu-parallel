@@ -1,3 +1,58 @@
+20141022
+
+* --env was changed to deal with Bash's new way of exporting a function.
+
+* GNU Parallel was cited in: Exclusion of cosmic rays in
+  protoplanetary disks. II. Chemical gradients and observational
+  signatures http://iopscience.iop.org/0004-637X/794/2/123/article
+
+* GNU Parallel was cited in: Application of Machine Learning to
+  Algorithm Selection for TSP
+  http://www.dbai.tuwien.ac.at/staff/musliu/art_ictai_cam.pdf
+
+* GNU Parallel was cited in: Performance Models for LTE-Advanced
+  Random Access
+  http://repository.asu.edu/attachments/137242/content/Tyagi_asu_0010E_14116.pdf
+
+* GNU Parallel was used (unfortunately without citation) in: De Novo
+  Insertions and Deletions of Predominantly Paternal Origin Are
+  Associated with Autism Spectrum Disorder
+  http://www.cell.com/cms/attachment/2019079667/2039310868/mmc1.pdf
+
+* GNU Parallel was determined 'popular' by Statistical Analysis of
+  Popular Open Source Software Projects and Their Communities
+  http://andiwre.itmaranatha.org/prosiding/ICITEE2014/PaperAndiWRE-ICITEE2014.pdf
+
+* GNU Parallel is demonstrated in: Data Science at the Command Line:
+  Facing the Future with Time-Tested Tools
+
+* GNU Parallel was covered in a talk at Sydney Perl Mongers group
+  http://www.openfusion.net/talks/pwp/#24
+
+* GNU Parallel and how to get started with it
+  http://www.jduck.net/blog/2014/09/30/gnu-paralell/
+
+* Behat/Selenium/Parallel
+  http://jaffamonkey.com/behat-selenium-parallel/
+
+* Comparing Golang, Scala, Elixir and Ruby for ETL
+  http://www.dimroc.com/2014/09/29/etl-language-showdown/
+
+* Parallelizing Batch Jobs for Fun and Profit
+  http://mikeseidle.com/tech/programming/2013/03/parallelizing-batch-jobs
+
+* Assemble a list of which of these hosts are up or down
+  http://opsfun.wordpress.com/2014/03/31/gnu-parallel/
+
+* Running commands on many nodes simultaneously
+  http://opsfun.wordpress.com/2014/03/31/19/
+
+* Ubuntu 13.04でGNU ParallelをGNUモードで動かす
+  http://qiita.com/YusukeSuzuki@github/items/7b96b5876bf980f21e85
+
+* Bug fixes and man page updates.
+
+
 20140922
 
 * If the file give as --sshloginfile is changed it will be re-read
