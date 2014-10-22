@@ -826,7 +826,7 @@ sub parse_options {
 
     if(@opt::v) { $Global::verbose = $#opt::v+1; } # Convert -v -v to v=2
     $Global::debug = $opt::D;
-    $Global::shell = parent_shell($$) || $ENV{'SHELL'} || "/bin/sh";
+    $Global::shell = $ENV{'PARALLEL_SHELL'} || parent_shell($$) || $ENV{'SHELL'} || "/bin/sh";
     if(defined $opt::X) { $Global::ContextReplace = 1; }
     if(defined $opt::silent) { $Global::verbose = 0; }
     if(defined $opt::group) { $Global::grouped = 1; }
@@ -1152,7 +1152,7 @@ sub parse_env_var {
     my @qcsh = (map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  }
 		grep { not /^parallel_bash_environment$/ } @non_functions);
     my @qbash = (map { my $a=$_; "export $a=" . env_quote($ENV{$a}) }
-		 @non_functions, @bash_pre_shellshock);
+		 grep { not /^parallel_bash_environment$/ } @non_functions, @bash_pre_shellshock);
 
     push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_pre_shellshock;
     push @qbash, map { /BASH_FUNC_(.*)\(\)/; "$1 $ENV{$_}" } @bash_post_shellshock;

@@ -14,6 +14,8 @@ perl -e '$|=1;while($t++<3){sleep(1);print "."}' &
 stdout /usr/bin/time -f %e niceload -l 8 -p $! | perl -ne '$_ >= 5 and print "OK\n"'
 
 echo "### Test --sensor -l negative"
-timeout 10 nice nice dd iflag=fullblock if=/dev/zero of=/dev/null bs=11G &
-niceload -t 1 --sensor 'free | field 3 | head -3|tail -1' -l -10000000 "free -g|egrep -q /.*1[0-9]. && echo more than 6 GB used"
-
+# When the size is bigger, then run
+SIZET=/tmp/parallel_sizetest
+rm -f $SIZET
+tmux new-session -d -n 10 "seq 10000 | pv -qL 1000 > $SIZET"
+niceload -t .01 --sensor "stat -c %b $SIZET" -l -10 "stat -c %b $SIZET"

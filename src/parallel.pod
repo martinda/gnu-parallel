@@ -81,7 +81,7 @@ first. To use aliases copy the full environment as described under
 B<--env> and use B<env_parallel> instead of B<parallel>.
 
 If it is a zsh function you will need to use this helper function
-B<exportf> to export and to set $SHELL to bash:
+B<exportf> to export and to set $PARALLEL_SHELL to bash:
 
   function exportf (){
     export $(echo $1)="`whence -f $1 | sed -e "s/$1 //" `"
@@ -93,7 +93,7 @@ B<exportf> to export and to set $SHELL to bash:
   }
 
   exportf my_func
-  SHELL=/bin/bash parallel "my_func {}" :::  1 2
+  PARALLEL_SHELL=/bin/bash parallel "my_func {}" :::  1 2
 
 The command cannot contain the character \257 (macron: ¯).
 
@@ -3196,6 +3196,31 @@ B<Example:> If each of the jobs tests a solution and one of jobs finds
 the solution the job can tell GNU B<parallel> not to start more jobs
 by: B<kill -TERM $PARALLEL_PID>. This only works on the local
 computer.
+
+
+=item $PARALLEL_SHELL (alpha testing)
+
+Use this shell the shell for the commands run by GNU Parallel:
+
+=over 2
+
+=item *
+
+$PARALLEL_SHELL. If undefined use:
+
+=item *
+
+The shell that started GNU Parallel. If that cannot be determined:
+
+=item *
+
+$SHELL. If undefined use:
+
+=item *
+
+/bin/sh
+
+=back
 
 
 =item $PARALLEL_SEQ

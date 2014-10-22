@@ -14,22 +14,22 @@ echo '### bug #41805: Idea: propagate --env for parallel --number-of-cores'
 ** test_zsh
   FOO=test_zsh parallel --env FOO,PATH -S zsh@lo env ::: "" |sort|egrep 'FOO|PATH'
 FOO=test_zsh
-PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin
+PATH=/home/tange/bin:/home/tange/bin:/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
   echo '** test_zsh_filter'
 ** test_zsh_filter
   FOO=test_zsh_filter parallel --filter-hosts --env FOO,PATH -S zsh@lo env ::: "" |sort|egrep 'FOO|PATH'
 FOO=test_zsh_filter
-PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin
+PATH=/home/tange/bin:/home/tange/bin:/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
   echo '** test_csh'
 ** test_csh
   FOO=test_csh parallel --env FOO,PATH -S csh@lo env ::: "" |sort|egrep 'FOO|PATH'
 FOO=test_csh
-PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin
+PATH=/home/tange/bin:/home/tange/bin:/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
   echo '** test_csh_filter'
 ** test_csh_filter
   FOO=test_csh_filter parallel --filter-hosts --env FOO,PATH -S csh@lo env ::: "" |sort|egrep 'FOO|PATH'
 FOO=test_csh_filter
-PATH=/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin
+PATH=/home/tange/bin:/home/tange/bin:/home/tange/bin:/home/tange/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/home/tange/terminals/data-import:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin:/home/tange/bin:/sbin:/usr/sbin:/usr/lib/oracle/xe/app/oracle/product/10.2.0/server/bin
   echo '** bug #41805 done'
 ** bug #41805 done
 echo '### Deal with long command lines on remote servers'

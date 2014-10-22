@@ -252,11 +252,15 @@ New in this release:
 
 * GNU Parallel was used (unfortunately without citation) in: De Novo Insertions and Deletions of Predominantly Paternal Origin Are Associated with Autism Spectrum Disorder http://www.cell.com/cms/attachment/2019079667/2039310868/mmc1.pdf
 
+* GNU Parallel was determined 'popular' by Statistical Analysis of Popular Open Source Software Projects and Their Communities http://andiwre.itmaranatha.org/prosiding/ICITEE2014/PaperAndiWRE-ICITEE2014.pdf
+
 * GNU Parallel is demonstrated in: Data Science at the Command Line: Facing the Future with Time-Tested Tools
 
 * GNU Parallel was covered in a talk at Sydney Perl Mongers group http://www.openfusion.net/talks/pwp/#24
 
 * GNU Parallel and how to get started with it http://www.jduck.net/blog/2014/09/30/gnu-paralell/
+
+* Behat/Selenium/Parallel http://jaffamonkey.com/behat-selenium-parallel/
 
 * Comparing Golang, Scala, Elixir and Ruby for ETL http://www.dimroc.com/2014/09/29/etl-language-showdown/
 
