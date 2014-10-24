@@ -123,8 +123,7 @@ if($opt::eta or $opt::bar) {
     $Global::JobQueue->total_jobs();
 }
 if($opt::pipepart) {
-    @Global::cat_partials =
-	map { pipe_part_files($_) } @opt::a;
+    @Global::cat_partials = map { pipe_part_files($_) } @opt::a;
     # Unget the command as many times as there are parts
     $Global::JobQueue->{'commandlinequeue'}->unget(
 	map { $Global::JobQueue->{'commandlinequeue'}->get() } @Global::cat_partials
@@ -772,7 +771,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20141022;
+    $Global::version = 20141023;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -5368,6 +5367,97 @@ sub total_failed {
     return ($total_failures);
 }
 
+sub wrapped {
+    # Wrap command with:
+    # * --shellquote
+    # * --nice
+    # * --cat
+    # * --fifo
+    # * --sshlogin
+    # * --pipepart (@Global::cat_partials)
+    # * --pipe
+    # * --tmux
+    # The ordering of the wrapping is important:
+    # * --nice/--cat/--fifo should be done on the remote machine
+    # * --pipepart/--pipe should be done on the local machine inside --tmux
+    # Uses:
+    #   $Global::envvar
+    #   $opt::shellquote
+    #   $opt::nice
+    #   $Global::shell
+    #   $opt::cat
+    #   $opt::fifo
+    #   @Global::cat_partials
+    #   $opt::pipe
+    #   $opt::tmux
+    # Returns:
+    #   $self->{'wrapped'} = the command wrapped with the above
+    my $self = shift;
+    if(not defined $self->{'wrapped'}) {
+	my $command = $Global::envvar.$self->replaced();
+	if($opt::shellquote) {
+	    # Prepend echo
+	    # and quote twice
+	    $command = "echo " .
+		::shell_quote_scalar(::shell_quote_scalar($command));
+	}
+	if($opt::nice) {
+	    # Prepend \nice -n19 $SHELL -c
+	    # and quote.
+	    # The '\' before nice is needed to avoid tcsh's built-in
+	    $command = '\nice'. " -n". $opt::nice. " ".
+		$Global::shell. " -c ".
+		::shell_quote_scalar($command);
+	}
+	if($opt::cat) {
+	    # Prepend 'cat > {};'
+	    # Append '_EXIT=$?;(rm {};exit $_EXIT)'
+	    $command =
+		$self->{'commandline'}->replace_placeholders(["cat > \257<\257>; "], 0, 0).
+		$command.
+		$self->{'commandline'}->replace_placeholders(
+		    ["; _EXIT=\$?; rm \257<\257>; exit \$_EXIT"], 0, 0);
+	} elsif($opt::fifo) {
+	    # Prepend 'mkfifo {}; ('
+	    # Append ') & _PID=$!; cat > {}; wait $_PID; _EXIT=$?;(rm {};exit $_EXIT)'
+	    $command =
+		$self->{'commandline'}->replace_placeholders(["mkfifo \257<\257>; ("], 0, 0).
+		$command.
+		$self->{'commandline'}->replace_placeholders([") & _PID=\$!; cat > \257<\257>; ",
+					    "wait \$_PID; _EXIT=\$?; ",
+					    "rm \257<\257>; exit \$_EXIT"],
+					    0,0);
+	}
+	# Wrap with ssh + tranferring of files
+	$command = $self->sshlogin_wrap($command);
+	if(@Global::cat_partials) {
+	    # Prepend:
+	    # < /tmp/foo perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 11 |
+	    $command = (shift @Global::cat_partials). "|". "(". $command. ")";
+	} elsif($opt::pipe) {
+	    # Prepend EOF-detector to avoid starting $command if EOF.
+	    # The $tmpfile might exist if run on a remote system - we accept that risk
+	    my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".chr");
+	    # Unlink to avoid leaving files if --dry-run or --sshlogin
+	    unlink $tmpfile;
+	    $command =
+		# Exit value:
+		#   empty input = true
+		#   some input = exit val from command
+		qq{ sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null'; }.
+		qq{ test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true; }.
+		qq{ (cat $tmpfile; rm $tmpfile; cat - ) | }.
+		"($command);";
+	}
+	if($opt::tmux) {
+	    # Wrap command with 'tmux'
+	    $command = $self->tmux_wrap($command);
+	}
+	$self->{'wrapped'} = $command;
+    }
+    return $self->{'wrapped'};
+}
+
 sub set_sshlogin {
     my $self = shift;
     my $sshlogin = shift;
@@ -5382,32 +5472,22 @@ sub sshlogin {
 
 sub sshlogin_wrap {
     # Wrap the command with the commands needed to run remotely
-    # Uses:
-    #   @Global::cat_partials
-    #   $Global::envvar
+    # Returns:
+    #   $self->{'sshlogin_wrap'} = command wrapped with ssh+transfer commands
     my $self = shift;
+    my $command = shift;
     if(not defined $self->{'sshlogin_wrap'}) {
 	my $sshlogin = $self->sshlogin();
 	my $sshcmd = $sshlogin->sshcommand();
 	my $serverlogin = $sshlogin->serverlogin();
-	my $next_command_line = $Global::envvar.$self->replaced();
 	my ($pre,$post,$cleanup)=("","","");
 
 	if($serverlogin eq ":") {
-	    if(@Global::cat_partials) {
-		# Prepend:
-		# < /tmp/foo perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 11 |
-                $self->{'sshlogin_wrap'} = (shift @Global::cat_partials). "|".
-		    "(". $next_command_line. ")";
-            } else {
-		$self->{'sshlogin_wrap'} = $next_command_line;
-            }
+	    # No transfer neeeded
+	    $self->{'sshlogin_wrap'} = $command;
 	} else {
 	    # --transfer
 	    $pre .= $self->sshtransfer();
-	    if(@Global::cat_partials) {
-		$pre .= (shift @Global::cat_partials)."|";
-	    }
 	    # --return
 	    $post .= $self->sshreturn();
 	    # --cleanup
@@ -5474,7 +5554,7 @@ sub sshlogin_wrap {
 		 . "$sshcmd $ssh_options $serverlogin $parallel_env "
 		 . $remote_pre
 #		 . ::shell_quote_scalar($signal_script . ::shell_quote_scalar($next_command_line))
-		 . ::shell_quote_scalar($next_command_line)
+		 . ::shell_quote_scalar($command)
 		 . ";"
 		 . $post);
 	}
@@ -5692,7 +5772,7 @@ sub start {
     #   job-object or undef if job not to run
     my $job = shift;
     # Get the shell command to be executed (possibly with ssh infront).
-    my $command = $job->sshlogin_wrap();
+    my $command = $job->wrapped();
 
     if($Global::interactive or $Global::stderr_verbose) {
 	if($Global::interactive) {
@@ -5733,21 +5813,6 @@ sub start {
 	    $job->seq(), "): $command\n");
     if($opt::pipe) {
 	my ($stdin_fh);
-	# Wrap command with end-of-file detector,
-	# so we do not spawn a program if there is no input.
-	# Exit value:
-	#   empty input = true
-	#   some input = exit val from command
-        my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".chr");
-	$command = qq{
-             sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null';
-             test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true;
-             (cat $tmpfile; rm $tmpfile; cat - ) | } .
-		 "($command);";
-	if($opt::tmux) {
-	    $command = $job->tmux_wrap($command);
-	}
-
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3($stdin_fh, ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
@@ -5760,9 +5825,6 @@ sub start {
 	# Give STDIN to the first job if using -a (but only if running
 	# locally - otherwise CTRL-C does not work for other jobs Bug#36585)
 	*IN = *STDIN;
-	if($opt::tmux) {
-	    $command = $job->tmux_wrap($command);
-	}
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
@@ -5776,9 +5838,6 @@ sub start {
 	     open(my $devtty_fh, "<", "/dev/tty")) {
 	# Give /dev/tty to the command if no one else is using it
 	*IN = $devtty_fh;
-	if($opt::tmux) {
-	    $command = $job->tmux_wrap($command);
-	}
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3("<&IN", ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
@@ -5788,9 +5847,6 @@ sub start {
 	    1;
 	};
     } else {
-	if($opt::tmux) {
-	    $command = $job->tmux_wrap($command);
-	}
 	# The eval is needed to catch exception from open3
 	eval {
 	    $pid = ::open3(::gensym, ">&OUT", ">&ERR", $Global::shell, "-c", $command) ||
@@ -5830,7 +5886,7 @@ sub tmux_wrap {
     close $fh;
     unlink $tmpfile;
     my $visual_command = $self->replaced();
-    my $title = ::undef_as_empty($self->{'commandline'}->replace_placeholders(["\257<\257>"],0,0))."";
+    my $title = $visual_command;
     # ; causes problems
     # ascii 194-245 annoys tmux
     $title =~ tr/[\011-\016;\302-\365]//d;
@@ -5846,11 +5902,12 @@ sub tmux_wrap {
     return "mkfifo $tmpfile; $tmux ".
 	# Run in tmux
 	::shell_quote_scalar(
-	"(".$actual_command.');(echo $?$status;echo 255) >'.$tmpfile.";".
+	"(".$actual_command.');(echo $?$status;echo 255) >'.$tmpfile."&".
 	"echo ".::shell_quote_scalar($visual_command).";".
 	"echo \007Job finished at: `date`;sleep 10").
 	# Run outside tmux
-	";  exit `perl -ne 'unlink $ARGV; 1..1 and print' $tmpfile;rm $tmpfile` ";
+	# Read the first line from the fifo and use that as status code
+	";  exit `perl -ne 'unlink \$ARGV; 1..1 and print' $tmpfile` ";
 }
 
 sub is_already_in_results {
@@ -5924,7 +5981,7 @@ sub print {
 	$Global::grouped or return;
 	# Check for disk full
 	exit_if_disk_full();
-	my $command = $self->sshlogin_wrap();
+	my $command = $self->wrapped();
 
 	if(($opt::dryrun or $Global::verbose) and $Global::grouped
 	   and
@@ -6256,7 +6313,7 @@ sub populate {
     my $max_len = $Global::minimal_command_line_length || Limits::Command::max_length();
 
     if($opt::cat or $opt::fifo) {
-	# Get a tempfile name
+	# Generate a tempfile name that will be used as {}
 	my($outfh,$name) = ::tmpfile(SUFFIX => ".pip");
 	close $outfh;
 	# Unlink is needed if: ssh otheruser@localhost
@@ -6484,6 +6541,8 @@ sub header_indexes_sorted {
 }
 
 sub len {
+    # Uses:
+    #   $opt::shellquote
     # The length of the command line with args substituted
     my $self = shift;
     my $len = 0;
@@ -6546,63 +6605,18 @@ sub replaced {
     # Uses:
     #   $Global::noquote
     #   $Global::quoting
-    #   $opt::cat
-    #   $opt::fifo
-    #   $opt::nice
-    #   $opt::shellquote
     # Returns:
     #   $replaced = command with place holders replaced and prepended
     my $self = shift;
     if(not defined $self->{'replaced'}) {
 	# Don't quote arguments if the input is the full command line
 	my $quote_arg = $Global::noquote ? 0 : not $Global::quoting;
-	my $cmdstring = $self->replace_placeholders($self->{'command'},$Global::quoting,$quote_arg);
-	if (length($cmdstring) != $self->len()) {
-	    ::debug("length", length $cmdstring, " != ", $self->len(), " ", $cmdstring, "\n");
+	$self->{'replaced'} = $self->replace_placeholders($self->{'command'},$Global::quoting,$quote_arg);
+	my $len = length $self->{'replaced'};
+	if ($len != $self->len()) {
+	    ::debug("length", $len, " != ", $self->len(), " ", $self->{'replaced'}, "\n");
 	} else {
-	    ::debug("length", length $cmdstring, " == ", $self->len(), " ", $cmdstring, "\n");
-	}
-	if($opt::cat) {
-	    # Prepend 'cat > {};'
-	    # Append '_EXIT=$?;(rm {};exit $_EXIT)'
-	    $self->{'replaced'} =
-		$self->replace_placeholders(["cat > \257<\257>; ", $cmdstring,
-					    "; _EXIT=\$?; rm \257<\257>; exit \$_EXIT"],
-					    0,0);
-	} elsif($opt::fifo) {
-	    # Prepend 'mkfifo {}; ('
-	    # Append ') & _PID=$!; cat > {}; wait $_PID; _EXIT=$?;(rm {};exit $_EXIT)'
-	    $self->{'replaced'} =
-		$self->replace_placeholders(["mkfifo \257<\257>; (",
-					    $cmdstring,
-					    ") & _PID=\$!; cat > \257<\257>; ",
-					    "wait \$_PID; _EXIT=\$?; ",
-					    "rm \257<\257>; exit \$_EXIT"],
-					    0,0);
-	} else {
-	    $self->{'replaced'} = $cmdstring;
-	}
-	if($self->{'replaced'} =~ /^\s*(-\S+)/) {
-	    # Is this really a command in $PATH starting with '-'?
-	    my $cmd = $1;
-	    if(not ::which($cmd)) {
-		::error("Command ($cmd) starts with '-'. Is this a wrong option?\n");
-		::wait_and_exit(255);
-	    }
-	}
-	if($opt::nice) {
-	    # Prepend \nice -n19 $SHELL -c
-	    # and quote
-	    # \ before nice is needed to avoid tcsh's built-in
-	    $self->{'replaced'} = '\nice'. " -n". $opt::nice. " ".
-		$Global::shell. " -c ".
-		::shell_quote_scalar($self->{'replaced'});
-	}
-	if($opt::shellquote) {
-	    # Prepend echo
-	    # and quote twice
-	    $self->{'replaced'} = "echo " .
-		::shell_quote_scalar(::shell_quote_scalar($self->{'replaced'}));
+	    ::debug("length", $len, " == ", $self->len(), " ", $self->{'replaced'}, "\n");
 	}
     }
     return $self->{'replaced'};
@@ -6761,6 +6775,15 @@ sub new {
     my @unget = ();
     my ($count,%replacecount,$posrpl,$perlexpr,%len);
     my @command = @$commandref;
+    # If the first command start with '-' it is probably an option
+    if($command[0] =~ /^\s*(-\S+)/) {
+	# Is this really a command in $PATH starting with '-'?
+	my $cmd = $1;
+	if(not ::which($cmd)) {
+	    ::error("Command ($cmd) starts with '-'. Is this a wrong option?\n");
+	    ::wait_and_exit(255);
+	}
+    }
     # Replace replacement strings with {= perl expr =}
     # Protect matching inside {= perl expr =}
     # by replacing {= and =} with \257< and \257>

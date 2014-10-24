@@ -160,7 +160,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}> (alpha testing)
+=item B<{#}> (beta testing)
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -171,7 +171,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}> (alpha testing)
+=item B<{%}> (beta testing)
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -556,7 +556,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var> (alpha testing)
+=item B<--env> I<var> (beta testing)
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -937,7 +937,7 @@ This is useful for scripts that depend on features only available from
 a certain version of GNU B<parallel>.
 
 
-=item B<--nonall> (beta testing)
+=item B<--nonall>
 
 B<--onall> with no arguments. Run the command on all computers given
 with B<--sshlogin> but take no arguments. GNU B<parallel> will log
@@ -948,7 +948,7 @@ This is useful for running the same command (e.g. uptime) on a list of
 servers.
 
 
-=item B<--onall> (beta testing)
+=item B<--onall>
 
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
@@ -999,7 +999,7 @@ B<--files> is often used with B<--pipe>.
 See also: B<--recstart>, B<--recend>, B<--fifo>, B<--cat>, B<--pipepart>.
 
 
-=item B<--pipepart> (beta testing)
+=item B<--pipepart>
 
 Pipe parts of a physical file. B<--pipepart> works similar to
 B<--pipe>, but is much faster. It has a few limitations:
@@ -1587,9 +1587,9 @@ B<--sshlogin> is often used with B<--transfer>, B<--return>,
 B<--cleanup>, and B<--trc>.
 
 
-=item B<--sshloginfile> I<filename> (beta testing)
+=item B<--sshloginfile> I<filename>
 
-=item B<--slf> I<filename> (beta testing)
+=item B<--slf> I<filename>
 
 File with sshlogins. The file consists of sshlogins on separate
 lines. Empty lines and lines starting with '#' are ignored. Example:
@@ -3198,7 +3198,7 @@ by: B<kill -TERM $PARALLEL_PID>. This only works on the local
 computer.
 
 
-=item $PARALLEL_SHELL (alpha testing)
+=item $PARALLEL_SHELL (beta testing)
 
 Use this shell the shell for the commands run by GNU Parallel:
 

@@ -24,7 +24,7 @@
 use strict;
 use Getopt::Long;
 $Global::progname="niceload";
-$Global::version = 20141022;
+$Global::version = 20141023;
 Getopt::Long::Configure("bundling","require_order");
 get_options_from_array(\@ARGV) || die_usage();
 if($opt::version) {
@@ -886,4 +886,4 @@ sub io_status_darwin {
     return ::min($io, 10);
 }
 
-$::exitsignal = $::exitstatus = 0; # Dummy
+$::exitsignal = $::exitstatus = $opt::battery = 0; # Dummy
