@@ -239,13 +239,6 @@ sub usleep {
     select(undef, undef, undef, $secs/1000);
 }
 
-sub deepusleep {
-    # Sleep this many milliseconds. Dont let children wake us up
-    my $sigchld = $SIG{'CHLD'};
-    $SIG{'CHLD'} = undef;
-    usleep(@_);
-    $SIG{'CHLD'} = $sigchld;
-}
 
 sub debug {
     if($opt::debug) {
@@ -616,7 +609,7 @@ sub sleep_for_recheck {
 	print STDERR "Sleeping $self->{'recheck'}s\n";
     }
     ::debug("recheck in $self->{'recheck'}s\n");
-    ::deepusleep(1000*$self->{'recheck'});
+    ::usleep(1000*$self->{'recheck'});
 }
 
 
@@ -627,7 +620,7 @@ sub sleep_while_running {
 	$self->{'runtime'} = int($self->{'runtime'}*100)/100;
 	print STDERR "Running $self->{'runtime'}s\n";
     }
-    ::deepusleep(1000*$self->{'runtime'});
+    ::usleep(1000*$self->{'runtime'});
 }
 
 

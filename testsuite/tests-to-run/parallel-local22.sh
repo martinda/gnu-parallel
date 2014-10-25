@@ -41,8 +41,8 @@ echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop (I
   echo a | parallel -qX echo  "'{}'"
 
 echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
-  parallel -k --slotreplace // -j2 sleep 1\;echo // ::: {1..4}
-  parallel -k -j2 sleep 1\;echo {%} ::: {1..4}
+  parallel -k --slotreplace // -j2 sleep 1\;echo // ::: {1..4} | sort
+  parallel -k -j2 sleep 1\;echo {%} ::: {1..4} | sort
 
 echo '### bug #42363: --pipepart and --fifo/--cat does not work'
   seq 100 > /tmp/bug42363; 

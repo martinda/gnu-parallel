@@ -1518,66 +1518,6 @@ sub shell_quote_file {
     return $a;
 }
 
-sub _shellwords {
-    # '"'"'\""'"'  foo\ bar\"   '\" '\ quux => (q("'""), 'foo bar"', '\"  quux');
-    my $s = shift;
-    # TODO: fails on " -v"
-    my (@words);
-    while($s =~ s{^
-          (
-           (
-            [^\\'"\s]+ | # Not quoted
-            '[^']*' | # '....' - inside '
-            \\. | # \? - quote single char
-            "( # Begin "
-              [^"\\]* | # Not quoted
-              (\\.)* # \? - quote single char
-            )*" # End "
-           )+
-          )
-          (\s+|$)
-          }{}xs
-	) {
-	# split into words
-	push @words, $1;
-    }
-    for my $w (@words) {
-	my @wordpart;
-	while($w =~ s{^
-          (
-           [^\\'"\s]+ | # Not quoted
-           '[^']*' | # '....' - inside '
-           \\. | # \? - quote single char
-           "( # Begin "
-             [^"\\]* | # Not quoted
-             (\\.)* # \? - quote single char
-           )*" # End "
-          ) }{}xs) {
-	    my $wp = $1;
-	    while($wp =~ s{^
-              ([^\\'"\s]+) | # Not quoted
-              '([^']*)' | # '....' - inside '
-              \\(.) | # \? - quote single char
-              "( # Begin "
-                [^"\\]* | # Not quoted
-                (\\.)* # \? - quote single char
-              )*" # End "
-              }{}xs) {
-		push @wordpart, $1, $2, $3;
-		my $doubleq = $4;
-		while($doubleq =~ s{^
-                  ([^"\\]+) | # Not quoted
-                  \\(.) # \? - quote single char
-                  }{}x) {
-		    push @wordpart, $1, $2;
-		}
-	    }
-	}
-	$w = join("",@wordpart);
-    }
-    return @words;
-}
-
 sub shellwords {
     # Input:
     #   $string = shell line
@@ -3131,7 +3071,6 @@ sub which {
 		q(s/^.{$s}//; print "@F[1,2] $_"' );
 	    # BSD-style `ps`
 	    my $bsd = q(ps -o pid,ppid,command -ax);
-	    # TODO test these on Cygwin, darwin
 	    %pid_parentpid_cmd =
 	    (
 	     'aix' => $sysv,
@@ -5242,13 +5181,23 @@ sub set_endtime {
 }
 
 sub timedout {
+    # Is the job timedout?
+    # Input:
+    #   $delta_time = time that the job may run
+    # Returns:
+    #   True or false
     my $self = shift;
     my $delta_time = shift;
     return time > $self->{'starttime'} + $delta_time;
 }
 
 sub kill {
-    # kill the jobs
+    # Kill the job.
+    # Send the signals to (grand)*children and pid.
+    # If no signals: TERM TERM KILL
+    # Wait 200 ms after each TERM.
+    # Input:
+    #   @signals = signals to send
     my $self = shift;
     my @signals = @_;
     my @family_pids = $self->family_pids();
@@ -5280,10 +5229,10 @@ sub kill {
     }
 }
 
-
-
 sub family_pids {
     # Find the pids with this->pid as (grand)*parent
+    # Returns:
+    #   @pids = pids of (grand)*children
     my $self = shift;
     my $pid = $self->pid();
     my @pids;
@@ -5308,6 +5257,10 @@ sub family_pids {
 
 sub failed {
     # return number of times failed for this $sshlogin
+    # Input:
+    #   $sshlogin
+    # Returns:
+    #   Number of times failed for $sshlogin
     my $self = shift;
     my $sshlogin = shift;
     return $self->{'failed'}{$sshlogin};
@@ -5315,6 +5268,8 @@ sub failed {
 
 sub failed_here {
     # return number of times failed for the current $sshlogin
+    # Returns:
+    #   Number of times failed for this sshlogin
     my $self = shift;
     return $self->{'failed'}{$self->sshlogin()};
 }
@@ -5358,13 +5313,13 @@ sub min_failed {
 
 sub total_failed {
     # Returns:
-    #   the number of times this command has failed
+    #   $total_failures = the number of times this command has failed
     my $self = shift;
     my $total_failures = 0;
     for (values %{$self->{'failed'}}) {
 	$total_failures += $_;
     }
-    return ($total_failures);
+    return $total_failures;
 }
 
 sub wrapped {
@@ -5463,6 +5418,7 @@ sub set_sshlogin {
     my $sshlogin = shift;
     $self->{'sshlogin'} = $sshlogin;
     delete $self->{'sshlogin_wrap'}; # If sshlogin is changed the wrap is wrong
+    delete $self->{'wrapped'};
 }
 
 sub sshlogin {

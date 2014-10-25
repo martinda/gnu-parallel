@@ -166,7 +166,8 @@ git tag -s -m "Released as $YYYYMMDD ('$TAG')" $TAG
 git tag -s -m "Released as $YYYYMMDD ('$TAG')" $YYYYMMDD
 
 git push
-
+git push origin $TAG
+git push origin $YYYYMMDD
 
 == Update documentation ==
 

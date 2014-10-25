@@ -31,15 +31,15 @@ echo '### Bug before 2009-08-26 causing regexp compile error or infinite loop (I
 'a'
 echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
 ### bug #42041: Implement $PARALLEL_JOBSLOT
-  parallel -k --slotreplace // -j2 sleep 1\;echo // ::: {1..4}
+  parallel -k --slotreplace // -j2 sleep 1\;echo // ::: {1..4} | sort
+1
 1
 2
+2
+  parallel -k -j2 sleep 1\;echo {%} ::: {1..4} | sort
+1
 1
 2
-  parallel -k -j2 sleep 1\;echo {%} ::: {1..4}
-1
-2
-1
 2
 echo '### bug #42363: --pipepart and --fifo/--cat does not work'
 ### bug #42363: --pipepart and --fifo/--cat does not work

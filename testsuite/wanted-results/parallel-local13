@@ -1,9 +1,6 @@
 ### Tests from xargs
-parallel: Warning: Only enough file handles to run 248 jobs in parallel.
-Running 'parallel -j0 -N248 --pipe parallel -j0' or raising ulimit -n or /etc/security/limits.conf may help.
 echo '### -0 -n3 echo < files0.xi'
 ### -0 -n3 echo < files0.xi
-parallel: Warning: No more file handles. Raising ulimit -n or /etc/security/limits.conf may help.
 stdout xargs -0 -n3 echo < files0.xi
 /src/gnu/autoconf-1.11 /src/gnu/autoconf-1.11/README /src/gnu/autoconf-1.11/Makefile.in
 /src/gnu/autoconf-1.11/INSTALL /src/gnu/autoconf-1.11/NEWS /src/gnu/autoconf-1.11/COPYING
