@@ -40,3 +40,33 @@ echo '2bug #43358: shellshock breaks exporting functions using --env'
   echo shellshock-hardened to non-shellshock-hardened;   funky() { echo Function $1; };   export -f funky;   parallel --env funky -S centos3.tange.dk funky ::: non-shellshock-hardened
 shellshock-hardened to non-shellshock-hardened
 Function non-shellshock-hardened
+echo '### bug #42999: --pipepart with remote does not work'
+### bug #42999: --pipepart with remote does not work
+  seq 100 > /tmp/bug42999; chmod 600 /tmp/bug42999;   parallel --sshdelay 0.3 --pipepart --block 31 -a /tmp/bug42999 -k -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;   parallel --sshdelay 0.2 --pipepart --block 31 -a /tmp/bug42999 -k --fifo -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;   parallel --sshdelay 0.1 --pipepart --block 31 -a /tmp/bug42999 -k --cat -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;
+     13      14      32
+     11      11      33
+     11      11      33
+     11      11      33
+     11      11      33
+     11      11      33
+     11      11      33
+     11      11      33
+     10       9      29
+     13      14      32 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     11      11      33 /tmp/XXXX
+     10       9      29 /tmp/XXXX
+13 14 32 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+11 11 33 /tmp/XXXX
+10  9 29 /tmp/XXXX

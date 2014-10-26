@@ -30,4 +30,10 @@ echo '2bug #43358: shellshock breaks exporting functions using --env'
   export -f funky; 
   parallel --env funky -S centos3.tange.dk funky ::: non-shellshock-hardened
 
+echo '### bug #42999: --pipepart with remote does not work'
+  seq 100 > /tmp/bug42999; chmod 600 /tmp/bug42999; 
+  parallel --sshdelay 0.3 --pipepart --block 31 -a /tmp/bug42999 -k -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ; 
+  parallel --sshdelay 0.2 --pipepart --block 31 -a /tmp/bug42999 -k --fifo -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ; 
+  parallel --sshdelay 0.1 --pipepart --block 31 -a /tmp/bug42999 -k --cat -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;
+
 EOF

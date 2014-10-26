@@ -49,12 +49,6 @@ echo '### bug #42363: --pipepart and --fifo/--cat does not work'
   parallel --pipepart --block 31 -a /tmp/bug42363 -k --fifo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ; 
   parallel --pipepart --block 31 -a /tmp/bug42363 -k --cat  wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;
 
-echo '### bug #42999: --pipepart with remote does not work'
-  seq 100 > /tmp/bug42999; chmod 600 /tmp/bug42999; 
-  parallel --pipepart --block 31 -a /tmp/bug42999 -k -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ; 
-  parallel --pipepart --block 31 -a /tmp/bug42999 -k --fifo -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ; 
-  parallel --pipepart --block 31 -a /tmp/bug42999 -k --cat -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;
-
 echo '### bug #42055: --pipepart -a bigfile should not require sequential reading of bigfile'
   parallel --pipepart -a /etc/passwd -L 1 should not be run
   parallel --pipepart -a /etc/passwd -N 1 should not be run
