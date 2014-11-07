@@ -565,7 +565,7 @@ remote execution.
 In Bash I<var> can also be a Bash function - just remember to B<export
 -f> the function, see B<command>.
 
-The variable '_' is special. It will copy all enviroment variables
+The variable '_' is special. It will copy all environment variables
 except for the ones mentioned in ~/.parallel/ignored_vars.
 
 To copy Bash arrays you need an importer function, as Bash arrays

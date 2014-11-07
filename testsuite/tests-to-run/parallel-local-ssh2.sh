@@ -1,6 +1,14 @@
 #!/bin/bash
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj8 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj7 -k -L1
+echo "### bug #43518: GNU Parallel doesn't obey servers' jobs capacity when an ssh login file is reloaded"
+  # Pre-20141106 Would reset the number of jobs run on all sshlogin if --slf changed
+  # Thus must take at least 25 sec to run
+  echo -e '1/lo\n1/csh@lo\n1/tcsh@lo\n1/parallel@lo\n' > /tmp/parallel.bug43518; 
+  parallel --delay 0.1 -N0 echo 1/: '>>' /tmp/parallel.bug43518 ::: {1..100} & 
+  seq 30 | stdout /usr/bin/time -f %e parallel  --slf /tmp/parallel.bug43518 'sleep {=$_=$_%3?0:10=}.{%}' | 
+  perl -ne '$_ > 25 and print "OK\n"'
+
 echo '### --filter-hosts --slf <()'
   parallel --nonall --filter-hosts --slf <(echo localhost) echo OK
 

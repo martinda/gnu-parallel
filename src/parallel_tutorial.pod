@@ -1190,7 +1190,7 @@ Output:
       echo 5; exit 5
 
 GNU Parallel can retry the command with --retries. This is useful if a
-command fails for unkown reasons now and then.
+command fails for unknown reasons now and then.
 
   parallel -k --retries 3 'echo tried {} >>/tmp/runs; echo completed {}; exit {}' ::: 1 2 0
   cat /tmp/runs

@@ -771,7 +771,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20141023;
+    $Global::version = 20141107;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2280,16 +2280,21 @@ sub parse_sshlogin {
         }
     }
     $Global::minimal_command_line_length = 8_000_000;
-    for my $sshlogin_string (::uniq(@login)) {
+    for my $ncpu_sshlogin_string (::uniq(@login)) {
+        my $sshlogin = SSHLogin->new($ncpu_sshlogin_string);
+	my $sshlogin_string = $sshlogin->string();
 	if($Global::host{$sshlogin_string}) {
 	    # This sshlogin has already been added:
 	    # It is probably a host that has come back
 	    # Set the max_jobs_running back to the original
-	    $Global::host{$sshlogin_string}->set_max_jobs_running(
-		$Global::host{$sshlogin_string}->orig_max_jobs_running());
+	    debug("run","Already seen $sshlogin_string\n");
+	    if($sshlogin->{'ncpus'}) {
+		# If ncpus set by '#/' of the sshlogin, overwrite it:
+		$Global::host{$sshlogin_string}->set_ncpus($sshlogin->ncpus());
+	    }
+	    $Global::host{$sshlogin_string}->set_max_jobs_running(undef);
 	    next;
 	}
-        my $sshlogin = SSHLogin->new($sshlogin_string);
 	if($sshlogin_string eq ":") {
 	    $sshlogin->set_maxlength(Limits::Command::max_length());
 	} else {
@@ -2298,7 +2303,7 @@ sub parse_sshlogin {
 	}
 	$Global::minimal_command_line_length =
 	    ::min($Global::minimal_command_line_length, $sshlogin->maxlength());
-        $Global::host{$sshlogin->string()} = $sshlogin;
+        $Global::host{$sshlogin_string} = $sshlogin;
     }
     # debug("start", "sshlogin: ", my_dump(%Global::host),"\n");
     if($opt::transfer or @opt::return or $opt::cleanup or @opt::basefile) {
