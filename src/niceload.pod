@@ -7,7 +7,8 @@ niceload - slow down a program when the load average is above a certain limit
 =head1 SYNOPSIS
 
 B<niceload> [-v] [-h] [-n nice] [-I io] [-L load] [-M mem] [-N]
-[--sensor program] [-t time] [-s time|-f factor] ( command | -p PID [-p PID ...] )
+[--sensor program] [-t time] [-s time|-f factor]
+( command | -p PID [-p PID ...] | --prg program )
 
 
 =head1 DESCRIPTION
@@ -30,6 +31,13 @@ run 1 second, suspend (3.00-1.00) seconds, run 1 second, suspend
 =head1 OPTIONS
 
 =over 9
+
+=item B<-B> (alpha testing)
+
+=item B<--battery> (alpha testing)
+
+Suspend if the system is running on battery. Short hand for: -l -1 --sensor 'cat /sys/class/power_supply/BAT0/status /proc/acpi/battery/BAT0/state 2>/dev/null |grep -i -q discharging; echo $?'
+
 
 =item B<-f> I<FACTOR>
 

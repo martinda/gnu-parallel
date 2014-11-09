@@ -9,16 +9,17 @@ int() {
 export -f int
 
 cat <<'EOF' | stdout parallel -k -vj0 -L1
-# The seq 10000000 should take > 1 cpu sec to run.
+# The seq 30000000 should take > 1 cpu sec to run.
 echo '### --soft -f and test if child is actually suspended and thus takes longer'
-  niceload --soft -f 0.5 'seq 20000000 | wc;echo This should finish last' & 
-  (sleep 1; seq 20000000 | wc;echo This should finish first) & 
+  niceload --soft -f 0.5 'seq 30000000 | nice wc;echo This should finish last' & 
+  (sleep 1; seq 30000000 | nice wc;echo This should finish first) & 
   wait
 
 echo '### niceload with no arguments should give no output'
   niceload
 
 echo '### Test -t and -s'
+  # This should sleep 2*1s and run 2*2s
   niceload -v -t 1 -s 2 sleep 4.5
 
 echo 'bug #38908: niceload: Ctrl-C/TERM should resume jobs if using -p - Order may change, but not output'

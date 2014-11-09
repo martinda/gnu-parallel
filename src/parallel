@@ -2372,15 +2372,16 @@ sub cleanup_basefile {
 
 sub filter_hosts {
     my(@cores, @cpus, @maxline, @echo);
+    my $envvar = ::shell_quote_scalar($Global::envvar);
     while (my ($host, $sshlogin) = each %Global::host) {
 	if($host eq ":") { next }
 	# The 'true' is used to get the $host out later
 	my $sshcmd = "true $host;" . $sshlogin->sshcommand()." ".$sshlogin->serverlogin();
-	push(@cores, $host."\t".$sshcmd." ".$Global::envvar." parallel --number-of-cores\n");
-	push(@cpus, $host."\t".$sshcmd." ".$Global::envvar." parallel --number-of-cpus\n");
-	push(@maxline, $host."\t".$sshcmd." ".$Global::envvar." parallel --max-line-length-allowed\n");
+	push(@cores, $host."\t".$sshcmd." ".$envvar." parallel --number-of-cores\n\0");
+	push(@cpus, $host."\t".$sshcmd." ".$envvar." parallel --number-of-cpus\n\0");
+	push(@maxline, $host."\t".$sshcmd." ".$envvar." parallel --max-line-length-allowed\n\0");
 	# 'echo' is used to get the best possible value for an ssh login time
-	push(@echo, $host."\t".$sshcmd." echo\n");
+	push(@echo, $host."\t".$sshcmd." echo\n\0");
     }
     my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".ssh");
     print $fh @cores, @cpus, @maxline, @echo;
@@ -2391,11 +2392,20 @@ sub filter_hosts {
     #              will make it less likely to overload the ssh daemon.
     # --retries 3: If the ssh daemon it overloaded, try 3 times
     # -s 16000: Half of the max line on UnixWare
-    my $cmd = "cat $tmpfile | $0 -j0 --timeout 5 -s 16000 --joblog - --plain --delay 0.1 --retries 3 --tag --tagstring {1} --colsep '\t' -k eval {2} 2>/dev/null";
+    my $cmd = "cat $tmpfile | $0 -j0 --timeout 5 -s 16000 --joblog - --plain --delay 0.1 --retries 3 --tag --tagstring {1} -0 --colsep '\t' -k eval {2} 2>/dev/null";
     ::debug("init", $cmd, "\n");
     open(my $host_fh, "-|", $cmd) || ::die_bug("parallel host check: $cmd");
     my (%ncores, %ncpus, %time_to_login, %maxlen, %echo, @down_hosts);
+    my $prepend = "";
     while(<$host_fh>) {
+	if(/\'$/) {
+	    # if last char = ' then append next line
+	    # This may be due to quoting of $Global::envvar
+	    $prepend .= $_;
+	    next;
+	}
+	$_ = $prepend . $_;
+	$prepend = "";
 	chomp;
 	my @col = split /\t/, $_;
 	if(defined $col[6]) {
