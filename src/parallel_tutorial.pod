@@ -1211,7 +1211,7 @@ Output:
 
 Note how job 1 and 2 were tried 3 times, but 0 was not retried because it had exit code 0.
 
-=head2 Limiting the ressources
+=head2 Limiting the resources
 
 To avoid overloading systems GNU Parallel can look at the system load
 before starting another job:

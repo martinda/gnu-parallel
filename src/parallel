@@ -723,6 +723,7 @@ sub options_hash {
 	 "cat" => \$opt::cat,
 	 "fifo" => \$opt::fifo,
 	 "pipepart|pipe-part" => \$opt::pipepart,
+	 "hostgroup|hostgroups" => \$opt::hostgroups,
 	);
 }
 
@@ -1702,6 +1703,7 @@ sub start_more_jobs {
 	$jobs_started_this_round = 0;
 	# This will start 1 job on each --sshlogin (if possible)
 	# thus distribute the jobs on the --sshlogins round robin
+
 	for my $sshlogin (values %Global::host) {
 	    if($Global::JobQueue->empty() and not $opt::pipe) {
 		# No more jobs in the queue
@@ -2163,14 +2165,33 @@ sub get_job_with_sshlogin {
     # Returns:
     #   next job object for $sshlogin if any available
     my $sshlogin = shift;
+    my $job = undef;
 
-    my $job = $Global::JobQueue->get();
-    if(not defined $job) {
-        # No more jobs
-	::debug("start", "No more jobs: JobQueue empty\n");
-        return undef;
+    if ($opt::hostgroups) {
+	my @other_hostgroup_jobs = ();
+
+        while($job = $Global::JobQueue->get()) {
+	    if($sshlogin->in_hostgroups($job->hostgroups())) {
+		# Found a job for this hostgroup
+		last;
+	    } else {
+		# This job was not in the hostgroups of $sshlogin
+                push @other_hostgroup_jobs, $job;
+            }
+        }
+	$Global::JobQueue->unget(@other_hostgroup_jobs);
+	if(not defined $job) {
+	    # No more jobs
+	    return undef;
+	}
+    } else {
+        $job = $Global::JobQueue->get();
+        if(not defined $job) {
+            # No more jobs
+	    ::debug("start", "No more jobs: JobQueue empty\n");
+            return undef;
+        }
     }
-#    if(not $sshlogin->start_more()) { return undef; }
 
     my $clean_command = $job->replaced();
     if($clean_command =~ /^\s*$/) {
@@ -2281,7 +2302,7 @@ sub parse_sshlogin {
     }
     $Global::minimal_command_line_length = 8_000_000;
     for my $ncpu_sshlogin_string (::uniq(@login)) {
-        my $sshlogin = SSHLogin->new($ncpu_sshlogin_string);
+	my $sshlogin = SSHLogin->new($ncpu_sshlogin_string);
 	my $sshlogin_string = $sshlogin->string();
 	if($Global::host{$sshlogin_string}) {
 	    # This sshlogin has already been added:
@@ -3335,11 +3356,25 @@ sub new {
     my $class = shift;
     my $sshlogin_string = shift;
     my $ncpus;
-    if($sshlogin_string =~ s:^(\d+)/:: and defined $1) {
+    my %hostgroups;
+    # SSHLogins can have these formats:
+    #   @grp+grp/ncpu//usr/bin/ssh user@server
+    #   ncpu//usr/bin/ssh user@server
+    #   /usr/bin/ssh user@server
+    #   user@server
+    #   ncpu/user@server
+    #   @grp+grp/user@server
+    if($sshlogin_string =~ s:^\@([^/]+)/::) {
+        # Look for SSHLogin hostgroups
+        %hostgroups = map { $_ => 1 } split(/\+/, $1);
+    }
+    if ($sshlogin_string =~ s:^(\d+)/::) {
         # Override default autodetected ncpus unless missing
         $ncpus = $1;
     }
     my $string = $sshlogin_string;
+    # An SSHLogin is always in the hostgroup of its $string-name
+    $hostgroups{$string} = 1;
     my @unget = ();
     my $no_slash_string = $string;
     $no_slash_string =~ s/[^-a-z0-9:]/_/gi;
@@ -3351,6 +3386,7 @@ sub new {
         'max_jobs_running' => undef,
         'orig_max_jobs_running' => undef,
         'ncpus' => $ncpus,
+        'hostgroups' => \%hostgroups,
         'sshcommand' => undef,
         'serverlogin' => undef,
         'control_path_dir' => undef,
@@ -3408,6 +3444,16 @@ sub maxlength {
 sub jobs_completed {
     my $self = shift;
     return $self->{'jobs_completed'};
+}
+
+sub in_hostgroups {
+    # Input:
+    #   @hostgroups = the hostgroups to look for
+    # Returns:
+    #   true if intersection of @hostgroups and the hostgroups of this
+    #        SSHLogin is non-empty
+    my $self = shift;
+    return grep { defined $self->{'hostgroups'}{$_} } @_;
 }
 
 sub inc_jobs_completed {
@@ -6136,6 +6182,14 @@ sub tag {
     return $self->{'tag'};
 }
 
+sub hostgroups {
+    my $self = shift;
+    if(not defined $self->{'hostgroups'}) {
+	$self->{'hostgroups'} = $self->{'commandline'}->{'arg_list'}[0][0]->{'hostgroups'};
+    }
+    return @{$self->{'hostgroups'}};
+}
+
 sub exitstatus {
     my $self = shift;
     return $self->{'exitstatus'};
@@ -7391,8 +7445,16 @@ package Arg;
 sub new {
     my $class = shift;
     my $orig = shift;
+    my @hostgroups;
+    if($opt::hostgroups) {
+	if($orig =~ s:@(.+)::) {
+	    # We found hostgroups on the arg
+	    @hostgroups = split(/\+/, $1);
+        }
+    }
     return bless {
 	'orig' => $orig,
+	'hostgroups' => \@hostgroups,
     }, ref($class) || $class;
 }
 
