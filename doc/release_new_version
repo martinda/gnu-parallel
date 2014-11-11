@@ -238,6 +238,9 @@ A central piece of command generation was rewritten making this release beta qua
 
 New in this release:
 
+* --hostgroup 
+  Thanks to Michel Courtine for developing a prototype.
+
 * GNU Parallel was cited in: SlideToolkit: An Assistive Toolset for the Histological Quantification of Whole Slide Images http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0110289#close
 
 * GNU Parallel was cited in: Exploring a multiprocessor design space to analyze the impact of using STT-RAM in the memory hierarchy http://conservancy.umn.edu/bitstream/handle/11299/167286/Borse_umn_0130M_15431.pdf

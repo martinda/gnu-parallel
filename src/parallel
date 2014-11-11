@@ -1545,7 +1545,9 @@ sub save_stdin_stdout_stderr {
     for my $fdno (1..61) {
 	# /dev/fd/62 and above are used by bash for <(cmd)
 	my $fh;
-	if(open($fh,">&=",$fdno)) {
+	# 2-argument-open is used to be compatible with old perl 5.8.0
+	# bug #43570: Perl 5.8.0 creates 61 files
+	if(open($fh,">&=$fdno")) {
 	    $Global::fd{$fdno}=$fh;
 	}
     }
