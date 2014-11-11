@@ -3375,6 +3375,7 @@ sub new {
     my $string = $sshlogin_string;
     # An SSHLogin is always in the hostgroup of its $string-name
     $hostgroups{$string} = 1;
+    @Global::hostgroups{keys %hostgroups} = values %hostgroups;
     my @unget = ();
     my $no_slash_string = $string;
     $no_slash_string =~ s/[^-a-z0-9:]/_/gi;
@@ -7450,6 +7451,10 @@ sub new {
 	if($orig =~ s:@(.+)::) {
 	    # We found hostgroups on the arg
 	    @hostgroups = split(/\+/, $1);
+	    if(not grep { defined $Global::hostgroups{$_} } @hostgroups) {
+		::warning("No such hostgroup (@hostgroups)\n");
+		@hostgroups = (keys %Global::hostgroups);
+	    }
         }
     }
     return bless {
