@@ -31,6 +31,9 @@ echo
 echo '### test round-robin';
   nice seq 1000 | $NICEPAR --block 1k --pipe --round-robin wc | sort
 
+echo '### bug #43600: --pipe --linebuffer --round does not work'
+  seq 10000000000 | parallel --pipe --linebuffer --round cat | head
+
 echo '### --version must have higher priority than retired options'
   $NICEPAR --version -g -Y -U -W -T | tail
 

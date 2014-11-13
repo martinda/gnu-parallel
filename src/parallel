@@ -483,6 +483,7 @@ sub round_robin_write {
     my ($header_ref,$block_ref,$recstart,$recend,$endpos) = @_;
     my $something_written = 0;
     my $block_passed = 0;
+    my $sleep = 1;
     while(not $block_passed) {
 	# Continue flushing existing buffers
 	# until one is empty and a new block is passed
@@ -497,6 +498,7 @@ sub round_robin_write {
 		last;
 	    }
 	}
+	$sleep = ::reap_usleep($sleep);
     }
     start_more_jobs();
     return $something_written;
