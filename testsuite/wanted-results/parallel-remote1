@@ -100,6 +100,11 @@ TODO test ssh with > 9 simultaneous
 98
 99
 100
+echo '### bug #41964: --controlmaster not seems to reuse OpenSSH connections to the same host'
+### bug #41964: --controlmaster not seems to reuse OpenSSH connections to the same host
+  (parallel -S redhat9.tange.dk true ::: {1..20}; echo No --controlmaster - finish last) &   (parallel -M -S redhat9.tange.dk true ::: {1..20}; echo With --controlmaster - finish first) &   wait
+With --controlmaster - finish first
+No --controlmaster - finish last
 echo '### --filter-hosts - OK, non-such-user, connection refused, wrong host'
 ### --filter-hosts - OK, non-such-user, connection refused, wrong host
   parallel --nonall --filter-hosts -S localhost,NoUser@localhost,154.54.72.206,"ssh 5.5.5.5" hostname

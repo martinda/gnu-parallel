@@ -723,7 +723,7 @@ sub options_hash {
 	 "cat" => \$opt::cat,
 	 "fifo" => \$opt::fifo,
 	 "pipepart|pipe-part" => \$opt::pipepart,
-	 "hostgroup|hostgroups" => \$opt::hostgroups,
+	 "hgrp|hostgroup|hostgroups" => \$opt::hostgroups,
 	);
 }
 
@@ -772,7 +772,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20141107;
+    $Global::version = 20141111;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -7457,7 +7457,9 @@ sub new {
 		::warning("No such hostgroup (@hostgroups)\n");
 		@hostgroups = (keys %Global::hostgroups);
 	    }
-        }
+        } else {
+	    @hostgroups = (keys %Global::hostgroups);
+	}
     }
     return bless {
 	'orig' => $orig,

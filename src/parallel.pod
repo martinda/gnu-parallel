@@ -740,10 +740,12 @@ Example:
 
   parallel --hostgroups \
     --sshlogin @grp1/myserver1 -S @grp1+grp2/myserver2 \
-    echo ::: my_grp1_arg@grp1 arg_for_grp2@grp2
+    --sshlogin @grp3/myserver3 \
+    echo ::: my_grp1_arg@grp1 arg_for_grp2@grp2 third_arg@grp1+grp3
 
-B<my_grp1_arg> may be run on either B<myserver1> or B<myserver2>, but
-B<arg_for_grp2> will only be run on B<myserver2>.
+B<my_grp1_arg> may be run on either B<myserver1> or B<myserver2>,
+B<third_arg> may be run on either B<myserver1> or B<myserver3>,
+but B<arg_for_grp2> will only be run on B<myserver2>.
 
 
 =item B<-I> I<replace-str>

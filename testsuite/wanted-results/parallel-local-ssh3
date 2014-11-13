@@ -1,0 +1,62 @@
+echo '### --hostgroup force ncpu'
+### --hostgroup force ncpu
+  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.{} ::: {1..8} | sort
+parallel
+parallel
+tange
+tange
+tange
+tange
+tange
+tange
+echo '### --hostgroup two group arg'
+### --hostgroup two group arg
+  parallel -k --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.{} ::: {1..8}@g1+g2 | sort
+parallel
+parallel
+tange
+tange
+tange
+tange
+tange
+tange
+echo '### --hostgroup one group arg'
+### --hostgroup one group arg
+  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.{} ::: {1..8}@g2
+tange
+tange
+tange
+tange
+tange
+tange
+tange
+tange
+echo '### --hostgroup multiple group arg + unused group'
+### --hostgroup multiple group arg + unused group
+  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g1/3/lo -S @g3/100/tcsh@lo whoami\;sleep 0.{} ::: {1..8}@g1+g2 | sort
+parallel
+parallel
+tange
+tange
+tange
+tange
+tange
+tange
+echo '### --hostgroup two groups @'
+### --hostgroup two groups @
+  parallel -k --hgrp -S @g1/parallel@lo -S @g2/lo --tag whoami\;echo ::: parallel@g1 tange@g2
+parallel	parallel
+parallel	parallel
+tange	tange
+tange	tange
+echo '### --hostgroup'
+### --hostgroup
+  parallel -k --hostgroup -S @grp1/lo echo ::: no_group explicit_group@grp1 implicit_group@lo
+no_group
+explicit_group
+implicit_group
+echo '### --hostgroup --sshlogin with @'
+### --hostgroup --sshlogin with @
+  parallel -k --hostgroups -S parallel@lo echo ::: no_group implicit_group@parallel@lo
+no_group
+implicit_group
