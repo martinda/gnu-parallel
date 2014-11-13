@@ -24,4 +24,13 @@ echo '### --hostgroup'
 echo '### --hostgroup --sshlogin with @'
   parallel -k --hostgroups -S parallel@lo echo ::: no_group implicit_group@parallel@lo
 
+echo '### --hostgroup -S @group'
+  parallel -S @g1/ -S @g1/1/tcsh@lo -S @g1/1/localhost -S @g2/1/parallel@lo whoami\;true ::: {1..6} | sort
+
+echo '### --hostgroup -S @group1 -Sgrp2'
+  parallel -S @g1/ -S @g2 -S @g1/1/tcsh@lo -S @g1/1/localhost -S @g2/1/parallel@lo whoami\;true ::: {1..6} | sort
+
+echo '### --hostgroup -S @group1+grp2'
+  parallel -S @g1+g2 -S @g1/1/tcsh@lo -S @g1/1/localhost -S @g2/1/parallel@lo whoami\;true ::: {1..6} | sort
+
 EOF

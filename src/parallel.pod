@@ -1590,6 +1590,9 @@ If I<hostgroups> is given, the I<sshlogin> will be added to that
 hostgroup. Multiple hostgroups are separated by '+'. The I<sshlogin>
 will always be added to a hostgroup named the same as I<sshlogin>.
 
+If only the I<hostgroups> is given, only the sshlogins in those
+hostgroups will be used.
+
 GNU B<parallel> will determine the number of CPU cores on the remote
 computers and run the number of jobs as specified by B<-j>.  If the
 number I<ncpu> is given GNU B<parallel> will use this number for

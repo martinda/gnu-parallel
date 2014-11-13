@@ -394,11 +394,12 @@ sub spreadstdin {
 		    "Increasing to --blocksize $blocksize\n");
       }
     }
+    ::debug("init", "Done reading input\n");
+
     # If there is anything left in the buffer write it
     substr($buf,0,0) = "";
     write_record_to_pipe($chunk_number++,\$header,\$buf,$recstart,$recend,length $buf);
 
-    ::debug("init", "Done reading input\n");
     $Global::start_no_new_jobs ||= 1;
     if($opt::roundrobin) {
 	for my $job (values %Global::running) {
@@ -2303,9 +2304,15 @@ sub parse_sshlogin {
         }
     }
     $Global::minimal_command_line_length = 8_000_000;
+    my @allowed_hostgroups;
     for my $ncpu_sshlogin_string (::uniq(@login)) {
 	my $sshlogin = SSHLogin->new($ncpu_sshlogin_string);
 	my $sshlogin_string = $sshlogin->string();
+	if($sshlogin_string eq "") {
+	    # This is an ssh group: -S @webservers
+	    push @allowed_hostgroups, $sshlogin->hostgroups();
+	    next;
+	}
 	if($Global::host{$sshlogin_string}) {
 	    # This sshlogin has already been added:
 	    # It is probably a host that has come back
@@ -2328,6 +2335,15 @@ sub parse_sshlogin {
 	    ::min($Global::minimal_command_line_length, $sshlogin->maxlength());
         $Global::host{$sshlogin_string} = $sshlogin;
     }
+    if(@allowed_hostgroups) {
+	# Remove hosts that are not in these groups
+	while (my ($string, $sshlogin) = each %Global::host) {
+	    if(not $sshlogin->in_hostgroups(@allowed_hostgroups)) {
+		delete $Global::host{$string};
+	    }
+	}
+    }
+
     # debug("start", "sshlogin: ", my_dump(%Global::host),"\n");
     if($opt::transfer or @opt::return or $opt::cleanup or @opt::basefile) {
         if(not remote_hosts()) {
@@ -3366,7 +3382,7 @@ sub new {
     #   user@server
     #   ncpu/user@server
     #   @grp+grp/user@server
-    if($sshlogin_string =~ s:^\@([^/]+)/::) {
+    if($sshlogin_string =~ s:^\@([^/]+)/?::) {
         # Look for SSHLogin hostgroups
         %hostgroups = map { $_ => 1 } split(/\+/, $1);
     }
@@ -3459,6 +3475,11 @@ sub in_hostgroups {
     return grep { defined $self->{'hostgroups'}{$_} } @_;
 }
 
+sub hostgroups {
+    my $self = shift;
+    return keys %{$self->{'hostgroups'}};
+}
+
 sub inc_jobs_completed {
     my $self = shift;
     $self->{'jobs_completed'}++;
@@ -3477,7 +3498,6 @@ sub set_max_jobs_running {
     # Initialize orig to the first non-zero value that comes around
     $self->{'orig_max_jobs_running'} ||= $self->{'max_jobs_running'};
 }
-
 
 sub swapping {
     my $self = shift;
