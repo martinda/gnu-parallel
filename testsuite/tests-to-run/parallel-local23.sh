@@ -34,6 +34,9 @@ echo '### test round-robin';
 echo '### bug #43600: --pipe --linebuffer --round does not work'
   seq 10000000000 | parallel --pipe --linebuffer --round cat | head
 
+echo '### Check that 4 processes are really used'
+  seq 1000000 | parallel -j4 --pipe --round --line-buf wc |sort
+
 echo '### --version must have higher priority than retired options'
   $NICEPAR --version -g -Y -U -W -T | tail
 

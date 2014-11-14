@@ -63,6 +63,13 @@ echo '### bug #43600: --pipe --linebuffer --round does not work'
 8
 9
 10
+echo '### Check that 4 processes are really used'
+### Check that 4 processes are really used
+  seq 1000000 | parallel -j4 --pipe --round --line-buf wc |sort
+ 149797  149797 1048579
+ 235145  235145 1646016
+ 299593  299593 2097151
+ 315465  315465 2097150
 echo '### --version must have higher priority than retired options'
 ### --version must have higher priority than retired options
   $NICEPAR --version -g -Y -U -W -T | tail
