@@ -507,6 +507,7 @@ sub nindex {
 	    }
 	    $sleep = ::reap_usleep($sleep);
 	}
+# TODO Why is needed?
 #	start_more_jobs();
 	return $something_written;
     }
@@ -1159,7 +1160,7 @@ sub parse_env_var {
     my @qcsh = (map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  }
 		grep { not /^parallel_bash_environment$/ } @non_functions);
     my @qbash = (map { my $a=$_; "export $a=" . env_quote($ENV{$a}) }
-		 grep { not /^parallel_bash_environment$/ } @non_functions, @bash_pre_shellshock);
+		 @non_functions, @bash_pre_shellshock);
 
     push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_pre_shellshock;
     push @qbash, map { /BASH_FUNC_(.*)\(\)/; "$1 $ENV{$_}" } @bash_post_shellshock;
@@ -1187,7 +1188,7 @@ sub parse_env_var {
 	     . join(" && ", @qbash)
 	     .q{;});
 	if($ENV{'parallel_bash_environment'}) {
-	    $Global::envvar .= "parallel_bash_environment;\n";
+	    $Global::envvar .= 'eval "$parallel_bash_environment";'."\n";
 	}
     }
     $Global::envvarlen = length $Global::envvar;

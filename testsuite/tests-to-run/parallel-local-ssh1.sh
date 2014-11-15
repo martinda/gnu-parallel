@@ -29,6 +29,7 @@ echo '### Test bug #34241: --pipe should not spawn unneeded processes'
 echo '### --env _'
   fUbAr="OK FUBAR" parallel -S parallel@lo --env _ echo '$fUbAr $DEBEMAIL' ::: test
   fUbAr="OK FUBAR" parallel -S csh@lo --env _ echo '$fUbAr $DEBEMAIL' ::: test
+
 echo '### --env _ with explicit mentioning of normally ignored var $DEBEMAIL'
   fUbAr="OK FUBAR" parallel -S parallel@lo --env DEBEMAIL,_ echo '$fUbAr $DEBEMAIL' ::: test
   fUbAr="OK FUBAR" parallel -S csh@lo --env DEBEMAIL,_ echo '$fUbAr $DEBEMAIL' ::: test
@@ -36,6 +37,17 @@ echo '### --env _ with explicit mentioning of normally ignored var $DEBEMAIL'
 echo 'bug #40137: SHELL not bash: Warning when exporting funcs'
   . <(printf 'myfunc() {\necho $1\n}'); export -f myfunc; parallel --env myfunc -S lo myfunc ::: no_warning
   . <(printf 'myfunc() {\necho $1\n}'); export -f myfunc; SHELL=/bin/sh parallel --env myfunc -S lo myfunc ::: warning
+
+echo 'env_parallel from man page - transfer non-exported var'
+  env_parallel() { 
+    export parallel_bash_environment="$(echo "shopt -s expand_aliases 2>/dev/null"; alias;typeset -p | grep -vFf <(readonly; echo GROUPS; echo FUNCNAME; echo DIRSTACK; echo _; echo PIPESTATUS; echo USERNAME) | grep -v BASH_;typeset -f)"; 
+    `which parallel` "$@"; 
+    unset parallel_bash_environment; 
+  }; 
+  var=nonexported env_parallel -S parallel@lo echo '$var' ::: variable
+
+echo 'compared to parallel - no transfer non-exported var'
+  var=nonexported parallel -S parallel@lo echo '$var' ::: variable
 
 echo '### bug #40002: --files and --nonall seem not to work together:'
   parallel --files --nonall -S localhost true | tee >(parallel rm) | wc -l

@@ -80,20 +80,22 @@ If it is a Bash function you need to B<export -f> the function
 first. To use aliases copy the full environment as described under
 B<--env> and use B<env_parallel> instead of B<parallel>.
 
-If it is a zsh function you will need to use this helper function
-B<exportf> to export and to set $PARALLEL_SHELL to bash:
-
-  function exportf (){
-    export $(echo $1)="`whence -f $1 | sed -e "s/$1 //" `"
-  }
-
-  function my_func(){
-    echo $1;
-    echo "hello";
-  }
-
-  exportf my_func
-  PARALLEL_SHELL=/bin/bash parallel "my_func {}" :::  1 2
+=cut
+# If it is a zsh function you will need to use this helper function
+# B<exportf> to export and to set $PARALLEL_SHELL to bash:
+# 
+#   function exportf (){
+#     export $(echo $1)="`whence -f $1 | sed -e "s/$1 //" `"
+#   }
+# 
+#   function my_func(){
+#     echo $1;
+#     echo "hello";
+#   }
+# 
+#   exportf my_func
+#   PARALLEL_SHELL=/bin/bash parallel "my_func {}" :::  1 2
+=pod
 
 The command cannot contain the character \257 (macron: ¯).
 
@@ -434,15 +436,15 @@ than a single record.
 
 I<size> defaults to 1M.
 
-See B<--pipe> for use of this.
+See B<--pipe> and B<--pipepart> for use of this.
 
 
 =item B<--cat>
 
-Create a temporary file with content. Normally B<--pipe> will give
-data to the program on stdin (standard input). With B<--cat> GNU
-B<parallel> will create a temporary file with the name in {}, so you
-can do: B<parallel --pipe --cat wc {}>.
+Create a temporary file with content. Normally B<--pipe>/B<--pipepart>
+will give data to the program on stdin (standard input). With B<--cat>
+GNU B<parallel> will create a temporary file with the name in {}, so
+you can do: B<parallel --pipe --cat wc {}>.
 
 See also B<--fifo>.
 
@@ -503,23 +505,21 @@ output) unless B<--decompress-program> is given.
 
 =item B<--ctrlc>
 
-Sends SIGINT to tasks running on remote computers thus killing them.
+If receiving SIGNING, GNU B<parallel> will send SIGINT to tasks
+running on remote computers thus killing them.
 
 
 =item B<--delimiter> I<delim>
 
 =item B<-d> I<delim>
 
-Input items are terminated by the specified character.  Quotes and
-backslash are not special; every character in the input is taken
-literally.  Disables the end-of-file string, which is treated like any
-other argument.  This can be used when the input consists of simply
-newline-separated items, although it is almost always better to design
-your program to use --null where this is possible.  The specified
-delimiter may be a single character, a C-style character escape such
-as \n, or an octal or hexadecimal escape code.  Octal and
-hexadecimal escape codes are understood as for the printf command.
-Multibyte characters are not supported.
+Input items are terminated by I<delim>.  Quotes and backslash are not
+special; every character in the input is taken literally.  Disables
+the end-of-file string, which is treated like any other argument. The
+specified delimiter may be characters, C-style character escapes such
+as \n, or octal or hexadecimal escape codes.  Octal and hexadecimal
+escape codes are understood as for the printf command.  Multibyte
+characters are not supported.
 
 =item B<--dirnamereplace> I<replace-str>
 
@@ -531,8 +531,8 @@ dirname of input line.
 
 =item B<-E> I<eof-str>
 
-Set the end of file string to eof-str.  If the end of file string
-occurs as a line of input, the rest of the input is ignored.  If
+Set the end of file string to I<eof-str>.  If the end of file string
+occurs as a line of input, the rest of the input is not read.  If
 neither B<-E> nor B<-e> is used, no end of file string is used.
 
 
@@ -540,16 +540,17 @@ neither B<-E> nor B<-e> is used, no end of file string is used.
 
 Delay starting next job I<secs> seconds. GNU B<parallel> will pause
 I<secs> seconds after starting each job. I<secs> can be less than 1
-seconds.
+second.
 
 
 =item B<--dry-run>
 
 Print the job to run on stdout (standard output), but do not run the
-job. Use B<-v -v> to include the ssh/rsync wrapping if the job would
-be run on a remote computer. Do not count on this literaly, though, as
-the job may be scheduled on another computer or the local computer if
-: is in the list.
+job. Use B<-v -v> to include the wrapping that GNU Parallel generates
+(for remote jobs, B<--tmux>, B<--nice>, B<--pipe>, B<--pipepart>,
+B<--fifo> and B<--cat>). Do not count on this literaly, though, as the
+job may be scheduled on another computer or the local computer if : is
+in the list.
 
 
 =item B<--eof>[=I<eof-str>]
@@ -571,8 +572,8 @@ remote execution.
 In Bash I<var> can also be a Bash function - just remember to B<export
 -f> the function, see B<command>.
 
-The variable '_' is special. It will copy all environment variables
-except for the ones mentioned in ~/.parallel/ignored_vars.
+The variable '_' is special. It will copy all exported environment
+variables except for the ones mentioned in ~/.parallel/ignored_vars.
 
 To copy Bash arrays you need an importer function, as Bash arrays
 cannot be exported:
@@ -594,15 +595,13 @@ cannot be exported:
     parallel --env my_importer \
       'my_importer; echo "{}" "${indexed[{}]}" "${assoc[${indexed[{}]}]}"' ::: "${!indexed[@]}"
 
-To copy the full environment use this function (e.g. by putting it in .bashrc):
+To copy the full environment (both exported and not exported variables
+and functions) use this function (e.g. by putting it in .bashrc):
 
     env_parallel() {
-      export parallel_bash_environment='() {
-        '"$(echo "shopt -s expand_aliases 2>/dev/null"; alias;typeset -p | grep -vFf <(readonly; echo GROUPS; echo FUNCNAME; echo DIRSTACK; echo _; echo PIPESTATUS; echo USERNAME) | grep -v BASH_;typeset -f)"'
-      }'
-      # Run as: env_parallel [normal parallel options]
-      `which parallel` "$@"
-      unset parallel_bash_environment
+      export parallel_bash_environment="$(echo "shopt -s expand_aliases 2>/dev/null"; alias;typeset -p | grep -vFf <(readonly; echo GROUPS; echo FUNCNAME; echo DIRSTACK; echo _; echo PIPESTATUS; echo USERNAME) | grep -v BASH_;typeset -f)";
+      `which parallel` "$@";
+      unset parallel_bash_environment;
     }
     # call as:
     env_parallel [normal parallel options]
@@ -615,7 +614,10 @@ See also: B<--record-env>.
 Show the estimated number of seconds before finishing. This forces GNU
 B<parallel> to read all jobs before starting to find the number of
 jobs. GNU B<parallel> normally only reads the next job to run.
+
 Implies B<--progress>.
+
+See also: B<--bar>, B<--progress>.
 
 
 =item B<--fg>
@@ -623,17 +625,17 @@ Implies B<--progress>.
 Run command in foreground thus GNU B<parallel> will wait for
 completion of the command before exiting.
 
-See also B<--bg>, B<man sem>.
-
 Implies B<--semaphore>.
+
+See also B<--bg>, B<man sem>.
 
 
 =item B<--fifo>
 
-Create a temporary fifo with content. Normally B<--pipe> will give
-data to the program on stdin (standard input). With B<--fifo> GNU
-B<parallel> will create a temporary fifo with the name in {}, so you
-can do: B<parallel --pipe --fifo wc {}>.
+Create a temporary fifo with content. Normally B<--pipe> and
+B<--pipepart> will give data to the program on stdin (standard
+input). With B<--fifo> GNU B<parallel> will create a temporary fifo
+with the name in {}, so you can do: B<parallel --pipe --fifo wc {}>.
 
 Beware: If data is not read from the fifo, the job will block forever.
 
@@ -724,7 +726,7 @@ For B<--pipe> the matched header will be prepended to each output.
 
 B<--header :> is an alias for B<--header '.*\n'>.
 
-If I<regexp> is a number, it will match that many lines.
+If I<regexp> is a number, it is a fixed number of lines.
 
 
 =item B<--hostgroups> (alpha testing)
@@ -775,7 +777,7 @@ To convert the times into ISO-8601 strict do:
   perl -a -F"\t" -ne \
     'chomp($F[2]=`date -d \@$F[2] +%FT%T`); print join("\t",@F)'
 
-See also B<--resume>.
+See also B<--resume> B<--resume-failed>.
 
 
 =item B<--jobs> I<N>
@@ -997,6 +999,7 @@ all the output from one server will be grouped together.
 Instead of printing the output to stdout (standard output) the output
 of each job is saved in a file and the filename is then printed.
 
+See also: B<--results>
 
 =item B<--pipe>
 

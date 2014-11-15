@@ -238,12 +238,17 @@ A central piece of command generation was rewritten making this release beta qua
 
 New in this release:
 
-* --hostgroup 
-  Thanks to Michel Courtine for developing a prototype.
+* Remote systems can be divided into hostgroups (e.g. web and db) by prepending '@groupname/' to the sshlogin. Multiple groups can be given by separating groups with '+'. E.g. @web/www1 @web+db/www2 @db/mariadb
+
+* Remote execution can be restricted to servers that are part of one or more groups by '@groupname' as an sshlogin. Multiple groups can be given by separating groups with '+'. E.g. -S @web or -S @db+web
+
+* With --hostgroup you can restrict arguments to certain hostgroups by appending '@groupname' to the argument.  Multiple groups can be given by separating groups with '+'. E.g. my_web_arg@web db-or-web-arg@db+web db-only-arg@db Thanks to Michel Courtine for developing a prototype for this.
 
 * GNU Parallel was cited in: SlideToolkit: An Assistive Toolset for the Histological Quantification of Whole Slide Images http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0110289#close
 
 * GNU Parallel was cited in: Exploring a multiprocessor design space to analyze the impact of using STT-RAM in the memory hierarchy http://conservancy.umn.edu/bitstream/handle/11299/167286/Borse_umn_0130M_15431.pdf
+
+* Command-Line OCR with Tesseract on Mac OS X https://ryanfb.github.io/etc/2014/11/13/command_line_ocr_on_mac_os_x.html
 
 * Bug fixes and man page updates.
 
