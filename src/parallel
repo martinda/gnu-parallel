@@ -507,8 +507,6 @@ sub nindex {
 	    }
 	    $sleep = ::reap_usleep($sleep);
 	}
-# TODO Why is needed?
-#	start_more_jobs();
 	return $something_written;
     }
 }
@@ -783,7 +781,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20141111;
+    $Global::version = 20141122;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -5159,6 +5157,17 @@ sub write {
 }
 
 sub set_stdin_buffer {
+    # Copy stdin buffer from $block_ref up to $endpos
+    # Prepend with $header_ref
+    # Remove $recstart and $recend if needed
+    # Input:
+    #   $header_ref = ref to $header to prepend
+    #   $block_ref = ref to $block to pass on
+    #   $endpos = length of $block to pass on
+    #   $recstart = --recstart regexp
+    #   $recend = --recend regexp
+    # Returns:
+    #   N/A
     my $self = shift;
     my ($header_ref,$block_ref,$endpos,$recstart,$recend) = @_;
     $self->{'stdin_buffer'} = ($self->virgin() ? $$header_ref : "").substr($$block_ref,0,$endpos);
@@ -5583,14 +5592,19 @@ sub sshlogin_wrap {
 	    # * not mixing STDERR and STDOUT
 	    # * terminating with ctrl-c
 	    # It works on Linux but not Solaris
+	    # Finishes on Solaris, but wrong exit code:
+	    # $SIG{CHLD} = sub {exit ($?&127 ? 128+($?&127) : 1+$?>>8)};
+	    # Hangs on Solaris, but correct exit code on Linux:
+	    # $SIG{CHLD} = sub { $done = 1 };
+	    # $p->poll;
 	    my $signal_script = "perl -e '".
 	    q{
 		use IO::Poll;
-		$SIG{CHLD} = sub {exit ($?&127 ? 128+($?&127) : 1+$?>>8)};
+                $SIG{CHLD} = sub { $done = 1 };
 		$p = IO::Poll->new;
 		$p->mask(STDOUT, POLLHUP);
 		$pid=fork; unless($pid) {setpgrp; exec $ENV{SHELL}, "-c", @ARGV; die "exec: $!\n"}
-		$p->poll;
+                $p->poll;
 		kill SIGHUP, -${pid} unless $done;
 		wait; exit ($?&127 ? 128+($?&127) : 1+$?>>8)
             } . "' ";
@@ -5600,7 +5614,7 @@ sub sshlogin_wrap {
 		($pre
 		 . "$sshcmd $ssh_options $serverlogin $parallel_env "
 		 . $remote_pre
-#		 . ::shell_quote_scalar($signal_script . ::shell_quote_scalar($next_command_line))
+#		 . ::shell_quote_scalar($signal_script . ::shell_quote_scalar($command))
 		 . ::shell_quote_scalar($command)
 		 . ";"
 		 . $post);

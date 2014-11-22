@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # force load > 10
-while uptime | grep -v age:.[1-9][0-9].[0-9][0-9] >/dev/null ; do (timeout 5 nice burnP6 2>/dev/null &) done
+while uptime | grep -v age:.[1-9]\\+[0-9].[0-9][0-9] >/dev/null ; do (timeout 5 nice burnP6 2>/dev/null &) done
 
 int() {
   perl -pe 's/(\d+\.\d*)/int($1)/e'

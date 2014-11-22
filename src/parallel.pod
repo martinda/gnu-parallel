@@ -2373,6 +2373,27 @@ can be written like this:
   cat list | parallel "do_something {} scale {.}.jpg ; do_step2 <{} {.}" |\
     process_output
 
+If the body of the loop is bigger, it improves readability to use a function:
+
+  (for x in `cat list` ; do
+    do_something $x
+    [... 100 lines that do something with $x ...]
+  done) | process_output
+
+  cat list | (while read x ; do
+    do_something $x
+    [... 100 lines that do something with $x ...]
+  done) | process_output
+
+can both be rewritten as:
+
+  doit() {
+    x=$1
+    do_something $x
+    [... 100 lines that do something with $x ...]
+  }
+  export -f doit
+  cat list | parallel doit
 
 =head1 EXAMPLE: Rewriting nested for-loops
 
