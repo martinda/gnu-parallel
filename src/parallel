@@ -781,7 +781,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20141122;
+    $Global::version = 20141123;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -6934,6 +6934,10 @@ sub new {
 		# But for tagstring we just need to mark it as seen
 		$replacecount{$1}||=1;
 	    }
+	}
+	if($opt::bar) {
+	    # If the command does not contain {} force it to be computed
+	    $replacecount{""}||=1;
 	}
 
 	$len{'context'} = 0+$contextlen;

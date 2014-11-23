@@ -1,6 +1,9 @@
 #!/bin/bash
 
 cat <<'EOF' | parallel -vj0 -k
+echo "bug #43654: --bar with command not using {}"
+  COLUMNS=80 stdout parallel --bar true {.} ::: 1
+
 echo "### Test --basenamereplace"
   parallel -j1 -k -X --basenamereplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b
   parallel -k --basenamereplace FOO echo FOO ::: /a/b.c a/b.c b.c /a/b a/b b

@@ -15,8 +15,8 @@
   db-or-web-arg@db+web db-only-arg@db Thanks to Michel Courtine for
   developing a prototype for this.
 
-* HTSeq-Hadoop: Extending HTSeq for Massively Parallel Sequencing Data
-  Analysis using Hadoop
+* GNU Parallel was cited in: HTSeq-Hadoop: Extending HTSeq for
+  Massively Parallel Sequencing Data Analysis using Hadoop
   http://essenceofescience.se/wp-content/uploads/2014/11/Siretskiy.pdf
 
 * GNU Parallel was cited in: SlideToolkit: An Assistive Toolset for

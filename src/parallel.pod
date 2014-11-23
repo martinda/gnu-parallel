@@ -162,7 +162,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}> (beta testing)
+=item B<{#}>
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -173,7 +173,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}> (beta testing)
+=item B<{%}>
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -563,7 +563,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var> (beta testing)
+=item B<--env> I<var>
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -729,9 +729,9 @@ B<--header :> is an alias for B<--header '.*\n'>.
 If I<regexp> is a number, it is a fixed number of lines.
 
 
-=item B<--hostgroups> (alpha testing)
+=item B<--hostgroups> (beta testing)
 
-=item B<--hgrp> (alpha testing)
+=item B<--hgrp> (beta testing)
 
 Enable hostgroups on arguments. If an argument contains '@' the string
 after '@' will be removed and treated as a list of hostgroups on which
@@ -3275,7 +3275,7 @@ by: B<kill -TERM $PARALLEL_PID>. This only works on the local
 computer.
 
 
-=item $PARALLEL_SHELL (beta testing)
+=item $PARALLEL_SHELL
 
 Use this shell the shell for the commands run by GNU Parallel:
 
