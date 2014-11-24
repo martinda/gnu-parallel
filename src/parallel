@@ -194,7 +194,6 @@ sub pipe_part_files {
     # Remote exec should look like:
     #  ssh -oLogLevel=quiet lo  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$SHELL\ \|\ grep\ \"/t\\\{0,1\\\}csh\"\ \>\ /dev/null\ \&\&\ setenv\ FOO\ /tmp/foo\ \|\|\ export\ FOO=/tmp/foo\; \(wc\ -\ \$FOO\)
     # ssh -tt not allowed. Remote will die due to broken pipe anyway.
-    # TODO test remote with --fifo / --cat
     return @cat_partials;
 }
 
@@ -3134,15 +3133,15 @@ sub which {
 	    (
 	     'aix' => $sysv,
 	     'cygwin' => $sysv,
-	     'msys' => $sysv,
-	     'dec_osf' => $sysv,
 	     'darwin' => $bsd,
+	     'dec_osf' => $sysv,
 	     'dragonfly' => $bsd,
 	     'freebsd' => $bsd,
 	     'gnu' => $sysv,
 	     'hpux' => $sysv,
 	     'linux' => $sysv,
 	     'mirbsd' => $bsd,
+	     'msys' => $sysv,
 	     'netbsd' => $bsd,
 	     'nto' => $sysv,
 	     'openbsd' => $bsd,
@@ -3724,6 +3723,66 @@ sub loadavg_too_high {
             $loadavg > $self->max_loadavg());
 }
 
+{
+    my $cmd;
+    sub loadavg_cmd {
+	if(not $cmd) {
+	    # aix => "ps -ae -o state,command" # state wrong
+	    # bsd => "ps ax -o state,command"
+	    # sysv => "ps -ef -o s -o comm"
+	    # dec_osf => bsd
+	    # dragonfly => bsd
+	    # freebsd => bsd
+	    # gnu => bsd
+	    # hpux => ps -el|awk '{print $2,$14,$15}'
+	    # irix => ps -ef -o state -o comm
+	    # linux => bsd
+	    # minix => ps el|awk '{print \$1,\$11}'
+	    # mirbsd => bsd
+	    # netbsd => bsd
+	    # openbsd => bsd
+	    # solaris => sysv
+	    # svr5 => sysv
+	    # ultrix => ps -ax | awk '{print $3,$5}'
+	    # unixware => ps -el|awk '{print $2,$14,$15}'
+	    my $ps = q{
+		$sysv="ps -ef -o s -o comm";
+		$sysv2="ps -ef -o state -o comm";
+		$bsd="ps ax -o state,command";
+		$psel="ps -el|awk '{ print \$2,\$14,\$15 }'";
+		$dummy="echo S COMMAND;echo R dummy";
+		%ps=(
+		    'aix' => "uptime",
+		    'cygwin' => $sysv,
+		    'darwin' => $bsd,
+		    'dec_osf' => $sysv2,
+		    'dragonfly' => $bsd,
+		    'freebsd' => $bsd,
+		    'gnu' => $bsd,
+		    'hpux' => $psel,
+		    'irix' => 'ps -ef -o state -o comm',
+		    'linux' => $bsd,
+		    'minix' => "ps el|awk '{print \$1,\$11}'",
+		    'mirbsd' => $bsd,
+		    'msys' => $sysv,
+		    'netbsd' => $bsd,
+		    'nto' => $dummy,
+		    'openbsd' => $bsd,
+		    'solaris' => $sysv,
+		    'svr5' => $psel,
+		    'ultrix' => "ps -ax | awk '{print \$3,\$5}'",
+		    );
+		print `$ps{$^O}`;
+	    };
+	    $ps =~ s/[ \t\n]+/ /g;
+	    $cmd = "perl -e ".::shell_quote_scalar($ps);
+	    $cmd =~ s/\^/\\^/g;
+	}
+	return $cmd;
+    }
+}
+
+
 sub loadavg {
     # If the currently know loadavg is too old:
     #   Recompute a new one in the background
@@ -3741,21 +3800,28 @@ sub loadavg {
 	local $/ = undef;
         my $load_out = <$load_fh>;
         close $load_fh;
-	my $load =()= ($load_out=~/(^[DR]....[^\[])/gm);
+	my $load =()= ($load_out=~/(^\s?[DOR]\S* [^\[])/gm);
         if($load > 0) {
 	    # load is overestimated by 1
             $self->{'loadavg'} = $load - 1;
-            ::debug("load", "New loadavg: ", $self->{'loadavg'});
-        } else {
-	    ::die_bug("loadavg_invalid_content: $load_out");
+            ::debug("load", "New loadavg: ", $self->{'loadavg'},"\n");
+        } elsif ($load_out=~/average: (\d+.\d+)/) {
+	    # Aix does not support instant load average
+	    # 04:11AM   up 21 days,  12:55,  1 user,  load average: 1.85, 1.57, 1.55
+	    $self->{'loadavg'} = $1;
+	} else {
+	    ::die_bug("loadavg_invalid_content: " .
+		      $self->{'loadavg_file'} . "\n$load_out");
 	}
-        ::debug("load", "Last update: ", $self->{'last_loadavg_update'});
-        if(time - $self->{'last_loadavg_update'} > 10) {
-            # last loadavg was started 10 seconds ago
-            ::debug("load", time - $self->{'last_loadavg_update'}, " secs old: ",
-		    $self->{'loadavg_file'});
+	# Because of instant load average, it should not be delayed 10 secs
+	# The instant load does not give 2 R if there is only 1 cpu.
+#        ::debug("load", "Last update: ", $self->{'last_loadavg_update'});
+#        if(time - $self->{'last_loadavg_update'} > 10) {
+#            # last loadavg was started 10 seconds ago
+#            ::debug("load", time - $self->{'last_loadavg_update'}, " secs old: ",
+#		    $self->{'loadavg_file'});
             $update_loadavg_file = 1;
-        }
+#        }
     } else {
         ::debug("load", "No loadavg file: ", $self->{'loadavg_file'});
         $self->{'loadavg'} = undef;
@@ -3768,12 +3834,15 @@ sub loadavg {
         -e $ENV{'HOME'}."/.parallel/tmp" or mkdir $ENV{'HOME'}."/.parallel/tmp";
         my $cmd = "";
         if($self->{'string'} ne ":") {
-	    $cmd = $self->sshcommand() . " " . $self->serverlogin() . " ";
+	    $cmd = $self->sshcommand() . " " . $self->serverlogin() . " " .
+		::shell_quote_scalar(loadavg_cmd());
+	} else {
+	    $cmd .= loadavg_cmd();
 	}
-	# TODO Is is called 'ps ax -o state,command' on other platforms?
-	$cmd .= "ps ax -o state,command";
+#	$cmd .= "ps ax -o state,command";
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
+        ::debug("load", "Cmd: ", $cmd);
         my $file = $self->{'loadavg_file'};
         my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".loa");
         qx{ ($cmd > $tmpfile && mv $tmpfile $file || rm $tmpfile) & };
