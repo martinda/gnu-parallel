@@ -2848,12 +2848,13 @@ sub usage {
 	 "",
 	 "See 'man $Global::progname' for details",
 	 "",
+	 "Academic tradition requires you to cite works you base your article on.",
 	 "When using programs that use GNU Parallel to process data for publication please cite:",
 	 "",
 	 "O. Tange (2011): GNU Parallel - The Command-Line Power Tool,",
 	 ";login: The USENIX Magazine, February 2011:42-47.",
 	 "",
-	 "Or you can get GNU Parallel without this requirement by paying 10000 EUR.",
+	 "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.\n",
 	 "");
 }
 
@@ -2873,13 +2874,14 @@ sub citation_notice {
 	# skip
     } else {
 	print $Global::original_stderr
-	    ("When using programs that use GNU Parallel to process data for publication please cite:\n",
+	    ("Academic tradition requires you to cite works you base your article on.\n",
+	     "When using programs that use GNU Parallel to process data for publication please cite:\n",
 	     "\n",
 	     "  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,\n",
 	     "  ;login: The USENIX Magazine, February 2011:42-47.\n",
 	     "\n",
 	     "This helps funding further development; and it won't cost you a cent.\n",
-	     "Or you can get GNU Parallel without this requirement by paying 10000 EUR.\n",
+	     "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.\n",
 	     "\n",
 	     "To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.\n\n",
 	    );
@@ -2931,10 +2933,8 @@ sub version {
                "GNU $Global::progname comes with no warranty.",
                "",
                "Web site: http://www.gnu.org/software/${Global::progname}\n",
-	       "When using programs that use GNU Parallel to process data for publication please cite:\n",
-	       "O. Tange (2011): GNU Parallel - The Command-Line Power Tool, ",
-	       ";login: The USENIX Magazine, February 2011:42-47.\n",
-	       "Or you can get GNU Parallel without this requirement by paying 10000 EUR.\n",
+	       "When using programs that use GNU Parallel to process data for publication",
+	       "please cite as described in 'parallel --bibtex'.\n",
         );
 }
 
@@ -2944,6 +2944,7 @@ sub bibtex {
 	print "WARNING: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n";
     }
     print join("\n",
+	       "Academic tradition requires you to cite works you base your article on.",
 	       "When using programs that use GNU Parallel to process data for publication please cite:",
 	       "",
                "\@article{Tange2011a,",
@@ -2963,7 +2964,7 @@ sub bibtex {
 	       "",
 	       "This helps funding further development.",
 	       "",
-	       "Or you can get GNU Parallel without this requirement by paying 10000 EUR.",
+	       "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.\n",
 	       ""
         );
     while(not -e $ENV{'HOME'}."/.parallel/will-cite") {
