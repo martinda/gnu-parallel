@@ -3058,7 +3058,7 @@ To submit your jobs to the queue:
 You can of course use B<-S> to distribute the jobs to remote
 computers:
 
-  true >jobqueue; tail -f jobqueue | parallel -S ..
+  true >jobqueue; tail -n+0 -f jobqueue | parallel -S ..
 
 There is a a small issue when using GNU B<parallel> as queue
 system/batch manager: You have to submit JobSlot number of jobs before

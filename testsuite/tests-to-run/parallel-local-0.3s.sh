@@ -23,11 +23,22 @@ echo '### Test bug #43284: {%} and {#} with --xapply';
 echo '**'
 
 echo '### Test bug #43376: {%} and {#} with --pipe'
-echo foo | parallel -q --pipe -k echo {#}
-echo foo | parallel --pipe -k echo {%}
-echo foo | parallel -q --pipe -k echo {%}
-echo foo | parallel --pipe -k echo {#}
+  echo foo | parallel -q --pipe -k echo {#}
+  echo foo | parallel --pipe -k echo {%}
+  echo foo | parallel -q --pipe -k echo {%}
+  echo foo | parallel --pipe -k echo {#}
 
 echo '**'
 
+echo '### {= and =} in different groups'
+  parallel echo {= s/a/b/ =} ::: a
+  parallel echo {= s/a/b/=} ::: a
+  parallel echo {= s/a/b/=}{= s/a/b/=} ::: a
+  parallel echo {= s/a/b/=}{=s/a/b/=} ::: a
+  parallel echo {= s/a/b/=}{= {= s/a/b/=} ::: a
+  parallel echo {= s/a/b/=}{={=s/a/b/=} ::: a
+  parallel echo {= s/a/b/ =} {={==} ::: a
+  parallel echo {={= =} ::: a
+  parallel echo {= {= =} ::: a
+  parallel echo {= {= =} =} ::: a
 EOF
