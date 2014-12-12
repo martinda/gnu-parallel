@@ -30,7 +30,7 @@ echo '### Test bug #43376: {%} and {#} with --pipe'
 
 echo '**'
 
-echo '### {= and =} in different groups'
+echo '### {= and =} in different groups separated by space'
   parallel echo {= s/a/b/ =} ::: a
   parallel echo {= s/a/b/=} ::: a
   parallel echo {= s/a/b/=}{= s/a/b/=} ::: a
@@ -41,4 +41,15 @@ echo '### {= and =} in different groups'
   parallel echo {={= =} ::: a
   parallel echo {= {= =} ::: a
   parallel echo {= {= =} =} ::: a
+
+echo '**'
+
+echo '### {} as part of the command'
+  echo p /bin/ls | parallel l{= s/p/s/ =}
+  echo /bin/ls-p | parallel --colsep '-' l{=2 s/p/s/ =} {1}
+  echo s /bin/ls | parallel l{}
+  echo /bin/ls | parallel ls {}
+  echo ls /bin/ls | parallel {}
+  echo ls /bin/ls | parallel
+
 EOF

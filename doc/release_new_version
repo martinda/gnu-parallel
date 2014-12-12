@@ -236,7 +236,11 @@ Haiku of the month:
 
 New in this release:
 
+* A semibig refactoring of big functions. All non-trivial functions are now less than 100 lines. The refactoring makes this release beta quality.
+
 * GNU Parallel was cited in: Parallel post-processing with MPI-Bash http://dl.acm.org/citation.cfm?id=2691137
+
+* GNU Parallel was cited in: Distinguishing cause from effect using observational data: methods and benchmarks http://arxiv-web3.library.cornell.edu/pdf/1412.3773.pdf
 
 * GNU Parallel: Open Source For You (OSFY) magazine, October 2013 edition http://www.shakthimaan.com/posts/2014/11/27/gnu-parallel/news.html
 
