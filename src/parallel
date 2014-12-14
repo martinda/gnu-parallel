@@ -950,7 +950,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20141209;
+    $Global::version = 20141212;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -6866,12 +6866,16 @@ sub replaced {
     if(not defined $self->{'replaced'}) {
 	# Don't quote arguments if the input is the full command line
 	my $quote_arg = $Global::noquote ? 0 : not $Global::quoting;
-	$self->{'replaced'} = $self->replace_placeholders($self->{'command'},$Global::quoting,$quote_arg);
+	$self->{'replaced'} = $self->
+	    replace_placeholders($self->{'command'},$Global::quoting,
+				 $quote_arg);
 	my $len = length $self->{'replaced'};
 	if ($len != $self->len()) {
-	    ::debug("length", $len, " != ", $self->len(), " ", $self->{'replaced'}, "\n");
+	    ::debug("length", $len, " != ", $self->len(),
+		    " ", $self->{'replaced'}, "\n");
 	} else {
-	    ::debug("length", $len, " == ", $self->len(), " ", $self->{'replaced'}, "\n");
+	    ::debug("length", $len, " == ", $self->len(),
+		    " ", $self->{'replaced'}, "\n");
 	}
     }
     return $self->{'replaced'};
@@ -6881,6 +6885,7 @@ sub replaced {
     my @target;
     my $context_replace;
     my @arg;
+    my $perl_expressions_as_re;
 
     sub fish_out_words_containing_replacement_strings {
 	my %word;
@@ -6966,63 +6971,47 @@ sub replaced {
 
 	for my $word (@word) {
 	    # word = AB \257< perlexpr \257> CD \257< perlexpr \257> EF
-	    my $w = $word;
-	    ::debug("replace", "Replacing in $w\n");
+	    ::debug("replace", "Replacing in $word\n");
+	    my $normal_replace;
 
-	    # Replace positional arguments
-	    $w =~ s< ([^\s\257]*)  # before {=
-                 \257<         # {=
-                 (-?\d+)       # Position (eg. -2 or 3)
-                 ([^\257]*?)   # The perl expression
-                 \257>         # =}
-                 ([^\s\257]*)  # after =}
-               >
-  	       { $1. # Context (pre)
-		 (
-		  $arg[$2 > 0 ? $2-1 : $n+$2] ? # If defined: replace
-		  $arg[$2 > 0 ? $2-1 : $n+$2]->replace($3,$quote_arg,$self)
-		  : "")
-		 .$4 }egx;# Context (post)
-	    ::debug("replace", "Positional replaced $word with: $w\n");
-
-	    if($w !~ /\257/) {
-		# No more replacement strings in $w: No need to do more
-		if($quote) {
-		    CORE::push(@{$replace{::shell_quote($word)}}, $w);
-		} else {
-		    CORE::push(@{$replace{$word}}, $w);
-		}
-		next;
-	    }
 	    # for each arg:
-	    #   compute replacement for each string
 	    #   replace replacement strings with replacement in the word value
 	    #   push to replace word value
-	    ::debug("replace", "Positional done: $w\n");
+	    $perl_expressions_as_re ||=
+		join("|", map {s/^-?\d+//; "\Q$_\E"} keys %{$self->{'replacecount'}});
 	    for my $arg (@arg) {
-		my $val = $w;
-		my $number_of_replacements = 0;
-		for my $perlexpr (keys %{$self->{'replacecount'}}) {
-		    # Replace {= perl expr =} with value for each arg
-		    $number_of_replacements +=
-			$val =~ s{\257<\Q$perlexpr\E\257>}
-		    {$arg ? $arg->replace($perlexpr,$quote_arg,$self) : ""}eg;
-		}
-		my $ww = $word;
+		my $val = $word;
+		# Replace {= perl expr =} with value for each arg
+		$val =~ s{\257<(-?\d+)?($perl_expressions_as_re)\257>}
+		    {
+			if($1) {
+			    # Positional replace
+			    # Find the relevant arg and replace it
+			    ($arg[$1 > 0 ? $1-1 : $n+$1] ? # If defined: replace
+			     $arg[$1 > 0 ? $1-1 : $n+$1]->
+			     replace($2,$quote_arg,$self)
+			     : "");
+			} else {
+			    # Normal replace
+			    $normal_replace ||= 1;
+			    ($arg ? $arg->replace($2,$quote_arg,$self) : "");
+			}
+		    }goxe;
 		if($quote) {
-		    $ww = ::shell_quote_scalar($word);
-		    $val = ::shell_quote_scalar($val);
+		    CORE::push(@{$replace{::shell_quote_scalar($word)}},
+			       ::shell_quote_scalar($val));
+		} else {
+		    CORE::push(@{$replace{$word}}, $val);
 		}
-		if($number_of_replacements) {
-		    CORE::push(@{$replace{$ww}}, $val);
-		}
+		# No normal replacements => only run once
+		$normal_replace or last;
 	    }
 	}
 
 	if($quote) {
 	    @target = ::shell_quote(@target);
 	}
-	# ::debug("replace", "%replace=",::my_dump(%replace),"\n");
+	::debug("replace", "%replace=",::my_dump(%replace),"\n");
 	if(%replace) {
 	    # Substitute the replace strings with the replacement values
 	    # Must be sorted by length if a short word is a substring of a long word

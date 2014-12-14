@@ -52,4 +52,13 @@ echo '### {} as part of the command'
   echo ls /bin/ls | parallel {}
   echo ls /bin/ls | parallel
 
+echo '**'
+
+echo '### bug #43817: Some JP char cause problems in positional replacement strings'
+  parallel -k echo ::: '�<�>' '�<1 $_=2�>' 'ワ'
+  parallel -k echo {1} ::: '�<�>' '�<1 $_=2�>' 'ワ'
+  parallel -Xj1 echo ::: '�<�>' '�<1 $_=2�>' 'ワ'
+  parallel -Xj1 echo {1} ::: '�<�>' '�<1 $_=2�>' 'ワ'
+
+
 EOF
