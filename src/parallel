@@ -1568,6 +1568,8 @@ sub save_stdin_stdout_stderr {
     }
     open $Global::original_stderr, ">&", "STDERR" or
 	::die_bug("Can't dup STDERR: $!");
+    open $Global::status_fd, ">&", "STDERR" or
+	::die_bug("Can't dup STDERR: $!");
     open $Global::original_stdin, "<&", "STDIN" or
 	::die_bug("Can't dup STDIN: $!");
 }
@@ -1881,7 +1883,7 @@ sub drain_job_queue {
     #   $Global::start_no_new_jobs
     # Returns: N/A
     if($opt::progress) {
-        print $Global::original_stderr init_progress();
+        ::status(init_progress());
     }
     my $last_header="";
     my $sleep = 0.2;
@@ -1898,11 +1900,10 @@ sub drain_job_queue {
             if($opt::progress) {
                 my %progress = progress();
                 if($last_header ne $progress{'header'}) {
-                    print $Global::original_stderr "\n", $progress{'header'}, "\n";
+                    ::status("\n", $progress{'header'}, "\n");
                     $last_header = $progress{'header'};
                 }
-                print $Global::original_stderr "\r",$progress{'status'};
-		flush $Global::original_stderr;
+                ::status("\r",$progress{'status'});
             }
 	    if($Global::total_running < $Global::max_jobs_running
 	       and not $Global::JobQueue->empty()) {
@@ -1936,8 +1937,7 @@ sub drain_job_queue {
 	     not $Global::start_no_new_jobs and not $Global::JobQueue->empty());
     if($opt::progress) {
 	my %progress = progress();
-	print $Global::original_stderr "\r", $progress{'status'}, "\n";
-	flush $Global::original_stderr;
+	::status("\r", $progress{'status'}, "\n");
     }
 }
 
@@ -1945,11 +1945,10 @@ sub toggle_progress {
     # Turn on/off progress view
     # Uses:
     #   $opt::progress
-    #   $Global::original_stderr
     # Returns: N/A
     $opt::progress = not $opt::progress;
     if($opt::progress) {
-        print $Global::original_stderr init_progress();
+        ::status(init_progress());
     }
 }
 
@@ -2761,14 +2760,14 @@ sub save_original_signal_handler {
 sub list_running_jobs {
     # Returns: N/A
     for my $v (values %Global::running) {
-        print $Global::original_stderr "$Global::progname: ",$v->replaced(),"\n";
+        ::status("$Global::progname: ",$v->replaced(),"\n");
     }
 }
 
 sub start_no_new_jobs {
     # Returns: N/A
     $SIG{TERM} = $Global::original_sig{TERM};
-    print $Global::original_stderr
+    ::status
         ("$Global::progname: SIGTERM received. No new jobs will be started.\n",
          "$Global::progname: Waiting for these ", scalar(keys %Global::running),
          " jobs to finish. Send SIGTERM again to stop now.\n");
@@ -2848,7 +2847,7 @@ sub process_failed_job {
 	    $Global::total_failed / $Global::total_started > $opt::halt_on_error)) {
 	    # If halt on error == 1 or --halt 10%
 	    # we should gracefully exit
-	    print $Global::original_stderr
+	    ::status
 		("$Global::progname: Starting no more jobs. ",
 		 "Waiting for ", scalar(keys %Global::running),
 		 " jobs to finish. This job failed:\n",
@@ -2857,7 +2856,7 @@ sub process_failed_job {
 	    $Global::halt_on_error_exitstatus = $job->exitstatus();
 	} elsif($opt::halt_on_error == 2) {
 	    # If halt on error == 2 we should exit immediately
-	    print $Global::original_stderr
+	    ::status
 		("$Global::progname: This job failed:\n",
 		 $job->replaced(),"\n");
 	    exit ($job->exitstatus());
@@ -2973,7 +2972,7 @@ sub citation_notice {
        -e $ENV{'HOME'}."/.parallel/will-cite") {
 	# skip
     } else {
-	print $Global::original_stderr
+	::status
 	    ("Academic tradition requires you to cite works you base your article on.\n",
 	     "When using programs that use GNU Parallel to process data for publication please cite:\n",
 	     "\n",
@@ -2985,26 +2984,29 @@ sub citation_notice {
 	     "\n",
 	     "To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.\n\n",
 	    );
-	flush $Global::original_stderr;
     }
 }
 
+sub status {
+    my @w = @_;
+    my $fh = $Global::status_fd || *STDERR;
+    print $fh @w;
+    flush $fh;
+}
 
 sub warning {
     my @w = @_;
-    my $fh = $Global::original_stderr || *STDERR;
+    my $fh = $Global::status_fd || *STDERR;
     my $prog = $Global::progname || "parallel";
     print $fh $prog, ": Warning: ", @w;
 }
 
-
 sub error {
     my @w = @_;
-    my $fh = $Global::original_stderr || *STDERR;
+    my $fh = $Global::status_fd || *STDERR;
     my $prog = $Global::progname || "parallel";
     print $fh $prog, ": Error: ", @w;
 }
-
 
 sub die_bug {
     my $bugid = shift;
@@ -3446,7 +3448,7 @@ sub my_dump {
         if ($@) {
             my $err =  "Neither Data::Dump nor Data::Dumper is installed\n".
                 "Not dumping output\n";
-            print $Global::original_stderr $err;
+            ::status($err);
             return $err;
         } else {
             return Dumper(@dump_this);
@@ -3939,11 +3941,11 @@ sub compute_max_loadavg {
                 close $in_fh;
                 $load = $self->compute_max_loadavg($opt_load_file);
             } else {
-                print $Global::original_stderr "Cannot open $loadspec\n";
+                ::error("Cannot open $loadspec\n");
                 ::wait_and_exit(255);
             }
         } else {
-            print $Global::original_stderr "Parsing of --load failed\n";
+            ::error("Parsing of --load failed\n");
             ::die_usage();
         }
         if($load < 0.01) {
@@ -4144,9 +4146,8 @@ sub compute_number_of_processes {
 		# It took more than 0.01 second to fork a processes on avg.
 		# Give the user a warning. He can press Ctrl-C if this
 		# sucks.
-		print $Global::original_stderr
-		    ("parallel: Warning: Starting $system_limit processes took > $forktime sec.\n",
-		     "Consider adjusting -j. Press CTRL-C to stop.\n");
+		::warning("Starting $system_limit processes took > $forktime sec.\n",
+			  "Consider adjusting -j. Press CTRL-C to stop.\n");
 		$slow_spawining_warning_printed = 1;
 	    }
 	}
@@ -6059,7 +6060,7 @@ sub start {
 sub interactive_start {
     my $command = shift;
     if($Global::interactive) {
-	print $Global::original_stderr "$command ?...";
+	::status("$command ?...");
 	open(my $tty_fh, "<", "/dev/tty") || ::die_bug("interactive-tty");
 	my $answer = <$tty_fh>;
 	close $tty_fh;
@@ -6110,7 +6111,7 @@ sub tmux_wrap {
     if($Global::total_running == 0) {
 	$tmux = "tmux new-session -s p$$ -d -n ".
 	    ::shell_quote_scalar($title);
-	print $Global::original_stderr "See output with: tmux attach -t p$$\n";
+	::status("See output with: tmux attach -t p$$\n");
     } else {
 	$tmux = "tmux new-window -t p$$ -n ".::shell_quote_scalar($title);
     }
