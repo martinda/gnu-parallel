@@ -23,11 +23,42 @@ echo '### Test bug #43284: {%} and {#} with --xapply';
 echo '**'
 
 echo '### Test bug #43376: {%} and {#} with --pipe'
-echo foo | parallel -q --pipe -k echo {#}
-echo foo | parallel --pipe -k echo {%}
-echo foo | parallel -q --pipe -k echo {%}
-echo foo | parallel --pipe -k echo {#}
+  echo foo | parallel -q --pipe -k echo {#}
+  echo foo | parallel --pipe -k echo {%}
+  echo foo | parallel -q --pipe -k echo {%}
+  echo foo | parallel --pipe -k echo {#}
 
 echo '**'
+
+echo '### {= and =} in different groups separated by space'
+  parallel echo {= s/a/b/ =} ::: a
+  parallel echo {= s/a/b/=} ::: a
+  parallel echo {= s/a/b/=}{= s/a/b/=} ::: a
+  parallel echo {= s/a/b/=}{=s/a/b/=} ::: a
+  parallel echo {= s/a/b/=}{= {= s/a/b/=} ::: a
+  parallel echo {= s/a/b/=}{={=s/a/b/=} ::: a
+  parallel echo {= s/a/b/ =} {={==} ::: a
+  parallel echo {={= =} ::: a
+  parallel echo {= {= =} ::: a
+  parallel echo {= {= =} =} ::: a
+
+echo '**'
+
+echo '### {} as part of the command'
+  echo p /bin/ls | parallel l{= s/p/s/ =}
+  echo /bin/ls-p | parallel --colsep '-' l{=2 s/p/s/ =} {1}
+  echo s /bin/ls | parallel l{}
+  echo /bin/ls | parallel ls {}
+  echo ls /bin/ls | parallel {}
+  echo ls /bin/ls | parallel
+
+echo '**'
+
+echo '### bug #43817: Some JP char cause problems in positional replacement strings'
+  parallel -k echo ::: '�<�>' '�<1 $_=2�>' 'ワ'
+  parallel -k echo {1} ::: '�<�>' '�<1 $_=2�>' 'ワ'
+  parallel -Xj1 echo ::: '�<�>' '�<1 $_=2�>' 'ワ'
+  parallel -Xj1 echo {1} ::: '�<�>' '�<1 $_=2�>' 'ワ'
+
 
 EOF
