@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-# Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014 Ole Tange and
-# Free Software Foundation, Inc.
+# Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014,2015 Ole Tange
+# and Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -951,7 +951,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20141212;
+    $Global::version = 20141225;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3036,7 +3036,8 @@ sub version {
     }
     print join("\n",
                "GNU $Global::progname $Global::version",
-               "Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014 Ole Tange and Free Software Foundation, Inc.",
+               "Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014,2015 Ole Tange",
+	       "and Free Software Foundation, Inc.",
                "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
                "This is free software: you are free to change and redistribute it.",
                "GNU $Global::progname comes with no warranty.",
@@ -3341,13 +3342,15 @@ sub kill_youngster_if_not_enough_mem {
     # If less than 50% enough free mem: kill off the youngest child
     # Put the child back in the queue.
     my %jobs_of;
-    use Tie::RefHash;
-    tie %jobs_of, 'Tie::RefHash';
+    my @sshlogins;
 
     for my $job (values %Global::running) {
+	if(not $jobs_of{$job->sshlogin()}) {
+	    push @sshlogins, $job->sshlogin();
+	}
 	push @{$jobs_of{$job->sshlogin()}}, $job;
     }
-    for my $sshlogin (keys %jobs_of) {
+    for my $sshlogin (@sshlogins) {
 	for my $job (sort { $b->seq() <=> $a->seq() } @{$jobs_of{$sshlogin}}) {
 	    if($sshlogin->memfree() < $opt::memfree * 0.5) {
 		::debug("mem","\n",map { $_->seq()." " } (sort { $b->seq() <=> $a->seq() } @{$jobs_of{$sshlogin}}));
@@ -7211,7 +7214,6 @@ sub replaced {
 			      sort { length $b <=> length $a } keys %replace);
 	    for(@target) {
 		# ::debug("replace","Replace in ",::my_dump($_));
-		# TODO can this be /o ?
 		s/($regexp)/join(" ",@{$replace{$1}})/ge;
 	    }
 	}

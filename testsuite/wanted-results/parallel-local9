@@ -206,12 +206,14 @@ With --plus:    {} = {+/}/{/} = {.}.{+.} = {+/}/{/.}.{+.} = {..}.{+..} =
 
 See 'man parallel' for details
 
+Academic tradition requires you to cite works you base your article on.
 When using programs that use GNU Parallel to process data for publication please cite:
 
 O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
 ;login: The USENIX Magazine, February 2011:42-47.
 
-Or you can get GNU Parallel without this requirement by paying 10000 EUR.
+If you pay 10000 EUR you should feel free to use GNU Parallel without citing.
+
 parallel: Error: Parsing of --jobs/-j/--max-procs/-P failed.
 echo '### Test of -j filename';   echo 3 >/tmp/jobs_to_run1;   parallel -j /tmp/jobs_to_run1 -v sleep {} ::: 10 8 6 5 4;   # Should give 6 8 10 5 4
 ### Test of -j filename
