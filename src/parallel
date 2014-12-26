@@ -4273,6 +4273,7 @@ sub compute_number_of_processes {
 	# Cleanup: Unget the command_lines or the @args
 	$Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->unget(@args);
 	$Global::JobQueue->unget(@jobs);
+	@jobs = undef;
     }
 
     sub processes_available_by_system_limit {
