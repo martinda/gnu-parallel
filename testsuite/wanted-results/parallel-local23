@@ -73,16 +73,16 @@ echo '### Check that 4 processes are really used'
 echo '### --version must have higher priority than retired options'
 ### --version must have higher priority than retired options
   $NICEPAR --version -g -Y -U -W -T | tail
+Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014,2015 Ole Tange
+and Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
 GNU parallel comes with no warranty.
 
 Web site: http://www.gnu.org/software/parallel
 
-When using programs that use GNU Parallel to process data for publication please cite:
-
-O. Tange (2011): GNU Parallel - The Command-Line Power Tool, 
-;login: The USENIX Magazine, February 2011:42-47.
-
-Or you can get GNU Parallel without this requirement by paying 10000 EUR.
+When using programs that use GNU Parallel to process data for publication
+please cite as described in 'parallel --bibtex'.
 echo '### bug #39787: --xargs broken'
 ### bug #39787: --xargs broken
   nice perl -e 'for(1..30000){print "$_\n"}' | $NICEPAR --xargs -k echo  | perl -ne 'print length $_,"\n"'

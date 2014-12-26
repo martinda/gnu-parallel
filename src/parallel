@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
-# Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014 Ole Tange and
-# Free Software Foundation, Inc.
+# Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014,2015 Ole Tange
+# and Free Software Foundation, Inc.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -951,7 +951,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20141212;
+    $Global::version = 20141225;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1481,7 +1481,7 @@ sub shell_quote {
     #   @shell_quoted_strings = string quoted with \ as needed by the shell
     my @strings = (@_);
     for my $a (@strings) {
-        $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
+        $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\^\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
         $a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
     }
     return wantarray ? @strings : "@strings";
@@ -3036,7 +3036,8 @@ sub version {
     }
     print join("\n",
                "GNU $Global::progname $Global::version",
-               "Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014 Ole Tange and Free Software Foundation, Inc.",
+               "Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014,2015 Ole Tange",
+	       "and Free Software Foundation, Inc.",
                "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>",
                "This is free software: you are free to change and redistribute it.",
                "GNU $Global::progname comes with no warranty.",
@@ -3341,13 +3342,15 @@ sub kill_youngster_if_not_enough_mem {
     # If less than 50% enough free mem: kill off the youngest child
     # Put the child back in the queue.
     my %jobs_of;
-    use Tie::RefHash;
-    tie %jobs_of, 'Tie::RefHash';
+    my @sshlogins;
 
     for my $job (values %Global::running) {
+	if(not $jobs_of{$job->sshlogin()}) {
+	    push @sshlogins, $job->sshlogin();
+	}
 	push @{$jobs_of{$job->sshlogin()}}, $job;
     }
-    for my $sshlogin (keys %jobs_of) {
+    for my $sshlogin (@sshlogins) {
 	for my $job (sort { $b->seq() <=> $a->seq() } @{$jobs_of{$sshlogin}}) {
 	    if($sshlogin->memfree() < $opt::memfree * 0.5) {
 		::debug("mem","\n",map { $_->seq()." " } (sort { $b->seq() <=> $a->seq() } @{$jobs_of{$sshlogin}}));
@@ -3375,6 +3378,9 @@ sub multiply_binary_prefix {
     # Returns:
     #   $value = int with prefixes multiplied
     my $s = shift;
+    if(not $s) {
+	return $s;
+    }
     $s =~ s/ki/*1024/gi;
     $s =~ s/mi/*1024*1024/gi;
     $s =~ s/gi/*1024*1024*1024/gi;
@@ -3994,7 +4000,6 @@ sub loadavg_too_high {
 	    };
 	    $ps =~ s/[ \t\n]+/ /g;
 	    $cmd = "perl -e ".::shell_quote_scalar($ps);
-	    $cmd =~ s/\^/\\^/g;
 	}
 	return $cmd;
     }
@@ -4057,7 +4062,6 @@ sub loadavg {
 	} else {
 	    $cmd .= loadavg_cmd();
 	}
-#	$cmd .= "ps ax -o state,command";
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         ::debug("load", "Cmd: ", $cmd);
@@ -4273,6 +4277,7 @@ sub compute_number_of_processes {
 	# Cleanup: Unget the command_lines or the @args
 	$Global::JobQueue->{'commandlinequeue'}->{'arg_queue'}->unget(@args);
 	$Global::JobQueue->unget(@jobs);
+	@jobs = undef;
     }
 
     sub processes_available_by_system_limit {
@@ -7208,6 +7213,7 @@ sub replaced {
 	    my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s }
 			      sort { length $b <=> length $a } keys %replace);
 	    for(@target) {
+		# ::debug("replace","Replace in ",::my_dump($_));
 		s/($regexp)/join(" ",@{$replace{$1}})/ge;
 	    }
 	}
@@ -7228,6 +7234,7 @@ sub new {
     my $return_files = shift;
     my @unget = ();
     my ($count,$posrpl,$perlexpr);
+    my ($replacecount_ref, $len_ref);
     my @command = @$commandref;
     # If the first command start with '-' it is probably an option
     if($command[0] =~ /^\s*(-\S+)/) {
@@ -7282,10 +7289,11 @@ sub new {
 	}
     }
     # Add {} if no replacement strings in @command
-    my($replacecount_ref, $len_ref, @command) =
+    ($replacecount_ref, $len_ref, @command) =
 	replacement_counts_and_lengths(@command);
-    if("@command" =~ /^\S*\257</) {
-	# Replacement string is (part of) the command (and not just argument)
+    if("@command" =~ /^[^ \t\n=]*\257</) {
+	# Replacement string is (part of) the command (and not just
+	# argument or variable definition V1={})
 	# E.g. parallel {}, parallel my_{= s/_//=}, parallel {2}
 	# Do no quote (Otherwise it will fail if the input contains spaces)
 	$Global::noquote = 1;
