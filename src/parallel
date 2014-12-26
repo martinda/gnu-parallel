@@ -3375,6 +3375,9 @@ sub multiply_binary_prefix {
     # Returns:
     #   $value = int with prefixes multiplied
     my $s = shift;
+    if(not $s) {
+	return $s;
+    }
     $s =~ s/ki/*1024/gi;
     $s =~ s/mi/*1024*1024/gi;
     $s =~ s/gi/*1024*1024*1024/gi;
@@ -3994,7 +3997,6 @@ sub loadavg_too_high {
 	    };
 	    $ps =~ s/[ \t\n]+/ /g;
 	    $cmd = "perl -e ".::shell_quote_scalar($ps);
-	    $cmd =~ s/\^/\\^/g;
 	}
 	return $cmd;
     }
@@ -4057,7 +4059,6 @@ sub loadavg {
 	} else {
 	    $cmd .= loadavg_cmd();
 	}
-#	$cmd .= "ps ax -o state,command";
         # As the command can take long to run if run remote
         # save it to a tmp file before moving it to the correct file
         ::debug("load", "Cmd: ", $cmd);
@@ -7229,6 +7230,7 @@ sub new {
     my $return_files = shift;
     my @unget = ();
     my ($count,$posrpl,$perlexpr);
+    my ($replacecount_ref, $len_ref);
     my @command = @$commandref;
     # If the first command start with '-' it is probably an option
     if($command[0] =~ /^\s*(-\S+)/) {
@@ -7283,7 +7285,7 @@ sub new {
 	}
     }
     # Add {} if no replacement strings in @command
-    my($replacecount_ref, $len_ref, @command) =
+    ($replacecount_ref, $len_ref, @command) =
 	replacement_counts_and_lengths(@command);
     if("@command" =~ /^\S*\257</) {
 	# Replacement string is (part of) the command (and not just argument)
