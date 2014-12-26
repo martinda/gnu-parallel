@@ -1481,7 +1481,7 @@ sub shell_quote {
     #   @shell_quoted_strings = string quoted with \ as needed by the shell
     my @strings = (@_);
     for my $a (@strings) {
-        $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
+        $a =~ s/([\002-\011\013-\032\\\#\?\`\(\)\{\}\[\]\^\*\>\<\~\|\; \"\!\$\&\'\202-\377])/\\$1/g;
         $a =~ s/[\n]/'\n'/g; # filenames with '\n' is quoted using \'
     }
     return wantarray ? @strings : "@strings";
@@ -7210,6 +7210,8 @@ sub replaced {
 	    my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s }
 			      sort { length $b <=> length $a } keys %replace);
 	    for(@target) {
+		# ::debug("replace","Replace in ",::my_dump($_));
+		# TODO can this be /o ?
 		s/($regexp)/join(" ",@{$replace{$1}})/ge;
 	    }
 	}
@@ -7287,8 +7289,9 @@ sub new {
     # Add {} if no replacement strings in @command
     ($replacecount_ref, $len_ref, @command) =
 	replacement_counts_and_lengths(@command);
-    if("@command" =~ /^\S*\257</) {
-	# Replacement string is (part of) the command (and not just argument)
+    if("@command" =~ /^[^ \t\n=]*\257</) {
+	# Replacement string is (part of) the command (and not just
+	# argument or variable definition V1={})
 	# E.g. parallel {}, parallel my_{= s/_//=}, parallel {2}
 	# Do no quote (Otherwise it will fail if the input contains spaces)
 	$Global::noquote = 1;
