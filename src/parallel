@@ -295,6 +295,7 @@ sub spreadstdin {
     #   $Global::start_no_new_jobs
     #   $opt::roundrobin
     #   %Global::running
+    # Returns: N/A
 
     my $buf = "";
     my ($recstart,$recend) = recstartrecend();
@@ -476,6 +477,8 @@ sub nindex {
 	#   $endpos = end position of $block
 	# Uses:
 	#   %Global::running
+	# Returns:
+	#   $something_written = amount of bytes written
 	my ($header_ref,$block_ref,$recstart,$recend,$endpos) = @_;
 	my $something_written = 0;
 	my $block_passed = 0;
@@ -952,7 +955,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20141225;
+    $Global::version = 20141229;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1107,8 +1110,10 @@ sub parse_env_var {
     # Bash functions must be parsed to export them remotely
     #   Pre-shellshock style bash function:
     #     myfunc=() {...
-    #   Post-shellshock style bash function:
+    #   Post-shellshock style bash function (v1):
     #     BASH_FUNC_myfunc()=() {...
+    #   Post-shellshock style bash function (v2):
+    #     BASH_FUNC_myfunc%%=() {...
     #
     # Uses:
     #   $Global::envvar = eval string that will set variables in both bash and csh
@@ -1143,7 +1148,7 @@ sub parse_env_var {
     }
     # Duplicate vars as BASH functions to include post-shellshock functions.
     # So --env myfunc should also look for BASH_FUNC_myfunc()
-    @vars = map { $_, "BASH_FUNC_$_()" } @vars;
+    @vars = map { $_, "BASH_FUNC_$_()", "BASH_FUNC_$_%%" } @vars;
     # Keep only defined variables
     @vars = grep { defined($ENV{$_}) } @vars;
     # Pre-shellshock style bash function:
@@ -1151,6 +1156,8 @@ sub parse_env_var {
     #   }
     # Post-shellshock style bash function:
     #   BASH_FUNC_myfunc()=() {  echo myfunc
+    #   }
+    #   BASH_FUNC_myfunc%%=() {  echo myfunc
     #   }
     my @bash_functions = grep { substr($ENV{$_},0,4) eq "() {" } @vars;
     my @non_functions = grep { substr($ENV{$_},0,4) ne "() {" } @vars;
@@ -1162,9 +1169,9 @@ sub parse_env_var {
     }
 
     # Pre-shellschock names are without ()
-    my @bash_pre_shellshock = grep { not /\(\)/ } @bash_functions;
+    my @bash_pre_shellshock = grep { not /\(\)|%%/ } @bash_functions;
     # Post-shellschock names are with ()
-    my @bash_post_shellshock = grep { /\(\)/ } @bash_functions;
+    my @bash_post_shellshock = grep { /\(\)|%%/ } @bash_functions;
 
     my @qcsh = (map { my $a=$_; "setenv $a " . env_quote($ENV{$a})  }
 		grep { not /^parallel_bash_environment$/ } @non_functions);
@@ -1172,14 +1179,14 @@ sub parse_env_var {
 		 @non_functions, @bash_pre_shellshock);
 
     push @qbash, map { my $a=$_; "eval $a\"\$$a\"" } @bash_pre_shellshock;
-    push @qbash, map { /BASH_FUNC_(.*)\(\)/; "$1 $ENV{$_}" } @bash_post_shellshock;
+    push @qbash, map { /BASH_FUNC_(.*)(\(\)|%%)/; "$1 $ENV{$_}" } @bash_post_shellshock;
 
     #ssh -tt -oLogLevel=quiet lo 'eval `echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$SHELL\ \|\ grep\ \"/t\\\{0,1\\\}csh\"\ \>\ /dev/null\ \&\&\ setenv\ BASH_FUNC_myfunc\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ a\"'
     #'\"\\\}\ \|\|\  myfunc\(\)\ \{\ \ echo\ a'
     #'\}\ \;myfunc\ 1;
 
     # Check if any variables contain \n
-    if(my @v = map { s/BASH_FUNC_(.*)\(\)/$1/; $_ } grep { $ENV{$_}=~/\n/ } @vars) {
+    if(my @v = map { s/BASH_FUNC_(.*)(\(\)|%%)/$1/; $_ } grep { $ENV{$_}=~/\n/ } @vars) {
 	# \n is bad for csh and will cause it to fail.
 	$Global::envwarn = ::shell_quote_scalar(q{echo $SHELL | egrep "/t?csh" > /dev/null && echo CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset }."@v".q{ && exec false;}."\n\n") . $Global::envwarn;
     }
@@ -4880,7 +4887,7 @@ sub no_of_cpus_qnx {
     # Returns:
     #   Number of physical CPUs on QNX
     #   undef if not QNX
-    # BUG: It is now known how to calculate this.
+    # BUG: It is not known how to calculate this.
     my $no_of_cpus = 0;
     return $no_of_cpus;
 }
@@ -4889,7 +4896,7 @@ sub no_of_cores_qnx {
     # Returns:
     #   Number of CPU cores on QNX
     #   undef if not QNX
-    # BUG: It is now known how to calculate this.
+    # BUG: It is not known how to calculate this.
     my $no_of_cores = 0;
     return $no_of_cores;
 }
@@ -5221,10 +5228,10 @@ sub new {
     return bless {
         'commandline' => $commandlineref, # CommandLine object
         'workdir' => undef, # --workdir
-        'stdin' => undef, # filehandle for stdin (used for --pipe)
+        # filehandle for stdin (used for --pipe)
 	# filename for writing stdout to (used for --files)
-        'remaining' => "", # remaining data not sent to stdin (used for --pipe)
-	'datawritten' => 0, # amount of data sent via stdin (used for --pipe)
+        # remaining data not sent to stdin (used for --pipe)
+	# amount of data sent via stdin (used for --pipe)
         'transfersize' => 0, # size of files using --transfer
         'returnsize' => 0, # size of files using --return
         'pid' => undef,
@@ -5540,15 +5547,9 @@ sub non_block_write {
     my $self = shift;
     my $something_written = 0;
     use POSIX qw(:errno_h);
-#    use Fcntl;
-#    my $flags = '';
+    # for loop used to avoid copying substr: $buf will be an alias for the substr
     for my $buf (substr($self->{'stdin_buffer'},$self->{'stdin_buffer_pos'})) {
 	my $in = $self->fh(0,"w");
-#	fcntl($in, F_GETFL, $flags)
-#	    or die "Couldn't get flags for HANDLE : $!\n";
-#	$flags |= O_NONBLOCK;
-#	fcntl($in, F_SETFL, $flags)
-#	    or die "Couldn't set flags for HANDLE: $!\n";
 	my $rv = syswrite($in, $buf);
 	if (!defined($rv) && $! == EAGAIN) {
 	    # would block
@@ -5875,6 +5876,49 @@ sub sshlogin_wrap {
     # Wrap the command with the commands needed to run remotely
     # Returns:
     #   $self->{'sshlogin_wrap'} = command wrapped with ssh+transfer commands
+    sub monitor_parent_sshd_script {
+	# This script is to solve the problem of
+	# * not mixing STDERR and STDOUT
+	# * terminating with ctrl-c
+	# If its parent is ssh: all good
+	# If its parent is init(1): ssh died, so kill children
+	my $monitor_parent_sshd_script;
+	if(not $monitor_parent_sshd_script) {
+	    $monitor_parent_sshd_script =
+		# This will be packed in ', so only use "
+	    q{
+		# If packed as hex, unpack
+		# if($ARGV[0] =~ s/^0x//) {
+		#    $ARGV[0] =~ s/(..)/chr(hex $1)/ge;
+		#}
+                $SIG{CHLD} = sub { $done = 1; };
+		$pid = fork;
+                unless($pid) {
+		    # Make own process group to be able to kill HUP it later
+		    setpgrp;
+		    exec $ENV{SHELL}, "-c", @ARGV;
+		    die "exec: $!\n";
+		}
+		do {
+		    # Parent is not init (ppid=1), so sshd is alive
+		    # Exponential sleep up to 1 sec
+                    $s = $s < 1 ? 0.001 + $s * 1.03 : $s;
+                    select(undef, undef, undef, $s);
+                } until ($done || getppid == 1);
+		# Kill HUP the process group if job not done
+		kill(SIGHUP, -${pid}) unless $done;
+		wait;
+		exit ($?&127 ? 128+($?&127) : 1+$?>>8)
+            };
+	    $monitor_parent_sshd_script =~ s/#.*//mg;
+	    $monitor_parent_sshd_script =~ s/\s//mg;
+	}
+	return $monitor_parent_sshd_script;
+    }
+    #sub hex_pack {
+    #return unpack("H*","@_");
+    #}
+
     my $self = shift;
     my $command = shift;
     if(not defined $self->{'sshlogin_wrap'}) {
@@ -5913,17 +5957,16 @@ sub sshlogin_wrap {
 	    if(($opt::pipe or $opt::pipepart) and $opt::ctrlc
 	       or
 	       not ($opt::pipe or $opt::pipepart) and not $opt::noctrlc) {
-		# TODO Determine if this is needed
 		# Propagating CTRL-C to kill remote jobs requires
 		# remote jobs to be run with a terminal.
-		$ssh_options = "-tt -oLogLevel=quiet";
-#		$ssh_options = "";
+#		$ssh_options = "-tt -oLogLevel=quiet";
+		$ssh_options = "";
 		# tty - check if we have a tty.
 		# stty:
 		#   -onlcr - make output 8-bit clean
 		#   isig - pass CTRL-C as signal
 		#   -echo - do not echo input
-		$remote_pre .= ::shell_quote_scalar('tty >/dev/null && stty isig -onlcr -echo;');
+#		$remote_pre .= ::shell_quote_scalar('tty >/dev/null && stty isig -onlcr -echo;');
 	    }
 	    if($opt::workdir) {
 		my $wd = ::shell_quote_file($self->workdir());
@@ -5933,34 +5976,43 @@ sub sshlogin_wrap {
 		    # but that fails on tcsh
 		    ::shell_quote_scalar(qq{ || exec false;});
 	    }
-	    # This script is to solve the problem of
-	    # * not mixing STDERR and STDOUT
-	    # * terminating with ctrl-c
+	    my $signal_script = "exec perl -e '".monitor_parent_sshd_script()."' ";
+	    # TODO clean this up
+	    # TODO Maybe env vars should be set in the perl script
 	    # It works on Linux but not Solaris
 	    # Finishes on Solaris, but wrong exit code:
 	    # $SIG{CHLD} = sub {exit ($?&127 ? 128+($?&127) : 1+$?>>8)};
 	    # Hangs on Solaris, but correct exit code on Linux:
 	    # $SIG{CHLD} = sub { $done = 1 };
 	    # $p->poll;
-	    my $signal_script = "perl -e '".
-	    q{
-		use IO::Poll;
-                $SIG{CHLD} = sub { $done = 1 };
-		$p = IO::Poll->new;
-		$p->mask(STDOUT, POLLHUP);
-		$pid=fork; unless($pid) {setpgrp; exec $ENV{SHELL}, "-c", @ARGV; die "exec: $!\n"}
-                $p->poll;
-		kill SIGHUP, -${pid} unless $done;
-		wait; exit ($?&127 ? 128+($?&127) : 1+$?>>8)
-            } . "' ";
-	    $signal_script =~ s/\s+/ /g;
+
+	    # $SIG{CHLD} = sub { $done = 1; ($^O eq "solaris") && exit 0 };
+	    # $SIG{CHLD} = sub { $done = 1; (1) && exit ($?&127 ? 128+($?&127) : 1+$?>>8); };
+	    # $SIG{CHLD} = sub { $done = 1; exit ($?&127 ? 128+($?&127) : 1+$?>>8); };
+	    # -> Linux: "" +script
+	    # -> Solaris: -tt -script
+	    # --ctrl-c => -tt
+#	    q{
+#                ($^O eq "solaris") && exec $ENV{SHELL}, "-c", @ARGV;
+#                $|=1;
+#		use IO::Poll;
+#                $SIG{CHLD} = sub {$done = 1; };
+#		$pid=fork; unless($pid) {setpgrp; exec $ENV{SHELL}, "-c", @ARGV; die "exec: $!\n"}
+#		$p = IO::Poll->new;
+#		$p->mask(STDOUT, POLLHUP);
+#                $p->poll;
+#		kill SIGHUP, -${pid} unless $done;
+#		wait; exit ($?&127 ? 128+($?&127) : 1+$?>>8)
+#            } . "' ";
+#	    $signal_script =~ s/\s+/ /g;
 
 	    $self->{'sshlogin_wrap'} =
 		($pre
 		 . "$sshcmd $ssh_options $serverlogin $parallel_env "
 		 . $remote_pre
-#		 . ::shell_quote_scalar($signal_script . ::shell_quote_scalar($command))
-		 . ::shell_quote_scalar($command)
+		 . ::shell_quote_scalar($signal_script . ::shell_quote_scalar($command))
+#		 . ::shell_quote_scalar($signal_script . hex_pack($command))
+#		 . ::shell_quote_scalar($command)
 		 . ";"
 		 . $post);
 	}
