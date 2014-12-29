@@ -32,8 +32,8 @@ measure() {
     CORES=$3
     VERSION=$4
 
-    # Force cpuspeed at 1.7GHz
-    forever 'parallel sudo cpufreq-set -f 1700MHz -c{} ::: {0..7}' &
+    # Force cpuspeed at 1.7GHz - seems to give tighter results
+    forever 'sleep 10;parallel sudo cpufreq-set -f 1700MHz -c{} ::: {0..7}' &
 
     PATH=/tmp/bin:$PATH
     cd /tmp/bin
@@ -53,4 +53,4 @@ _
     evince /tmp/boxplot.pdf
 }
 
-measure 300 1000 8 1
+measure 3000 1000 8 1
