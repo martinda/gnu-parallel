@@ -983,11 +983,13 @@ servers.
 Run all the jobs on all computers given with B<--sshlogin>. GNU
 B<parallel> will log into B<--jobs> number of computers in parallel
 and run one job at a time on the computer. The order of the jobs will
-not be changed, but some computers may finish before others. B<-j>
-adjusts how many computers to log into in parallel.
+not be changed, but some computers may finish before others.
 
 When using B<--group> the output will be grouped by each server, so
 all the output from one server will be grouped together.
+
+B<--joblog> will contain an entry for each job on each server, so
+there will be several job sequence 1.
 
 
 =item B<--output-as-files>
