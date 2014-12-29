@@ -80,5 +80,5 @@ portable:
 timings: tests-to-run/* ../src/parallel
 	ls tests-to-run/*.sh | parallel echo /usr/bin/time -f %e bash >/tmp/timing.script
 	stdout bash -x /tmp/timing.script | tee /tmp/timing.out
-	echo usr.bin.time_END >>/tmp/timing.out
-	perl -ne '/usr.bin.time/ and do { print $$last.$$h; $$h=$$_ }; chomp; $$last = $$_' /tmp/timing.out | sort -n >timings
+	echo + .usr.bin.time_END >>/tmp/timing.out
+	perl -ne '/\+ .usr.bin.time/ and do { print $$last.$$h; $$h=$$_ }; chomp; s/.*\0//;$$last = $$_' /tmp/timing.out |sort -n >timings

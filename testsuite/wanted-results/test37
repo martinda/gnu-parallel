@@ -42,7 +42,7 @@ echo /dev/fd/62
 /dev/fd/62
 echo foo
 foo
-ssh parallel@redhat9.tange.dk ssh -tt -oLogLevel=quiet centos3.tange.dk  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;perl\ -pe\ \"\\\$a=1\;\ print\ \\\$a\"\ \<\(echo\ foo\);
+ssh parallel@redhat9.tange.dk ssh  centos3.tange.dk  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  exec\ perl\ -e\ \'\$SIG\{CHLD\}=sub\{\$done=1\;\}\;\$pid=fork\;unless\(\$pid\)\{setpgrp\;exec\$ENV\{SHELL\},\"-c\",@ARGV\;die\"exec:\$\!\\n\"\;\}do\{\$s=\$s\<1\?0.001+\$s\*1.03:\$s\;select\(undef,undef,undef,\$s\)\;\}until\(\$done\|\|getppid==1\)\;kill\(SIGHUP,-\$\{pid\}\)unless\$done\;wait\;exit\(\$\?\&127\?128+\(\$\?\&127\):1+\$\?\>\>8\)\'\ perl\\\ -pe\\\ \\\"\\\\\\\$a=1\\\;\\\ print\\\ \\\\\\\$a\\\"\\\ \\\<\\\(echo\\\ foo\\\);
 1foo
 ### Test quoting of $ in command from profile file
 perl -pe '$a=1; print $a' <(echo foo)

@@ -77,11 +77,11 @@ OK
 Input for ssh
 parallel@parallel-server1 mkdir -p ./.
 -l parallel parallel-server1 rsync --server -lDrRze.iLsfx . ./.
--tt -oLogLevel=quiet parallel@parallel-server1 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ X\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=X\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
-'newlineX > tmp/parallel.file.'
-'newlineX.out;cat tmp/parallel.file.'
-'newlineX > tmp/parallel.file.'
-'newlineX.out2
+parallel@parallel-server1 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ X\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=X\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; exec perl -e '$SIG{CHLD}=sub{$done=1;};$pid=fork;unless($pid){setpgrp;exec$ENV{SHELL},"-c",@ARGV;die"exec:$!\n";}do{$s=$s<1?0.001+$s*1.03:$s;select(undef,undef,undef,$s);}until($done||getppid==1);kill(SIGHUP,-${pid})unless$done;wait;exit($?&127?128+($?&127):1+$?>>8)' cat\ tmp/parallel.file.\''
+'\'newlineX\ \>\ tmp/parallel.file.\''
+'\'newlineX.out\;cat\ tmp/parallel.file.\''
+'\'newlineX\ \>\ tmp/parallel.file.\''
+'\'newlineX.out2
 -l parallel parallel-server1 cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
 'newlineX.out
 -l parallel parallel-server1 cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
@@ -94,11 +94,11 @@ parallel@parallel-server1 (rm -f ./tmp/parallel.file.'
 'newlineX.out2; rmdir ./tmp/ ./ 2>/dev/null;)
 parallel@parallel-server2 mkdir -p ./.
 -l parallel parallel-server2 rsync --server -lDrRze.iLsfx . ./.
--tt -oLogLevel=quiet parallel@parallel-server2 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ X\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=X\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; tty >/dev/null && stty isig -onlcr -echo;cat tmp/parallel.file.'
-'newlineX > tmp/parallel.file.'
-'newlineX.out;cat tmp/parallel.file.'
-'newlineX > tmp/parallel.file.'
-'newlineX.out2
+parallel@parallel-server2 eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ X\;  setenv PARALLEL_PID 00000  || echo PARALLEL_SEQ=X\;export PARALLEL_SEQ\;  PARALLEL_PID=00000\;export PARALLEL_PID` ; exec perl -e '$SIG{CHLD}=sub{$done=1;};$pid=fork;unless($pid){setpgrp;exec$ENV{SHELL},"-c",@ARGV;die"exec:$!\n";}do{$s=$s<1?0.001+$s*1.03:$s;select(undef,undef,undef,$s);}until($done||getppid==1);kill(SIGHUP,-${pid})unless$done;wait;exit($?&127?128+($?&127):1+$?>>8)' cat\ tmp/parallel.file.\''
+'\'newlineX\ \>\ tmp/parallel.file.\''
+'\'newlineX.out\;cat\ tmp/parallel.file.\''
+'\'newlineX\ \>\ tmp/parallel.file.\''
+'\'newlineX.out2
 -l parallel parallel-server2 cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
 'newlineX.out
 -l parallel parallel-server2 cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
