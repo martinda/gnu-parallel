@@ -226,9 +226,9 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20141222 ('') released
+Subject: GNU Parallel 20141222 ('Manila') released
 
-GNU Parallel 20141222 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20141222 ('Manila') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 Haiku of the month:
 
@@ -237,6 +237,10 @@ Haiku of the month:
 New in this release:
 
 * GNU Parallel was cited in: Parallel post-processing with MPI-Bash http://dl.acm.org/citation.cfm?id=2691137
+
+* GNU Parallel: Open Source For You (OSFY) magazine, October 2013 edition http://www.shakthimaan.com/posts/2014/11/27/gnu-parallel/news.html
+
+* コマンドを並列に実行するGNU parallelがとても便利 http://bicycle1885.hatenablog.com/entry/2014/08/10/143612
 
 * Bug fixes and man page updates.
 

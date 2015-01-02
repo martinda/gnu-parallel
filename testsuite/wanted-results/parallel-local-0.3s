@@ -16,13 +16,35 @@ echo '**'
 **
 echo '### Test bug #43376: {%} and {#} with --pipe'
 ### Test bug #43376: {%} and {#} with --pipe
-echo foo | parallel -q --pipe -k echo {#}
+  echo foo | parallel -q --pipe -k echo {#}
 1
-echo foo | parallel --pipe -k echo {%}
+  echo foo | parallel --pipe -k echo {%}
 1
-echo foo | parallel -q --pipe -k echo {%}
+  echo foo | parallel -q --pipe -k echo {%}
 1
-echo foo | parallel --pipe -k echo {#}
+  echo foo | parallel --pipe -k echo {#}
 1
 echo '**'
 **
+echo '### {= and =} in different groups'
+### {= and =} in different groups
+  parallel echo {= s/a/b/ =} ::: a
+b
+  parallel echo {= s/a/b/=} ::: a
+b
+  parallel echo {= s/a/b/=}{= s/a/b/=} ::: a
+bb
+  parallel echo {= s/a/b/=}{=s/a/b/=} ::: a
+bb
+  parallel echo {= s/a/b/=}{= {= s/a/b/=} ::: a
+b{= b
+  parallel echo {= s/a/b/=}{={=s/a/b/=} ::: a
+b{=b
+  parallel echo {= s/a/b/ =} {={==} ::: a
+b {=a
+  parallel echo {={= =} ::: a
+{=a
+  parallel echo {= {= =} ::: a
+{= a
+  parallel echo {= {= =} =} ::: a
+{= a =}

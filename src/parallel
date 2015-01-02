@@ -780,7 +780,7 @@ sub get_options_from_array {
 sub parse_options {
     # Returns: N/A
     # Defaults:
-    $Global::version = 20141123;
+    $Global::version = 20141209;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -6934,6 +6934,7 @@ sub new {
 	}
     }
     # Replace replacement strings with {= perl expr =}
+    @command = merge_rpl_parts(@command);
     # Protect matching inside {= perl expr =}
     # by replacing {= and =} with \257< and \257>
     for(@command) {
@@ -6941,7 +6942,10 @@ sub new {
 	    ::error("Command cannot contain the character \257. Use a function for that.\n");
 	    ::wait_and_exit(255);
 	}
-	s/\Q$Global::parensleft\E(.*?)\Q$Global::parensright\E/\257<$1\257>/gx;
+	# Needs to match rightmost left parens (Perl defaults to leftmost)
+	# to deal with: {={==}
+	# Disallow \257 to avoid nested {= {= =} =}
+	while(s/([^\257]*) \Q$Global::parensleft\E ([^\257]*?) \Q$Global::parensright\E /$1\257<$2\257>/gx) {}
     }
     for my $rpl (keys %Global::rpl) {
 	# Replace the short hand string with the {= perl expr =} in $command and $opt::tagstring
@@ -7046,6 +7050,41 @@ sub new {
 	'return_files' => $return_files,
 	'seq' => 1,
     }, ref($class) || $class;
+}
+
+sub merge_rpl_parts {
+    # '{=' 'perlexpr' '=}'  => '{= perlexpr =}'
+    # Input:
+    #   @in = the @command as given by the user
+    # Uses:
+    #   $Global::parensleft
+    #   $Global::parensright
+    # Returns:
+    #   @command with parts merged to keep {= and =} as one
+    my @in = @_;
+    my @out;
+    my $l = quotemeta($Global::parensleft);
+    my $r = quotemeta($Global::parensright);
+
+    while(@in) {
+	my $s = shift @in;
+	$_ = $s;
+	# Remove matching (right most) parens
+	while(s/(.*)$l.*?$r/$1/o) {}
+	if(/$l/o) {
+	    # Missing right parens
+	    while(@in) {
+		$s .= " ".shift @in;
+		$_ = $s;
+		while(s/(.*)$l.*?$r/$1/o) {}
+		if(not /$l/o) {
+		    last;
+		}
+	    }
+	}
+	push @out, $s;
+    }
+    return @out;
 }
 
 sub get {
