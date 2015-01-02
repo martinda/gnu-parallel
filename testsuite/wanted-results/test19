@@ -77,7 +77,7 @@ OK
 Input for ssh
 one-server mkdir -p ./.
 -l parallel one-server rsync --server -lDrRze.iLsfx . ./.
-one-server exec perl -e '@u=("use","IPC::Open3;");eval"@u";$SIG{CHLD}='IGNORE';my($gzin_fh,$gzout_fh,$eval);my$gzpid=open3($gzin_fh,$gzout_fh,">&STDERR","gzip","-dc");if(my$perlpid=fork){close$gzin_fh;$eval=join"",<$gzout_fh>;close$gzout_fh;}else{close$gzout_fh;print$gzin_fh(pack("H*",join"",@ARGV));close$gzin_fh;exit;}wait;eval$eval;' hex
+one-server exec perl -e @GNU_Parallel=\(\"use\",\"IPC::Open3\;\"\)\;eval\"@GNU_Parallel\"\;\$SIG\{CHLD\}=\"IGNORE\"\;my\$zip=\(grep\{-x\$_\}\"/usr/local/bin/bzip2\"\)\[0\]\|\|\"bzip2\"\;my\(\$in,\$out,\$eval\)\;open3\(\$in,\$out,\"\>\&STDERR\",\$zip,\"-dc\"\)\;if\(my\$perlpid=fork\)\{close\$in\;\$eval=join\"\",\<\$out\>\;close\$out\;\}else\{close\$out\;print\$in\(pack\(\"H\*\",join\"\",@ARGV\)\)\;close\$in\;exit\;\}wait\;eval\$eval\; hex
 -l parallel one-server cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
 'newlineX.out
 -l parallel one-server cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
@@ -90,7 +90,7 @@ one-server (rm -f ./tmp/parallel.file.'
 'newlineX.out2; rmdir ./tmp/ ./ 2>/dev/null;)
 one-server mkdir -p ./.
 -l parallel one-server rsync --server -lDrRze.iLsfx . ./.
-one-server exec perl -e '@u=("use","IPC::Open3;");eval"@u";$SIG{CHLD}='IGNORE';my($gzin_fh,$gzout_fh,$eval);my$gzpid=open3($gzin_fh,$gzout_fh,">&STDERR","gzip","-dc");if(my$perlpid=fork){close$gzin_fh;$eval=join"",<$gzout_fh>;close$gzout_fh;}else{close$gzout_fh;print$gzin_fh(pack("H*",join"",@ARGV));close$gzin_fh;exit;}wait;eval$eval;' hex
+one-server exec perl -e @GNU_Parallel=\(\"use\",\"IPC::Open3\;\"\)\;eval\"@GNU_Parallel\"\;\$SIG\{CHLD\}=\"IGNORE\"\;my\$zip=\(grep\{-x\$_\}\"/usr/local/bin/bzip2\"\)\[0\]\|\|\"bzip2\"\;my\(\$in,\$out,\$eval\)\;open3\(\$in,\$out,\"\>\&STDERR\",\$zip,\"-dc\"\)\;if\(my\$perlpid=fork\)\{close\$in\;\$eval=join\"\",\<\$out\>\;close\$out\;\}else\{close\$out\;print\$in\(pack\(\"H\*\",join\"\",@ARGV\)\)\;close\$in\;exit\;\}wait\;eval\$eval\; hex
 -l parallel one-server cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
 'newlineX.out
 -l parallel one-server cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'

@@ -754,7 +754,7 @@ args on cmdline
 \nice -n1 /bin/bash -c PAR=a\ bash\ -c\ \"echo\ \ \\\$PAR\ b\"
 a b
 ### Test --nice remote
-ssh one-server  exec\ perl\ -e\ \'@u=\(\"use\",\"IPC::Open3\;\"\)\;eval\"@u\"\;\$SIG\{CHLD\}=\'IGNORE\'\;my\(\$gzin_fh,\$gzout_fh,\$eval\)\;my\$gzpid=open3\(\$gzin_fh,\$gzout_fh,\"\>\&STDERR\",\"gzip\",\"-dc\"\)\;if\(my\$perlpid=fork\)\{close\$gzin_fh\;\$eval=join\"\",\<\$gzout_fh\>\;close\$gzout_fh\;\}else\{close\$gzout_fh\;print\$gzin_fh\(pack\(\"H\*\",join\"\",@ARGV\)\)\;close\$gzin_fh\;exit\;\}wait\;eval\$eval\;\'\ hex;
+ssh one-server exec perl -e \\\$ENV\\\{\\\"PARALLEL_PID\\\"\\\}=\\\"pId\\\"\\\;\\\$ENV\\\{\\\"PARALLEL_SEQ\\\"\\\}=\\\"1\\\"\\\;\\\$bashfunc\\\ =\\\ \\\"\\\"\\\;@ARGV=\\\"\\\\\\\\nice\\\ -n1\\\ /bin/bash\\\ -c\\\ PAR=a\\\\\\\\\\\ bash\\\\\\\\\\\ -c\\\\\\\\\\\ \\\\\\\\\\\\\\\"echo\\\\\\\\\\\ \\\\\\\\\\\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\$PAR\\\\\\\\\\\ b\\\\\\\\\\\\\\\"\\\"\\\;\\\$SIG\\\{CHLD\\\}=sub\\\{\\\$done=1\\\;\\\}\\\;\\\$pid=fork\\\;unless\\\(\\\$pid\\\)\\\{setpgrp\\\;exec\\\$ENV\\\{SHELL\\\},\\\"-c\\\",\\\(\\\$bashfunc.\\\"@ARGV\\\"\\\)\\\;die\\\"exec:\\\$\\\!\\\\n\\\"\\\;\\\}do\\\{\\\$s=\\\$s\\\<1\\\?0.001+\\\$s\\\*1.03:\\\$s\\\;select\\\(undef,undef,undef,\\\$s\\\)\\\;\\\}until\\\(\\\$done\\\|\\\|getppid==1\\\)\\\;kill\\\(SIGHUP,-\\\$\\\{pid\\\}\\\)unless\\\$done\\\;wait\\\;exit\\\(\\\$\\\?\\\&127\\\?128+\\\(\\\$\\\?\\\&127\\\):1+\\\$\\\?\\\>\\\>8\\\);
 a b
 ### Test distribute arguments at EOF to 2 jobslots
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
