@@ -5450,9 +5450,9 @@ sub set_non_blocking {
     for my $fdno (1,2) {
 	my $fdr = $self->fh($fdno,'r');
 	my $flags;
-	fcntl($fdr, &F_GETFL, $flags) || die $!; # Get the current flags on the filehandle
-	$flags |= &O_NONBLOCK; # Add non-blocking to the flags
-	fcntl($fdr, &F_SETFL, $flags) || die $!; # Set the flags on the filehandle
+	fcntl($fdr, &::F_GETFL, $flags) || die $!; # Get the current flags on the filehandle
+	$flags |= &::O_NONBLOCK; # Add non-blocking to the flags
+	fcntl($fdr, &::F_SETFL, $flags) || die $!; # Set the flags on the filehandle
     }
 }
 
