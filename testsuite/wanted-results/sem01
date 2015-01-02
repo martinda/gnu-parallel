@@ -96,3 +96,5 @@ done 4
 40
 ### Test bug #33621: --bg -p should give an error message
 parallel: Error: Jobs running in the background cannot be interactive.
+### Failed on 20141226
+OK

@@ -42,3 +42,6 @@ sem --wait
 
 echo '### Test bug #33621: --bg -p should give an error message'
 stdout parallel -p --bg echo x{}
+
+echo '### Failed on 20141226'
+sem --fg --line-buffer --id lock_id echo OK
