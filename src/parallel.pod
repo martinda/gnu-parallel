@@ -1534,6 +1534,9 @@ On FreeBSD B<env> is needed:
   debian.org
   freenetproject.org
 
+There are many limitations of shebang (#!) depending on your operating
+system. See details on http://www.in-ulm.de/~mascheck/various/shebang/
+
 
 =item B<--shebang-wrap>
 
@@ -3008,6 +3011,37 @@ Name the semaphore to have multiple different semaphores active at the
 same time:
 
   seq 3 | parallel sem --id mymutex sed -i -e 'i{}' myfile
+
+
+=head1 EXAMPLE: Mutex for a script
+
+Assume a script is called from cron or from a web service, but only
+one instance can be run at a time. With B<sem> and B<--shebang-wrap>
+the script can be made to wait for other instances to finish. Here in
+B<bash>:
+
+  #!/usr/bin/sem --shebang-wrap -u --id $0 --fg /bin/bash
+  
+  echo This will run
+  sleep 5
+  echo exclusively
+
+Here B<perl>:
+
+  #!/usr/bin/sem --shebang-wrap -u --id $0 --fg /usr/bin/perl
+  
+  print "This will run ";
+  sleep 5;
+  print "exclusively\n";
+
+Here B<python>:
+
+  #!/usr/local/bin/sem --shebang-wrap -u --id $0 --fg /usr/bin/python
+  
+  import time
+  print "This will run ";
+  time.sleep(5)
+  print "exclusively";
 
 
 =head1 EXAMPLE: Start editor with filenames from stdin (standard input)
