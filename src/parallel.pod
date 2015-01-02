@@ -682,11 +682,11 @@ See also: B<--line-buffer> B<--ungroup>
 Print a summary of the options to GNU B<parallel> and exit.
 
 
-=item B<--halt-on-error> I<val>
+=item B<--halt-on-error> I<val> (alpha testing)
 
-=item B<--halt> I<val>
+=item B<--halt> I<val> (alpha testing)
 
-How should GNU B<parallel> terminate if one of more jobs fail?
+How should GNU B<parallel> terminate?
 
 =over 7
 
@@ -705,6 +705,17 @@ last failing job.
 
 Kill off all jobs immediately and exit without cleanup. The exit
 status will be the exit status from the failing job.
+
+=item Z<>-1
+
+Do not start new jobs if a job succeeds, but complete the running jobs
+including cleanup. The exit status will be the exit status from the
+last failing job if any.
+
+=item Z<>-2
+
+Kill off all jobs immediately and exit without cleanup. The exit
+status will be 0.
 
 =item Z<>1-99%
 
