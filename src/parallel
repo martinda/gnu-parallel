@@ -2825,13 +2825,14 @@ sub reaper {
 		$Global::timeoutq->update_delta_time($job->runtime());
 	    }
             # Force printing now if --halt forces us to exit
-            my $print_now = $opt::halt and
-		(($opt::halt == 2 and $job->exitstatus())
-		 or
-		 ($opt::halt == -2 and not $job->exitstatus()));
-            if($opt::keeporder and not $print_now) {
-                $job->print_earlier_jobs();
-            } else {
+            my $print_now =
+		($opt::halt and
+		 (($opt::halt == 2 and $job->exitstatus())
+		  or
+		  ($opt::halt == -2 and not $job->exitstatus())));
+	    if($opt::keeporder and not $print_now) {
+		$job->print_earlier_jobs();
+	    } else {
                 $job->print();
             }
 	    $job->should_we_halt();
@@ -6025,9 +6026,8 @@ sub sshlogin_wrap {
 	    if($opt::workdir) {
 		# Create remote workdir if needed. Then cd to it.
 	        my $wd = $self->workdir();
-		$pwd = qq{system("mkdir","-p","--","$wd") || chdir "$wd" ||}.
+		$pwd = qq{system("mkdir","-p","--","$wd"); chdir "$wd" ||}.
 		    qq{print(STDERR "parallel: Cannot chdir to $wd\\n") && exit 255;};
-		$command = "cd $wd;$command";
 	    }
 	    my ($csh_friendly,$envset,$bashfuncset) = env_as_eval();
 	    my $remote_command = $pwd.$envset.$bashfuncset.
