@@ -162,8 +162,8 @@ for(keys %Global::sshmaster) {
     kill "TERM", $_;
 }
 ::debug("init", "Halt\n");
-if($opt::halt_on_error) {
-    wait_and_exit($Global::halt_on_error_exitstatus);
+if($opt::halt) {
+    wait_and_exit($Global::halt_exitstatus);
 } else {
     wait_and_exit(min(undef_as_zero($Global::exitstatus),254));
 }
@@ -664,7 +664,7 @@ sub options_hash {
 	 "compress" => \$opt::compress,
 	 "tty" => \$opt::tty,
 	 "T" => \$opt::retired,
-	 "halt-on-error|halt=s" => \$opt::halt_on_error,
+	 "halt-on-error|halt=s" => \$opt::halt,
 	 "H=i" => \$opt::retired,
 	 "retries=i" => \$opt::retries,
 	 "dry-run|dryrun" => \$opt::dryrun,
@@ -822,8 +822,8 @@ sub parse_options {
     $opt::blocksize = multiply_binary_prefix($opt::blocksize);
     $opt::memfree = multiply_binary_prefix($opt::memfree);
     if(defined $opt::controlmaster) { $opt::noctrlc = 1; }
-    if(defined $opt::halt_on_error and
-       $opt::halt_on_error=~/%/) { $opt::halt_on_error /= 100; }
+    if(defined $opt::halt and
+       $opt::halt =~ /%/) { $opt::halt /= 100; }
     if(defined $opt::timeout and $opt::timeout !~ /^\d+(\.\d+)?%?$/) {
 	::error("--timeout must be seconds or percentage\n");
 	wait_and_exit(255);
@@ -996,7 +996,7 @@ sub init_globals {
     $Global::stderr_verbose = 0;
     $Global::default_simultaneous_sshlogins = 9;
     $Global::exitstatus = 0;
-    $Global::halt_on_error_exitstatus = 0;
+    $Global::halt_exitstatus = 0;
     $Global::arg_sep = ":::";
     $Global::arg_file_sep = "::::";
     $Global::trim = 'n';
@@ -2861,7 +2861,7 @@ sub reaper {
     #   @Global::slots
     #   $opt::timeout
     #   $Global::timeoutq
-    #   $opt::halt_on_error
+    #   $opt::halt
     #   $opt::keeporder
     #   $Global::total_running
     # Returns: N/A
@@ -2895,18 +2895,17 @@ sub reaper {
 		# Update average runtime for timeout
 		$Global::timeoutq->update_delta_time($job->runtime());
 	    }
-            # Force printing now if the job failed and we are going to exit
-            my $print_now = ($opt::halt_on_error and $opt::halt_on_error == 2
-			     and $job->exitstatus());
+            # Force printing now if --halt forces us to exit
+            my $print_now = $opt::halt and
+		(($opt::halt == 2 and $job->exitstatus())
+		 or
+		 ($opt::halt == -2 and not $job->exitstatus()));
             if($opt::keeporder and not $print_now) {
                 $job->print_earlier_jobs();
             } else {
                 $job->print();
             }
-            if($job->exitstatus()) {
-		$job->fail();
-	    }
-
+	    $job->should_we_halt();
         }
         my $sshlogin = $job->sshlogin();
         $sshlogin->dec_jobs_running();
@@ -6778,33 +6777,55 @@ sub set_exitsignal {
     }
 }
 
-sub fail {
-    # The jobs had a exit status <> 0, so error
+sub should_we_halt {
+    # Should we halt? Immediately? Gracefully?
     # Returns: N/A
     my $job = shift;
-    $Global::exitstatus++;
-    $Global::total_failed++;
-    if($opt::halt_on_error) {
-	if($opt::halt_on_error == 1
-	   or
-	   ($opt::halt_on_error < 1 and $Global::total_failed > 3
-	    and
-	    $Global::total_failed / $Global::total_started > $opt::halt_on_error)) {
-	    # If halt on error == 1 or --halt 10%
-	    # we should gracefully exit
-	    ::status
-		("$Global::progname: Starting no more jobs. ",
-		 "Waiting for ", scalar(keys %Global::running),
-		 " jobs to finish. This job failed:\n",
-		 $job->replaced(),"\n");
-	    $Global::start_no_new_jobs ||= 1;
-	    $Global::halt_on_error_exitstatus = $job->exitstatus();
-	} elsif($opt::halt_on_error == 2) {
-	    # If halt on error == 2 we should exit immediately
-	    ::status
-		("$Global::progname: This job failed:\n",
-		 $job->replaced(),"\n");
-	    exit ($job->exitstatus());
+    if($job->exitstatus()) {
+	$Global::exitstatus++;
+	$Global::total_failed++;
+        if($opt::halt) {
+	    if($opt::halt == 1
+	       or
+	       ($opt::halt > 0 and $opt::halt < 1 and $Global::total_failed > 3
+		and
+		$Global::total_failed / $Global::total_started > $opt::halt)) {
+		# If halt on error == 1 or --halt 10%
+		# we should gracefully exit
+		::status
+		    ("$Global::progname: Starting no more jobs. ",
+		     "Waiting for ", scalar(keys %Global::running),
+		     " jobs to finish. This job failed:\n",
+		     $job->replaced(),"\n");
+		$Global::start_no_new_jobs ||= 1;
+		$Global::halt_exitstatus = $job->exitstatus();
+	    } elsif($opt::halt == 2) {
+		# If halt on error == 2 we should exit immediately
+		::status
+		    ("$Global::progname: This job failed:\n",
+		     $job->replaced(),"\n");
+		exit ($job->exitstatus());
+	    }
+	}
+    } else {
+        if($opt::halt) {
+	    if($opt::halt == -1) {
+		# If halt on error == -1
+		# we should gracefully exit
+		::status
+		    ("$Global::progname: Starting no more jobs. ",
+		     "Waiting for ", scalar(keys %Global::running),
+		     " jobs to finish. This job succeeded:\n",
+		     $job->replaced(),"\n");
+		$Global::start_no_new_jobs ||= 1;
+		$Global::halt_exitstatus = $job->exitstatus();
+	    } elsif($opt::halt == -2) {
+		# If halt on error == -2 we should exit immediately
+		::status
+		    ("$Global::progname: This job succeeded:\n",
+		     $job->replaced(),"\n");
+		exit ($job->exitstatus());
+	    }
 	}
     }
 }
