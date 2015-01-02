@@ -236,6 +236,10 @@ Haiku of the month:
 
 New in this release:
 
+* Remote jobs now sends stderr (standard error) to stderr (standard error) instead of stdout (standard output)
+
+* Remote execution is now packed using hex encoded bzip2. That means that big environments (app. 250 KB) can be transferred. 
+
 * A semibig refactoring of big functions. All non-trivial functions are now less than 100 lines. The refactoring makes this release beta quality.
 
 * GNU Parallel was cited in: Parallel post-processing with MPI-Bash http://dl.acm.org/citation.cfm?id=2691137
@@ -246,7 +250,11 @@ New in this release:
 
 * GNU Parallel: Open Source For You (OSFY) magazine, October 2013 edition http://www.shakthimaan.com/posts/2014/11/27/gnu-parallel/news.html
 
+* Multithreaded Encryption and Compression http://www.krazyworks.com/multithreaded-encryption-and-compression/
+
 * コマンドを並列に実行するGNU parallelがとても便利 http://bicycle1885.hatenablog.com/entry/2014/08/10/143612
+
+* GNU Parallel on OSX and Linux https://darknightelf.wordpress.com/2015/01/01/gnu-parallel-on-osx/
 
 * Bug fixes and man page updates.
 

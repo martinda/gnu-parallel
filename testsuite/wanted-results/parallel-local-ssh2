@@ -12,30 +12,26 @@ echo '### --wd no-such-dir - csh'
 ### --wd no-such-dir - csh
   stdout parallel --wd /no-such-dir -S csh@localhost echo ::: "ERROR IF PRINTED"; echo Exit code $?
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
-/no-such-dir: No such file or directory.
+parallel: Cannot chdir to /no-such-dir
 Exit code 1
 echo '### --wd no-such-dir - tcsh'
 ### --wd no-such-dir - tcsh
   stdout parallel --wd /no-such-dir -S tcsh@localhost echo ::: "ERROR IF PRINTED"; echo Exit code $?
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
-/no-such-dir: No such file or directory.
+parallel: Cannot chdir to /no-such-dir
 Exit code 1
 echo '### --wd no-such-dir - bash'
 ### --wd no-such-dir - bash
   stdout parallel --wd /no-such-dir -S parallel@localhost echo ::: "ERROR IF PRINTED"; echo Exit code $?
 mkdir: cannot create directory ‘/no-such-dir’: Permission denied
-bash: line 0: cd: /no-such-dir: No such file or directory
+parallel: Cannot chdir to /no-such-dir
 Exit code 1
 echo '### bug #42725: csh with \n in variables'
 ### bug #42725: csh with \n in variables
   not_csh() { echo This is not csh/tcsh; };   export -f not_csh;   parallel --env not_csh -S csh@lo not_csh ::: 1;   parallel --env not_csh -S tcsh@lo not_csh ::: 1;   parallel --env not_csh -S parallel@lo not_csh ::: 1
-CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
-CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
 This is not csh/tcsh
-Badly placed ()'s.
-}: Command not found.
-Badly placed ()'s.
-}: Command not found.
+CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
+CSH/TCSH DO NOT SUPPORT newlines IN VARIABLES/FUNCTIONS. Unset not_csh
 echo '### bug #43358: shellshock breaks exporting functions using --env'
 ### bug #43358: shellshock breaks exporting functions using --env
   echo shellshock-hardened to shellshock-hardened;   funky() { echo Function $1; };   export -f funky;   parallel --env funky -S parallel@localhost funky ::: shellshock-hardened

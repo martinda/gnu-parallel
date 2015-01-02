@@ -39,27 +39,27 @@ parallel -v -J test_profile ::: <(echo a) <(echo b)
 echo '### Test ugly quoting from profile file --plain'
 parallel -v -J test_profile --plain echo ::: <(echo a) <(echo b)
 
-PARALLEL='-k --jobs 1 echo' parallel -S ssh\ parallel\@$SERVER1\ ssh\ parallel@$SERVER2 -v ::: foo
-PARALLEL='-k --jobs 1 perl -pe \"\\$a=1; print \\$a\"' parallel -S ssh\ parallel\@$SERVER1\ ssh\ $SERVER2 -vv '<(echo {})' ::: foo
+PARALLEL='-k --jobs 1 echo' parallel -S ssh\ parallel\@$SERVER1 -v ::: foo
+PARALLEL='-k --jobs 1 perl -pe \"\\$a=1; print \\$a\"' parallel -S ssh\ parallel\@$SERVER1 -v '<(echo {})' ::: foo
 
 echo '### Test quoting of $ in command from profile file'
 cat <<EOF >~/.parallel/test_profile
 -k --jobs 1 perl -pe \'\\\$a=1; print \\\$a\'
 EOF
-parallel -v -J test_profile -S ssh\ parallel\@$SERVER1\ ssh\ $SERVER2 '<(echo {})' ::: foo
+parallel -v -J test_profile -S ssh\ parallel\@$SERVER1 '<(echo {})' ::: foo
 
 echo '### Test quoting of $ in command from profile file --plain'
-parallel -v -J test_profile --plain -S ssh\ parallel\@$SERVER1\ ssh\ $SERVER2 'cat <(echo {})' ::: foo
+parallel -v -J test_profile --plain -S ssh\ parallel\@$SERVER1 'cat <(echo {})' ::: foo
 
 echo '### Test quoting of $ in command from $PARALLEL'
-PARALLEL='-k --jobs 1 perl -pe \"\\$a=1; print \\$a\" ' parallel -S ssh\ parallel\@$SERVER1\ ssh\ $SERVER2 -v '<(echo {})' ::: foo
+PARALLEL='-k --jobs 1 perl -pe \"\\$a=1; print \\$a\" ' parallel -S ssh\ parallel\@$SERVER1 -v '<(echo {})' ::: foo
 
 echo '### Test quoting of $ in command from $PARALLEL --plain'
-PARALLEL='-k --jobs 1 perl -pe \"\\$a=1; print \\$a\" ' parallel --plain -S ssh\ parallel\@$SERVER1\ ssh\ $SERVER2 -v 'cat <(echo {})' ::: foo
+PARALLEL='-k --jobs 1 perl -pe \"\\$a=1; print \\$a\" ' parallel --plain -S ssh\ parallel\@$SERVER1 -v 'cat <(echo {})' ::: foo
 
 echo '### Test quoting of space in arguments (-S) from profile file'
 cat <<EOF >~/.parallel/test_profile
--k --jobs 1 -S ssh\ parallel\@$SERVER1\ ssh\ parallel@$SERVER2 perl -pe \'\$a=1; print \$a\'
+-k --jobs 1 -S ssh\ parallel\@$SERVER1 perl -pe \'\$a=1; print \$a\'
 EOF
 parallel -v -J test_profile '<(echo {})' ::: foo
 
@@ -67,17 +67,17 @@ echo '### Test quoting of space in arguments (-S) from profile file --plain'
 parallel -v -J test_profile --plain 'cat <(echo {})' ::: foo
 
 echo '### Test quoting of space in arguments (-S) from $PARALLEL'
-PARALLEL='-k --jobs 1 -S ssh\ parallel@'$SERVER1'\ ssh\ parallel@'$SERVER2' perl -pe \"\\$a=1; print \\$a\" ' parallel -v '<(echo {})' ::: foo
+PARALLEL='-k --jobs 1 -S ssh\ parallel@'$SERVER1' perl -pe \"\\$a=1; print \\$a\" ' parallel -v '<(echo {})' ::: foo
 
 echo '### Test quoting of space in long arguments (--sshlogin) from profile file'
 cat <<EOF >~/.parallel/test_profile
 # testprofile
--k --jobs 1 --sshlogin ssh\ parallel\@$SERVER1\ ssh\ parallel@$SERVER2 perl -pe \'\$a=1; print \$a\'
+-k --jobs 1 --sshlogin ssh\ parallel\@$SERVER1 perl -pe \'\$a=1; print \$a\'
 EOF
 parallel -v -J test_profile '<(echo {})' ::: foo
 
 echo '### Test quoting of space in arguments (-S) from $PARALLEL'
-PARALLEL='-k --jobs 1 --sshlogin ssh\ parallel\@'$SERVER1'\ ssh\ parallel@'$SERVER2' perl -pe \"\\$a=1; print \\$a\" ' parallel -v '<(echo {})' ::: foo
+PARALLEL='-k --jobs 1 --sshlogin ssh\ parallel\@'$SERVER1' perl -pe \"\\$a=1; print \\$a\" ' parallel -v '<(echo {})' ::: foo
 
 echo '### Test merging of profiles - sort needed because -k only works on the single machine'
 echo --tag > ~/.parallel/test_tag

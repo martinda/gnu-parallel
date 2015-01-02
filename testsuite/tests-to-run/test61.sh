@@ -3,12 +3,14 @@
 SERVER1=parallel-server3
 SERVER2=parallel-server2
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj0 -k
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj0 -k -L1
 echo '### Test --return of weirdly named file'
-stdout parallel --return {} -vv -S parallel\@$SERVER1 echo '>'{} ::: 'aa<${#}" b'; rm 'aa<${#}" b'
+stdout parallel --return {} -vv -S parallel\@$SERVER1 echo '>'{} ::: 'aa<${#}" b' | 
+  perl -pe 's/\S*parallel-server\S*/one-server/;s/[a-f0-9]{500,}/hex/;'; rm 'aa<${#}" b'
 
 echo '### Test if remote login shell is csh'
-stdout parallel -k -vv -S csh@localhost 'echo $PARALLEL_PID $PARALLEL_SEQ {}| wc -w' ::: a b c
+stdout parallel -k -vv -S csh@localhost 'echo $PARALLEL_PID $PARALLEL_SEQ {}| wc -w' ::: a b c | 
+  perl -pe 's/\S*parallel-server\S*/one-server/;s/[a-f0-9]{500,}/hex/;'
 
 echo '### Test {} multiple times in different commands'
 seq 10 | parallel -v -Xj1 echo {} \; echo {}

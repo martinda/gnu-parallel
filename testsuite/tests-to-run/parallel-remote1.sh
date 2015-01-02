@@ -11,7 +11,7 @@ echo 'TODO test ssh with > 9 simultaneous'
 echo 'ssh "$@"; echo "$@" >>/tmp/myssh1-run' >/tmp/myssh1
 echo 'ssh "$@"; echo "$@" >>/tmp/myssh2-run' >/tmp/myssh2
 chmod 755 /tmp/myssh1 /tmp/myssh2
-seq 1 100 | parallel --sshdelay 0.05 --sshlogin "/tmp/myssh1 $SSHLOGIN1,/tmp/myssh2 $SSHLOGIN2" -k echo
+seq 1 100 | parallel --sshdelay 0.01 --retries 10 --sshlogin "/tmp/myssh1 $SSHLOGIN1,/tmp/myssh2 $SSHLOGIN2" -k echo
 
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/\;s/\$SSHLOGIN1/$SSHLOGIN1/\;s/\$SSHLOGIN2/$SSHLOGIN2/\;s/\$SSHLOGIN3/$SSHLOGIN3/ | parallel -vj1 -k -L1
 echo '### bug #41964: --controlmaster not seems to reuse OpenSSH connections to the same host'

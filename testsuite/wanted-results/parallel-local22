@@ -130,12 +130,10 @@ shell? /bin/bash -c cp `which yash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit e
 which bash => shell path /bin/bash
 shell? /bin/bash -c cp `which zsh` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
 which bash => shell path /bin/bash
-MANPATH: Undefined variable.
 /tmp/SHELL: -c: bad option(s)
 Local configuration error occurred.
 Contact the systems administrator for further assistance.
 SHELL: applet not found
-MANPATH: Undefined variable.
   echo '## Known shells -c'
 ## Known shells -c
   parallel -k "\`which {}\` -c 'parallel -Dinit echo ::: 1' | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
@@ -168,12 +166,8 @@ shell? /bin/bash -c `which yash` -c 'parallel -Dinit echo ::: 1' | grep which;
 which bash => shell path /bin/bash
 shell? /bin/bash -c `which zsh` -c 'parallel -Dinit echo ::: 1' | grep which;
 which bash => shell path /bin/bash
-MANPATH: Undefined variable.
-MANPATH: Undefined variable.
 Local configuration error occurred.
 Contact the systems administrator for further assistance.
-MANPATH: Undefined variable.
-MANPATH: Undefined variable.
   echo '## Known shells |'
 ## Known shells |
   parallel -k "echo 'parallel -Dinit echo ::: 1' | \`which {}\` | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
@@ -197,12 +191,8 @@ which static-sh => shell path /bin/static-sh
 which tcsh => shell path /usr/bin/tcsh
 which yash => shell path /usr/bin/yash
 which zsh => shell path /usr/bin/zsh
-MANPATH: Undefined variable.
-MANPATH: Undefined variable.
 Local configuration error occurred.
 Contact the systems administrator for further assistance.
-MANPATH: Undefined variable.
-MANPATH: Undefined variable.
   echo '## Started directly from perl'
 ## Started directly from perl
   perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which

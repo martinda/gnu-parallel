@@ -9,6 +9,9 @@ cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout paral
 echo '### Stop if all hosts are filtered and there are no hosts left to run on'
   stdout parallel --filter-hosts -S no-such.host echo ::: 1
 
+echo '### Can csh propagate a variable containing \n'; 
+  export A=$(seq 3); parallel -S csh@localhost --env A bash -c \''echo "$A"'\' ::: dummy
+
 echo '### bug #41805: Idea: propagate --env for parallel --number-of-cores'
   echo '** test_zsh'
   FOO=test_zsh parallel --env FOO,HOME -S zsh@lo env ::: "" |sort|egrep 'FOO|^HOME'

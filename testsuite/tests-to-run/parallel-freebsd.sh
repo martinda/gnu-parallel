@@ -54,8 +54,6 @@ bash -c 'echo bug \#43358: shellshock breaks exporting functions using --env _;
   export -f funky; 
   parallel --env funky -S parallel@192.168.1.72 funky ::: shellshock-hardened'
 
-
-
 EOF
 
 VBoxManage controlvm FreeBSD71 savestate
