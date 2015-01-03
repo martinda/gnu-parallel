@@ -574,17 +574,11 @@ sub acquire_semaphore {
     if($Semaphore::fg) {
 	# skip
     } else {
-	# If run in the background, the PID will change
-	# therefore release and re-acquire the semaphore
-	$sem->release();
 	if(fork()) {
 	    exit(0);
 	} else {
-	    # child
-	    # Get a semaphore for this pid
-	    ::die_bug("Can't start a new session: $!") if setsid() == -1;
-	    $sem = Semaphore->new($Semaphore::name,$Global::host{':'}->max_jobs_running());
-	    $sem->acquire();
+	    # If run in the background, the PID will change
+	    $sem->pid_change();
 	}
     }
     return $sem;
@@ -715,7 +709,7 @@ sub options_hash {
 	 "exit|x" => \$opt::x,
 	 # Semaphore
 	 "semaphore" => \$opt::semaphore,
-	 "semaphoretimeout=i" => \$opt::semaphoretimeout,
+	 "semaphoretimeout|st=i" => \$opt::semaphoretimeout,
 	 "semaphorename|id=s" => \$opt::semaphorename,
 	 "fg" => \$opt::fg,
 	 "bg" => \$opt::bg,
@@ -8352,43 +8346,58 @@ sub new {
     }, ref($class) || $class;
 }
 
+sub remove_dead_locks {
+    my $self = shift;
+    my $lockdir = $self->{'lockdir'};
+
+    for my $d (glob "$lockdir/*") {
+	$d =~ m:$lockdir/([0-9]+)\@([-\._a-z0-9]+)$:o or next;
+	my ($pid, $host) = ($1, $2);
+	if($host eq ::hostname()) {
+	    if(not kill 0, $pid) {
+		::debug("sem", "Dead: $d\n");
+		unlink $d;
+	    } else {
+		::debug("sem", "Alive: $d\n");
+	    }
+	}
+    }
+}
+
 sub acquire {
     my $self = shift;
     my $sleep = 1; # 1 ms
     my $start_time = time;
     while(1) {
+	# Can we get a lock?
 	$self->atomic_link_if_count_less_than() and last;
-	::debug("sem", "Remove dead locks");
-	my $lockdir = $self->{'lockdir'};
-	for my $d (glob "$lockdir/*") {
-	    ::debug("sem", "Lock $d $lockdir\n");
-	    $d =~ m:$lockdir/([0-9]+)\@([-\._a-z0-9]+)$:o or next;
-	    my ($pid, $host) = ($1, $2);
-	    if($host eq ::hostname()) {
-		if(not kill 0, $1) {
-		    ::debug("sem", "Dead: $d");
-		    unlink $d;
-		} else {
-		    ::debug("sem", "Alive: $d");
-		}
-	    }
-	}
-	# try again
-	$self->atomic_link_if_count_less_than() and last;
+	$self->remove_dead_locks();
 	# Retry slower and slower up to 1 second
 	$sleep = ($sleep < 1000) ? ($sleep * 1.1) : ($sleep);
 	# Random to avoid every sleeping job waking up at the same time
 	::usleep(rand()*$sleep);
-	if(defined($opt::timeout) and
-	   $start_time + $opt::timeout > time) {
-	    # Acquire the lock anyway
-	    if(not -e $self->{'idfile'}) {
-		open (my $fh, ">", $self->{'idfile'}) or
-		    ::die_bug("timeout_write_idfile: $self->{'idfile'}");
-		close $fh;
+	if($opt::semaphoretimeout) {
+	    if($opt::semaphoretimeout > 0
+	       and
+	       time - $start_time > $opt::semaphoretimeout) {
+		# Timeout: Take the semaphore anyway
+		::warning("Semaphore timed out. Stealing the semaphore.\n");
+		if(not -e $self->{'idfile'}) {
+		    open (my $fh, ">", $self->{'idfile'}) or
+			::die_bug("timeout_write_idfile: $self->{'idfile'}");
+		    close $fh;
+		}
+		link $self->{'idfile'}, $self->{'pidfile'};
+		last;
 	    }
-	    link $self->{'idfile'}, $self->{'pidfile'};
-	    last;
+	    if($opt::semaphoretimeout < 0
+	       and
+	       time - $start_time > -$opt::semaphoretimeout) {
+		# Timeout: Exit
+		::warning("Semaphore timed out. Exiting.\n");
+		exit(1);
+		last;
+	    }
 	}
     }
     ::debug("sem", "acquired $self->{'pid'}\n");
@@ -8409,25 +8418,17 @@ sub release {
     ::debug("run", "released $self->{'pid'}\n");
 }
 
-sub _release {
+sub pid_change {
+    # This should do what release()+acquire() would do without having
+    # to re-acquire the semaphore
     my $self = shift;
 
-    unlink $self->{'pidfile'};
-    $self->lock();
-    my $nlinks = $self->nlinks();
-    ::debug("sem", $nlinks, "<", $self->{'count'});
-    if($nlinks-- > 1) {
-       unlink $self->{'idfile'};
-       open (my $fh, ">", $self->{'idfile'}) or
-           ::die_bug("write_idfile: $self->{'idfile'}");
-       print $fh "#"x$nlinks;
-       close $fh;
-    } else {
-       unlink $self->{'idfile'};
-       rmdir $self->{'lockdir'};
-    }
-    $self->unlock();
-    ::debug("sem", "released $self->{'pid'}\n");
+    my $old_pidfile =  $self->{'pidfile'};
+    $self->{'pid'} = $$;
+    $self->{'pidfile'} = $self->{'lockdir'}."/".$$.'@'.::hostname();
+    my $retval = link $self->{'idfile'}, $self->{'pidfile'};
+    ::debug("sem","link($self->{'idfile'},$self->{'pidfile'})=$retval\n");
+    unlink $old_pidfile;
 }
 
 sub atomic_link_if_count_less_than {
@@ -8435,40 +8436,17 @@ sub atomic_link_if_count_less_than {
     my $self = shift;
     my $retval = 0;
     $self->lock();
-    ::debug($self->nlinks(), "<", $self->{'count'});
-    if($self->nlinks() < $self->{'count'}) {
-	-d $self->{'lockdir'} or mkdir_or_die($self->{'lockdir'});
-	if(not -e $self->{'idfile'}) {
-	    open (my $fh, ">", $self->{'idfile'}) or
-		::die_bug("write_idfile: $self->{'idfile'}");
-	    close $fh;
-	}
-	$retval = link $self->{'idfile'}, $self->{'pidfile'};
-    }
-    $self->unlock();
-    ::debug("run", "atomic $retval");
-    return $retval;
-}
-
-sub _atomic_link_if_count_less_than {
-    # Link $file1 to $file2 if nlinks to $file1 < $count
-    my $self = shift;
-    my $retval = 0;
-    $self->lock();
     my $nlinks = $self->nlinks();
-    ::debug("sem", $nlinks, "<", $self->{'count'});
-    if($nlinks++ < $self->{'count'}) {
+    ::debug("sem","$nlinks<$self->{'count'} ");
+    if($nlinks < $self->{'count'}) {
 	-d $self->{'lockdir'} or mkdir_or_die($self->{'lockdir'});
 	if(not -e $self->{'idfile'}) {
 	    open (my $fh, ">", $self->{'idfile'}) or
 		::die_bug("write_idfile: $self->{'idfile'}");
 	    close $fh;
 	}
-	open (my $fh, ">", $self->{'idfile'}) or
-	    ::die_bug("write_idfile: $self->{'idfile'}");
-	print $fh "#"x$nlinks;
-	close $fh;
 	$retval = link $self->{'idfile'}, $self->{'pidfile'};
+	::debug("sem","link($self->{'idfile'},$self->{'pidfile'})=$retval\n");
     }
     $self->unlock();
     ::debug("sem", "atomic $retval");
@@ -8478,7 +8456,6 @@ sub _atomic_link_if_count_less_than {
 sub nlinks {
     my $self = shift;
     if(-e $self->{'idfile'}) {
-	::debug("sem", "nlinks", (stat(_))[3], "size", (stat(_))[7], "\n");
 	return (stat(_))[3];
     } else {
 	return 0;
@@ -8522,10 +8499,20 @@ sub lock {
 	::usleep(rand()*$sleep);
 	$total_sleep += $sleep;
 	if($opt::semaphoretimeout) {
-	    if($total_sleep/1000 > $opt::semaphoretimeout) {
-		# Timeout: bail out
-		::warning("Semaphore timed out. Ignoring timeout.");
+	    if($opt::semaphoretimeout > 0
+	       and
+	       $total_sleep/1000 > $opt::semaphoretimeout) {
+		# Timeout: Take the semaphore anyway
+		::warning("Semaphore timed out. Taking the semaphore.");
 		$locked = 3;
+		last;
+	    }
+	    if($opt::semaphoretimeout < 0
+	       and
+	       $total_sleep/1000 > -$opt::semaphoretimeout) {
+		# Timeout: Exit
+		::warning("Semaphore timed out. Exiting.");
+		$locked = 4;
 		last;
 	    }
 	} else {

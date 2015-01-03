@@ -1467,7 +1467,7 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
-=item B<--semaphore>
+=item B<--semaphore> (alpha testing)
 
 Work as a counting semaphore. B<--semaphore> will cause GNU
 B<parallel> to start I<command> in the background. When the number of
@@ -1504,9 +1504,13 @@ Implies B<--semaphore>.
 See also B<man sem>.
 
 
-=item B<--semaphoretimeout> I<secs>
+=item B<--semaphoretimeout> I<secs> (alpha testing)
 
-If the semaphore is not released within secs seconds, take it anyway.
+=item B<--st> I<secs> (alpha testing)
+
+If I<secs> > 0: If the semaphore is not released within I<secs> seconds, take it anyway.
+
+If I<secs> < 0: If the semaphore is not released within I<secs> seconds, exit.
 
 Implies B<--semaphore>.
 

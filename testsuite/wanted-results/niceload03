@@ -11,8 +11,8 @@ echo '### niceload with no arguments should give no output'
   niceload
 echo '### Test -t and -s'
 ### Test -t and -s
-  # This should sleep 2*1s and run 2*2s
-  niceload -v -t 1 -s 2 sleep 4.5
+  # This should sleep at least 2*1s and run 2*2s
+  stdout niceload -v -t 1 -s 2 sleep 4.5 | head -n 4
 Sleeping 1s
 Running 2s
 Sleeping 1s
