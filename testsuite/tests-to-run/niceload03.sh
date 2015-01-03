@@ -19,8 +19,8 @@ echo '### niceload with no arguments should give no output'
   niceload
 
 echo '### Test -t and -s'
-  # This should sleep 2*1s and run 2*2s
-  niceload -v -t 1 -s 2 sleep 4.5
+  # This should sleep at least 2*1s and run 2*2s
+  stdout niceload -v -t 1 -s 2 sleep 4.5 | head -n 4
 
 echo 'bug #38908: niceload: Ctrl-C/TERM should resume jobs if using -p - Order may change, but not output'
   # This should take 10 seconds to run + delay from niceload

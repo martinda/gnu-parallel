@@ -252,9 +252,9 @@ New in this release:
 
 * Multithreaded Encryption and Compression http://www.krazyworks.com/multithreaded-encryption-and-compression/
 
-* コマンドを並列に実行するGNU parallelがとても便利 http://bicycle1885.hatenablog.com/entry/2014/08/10/143612
-
 * GNU Parallel on OSX and Linux https://darknightelf.wordpress.com/2015/01/01/gnu-parallel-on-osx/
+
+* コマンドを並列に実行するGNU parallelがとても便利 http://bicycle1885.hatenablog.com/entry/2014/08/10/143612
 
 * Bug fixes and man page updates.
 
