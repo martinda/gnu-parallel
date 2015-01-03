@@ -8,7 +8,7 @@ int() {
 }
 export -f int
 
-cat <<'EOF' | stdout parallel -k -vj0 -L1
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k --joblog /tmp/jl-`basename $0` -L1
 # The seq 30000000 should take > 1 cpu sec to run.
 echo '### --soft -f and test if child is actually suspended and thus takes longer'
   niceload --soft -f 0.5 'seq 30000000 | nice wc;echo This should finish last' & 

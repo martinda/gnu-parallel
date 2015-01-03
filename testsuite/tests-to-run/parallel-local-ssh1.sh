@@ -5,7 +5,7 @@ rm -rf tmp
 mkdir tmp
 cd tmp
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj5 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj5 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### Stop if all hosts are filtered and there are no hosts left to run on'
   stdout parallel --filter-hosts -S no-such.host echo ::: 1
 

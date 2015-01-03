@@ -7,7 +7,7 @@ export XAP
 NICEPAR="nice nice parallel"
 export NICEPAR
 
-cat <<'EOF' | sed -e 's/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj0 -k --joblog /tmp/jl-`basename $0` -L1
 echo 'bug #41613: --compress --line-buffer no newline';
   perl -e 'print "It worked"'| $NICEPAR --pipe --compress --line-buffer cat; echo
 

@@ -3,7 +3,7 @@
 SERVER1=parallel-server3
 SERVER2=parallel-server2
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj0 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj10 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### Test --return of weirdly named file'
 stdout parallel --return {} -vv -S parallel\@$SERVER1 echo '>'{} ::: 'aa<${#}" b' | 
   perl -pe 's/\S*parallel-server\S*/one-server/;s/[a-f0-9]{500,}/hex/;s/\d{5,8}/pId/g;'; rm 'aa<${#}" b'

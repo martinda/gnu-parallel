@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj6 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj6 -k --joblog /tmp/jl-`basename $0` -L1
 echo "### bug #43518: GNU Parallel doesn't obey servers' jobs capacity when an ssh login file is reloaded"
   # Pre-20141106 Would reset the number of jobs run on all sshlogin if --slf changed
   # Thus must take at least 25 sec to run

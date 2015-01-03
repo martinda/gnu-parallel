@@ -132,7 +132,7 @@ echo /tmp/parallel_f1 /tmp/parallel_f2 | stdout parallel -kv --delimiter ' ' gzi
 rm /tmp/parallel_f*
 
 
-cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -j10 -k -L1
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj10 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### Test -i and --replace: Replace with argument'
 (echo a; echo END; echo b) | parallel -k -i -eEND echo repl{}ce
 (echo a; echo END; echo b) | parallel -k --replace -eEND echo repl{}ce

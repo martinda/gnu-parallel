@@ -1,6 +1,7 @@
 #!/bin/bash
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -v -k --joblog /tmp/jl-`basename $0` -L1
+# -L1 will join lines ending in ' '
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### Test mutex. This should not mix output'; 
   parallel --semaphore --id mutex -u seq 1 10 '|' pv -qL 20; 
   parallel --semaphore --id mutex -u seq 11 20 '|' pv -qL 100; 

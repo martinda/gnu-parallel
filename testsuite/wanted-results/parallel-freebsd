@@ -15,9 +15,8 @@ echo 'Test --compress --pipe'
 Test --compress --pipe
   jot 1000 | parallel --compress --pipe cat | wc
     1000    1000    3893
-echo 'bug #41613: --compress --line-buffer no newline';
+echo 'bug #41613: --compress --line-buffer no newline';   perl -e 'print "It worked"'| parallel --pipe --compress --line-buffer cat; echo
 bug #41613: --compress --line-buffer no newline
-  perl -e 'print "It worked"'| parallel --pipe --compress --line-buffer cat; echo
 It worked
 echo 'bug #40135: FreeBSD: sem --fg does not finish under /bin/sh'
 bug #40135: FreeBSD: sem --fg does not finish under /bin/sh

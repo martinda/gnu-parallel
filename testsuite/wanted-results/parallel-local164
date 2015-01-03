@@ -70,8 +70,9 @@ a_b_c_
 a_b_c_d
   parallel -k -C %+ echo {4} ::: 'a% c %%b'
 
-echo "### test08";   cd input-files/test08;   ls | parallel -q  perl -ne '/_PRE (\d+)/ and $p=$1; /hatchname> (\d+)/ and $1!=$p and print $ARGV,"\n"' | sort;
+echo "### test08"
 ### test08
+  cd input-files/test08;   ls | parallel -q  perl -ne '/_PRE (\d+)/ and $p=$1; /hatchname> (\d+)/ and $1!=$p and print $ARGV,"\n"' | sort
 b
 d
 seq 1 10 | parallel -j 1 echo | sort
@@ -342,6 +343,8 @@ bug #38439: "open files" with --files --pipe blocks after a while
 18 of 20
 19 of 20
 20 of 20
+parallel: Warning: Only enough file handles to run 1 jobs in parallel.
+Running 'parallel -j0 -N1 --pipe parallel -j0' or raising ulimit -n or /etc/security/limits.conf may help.
 echo 'bug #34241: --pipe should not spawn unneeded processes - part 2'
 bug #34241: --pipe should not spawn unneeded processes - part 2
   seq 500 | parallel --tmpdir . -j10 --pipe --block 1k --files wc >/dev/null;   ls *.par | wc -l; rm *.par;   seq 500 | parallel --tmpdir . -j10 --pipe --block 1k --files --dry-run wc >/dev/null;   echo No .par should exist;   stdout ls *.par

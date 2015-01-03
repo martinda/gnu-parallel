@@ -2,6 +2,9 @@ echo '### bug #36595: silent loss of input with --pipe and --sshlogin'
 ### bug #36595: silent loss of input with --pipe and --sshlogin
   seq 10000 | xargs | parallel --pipe -S 10/localhost cat | wc
       1   10000   48894
+parallel: Warning: ssh to localhost only allows for 9 simultaneous logins.
+You may raise this by changing /etc/ssh/sshd_config:MaxStartups and MaxSessions on localhost.
+Using only 8 connections to avoid race conditions.
 echo 'bug #36707: --controlmaster eats jobs'
 bug #36707: --controlmaster eats jobs
   seq 2 | parallel -k --controlmaster --sshlogin localhost echo OK{}
@@ -113,7 +116,7 @@ echo '### How do we deal with missing $SHELL'
 3
 echo '### Test if length is computed correctly - first should give one line, second 2 lines each'
 ### Test if length is computed correctly - first should give one line, second 2 lines each
-  seq 4 | parallel -s 29 -X -kj1 echo a{}b{}c 
+  seq 4 | parallel -s 29 -X -kj1 echo a{}b{}c
 a1b1c a2b2c a3b3c a4b4c
   seq 4 | parallel -s 28 -X -kj1 echo a{}b{}c
 a1b1c a2b2c a3b3c
@@ -123,9 +126,9 @@ a4b4c
   seq 4 | parallel -s 20 -X -kj1 echo {} {}
 1 2 3 1 2 3
 4 4
-  seq 4 | parallel -s 23 -m -kj1 echo a{}b{}c 
+  seq 4 | parallel -s 23 -m -kj1 echo a{}b{}c
 a1 2 3 4b1 2 3 4c
-  seq 4 | parallel -s 22 -m -kj1 echo a{}b{}c 
+  seq 4 | parallel -s 22 -m -kj1 echo a{}b{}c
 a1 2 3b1 2 3c
 a4b4c
   seq 4 | parallel -s 21 -m -kj1 echo {} {}

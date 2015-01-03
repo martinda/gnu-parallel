@@ -1,8 +1,7 @@
 #!/bin/bash
 
 # SSH only allowed to localhost/lo
-
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj2 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj2 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### --hostgroup force ncpu'
   parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.{} ::: {1..8} | sort
 

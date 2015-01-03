@@ -6,7 +6,7 @@ SSHLOGIN1=parallel@$SERVER1
 SSHLOGIN2=parallel@$SERVER2
 
 # -L1 will join lines ending in ' '
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/\;s/\$SSHLOGIN1/$SSHLOGIN1/\;s/\$SSHLOGIN2/$SSHLOGIN2/ | parallel -vj0 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/\;s/\$SSHLOGIN1/$SSHLOGIN1/\;s/\$SSHLOGIN2/$SSHLOGIN2/ | parallel -vj10 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### Test --onall'; 
   parallel --onall -S $SSHLOGIN1,$SSHLOGIN2 '(echo {1} {2}) | awk \{print\ \$2}' ::: a b c ::: 1 2
 

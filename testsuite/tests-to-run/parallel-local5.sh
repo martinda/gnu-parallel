@@ -5,7 +5,7 @@ echo '### Test --pipe'
 seq 1 1000000 >/tmp/parallel-seq
 shuf --random-source=/tmp/parallel-seq /tmp/parallel-seq >/tmp/blocktest
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj2 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj2 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### Test 200M records with too small block'; 
   ( 
    echo start; 

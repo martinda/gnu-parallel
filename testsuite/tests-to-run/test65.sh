@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # -L1 will join lines ending in ' '
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj10 -k -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj10 -k --joblog /tmp/jl-`basename $0` -L1
 echo "### Test memory consumption stays (almost) the same for 30 and 300 jobs"
   out30=$( stdout memusg parallel -j2 true :::: <(perl -e '$a="x"x100000;for(1..30){print $a,"\n"}') ); 
   out300=$( stdout memusg parallel -j2 true :::: <(perl -e '$a="x"x100000;for(1..300){print $a,"\n"}') ); 

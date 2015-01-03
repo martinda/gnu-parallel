@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat <<'EOF' | parallel -vj0 -vk
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### bug #36595: silent loss of input with --pipe and --sshlogin'
   seq 10000 | xargs | parallel --pipe -S 10/localhost cat | wc
 
@@ -32,12 +32,12 @@ echo '### How do we deal with missing $SHELL'
    unset SHELL; stdout perl -w $(which parallel) -k echo ::: 1 2 3
 
 echo '### Test if length is computed correctly - first should give one line, second 2 lines each'
-  seq 4 | parallel -s 29 -X -kj1 echo a{}b{}c 
+  seq 4 | parallel -s 29 -X -kj1 echo a{}b{}c
   seq 4 | parallel -s 28 -X -kj1 echo a{}b{}c
   seq 4 | parallel -s 21 -X -kj1 echo {} {}
   seq 4 | parallel -s 20 -X -kj1 echo {} {}
-  seq 4 | parallel -s 23 -m -kj1 echo a{}b{}c 
-  seq 4 | parallel -s 22 -m -kj1 echo a{}b{}c 
+  seq 4 | parallel -s 23 -m -kj1 echo a{}b{}c
+  seq 4 | parallel -s 22 -m -kj1 echo a{}b{}c
   seq 4 | parallel -s 21 -m -kj1 echo {} {}
   seq 4 | parallel -s 20 -m -kj1 echo {} {}
 

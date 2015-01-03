@@ -15,7 +15,7 @@ forceload () {
 # Force load avg > number of cpu cores
 forceload $(parallel --number-of-cores)
 
-cat <<'EOF' | parallel -vj0 -k -L1
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k --joblog /tmp/jl-`basename $0` -L1
 echo "bug #38441: CPU usage goes to 100% if load is higher than --load at first job"
 /usr/bin/time -f %e parallel --load 100% true ::: a 2>&1 | 
   perl -ne '$_ > 1 and print "More than 1 secs wall clock: OK\n"'

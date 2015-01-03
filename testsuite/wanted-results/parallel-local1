@@ -211,7 +211,7 @@ echo ac
 ac
 echo '### Test bug #34241: --pipe should not spawn unneeded processes'
 ### Test bug #34241: --pipe should not spawn unneeded processes
-  seq 3 | parallel -j30 --pipe --block-size 10 cat\;echo o 
+  seq 3 | parallel -j30 --pipe --block-size 10 cat\;echo o
 1
 2
 3
@@ -369,12 +369,9 @@ echo '### Test --seqreplace and line too long'
       1 parallel: Error: Command line too long (309 >= 210) at number 0: 100...
 echo '### bug #37042: -J foo is taken from the whole command line - not just the part before the command'
 ### bug #37042: -J foo is taken from the whole command line - not just the part before the command
-  echo '--tagstring foo' > ~/.parallel/bug_37042_profile; 
-  parallel -J bug_37042_profile echo ::: tag_with_foo; 
+  echo '--tagstring foo' > ~/.parallel/bug_37042_profile;   parallel -J bug_37042_profile echo ::: tag_with_foo;   parallel --tagstring a -J bug_37042_profile echo ::: tag_with_a;   parallel --tagstring a echo -J bug_37042_profile ::: print_-J_bug_37042_profile
 foo	tag_with_foo
-  parallel --tagstring a -J bug_37042_profile echo ::: tag_with_a; 
 a	tag_with_a
-  parallel --tagstring a echo -J bug_37042_profile ::: print_-J_bug_37042_profile;
 a	-J bug_37042_profile print_-J_bug_37042_profile
 echo '### Bug introduce by fixing bug #37042'
 ### Bug introduce by fixing bug #37042

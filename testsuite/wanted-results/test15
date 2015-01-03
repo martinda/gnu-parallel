@@ -297,56 +297,89 @@ via pseudotty
 gzip /tmp/parallel_f1
 gzip /tmp/parallel_f2'
 '
+echo '### Test -i and --replace: Replace with argument'
 ### Test -i and --replace: Replace with argument
+(echo a; echo END; echo b) | parallel -k -i -eEND echo repl{}ce
 replace
+(echo a; echo END; echo b) | parallel -k --replace -eEND echo repl{}ce
 replace
+(echo a; echo END; echo b) | parallel -k -i+ -eEND echo repl+ce
 replace
+(echo e; echo END; echo b) | parallel -k -i'*' -eEND echo r'*'plac'*'
 replace
+(echo a; echo END; echo b) | parallel -k --replace + -eEND echo repl+ce
 replace
+(echo a; echo END; echo b) | parallel -k --replace== -eEND echo repl=ce
 replace
+(echo a; echo END; echo b) | parallel -k --replace = -eEND echo repl=ce
 replace
+(echo a; echo END; echo b) | parallel -k --replace=^ -eEND echo repl^ce
 replace
+(echo a; echo END; echo b) | parallel -k -I^ -eEND echo repl^ce
 replace
+echo '### Test -E: Artificial end-of-file'
 ### Test -E: Artificial end-of-file
+(echo include this; echo END; echo not this) | parallel -k -E END echo
 include this
+(echo include this; echo END; echo not this) | parallel -k -EEND echo
 include this
+echo '### Test -e and --eof: Artificial end-of-file'
 ### Test -e and --eof: Artificial end-of-file
+(echo include this; echo END; echo not this) | parallel -k -e END echo
 include this
+(echo include this; echo END; echo not this) | parallel -k -eEND echo
 include this
+(echo include this; echo END; echo not this) | parallel -k --eof=END echo
 include this
+(echo include this; echo END; echo not this) | parallel -k --eof END echo
 include this
+echo '### Test -n and --max-args: Max number of args per line (only with -X and -m)'
 ### Test -n and --max-args: Max number of args per line (only with -X and -m)
+(echo line 1;echo line 2;echo line 3) | parallel -k -n1 -m echo
 line 1
 line 2
 line 3
+(echo line 1;echo line 1;echo line 2) | parallel -k -n2 -m echo
 line 1 line 1
 line 2
+(echo line 1;echo line 2;echo line 3) | parallel -k -n1 -X echo
 line 1
 line 2
 line 3
+(echo line 1;echo line 1;echo line 2) | parallel -k -n2 -X echo
 line 1 line 1
 line 2
+(echo line 1;echo line 2;echo line 3) | parallel -k -n1 echo
 line 1
 line 2
 line 3
+(echo line 1;echo line 1;echo line 2) | parallel -k -n2 echo
 line 1 line 1
 line 2
+(echo line 1;echo line 2;echo line 3) | parallel -k --max-args=1 -X echo
 line 1
 line 2
 line 3
+(echo line 1;echo line 2;echo line 3) | parallel -k --max-args 1 -X echo
 line 1
 line 2
 line 3
+(echo line 1;echo line 1;echo line 2) | parallel -k --max-args=2 -X echo
 line 1 line 1
 line 2
+(echo line 1;echo line 1;echo line 2) | parallel -k --max-args 2 -X echo
 line 1 line 1
 line 2
+(echo line 1;echo line 2;echo line 3) | parallel -k --max-args 1 echo
 line 1
 line 2
 line 3
+(echo line 1;echo line 1;echo line 2) | parallel -k --max-args 2 echo
 line 1 line 1
 line 2
+echo '### Test --max-procs and -P: Number of processes'
 ### Test --max-procs and -P: Number of processes
+seq 1 10 | parallel -k --max-procs +0 echo max proc
 max proc 1
 max proc 2
 max proc 3
@@ -357,6 +390,7 @@ max proc 7
 max proc 8
 max proc 9
 max proc 10
+seq 1 10 | parallel -k -P 200% echo 200% proc
 200% proc 1
 200% proc 2
 200% proc 3
@@ -367,42 +401,65 @@ max proc 10
 200% proc 8
 200% proc 9
 200% proc 10
+echo '### Test --delimiter and -d: Delimiter instead of newline'
 ### Test --delimiter and -d: Delimiter instead of newline
+echo '# Yes there is supposed to be an extra newline for -d N'
 # Yes there is supposed to be an extra newline for -d N
+echo line 1Nline 2Nline 3 | parallel -k -d N echo This is
 This is line 1
 This is line 2
 This is line 3
 
+echo line 1Nline 2Nline 3 | parallel -k --delimiter N echo This is
 This is line 1
 This is line 2
 This is line 3
 
+printf "delimiter NUL line 1\0line 2\0line 3" | parallel -k -d '\0' echo
 delimiter NUL line 1
 line 2
 line 3
+printf "delimiter TAB line 1\tline 2\tline 3" | parallel -k --delimiter '\t' echo
 delimiter TAB line 1
 line 2
 line 3
+echo '### Test --max-chars and -s: Max number of chars in a line'
 ### Test --max-chars and -s: Max number of chars in a line
+(echo line 1;echo line 1;echo line 2) | parallel -k --max-chars 25 -X echo
 line 1 line 1
 line 2
+(echo line 1;echo line 1;echo line 2) | parallel -k -s 25 -X echo
 line 1 line 1
 line 2
+echo '### Test --no-run-if-empty and -r: This should give no output'
 ### Test --no-run-if-empty and -r: This should give no output
+echo "  " | parallel -r echo
+echo "  " | parallel --no-run-if-empty echo
+echo '### Test --help and -h: Help output (just check we get the same amount of lines)'
 ### Test --help and -h: Help output (just check we get the same amount of lines)
+echo Output from -h and --help
 Output from -h and --help
+parallel -h | wc -l
 35
+parallel --help | wc -l
 35
+echo '### Test --version: Version output (just check we get the same amount of lines)'
 ### Test --version: Version output (just check we get the same amount of lines)
+parallel --version | wc -l
 11
+echo '### Test --verbose and -t'
 ### Test --verbose and -t
+(echo b; echo c; echo f) | parallel -k -t echo {}ar 2>&1 >/dev/null
 echo bar
 echo car
 echo far
+(echo b; echo c; echo f) | parallel -k --verbose echo {}ar 2>&1 >/dev/null
 echo bar
 echo car
 echo far
+echo '### Test --show-limits'
 ### Test --show-limits
+(echo b; echo c; echo f) | parallel -k --show-limits echo {}ar
 Maximal size of command: 131071
 Maximal used size of command: 131071
 
@@ -412,6 +469,7 @@ press CTRL-D or CTRL-C
 bar
 car
 far
+(echo b; echo c; echo f) | parallel -j1 -kX --show-limits -s 100 echo {}ar
 Maximal size of command: 131071
 Maximal used size of command: 100
 
@@ -419,9 +477,13 @@ Execution of  will continue now, and it will try to read its input
 and run commands; if this is not what you wanted to happen, please
 press CTRL-D or CTRL-C
 bar car far
+echo '### Test empty line as input'
 ### Test empty line as input
+echo | parallel echo empty input line
 empty input line
+echo '### Tests if (cat | sh) works'
 ### Tests if (cat | sh) works
+perl -e 'for(1..25) {print "echo a $_; echo b $_\n"}' | parallel 2>&1 | sort
 a 1
 a 10
 a 11
@@ -472,7 +534,9 @@ b 6
 b 7
 b 8
 b 9
+echo '### Test if xargs-mode works'
 ### Test if xargs-mode works
+perl -e 'for(1..25) {print "a $_\nb $_\n"}' | parallel echo 2>&1 | sort
 a 1
 a 10
 a 11
@@ -523,17 +587,25 @@ b 6
 b 7
 b 8
 b 9
+echo '### Test -q'
 ### Test -q
+parallel -kq perl -e '$ARGV[0]=~/^\S+\s+\S+$/ and print $ARGV[0],"\n"' ::: "a b" c "d e f" g "h i"
 a b
 h i
+echo '### Test -q {#}'
 ### Test -q {#}
+parallel -kq echo {#} ::: a b
 1
 2
+parallel -kq echo {\#} ::: a b
 1
 2
+parallel -kq echo {\\#} ::: a b
 {\#} a
 {\#} b
+echo '### Test long commands do not take up all memory'
 ### Test long commands do not take up all memory
+seq 1 100 | parallel -j0 -qv perl -e '$r=rand(shift);for($f=0;$f<$r;$f++){$a="a"x100};print shift,"\n"' 10000 2>/dev/null | sort
 1
 10
 100
@@ -734,29 +806,45 @@ perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\)\{\$a=\"a\"x100\}\;print
 perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\)\{\$a=\"a\"x100\}\;print\ shift,\"\\n\" 10000 97
 perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\)\{\$a=\"a\"x100\}\;print\ shift,\"\\n\" 10000 98
 perl -e \$r=rand\(shift\)\;for\(\$f=0\;\$f\<\$r\;\$f++\)\{\$a=\"a\"x100\}\;print\ shift,\"\\n\" 10000 99
+echo '### Test 0-arguments'
 ### Test 0-arguments
+seq 1 2 | parallel -k -n0 echo n0
 n0
 n0
+seq 1 2 | parallel -k -L0 echo L0
 L0
 L0
+seq 1 2 | parallel -k -N0 echo N0
 N0
 N0
+echo '### Because of --tollef -l, then -l0 == -l1, sorry'
 ### Because of --tollef -l, then -l0 == -l1, sorry
+seq 1 2 | parallel -k -l0 echo l0
 l0 1
 l0 2
+echo '### Test replace {}'
 ### Test replace {}
+seq 1 2 | parallel -k -N0 echo replace {} curlies
 replace curlies
 replace curlies
+echo '### Test arguments on commandline'
 ### Test arguments on commandline
+parallel -k -N0 echo args on cmdline ::: 1 2
 args on cmdline
 args on cmdline
+echo '### Test --nice locally'
 ### Test --nice locally
+parallel --nice 1 -vv 'PAR=a bash -c "echo  \$PAR {}"' ::: b
 \nice -n1 /bin/bash -c PAR=a\ bash\ -c\ \"echo\ \ \\\$PAR\ b\"
 a b
+echo '### Test --nice remote'
 ### Test --nice remote
+stdout parallel --nice 1 -S .. -vv 'PAR=a bash -c "echo  \$PAR {}"' ::: b |   perl -pe 's/\S*parallel-server\S*/one-server/;s/[a-f0-9]{500,}/hex/;s/\d{5,8}/pId/g;'
 ssh one-server exec perl -e \\\$ENV\\\{\\\"PARALLEL_PID\\\"\\\}=\\\"pId\\\"\\\;\\\$ENV\\\{\\\"PARALLEL_SEQ\\\"\\\}=\\\"1\\\"\\\;\\\$bashfunc\\\ =\\\ \\\"\\\"\\\;@ARGV=\\\"\\\\\\\\nice\\\ -n1\\\ /bin/bash\\\ -c\\\ PAR=a\\\\\\\\\\\ bash\\\\\\\\\\\ -c\\\\\\\\\\\ \\\\\\\\\\\\\\\"echo\\\\\\\\\\\ \\\\\\\\\\\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\$PAR\\\\\\\\\\\ b\\\\\\\\\\\\\\\"\\\"\\\;\\\$SIG\\\{CHLD\\\}=sub\\\{\\\$done=1\\\;\\\}\\\;\\\$pid=fork\\\;unless\\\(\\\$pid\\\)\\\{setpgrp\\\;exec\\\$ENV\\\{SHELL\\\},\\\"-c\\\",\\\(\\\$bashfunc.\\\"@ARGV\\\"\\\)\\\;die\\\"exec:\\\$\\\!\\\\n\\\"\\\;\\\}do\\\{\\\$s=\\\$s\\\<1\\\?0.001+\\\$s\\\*1.03:\\\$s\\\;select\\\(undef,undef,undef,\\\$s\\\)\\\;\\\}until\\\(\\\$done\\\|\\\|getppid==1\\\)\\\;kill\\\(SIGHUP,-\\\$\\\{pid\\\}\\\)unless\\\$done\\\;wait\\\;exit\\\(\\\$\\\?\\\&127\\\?128+\\\(\\\$\\\?\\\&127\\\):1+\\\$\\\?\\\>\\\>8\\\);
 a b
+echo '### Test distribute arguments at EOF to 2 jobslots'
 ### Test distribute arguments at EOF to 2 jobslots
+seq 1 92 | parallel -j+0 -kX -s 100 echo
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65
 66 67 68 69
@@ -766,7 +854,9 @@ a b
 82 83 84 85
 86 87 88 89
 90 91 92
+echo '### Test distribute arguments at EOF to 5 jobslots'
 ### Test distribute arguments at EOF to 5 jobslots
+seq 1 92 | parallel -j+3 -kX -s 100 echo
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65
 66 67 68
@@ -778,7 +868,9 @@ a b
 84 85 86
 87 88 89
 90 91 92
+echo '### Test distribute arguments at EOF to infinity jobslots'
 ### Test distribute arguments at EOF to infinity jobslots
+seq 1 92 | parallel -j0 -kX -s 100 echo 2>/dev/null
 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34
 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65
 66
@@ -808,14 +900,22 @@ a b
 90
 91
 92
+echo '### Test -N is not broken by distribution - single line'
 ### Test -N is not broken by distribution - single line
+seq 9 | parallel  -N 10  echo
 1 2 3 4 5 6 7 8 9
+echo '### Test -N is not broken by distribution - two lines'
 ### Test -N is not broken by distribution - two lines
+seq 19 | parallel -k -N 10  echo
 1 2 3 4 5 6 7 8 9 10
 11 12 13 14 15 16 17 18 19
+echo '### Test -N context replace'
 ### Test -N context replace
+seq 19 | parallel -k -N 10  echo a{}b
 a1b a2b a3b a4b a5b a6b a7b a8b a9b a10b
 a11b a12b a13b a14b a15b a16b a17b a18b a19b
+echo '### Test -L context replace'
 ### Test -L context replace
+seq 19 | parallel -k -L 10  echo a{}b
 a1b a2b a3b a4b a5b a6b a7b a8b a9b a10b
 a11b a12b a13b a14b a15b a16b a17b a18b a19b

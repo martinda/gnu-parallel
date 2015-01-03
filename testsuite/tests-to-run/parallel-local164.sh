@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # -L1 will join lines ending in ' '
-cat <<'EOF' | parallel -vj10 -k -L1
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### bug #38354: -J profile_name should read from `pwd`/profile_name before ~/.parallel/profile_name'
   echo "echo echo from ./local_test_profile" > local_test_profile; 
   parallel --profile local_test_profile echo ::: 1; 
@@ -56,9 +56,9 @@ echo "### Computing length of command line"
   parallel -k -C %+ echo '"{1}_{3}_{2}_{4}"' ::: 'a% c %%b' 'a%c% b %d'
   parallel -k -C %+ echo {4} ::: 'a% c %%b'
 
-echo "### test08"; 
+echo "### test08"
   cd input-files/test08; 
-  ls | parallel -q  perl -ne '/_PRE (\d+)/ and $p=$1; /hatchname> (\d+)/ and $1!=$p and print $ARGV,"\n"' | sort;
+  ls | parallel -q  perl -ne '/_PRE (\d+)/ and $p=$1; /hatchname> (\d+)/ and $1!=$p and print $ARGV,"\n"' | sort
 
 seq 1 10 | parallel -j 1 echo | sort
 seq 1 10 | parallel -j 2 echo | sort

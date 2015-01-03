@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cat <<'EOF' | parallel -vj0 -k
+cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k --joblog /tmp/jl-`basename $0` -L1
 echo "bug #43654: --bar with command not using {} - only last output line "
   COLUMNS=80 stdout parallel --bar true {.} ::: 1 | perl -pe 's/.*\r/\r/'
 
@@ -109,7 +109,7 @@ echo '### Test of bug: If input is empty string'
   (echo ; echo abcbdbebf;echo abc) | parallel -k --colsep b -v echo {1}{2}
 
 echo '### Test bug #34241: --pipe should not spawn unneeded processes'
-  seq 3 | parallel -j30 --pipe --block-size 10 cat\;echo o 
+  seq 3 | parallel -j30 --pipe --block-size 10 cat\;echo o
 
 echo '### Test :::: mixed with :::'
 echo '### Test :::: < ::: :::'
@@ -152,7 +152,7 @@ echo '### bug #37042: -J foo is taken from the whole command line - not just the
   echo '--tagstring foo' > ~/.parallel/bug_37042_profile; 
   parallel -J bug_37042_profile echo ::: tag_with_foo; 
   parallel --tagstring a -J bug_37042_profile echo ::: tag_with_a; 
-  parallel --tagstring a echo -J bug_37042_profile ::: print_-J_bug_37042_profile;
+  parallel --tagstring a echo -J bug_37042_profile ::: print_-J_bug_37042_profile
 
 echo '### Bug introduce by fixing bug #37042'
   parallel --xapply -a <(printf 'abc') --colsep '\t' echo {1}
