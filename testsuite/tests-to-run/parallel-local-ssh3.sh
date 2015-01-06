@@ -32,4 +32,7 @@ echo '### --hostgroup -S @group1 -Sgrp2'
 echo '### --hostgroup -S @group1+grp2'
   parallel -S @g1+g2 -S @g1/1/tcsh@lo -S @g1/1/localhost -S @g2/1/parallel@lo whoami\;true ::: {1..6} | sort
 
+echo '### trailing space in sshlogin'
+  echo 'sshlogin trailing space' | parallel  --sshlogin "ssh -l parallel localhost " echo
+
 EOF

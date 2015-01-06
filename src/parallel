@@ -949,7 +949,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150101;
+    $Global::version = 20150106;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2305,6 +2305,7 @@ sub parse_sshlogin {
 		# This may add to @Global::sshlogin - possibly bug
 		read_sshloginfile(expand_slf_shorthand($s));
             } else {
+		$s =~ s/\s*$//;
                 push (@login, $s);
             }
         }

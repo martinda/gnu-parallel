@@ -87,3 +87,7 @@ tange
 tange
 tcsh
 tcsh
+echo '### trailing space in sshlogin'
+### trailing space in sshlogin
+  echo 'sshlogin trailing space' | parallel  --sshlogin "ssh -l parallel localhost " echo
+sshlogin trailing space

@@ -4274,18 +4274,20 @@ The error message you get (if any).
 =item *
 
 The complete output of B<parallel --version>. If you are not running
-the latest released version you should specify why you believe the
-problem is not fixed in that version.
+the latest released version (see http://ftp.gnu.org/gnu/parallel/) you
+should specify why you believe the problem is not fixed in that
+version.
 
 =item *
 
-A complete example that others can run that shows the problem. This
-should preferably be small and simple. A combination of B<yes>,
-B<seq>, B<cat>, B<echo>, and B<sleep> can reproduce most errors. If
-your example requires large files, see if you can make them by
-something like B<seq 1000000> > B<file> or B<yes | head -n 10000000> >
-B<file>. If your example requires remote execution, see if you can
-use B<localhost> - maybe using another login.
+A complete example that others can run that shows the problem
+including all files needed to run the example. This should preferably
+be small and simple. A combination of B<yes>, B<seq>, B<cat>, B<echo>,
+and B<sleep> can reproduce most errors. If your example requires large
+files, see if you can make them by something like B<seq 1000000> >
+B<file> or B<yes | head -n 10000000> > B<file>. If your example
+requires remote execution, see if you can use B<localhost> - maybe
+using another login.
 
 =item *
 
