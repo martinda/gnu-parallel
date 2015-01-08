@@ -3,16 +3,16 @@
 # SSH only allowed to localhost/lo
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj2 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### --hostgroup force ncpu'
-  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.{} ::: {1..8} | sort
+  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.2{} ::: {1..8} | sort
 
 echo '### --hostgroup two group arg'
-  parallel -k --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.{} ::: {1..8}@g1+g2 | sort
+  parallel -k --sshdelay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.3{} ::: {1..8}@g1+g2 | sort
 
 echo '### --hostgroup one group arg'
-  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.{} ::: {1..8}@g2
+  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g2/3/lo whoami\;sleep 0.2{} ::: {1..8}@g2
 
 echo '### --hostgroup multiple group arg + unused group'
-  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g1/3/lo -S @g3/100/tcsh@lo whoami\;sleep 0.{} ::: {1..8}@g1+g2 | sort
+  parallel --delay 0.1 --hgrp -S @g1/1/parallel@lo -S @g1/3/lo -S @g3/100/tcsh@lo whoami\;sleep 0.2{} ::: {1..8}@g1+g2 | sort
 
 echo '### --hostgroup two groups @'
   parallel -k --hgrp -S @g1/parallel@lo -S @g2/lo --tag whoami\;echo ::: parallel@g1 tange@g2

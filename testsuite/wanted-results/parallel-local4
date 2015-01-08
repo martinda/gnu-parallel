@@ -2,9 +2,6 @@ echo '### bug #36595: silent loss of input with --pipe and --sshlogin'
 ### bug #36595: silent loss of input with --pipe and --sshlogin
   seq 10000 | xargs | parallel --pipe -S 10/localhost cat | wc
       1   10000   48894
-parallel: Warning: ssh to localhost only allows for 9 simultaneous logins.
-You may raise this by changing /etc/ssh/sshd_config:MaxStartups and MaxSessions on localhost.
-Using only 8 connections to avoid race conditions.
 echo 'bug #36707: --controlmaster eats jobs'
 bug #36707: --controlmaster eats jobs
   seq 2 | parallel -k --controlmaster --sshlogin localhost echo OK{}

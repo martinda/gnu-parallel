@@ -15,10 +15,10 @@ echo '### -N and --noswap. Must give 0'
 --noswap 0
 echo '### -H and --hard'
 ### -H and --hard
-  niceload  -H -l 9.9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK-l9.9
-OK-l9.9
-  niceload  --hard -l 9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK-l9
-OK-l9
+  niceload  -H -l 9.9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK-load below 9.9
+OK-load below 9.9
+  niceload  --hard -l 9 uptime | grep ':.[1-9][0-9].[0-9][0-9],' || echo OK-load below 10
+OK-load below 10
 echo '### -f and --factor'
 ### -f and --factor
   niceload -H -f 0.01 -l6 echo f 0.1 finish first

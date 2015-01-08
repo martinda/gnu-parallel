@@ -4,7 +4,7 @@
 
 Check that documentation is updated (compare to web):
 
-Fixet for 20141022
+Fixet for 20141122
 git diff last-release-commit
 Unmodified beta since last version => production
 Unmodified alpha since last version => beta
@@ -226,9 +226,9 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20150122 ('Manila SQ8501') released
+Subject: GNU Parallel 20150122 ('Manila QZ8501') released
 
-GNU Parallel 20150122 ('Manila SQ8501') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20150122 ('Hebdo Manila QZ8501') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 Haiku of the month:
 
@@ -238,7 +238,9 @@ New in this release:
 
 * Remote jobs now sends stderr (standard error) to stderr (standard error) instead of stdout (standard output)
 
-* Remote execution is now packed using hex encoded bzip2. That means that big environments (app. 250 KB) can be transferred. 
+* Remote execution is now packed using hex encoded bzip2. That means that big environments (app. 250 KB) can be transferred. This change makes remote execution alpha quality.
+
+* --semaphoretimeout now takes a negative value. This means give up if the semaphore is not gotten within the timeout.
 
 * A semibig refactoring of big functions. All non-trivial functions are now less than 100 lines. The refactoring makes this release beta quality.
 
@@ -253,6 +255,10 @@ New in this release:
 * Multithreaded Encryption and Compression http://www.krazyworks.com/multithreaded-encryption-and-compression/
 
 * GNU Parallel on OSX and Linux https://darknightelf.wordpress.com/2015/01/01/gnu-parallel-on-osx/
+
+* How to build gnu parallel from source on Ubuntu PC? http://blog.ovidiuparvu.com/build-gnu-parallel-source-ubuntu-pc/
+
+* From SRA Project to FastQ http://danielecook.com/sra-project-fastq/
 
 * コマンドを並列に実行するGNU parallelがとても便利 http://bicycle1885.hatenablog.com/entry/2014/08/10/143612
 
