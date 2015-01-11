@@ -600,8 +600,8 @@ sub options_hash {
 	 "resume" => \$opt::resume,
 	 "resume-failed|resumefailed" => \$opt::resume_failed,
 	 "silent" => \$opt::silent,
-	 #"silent-error|silenterror" => \$opt::silent_error,
 	 "keep-order|keeporder|k" => \$opt::keeporder,
+	 "no-keep-order|nokeeporder|nok|no-k" => \$opt::nokeeporder,
 	 "group" => \$opt::group,
 	 "g" => \$opt::retired,
 	 "ungroup|u" => \$opt::ungroup,
@@ -681,10 +681,10 @@ sub options_hash {
 	 "files|output-as-files|outputasfiles" => \$opt::files,
 	 "block|block-size|blocksize=s" => \$opt::blocksize,
 	 "tollef" => \$opt::retired,
-	 "gnu" => \$opt::gnu,
+	 "gnu" => \$opt::ignored_option,
 	 "xapply" => \$opt::xapply,
 	 "bibtex" => \$opt::bibtex,
-	 "nn|nonotice|no-notice" => \$opt::no_notice,
+	 "wc|willcite|will-cite|nn|nonotice|no-notice" => \$opt::willcite,
 	 "memfree=s" => \$opt::memfree,
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$opt::jobs,
@@ -773,6 +773,10 @@ sub parse_options {
     # Returns: N/A
     init_globals();
     @ARGV=read_options();
+
+    # no-* overrides *
+    if($opt::nokeeporder) { $opt::keeporder = undef; }
+    if($opt::noctrlc) { $opt::ctrlc = undef; }
 
     if(@opt::v) { $Global::verbose = $#opt::v+1; } # Convert -v -v to v=2
     $Global::debug = $opt::D;
@@ -2699,7 +2703,7 @@ sub onall {
 	     (@opt::env ? map { "--env ".::shell_quote_scalar($_) } @opt::env : ""),
 	);
     ::debug("init", "| $0 $options\n");
-    open(my $parallel_fh, "|-", "$0 --no-notice -j0 $options") ||
+    open(my $parallel_fh, "|-", "$0 --will-cite -j0 $options") ||
 	::die_bug("This does not run GNU Parallel: $0 $options");
     my @joblogs;
     for my $host (sort keys %Global::host) {
@@ -2914,11 +2918,11 @@ sub usage {
 
 
 sub citation_notice {
-    # if --no-notice or --plain: do nothing
+    # if --will-cite or --plain: do nothing
     # if stderr redirected: do nothing
     # if ~/.parallel/will-cite: do nothing
     # else: print citation notice to stderr
-    if($opt::no_notice
+    if($opt::willcite
        or
        $opt::plain
        or
@@ -2937,7 +2941,7 @@ sub citation_notice {
 	     "This helps funding further development; and it won't cost you a cent.\n",
 	     "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.\n",
 	     "\n",
-	     "To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.\n\n",
+	     "To silence this citation notice run 'parallel --bibtex' once or use '--will-cite'.\n\n",
 	    );
     }
 }
@@ -2979,9 +2983,6 @@ sub die_bug {
 
 sub version {
     # Returns: N/A
-    if($opt::tollef and not $opt::gnu) {
-	print "WARNING: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n";
-    }
     print join("\n",
                "GNU $Global::progname $Global::version",
                "Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014,2015 Ole Tange",
@@ -2998,9 +2999,6 @@ sub version {
 
 sub bibtex {
     # Returns: N/A
-    if($opt::tollef and not $opt::gnu) {
-	print "WARNING: YOU ARE USING --tollef. IF THINGS ARE ACTING WEIRD USE --gnu.\n";
-    }
     print join("\n",
 	       "Academic tradition requires you to cite works you base your article on.",
 	       "When using programs that use GNU Parallel to process data for publication please cite:",
@@ -3022,8 +3020,10 @@ sub bibtex {
 	       "",
 	       "This helps funding further development.",
 	       "",
-	       "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.\n",
-	       ""
+	       "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.",
+	       "",
+	       "If you send a copy of your published article to tange\@gnu.org, it will be",
+	       "mentioned in the release notes of next version of GNU Parallel.\n\n",
         );
     while(not -e $ENV{'HOME'}."/.parallel/will-cite") {
 	print "\nType: 'will cite' and press enter.\n> ";

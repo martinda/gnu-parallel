@@ -4263,6 +4263,9 @@ change your alias to a script.
 Report bugs to <bug-parallel@gnu.org> or
 https://savannah.gnu.org/bugs/?func=additem&group=parallel
 
+See a perfect bug report on
+https://lists.gnu.org/archive/html/bug-parallel/2015-01/msg00000.html
+
 Your bug report should always include:
 
 =over 2
