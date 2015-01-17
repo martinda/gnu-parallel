@@ -44,4 +44,14 @@ echo '### bug #42999: --pipepart with remote does not work'
   parallel --sshdelay 0.2 --pipepart --block 31 -a /tmp/bug42999 -k --fifo -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ; 
   parallel --sshdelay 0.1 --pipepart --block 31 -a /tmp/bug42999 -k --cat -S parallel@lo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;
 
+echo '### --cat gives incorrect exit value in csh'
+  echo false | parallel --pipe --cat   -Scsh@lo 'cat {}; false' ; echo $?; 
+  echo false | parallel --pipe --cat  -Stcsh@lo 'cat {}; false' ; echo $?; 
+  echo true  | parallel --pipe --cat   -Scsh@lo 'cat {}; true' ; echo $?; 
+  echo true  | parallel --pipe --cat  -Stcsh@lo 'cat {}; true' ; echo $?; 
+
+echo '### --cat and --fifo exit value in bash'
+  echo true  | parallel --pipe --fifo -Slo 'cat {}; true' ; echo $?; 
+  echo false | parallel --pipe --fifo -Slo 'cat {}; false' ; echo $?; 
+
 EOF

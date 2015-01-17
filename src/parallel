@@ -5710,6 +5710,32 @@ sub total_failed {
     return $total_failures;
 }
 
+{
+    my $script;
+
+    sub postpone_exit_and_cleanup {
+	# Command to remove files and dirs (given as args) without
+	# affecting the exit value in $?/$status.
+	if(not $script) {
+	    $script = "perl -e '".
+		::spacefree(0,q{
+		    $bash=shift;
+		    $csh=shift;
+		    for(@ARGV){
+			unlink;
+			rmdir;
+		    }
+		    if($bash=~s/h//) {
+			exit $bash;
+		    }
+		    exit $csh;
+			    }).
+			"' ".'"$?h" "$status" ';
+	}
+	return $script
+    }
+}
+
 sub wrapped {
     # Wrap command with:
     # * --shellquote
@@ -5754,22 +5780,23 @@ sub wrapped {
 	}
 	if($opt::cat) {
 	    # Prepend 'cat > {};'
-	    # Append '_EXIT=$?;(rm {};exit $_EXIT)'
+	    # Append 'unlink {} without affecting $?'
 	    $command =
 		$self->{'commandline'}->replace_placeholders(["cat > \257<\257>; "], 0, 0).
-		$command.
-		$self->{'commandline'}->replace_placeholders(
-		    ["; _EXIT=\$?; rm \257<\257>; exit \$_EXIT"], 0, 0);
+		$command.";". postpone_exit_and_cleanup().
+		$self->{'commandline'}->replace_placeholders(["\257<\257>"], 0, 0);
 	} elsif($opt::fifo) {
 	    # Prepend 'mkfifo {}; ('
-	    # Append ') & _PID=$!; cat > {}; wait $_PID; _EXIT=$?;(rm {};exit $_EXIT)'
+	    # Append ') & _PID=$!; cat > {}; wait $_PID; '
+	    # (This makes it fail in csh, but give the correct exit code in bash)
+	    # Append 'unlink {} without affecting $?'
 	    $command =
-		$self->{'commandline'}->replace_placeholders(["mkfifo \257<\257>; ("], 0, 0).
-		$command.
+		$self->{'commandline'}->replace_placeholders(["mkfifo \257<\257>;\n ("], 0, 0).
+		$command.";".
 		$self->{'commandline'}->replace_placeholders([") & _PID=\$!; cat > \257<\257>; ",
-					    "wait \$_PID; _EXIT=\$?; ",
-					    "rm \257<\257>; exit \$_EXIT"],
-					    0,0);
+					    "wait \$_PID; "]).
+		postpone_exit_and_cleanup().
+		$self->{'commandline'}->replace_placeholders(["\257<\257>"], 0, 0);
 	}
 	# Wrap with ssh + tranferring of files
 	$command = $self->sshlogin_wrap($command);
@@ -5872,7 +5899,7 @@ sub hex_zip_eval {
 	}
         wait;
 	eval $eval;
-    });
+			     });
     ::debug("hex",$script,"\n");
     return $script;
 }
@@ -8551,4 +8578,4 @@ sub mkdir_or_die {
 
 # Keep perl -w happy
 $opt::ctrlc = $opt::x = $Semaphore::timeout = $Semaphore::wait =
-$Job::file_descriptor_warning_printed = 0;
+$opt::ignored_option = $Job::file_descriptor_warning_printed = 0;

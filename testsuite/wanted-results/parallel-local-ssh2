@@ -72,3 +72,20 @@ echo '### bug #42999: --pipepart with remote does not work'
 11 11 33 /tmp/XXXX
 11 11 33 /tmp/XXXX
 10  9 29 /tmp/XXXX
+echo '### --cat gives incorrect exit value in csh'
+### --cat gives incorrect exit value in csh
+  echo false | parallel --pipe --cat   -Scsh@lo 'cat {}; false' ; echo $?;   echo false | parallel --pipe --cat  -Stcsh@lo 'cat {}; false' ; echo $?;   echo true  | parallel --pipe --cat   -Scsh@lo 'cat {}; true' ; echo $?;   echo true  | parallel --pipe --cat  -Stcsh@lo 'cat {}; true' ; echo $?; echo '### --cat and --fifo exit value in bash'
+false
+1
+false
+1
+true
+0
+true
+0
+### --cat and --fifo exit value in bash
+  echo true  | parallel --pipe --fifo -Slo 'cat {}; true' ; echo $?;   echo false | parallel --pipe --fifo -Slo 'cat {}; false' ; echo $?; 
+true
+0
+false
+1

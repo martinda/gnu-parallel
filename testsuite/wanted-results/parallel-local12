@@ -8,7 +8,7 @@ When using programs that use GNU Parallel to process data for publication please
 This helps funding further development; and it won't cost you a cent.
 If you pay 10000 EUR you should feel free to use GNU Parallel without citing.
 
-To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.
+To silence this citation notice run 'parallel --bibtex' once or use '--will-cite'.
 
 cat -
 via first cat
@@ -24,7 +24,7 @@ When using programs that use GNU Parallel to process data for publication please
 This helps funding further development; and it won't cost you a cent.
 If you pay 10000 EUR you should feel free to use GNU Parallel without citing.
 
-To silence this citation notice run 'parallel --bibtex' once or use '--no-notice'.
+To silence this citation notice run 'parallel --bibtex' once or use '--will-cite'.
 
 echo a
 a
