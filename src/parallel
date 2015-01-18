@@ -3141,7 +3141,8 @@ sub which {
     #   @full_path = full paths to @programs. Nothing if not found
     my @which;
     for my $prg (@_) {
-	push @which, map { $_."/".$prg } grep { -x $_."/".$prg } split(":",$ENV{'PATH'});
+	push @which, grep { not -d $_ and -x $_ } 
+	map { $_."/".$prg } split(":",$ENV{'PATH'});
     }
     return @which;
 }
