@@ -5039,7 +5039,7 @@ sub cleanup_cmd {
 	$dir .= $_."/";
 	unshift @rmdir, ::shell_quote_file($dir);
     }
-    my $rmdir = @rmdir ? "rmdir @rmdir 2>/dev/null;" : "";
+    my $rmdir = @rmdir ? "rmdir @rmdir >&/dev/null;" : "";
     if(defined $opt::workdir and $opt::workdir eq "...") {
 	$rmdir .= "rm -rf " . ::shell_quote_file($workdir).';';
     }
@@ -5814,6 +5814,7 @@ sub wrapped {
 		# Exit value:
 		#   empty input = true
 		#   some input = exit val from command
+		# sh -c needed as csh cannot hide stderr
 		qq{ sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null'; }.
 		qq{ test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true; }.
 		qq{ (cat $tmpfile; rm $tmpfile; cat - ) | }.
@@ -5841,20 +5842,21 @@ sub sshlogin {
     return $self->{'sshlogin'};
 }
 
-sub string_zip_hex {
-    # Pipe string through 'bzip2 -9' and hex encode it into 1000 byte
-    # blocks.
+sub string_zip_base64 {
+    # Pipe string through 'bzip2 -9' and base64 encode it into 1000
+    # byte blocks.
     # 1000 bytes is the largest word size csh supports
     # Input:
     #   @strings = to be encoded
     # Returns:
-    #   @hex = 1000 byte block
-    my($zipin_fh, $zipout_fh,@hex);
+    #   @base64 = 1000 byte block
+    my($zipin_fh, $zipout_fh,@base64);
     ::open3($zipin_fh,$zipout_fh,">&STDERR","bzip2 -9");
     if(fork) {
 	close $zipin_fh;
-	# Chop hex into 1000 byte blocks
-	@hex = unpack("(H1000)*",join"",<$zipout_fh>);
+	$Global::use{"MIME::Base64"} ||= eval "use MIME::Base64; 1;";
+	# Split base64 encoded into 1000 byte blocks
+	@base64 = unpack("(A1000)*",encode_base64((join"",<$zipout_fh>),""));
 	close $zipout_fh;
     } else {
 	close $zipout_fh;
@@ -5862,22 +5864,22 @@ sub string_zip_hex {
 	close $zipin_fh;
 	exit;
     }
-    ::debug("hex","Orig:@_\nAs hex:@hex\n");
-    return @hex;
+    ::debug("base64","Orig:@_\nAs base64:@base64\n");
+    return @base64;
 }
 
-sub hex_zip_eval {
+sub base64_zip_eval {
     # Script that:
-    #   * reads hexstrings from @ARGV
-    #   * unhexes them
+    #   * reads base64 strings from @ARGV
+    #   * decodes them
     #   * pipes through 'bzip2 -dc'
     #   * evals the result
-    # Reverse of string_bz_hex + eval
+    # Reverse of string_zip_base64 + eval
     # Will be wrapped in ' so single quote is forbidden
     # Returns:
     #   $script = 1-liner for perl -e
     my $script = ::spacefree(0,q{
-        @GNU_Parallel=("use","IPC::Open3;");
+        @GNU_Parallel=("use","IPC::Open3;","use","MIME::Base64");
         eval "@GNU_Parallel";
 
         $SIG{CHLD}="IGNORE";
@@ -5892,17 +5894,18 @@ sub hex_zip_eval {
 	    close $out;
 	} else {
 	    close $out;
-	    # Pipe decoded hex into 'bzip2 -dc'
-	    print $in (pack("H*",join"",@ARGV));
+	    # Pipe decoded base64 into 'bzip2 -dc'
+	    print $in (decode_base64(join"",@ARGV));
 	    close $in;
 	    exit;
 	}
         wait;
 	eval $eval;
 			     });
-    ::debug("hex",$script,"\n");
+    ::debug("base64",$script,"\n");
     return $script;
 }
+
 
 sub sshlogin_wrap {
     # Wrap the command with the commands needed to run remotely
@@ -6013,7 +6016,7 @@ sub sshlogin_wrap {
 	if($ENV{"parallel_bash_environment"}) {
 	    $bashfuncset .= '$bashfunc .= "eval\ \"\$parallel_bash_environment\"\;";';
 	}
-	::debug("hex",$envset,$bashfuncset,"\n");
+	::debug("base64",$envset,$bashfuncset,"\n");
 	return $csh_friendly,$envset,$bashfuncset;
     }
 
@@ -6062,8 +6065,8 @@ sub sshlogin_wrap {
 	       $command =~ "\n") {
 		# csh does not deal well with > 1000 chars in one word
 		# csh does not deal well with $ENV with \n
-		$quoted_remote_command = "exec perl -e '".::shell_quote_scalar(hex_zip_eval())."' ".
-		    join" ",string_zip_hex($remote_command);
+		$quoted_remote_command = "exec perl -e '".::shell_quote_scalar(base64_zip_eval())."' ".
+		    join" ",string_zip_base64($remote_command);
 	    }
 	    $self->{'sshlogin_wrap'} =
 		($pre
