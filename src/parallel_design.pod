@@ -1,0 +1,490 @@
+#!/usr/bin/perl -w
+
+=encoding utf8
+
+=head1 Design of GNU Parallel
+
+This document describes design decisions made in the development of
+GNU B<parallel> and the reasoning behind them. It will give an
+overview of why some of the code looks like it does, and help new
+maintainers understand the code better.
+
+=head2 Job slots
+
+The easiest way to explain what GNU B<parallel> does is to assume that
+there are a number of job slots, and when a slot becomes available a
+job from the queue will be run in that slot. But originally GNU
+B<parallel> did not model job slots in the code. Job slots have been
+added to make it possible to use {%} as a replacement string.
+
+Job slots were added to the code in 20140522, but while the job
+sequence number can be computed in advance, the job slot can only be
+computed the moment a slot becomes available. So it has been
+implemented as a stack with lazy evaluation: Draw one from an empty
+stack and the stack is extended by one. When a job is done, push the
+available job slot back on the stack.
+
+This implementation also means that if you use remote executions, you
+cannot assume that a given job slot will remain on the same remote
+server. This goes double since number of job slots can be adjusted on
+the fly (by giving B<--jobs> a file name).
+
+=head2 Rsync protocol version
+
+B<rsync> 3.1.x uses protocol 31 which is unsupported by version
+2.5.7. That means that you cannot push a file to a remote system using
+B<rsync> protocol 31, if the remote system uses 2.5.7. B<rsync> does
+not automatically downgrade to protocol 30.
+
+GNU B<parallel> does not require protocol 31, so if the B<rsync>
+version is >= 3.1.0 then B<--protocol 30> is added to force newer
+B<rsync>s to talk to version 2.5.7.
+
+
+=head2 Wrapping
+
+The command given by the user can be wrapped in multiple
+templates. Templates can be wrapped in other templates.
+
+=over 15
+
+=item --shellquote
+
+echo <<shell double quoted input>>
+
+=item --nice I<pri>
+
+\nice -n I<pri> $shell -c <<shell quoted input>>
+
+The \ is needed to avoid using the builtin nice command, which does not
+support -n in B<tcsh>. B<$shell -c> is needed to nice composed commands
+command.
+
+=item --cat
+
+(cat > {}; <<input>> {}; perl -e '$bash=shift; $csh=shift; for(@ARGV)
+{unlink;rmdir;} if($bash=~s/h//) {exit$bash;} exit$csh;' "$?h"
+"$status" {});
+
+{} is really just a tmpfile. The Perl script saves the exit value,
+unlinks the tmpfile, and returns the exit value - no matter if the
+shell is B<bash> (using $?) or B<*csh> (using $status).
+
+=item --fifo
+
+(mkfifo {};
+ (<<input>> {};) & _PID=$!; cat > {};  wait $_PID; perl -e '$bash=shift; $csh=shift; for(@ARGV)
+{unlink;rmdir;} if($bash=~s/h//) {exit$bash;} exit$csh;' "$?h"
+"$status" {});
+
+B<wait $_PID> makes sure the exit value is from that PID. This makes it 
+incompatible with B<*csh>. The Perl script is the same as from B<--cat>.
+
+=item --sshlogin I<sln>
+
+ssh I<sln> <<shell quoted input>>
+
+=item --transfer
+
+( ssh I<sln> mkdir -p ./I<workdir>;rsync --protocol 30 -rlDzR -essh ./{} I<sln>:./I<workdir> ); <<input>>
+
+Read about B<--protocol 30> in the section B<Rsync protocol version>.
+
+=item --basefile
+
+<<todo>>
+
+=item --return I<file>
+
+<<input>>; _EXIT_status=$?; mkdir -p I<workdir>; rsync --protocol 30 --rsync-path=cd\ ./I<workdir>\;\ rsync -rlDzR -essh I<sln>:./I<file> ./I<workdir>; exit $_EXIT_status;
+
+The B<--rsync-path=cd ...> is needed because old versions of B<rsync>
+do not support B<--no-implied-dirs>.
+
+The B<$_EXIT_status> trick is to postpone the exit value. This makes it
+incompatible with B<*csh> and should be fixed in the future. Maybe a
+wrapping 'sh -c' is enough?
+
+=item --cleanup
+
+<<input>> _EXIT_status=$?; <<return>>
+
+ssh I<sln> \(rm\ -f\ ./I<workdir>/{}\;\ rmdir\ ./I<workdir>\ \>\&/dev/null\;\); exit $_EXIT_status;
+
+B<$_EXIT_status>: see B<--return> above.
+
+
+=item --pipe
+
+sh -c 'dd bs=1 count=1 of=I<tmpfile> 2>/dev/null'; test ! -s "I<tmpfile>" && rm -f "I<tmpfile>" && exec true; (cat I<tmpfile>; rm I<tmpfile>; cat - ) | ( <<input>> );
+
+This small wrapper makes sure that <<input>> will never be run if
+there is no data. B<sh -c> is needed to hide stderr if the user's
+shell is B<csh> (which cannot hide stderr).
+
+=item --tmux
+
+mkfifo I<tmpfile>; tmux new-session -s pI<PID> -d -n <<shell quoted input>> \( <<shell quoted input>> \)\;\(echo\ \$\?\$status\;echo\ 255\)\ \>I<tmpfile>\&echo\ <<shell double quoted input>>\;echo\ \Job\ finished\ at:\ \`date\`\;sleep\ 10;  exit `perl -ne 'unlink $ARGV; 1..1 and print' I<tmpfile>` 
+
+The input is used as the name of the windows in B<tmux>. To get the
+exit value out from B<tmux> a fifo is used. This fifo is being opened
+by perl and the first value read is used as exit value. Works in
+B<csh>.
+
+=back
+
+The ordering of the wrapping is important:
+
+=over 5
+
+=item *
+
+B<--nice>/B<--cat>/B<--fifo> should be done on the remote machine
+
+=item *
+
+B<--pipepart>/B<--pipe> should be done on the local machine inside B<--tmux>
+
+=back
+
+
+=head2 Shell shock
+
+The shell shock bug in B<bash> did not affect GNU B<parallel>, but the
+solutions did. B<bash> first introduced functions in variables named:
+I<BASH_FUNC_myfunc()> and later changed that to I<BASH_FUNC_myfunc%%>. When
+transferring functions GNU B<parallel> reads off the function and changes
+that into a function definition, which is copied to the remote system and
+executed before the actual command is executed. Therefore GNU B<parallel>
+needs to know how to read the function.
+
+From version 20150122 GNU B<parallel> tries both the ()-version and
+the %%-version, and the function definition works on both pre- and
+post-shellshock versions of B<bash>.
+
+
+=head2 Remote Ctrl-C and standard error (stderr)
+
+If the user presses Ctrl-C the user expect jobs to stop. This works
+out of the box if the jobs are run locally. Unfortunately it is not so
+simple if the jobs are run remotely.
+
+If remote jobs are run in a tty using B<ssh -tt>, then Ctrl-C works,
+but all output to standard error (stderr) is sent to standard output
+(stdout). This is not what the user expects.
+
+If remote jobs are run without a tty using B<ssh> (without B<-tt>),
+then output to standard error (stderr) is kept on stderr, but Ctrl-C
+does not kill remote jobs. This is not what the user expects.
+
+So what is needed is a way to have both. It seems the reason why
+Ctrl-C does not kill the remote jobs is because the shell does not
+propagate the hang-up signal from B<sshd>. But when B<sshd> dies, the
+parent of the login shell becomes B<init> (process id 1). So by
+exec'ing a Perl wrapper to monitor the parent pid and kill the child
+if the parent pid becomes 1, then Ctrl-C works and stderr is kept on
+stderr. The wrapper looks like this:
+
+    $SIG{CHLD} = sub { $done = 1; };
+    $pid = fork;
+    unless($pid) {
+        # Make own process group to be able to kill HUP it later
+        setpgrp;
+        exec $ENV{SHELL}, "-c", ($bashfunc."@ARGV");
+        die "exec: $!\n";
+    }
+    do {
+        # Parent is not init (ppid=1), so sshd is alive
+        # Exponential sleep up to 1 sec
+        $s = $s < 1 ? 0.001 + $s * 1.03 : $s;
+        select(undef, undef, undef, $s);
+    } until ($done || getppid == 1);
+    # Kill HUP the process group if job not done
+    kill(SIGHUP, -${pid}) unless $done;
+    wait;
+    exit ($?&127 ? 128+($?&127) : 1+$?>>8)
+
+
+=head2 Transferring of variables and functions
+
+Transferring of variables and functions is done by running a Perl
+script before running the actual command. The Perl script sets
+$ENV{variable} to the correct value before exec'ing the a shell that
+runs the function definition followed by the actual command.
+
+B<env_parallel> (mentioned in the man page) copies the full current
+environment into the environment variable
+B<parallel_bash_environment>. This variable is picked up by GNU
+B<parallel> and used to create the Perl script mentioned above.
+
+
+=head2 Base64 encode bzip2
+
+B<csh> limits words of commands to 1024 chars. This is often too little
+when GNU B<parallel> encodes environment variables and wraps the
+command with different templates. All of these are combined and quoted
+into one single word, which often is longer than 1024 chars.
+
+When the line to run is > 1000 chars, GNU B<parallel> therefore
+encodes the line to run. The encoding B<bzip2>s the line to run,
+converts this to base64, splits the base64 into 1000 char blocks (so B<csh>
+does not fail), and prepends it with this Perl script that decodes,
+decompresses and B<eval>s the line.
+
+    @GNU_Parallel=("use","IPC::Open3;","use","MIME::Base64");
+    eval "@GNU_Parallel";
+
+    $SIG{CHLD}="IGNORE";
+    # Search for bzip2. Not found => use default path
+    my $zip = (grep { -x $_ } "/usr/local/bin/bzip2")[0] || "bzip2";
+    # $in = stdin on $zip, $out = stdout from $zip
+    my($in, $out,$eval);
+    open3($in,$out,">&STDERR",$zip,"-dc");
+    if(my $perlpid = fork) {
+        close $in;
+        $eval = join "", <$out>;
+        close $out;
+    } else {
+        close $out;
+        # Pipe decoded base64 into 'bzip2 -dc'
+        print $in (decode_base64(join"",@ARGV));
+        close $in;
+        exit;
+    }
+    wait;
+    eval $eval;
+
+Perl and B<bzip2> must be installed on the remote system, but a small
+test showed that B<bzip2> is installed by default on all platforms
+that runs GNU B<parallel>, so this is not a big problem.
+
+The added bonus of this is that much bigger environments can now be
+transferred as they will be below B<bash>'s limit of 131072 chars.
+
+
+=head2 Which shell to use
+
+Different shells behave differently. A command that works in B<tcsh>
+may not work in B<bash>.  It is therefore important that the correct
+shell is used when GNU B<parallel> executes commands.
+
+GNU B<parallel> tries hard to use the right shell. If GNU B<parallel>
+is called from B<tcsh> it will use B<tcsh>.  If it is called from
+B<bash> it will use B<bash>. It does this by looking at the
+(grand*)parent process: If the (grand*)parent process is a shell, use
+this shell; otherwise look at the parent of this (grand*)parent. If
+none of the (grand*)parents are shells, then $SHELL is used.
+
+This will do the right thing in most cases. If called from:
+
+=over 2
+
+=item *
+
+an interactive shell
+
+=item *
+
+a shell script
+
+=item *
+
+a Perl script in `` or using B<system> if called as a single string
+
+=back
+
+But there are situations where it will fail:
+
+  #!/usr/bin/perl
+
+  system("parallel",'setenv a {}; echo $a',":::",2);
+
+Here it depends on which shell is used to call the Perl script. If the
+Perl script is called from B<tcsh> it will work just fine, but if it
+is called from B<bash> it will fail.
+
+
+=head2 Quoting
+
+Quoting is kept simple: Use \ for all special chars and ' for
+newline. Whether a char is special depends on the shell and the
+context. Luckily quoting a bit too many does not break things.
+
+It is fast, but had the distinct disadvantage that if at string needs
+to be quoted multiple times, the \'s double every time.
+
+
+=head2 --pipepart vs. --pipe
+
+While B<--pipe> and B<--pipepart> look much the same to the user, they are
+implemented very differently.
+
+With B<--pipe> GNU B<parallel> reads the blocks from standard input
+(stdin), which is then given to the command on standard input (stdin);
+so every block is being processed by GNU B<parallel> itself. This is
+the reason why B<--pipe> maxes out at around 100 MB/sec.
+
+B<--pipepart> on the other hand first identifies at which byte
+position blocks starts and how long they are. It does that by seeking
+into the file by the size of a block and then reading until it meets
+end of a block. The seeking explains why GNU B<parallel> does not know
+the line number and why B<-L/-l> and B<-N> do not work.
+
+With a reasonable block and file size this seeking is often more than
+1000 faster than reading the full file. The byte positions are then
+given to a small script that reads from position X to Y and sends
+output to standard output (stdout). This small script is prepended to
+the command and the full command is executed just as if GNU
+B<parallel> had been in its normal mode. The script looks like this:
+
+  < file perl -e 'while(@ARGV) { 
+     sysseek(STDIN,shift,0) || die;
+     $left = shift;
+     while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){
+       $left -= $read; syswrite(STDOUT,$buf);
+     }
+  }' startbyte length_in_bytes
+
+It delivers 1 GB/s per core.
+
+Instead of the script B<dd> was tried, but many versions of B<dd> do
+not support reading from one byte to another and might cause partial
+data:
+
+  yes | dd bs=1024k count=10 | wc
+
+=head2 --jobs and --onall
+
+When running the same commands on many servers what should B<--jobs>
+signify? Is it the number of servers to run on in parallel?  Is it the
+number of jobs run in parallel on each server?
+
+GNU B<parallel> lets B<--jobs> represent the number of servers to run
+on in parallel. This is to make it possible to run a sequence of
+commands (that cannot be parallelized) on each server, but run the
+same sequence on multiple servers.
+
+
+=head2 Disk full
+
+GNU B<parallel> buffers on disk. If the disk is full data may be
+lost. To check if the disk is full GNU B<parallel> writes a 8193 byte
+file when a job finishes. If this file is written succesfully, it is
+removed immediately. If it is not written succesfully, the disk is
+full. The size 8193 was chosen because 8192 gave wrong result on some
+file systems, whereas 8193 did the correct thing on all tested
+filesystems.
+
+=head2 Perl replacement strings, {= =}, and --rpl
+
+The shorthands for replacement strings makes a command look more
+cryptic. Different users will need different replacement
+strings. Instead of inventing more shorthands you get more more
+flexible replacement strings if they can be programmed by the user.
+
+The language Perl was chosen because GNU B<parallel> is written in
+Perl and it was easy and reasonably fast to run the code given by the
+user.
+
+If a user needs the same programmed replacement string again and
+again, the user may want to make his own shorthand for it. This is
+what B<--rpl> is for. It works so well, that even GNU B<parallel>'s
+own shorthands are implemented using B<--rpl>.
+
+In Perl code the bigrams {= and =} rarely exist. They look like a
+matching pair and can be entered on all keyboards. This made them good
+candidates for enclosing the Perl expression in the replacement
+strings. Another candidate ,, and ,, was rejected because they do not
+look like a matching pair. B<--parens> was made, so that the users can
+still use ,, and ,, if they like: B<--parens ,,,,>
+
+Internally, however, the {= and =} are replaced by \257< and
+\257>. This is to make it simple to make regular expressions: \257 is
+disallowed on the command line, so when that is matched, it is known
+that this is a replacement string.
+
+
+=head2 Test suite
+
+GNU B<parallel> uses its own testing framework. This is mostly due to
+historical reasons. It deals reasonably well with tests that are
+dependent on how long a given test runs (e.g. more than 10 secs is a
+pass, but less is a fail). It parallelizes most tests, but it is easy
+to force a test to run as the single test (which may be important for
+timing issues). It deals reasonably well with tests that fail
+intermittently. It detects which tests that failed and pushes these to
+the top, so when running the test suite again, the tests that failed
+most recently are run first.
+
+If GNU B<parallel> should adopt a real testing framework then those
+elements would be important.
+
+Since many tests are dependent on which hardware it is running on,
+these tests break when run on a different hardware than what the test
+was written for.
+
+When most bugs are fixed a test is added, so this bug will not
+reappear. That is, however, sometimes hard to create the environment
+in which the bug shows up. One of the harder problems is to make a
+machine start swapping without forcing it to its knees.
+
+
+=head1 Ideas for new design
+
+=head2 Multiple processes working together
+
+Open3 is slow. Printing is slow. It would be good if they did not tie
+up ressources, but were run in separate threads.
+
+
+=head2 Transferring of variables and functions from zsh
+
+Transferring Bash functions to remote zsh works.
+Can parallel_bash_environment be used to import zsh functions?
+
+
+=head2 --rrs on remote using a perl wrapper
+
+... | perl -pe '$/=$recend$recstart;BEGIN{ if(substr($_) eq $recstart) substr($_)="" } eof and substr($_) eq $recend) substr($_)="" 
+
+It ought to be possible to write a filter that removed rec sep on the
+fly instead of inside GNU B<parallel>. This could then use more cpus.
+
+Will that require 2x record size memory?
+
+Will that require 2x block size memory?
+
+
+=head1 Historical decisions
+
+=head2 --tollef
+
+You can read about the history of GNU B<parallel> on https://www.gnu.org/software/parallel/history.html
+
+B<--tollef> was included to make GNU B<parallel> switch compatible
+with the parallel from moreutils (which is made by Tollef Fog
+Heen). This was done so that users of that parallel easily could port
+their use to GNU B<parallel>: Simply set B<PARALLEL="--tollef"> and
+that would be it.
+
+But several distributions chose to make B<--tollef> global (by putting it
+into /etc/parallel/config), and that caused much confusion when people
+tried out the examples from GNU B<parallel>'s man page and these did
+not work.  The users became frustrated because the distribution did
+not make it clear to them that it has made B<--tollef> global.
+
+So to lessen the frustration and the resulting support, B<--tollef>
+was obsoleted 20130222 and removed one year later.
+
+
+=head2 Transferring of variables and functions
+
+Until 20150122 variables and functions were transferred by looking at
+$SHELL to see whether the shell was a B<*csh> shell. If so the
+variables would be set using B<setenv>. Otherwise they would be set
+using B<=>. The caused the content of the variable to be repeated:
+
+echo $SHELL | grep "/t\{0,1\}csh" > /dev/null && setenv VAR foo ||
+export VAR=foo
+
+=cut

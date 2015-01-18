@@ -115,7 +115,7 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)" \
-	"$(DESTDIR)$(docdir)"
+	"$(DESTDIR)$(man7dir)" "$(DESTDIR)$(docdir)"
 SCRIPTS = $(bin_SCRIPTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -137,6 +137,7 @@ am__can_run_installinfo = \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
 man1dir = $(mandir)/man1
+man7dir = $(mandir)/man7
 NROFF = nroff
 MANS = $(man_MANS)
 DATA = $(doc_DATA)
@@ -217,19 +218,19 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 bin_SCRIPTS = parallel sql niceload
-@DOCUMENTATION_TRUE@man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1
-@DOCUMENTATION_TRUE@doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
-DISTCLEANFILES = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 \
-	parallel.html sem.html sql.html niceload.html parallel_tutorial.html \
-	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi \
-	parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
+@DOCUMENTATION_TRUE@man_MANS = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.7 parallel_design.7
+@DOCUMENTATION_TRUE@doc_DATA = parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel_design.html \
+@DOCUMENTATION_TRUE@	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel_design.texi \
+@DOCUMENTATION_TRUE@	parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf parallel_design.pdf
+
+DISTCLEANFILES = parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.7 parallel_design.7 \
+	parallel.html sem.html sql.html niceload.html parallel_tutorial.html parallel_design.html \
+	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi parallel_design.texi \
+	parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf parallel_design.pdf
 
 EXTRA_DIST = parallel sem sql niceload \
-	parallel.1 sem.1 sql.1 niceload.1 parallel_tutorial.1 \
-	parallel.html sem.html sql.html niceload.html parallel_tutorial.html \
 	sem.pod parallel.pod niceload.pod parallel_tutorial.pod \
-	parallel.texi sem.texi sql.texi niceload.texi parallel_tutorial.texi \
-	parallel.pdf sem.pdf sql.pdf niceload.pdf parallel_tutorial.pdf
+	$(DISTCLEANFILES)
 
 all: all-am
 
@@ -342,6 +343,49 @@ uninstall-man1:
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
 	dir='$(DESTDIR)$(man1dir)'; $(am__uninstall_files_from_dir)
+install-man7: $(man_MANS)
+	@$(NORMAL_INSTALL)
+	@list1=''; \
+	list2='$(man_MANS)'; \
+	test -n "$(man7dir)" \
+	  && test -n "`echo $$list1$$list2`" \
+	  || exit 0; \
+	echo " $(MKDIR_P) '$(DESTDIR)$(man7dir)'"; \
+	$(MKDIR_P) "$(DESTDIR)$(man7dir)" || exit 1; \
+	{ for i in $$list1; do echo "$$i"; done;  \
+	if test -n "$$list2"; then \
+	  for i in $$list2; do echo "$$i"; done \
+	    | sed -n '/\.7[a-z]*$$/p'; \
+	fi; \
+	} | while read p; do \
+	  if test -f $$p; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; echo "$$p"; \
+	done | \
+	sed -e 'n;s,.*/,,;p;h;s,.*\.,,;s,^[^7][0-9a-z]*$$,7,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,' | \
+	sed 'N;N;s,\n, ,g' | { \
+	list=; while read file base inst; do \
+	  if test "$$base" = "$$inst"; then list="$$list $$file"; else \
+	    echo " $(INSTALL_DATA) '$$file' '$(DESTDIR)$(man7dir)/$$inst'"; \
+	    $(INSTALL_DATA) "$$file" "$(DESTDIR)$(man7dir)/$$inst" || exit $$?; \
+	  fi; \
+	done; \
+	for i in $$list; do echo "$$i"; done | $(am__base_list) | \
+	while read files; do \
+	  test -z "$$files" || { \
+	    echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(man7dir)'"; \
+	    $(INSTALL_DATA) $$files "$(DESTDIR)$(man7dir)" || exit $$?; }; \
+	done; }
+
+uninstall-man7:
+	@$(NORMAL_UNINSTALL)
+	@list=''; test -n "$(man7dir)" || exit 0; \
+	files=`{ for i in $$list; do echo "$$i"; done; \
+	l2='$(man_MANS)'; for i in $$l2; do echo "$$i"; done | \
+	  sed -n '/\.7[a-z]*$$/p'; \
+	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^7][0-9a-z]*$$,7,;x' \
+	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
+	dir='$(DESTDIR)$(man7dir)'; $(am__uninstall_files_from_dir)
 install-docDATA: $(doc_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(doc_DATA)'; test -n "$(docdir)" || list=; \
@@ -404,7 +448,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(SCRIPTS) $(MANS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(docdir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(man7dir)" "$(DESTDIR)$(docdir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -475,7 +519,7 @@ install-info: install-info-am
 
 install-info-am:
 
-install-man: install-man1
+install-man: install-man1 install-man7
 
 install-pdf: install-pdf-am
 
@@ -505,7 +549,7 @@ ps-am:
 
 uninstall-am: uninstall-binSCRIPTS uninstall-docDATA uninstall-man
 
-uninstall-man: uninstall-man1
+uninstall-man: uninstall-man1 uninstall-man7
 
 .MAKE: install-am install-exec-am install-strip
 
@@ -515,12 +559,13 @@ uninstall-man: uninstall-man1
 	install-data install-data-am install-docDATA install-dvi \
 	install-dvi-am install-exec install-exec-am install-exec-hook \
 	install-html install-html-am install-info install-info-am \
-	install-man install-man1 install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic pdf pdf-am ps ps-am tags-am \
-	uninstall uninstall-am uninstall-binSCRIPTS uninstall-docDATA \
-	uninstall-man uninstall-man1
+	install-man install-man1 install-man7 install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-generic pdf \
+	pdf-am ps ps-am tags-am uninstall uninstall-am \
+	uninstall-binSCRIPTS uninstall-docDATA uninstall-man \
+	uninstall-man1 uninstall-man7
 
 
 install-exec-hook:
@@ -535,11 +580,17 @@ parallel.1: parallel.pod
 	&& mv $(srcdir)/parallel.1n $(srcdir)/parallel.1 \
 	|| echo "Warning: pod2man not found. Using old parallel.1"
 
-parallel_tutorial.1: parallel_tutorial.pod
+parallel_tutorial.7: parallel_tutorial.pod
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
-		--section=1 $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.1n \
-	&& mv $(srcdir)/parallel_tutorial.1n $(srcdir)/parallel_tutorial.1 \
-	|| echo "Warning: pod2man not found. Using old parallel_tutorial.1"
+		--section=7 $(srcdir)/parallel_tutorial.pod > $(srcdir)/parallel_tutorial.7n \
+	&& mv $(srcdir)/parallel_tutorial.7n $(srcdir)/parallel_tutorial.7 \
+	|| echo "Warning: pod2man not found. Using old parallel_tutorial.7"
+
+parallel_design.7: parallel_design.pod
+	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
+		--section=7 $(srcdir)/parallel_design.pod > $(srcdir)/parallel_design.7n \
+	&& mv $(srcdir)/parallel_design.7n $(srcdir)/parallel_design.7 \
+	|| echo "Warning: pod2man not found. Using old parallel_design.7"
 
 sem.1: sem.pod
 	pod2man --release='$(PACKAGE_VERSION)' --center='$(PACKAGE_NAME)' \
@@ -573,7 +624,14 @@ parallel_tutorial.html: parallel_tutorial.pod parallel.html
 	rm -f $(srcdir)/pod2htm*
 
 # Depending on parallel_tutorial.html to avoid stupid pod2html race condition
-sem.html: sem.pod parallel_tutorial.html
+parallel_design.html: parallel_design.pod parallel.html
+	pod2html --title "GNU Parallel design" $(srcdir)/parallel_design.pod > $(srcdir)/parallel_design.htmln \
+	&& mv $(srcdir)/parallel_design.htmln $(srcdir)/parallel_design.html \
+	|| echo "Warning: pod2html not found. Using old parallel_design.html"
+	rm -f $(srcdir)/pod2htm*
+
+# Depending on parallel_design.html to avoid stupid pod2html race condition
+sem.html: sem.pod parallel_design.html
 	pod2html --title "sem (GNU Parallel)" $(srcdir)/sem.pod > $(srcdir)/sem.htmln \
 	&& mv $(srcdir)/sem.htmln $(srcdir)/sem.html \
 	|| echo "Warning: pod2html not found. Using old sem.html"
@@ -601,6 +659,10 @@ parallel_tutorial.texi: parallel_tutorial.pod
 	pod2texi --output=$(srcdir)/parallel_tutorial.texi $(srcdir)/parallel_tutorial.pod \
 	|| echo "Warning: pod2texi not found. Using old parallel_tutorial.texi"
 
+parallel_design.texi: parallel_design.pod
+	pod2texi --output=$(srcdir)/parallel_design.texi $(srcdir)/parallel_design.pod \
+	|| echo "Warning: pod2texi not found. Using old parallel_design.texi"
+
 sem.texi: sem.pod
 	pod2texi --output=$(srcdir)/sem.texi $(srcdir)/sem.pod \
 	|| echo "Warning: pod2texi not found. Using old sem.texi"
@@ -620,6 +682,10 @@ parallel.pdf: parallel.pod
 parallel_tutorial.pdf: parallel_tutorial.pod
 	pod2pdf --output-file $(srcdir)/parallel_tutorial.pdf $(srcdir)/parallel_tutorial.pod --title "GNU Parallel Tutorial" \
 	|| echo "Warning: pod2pdf not found. Using old parallel_tutorial.pdf"
+
+parallel_design.pdf: parallel_design.pod
+	pod2pdf --output-file $(srcdir)/parallel_design.pdf $(srcdir)/parallel_design.pod --title "GNU Parallel Design" \
+	|| echo "Warning: pod2pdf not found. Using old parallel_design.pdf"
 
 sem.pdf: sem.pod
 	pod2pdf --output-file $(srcdir)/sem.pdf $(srcdir)/sem.pod --title "GNU sem" \
