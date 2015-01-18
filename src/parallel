@@ -7418,7 +7418,6 @@ sub replaced {
 	    my $regexp = join('|', map { my $s = $_; $s =~ s/(\W)/\\$1/g; $s }
 			      sort { length $b <=> length $a } keys %replace);
 	    for(@target) {
-		# ::debug("replace","Replace in ",::my_dump($_));
 		s/($regexp)/join(" ",@{$replace{$1}})/ge;
 	    }
 	}
