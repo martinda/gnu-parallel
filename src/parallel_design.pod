@@ -9,6 +9,47 @@ GNU B<parallel> and the reasoning behind them. It will give an
 overview of why some of the code looks like it does, and help new
 maintainers understand the code better.
 
+
+=head2 One file program
+
+GNU B<parallel> is a Perl script in a single file. It is object
+oriented, but contrary to normal Perl scripts each class is not in its
+own file. This is due to user experience: The goal is that in a pinch
+the user will be able to get GNU B<parallel> working simply by copying
+a single file: No need messing around with environment variables like
+PERL5LIB.
+
+
+=head2 Old Perl style 
+
+GNU B<parallel> uses some old, deprecated constructs. This is due to a
+goal of being able to run on old installations. Currently the target
+is CentOS 3.9 and Perl 5.8.0.
+
+
+=head2 Exponentially back off
+
+GNU B<parallel> busy waits. This is because the reason why a job is
+not started may be due to load average, and thus it will not make
+sense to wait for a job to finish. Instead the load average must be
+checked again. Load average is not the only reason.
+
+To not burn up too up too much CPU GNU B<parallel> sleeps
+exponentially longer and longer if nothing happens, maxing out at 1
+second.
+
+
+=head2 Shell compatibility
+
+It is a goal to have GNU B<parallel> work equally well in any
+shell. However, in practice GNU B<parallel> is being developed in
+B<bash> and thus testing in other shells is limited to reported bugs.
+
+When an incompatibility is found there is often not an easy fix:
+Fixing the problem in B<csh> often breaks it in B<bash>. In these
+cases the fix is often to use a small Perl script and call that.
+
+
 =head2 Job slots
 
 The easiest way to explain what GNU B<parallel> does is to assume that
@@ -28,6 +69,7 @@ This implementation also means that if you use remote executions, you
 cannot assume that a given job slot will remain on the same remote
 server. This goes double since number of job slots can be adjusted on
 the fly (by giving B<--jobs> a file name).
+
 
 =head2 Rsync protocol version
 
@@ -365,6 +407,19 @@ commands (that cannot be parallelized) on each server, but run the
 same sequence on multiple servers.
 
 
+=head2 Buffering on disk
+
+GNU B<parallel> buffers on disk in $TMPDIR using files, that are
+removed as soon as they are created, but which are kept open. So even
+if GNU B<parallel> is killed by a power outage, there will be no files
+to clean up afterwards. Another advantage is that the file system is
+aware that these files will be lost in case of a crash, so it does
+not need to sync them to disk.
+
+It gives the odd situation that a disk can be fully used, but there
+are no visible files on it.
+
+
 =head2 Disk full
 
 GNU B<parallel> buffers on disk. If the disk is full data may be
@@ -374,6 +429,7 @@ removed immediately. If it is not written succesfully, the disk is
 full. The size 8193 was chosen because 8192 gave wrong result on some
 file systems, whereas 8193 did the correct thing on all tested
 filesystems.
+
 
 =head2 Perl replacement strings, {= =}, and --rpl
 
@@ -400,8 +456,8 @@ still use ,, and ,, if they like: B<--parens ,,,,>
 
 Internally, however, the {= and =} are replaced by \257< and
 \257>. This is to make it simple to make regular expressions: \257 is
-disallowed on the command line, so when that is matched, it is known
-that this is a replacement string.
+disallowed on the command line, so when that is matched in a regular
+expression, it is known that this is a replacement string.
 
 
 =head2 Test suite
@@ -424,9 +480,45 @@ these tests break when run on a different hardware than what the test
 was written for.
 
 When most bugs are fixed a test is added, so this bug will not
-reappear. That is, however, sometimes hard to create the environment
-in which the bug shows up. One of the harder problems is to make a
-machine start swapping without forcing it to its knees.
+reappear. It is, however, sometimes hard to create the environment in
+which the bug shows up - especially if the bug only shows up
+sometimes. One of the harder problems was to make a machine start
+swapping without forcing it to its knees.
+
+
+=head2 Median runtime
+
+Using a percentage for B<--timeout> causes GNU B<parallel> to compute
+the median run time of a job. The median is a better indicator of the
+expected run time than average, because there will often be outliers
+taking way longer than the normal run time.
+
+To avoid keeping all run times in memory, an implementation of
+remedian was made (Rousseeuw et al).
+
+
+=head2 Error messages and warnings
+
+Error messages like: ERROR, Not found, and 42 are not very
+helpful. GNU B<parallel> strives to inform the user:
+
+=over 2
+
+=item *
+
+What went wrong?
+
+=item *
+
+Why did it go wrong?
+
+=item *
+
+What can be done about it?
+
+=back
+
+Unfortunately it is not always possible to predict the root cause of the error.
 
 
 =head1 Ideas for new design

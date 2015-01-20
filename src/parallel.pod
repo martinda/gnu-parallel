@@ -94,7 +94,8 @@ B<--env> and use B<env_parallel> instead of B<parallel>.
 #   }
 # 
 #   exportf my_func
-#   PARALLEL_SHELL=/bin/bash parallel "my_func {}" :::  1 2
+#   parallel --env my_func "my_func {}" :::  1 2
+#   TODO accept --env without -S
 =pod
 
 The command cannot contain the character \257 (macron: ¯).
