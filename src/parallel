@@ -953,7 +953,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150115;
+    $Global::version = 20150122;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -2933,7 +2933,8 @@ sub citation_notice {
     } else {
 	::status
 	    ("Academic tradition requires you to cite works you base your article on.\n",
-	     "When using programs that use GNU Parallel to process data for publication please cite:\n",
+	     "When using programs that use GNU Parallel to process data for publication\n",
+	     "please cite:\n",
 	     "\n",
 	     "  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,\n",
 	     "  ;login: The USENIX Magazine, February 2011:42-47.\n",
@@ -2941,7 +2942,7 @@ sub citation_notice {
 	     "This helps funding further development; and it won't cost you a cent.\n",
 	     "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.\n",
 	     "\n",
-	     "To silence this citation notice run 'parallel --bibtex' once or use '--will-cite'.\n\n",
+	     "Silence the citation notice: run 'parallel --bibtex' once or use '--will-cite'.\n\n",
 	    );
     }
 }
@@ -3996,7 +3997,7 @@ sub loadavg {
             $self->{'loadavg'} = $load - 1;
             ::debug("load", "New loadavg: ", $self->{'loadavg'},"\n");
         } elsif ($load_out=~/average: (\d+.\d+)/) {
-	    # Aix does not support instant load average
+	    # AIX does not support instant load average
 	    # 04:11AM   up 21 days,  12:55,  1 user,  load average: 1.85, 1.57, 1.55
 	    $self->{'loadavg'} = $1;
 	} else {
@@ -7926,8 +7927,8 @@ sub new {
     my $fhs = shift;
     for my $fh (@$fhs) {
 	if(-t $fh) {
-	    ::warning("Input is read from the terminal. ".
-		      "Only experts do this on purpose. ".
+	    ::warning("Input is read from the terminal.\n");
+	    ::warning("Only experts do this on purpose. ".
 		      "Press CTRL-D to exit.\n");
 	}
     }

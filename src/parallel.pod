@@ -100,7 +100,7 @@ B<--env> and use B<env_parallel> instead of B<parallel>.
 
 The command cannot contain the character \257 (macron: ¯).
 
-=item B<{}>
+=item B<{}> (alpha testing)
 
 Input line. This replacement string will be replaced by a full line
 read from the input source. The input source is normally stdin
@@ -113,7 +113,7 @@ If the command line contains no replacement strings then B<{}> will be
 appended to the command line.
 
 
-=item B<{.}>
+=item B<{.}> (alpha testing)
 
 Input line without extension. This replacement string will be replaced
 by the input with the extension removed. If the input line contains
@@ -129,7 +129,7 @@ The replacement string B<{.}> can be changed with B<--er>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/}>
+=item B<{/}> (alpha testing)
 
 Basename of input line. This replacement string will be replaced by
 the input with the directory part removed.
@@ -140,7 +140,7 @@ B<--basenamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{//}>
+=item B<{//}> (alpha testing)
 
 Dirname of input line. This replacement string will be replaced by the
 dir of the input line. See B<dirname>(1).
@@ -151,7 +151,7 @@ B<--dirnamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/.}>
+=item B<{/.}> (alpha testing)
 
 Basename of input line without extension. This replacement string will
 be replaced by the input with the directory and extension part
@@ -163,7 +163,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}>
+=item B<{#}> (alpha testing)
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -174,7 +174,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}>
+=item B<{%}> (alpha testing)
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -186,7 +186,7 @@ The replacement string B<{%}> can be changed with B<--slotreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>B<}>
+=item B<{>I<n>B<}> (alpha testing)
 
 Argument from input source I<n> or the I<n>'th argument. This
 positional replacement string will be replaced by the input from input
@@ -197,7 +197,7 @@ I<n>'th last argument.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>.B<}>
+=item B<{>I<n>.B<}> (alpha testing)
 
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
@@ -210,7 +210,7 @@ extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}>
+=item B<{>I<n>/B<}> (alpha testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.
@@ -223,7 +223,7 @@ directory (if any) removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>//B<}>
+=item B<{>I<n>//B<}> (alpha testing)
 
 Dirname of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{//}>.
@@ -235,7 +235,7 @@ the I<n>'th argument (when used with B<-N>). See B<dirname>(1).
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}>
+=item B<{>I<n>/.B<}> (alpha testing)
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -249,7 +249,7 @@ directory (if any) and extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{=>I<perl expression>B<=}>
+=item B<{=>I<perl expression>B<=}> (alpha testing)
 
 Replace with calculated I<perl expression>. B<$_> will contain the
 same as B<{}>. After evaluating I<perl expression> B<$_> will be used
@@ -262,7 +262,7 @@ The B<{=>I<perl expression>B<=}> must be given as a single string.
 See also: B<--rpl> B<--parens>
 
 
-=item B<{=>I<n> I<perl expression>B<=}>
+=item B<{=>I<n> I<perl expression>B<=}> (alpha testing)
 
 Positional equivalent to B<{= perl expression =}>. To understand
 positional replacement strings see B<{>I<n>B<}>.
@@ -426,7 +426,7 @@ notice.
 
 =item B<--block-size> I<size>
 
-Size of block in bytes. The size can be postfixed with K, M, G, T, P,
+Size of block in bytes. The I<size> can be postfixed with K, M, G, T, P,
 k, m, g, t, or p which would multiply the size with 1024, 1048576,
 1073741824, 1099511627776, 1125899906842624, 1000, 1000000,
 1000000000, 1000000000000, or 1000000000000000 respectively.
@@ -440,7 +440,7 @@ I<size> defaults to 1M.
 See B<--pipe> and B<--pipepart> for use of this.
 
 
-=item B<--cat>
+=item B<--cat> (alpha testing)
 
 Create a temporary file with content. Normally B<--pipe>/B<--pipepart>
 will give data to the program on stdin (standard input). With B<--cat>
@@ -450,7 +450,7 @@ you can do: B<parallel --pipe --cat wc {}>.
 See also B<--fifo>.
 
 
-=item B<--cleanup>
+=item B<--cleanup> (alpha testing)
 
 Remove transferred files. B<--cleanup> will remove the transferred files
 on the remote computer after processing is done.
@@ -564,7 +564,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var>
+=item B<--env> I<var> (alpha testing)
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -631,7 +631,7 @@ Implies B<--semaphore>.
 See also B<--bg>, B<man sem>.
 
 
-=item B<--fifo>
+=item B<--fifo> (alpha testing)
 
 Create a temporary fifo with content. Normally B<--pipe> and
 B<--pipepart> will give data to the program on stdin (standard
@@ -921,7 +921,7 @@ limiting factor.
 See also: B<--group> B<--ungroup>
 
 
-=item B<--load> I<max-load>
+=item B<--load> I<max-load> (alpha testing)
 
 Do not start new jobs on a given computer unless the number of running
 processes on the computer is less than I<max-load>. I<max-load> uses
@@ -967,6 +967,21 @@ Support for B<-m> with B<--sshlogin> is limited and may fail.
 
 See also B<-X> for context replace. If in doubt use B<-X> as that will
 most likely do what is needed.
+
+
+=item B<--memfree> I<size> (alpha testing)
+
+Minimum memory free when starting another job. The I<size> can be
+postfixed with K, M, G, T, P, k, m, g, t, or p which would multiply
+the size with 1024, 1048576, 1073741824, 1099511627776,
+1125899906842624, 1000, 1000000, 1000000000, 1000000000000, or
+1000000000000000 respectively.
+
+If the jobs take up very different amount of RAM, GNU B<parallel> will
+only start as many as there is memory for. If less than I<size> bytes
+are free, no more jobs will be started. If less than 50% I<size> bytes
+are free, the youngest job will be killed, and put back on the queue
+to be run later.
 
 
 =item B<--minversion> I<version>
@@ -1148,6 +1163,12 @@ itself to determine the number of physical CPUs on remote computers).
 
 Print the number of CPU cores and exit (used by GNU B<parallel> itself
 to determine the number of CPU cores on remote computers).
+
+
+=item B<--no-keep-order>  (alpha testing)
+
+Overrides an earlier B<--keep-order> (e.g. if set in
+B<~/.parallel/config>).
 
 
 =item B<--no-notice>
@@ -1367,7 +1388,7 @@ useful if some jobs fail for no apparent reason (such as network
 failure).
 
 
-=item B<--return> I<filename>
+=item B<--return> I<filename> (alpha testing)
 
 Transfer files from remote computers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote computers. When
@@ -1603,9 +1624,9 @@ I<secs> seconds after starting each ssh. I<secs> can be less than 1
 seconds.
 
 
-=item B<-S> I<[@hostgroups/][ncpu/]sshlogin[,[@hostgroups/][ncpu/]sshlogin[,...]]>
+=item B<-S> I<[@hostgroups/][ncpu/]sshlogin[,[@hostgroups/][ncpu/]sshlogin[,...]]> (alpha testing)
 
-=item B<--sshlogin> I<[@hostgroups/][ncpu/]sshlogin[,[@hostgroups/][ncpu/]sshlogin[,...]]>
+=item B<--sshlogin> I<[@hostgroups/][ncpu/]sshlogin[,[@hostgroups/][ncpu/]sshlogin[,...]]> (alpha testing)
 
 Distribute jobs to remote computers. The jobs will be run on a list of
 remote computers.
@@ -1786,7 +1807,7 @@ Print the job to be run on stderr (standard error).
 See also B<-v>, B<-p>.
 
 
-=item B<--transfer>
+=item B<--transfer> (alpha testing)
 
 Transfer files to remote computers. B<--transfer> is used with
 B<--sshlogin> when the arguments are files and should be transferred
@@ -1813,7 +1834,7 @@ B<--transfer> is often used with B<--return> and B<--cleanup>.
 B<--transfer> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
 
 
-=item B<--trc> I<filename>
+=item B<--trc> I<filename> (alpha testing)
 
 Transfer, Return, Cleanup. Short hand for:
 

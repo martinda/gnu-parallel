@@ -57,17 +57,14 @@ pushd
 
 == Upload ==
 
-eval `gpg-agent --daemon`
+export YYYYMMDD=`yyyymmdd`
+make upload
 
-YYYYMMDD=`yyyymmdd`
-cp parallel-$YYYYMMDD.tar.bz2 parallel-latest.tar.bz2
+# Only needed for alpha:
+eval `gpg-agent --daemon`
 cp doc/parallel.directive parallel-$YYYYMMDD.tar.bz2.directive
 perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-*.tar.*directive
 gpg --clearsign --yes parallel-$YYYYMMDD.tar.bz2.directive
-
-cp doc/parallel.latest.directive parallel-latest.tar.bz2.directive
-perl -i -pe "s/20\d\d\d\d\d\d/$YYYYMMDD/" parallel-latest.tar.*directive
-gpg --clearsign --yes parallel-latest.tar.bz2.directive
 
 (echo '#!/bin/bash';
  echo;
@@ -82,30 +79,9 @@ gpg --clearsign --yes parallel-latest.tar.bz2.directive
  gpg -ab -o - parallel-$YYYYMMDD.tar.bz2
 ) > parallel-$YYYYMMDD.tar.bz2.sig
 
-(echo '#!/bin/bash';
- echo;
- echo "# To check the signature run:"
- echo "#  echo | gpg"
- echo "#  gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-latest.tar.bz2.sig"
- echo
- echo "echo | gpg 2>/dev/null"
- echo 'gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve $0'
- echo 'exit $?'
- echo
- gpg -ab -o - parallel-$YYYYMMDD.tar.bz2
-) > parallel-latest.tar.bz2.sig
-
-gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-latest.tar.bz2.sig
 gpg --auto-key-locate keyserver --keyserver-options auto-key-retrieve parallel-$YYYYMMDD.tar.bz2.sig
 
-#../ftpsync/src/ftpsync parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} ftp://ftp-upload.gnu.org/incoming/alpha/
-
-../ftpsync/src/ftpsync parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} ftp://ftp-upload.gnu.org/incoming/ftp/
-../ftpsync/src/ftpsync parallel-latest.tar.bz2{,.sig,*asc} ftp://ftp-upload.gnu.org/incoming/ftp/
-
-#echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
-#echo put parallel-latest.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/ftp/
-#echo put parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} | ncftp ftp://ftp-upload.gnu.org/incoming/alpha/
+../ftpsync/src/ftpsync parallel-$YYYYMMDD.tar.bz2{,.sig,*asc} ftp://ftp-upload.gnu.org/incoming/alpha/
 
 
 == Update OpenSUSE build system ==
@@ -118,19 +94,20 @@ find home:tange/parallel/* -type f | grep -v parallel.spec | parallel -Xj1 osc r
 # This should not create new files
 osc up home:tange/parallel/
 make
-# Update versionsnummeret from 20110422-2 to YYYYMMDD-1
 # Reload build-status:
 https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 # Check that one .deb (Debian 5.0) and one .rpm (CentOS) end with 'succeeded'
 
 == Download and test ==
 
+# Only needed for alpha
+
 YYYYMMDD=`yyyymmdd`
 pushd /tmp
 rm -rf parallel-${YYYYMMDD}*
 # This can take 7 minutes
-while ! wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2 ; do sleep 2; done
-#while ! wget http://alpha.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2 ; do sleep 2; done
+#while ! wget http://ftp.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2 ; do sleep 2; done
+while ! wget http://alpha.gnu.org/gnu/parallel/parallel-$YYYYMMDD.tar.bz2 ; do sleep 2; done
 tar xjvf parallel-$YYYYMMDD.tar.bz2
 cd parallel-$YYYYMMDD
 ./configure
@@ -228,19 +205,22 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20150122 (' (((:~{> Hebdo Manila QZ8501') released
+Subject: GNU Parallel 20150122 (' (((:~{> Je Suis Charlie') released
 
-GNU Parallel 20150122 ('Hebdo Manila QZ8501') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20150122 (' (((:~{> Je Suis Charlie') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 Haiku of the month:
 
-<<>>
+If not enough time:
+Run jobs using Parallel.
+Keeps CPUs warm.
+  -- Ole Tange
 
 New in this release:
 
 * Remote jobs now send stderr (standard error) to stderr (standard error) instead of stdout (standard output).
 
-* Remote execution command is now packed using base64 encoded bzip2. This means that big environments (app. 250 KB) can be transferred. This change makes remote execution alpha quality.
+* Remote execution command is now packed using base64 encoded bzip2. This means that big environments (app. 100 KB) can be transferred. This change makes remote execution alpha quality.
 
 * --semaphoretimeout now takes a negative value. This means give up if the semaphore is not gotten within the timeout.
 
@@ -251,6 +231,8 @@ New in this release:
 * A semibig refactoring of big functions. All non-trivial functions are now less than 100 lines. The refactoring makes this release beta quality.
 
 * A description of the design decisions for GNU Parallel can be found in 'man parallel_design'.
+
+* A bug fix in replacement strings cause rewrite of the replacement function. This makes use of replacement strings alpha quality.
 
 * GNU Parallel was cited in: SlideToolkit: An Assistive Toolset for the Histological Quantification of Whole Slide Images http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0110289
 

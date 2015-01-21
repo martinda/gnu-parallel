@@ -1,3 +1,132 @@
+20150122
+
+* Remote jobs now send stderr (standard error) to stderr (standard
+  error) instead of stdout (standard output).
+
+* Remote execution command is now packed using base64 encoded
+  bzip2. This means that big environments (app. 100 KB) can be
+  transferred. This change makes remote execution alpha quality.
+
+* --semaphoretimeout now takes a negative value. This means give up if
+  the semaphore is not gotten within the timeout.
+
+* --halt -1 and -2 now means halt if a job succeeds (so the opposite
+  of 1 and 2).
+
+* Bash's second fix of shellshock caused --env to break again when
+  exporting functions. This has been fixed again.
+
+* A semibig refactoring of big functions. All non-trivial functions
+  are now less than 100 lines. The refactoring makes this release beta
+  quality.
+
+* A description of the design decisions for GNU Parallel can be found
+  in 'man parallel_design'.
+
+* A bug fix in replacement strings cause rewrite of the replacement
+  function. This makes use of replacement strings alpha quality.
+
+* GNU Parallel was cited in: SlideToolkit: An Assistive Toolset for
+  the Histological Quantification of Whole Slide Images
+  http://www.plosone.org/article/info%3Adoi%2F10.1371%2Fjournal.pone.0110289
+
+* GNU Parallel was cited in: Improving Energy and Performance with
+  Spintronics Caches in Multicore Systems
+  http://link.springer.com/chapter/10.1007/978-3-319-14313-2_24
+
+* GNU Parallel was cited in: Parallel post-processing with MPI-Bash
+  http://dl.acm.org/citation.cfm?id=2691137
+
+* GNU Parallel was cited in: Distinguishing cause from effect using
+  observational data: methods and benchmarks
+  http://arxiv-web3.library.cornell.edu/pdf/1412.3773.pdf
+
+* GNU Parallel was cited in: Data Science at the Command Line
+  http://cdn.oreillystatic.com/oreilly/booksamplers/9781491947852_sampler.pdf
+
+* GNU Parallel was cited in: Resolution of Genetic Map Expansion
+  Caused by Excess Heterozygosity in Plant Recombinant Inbred
+  Populations http://www.g3journal.org/content/4/10/1963.full.pdf
+
+* GNU Parallel was cited in: Bayesian Inference of Protein Structure
+  from Chemical Shift Data https://peerj.com/preprints/692v1.pdf
+
+* GNU Parallel was cited in: Clonal interference and Mullerʼs ratchet
+  in spatial habitats http://iopscience.iop.org/1478-3975/11/5/056003
+
+* GNU Parallel was cited in: Web-scale content reuse detection
+  ftp://info.isi.edu/isi-pubs/tr-692.pdf
+
+* GNU Parallel was cited in: Computação Verde na Camada de Aplicação
+  https://linux.ime.usp.br/~tpaiva/mac0499/files/monografia.pdf
+
+* GNU Parallel was cited in: Frameshift alignment: statistics and
+  post-genomic applications
+  http://bioinformatics.oxfordjournals.org/content/30/24/3575.full.pdf+html
+
+* GNU Parallel was cited in: Towards Recommender Engineering Tools and
+  Experiments for Identifying Recommender Differences
+  http://elehack.net/research/thesis/mde-thesis.pdf
+
+* GNU Parallel was cited in: Speaker Environment Classification Using
+  Rhythm Metrics in Levantine Arabic Dialect
+  http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6923918
+
+* GNU Parallel was cited in: A Formal Proof Of The Kepler Conjecture
+  http://arxiv.org/pdf/1501.02155.pdf
+
+* GNU Parallel was cited in: Allocation Policy Analysis for Cache
+  Coherence Protocols for STT-MRAM-based caches
+  http://conservancy.umn.edu/bitstream/handle/11299/169362/Nandkar_umn_0130M_15551.pdf
+
+* GNU Parallel was cited in: Using Trusted Platform Module for
+  securing virtual environment access in Cloud
+  http://dar.aucegypt.edu:8080/bitstream/handle/10526/4237/Using%20Trusted%20Platform%20Module%20for%20Securing%20Virtual%20Environment%20Access%20in%20Cloud.pdf
+
+* GNU Parallel was cited in: Weakly Supervised Learning for
+  Compositional Sentiment Recognition
+  http://computerlinguist.org/static/downloads/ma-thesis/Master_Thesis-Michael_Haas-Weakly_Supervised_Learning_for_Compositional_Sentiment_Recognition.pdf
+
+* GNU Parallel was cited in: Agility and Performance in Elastic
+  Distributed Storage http://dl.acm.org/citation.cfm?id=2668129
+
+* GNU Parallel was used (unfortunately without citation) in: Large
+  Scale Author Name Disambiguation in Digital Libraries
+  http://semanticommunity.info/@api/deki/files/31523/P227_3546.pdf
+
+* GNU Parallel is used in BEDOPS:
+  https://media.readthedocs.org/pdf/bedops/v2p5p0/bedops.pdf
+
+* Job ad asking for GNU Parallel skills:
+  http://www.aplitrak.com/?adid=dXMzMTYxMjQuMzg0MTkuMTU1MEBtYW5wb3dlcmZveG5hLmFwbGl0cmFrLmNvbQ#sthash.kYCIhhty.KcoT6HnJ.dpbs
+
+* GNU Parallel: Open Source For You (OSFY) magazine, October 2013
+  edition
+  http://www.shakthimaan.com/posts/2014/11/27/gnu-parallel/news.html
+
+* Multithreaded Encryption and Compression
+  http://www.krazyworks.com/multithreaded-encryption-and-compression/
+
+* GNU Parallel on OSX and Linux
+  https://darknightelf.wordpress.com/2015/01/01/gnu-parallel-on-osx/
+
+* How to build gnu parallel from source on Ubuntu PC?
+  http://blog.ovidiuparvu.com/build-gnu-parallel-source-ubuntu-pc/
+
+* GNU parallel for openaddr-process-one
+  https://nelsonslog.wordpress.com/2015/01/09/gnu-parallel-for-openaddr-process-one/
+
+* From SRA Project to FastQ http://danielecook.com/sra-project-fastq/
+
+* Software Development Tooling
+  http://www.computer.org/csdl/mags/so/2014/06/mso2014060021.pdf
+
+* コマンドを並列に実行するGNU parallelがとても便利
+  http://bicycle1885.hatenablog.com/entry/2014/08/10/143612
+
+* Bug fixes and man page updates.
+
+
 20141122
 
 * Remote systems can be divided into hostgroups (e.g. web and db) by
