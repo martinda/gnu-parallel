@@ -57,16 +57,19 @@ make install prefix=$RPM_BUILD_ROOT%{_prefix} exec_prefix=$RPM_BUILD_ROOT%{_pref
 
 rm $RPM_BUILD_ROOT%{_docdir}/parallel.html
 rm $RPM_BUILD_ROOT%{_docdir}/parallel_tutorial.html
+rm $RPM_BUILD_ROOT%{_docdir}/parallel_design.html
 rm $RPM_BUILD_ROOT%{_docdir}/niceload.html
 rm $RPM_BUILD_ROOT%{_docdir}/sem.html
 rm $RPM_BUILD_ROOT%{_docdir}/sql.html
 rm $RPM_BUILD_ROOT%{_docdir}/parallel.texi
 rm $RPM_BUILD_ROOT%{_docdir}/parallel_tutorial.texi
+rm $RPM_BUILD_ROOT%{_docdir}/parallel_design.texi
 rm $RPM_BUILD_ROOT%{_docdir}/niceload.texi
 rm $RPM_BUILD_ROOT%{_docdir}/sem.texi
 rm $RPM_BUILD_ROOT%{_docdir}/sql.texi
 rm $RPM_BUILD_ROOT%{_docdir}/parallel.pdf
 rm $RPM_BUILD_ROOT%{_docdir}/parallel_tutorial.pdf
+rm $RPM_BUILD_ROOT%{_docdir}/parallel_design.pdf
 rm $RPM_BUILD_ROOT%{_docdir}/niceload.pdf
 rm $RPM_BUILD_ROOT%{_docdir}/sem.pdf
 rm $RPM_BUILD_ROOT%{_docdir}/sql.pdf
@@ -78,7 +81,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 /usr/bin/*
 /usr/share/man/man1/*
-%doc README NEWS src/parallel.html src/parallel_tutorial.html src/sem.html src/sql.html src/niceload.html src/parallel.texi src/parallel_tutorial.texi src/niceload.texi src/sem.texi src/sql.texi src/parallel.pdf src/parallel_tutorial.pdf src/niceload.pdf src/sem.pdf src/sql.pdf
+/usr/share/man/man7/*
+%doc README NEWS src/parallel.html src/parallel_tutorial.html src/parallel_design.html src/sem.html src/sql.html src/niceload.html src/parallel.texi src/parallel_tutorial.texi src/parallel_design.texi src/niceload.texi src/sem.texi src/sql.texi src/parallel.pdf src/parallel_tutorial.pdf src/parallel_design.pdf src/niceload.pdf src/sem.pdf src/sql.pdf
 
 %changelog
 * Sat Jan 22 2011 Ole Tange

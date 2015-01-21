@@ -135,6 +135,7 @@ pushd
 
 git diff
 
+# Recheck OBS https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 git commit -a
 
 Released as 20150x22 ('').
