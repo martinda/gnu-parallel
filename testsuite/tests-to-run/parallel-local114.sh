@@ -5,13 +5,17 @@ echo "### --line-buffer"
   seq 10 | parallel -j20 --line-buffer  'seq {} 10 | pv -qL 10' > /tmp/parallel_l$$; 
   seq 10 | parallel -j20                'seq {} 10 | pv -qL 10' > /tmp/parallel_$$; 
   cat /tmp/parallel_l$$ | wc; 
-  diff /tmp/parallel_$$ /tmp/parallel_l$$ >/dev/null ; echo These must diff: $?
+  diff /tmp/parallel_$$ /tmp/parallel_l$$ >/dev/null ; 
+  echo These must diff: $?; 
+  rm /tmp/parallel_l$$ /tmp/parallel_$$
 
 echo "### --pipe --line-buffer"
   seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --tagstring {#} pv -qL 10 > /tmp/parallel_pl$$; 
   seq 200| parallel -N10 -L1 --pipe  -j20               --tagstring {#} pv -qL 10 > /tmp/parallel_p$$; 
   cat /tmp/parallel_pl$$ | wc; 
-  diff /tmp/parallel_p$$ /tmp/parallel_pl$$ >/dev/null ; echo These must diff: $?
+  diff /tmp/parallel_p$$ /tmp/parallel_pl$$ >/dev/null ; 
+  echo These must diff: $?; 
+  rm /tmp/parallel_pl$$ /tmp/parallel_p$$
 
 echo "### --pipe --line-buffer --compress"
   seq 200| parallel -N10 -L1 --pipe  -j20 --line-buffer --compress --tagstring {#} pv -qL 10 | wc
@@ -74,13 +78,13 @@ echo "### bug #36659: --sshlogin strips leading slash from ssh command";
 
 echo "### bug #36660: --workdir mkdir does not use --sshlogin custom ssh"; 
   rm -rf /tmp/foo36660; 
-  cd /tmp; echo OK > parallel_test.txt; 
+  cd /tmp; echo OK > parallel_test36660.txt; 
   ssh () { echo Failed; }; 
   export -f ssh; 
-  parallel --workdir /tmp/foo36660/bar --transfer --sshlogin '/usr/bin/ssh localhost' cat ::: parallel_test.txt; 
+  parallel --workdir /tmp/foo36660/bar --transfer --sshlogin '/usr/bin/ssh localhost' cat ::: parallel_test36660.txt; 
+  rm -rf /tmp/foo36660 parallel_test36660.txt
 
 echo "bug #36657: --load does not work with custom ssh"; 
-  cd /tmp; echo OK > parallel_test.txt; 
   ssh () { echo Failed; }; 
   export -f ssh; 
   parallel --load=1000% -S "/usr/bin/ssh localhost" echo ::: OK

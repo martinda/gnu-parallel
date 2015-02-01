@@ -41,4 +41,26 @@ echo '### Test if length is computed correctly - first should give one line, sec
   seq 4 | parallel -s 21 -m -kj1 echo {} {}
   seq 4 | parallel -s 20 -m -kj1 echo {} {}
 
+echo 'bug #44144: --tagstring {=s/a/b/=} broken'
+  # Do not be confused by {} in --rpl
+  parallel --rpl '{:} s/A/D/;{}' --tagstring '{1:}{-1:}{= s/A/E/=}' echo {} ::: A/B.C
+  # Non-standard --parens 
+  parallel --parens ,, --rpl '{:} s/A/D/;{}' --tagstring '{1:}{-1:}, 's/A/E/, echo {} ::: A/B.C
+  # Non-standard --parens -i
+  parallel --rpl '{:} s/A/D/;{}' --tag --parens ,, -iDUMMY echo {} ::: A/B.C
+
+echo 'env in zsh'
+  echo 'Normal variable export'
+  export B=\'; 
+  PARALLEL_SHELL=/usr/bin/zsh parallel --env B echo '$B' ::: a
+
+  echo 'Function export as variable'
+  export myfuncvar="() { echo myfuncvar \$*; }"; 
+  PARALLEL_SHELL=/usr/bin/zsh parallel --env myfuncvar myfuncvar ::: a
+
+  echo 'Function export as function'
+  myfunc() { echo myfunc $*; };
+  export -f myfunc; 
+  PARALLEL_SHELL=/usr/bin/zsh parallel --env myfunc myfunc ::: a
+
 EOF

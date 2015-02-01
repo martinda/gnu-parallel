@@ -64,14 +64,14 @@ bug #41412: --timeout + --delay causes deadlock
   parallel -j10 --timeout 2.2 --delay 3 "sleep {}; echo {}" ::: 1 2 7 8 9
 1
 2
-echo '### Test --spreadstdin - more procs than args';   rm -f /tmp/parallel.ss.*;   seq 1 5 | stdout $NICEPAR -j 10 --spreadstdin 'cat >/tmp/parallel.ss.$PARALLEL_SEQ' >/dev/null;   cat /tmp/parallel.ss.*;
+echo '### Test --spreadstdin - more procs than args';   rm -f /tmp/parallel.ss.*;   seq 1 5 | stdout $NICEPAR -j 10 --spreadstdin 'cat >/tmp/parallel.ss.$PARALLEL_SEQ' >/dev/null;   cat /tmp/parallel.ss.*;   rm -f /tmp/parallel.ss.*
 ### Test --spreadstdin - more procs than args
 1
 2
 3
 4
 5
-echo '### Test --spreadstdin - more args than procs';   rm -f /tmp/parallel.ss2.*;   seq 1 10 | stdout $NICEPAR -j 5 --spreadstdin 'cat >/tmp/parallel.ss2.$PARALLEL_SEQ' >/dev/null;   cat /tmp/parallel.ss2.*
+echo '### Test --spreadstdin - more args than procs';   rm -f /tmp/parallel.ss2.*;   seq 1 10 | stdout $NICEPAR -j 5 --spreadstdin 'cat >/tmp/parallel.ss2.$PARALLEL_SEQ' >/dev/null;   cat /tmp/parallel.ss2.*;   rm -f /tmp/parallel.ss2.*
 ### Test --spreadstdin - more args than procs
 1
 2

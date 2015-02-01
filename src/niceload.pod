@@ -32,9 +32,9 @@ run 1 second, suspend (3.00-1.00) seconds, run 1 second, suspend
 
 =over 9
 
-=item B<-B> (alpha testing)
+=item B<-B> (beta testing)
 
-=item B<--battery> (alpha testing)
+=item B<--battery> (beta testing)
 
 Suspend if the system is running on battery. Short hand for: -l -1 --sensor 'cat /sys/class/power_supply/BAT0/status /proc/acpi/battery/BAT0/state 2>/dev/null |grep -i -q discharging; echo $?'
 

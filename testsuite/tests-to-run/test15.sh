@@ -92,8 +92,8 @@ echo '### Test -x'
 (seq 1 10; echo 1234; seq 12 15) | stdout xargs -s 10 -x echo
 
 echo '### Test -a and --arg-file: Read input from file instead of stdin'
-seq 1 10 >/tmp/$$-1; parallel -k -a /tmp/$$-1 echo
-seq 1 10 >/tmp/$$-2; parallel -k --arg-file /tmp/$$-2 echo
+seq 1 10 >/tmp/parallel_$$-1; parallel -k -a /tmp/parallel_$$-1 echo; rm /tmp/parallel_$$-1
+seq 1 10 >/tmp/parallel_$$-2; parallel -k --arg-file /tmp/parallel_$$-2 echo; rm /tmp/parallel_$$-2
 
 EOF
 

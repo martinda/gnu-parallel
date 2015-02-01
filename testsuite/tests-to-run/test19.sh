@@ -126,3 +126,5 @@ cat /tmp/myssh1-run /tmp/myssh2-run | perl -pe 's/(PID.)\d+/${1}00000/g;s/(SEQ[ 
   perl -pe 's/\S*parallel-server\S*/one-server/;s:[a-zA-Z0-9/+=]{500,}:base64:;'
 rm /tmp/myssh1-run /tmp/myssh2-run
 
+rm -rf /tmp/parallel.file*
+rm /tmp/myssh1 /tmp/myssh2

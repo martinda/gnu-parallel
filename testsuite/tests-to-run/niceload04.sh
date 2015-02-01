@@ -20,3 +20,4 @@ echo '### multiple -p'
 /tmp/mysleep 2 &
 echo '### --prg'
   stdout /usr/bin/time -f %e niceload -l 8 -H --prg mysleep | perl -ne '$_ > 5 and print "--prg OK\n"'
+rm /tmp/mysleep

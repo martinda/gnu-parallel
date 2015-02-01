@@ -29,12 +29,18 @@ echo '### Test --load read from a file - more than 3s'
   echo '# This will run 10 processes in parallel for 10s'; 
   seq 10 | parallel --nice 19 --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null" & 
   ( echo 8 > /tmp/parallel_load_file; sleep 10; echo 1000 > /tmp/parallel_load_file ) &  
-  sleep 1;stdout /usr/bin/time -f %e parallel --load /tmp/parallel_load_file sleep ::: 1 | perl -ne '$_ > 9 and print "OK\n"'
+  sleep 1; 
+  stdout /usr/bin/time -f %e parallel --load /tmp/parallel_load_file sleep ::: 1 | 
+    perl -ne '$_ > 9 and print "OK\n"'; 
+  rm /tmp/parallel_load_file
 
 echo '### Test --load read from a file - less than 10s'; 
   echo '# This will run 10 processes in parallel for 10s'; 
   seq 10 | parallel --nice 19 --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null" &
   ( echo 8 > /tmp/parallel_load_file2; sleep 10; echo 1000 > /tmp/parallel_load_file2 ) & 
-  sleep 1;stdout /usr/bin/time -f %e parallel --load /tmp/parallel_load_file2 sleep ::: 1 | perl -ne '$_ < 20 and print "OK\n"'
+  sleep 1; 
+  stdout /usr/bin/time -f %e parallel --load /tmp/parallel_load_file2 sleep ::: 1 | 
+    perl -ne '$_ < 20 and print "OK\n"'; 
+  rm /tmp/parallel_load_file2
 
 EOF

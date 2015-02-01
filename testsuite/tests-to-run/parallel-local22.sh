@@ -48,6 +48,7 @@ echo '### bug #42363: --pipepart and --fifo/--cat does not work'
   seq 100 > /tmp/bug42363; 
   parallel --pipepart --block 31 -a /tmp/bug42363 -k --fifo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ; 
   parallel --pipepart --block 31 -a /tmp/bug42363 -k --cat  wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;
+  rm /tmp/bug42363
 
 echo '### bug #42055: --pipepart -a bigfile should not require sequential reading of bigfile'
   parallel --pipepart -a /etc/passwd -L 1 should not be run
@@ -71,17 +72,25 @@ echo '### bug #42892: parallel -a nonexiting --pipepart'
 echo '### bug #42913: Dont use $SHELL but the shell currently running'
   echo '## Unknown shell => $SHELL (bash)'
   parallel -j1 "cp \`which {}\` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;" 
-  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh; 
+  rm /tmp/SHELL /tmp/par*.par
+
   echo '## Known shells -c'
   parallel -k "\`which {}\` -c 'parallel -Dinit echo ::: 1' | grep which;" 
-  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh; 
+  rm /tmp/par*.par
+
   echo '## Known shells |'
   parallel -k "echo 'parallel -Dinit echo ::: 1' | \`which {}\` | grep which;" 
-  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+  ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh; 
+  rm /tmp/par*.par
+
   echo '## Started directly from perl'
-  perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which
+  perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which; 
+  rm /tmp/par*.par
 
 EOF
+
 
 # TODO This is too unstable
 # echo '### --tmux test - check termination'

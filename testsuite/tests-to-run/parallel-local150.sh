@@ -60,7 +60,8 @@ echo "### BUG-fix: bash -c 'parallel -a <(seq 1 3) echo'"
 
 echo "### bug #35268: shell_quote doesn't treats [] brackets correctly"
   touch /tmp/foo1; 
-  stdout parallel echo ::: '/tmp/foo[123]'
+  stdout parallel echo ::: '/tmp/foo[123]'; 
+  rm /tmp/foo1
 
 echo '### Test make .deb package'; 
   cd ~/privat/parallel/packager/debian; 

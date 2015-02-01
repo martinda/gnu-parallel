@@ -19,3 +19,4 @@ SIZET=/tmp/parallel_sizetest
 rm -f $SIZET
 tmux new-session -d -n 10 "seq 10000 | pv -qL 1000 > $SIZET"
 niceload -t .01 --sensor "stat -c %b $SIZET" -l -10 "stat -c %b $SIZET"
+rm $SIZET

@@ -114,3 +114,5 @@ echo '### Test --block size=1M -j1 - more data than cpu';
 echo '### Test --pipe default settings'; 
   cat /tmp/blocktest | parallel --pipe sort | sort -n | md5sum
 EOF
+
+rm /tmp/parallel-seq /tmp/blocktest

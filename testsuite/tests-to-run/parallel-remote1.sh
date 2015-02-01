@@ -35,3 +35,4 @@ echo '### test --filter-hosts with server w/o ssh, non-existing server'
 echo '### Missing: test --filter-hosts proxied through the one host'
 
 EOF
+rm /tmp/myssh1 /tmp/myssh2

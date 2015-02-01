@@ -13,6 +13,8 @@
 * --halt -1 and -2 now means halt if a job succeeds (so the opposite
   of 1 and 2).
 
+* --no-keep-order will reverse --keep-order.
+
 * Bash's second fix of shellshock caused --env to break again when
   exporting functions. This has been fixed again.
 
@@ -23,7 +25,7 @@
 * A description of the design decisions for GNU Parallel can be found
   in 'man parallel_design'.
 
-* A bug fix in replacement strings cause rewrite of the replacement
+* A bug fix in replacement strings caused rewrite of the replacement
   function. This makes use of replacement strings alpha quality.
 
 * GNU Parallel was cited in: SlideToolkit: An Assistive Toolset for

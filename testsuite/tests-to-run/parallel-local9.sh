@@ -59,24 +59,28 @@ echo 'bug #41412: --timeout + --delay causes deadlock';
 echo '### Test --spreadstdin - more procs than args'; 
   rm -f /tmp/parallel.ss.*; 
   seq 1 5 | stdout $NICEPAR -j 10 --spreadstdin 'cat >/tmp/parallel.ss.$PARALLEL_SEQ' >/dev/null; 
-  cat /tmp/parallel.ss.*;
+  cat /tmp/parallel.ss.*; 
+  rm -f /tmp/parallel.ss.*
 
 echo '### Test --spreadstdin - more args than procs'; 
   rm -f /tmp/parallel.ss2.*; 
   seq 1 10 | stdout $NICEPAR -j 5 --spreadstdin 'cat >/tmp/parallel.ss2.$PARALLEL_SEQ' >/dev/null; 
-  cat /tmp/parallel.ss2.*
+  cat /tmp/parallel.ss2.*; 
+  rm -f /tmp/parallel.ss2.*
 
 nice nice seq 1 1000 | $NICEPAR -j1 --spreadstdin cat "|cat "|wc -c
 nice nice seq 1 10000 | $NICEPAR -j10 --spreadstdin cat "|cat "|wc -c
 nice nice seq 1 100000 | $NICEPAR -j1 --spreadstdin cat "|cat "|wc -c
 nice nice seq 1 1000000 | $NICEPAR -j10 --spreadstdin cat "|cat "|wc -c
 
-seq 1 10 | $NICEPAR --recend "\n" -j1 --spreadstdin gzip -9 >/tmp/foo.gz
+seq 1 10 | $NICEPAR --recend "\n" -j1 --spreadstdin gzip -9 >/tmp/foo.gz; 
+  rm /tmp/foo.gz
 
 echo '### Test --spreadstdin - similar to the failing below'; 
   nice seq 1 100000 | $NICEPAR --recend "\n" -j10 --spreadstdin gzip -9 >/tmp/foo2.gz; 
   diff <(nice seq 1 100000) <(zcat /tmp/foo2.gz |sort -n); 
-  diff <(nice seq 1 100000|wc -c) <(zcat /tmp/foo2.gz |wc -c)
+  diff <(nice seq 1 100000|wc -c) <(zcat /tmp/foo2.gz |wc -c);
+  rm /tmp/foo2.gz
 
 echo '### Test --spreadstdin - this failed during devel'; 
   nice seq 1 1000000 | md5sum; 

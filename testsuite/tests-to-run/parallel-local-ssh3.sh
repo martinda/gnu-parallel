@@ -46,11 +46,18 @@ echo '### Special char file and dir transfer return and cleanup'
   }; 
   export -f mytouch; 
   parallel --env mytouch -Sparallel@lo --transfer 
-  --return d"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"/g"`perl -e 'print pack("c*",1..9,11..46,48..255)'`" 
+  --return {=s:/f:/g:=} 
     mytouch 
     ::: d"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"/f"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"; 
-  cat d"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"/g"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"; 
+  cat d"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"/g"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"
 
+echo '### Uniq {=perlexpr=} in return - not used in command'
+  cd /tmp; 
+  rm -f /tmp/parallel_perlexpr.2Parallel_PerlexPr; 
+  echo local > parallel_perlexpr; 
+  parallel -Sparallel@lo --trc {=s/pr/pr.2/=}{=s/p/P/g=} echo remote OK '>' {}.2{=s/p/P/g=} ::: parallel_perlexpr; 
+  cat /tmp/parallel_perlexpr.2Parallel_PerlexPr; 
+  rm -f /tmp/parallel_perlexpr.2Parallel_PerlexPr /tmp/parallel_perlexpr
 
 #  Should be changed to --return '{=s:/f:/g:=}' and tested with csh
 

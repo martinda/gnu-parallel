@@ -233,7 +233,7 @@ xargs: argument line too long
 15
 echo '### Test -a and --arg-file: Read input from file instead of stdin'
 ### Test -a and --arg-file: Read input from file instead of stdin
-seq 1 10 >/tmp/$$-1; parallel -k -a /tmp/$$-1 echo
+seq 1 10 >/tmp/parallel_$$-1; parallel -k -a /tmp/parallel_$$-1 echo; rm /tmp/parallel_$$-1
 1
 2
 3
@@ -244,7 +244,7 @@ seq 1 10 >/tmp/$$-1; parallel -k -a /tmp/$$-1 echo
 8
 9
 10
-seq 1 10 >/tmp/$$-2; parallel -k --arg-file /tmp/$$-2 echo
+seq 1 10 >/tmp/parallel_$$-2; parallel -k --arg-file /tmp/parallel_$$-2 echo; rm /tmp/parallel_$$-2
 1
 2
 3
@@ -844,7 +844,7 @@ a b
 echo '### Test --nice remote'
 ### Test --nice remote
 stdout parallel --nice 1 -S .. -vv 'PAR=a bash -c "echo  \$PAR {}"' ::: b |   perl -pe 's/\S*parallel-server\S*/one-server/;s/[a-f0-9]{500,}/hex/;s/\d{5,8}/pId/g;'
-ssh one-server exec perl -e \\\$ENV\\\{\\\"PARALLEL_PID\\\"\\\}=\\\"pId\\\"\\\;\\\$ENV\\\{\\\"PARALLEL_SEQ\\\"\\\}=\\\"1\\\"\\\;\\\$bashfunc\\\ =\\\ \\\"\\\"\\\;@ARGV=\\\"\\\\\\\\nice\\\ -n1\\\ /bin/bash\\\ -c\\\ PAR=a\\\\\\\\\\\ bash\\\\\\\\\\\ -c\\\\\\\\\\\ \\\\\\\\\\\\\\\"echo\\\\\\\\\\\ \\\\\\\\\\\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\$PAR\\\\\\\\\\\ b\\\\\\\\\\\\\\\"\\\"\\\;\\\$SIG\\\{CHLD\\\}=sub\\\{\\\$done=1\\\;\\\}\\\;\\\$pid=fork\\\;unless\\\(\\\$pid\\\)\\\{setpgrp\\\;exec\\\$ENV\\\{SHELL\\\},\\\"-c\\\",\\\(\\\$bashfunc.\\\"@ARGV\\\"\\\)\\\;die\\\"exec:\\\$\\\!\\\\n\\\"\\\;\\\}do\\\{\\\$s=\\\$s\\\<1\\\?0.001+\\\$s\\\*1.03:\\\$s\\\;select\\\(undef,undef,undef,\\\$s\\\)\\\;\\\}until\\\(\\\$done\\\|\\\|getppid==1\\\)\\\;kill\\\(SIGHUP,-\\\$\\\{pid\\\}\\\)unless\\\$done\\\;wait\\\;exit\\\(\\\$\\\?\\\&127\\\?128+\\\(\\\$\\\?\\\&127\\\):1+\\\$\\\?\\\>\\\>8\\\);
+ssh one-server exec perl\ -e\ \\\$ENV\\\{\\\"PARALLEL_PID\\\"\\\}=\\\"pId\\\"\\\;\\\$ENV\\\{\\\"PARALLEL_SEQ\\\"\\\}=\\\"1\\\"\\\;\\\$bashfunc\\\ =\\\ \\\"\\\"\\\;@ARGV=\\\"\\\\\\\\nice\\\ -n1\\\ /bin/bash\\\ -c\\\ PAR=a\\\\\\\\\\\ bash\\\\\\\\\\\ -c\\\\\\\\\\\ \\\\\\\\\\\\\\\"echo\\\\\\\\\\\ \\\\\\\\\\\ \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\$PAR\\\\\\\\\\\ b\\\\\\\\\\\\\\\"\\\"\\\;\\\$SIG\\\{CHLD\\\}=sub\\\{\\\$done=1\\\;\\\}\\\;\\\$pid=fork\\\;unless\\\(\\\$pid\\\)\\\{setpgrp\\\;exec\\\$ENV\\\{SHELL\\\},\\\"-c\\\",\\\(\\\$bashfunc.\\\"@ARGV\\\"\\\)\\\;die\\\"exec:\\\$\\\!\\\\n\\\"\\\;\\\}do\\\{\\\$s=\\\$s\\\<1\\\?0.001+\\\$s\\\*1.03:\\\$s\\\;select\\\(undef,undef,undef,\\\$s\\\)\\\;\\\}until\\\(\\\$done\\\|\\\|getppid==1\\\)\\\;kill\\\(SIGHUP,-\\\$\\\{pid\\\}\\\)unless\\\$done\\\;wait\\\;exit\\\(\\\$\\\?\\\&127\\\?128+\\\(\\\$\\\?\\\&127\\\):1+\\\$\\\?\\\>\\\>8\\\);
 a b
 echo '### Test distribute arguments at EOF to 2 jobslots'
 ### Test distribute arguments at EOF to 2 jobslots
