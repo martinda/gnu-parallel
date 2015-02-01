@@ -1,0 +1,20 @@
+echo '### zsh'
+### zsh
+  ssh zsh@lo 'fun="() { echo function from zsh to zsh \$*; }";               export fun;               parallel --env fun fun ::: OK'
+function from zsh to zsh OK
+  ssh zsh@lo 'fun="() { echo function from zsh to bash \$*; }";               export fun;               parallel -S parallel@lo --env fun fun ::: OK'
+function from zsh to bash OK
+echo '### csh'
+### csh
+  echo "3 big vars run remotely - length(base64) > 1000"
+3 big vars run remotely - length(base64) > 1000
+  ssh csh@lo 'setenv A `seq 200|xargs`;               setenv B `seq 200 -1 1|xargs`;               setenv C `seq 300 -2 1|xargs`;               parallel -Scsh@lo --env A,B,C -k echo \$\{\}\|wc ::: A B C'
+      1     200     692
+      1     200     692
+      1     150     547
+  echo "3 big vars run locally"
+3 big vars run locally
+  ssh csh@lo 'setenv A `seq 200|xargs`;               setenv B `seq 200 -1 1|xargs`;               setenv C `seq 300 -2 1|xargs`;               parallel --env A,B,C -k echo \$\{\}\|wc ::: A B C'
+      1     200     692
+      1     200     692
+      1     150     547

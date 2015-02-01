@@ -6025,16 +6025,63 @@ sub sshlogin_wrap {
 
     my $self = shift;
     my $command = shift;
+    # TODO test that *sh -c 'parallel --env' use *sh
     if(not defined $self->{'sshlogin_wrap'}) {
 	my $sshlogin = $self->sshlogin();
-	my $sshcmd = $sshlogin->sshcommand();
 	my $serverlogin = $sshlogin->serverlogin();
-	my ($pre,$post,$cleanup)=("","","");
+	my $quoted_remote_command;
+	$ENV{'PARALLEL_SEQ'} = $self->seq();
+	$ENV{'PARALLEL_PID'} = $$;
 	if($serverlogin eq ":") {
-	    # No transfer/environment neeeded
-	    # TODO Copy env between shells (zsh to bash)
-	    $self->{'sshlogin_wrap'} = $command;
+	    if(@opt::env) {
+		# Prepend with environment setter, which sets functions in zsh
+		my ($csh_friendly,$envset,$bashfuncset) = env_as_eval();
+		my $env_command = $envset.$bashfuncset.
+		    '@ARGV="'.::perl_quote_scalar($command).'";'.
+		    "exec\"$Global::shell\",\"-c\",\(\$bashfunc.\"\@ARGV\"\)\;die\"exec:\$\!\\n\"\;";
+		if(length $env_command > 1000
+		   or
+		   not $csh_friendly
+		   or
+		   $command =~ /\n/) {
+		    # csh does not deal well with > 1000 chars in one word
+		    # csh does not deal well with $ENV with \n
+		    $env_command = "perl -e '".base64_zip_eval()."' ".
+			join" ",string_zip_base64($env_command);
+		    $self->{'sshlogin_wrap'} = $env_command;
+		} else {
+		    $self->{'sshlogin_wrap'} = "perl -e ".::shell_quote_scalar($env_command);
+		}
+	    } else {
+		$self->{'sshlogin_wrap'} = $command;
+	    }
 	} else {
+	    my $pwd = "";
+	    if($opt::workdir) {
+		# Create remote workdir if needed. Then cd to it.
+	        my $wd = $self->workdir();
+		$pwd = qq{system("mkdir","-p","--","$wd"); chdir "$wd" ||}.
+		    qq{print(STDERR "parallel: Cannot chdir to $wd\\n") && exit 255;};
+	    }
+	    my ($csh_friendly,$envset,$bashfuncset) = env_as_eval();
+	    my $remote_command = $pwd.$envset.$bashfuncset.
+		'@ARGV="'.::perl_quote_scalar($command).'";'. monitor_parent_sshd_script();
+	    $quoted_remote_command = "perl -e ".::shell_quote_scalar($remote_command);
+	    if(length $quoted_remote_command > 1000
+	       or
+	       not $csh_friendly
+	       or
+	       $command =~ /\n/) {
+		# csh does not deal well with > 1000 chars in one word
+		# csh does not deal well with $ENV with \n
+		$quoted_remote_command = "perl -e \\''".base64_zip_eval()."'\\' ".
+		    join" ",string_zip_base64($remote_command);
+	    } else {
+		$quoted_remote_command = ::shell_quote_scalar($quoted_remote_command);
+	    }
+
+	    my $sshcmd = $sshlogin->sshcommand();
+	    my ($pre,$post,$cleanup)=("","","");
 	    # --transfer
 	    $pre .= $self->sshtransfer();
 	    # --return
@@ -6045,36 +6092,9 @@ sub sshlogin_wrap {
 		# We need to save the exit status of the job
 		$post = '_EXIT_status=$?; ' . $post . ' exit $_EXIT_status;';
 	    }
-	    # If the remote login shell is (t)csh then use 'setenv'
-	    # otherwise use 'export'
-	    # We cannot use parse_env_var(), as PARALLEL_SEQ changes
-	    # for each command
-	    $ENV{'PARALLEL_SEQ'} = $self->seq();
-	    $ENV{'PARALLEL_PID'} = $$;
-	    my $pwd = "";
-	    if($opt::workdir) {
-		# Create remote workdir if needed. Then cd to it.
-	        my $wd = $self->workdir();
-		$pwd = qq{system("mkdir","-p","--","$wd"); chdir "$wd" ||}.
-		    qq{print(STDERR "parallel: Cannot chdir to $wd\\n") && exit 255;};
-	    }
-	    my ($csh_friendly,$envset,$bashfuncset) = env_as_eval();
-	    my $remote_command = $pwd.$envset.$bashfuncset.
-	    '@ARGV="'.::perl_quote_scalar($command).'";'. monitor_parent_sshd_script();
-	    my $quoted_remote_command = "exec perl -e ".::shell_quote_scalar(::shell_quote_scalar($remote_command));
-	    if(length $quoted_remote_command > 1000
-	       or
-	       not $csh_friendly
-	       or
-	       $command =~ "\n") {
-		# csh does not deal well with > 1000 chars in one word
-		# csh does not deal well with $ENV with \n
-		$quoted_remote_command = "exec perl -e '".::shell_quote_scalar(base64_zip_eval())."' ".
-		    join" ",string_zip_base64($remote_command);
-	    }
 	    $self->{'sshlogin_wrap'} =
 		($pre
-		 . "$sshcmd $serverlogin "
+		 . "$sshcmd $serverlogin exec "
 		 . $quoted_remote_command
 		 . ";"
 		 . $post);

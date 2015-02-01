@@ -61,8 +61,4 @@ echo '### Uniq {=perlexpr=} in return - not used in command'
 
 #  Should be changed to --return '{=s:/f:/g:=}' and tested with csh - is error code kept?
 
-echo '### zsh'
-  ssh zsh@lo 'fun="() { echo function from zsh to zsh \$*; }"; export fun; parallel --env fun fun ::: OK'
-  ssh zsh@lo 'fun="() { echo function from zsh to bash \$*; }"; export fun; parallel -S parallel@lo --env fun fun ::: OK'
-
 EOF
