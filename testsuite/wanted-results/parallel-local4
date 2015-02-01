@@ -133,3 +133,26 @@ a4b4c
   seq 4 | parallel -s 20 -m -kj1 echo {} {}
 1 2 3 1 2 3
 4 4
+echo 'bug #44144: --tagstring {=s/a/b/=} broken'
+bug #44144: --tagstring {=s/a/b/=} broken
+  # Do not be confused by {} in --rpl
+  parallel --rpl '{:} s/A/D/;{}' --tagstring '{1:}{-1:}{= s/A/E/=}' echo {} ::: A/B.C
+D/B.CD/B.CE/B.C	A/B.C
+  # Non-standard --parens   parallel --parens ,, --rpl '{:} s/A/D/;{}' --tagstring '{1:}{-1:}, 's/A/E/, echo {} ::: A/B.C
+  # Non-standard --parens -i
+  parallel --rpl '{:} s/A/D/;{}' --tag --parens ,, -iDUMMY echo {} ::: A/B.C
+A/B.C	{} A/B.C
+echo 'env in zsh'
+env in zsh
+  echo 'Normal variable export'
+Normal variable export
+  export B=\';   PARALLEL_SHELL=/usr/bin/zsh parallel --env B echo '$B' ::: a
+' a
+  echo 'Function export as variable'
+Function export as variable
+  export myfuncvar="() { echo myfuncvar \$*; }";   PARALLEL_SHELL=/usr/bin/zsh parallel --env myfuncvar myfuncvar ::: a
+myfuncvar a
+  echo 'Function export as function'
+Function export as function
+  myfunc() { echo myfunc $*; };   export -f myfunc;   PARALLEL_SHELL=/usr/bin/zsh parallel --env myfunc myfunc ::: a
+myfunc a

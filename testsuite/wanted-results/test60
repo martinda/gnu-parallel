@@ -66,11 +66,11 @@ echo '### Test read sshloginfile from STDIN';   echo parallel@parallel-server1 |
 ### Test read sshloginfile from STDIN
 redhat9.tange.dk
 redhat9.tange.dk
-echo '### Test --nonall --basefile';   touch /tmp/nonall--basefile;   parallel --nonall --basefile /tmp/nonall--basefile -S parallel@parallel-server1,parallel@parallel-server2 ls /tmp/nonall--basefile
+echo '### Test --nonall --basefile';   touch /tmp/nonall--basefile;   parallel --nonall --basefile /tmp/nonall--basefile -S parallel@parallel-server1,parallel@parallel-server2 ls /tmp/nonall--basefile\; rm  /tmp/nonall--basefile;   rm /tmp/nonall--basefile
 ### Test --nonall --basefile
 /tmp/nonall--basefile
 /tmp/nonall--basefile
-echo '### Test --onall --basefile';   touch /tmp/onall--basefile;   parallel --onall --basefile /tmp/onall--basefile -S parallel@parallel-server1,parallel@parallel-server2 ls ::: /tmp/onall--basefile
+echo '### Test --onall --basefile';   touch /tmp/onall--basefile;   parallel --onall --basefile /tmp/onall--basefile -S parallel@parallel-server1,parallel@parallel-server2 ls {}\; rm {} ::: /tmp/onall--basefile;   rm /tmp/onall--basefile
 ### Test --onall --basefile
 /tmp/onall--basefile
 /tmp/onall--basefile

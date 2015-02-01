@@ -95,7 +95,7 @@ echo '### bug #42913: Dont use $SHELL but the shell currently running'
 ### bug #42913: Dont use $SHELL but the shell currently running
   echo '## Unknown shell => $SHELL (bash)'
 ## Unknown shell => $SHELL (bash)
-  parallel -j1 "cp \`which {}\` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh;   rm /tmp/SHELL
+  parallel -j1 "cp \`which {}\` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh;   rm -f /tmp/SHELL /tmp/par*.par
 shell? /bin/bash -c cp `which ash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
 which bash => shell path /bin/bash
 shell? /bin/bash -c cp `which bash` /tmp/SHELL; /tmp/SHELL -c 'parallel -Dinit echo ::: 1' | grep which;
@@ -137,7 +137,7 @@ Contact the systems administrator for further assistance.
 SHELL: applet not found
   echo '## Known shells -c'
 ## Known shells -c
-  parallel -k "\`which {}\` -c 'parallel -Dinit echo ::: 1' | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+  parallel -k "\`which {}\` -c 'parallel -Dinit echo ::: 1' | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh;   rm -f /tmp/par*.par
 which ash => shell path /bin/ash
 shell? /bin/bash -c `which bash` -c 'parallel -Dinit echo ::: 1' | grep which;
 which bash => shell path /bin/bash
@@ -171,7 +171,7 @@ Local configuration error occurred.
 Contact the systems administrator for further assistance.
   echo '## Known shells |'
 ## Known shells |
-  parallel -k "echo 'parallel -Dinit echo ::: 1' | \`which {}\` | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh
+  parallel -k "echo 'parallel -Dinit echo ::: 1' | \`which {}\` | grep which;"   ::: ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh posh rbash rush rzsh sash sh static-sh tcsh yash zsh;   rm -f /tmp/par*.par
 which ash => shell path /bin/ash
 which bash => shell path /bin/bash
 which csh => shell path /bin/csh
@@ -196,6 +196,6 @@ Local configuration error occurred.
 Contact the systems administrator for further assistance.
   echo '## Started directly from perl'
 ## Started directly from perl
-  perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which
-shell? /bin/bash -c   perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which
+  perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which;   rm -f /tmp/par*.par
+shell? /bin/bash -c   perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which;   rm -f /tmp/par*.par
 which bash => shell path /bin/bash

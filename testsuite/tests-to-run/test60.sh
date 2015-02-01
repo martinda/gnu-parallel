@@ -28,12 +28,12 @@ echo '### Test read sshloginfile from STDIN';
 
 echo '### Test --nonall --basefile'; 
   touch /tmp/nonall--basefile; 
-  parallel --nonall --basefile /tmp/nonall--basefile -S $SSHLOGIN1,$SSHLOGIN2 ls /tmp/nonall--basefile; 
+  parallel --nonall --basefile /tmp/nonall--basefile -S $SSHLOGIN1,$SSHLOGIN2 ls /tmp/nonall--basefile\; rm  /tmp/nonall--basefile; 
   rm /tmp/nonall--basefile
 
 echo '### Test --onall --basefile'; 
   touch /tmp/onall--basefile; 
-  parallel --onall --basefile /tmp/onall--basefile -S $SSHLOGIN1,$SSHLOGIN2 ls ::: /tmp/onall--basefile;
+  parallel --onall --basefile /tmp/onall--basefile -S $SSHLOGIN1,$SSHLOGIN2 ls {}\; rm {} ::: /tmp/onall--basefile; 
   rm /tmp/onall--basefile
 
 echo '### Test --workdir .'; 

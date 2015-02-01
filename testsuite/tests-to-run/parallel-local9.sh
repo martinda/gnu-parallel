@@ -79,7 +79,7 @@ seq 1 10 | $NICEPAR --recend "\n" -j1 --spreadstdin gzip -9 >/tmp/foo.gz;
 echo '### Test --spreadstdin - similar to the failing below'; 
   nice seq 1 100000 | $NICEPAR --recend "\n" -j10 --spreadstdin gzip -9 >/tmp/foo2.gz; 
   diff <(nice seq 1 100000) <(zcat /tmp/foo2.gz |sort -n); 
-  diff <(nice seq 1 100000|wc -c) <(zcat /tmp/foo2.gz |wc -c);
+  diff <(nice seq 1 100000|wc -c) <(zcat /tmp/foo2.gz |wc -c); 
   rm /tmp/foo2.gz
 
 echo '### Test --spreadstdin - this failed during devel'; 
