@@ -288,7 +288,7 @@ sub spreadstdin {
     # Uses:
     #   $opt::blocksize
     #   STDIN
-    #   $opr::r
+    #   $opt::r
     #   $Global::max_lines
     #   $Global::max_number_of_args
     #   $opt::regexp
@@ -901,7 +901,8 @@ sub parse_options {
 	$Global::ContextReplace = 1;
     }
     if(defined $opt::tag and not defined $opt::tagstring) {
-	$opt::tagstring = "\257<\257>"; # Default = {}
+	# Default = {}
+	$opt::tagstring = $Global::parensleft.$Global::parensright;
     }
     if(defined $opt::pipepart and
        (defined $opt::L or defined $opt::max_lines
@@ -953,7 +954,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150122;
+    $Global::version = 20150123;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -7442,6 +7443,7 @@ sub new {
     my ($count,$posrpl,$perlexpr);
     my ($replacecount_ref, $len_ref);
     my @command = @$commandref;
+    my $dummy = '';
     # If the first command start with '-' it is probably an option
     if($command[0] =~ /^\s*(-\S+)/) {
 	# Is this really a command in $PATH starting with '-'?
@@ -7456,47 +7458,39 @@ sub new {
 
     # Protect matching inside {= perl expr =}
     # by replacing {= and =} with \257< and \257>
-    for(@command) {
+    # in @command, --return and --tagstring (if used)
+    for(@command,@$return_files,
+	(defined $opt::tagstring ? $opt::tagstring : $dummy)) {
+	# Disallow \257 to avoid nested {= {= =} =}
 	if(/\257/) {
 	    ::error("Command cannot contain the character \257. Use a function for that.\n");
 	    ::wait_and_exit(255);
 	}
 	# Needs to match rightmost left parens (Perl defaults to leftmost)
 	# to deal with: {={==}
-	# Disallow \257 to avoid nested {= {= =} =}
-	while(s/([^\257]*) \Q$Global::parensleft\E ([^\257]*?) \Q$Global::parensright\E /$1\257<$2\257>/gx) {}
-    }
-    for my $rpl (keys %Global::rpl) {
-	# Replace the short hand string (--rpl)
-	# with the {= perl expr =} in $command and $opt::tagstring
-	# Avoid replacing inside existing {= perl expr =}
-	for(@command,@Global::ret_files) {
-	    while(s/((^|\257>)[^\257]*?) # Don't replace after \257 unless \257>
-                  \Q$rpl\E/$1\257<$Global::rpl{$rpl}\257>/xg) {
+	while(s{([^\257]*) \Q$Global::parensleft\E ([^\257]*?) \Q$Global::parensright\E }
+	      {$1\257<$2\257>}gx) {}
+	for my $rpl (keys %Global::rpl) {
+	    # Replace the short hand string (--rpl)
+	    # with the {= perl expr =}
+	    # Avoid replacing inside existing {= perl expr =}
+	    while(s{((^|\257>)[^\257]*?) # Don't replace after \257 unless \257>
+                  \Q$rpl\E}
+		  {$1\257<$Global::rpl{$rpl}\257>}xg) {
 	    }
-	}
-	if(defined $opt::tagstring) {
-	    for($opt::tagstring) {
-		while(s/((^|\257>)[^\257]*?) # Don't replace after \257 unless \257>
-                      \Q$rpl\E/$1\257<$Global::rpl{$rpl}\257>/x) {}
-	    }
-	}
-	# Do the same for the positional replacement strings
-	# A bit harder as we have to put in the position number
-	$posrpl = $rpl;
-	if($posrpl =~ s/^\{//) {
-	    # Only do this if the shorthand start with {
-	    for(@command,@Global::ret_files) {
-		s/\{(-?\d+)\Q$posrpl\E/\257<$1 $Global::rpl{$rpl}\257>/g;
-	    }
-	    if(defined $opt::tagstring) {
-		$opt::tagstring =~ s/\{(-?\d+)\Q$posrpl\E/\257<$1 $perlexpr\257>/g;
+	    # Do the same for the positional replacement strings
+	    # A bit harder as we have to put in the position number
+	    $posrpl = $rpl;
+	    if($posrpl =~ s/^\{//) {
+		# Only do this if the shorthand start with {
+		s{\{(-?\d+)\Q$posrpl\E}
+		{\257<$1 $Global::rpl{$rpl}\257>}g;
 	    }
 	}
     }
     # Add {} if no replacement strings in @command
     ($replacecount_ref, $len_ref, @command) =
-	replacement_counts_and_lengths(@command);
+	replacement_counts_and_lengths($return_files,@command);
     if("@command" =~ /^[^ \t\n=]*\257</) {
 	# Replacement string is (part of) the command (and not just
 	# argument or variable definition V1={})
@@ -7561,9 +7555,11 @@ sub replacement_counts_and_lengths {
     # If no {} found in @command: add it to @command
     #
     # Input:
+    #   \@return_files = array of filenames to return
     #   @command = command template
     # Output:
     #   \%replacecount, \%len, @command
+    my $return_files = shift;
     my @command = @_;
     my (%replacecount,%len);
     my $sum = 0;
@@ -7591,6 +7587,15 @@ sub replacement_counts_and_lengths {
 	    }
 	    # All {= perl expr =} have been removed: The rest is non-context
 	    $noncontextlen += length $c;
+	}
+	for(@$return_files) {
+	    my $t = $_;
+	    while($t =~ s/ \257<([^\257]*)\257> //x) {
+		# %replacecount = { "perlexpr" => number of times seen }
+		# e.g { "$_++" => 2 }
+		# But for tagstring we just need to mark it as seen
+		$replacecount{$1} ||= 1;
+	    }
 	}
 	if($opt::tagstring) {
 	    my $t = $opt::tagstring;
