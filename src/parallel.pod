@@ -1392,7 +1392,7 @@ useful if some jobs fail for no apparent reason (such as network
 failure).
 
 
-=item B<--return> I<filename> (beta testing)
+=item B<--return> I<filename> (alpha testing)
 
 Transfer files from remote computers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote computers. When
@@ -1768,7 +1768,7 @@ the lines will be prepended with the sshlogin instead.
 B<--tag> is ignored when using B<-u>.
 
 
-=item B<--tagstring> I<str>
+=item B<--tagstring> I<str> (alpha testing)
 
 Tag lines with a string. Each output line will be prepended with
 I<str> and TAB (\t). I<str> can contain replacement strings such as
@@ -1785,7 +1785,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--tmux>
+=item B<--tmux> (alpha testing)
 
 Use B<tmux> for output. Start a B<tmux> session and run each job in a
 window in that session. No other output will be produced.

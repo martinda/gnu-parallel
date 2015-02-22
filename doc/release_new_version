@@ -100,7 +100,7 @@ https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
 
 == Download and test ==
 
-# Only needed for alpha
+# Only needed for alpha (part of 'make upload')
 
 YYYYMMDD=`yyyymmdd`
 pushd /tmp
