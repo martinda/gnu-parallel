@@ -366,7 +366,7 @@ echo '### Test --seqreplace and line too long'
  seq 1 1000 | stdout parallel -j1 -s 210 -k --seqreplace I echo IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII \|wc | uniq -c
       9       1       1     101
      90       1       1     201
-      1 parallel: Error: Command line too long (309 >= 210) at number 0: 100...
+      1 parallel: Error: Command line too long (309 >= 210) at input 0: 100
 echo '### bug #37042: -J foo is taken from the whole command line - not just the part before the command'
 ### bug #37042: -J foo is taken from the whole command line - not just the part before the command
   echo '--tagstring foo' > ~/.parallel/bug_37042_profile;   parallel -J bug_37042_profile echo ::: tag_with_foo;   parallel --tagstring a -J bug_37042_profile echo ::: tag_with_a;   parallel --tagstring a echo -J bug_37042_profile ::: print_-J_bug_37042_profile

@@ -18,8 +18,8 @@ echo '### bug #32191: Deep recursion on subroutine main::get_job_with_sshlogin'
 
 echo '### Test --load locally - should take >10s'
   echo '# This will run 10 processes in parallel for 10s'; 
-  seq 10 | parallel --nice 19 --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null" &
-  stdout /usr/bin/time -f %e parallel --load 10 sleep ::: 1 | perl -ne '$_ > 10 and print "OK\n"'
+  seq 10 | parallel --nice 19 --timeout 13 -j0 -N0 "gzip < /dev/zero > /dev/null" &
+  sleep 2; stdout /usr/bin/time -f %e parallel --load 10 sleep ::: 1 | perl -ne '$_ > 10 and print "OK\n"'
 
 echo '### Test --load remote'
   ssh parallel@$SERVER2 'seq 10 | parallel --nice 19 --timeout 10 -j0 -N0 "gzip < /dev/zero > /dev/null"' &

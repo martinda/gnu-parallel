@@ -86,8 +86,8 @@ stdout xargs -i -s26 -0 echo from \{\} to x{}y < items-0.xi
 xargs: argument list too long
 from one to xoney
 stdout parallel -k -i -s26 -0 echo from \{\} to x{}y < items-0.xi
-parallel: Error: Command line too long (42 >= 26) at number 0:  	
-...
+parallel: Error: Command line too long (42 >= 26) at input 0:  	
+
 echo '###  -l -0 echo < ldata-0.xi'
 ###  -l -0 echo < ldata-0.xi
 stdout xargs -l -0 echo < ldata-0.xi
@@ -998,7 +998,7 @@ echo '###  -s6 echo < files.xi'
 stdout xargs -s6 echo < files.xi
 xargs: argument line too long
 stdout parallel -k -X -s6 echo < files.xi
-parallel: Error: Command line too long (27 >= 6) at number -7: /src/gnu/autoconf-1.11...
+parallel: Error: Command line too long (27 >= 6) at input -7: /src/gnu/autoconf-1.11
 echo '###  -iARG -s86 echo ARG is xARGx < files.xi'
 ###  -iARG -s86 echo ARG is xARGx < files.xi
 stdout xargs -iARG -s86 echo ARG is xARGx < files.xi
@@ -1209,7 +1209,7 @@ stdout xargs -i -s26 echo from \{\} to x{}y < items.xi
 xargs: argument list too long
 from dumb to xdumby
 stdout parallel -k -i -s26 echo from \{\} to x{}y < items.xi
-parallel: Error: Command line too long (36 >= 26) at number 0:  	...
+parallel: Error: Command line too long (36 >= 26) at input 0:  	
 echo '###  -i__ echo FIRST __ IS OK < quotes.xi'
 ###  -i__ echo FIRST __ IS OK < quotes.xi
 stdout xargs -i__ echo FIRST __ IS OK < quotes.xi

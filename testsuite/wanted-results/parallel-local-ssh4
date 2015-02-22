@@ -18,3 +18,41 @@ echo '### csh'
       1     200     692
       1     200     692
       1     150     547
+echo '### Test tmux works on different shells'
+### Test tmux works on different shells
+  parallel -Scsh@lo,tcsh@lo,parallel@lo,zsh@lo --tmux echo ::: 1 2 3 4; echo $?
+0
+  parallel -Scsh@lo,tcsh@lo,parallel@lo,zsh@lo --tmux false ::: 1 2 3 4; echo $?
+4
+  export PARTMUX='parallel -Scsh@lo,tcsh@lo,parallel@lo,zsh@lo --tmux ';   ssh zsh@lo "$PARTMUX" 'true ::: 1 2 3 4; echo $status';   ssh zsh@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $status';   ssh parallel@lo "$PARTMUX" 'true ::: 1 2 3 4; echo $?';   ssh parallel@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $?';   ssh tcsh@lo "$PARTMUX" 'true ::: 1 2 3 4; echo $status';   ssh tcsh@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $status'
+0
+4
+0
+4
+0
+4
+echo '### TODO This fails - word too long'
+### TODO This fails - word too long
+  export PARTMUX='parallel -Scsh@lo,tcsh@lo,parallel@lo,zsh@lo --tmux ';   stdout ssh csh@lo "$PARTMUX" 'true ::: 1 2 3 4; echo $status' | grep -v 'See output';   stdout ssh csh@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $status' | grep -v 'See output'
+Word too long.
+Word too long.
+Word too long.
+Word too long.
+4
+Word too long.
+Word too long.
+Word too long.
+Word too long.
+4
+echo '### works'
+### works
+  parallel -Sparallel@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
+  stdout parallel -Sparallel@lo --tmux echo ::: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+parallel: Error: Command line too long (402 >= 238) at input 0: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...
+echo '### These blocked due to length'
+### These blocked due to length
+  parallel -Slo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
+  parallel -Scsh@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
+  parallel -Stcsh@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
+  parallel -Szsh@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
+  parallel -Scsh@lo --tmux echo ::: 111111111111111111111111111111111111111111111111111111111

@@ -1,7 +1,7 @@
 echo '### Test if we can deal with output > 4 GB'
 ### Test if we can deal with output > 4 GB
 ##  echo | niceload --io 10 parallel -q perl -e '"\$a=\"x\"x1000000;for(0..4300){print \$a}"' | md5sum
-  echo | parallel --tmpdir /dev/shm -q perl -e '$a="x"x1000000;for(0..4300){print $a}' | md5sum
+  echo | parallel --tmpdir /dev/shm -q perl -e '$a="x"x1000000;for(0..4300){print $a}' | nice md5sum
 46a318993dfc8e2afd71ff2bc6f605f1  -
 echo '**'
 **

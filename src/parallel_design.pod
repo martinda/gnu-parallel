@@ -83,6 +83,38 @@ version is >= 3.1.0 then B<--protocol 30> is added to force newer
 B<rsync>s to talk to version 2.5.7.
 
 
+=head2 Compression
+
+B<--compress> compresses the data in the temporary files. This is a
+bit tricky because there should be no files to clean up if GNU
+B<parallel> is killed by a power outage.
+
+GNU B<parallel> first selects a compress program. If the user has not
+selected one, the first of these that are in $PATH is used: B<lzop
+pigz pxz gzip plzip pbzip2 lzma xz lzip bzip2>. They are sorted by
+speed on a 8 core machine.
+
+Schematically the setup is as follows:
+
+  command started by parallel | compress > tmpfile
+  cattail tmpfile | uncompress | parallel
+
+The setup is duplicated for both standard output (stdout) and standard
+error (stderr).
+
+GNU B<parallel> pipes output from the command run into the compress
+program which saves to a tmpfile. GNU B<parallel> records the pid of
+the compress program.  At the same time a small perl script (called
+B<cattail> above) is started: It basically does B<cat> followed by
+B<tail -f>, but it also removes the tmpfile as soon as the first byte
+is read, and it continously checks if the pid of the compress program
+is dead. If the compress program is dead, B<cattail> reads the rest of
+tmpfile and exits.
+
+As most compress programs write out a header when they start, the
+tmpfile in practice is unlinked after around 40 ms.
+
+
 =head2 Wrapping
 
 The command given by the user can be wrapped in multiple
@@ -166,12 +198,20 @@ shell is B<csh> (which cannot hide stderr).
 
 =item --tmux
 
-mkfifo I<tmpfile>; tmux new-session -s pI<PID> -d -n <<shell quoted input>> \( <<shell quoted input>> \)\;\(echo\ \$\?\$status\;echo\ 255\)\ \>I<tmpfile>\&echo\ <<shell double quoted input>>\;echo\ \Job\ finished\ at:\ \`date\`\;sleep\ 10;  exit `perl -ne 'unlink $ARGV; 1..1 and print' I<tmpfile>` 
 
-The input is used as the name of the windows in B<tmux>. To get the
-exit value out from B<tmux> a fifo is used. This fifo is being opened
-by perl and the first value read is used as exit value. Works in
-B<csh>.
+mkfifo I<tmpfile>; tmux new-session -s pI<PID> -d -n <<shell quoted input>> \(<<shell quoted input>>\)\;\ perl\ -e\ \'while\(\$t++\<3\)\{\ print\ \$ARGV\[0\],\"\\n\"\ \}\'\ \$\?h/\$status/255\ \>\>\ I<tmpfile>\&echo\ <<shell double quoted input>>\;echo\ \Job\ finished\ at:\ \`date\`\;sleep\ 10; exec perl -e '$/="/";$_=<>;$c=<>;unlink $ARGV; /(\d+)h/ and exit($1);exit$c' I<tmpfile>
+
+The input is used as the name of the windows in B<tmux>. When the job
+inside B<tmux> finishes, the exit value is printed to a fifo.  This
+fifo is opened by perl outside B<tmux>, and perl then removes the fifo
+(but keeping it open). Perl blocks until the first value is read from
+the fifo, and this value is used as exit value.
+
+To make it compatible with B<csh> and B<bash> the exit value is
+printed as: $?h/$status/255 and this is parsed by perl.
+
+There is a bug that makes it necessary to print the exit value 3
+times. Works in B<csh>.
 
 =back
 
@@ -249,10 +289,11 @@ stderr. The wrapper looks like this:
 
 =head2 Transferring of variables and functions
 
-Transferring of variables and functions is done by running a Perl
-script before running the actual command. The Perl script sets
-$ENV{variable} to the correct value before exec'ing the a shell that
-runs the function definition followed by the actual command.
+Transferring of variables and functions given by B<-env> is done by
+running a Perl script remotely that calls the actual command. The Perl
+script sets $ENV{variable} to the correct value before exec'ing the a
+shell that runs the function definition followed by the actual
+command.
 
 B<env_parallel> (mentioned in the man page) copies the full current
 environment into the environment variable
@@ -317,7 +358,7 @@ B<bash> it will use B<bash>. It does this by looking at the
 this shell; otherwise look at the parent of this (grand*)parent. If
 none of the (grand*)parents are shells, then $SHELL is used.
 
-This will do the right thing in most cases. If called from:
+This will do the right thing if called from:
 
 =over 2
 
@@ -331,11 +372,11 @@ a shell script
 
 =item *
 
-a Perl script in `` or using B<system> if called as a single string
+a Perl script in `` or using B<system> if called as a single string.
 
 =back
 
-But there are situations where it will fail:
+While these cover most cases, there are situations where it will fail:
 
   #!/usr/bin/perl
 
@@ -343,7 +384,8 @@ But there are situations where it will fail:
 
 Here it depends on which shell is used to call the Perl script. If the
 Perl script is called from B<tcsh> it will work just fine, but if it
-is called from B<bash> it will fail.
+is called from B<bash> it will fail, because the command B<setenv> is
+not known to B<bash>.
 
 
 =head2 Quoting
@@ -352,8 +394,9 @@ Quoting is kept simple: Use \ for all special chars and ' for
 newline. Whether a char is special depends on the shell and the
 context. Luckily quoting a bit too many does not break things.
 
-It is fast, but had the distinct disadvantage that if at string needs
-to be quoted multiple times, the \'s double every time.
+It is fast, but had the distinct disadvantage that if a string needs
+to be quoted multiple times, the \'s double every time - increasing
+the string length exponentially.
 
 
 =head2 --pipepart vs. --pipe
@@ -366,8 +409,8 @@ With B<--pipe> GNU B<parallel> reads the blocks from standard input
 so every block is being processed by GNU B<parallel> itself. This is
 the reason why B<--pipe> maxes out at around 100 MB/sec.
 
-B<--pipepart> on the other hand first identifies at which byte
-position blocks starts and how long they are. It does that by seeking
+B<--pipepart>, on the other hand, first identifies at which byte
+positions blocks start and how long they are. It does that by seeking
 into the file by the size of a block and then reading until it meets
 end of a block. The seeking explains why GNU B<parallel> does not know
 the line number and why B<-L/-l> and B<-N> do not work.
@@ -391,7 +434,7 @@ It delivers 1 GB/s per core.
 
 Instead of the script B<dd> was tried, but many versions of B<dd> do
 not support reading from one byte to another and might cause partial
-data:
+data. See this for a surprising example:
 
   yes | dd bs=1024k count=10 | wc
 
@@ -424,8 +467,8 @@ are no visible files on it.
 
 GNU B<parallel> buffers on disk. If the disk is full data may be
 lost. To check if the disk is full GNU B<parallel> writes a 8193 byte
-file when a job finishes. If this file is written succesfully, it is
-removed immediately. If it is not written succesfully, the disk is
+file when a job finishes. If this file is written successfully, it is
+removed immediately. If it is not written successfully, the disk is
 full. The size 8193 was chosen because 8192 gave wrong result on some
 file systems, whereas 8193 did the correct thing on all tested
 filesystems.
@@ -433,7 +476,7 @@ filesystems.
 
 =head2 Perl replacement strings, {= =}, and --rpl
 
-The shorthands for replacement strings makes a command look more
+The shorthands for replacement strings make a command look more
 cryptic. Different users will need different replacement
 strings. Instead of inventing more shorthands you get more more
 flexible replacement strings if they can be programmed by the user.
@@ -468,9 +511,9 @@ dependent on how long a given test runs (e.g. more than 10 secs is a
 pass, but less is a fail). It parallelizes most tests, but it is easy
 to force a test to run as the single test (which may be important for
 timing issues). It deals reasonably well with tests that fail
-intermittently. It detects which tests that failed and pushes these to
-the top, so when running the test suite again, the tests that failed
-most recently are run first.
+intermittently. It detects which tests failed and pushes these to the
+top, so when running the test suite again, the tests that failed most
+recently are run first.
 
 If GNU B<parallel> should adopt a real testing framework then those
 elements would be important.
@@ -486,7 +529,7 @@ sometimes. One of the harder problems was to make a machine start
 swapping without forcing it to its knees.
 
 
-=head2 Median runtime
+=head2 Median run time
 
 Using a percentage for B<--timeout> causes GNU B<parallel> to compute
 the median run time of a job. The median is a better indicator of the
@@ -523,10 +566,10 @@ Unfortunately it is not always possible to predict the root cause of the error.
 
 =head2 Computation of load
 
-Contrary to the obvious --load does not use load average. This is due
-to load average rising too slowly. Instead it uses B<ps> to list the
-number of jobs in running or blocked state (state D, O or R). This
-gives an instat load.
+Contrary to the obvious B<--load> does not use load average. This is
+due to load average rising too slowly. Instead it uses B<ps> to list
+the number of jobs in running or blocked state (state D, O or R). This
+gives an instant load.
 
 As remote calculation of load can be slow, a process is spawned to run
 B<ps> and put the result in a file, which is then used next time.

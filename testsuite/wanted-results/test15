@@ -152,7 +152,7 @@ e
 echo '### test too long args'
 ### test too long args
 perl -e 'print "z"x1000000' | parallel echo 2>&1
-parallel: Error: Command line too long (1000005 >= 131071) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Error: Command line too long (1000005 >= 131071) at input 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 perl -e 'print "z"x1000000' | xargs echo 2>&1
 xargs: argument line too long
 (seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout parallel -j1 -km -s 10 echo
@@ -161,7 +161,7 @@ xargs: argument line too long
 5 6
 7 8
 9 10
-parallel: Error: Command line too long (1000007 >= 10) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Error: Command line too long (1000007 >= 10) at input 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 (seq 1 10; perl -e 'print "z"x1000000'; seq 12 15) | stdout xargs -s 10 echo
 1 2
 3 4
@@ -175,7 +175,7 @@ xargs: argument line too long
 5 6
 7 8
 9 10
-parallel: Error: Command line too long (1000007 >= 10) at number 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
+parallel: Error: Command line too long (1000007 >= 10) at input 0: zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz...
 echo '### Test -x'
 ### Test -x
 (seq 1 10; echo 12345; seq 12 15) | stdout parallel -j1 -km -s 10 -x echo
@@ -184,14 +184,14 @@ echo '### Test -x'
 5 6
 7 8
 9 10
-parallel: Error: Command line too long (10 >= 10) at number 0: 12345...
+parallel: Error: Command line too long (10 >= 10) at input 0: 12345
 (seq 1 10; echo 12345; seq 12 15) | stdout parallel -j1 -kX -s 10 -x echo
 1 2
 3 4
 5 6
 7 8
 9 10
-parallel: Error: Command line too long (10 >= 10) at number 0: 12345...
+parallel: Error: Command line too long (10 >= 10) at input 0: 12345
 (seq 1 10; echo 12345; seq 12 15) | stdout xargs -s 10 -x echo
 1 2
 3 4
@@ -444,9 +444,9 @@ echo '### Test --help and -h: Help output (just check we get the same amount of 
 echo Output from -h and --help
 Output from -h and --help
 parallel -h | wc -l
-35
+37
 parallel --help | wc -l
-35
+37
 echo '### Test --version: Version output (just check we get the same amount of lines)'
 ### Test --version: Version output (just check we get the same amount of lines)
 parallel --version | wc -l

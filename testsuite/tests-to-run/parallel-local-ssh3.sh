@@ -46,7 +46,7 @@ echo '### Special char file and dir transfer return and cleanup'
   }; 
   export -f mytouch; 
   parallel --env mytouch -Sparallel@lo --transfer 
-  --return {=s:/f:/g:=} 
+    --return {=s:/f:/g:=} 
     mytouch 
     ::: d"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"/f"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"; 
   cat d"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"/g"`perl -e 'print pack("c*",1..9,11..46,48..255)'`"

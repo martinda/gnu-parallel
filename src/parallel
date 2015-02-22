@@ -132,7 +132,6 @@ if($Global::semaphore) {
     $sem = acquire_semaphore();
 }
 $SIG{TERM} = \&start_no_new_jobs;
-
 start_more_jobs();
 if(not $opt::pipepart) {
     if($opt::pipe) {
@@ -954,7 +953,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150123;
+    $Global::version = 20150201;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1161,7 +1160,7 @@ sub open_joblog {
 		    if(/$joblog_regexp/o) {
 			# This is 30% faster than set_job_already_run($1);
 			vec($Global::job_already_run,($1||0),1) = 1;
-		    } elsif(not /\d+\s+[^\s]+\s+([0-9.]+\s+){6}/) {
+		    } elsif(not /\d+\s+[^\s]+\s+([-0-9.]+\s+){6}/) {
 			::error("Format of '$opt::joblog' is wrong: $_");
 			::wait_and_exit(255);
 		    }
@@ -1198,8 +1197,10 @@ sub find_compression_program {
     #   $compress_program = compress program with options
     #   $decompress_program = decompress program with options
 
-    # Search for these. Sorted by speed
-    my @prg = qw(lzop pigz pxz gzip plzip pbzip2 lzma xz lzip bzip2);
+    # Search for these. Sorted by speed on 16 core
+    # parallel -j1  --joblog jl --arg-sep ,  parallel --compress-program \'{3}" "-{2}\' cat ::: gz '>'/dev/null , 1 2 3 ,  {1..3} , lz4 lzop pigz pxz gzip plzip pbzip2 lzma xz lzip bzip2
+    # sort -nk4 jl
+    my @prg = qw(lz4 pigz lzop plzip pbzip2 pxz gzip lzma xz bzip2 lzip);
     for my $p (@prg) {
 	if(which($p)) {
 	    return ("$p -c -1","$p -dc");
@@ -1395,6 +1396,7 @@ sub read_args_from_command_line {
 sub cleanup {
     # Returns: N/A
     if(@opt::basefile) { cleanup_basefile(); }
+    unlink keys %Global::unlink;
 }
 
 sub __QUOTING_ARGUMENTS_FOR_SHELL__ {}
@@ -2569,7 +2571,7 @@ sub parallelized_host_filtering {
     while (my ($host, $sshlogin) = each %Global::host) {
 	if($host eq ":") { next }
 	# The 'true' is used to get the $host out later
-	my $sshcmd = "true $host;" . $sshlogin->sshcommand()." ".$sshlogin->serverlogin();
+	my $sshcmd = "true $host; exec " . $sshlogin->sshcommand()." ".$sshlogin->serverlogin();
 	push(@cores, $host."\t".$sshcmd." ".$envvar." parallel --number-of-cores\n\0");
 	push(@cpus, $host."\t".$sshcmd." ".$envvar." parallel --number-of-cpus\n\0");
 	push(@maxline, $host."\t".$sshcmd." ".$envvar." parallel --max-line-length-allowed\n\0");
@@ -2771,6 +2773,7 @@ sub start_no_new_jobs {
     # Start no more jobs
     # Returns: N/A
     $SIG{TERM} = $Global::original_sig{TERM};
+    unlink keys %Global::unlink;
     ::status
         ("$Global::progname: SIGTERM received. No new jobs will be started.\n",
          "$Global::progname: Waiting for these ", scalar(keys %Global::running),
@@ -2908,11 +2911,13 @@ sub usage {
 	 "See 'man $Global::progname' for details",
 	 "",
 	 "Academic tradition requires you to cite works you base your article on.",
-	 "When using programs that use GNU Parallel to process data for publication please cite:",
+	 "When using programs that use GNU Parallel to process data for publication",
+	 "please cite:",
 	 "",
-	 "O. Tange (2011): GNU Parallel - The Command-Line Power Tool,",
-	 ";login: The USENIX Magazine, February 2011:42-47.",
+	 "  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,",
+	 "  ;login: The USENIX Magazine, February 2011:42-47.",
 	 "",
+	 "This helps funding further development; and it won't cost you a cent.",
 	 "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.\n",
 	 "");
 }
@@ -3003,7 +3008,8 @@ sub bibtex {
     # Returns: N/A
     print join("\n",
 	       "Academic tradition requires you to cite works you base your article on.",
-	       "When using programs that use GNU Parallel to process data for publication please cite:",
+	       "When using programs that use GNU Parallel to process data for publication",
+	       "please cite:",
 	       "",
                "\@article{Tange2011a,",
 	       " title = {GNU Parallel - The Command-Line Power Tool},",
@@ -3020,8 +3026,7 @@ sub bibtex {
 	       "",
 	       "(Feel free to use \\nocite{Tange2011a})",
 	       "",
-	       "This helps funding further development.",
-	       "",
+	       "This helps funding further development; and it won't cost you a cent.",
 	       "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.",
 	       "",
 	       "If you send a copy of your published article to tange\@gnu.org, it will be",
@@ -3388,6 +3393,7 @@ sub multiply_binary_prefix {
 sub tmpfile {
     # Create tempfile as $TMPDIR/parXXXXX
     # Returns:
+    #   $filehandle = opened file handle
     #   $filename = file name created
     return ::tempfile(DIR=>$ENV{'TMPDIR'}, TEMPLATE => 'parXXXXX', @_);
 }
@@ -5959,6 +5965,15 @@ sub sshlogin_wrap {
 	    # Split up --env VAR1,VAR2
 	    push @vars, split /,/, $varstring;
 	}
+	for (@vars) {
+	    if(-r $_ and not -d) {
+		# Read as environment definition bug #44041
+		# TODO parse this
+		my $fh = ::open_or_exit($_);
+		$Global::envdef = join("",<$fh>);
+		close $fh;
+	    }
+	}
 	if(grep { /^_$/ } @vars) {
 	    # --env _
 	    # Include all vars that are not in a clean environment
@@ -6039,7 +6054,7 @@ sub sshlogin_wrap {
 		my $env_command = $envset.$bashfuncset.
 		    '@ARGV="'.::perl_quote_scalar($command).'";'.
 		    "exec\"$Global::shell\",\"-c\",\(\$bashfunc.\"\@ARGV\"\)\;die\"exec:\$\!\\n\"\;";
-		if(length $env_command > 1000
+		if(length $env_command > 999
 		   or
 		   not $csh_friendly
 		   or
@@ -6067,7 +6082,7 @@ sub sshlogin_wrap {
 	    my $remote_command = $pwd.$envset.$bashfuncset.
 		'@ARGV="'.::perl_quote_scalar($command).'";'. monitor_parent_sshd_script();
 	    $quoted_remote_command = "perl -e ".::shell_quote_scalar($remote_command);
-	    if(length $quoted_remote_command > 1000
+	    if(length $quoted_remote_command > 999
 	       or
 	       not $csh_friendly
 	       or
@@ -6431,40 +6446,84 @@ sub print_dryrun_and_verbose {
     }
 }
 
-sub tmux_wrap {
-    # Wrap command with tmux for session pPID
-    # Input:
-    #   $actual_command = the actual command being run (incl ssh wrap)
-    my $self = shift;
-    my $actual_command = shift;
-    # Temporary file name. Used for fifo to communicate exit val
-    my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".tmx");
-    $Global::unlink{$tmpfile}=1;
-    close $fh;
-    unlink $tmpfile;
-    my $visual_command = $self->replaced();
-    my $title = $visual_command;
-    # ; causes problems
-    # ascii 194-245 annoys tmux
-    $title =~ tr/[\011-\016;\302-\365]//d;
+{
+    my $tmuxsocket;
 
-    my $tmux;
-    if($Global::total_running == 0) {
-	$tmux = "tmux new-session -s p$$ -d -n ".
-	    ::shell_quote_scalar($title);
-	::status("See output with: tmux attach -t p$$\n");
-    } else {
-	$tmux = "tmux new-window -t p$$ -n ".::shell_quote_scalar($title);
+    sub tmux_wrap {
+	# Wrap command with tmux for session pPID
+	# Input:
+	#   $actual_command = the actual command being run (incl ssh wrap)
+	my $self = shift;
+	my $actual_command = shift;
+	# Temporary file name. Used for fifo to communicate exit val
+	my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".tmx");
+	$Global::unlink{$tmpfile}=1;
+	close $fh;
+	unlink $tmpfile;
+	my $visual_command = $self->replaced();
+	my $title = $visual_command;
+	if($visual_command =~ /\0/) {
+	    ::error("Command line contains NUL. tmux is confused by NUL.\n");
+	    ::wait_and_exit(255);
+	}
+	# ; causes problems
+	# ascii 194-245 annoys tmux
+	$title =~ tr/[\011-\016;\302-\365]//d;
+	$title = ::shell_quote_scalar($title);
+
+	my $l_act = length($actual_command);
+	my $l_tit = length($title);
+	# The line to run contains a 118 chars extra code + the title 2x
+	my $l_tot = 2 * $l_tit + $l_act + 30;
+
+	while($l_tit < 1000 and
+	      (
+	       (900 < $l_tot and $l_tot < 1300)
+	       or
+	       (9250 < $l_tot and $l_tot < 9800)
+	      )) {
+	    # tmux blocks for certain lengths:
+	    # 900 < title + command < 1200
+	    # 9250 < title + command < 9800
+	    # but only if title < 1000, so expand the title with 75 spaces
+	    # The measured lengths are:
+	    # 996 < (title + whole command) < 1127
+	    # 9331 < (title + whole command) < 9636
+	    $title = $title.('\ 'x75);
+	    $l_tit = length($title);
+	    $l_tot = 2 * $l_tit + $l_act + 30;
+	}
+
+	my $tmux;
+	$ENV{'TMUX'} ||= "tmux";
+	if(not $tmuxsocket) {
+	    (undef, $tmuxsocket) = ::tmpfile(SUFFIX => ".tms");
+	    $Global::unlink{$tmuxsocket} = 1;
+	    unlink $tmuxsocket;
+	    ::status("See output with: $ENV{'TMUX'} -S $tmuxsocket attach -t p$$\n");
+	}
+	$tmux = $ENV{'TMUX'}." -S $tmuxsocket new-session -s p$$ -d 'sleep .2' >&/dev/null;" .
+	    $ENV{'TMUX'}." -S $tmuxsocket new-window -t p$$ -n $title";
+
+	::debug("tmux", "title len:", $l_tit, " act ", $l_act, " max ",
+		$Limits::Command::line_max_len, " tot ",
+		$l_tot, "\n");
+
+	return "mkfifo $tmpfile; $tmux ".
+	    # Run in tmux
+	    ::shell_quote_scalar
+	    (
+	     "(".$actual_command.');'.
+	     # The triple print is needed - otherwise the testsuite fails
+	     q[ perl -e 'while($t++<3){ print $ARGV[0],"\n" }' $?h/$status >> ].$tmpfile."&".
+	     "echo $title; echo \007Job finished at: `date`;sleep 10"
+	    ).
+	    # Run outside tmux
+	    # Read a / separated line: 0h/2 for csh, 2/0 for bash.
+	    # If csh the first will be 0h, so use the second as exit value.
+	    # Otherwise just use the first value as exit value.
+	    q{; exec perl -e '$/="/";$_=<>;$c=<>;unlink $ARGV; /(\d+)h/ and exit($1);exit$c' }.$tmpfile;
     }
-    return "mkfifo $tmpfile; $tmux ".
-	# Run in tmux
-	::shell_quote_scalar(
-	"(".$actual_command.');(echo $?$status;echo 255) >'.$tmpfile."&".
-	"echo ".::shell_quote_scalar($visual_command).";".
-	"echo \007Job finished at: `date`;sleep 10").
-	# Run outside tmux
-	# Read the first line from the fifo and use that as status code
-	";  exit `perl -ne 'unlink \$ARGV; 1..1 and print' $tmpfile` ";
 }
 
 sub is_already_in_results {
@@ -6516,7 +6575,7 @@ sub should_be_retried {
 	    ::debug("run", "Retry ", $self->seq(), "\n");
 	    return 1;
 	}
-    }
+}
 }
 
 {
@@ -7019,10 +7078,12 @@ sub populate {
 		::error("Command line too long (",
 			$self->len(), " >= ",
 			$max_len,
-			") at number ",
+			") at input ",
 			$self->{'arg_queue'}->arg_number(),
 			": ".
-			(substr($args,0,50))."...\n");
+			((length $args > 50) ?
+			 (substr($args,0,50))."...\n" :
+			 $args."\n"));
 		$self->{'arg_queue'}->unget($self->pop());
 		::wait_and_exit(255);
 	    }
@@ -7764,7 +7825,7 @@ sub max_length {
 	    print $fh $cached_limit;
 	    close $fh;
 	}
-	$Limits::Command::line_max_len = $cached_limit;
+	$Limits::Command::line_max_len = tmux_length($cached_limit);
 	if($opt::max_chars) {
 	    if($opt::max_chars <= $cached_limit) {
 		$Limits::Command::line_max_len = $opt::max_chars;
@@ -7820,6 +7881,48 @@ sub is_acceptable_command_line_length {
     close STDERR;
     ::debug("init", "$len=$? ");
     return not $?;
+}
+
+sub tmux_length {
+    # If $opt::tmux set, find the limit for tmux
+    # tmux 1.8 has a 2kB limit
+    # tmux 1.9 has a 16kB limit
+    # Input:
+    #   $len = maximal command line length
+    # Returns:
+    #   $tmux_len = maximal length runable in tmux
+    my $len = shift;
+    if($opt::tmux) {
+	$ENV{'TMUX'} ||= "tmux";
+	my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".tmb");
+	$Global::unlink{$tmpfile}=1;
+	close $fh;
+	unlink $tmpfile;
+	my $b2020 = "x"x2020;
+	my $b16320 = "x"x16320;
+	my $b100000 = "x"x100000;
+	my $blen = "x"x$len;
+	my @out = qx{
+            sleep .2;
+	    echo 1;
+	    $ENV{'TMUX'} -S $tmpfile new-session -d -n echo 2020$b2020 2>/dev/null && echo 2020;
+	    $ENV{'TMUX'} -S $tmpfile new-session -d -n echo 16320$b16320 2>/dev/null && echo 16320;
+	    $ENV{'TMUX'} -S $tmpfile new-session -d -n echo 100000$b100000 2>/dev/null && echo 100000;
+	},
+	# $len can be > 131072 which will confuse bash, so run it on its own
+	qx{
+	    $ENV{'TMUX'} -S $tmpfile new-session -d -n echo $len$blen 2>/dev/null && echo $len;
+	};
+	unlink $tmpfile;
+	::debug("tmux","tmux-length ",@out);
+	chomp @out;
+	# The arguments is given 3 times on the command line
+	# and the wrapping is around 50 chars
+	my $tmux_len = (::max(@out));
+	$len = ::min($len,int($tmux_len/4-28));
+	::debug("tmux","tmux-length ",$len);
+    }
+    return $len;
 }
 
 
@@ -8608,4 +8711,5 @@ sub mkdir_or_die {
 
 # Keep perl -w happy
 $opt::ctrlc = $opt::x = $Semaphore::timeout = $Semaphore::wait =
-$opt::ignored_option = $Job::file_descriptor_warning_printed = 0;
+$opt::ignored_option = $Job::file_descriptor_warning_printed =
+$Global::envdef = 0;

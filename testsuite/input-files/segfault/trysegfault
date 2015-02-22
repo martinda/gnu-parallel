@@ -1,4 +1,4 @@
-stdout parallel -i -s28 -0 true from \{\} to x{}y < items-0.xi |egrep -v 'exit|Command|\.\.\.'
+stdout parallel -i -s28 -0 true from \{\} to x{}y < items-0.xi | egrep -v 'exit|Command|\.\.\.' | grep .
 
 # Fejler
 #stdout parallel -Di -s28 -0 true from \{\} to x{}y < items-0.xi > /dev/null
