@@ -22,7 +22,7 @@
   Experiments for Identifying Recommender Differences
   http://elehack.net/research/thesis/mde-thesis.pdf
 
-* GNU Parallel was using (unfortunately with wrong citation) in:
+* GNU Parallel was used (unfortunately with wrong citation) in:
   Performance and Scaling Comparison Study of RDBMS and NoSQL
   (MongoDB)
   http://ijact.in/wp-content/uploads/2014/11/COMPUSOFT-311-1270-1275.pdf
@@ -37,7 +37,7 @@
   http://biorxiv.org/content/biorxiv/early/2014/12/05/012179.full.pdf
 
 * Zip Folders with GNU Parallel
-  http://fazky.github.io/Linux/2015-01-07-GNU-Parallel.html
+  http://fazky.github.io/posts/Linux/2015-01-07-GNU-Parallel.html
 
 * Using GNU Parallel with Freesurfer
   http://programminginadarkroom.blogspot.dk/2015/02/using-gnu-parallel-with-freesurfer.html

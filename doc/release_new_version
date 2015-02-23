@@ -208,44 +208,21 @@ cc:Tim Cuthbertson <tim3d.junk@gmail.com>,
    Ryoichiro Suzuki <ryoichiro.suzuki@gmail.com>,
    Jesse Alama <jesse.alama@gmail.com>
 
-Subject: GNU Parallel 20150222 (' (((:~{> Krudttønden') released
+Subject: GNU Parallel 20150322 ('') released
 
-GNU Parallel 20150222 (' (((:~{> Krudttønden') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
+GNU Parallel 20150322 ('') has been released. It is available for download at: http://ftp.gnu.org/gnu/parallel/
 
 Haiku of the month:
 
-  xargs' space and quote
-  headache causing behaviour.
-  Use GNU Parallel
-    -- Ole Tange
+  <<>>
 
 New in this release:
 
-* --tmux has gotten a major overhaul.
+* GNU Parallel was cited in: RIG: Recalibration and Interrelation of genomic sequence data with the GATK http://www.g3journal.org/content/early/2015/02/13/g3.115.017012.full.pdf+html
 
-* GNU Parallel was cited in: RaftLib: A C++ Template Library for High Performance Stream Parallel Processing http://www.cs.wustl.edu/~lip/pubs/pmam15_jbeard.pdf
+* GNU Parallel was cited in: MPI-blastn and NCBI-TaxCollector: Improving metagenomic analysis with high performance classification and wide taxonomic attachment http://www.worldscientific.com/doi/abs/10.1142/S0219720014500139?af=R&
 
-* GNU Parallel was cited in: Towards Collaborative Exploration and Analysis of Big Data from Mars: A Noachis Terra Case Study http://link.springer.com/chapter/10.1007/978-3-319-13865-7_25
-
-* GNU Parallel was cited in: Quantifying properties of hot and dense QCD matter through systematic model-to-data comparison http://arxiv.org/pdf/1502.00339.pdf
-
-* GNU Parallel was cited in: Towards Collaborative Exploration and Analysis of Big Data from Mars: A Noachis Terra Case Study http://link.springer.com/chapter/10.1007/978-3-319-13865-7_25
-
-* GNU Parallel was cited in: Towards Recommender Engineering Tools and Experiments for Identifying Recommender Differences http://elehack.net/research/thesis/mde-thesis.pdf
-
-* GNU Parallel was using (unfortunately with wrong citation) in: Performance and Scaling Comparison Study of RDBMS and NoSQL (MongoDB) http://ijact.in/wp-content/uploads/2014/11/COMPUSOFT-311-1270-1275.pdf
-
-* GNU Parallel was used (unfortunately without citation) in: Parallel Implementation of Big Data Pre-Processing Algorithms for Sentiment Analysis of Social Networking Data http://www.researchmathsci.org/IJFMAart/ijfma-v6n2-7.pdf
-
-* GNU Parallel was used (unfortunately without citation) in: SpeedSeq: Ultra-fast personal genome analysis and interpretation http://biorxiv.org/content/biorxiv/early/2014/12/05/012179.full.pdf
-
-* Zip Folders with GNU Parallel http://fazky.github.io/Linux/2015-01-07-GNU-Parallel.html
-
-* Using GNU Parallel with Freesurfer http://programminginadarkroom.blogspot.dk/2015/02/using-gnu-parallel-with-freesurfer.html
-
-* GNU Parallel is used in Velociraptor: https://github.com/ericwhyne/Velociraptor
-
-* Marcus Beach GNU Parallel http://marcusbeach.co/gnu-parallel/
+* GNU Parallel was used in: https://github.com/alexbyrnes/FCC-Political-Ads_The-Code
 
 * Bug fixes and man page updates.
 

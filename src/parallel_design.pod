@@ -198,20 +198,52 @@ shell is B<csh> (which cannot hide stderr).
 
 =item --tmux
 
+mkfifo I<tmpfile.tmx>;
+tmux -S <tmpfile.tms> new-session -s pI<PID> -d 'sleep .2' >&/dev/null;
+tmux -S <tmpfile.tms> new-window -t pI<PID> -n <<shell quoted input>> \(<<shell quoted input>>\)\;\ perl\ -e\ \'while\(\$t++\<3\)\{\ print\ \$ARGV\[0\],\"\\n\"\ \}\'\ \$\?h/\$status\ \>\>\ I<tmpfile.tmx>\&echo\ <<shell double quoted input>>\;echo\ \Job\ finished\ at:\ \`date\`\;sleep\ 10;
+exec perl -e '$/="/";$_=<>;$c=<>;unlink $ARGV; /(\d+)h/ and exit($1);exit$c' I<tmpfile.tmx>
 
-mkfifo I<tmpfile>; tmux new-session -s pI<PID> -d -n <<shell quoted input>> \(<<shell quoted input>>\)\;\ perl\ -e\ \'while\(\$t++\<3\)\{\ print\ \$ARGV\[0\],\"\\n\"\ \}\'\ \$\?h/\$status/255\ \>\>\ I<tmpfile>\&echo\ <<shell double quoted input>>\;echo\ \Job\ finished\ at:\ \`date\`\;sleep\ 10; exec perl -e '$/="/";$_=<>;$c=<>;unlink $ARGV; /(\d+)h/ and exit($1);exit$c' I<tmpfile>
+First a FIFO is made (.tmx). It is used for communicating exit
+value. Next a new tmux session is made. This may fail if there is
+already a session, so the output is ignored. If all job slots finish
+at the same time, then B<tmux> will close the session. A temporary
+socket is made (.tms) to avoid a race condition in B<tmux>. It is
+cleaned up when GNU B<parallel> finishes.
 
 The input is used as the name of the windows in B<tmux>. When the job
-inside B<tmux> finishes, the exit value is printed to a fifo.  This
-fifo is opened by perl outside B<tmux>, and perl then removes the fifo
-(but keeping it open). Perl blocks until the first value is read from
-the fifo, and this value is used as exit value.
+inside B<tmux> finishes, the exit value is printed to the FIFO (.tmx).
+This FIFO is opened by B<perl> outside B<tmux>, and B<perl> then
+removes the FIFO. B<Perl> blocks until the first value is read from
+the FIFO, and this value is used as exit value.
 
 To make it compatible with B<csh> and B<bash> the exit value is
-printed as: $?h/$status/255 and this is parsed by perl.
+printed as: $?h/$status and this is parsed by B<perl>.
+
+Works in B<csh>.
 
 There is a bug that makes it necessary to print the exit value 3
-times. Works in B<csh>.
+times.
+
+Another bug in B<tmux> requires the length of the tmux title and
+command to not have certain limits.  When inside these limits, 75 '\ '
+are added to the title to force it to be outside the limits.
+
+You can map the bad limits using:
+
+perl -e 'map { $a=$_; print map { "$a,$_\n" } (1..17000) } (1..17000)' | shuf > ab;
+
+cat ab | parallel --colsep , --tagstring '{1}{=$_="\t"=}{2}'
+tmux -S /tmp/p{%} new-session -d -n '{=1 $_="O"x$_ =}' true'\ {=2 $_="O"x$_ =};echo $?;rm /tmp/p{%}'
+> value.csv 2>/dev/null
+
+R -e 'a<-read.table("value.csv");X11();plot(a[,1],a[,2],col=a[,3]+5,cex=0.1);Sys.sleep(1000)'
+
+For B<tmux 1.8> 17000 can be lowered to 2100.
+
+The interesting areas are title 0..1000 with (title + whole command)
+in 996..1127 and 9331..9636.
+
+
 
 =back
 

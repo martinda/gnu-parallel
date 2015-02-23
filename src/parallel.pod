@@ -104,7 +104,7 @@ B<--env> and use B<env_parallel> instead of B<parallel>.
 
 The command cannot contain the character \257 (macron: ¯).
 
-=item B<{}> (beta testing)
+=item B<{}>
 
 Input line. This replacement string will be replaced by a full line
 read from the input source. The input source is normally stdin
@@ -117,7 +117,7 @@ If the command line contains no replacement strings then B<{}> will be
 appended to the command line.
 
 
-=item B<{.}> (beta testing)
+=item B<{.}>
 
 Input line without extension. This replacement string will be replaced
 by the input with the extension removed. If the input line contains
@@ -133,7 +133,7 @@ The replacement string B<{.}> can be changed with B<--er>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/}> (beta testing)
+=item B<{/}>
 
 Basename of input line. This replacement string will be replaced by
 the input with the directory part removed.
@@ -144,7 +144,7 @@ B<--basenamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{//}> (beta testing)
+=item B<{//}>
 
 Dirname of input line. This replacement string will be replaced by the
 dir of the input line. See B<dirname>(1).
@@ -155,7 +155,7 @@ B<--dirnamereplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{/.}> (beta testing)
+=item B<{/.}>
 
 Basename of input line without extension. This replacement string will
 be replaced by the input with the directory and extension part
@@ -167,7 +167,7 @@ B<--basenameextensionreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{#}> (beta testing)
+=item B<{#}>
 
 Sequence number of the job to run. This replacement string will be
 replaced by the sequence number of the job being run. It contains the
@@ -178,7 +178,7 @@ The replacement string B<{#}> can be changed with B<--seqreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{%}> (beta testing)
+=item B<{%}>
 
 Job slot number. This replacement string will be replaced by the job's
 slot number between 1 and number of jobs to run in parallel. There
@@ -190,7 +190,7 @@ The replacement string B<{%}> can be changed with B<--slotreplace>.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>B<}> (beta testing)
+=item B<{>I<n>B<}>
 
 Argument from input source I<n> or the I<n>'th argument. This
 positional replacement string will be replaced by the input from input
@@ -201,7 +201,7 @@ I<n>'th last argument.
 To understand replacement strings see B<{}>.
 
 
-=item B<{>I<n>.B<}> (beta testing)
+=item B<{>I<n>.B<}>
 
 Argument from input source I<n> or the I<n>'th argument without
 extension. It is a combination of B<{>I<n>B<}> and B<{.}>.
@@ -214,7 +214,7 @@ extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/B<}> (beta testing)
+=item B<{>I<n>/B<}>
 
 Basename of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{/}>.
@@ -227,7 +227,7 @@ directory (if any) removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>//B<}> (beta testing)
+=item B<{>I<n>//B<}>
 
 Dirname of argument from input source I<n> or the I<n>'th argument.
 It is a combination of B<{>I<n>B<}> and B<{//}>.
@@ -239,7 +239,7 @@ the I<n>'th argument (when used with B<-N>). See B<dirname>(1).
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{>I<n>/.B<}> (beta testing)
+=item B<{>I<n>/.B<}>
 
 Basename of argument from input source I<n> or the I<n>'th argument
 without extension.  It is a combination of B<{>I<n>B<}>, B<{/}>, and
@@ -253,7 +253,7 @@ directory (if any) and extension removed.
 To understand positional replacement strings see B<{>I<n>B<}>.
 
 
-=item B<{=>I<perl expression>B<=}> (beta testing)
+=item B<{=>I<perl expression>B<=}>
 
 Replace with calculated I<perl expression>. B<$_> will contain the
 same as B<{}>. After evaluating I<perl expression> B<$_> will be used
@@ -266,7 +266,7 @@ The B<{=>I<perl expression>B<=}> must be given as a single string.
 See also: B<--rpl> B<--parens>
 
 
-=item B<{=>I<n> I<perl expression>B<=}> (beta testing)
+=item B<{=>I<n> I<perl expression>B<=}>
 
 Positional equivalent to B<{= perl expression =}>. To understand
 positional replacement strings see B<{>I<n>B<}>.
@@ -444,7 +444,7 @@ I<size> defaults to 1M.
 See B<--pipe> and B<--pipepart> for use of this.
 
 
-=item B<--cat> (beta testing)
+=item B<--cat>
 
 Create a temporary file with content. Normally B<--pipe>/B<--pipepart>
 will give data to the program on stdin (standard input). With B<--cat>
@@ -454,7 +454,7 @@ you can do: B<parallel --pipe --cat wc {}>.
 See also B<--fifo>.
 
 
-=item B<--cleanup> (beta testing)
+=item B<--cleanup>
 
 Remove transferred files. B<--cleanup> will remove the transferred files
 on the remote computer after processing is done.
@@ -568,7 +568,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var> (beta testing)
+=item B<--env> I<var>
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -635,7 +635,7 @@ Implies B<--semaphore>.
 See also B<--bg>, B<man sem>.
 
 
-=item B<--fifo> (beta testing)
+=item B<--fifo>
 
 Create a temporary fifo with content. Normally B<--pipe> and
 B<--pipepart> will give data to the program on stdin (standard
@@ -687,9 +687,9 @@ See also: B<--line-buffer> B<--ungroup>
 Print a summary of the options to GNU B<parallel> and exit.
 
 
-=item B<--halt-on-error> I<val> (beta testing)
+=item B<--halt-on-error> I<val>
 
-=item B<--halt> I<val> (beta testing)
+=item B<--halt> I<val>
 
 How should GNU B<parallel> terminate?
 
@@ -925,7 +925,7 @@ limiting factor.
 See also: B<--group> B<--ungroup>
 
 
-=item B<--load> I<max-load> (beta testing)
+=item B<--load> I<max-load>
 
 Do not start new jobs on a given computer unless the number of running
 processes on the computer is less than I<max-load>. I<max-load> uses
@@ -973,7 +973,7 @@ See also B<-X> for context replace. If in doubt use B<-X> as that will
 most likely do what is needed.
 
 
-=item B<--memfree> I<size> (beta testing)
+=item B<--memfree> I<size>
 
 Minimum memory free when starting another job. The I<size> can be
 postfixed with K, M, G, T, P, k, m, g, t, or p which would multiply
@@ -1169,7 +1169,7 @@ Print the number of CPU cores and exit (used by GNU B<parallel> itself
 to determine the number of CPU cores on remote computers).
 
 
-=item B<--no-keep-order>  (beta testing)
+=item B<--no-keep-order>
 
 Overrides an earlier B<--keep-order> (e.g. if set in
 B<~/.parallel/config>).
@@ -1392,7 +1392,7 @@ useful if some jobs fail for no apparent reason (such as network
 failure).
 
 
-=item B<--return> I<filename> (alpha testing)
+=item B<--return> I<filename> (beta testing)
 
 Transfer files from remote computers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote computers. When
@@ -1493,7 +1493,7 @@ operating system and the B<-s> option.  Pipe the input from /dev/null
 to do anything.
 
 
-=item B<--semaphore> (beta testing)
+=item B<--semaphore>
 
 Work as a counting semaphore. B<--semaphore> will cause GNU
 B<parallel> to start I<command> in the background. When the number of
@@ -1530,9 +1530,9 @@ Implies B<--semaphore>.
 See also B<man sem>.
 
 
-=item B<--semaphoretimeout> I<secs> (beta testing)
+=item B<--semaphoretimeout> I<secs>
 
-=item B<--st> I<secs> (beta testing)
+=item B<--st> I<secs>
 
 If I<secs> > 0: If the semaphore is not released within I<secs> seconds, take it anyway.
 
@@ -1628,9 +1628,9 @@ I<secs> seconds after starting each ssh. I<secs> can be less than 1
 seconds.
 
 
-=item B<-S> I<[@hostgroups/][ncpu/]sshlogin[,[@hostgroups/][ncpu/]sshlogin[,...]]> (beta testing)
+=item B<-S> I<[@hostgroups/][ncpu/]sshlogin[,[@hostgroups/][ncpu/]sshlogin[,...]]>
 
-=item B<--sshlogin> I<[@hostgroups/][ncpu/]sshlogin[,[@hostgroups/][ncpu/]sshlogin[,...]]> (beta testing)
+=item B<--sshlogin> I<[@hostgroups/][ncpu/]sshlogin[,[@hostgroups/][ncpu/]sshlogin[,...]]>
 
 Distribute jobs to remote computers. The jobs will be run on a list of
 remote computers.
@@ -1768,7 +1768,7 @@ the lines will be prepended with the sshlogin instead.
 B<--tag> is ignored when using B<-u>.
 
 
-=item B<--tagstring> I<str> (alpha testing)
+=item B<--tagstring> I<str> (beta testing)
 
 Tag lines with a string. Each output line will be prepended with
 I<str> and TAB (\t). I<str> can contain replacement strings such as
@@ -1785,7 +1785,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--tmux> (alpha testing)
+=item B<--tmux> (beta testing)
 
 Use B<tmux> for output. Start a B<tmux> session and run each job in a
 window in that session. No other output will be produced.
@@ -1811,7 +1811,7 @@ Print the job to be run on stderr (standard error).
 See also B<-v>, B<-p>.
 
 
-=item B<--transfer> (beta testing)
+=item B<--transfer>
 
 Transfer files to remote computers. B<--transfer> is used with
 B<--sshlogin> when the arguments are files and should be transferred
@@ -1838,7 +1838,7 @@ B<--transfer> is often used with B<--return> and B<--cleanup>.
 B<--transfer> is ignored when used with B<--sshlogin :> or when not used with B<--sshlogin>.
 
 
-=item B<--trc> I<filename> (beta testing)
+=item B<--trc> I<filename>
 
 Transfer, Return, Cleanup. Short hand for:
 

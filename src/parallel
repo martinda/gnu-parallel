@@ -953,7 +953,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150222;
+    $Global::version = 20150223;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4616,20 +4616,35 @@ sub no_of_cpus_gnu_linux {
     #   undef if not GNU/Linux
     my $no_of_cpus;
     my $no_of_cores;
+    my $no_of_active_cores;
     if(-e "/proc/cpuinfo") {
         $no_of_cpus = 0;
         $no_of_cores = 0;
         my %seen;
-        open(my $in_fh, "<", "/proc/cpuinfo") || return undef;
-        while(<$in_fh>) {
-            if(/^physical id.*[:](.*)/ and not $seen{$1}++) {
-                $no_of_cpus++;
-            }
-            /^processor.*[:]/i and $no_of_cores++;
-        }
-        close $in_fh;
+        if(open(my $in_fh, "<", "/proc/cpuinfo")) {
+	    while(<$in_fh>) {
+		if(/^physical id.*[:](.*)/ and not $seen{$1}++) {
+		    $no_of_cpus++;
+		}
+		/^processor.*[:]/i and $no_of_cores++;
+	    }
+	    close $in_fh;
+	}
     }
-    return ($no_of_cpus||$no_of_cores);
+    if(-e "/proc/self/status") {
+	# if 'taskset' is used to limit number of cores
+        if(open(my $in_fh, "<", "/proc/self/status")) {
+	    while(<$in_fh>) {
+		if(/^Cpus_allowed:\s*(\S+)/) {
+		    my $a = $1;
+		    $a =~ tr/,//d;
+		    $no_of_active_cores = unpack ("%32b*", pack ("H*",$a));
+		}
+	    }
+	    close $in_fh;
+	}
+    }
+    return (::min($no_of_cpus || $no_of_cores,$no_of_active_cores));
 }
 
 sub no_of_cores_gnu_linux {
@@ -4637,6 +4652,7 @@ sub no_of_cores_gnu_linux {
     #   Number of CPU cores on GNU/Linux
     #   undef if not GNU/Linux
     my $no_of_cores;
+    my $no_of_active_cores;
     if(-e "/proc/cpuinfo") {
         $no_of_cores = 0;
         open(my $in_fh, "<", "/proc/cpuinfo") || return undef;
@@ -4645,7 +4661,20 @@ sub no_of_cores_gnu_linux {
         }
         close $in_fh;
     }
-    return $no_of_cores;
+    if(-e "/proc/self/status") {
+	# if 'taskset' is used to limit number of cores
+        if(open(my $in_fh, "<", "/proc/self/status")) {
+	    while(<$in_fh>) {
+		if(/^Cpus_allowed:\s*(\S+)/) {
+		    my $a = $1;
+		    $a =~ tr/,//d;
+		    $no_of_active_cores = unpack ("%32b*", pack ("H*",$a));
+		}
+	    }
+	    close $in_fh;
+	}	
+    }
+    return (::min($no_of_cores,$no_of_active_cores));
 }
 
 sub no_of_cpus_freebsd {
