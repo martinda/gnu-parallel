@@ -1,3 +1,12 @@
+echo '### bug #44358: 2 GB records cause problems for -N2'
+### bug #44358: 2 GB records cause problems for -N2
+  (yes "`echo {1..100}`" | head -c 5000000000; echo FOO;    yes "`echo {1..100}`" | head -c 3000000000; echo FOO;    yes "`echo {1..100}`" | head -c 1000000000;) |     parallel --pipe --recend FOO'\n' --block 1g -k LANG=c wc -c
+5000000004
+3000000004
+1000000000
+parallel: Warning: A record was longer than 1000000000. Increasing to --blocksize 1300000001
+parallel: Warning: A record was longer than 1300000001. Increasing to --blocksize 1690000003
+parallel: Warning: A record was longer than 1690000003. Increasing to --blocksize 2147483647
 echo "### --line-buffer"
 ### --line-buffer
   seq 10 | parallel -j20 --line-buffer  'seq {} 10 | pv -qL 10' > /tmp/parallel_l$$;   seq 10 | parallel -j20                'seq {} 10 | pv -qL 10' > /tmp/parallel_$$;   cat /tmp/parallel_l$$ | wc;   diff /tmp/parallel_$$ /tmp/parallel_l$$ >/dev/null ;   echo These must diff: $?;   rm /tmp/parallel_l$$ /tmp/parallel_$$

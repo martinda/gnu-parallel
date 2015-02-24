@@ -1,4 +1,9 @@
 ### Test --pipe
+echo '### -L >4GB'
+### -L >4GB
+  (head -c 5000000000 /dev/zero; echo FOO;    head -c 3000000000 /dev/zero; echo FOO;    head -c 1000000000 /dev/zero;) |    parallel --pipe  -L2 --block 1g -k LANG=c wc -c
+8000000008
+1000000000
 echo '### Test 200M records with too small block';   (    echo start;    seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;    echo start;    seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;    echo start;    seq 1 44 | parallel -uj1 cat /tmp/blocktest\;true;    echo end;   ) | stdout parallel -k --block 200m -j2 --pipe --recend 'end\n' wc -c |   egrep -v '^0$'
 ### Test 200M records with too small block
 parallel: Warning: A record was longer than 200000000. Increasing to --blocksize 260000001

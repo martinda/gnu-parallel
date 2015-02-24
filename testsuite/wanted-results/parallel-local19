@@ -55,6 +55,11 @@ rm -- 2-col/abc-2-col-2-col.txt
 rm -- a/abc-a-a
 rm -- b/abc-b-b
 rm -- \‰\∏\≠\Â\õ\Ω\ \(Zh\≈\çnggu\√\≥\)/abc-\‰\∏\≠\Â\õ\Ω\ \(Zh\≈\çnggu\√\≥\)-\‰\∏\≠\Â\õ\Ω\ \(Zh\≈\çnggu\√\≥\)
+echo '### bug #44358: 2 GB records cause problems for -N2'
+### bug #44358: 2 GB records cause problems for -N2
+  (yes "`echo {1..100}`" | head -c 5000000000; echo FOO;    yes "`echo {1..100}`" | head -c 3000000000; echo FOO;    yes "`echo {1..100}`" | head -c 1000000000;) |     parallel --pipe --recend FOO'\n' -N2 --block 1g -k LANG=c wc -c
+8000000008
+1000000000
 echo '### Test compress'
 ### Test compress
   seq 5 | parallel -j2 --tag --compress 'seq {} | pv -q -L 10'

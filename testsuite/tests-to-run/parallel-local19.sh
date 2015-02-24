@@ -29,6 +29,12 @@ ls | parallel -kv rm -- {.}/abc-{.}-{} 2>&1
 
 # -L1 will join lines ending in ' '
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | nice parallel -vj0 -k -L1
+echo '### bug #44358: 2 GB records cause problems for -N2'
+  (yes "`echo {1..100}`" | head -c 5000000000; echo FOO; 
+   yes "`echo {1..100}`" | head -c 3000000000; echo FOO; 
+   yes "`echo {1..100}`" | head -c 1000000000;) | 
+    parallel --pipe --recend FOO'\n' -N2 --block 1g -k LANG=c wc -c
+
 echo '### Test compress'
   seq 5 | parallel -j2 --tag --compress 'seq {} | pv -q -L 10'
 

@@ -251,7 +251,7 @@ sub find_split_positions {
 		}
 	    } else {
 		# If match $recend$recstart => Record position
-		my $i = index($buf,$recendrecstart);
+		my $i = index64(\$buf,$recendrecstart);
 		if($i != -1) {
 		    push(@pos,$pos+$i);
 		    # Start looking for next record _after_ this match
@@ -301,8 +301,8 @@ sub spreadstdin {
     my $recendrecstart = $recend.$recstart;
     my $chunk_number = 1;
     my $one_time_through;
-    my $two_gb = (2<<30)-1;
-    my $blocksize = ::min($opt::blocksize,$two_gb);
+    my $two_gb = (1<<31)-1;
+    my $blocksize = $opt::blocksize;
     my $in = *STDIN;
     my $header = find_header(\$buf,$in);
     while(1) {
@@ -323,10 +323,10 @@ sub spreadstdin {
       if($Global::max_lines and not $Global::max_number_of_args) {
 	  # Read n-line records
 	  my $n_lines = $buf =~ tr/\n/\n/;
-	  my $last_newline_pos = rindex($buf,"\n");
+	  my $last_newline_pos = rindex64(\$buf,"\n");
 	  while($n_lines % $Global::max_lines) {
 	      $n_lines--;
-	      $last_newline_pos = rindex($buf,"\n",$last_newline_pos-1);
+	      $last_newline_pos = rindex64(\$buf,"\n",$last_newline_pos-1);
 	  }
 	  # Chop at $last_newline_pos as that is where n-line record ends
 	  $anything_written +=
@@ -368,19 +368,8 @@ sub spreadstdin {
 		  substr($buf,0,$i) = "";
 	      }
 	  } else {
-	      my $i;
-	      if(length $buf < $two_gb) {
-		  # Find the last recend+recstart in $buf
-		  $i = rindex($buf,$recendrecstart);
-	      } else {
-		  # Find the last recend+recstart in the last 2 GB of $buf
-		  # rindex does not work on > 2GB
-		  my $over2gb = (length $buf)-$two_gb;
-		  $i = rindex(substr($buf,$over2gb,$two_gb),$recendrecstart);
-		  if($i != -1) {
-		      $i += $over2gb;
-		  }
-	      }
+	      # Find the last recend+recstart in $buf
+	      my $i = rindex64(\$buf,$recendrecstart);
 	      if($i != -1) {
 		  $i += length $recend; # find the actual splitting location
 		  $anything_written +=
@@ -471,8 +460,9 @@ sub nindex {
     #   the position where the Nth copy is found
     my ($buf_ref, $str, $n) = @_;
     my $i = 0;
+    my $two_gb = (1<<31)-1;
     for(1..$n) {
-	$i = index($$buf_ref,$str,$i+1);
+	$i = index64($buf_ref,$str,$i+1);
 	if($i == -1) { last }
     }
     return $i;
@@ -518,6 +508,79 @@ sub nindex {
 	}
 	return $something_written;
     }
+}
+
+sub index64 {
+    # Do index on strings > 2GB.
+    # index in Perl < v5.22 does not work for > 2GB
+    # Input:
+    #   as index
+    # Output:
+    #   as index
+    my $ref = shift;
+    my $match = shift;
+    my $pos = shift || 0;
+    my $block_size = (1<<31)-1;
+    my $strlen   = length($$ref);
+    # No point in doing extra work if we don't need to.
+    if($strlen < $block_size) {
+	return index($$ref, $match, $pos);
+    }
+
+    my $matchlen = length($match);
+    my $ret;
+    my $offset = $pos;
+    while($offset < $strlen) {
+	$ret = index(
+	    substr($$ref, $offset, $block_size),
+	    $match, $pos-$offset);
+	if($ret != -1) {
+	    return $ret + $offset;
+	}
+	$offset += ($block_size - $matchlen - 1);
+    }
+    return -1;
+}
+
+sub rindex64 {
+    # Do rindex on strings > 2GB.
+    # rindex in Perl < v5.22 does not work for > 2GB
+    # Input:
+    #   as rindex
+    # Output:
+    #   as rindex
+    my $ref = shift;
+    my $match = shift;
+    my $pos = shift;
+    my $block_size = (1<<31)-1;
+    my $strlen = length($$ref);
+    # Default: search from end
+    $pos = defined $pos ? $pos : $strlen;
+    # No point in doing extra work if we don't need to.
+    if($strlen < $block_size) {
+	return rindex($$ref, $match, $pos);
+    }
+
+    my $matchlen = length($match);
+    my $ret;
+    my $offset = $pos - $block_size + $matchlen;
+    if($offset < 0) {
+	# The offset is less than a $block_size
+	# Set the $offset to 0 and
+	# Adjust block_size accordingly
+	$block_size = $block_size + $offset;
+	$offset = 0;
+    }
+    while($offset >= 0) {
+	$ret = rindex(
+	    substr($$ref, $offset, $block_size),
+	    $match);
+	if($ret != -1) {
+	    return $ret + $offset;
+	}
+	$offset -= ($block_size - $matchlen - 1);
+    }
+    return -1;
 }
 
 sub write_record_to_pipe {
@@ -831,6 +894,10 @@ sub parse_options {
        not defined $opt::recend) { $opt::recend = "\n"; }
     if(not defined $opt::blocksize) { $opt::blocksize = "1M"; }
     $opt::blocksize = multiply_binary_prefix($opt::blocksize);
+    if($opt::blocksize > (1<<31)-1) {
+	warning("--blocksize >= 2G causes problems. Using 2G-1\n");
+	$opt::blocksize = (1<<31)-1;
+    }
     $opt::memfree = multiply_binary_prefix($opt::memfree);
     if(defined $opt::controlmaster) { $opt::noctrlc = 1; }
     if(defined $opt::halt and
@@ -6771,7 +6838,7 @@ sub linebuffer_print {
     while(read($in_fh,substr($$partial,length $$partial),3276800)) {
 	# Append to $$partial
 	# Find the last \n
-	my $i = rindex($$partial,"\n");
+	my $i = ::rindex64($partial,"\n");
 	if($i != -1) {
 	    # One or more complete lines were found
 	    if($fdno == 2 and not $self->{'printed_first_line',$fdno}++) {
@@ -6779,14 +6846,14 @@ sub linebuffer_print {
 		# This is a crappy way of ignoring it.
 		$$partial =~ s/^(client_process_control: )?tcgetattr: Invalid argument\n//;
 		# Length of partial line has changed: Find the last \n again
-		$i = rindex($$partial,"\n");
+		$i = ::rindex64($partial,"\n");
 	    }
 	    if($opt::tag or defined $opt::tagstring) {
 		# Replace ^ with $tag within the full line
 		my $tag = $self->tag();
 		substr($$partial,0,$i+1) =~ s/^/$tag/gm;
 		# Length of partial line has changed: Find the last \n again
-		$i = rindex($$partial,"\n");
+		$i = ::rindex64($partial,"\n");
 	    }
 	    # Print up to and including the last \n
 	    print $out_fd substr($$partial,0,$i+1);
