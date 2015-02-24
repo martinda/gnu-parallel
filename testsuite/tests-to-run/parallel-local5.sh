@@ -119,6 +119,11 @@ echo '### Test --block size=1M -j1 - more data than cpu';
 
 echo '### Test --pipe default settings'; 
   cat /tmp/blocktest | parallel --pipe sort | sort -n | md5sum
+
+echo '### bug #44350: --tagstring should support \t'; 
+  parallel --tagstring 'a\tb' echo ::: c
+  parallel -d '\t' echo ::: 'a	b'
+  parallel -d '"' echo ::: 'a"b'
 EOF
 
 rm /tmp/parallel-seq /tmp/blocktest

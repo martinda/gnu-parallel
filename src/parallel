@@ -860,7 +860,8 @@ sub parse_options {
     if(defined $opt::X) { $Global::ContextReplace = 1; }
     if(defined $opt::silent) { $Global::verbose = 0; }
     if(defined $opt::0) { $/ = "\0"; }
-    if(defined $opt::d) { my $e="sprintf \"$opt::d\""; $/ = eval $e; }
+    if(defined $opt::d) { my $e="sprintf qq{$opt::d}"; $/ = eval $e; }
+    if(defined $opt::tagstring) { my $e="sprintf qq{$opt::tagstring}"; $opt::tagstring = eval $e; }
     if(defined $opt::p) { $Global::interactive = $opt::p; }
     if(defined $opt::q) { $Global::quoting = 1; }
     if(defined $opt::r) { $Global::ignore_empty = 1; }
@@ -1034,7 +1035,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150224;
+    $Global::version = 20150225;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
