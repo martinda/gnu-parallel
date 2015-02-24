@@ -301,7 +301,8 @@ sub spreadstdin {
     my $recendrecstart = $recend.$recstart;
     my $chunk_number = 1;
     my $one_time_through;
-    my $blocksize = $opt::blocksize;
+    my $two_gb = (2<<30)-1;
+    my $blocksize = ::min($opt::blocksize,$two_gb);
     my $in = *STDIN;
     my $header = find_header(\$buf,$in);
     while(1) {
@@ -367,8 +368,19 @@ sub spreadstdin {
 		  substr($buf,0,$i) = "";
 	      }
 	  } else {
-	      # Find the last recend-recstart in $buf
-	      my $i = rindex($buf,$recendrecstart);
+	      my $i;
+	      if(length $buf < $two_gb) {
+		  # Find the last recend+recstart in $buf
+		  $i = rindex($buf,$recendrecstart);
+	      } else {
+		  # Find the last recend+recstart in the last 2 GB of $buf
+		  # rindex does not work on > 2GB
+		  my $over2gb = (length $buf)-$two_gb;
+		  $i = rindex(substr($buf,$over2gb,$two_gb),$recendrecstart);
+		  if($i != -1) {
+		      $i += $over2gb;
+		  }
+	      }
 	      if($i != -1) {
 		  $i += length $recend; # find the actual splitting location
 		  $anything_written +=
@@ -380,11 +392,13 @@ sub spreadstdin {
       }
       if(not $anything_written and not eof($in)) {
 	  # Nothing was written - maybe the block size < record size?
-	  # Increase blocksize exponentially
-	  my $old_blocksize = $blocksize;
-	  $blocksize = ceil($blocksize * 1.3 + 1);
-	  ::warning("A record was longer than $old_blocksize. " .
-		    "Increasing to --blocksize $blocksize\n");
+	  # Increase blocksize exponentially up to 2GB-1 (2GB causes problems)
+	  if($blocksize < $two_gb) {
+	      my $old_blocksize = $blocksize;
+	      $blocksize = ::min(ceil($blocksize * 1.3 + 1), $two_gb);
+	      ::warning("A record was longer than $old_blocksize. " .
+			"Increasing to --blocksize $blocksize\n");
+	  }
       }
     }
     ::debug("init", "Done reading input\n");
@@ -953,7 +967,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150223;
+    $Global::version = 20150224;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -4672,7 +4686,7 @@ sub no_of_cores_gnu_linux {
 		}
 	    }
 	    close $in_fh;
-	}	
+	}
     }
     return (::min($no_of_cores,$no_of_active_cores));
 }
@@ -5485,7 +5499,15 @@ sub write {
     my $self = shift;
     my $remaining_ref = shift;
     my $stdin_fh = $self->fh(0,"w");
-    syswrite($stdin_fh,$$remaining_ref);
+
+    my $len = length $$remaining_ref;
+    # syswrite may not write all in one go,
+    # so make sure everything is written.
+    while($len) {
+        my $written = syswrite($stdin_fh,$$remaining_ref);
+	substr($$remaining_ref,0,$written) = "";
+	$len -= $written;
+    }
 }
 
 sub set_stdin_buffer {
