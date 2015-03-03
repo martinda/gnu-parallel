@@ -73,11 +73,11 @@ parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines
 echo '### bug #42893: --block should not cause decimals in cat_partial'
 ### bug #42893: --block should not cause decimals in cat_partial
   seq 100000 >/tmp/parallel-decimal;   parallel --dry-run -kvv --pipepart --block 0.12345M -a /tmp/parallel-decimal true;   rm /tmp/parallel-decimal
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 129449|(true)
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 129449 129450|(true)
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 258899 129450|(true)
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 388349 129450|(true)
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 517799 71096|(true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 129449 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 129449 129450 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 258899 129450 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 388349 129450 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 517799 71096 | (true)
 echo '### bug #42902: profiles containing arguments with space'
 ### bug #42902: profiles containing arguments with space
   echo "--rpl 'FULLPATH chomp(\$_=\"/bin/bash=\".\`readlink -f \$_\`);' " > ~/.parallel/FULLPATH;   parallel -JFULLPATH echo FULLPATH ::: $0

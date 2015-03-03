@@ -70,3 +70,12 @@ hurd.polarhome.com	Works on hurd.polarhome.com
 copy_and_test raspberrypi.polarhome.com
 raspberrypi.polarhome.com	### Run the test on raspberrypi.polarhome.com
 raspberrypi.polarhome.com	Works on raspberrypi.polarhome.com
+copy_and_test macosx.polarhome.com
+macosx.polarhome.com	### Run the test on macosx.polarhome.com
+macosx.polarhome.com	Works on macosx.polarhome.com
+copy_and_test hpux-ia64.polarhome.com
+hpux-ia64.polarhome.com	### Run the test on hpux-ia64.polarhome.com
+hpux-ia64.polarhome.com	Works on hpux-ia64.polarhome.com
+copy_and_test syllable.polarhome.com
+syllable.polarhome.com	### Run the test on syllable.polarhome.com
+syllable.polarhome.com	chmod: changing permissions of `bin/p.tmp': Function not implemented

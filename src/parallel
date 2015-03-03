@@ -1035,7 +1035,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150225;
+    $Global::version = 20150302;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3315,6 +3315,7 @@ sub which {
 	     'openbsd' => $bsd,
 	     'solaris' => $sysv,
 	     'svr5' => $sysv,
+	     'syllable' => "echo ps not supported",
 	    );
 	}
 	$pid_parentpid_cmd{$^O} or ::die_bug("pid_parentpid_cmd for $^O missing");
@@ -4932,7 +4933,7 @@ sub no_of_cpus_hpux {
     #   Number of physical CPUs on HP-UX
     #   undef if not HP-UX
     my $no_of_cpus =
-        (`/usr/bin/mpsched -s 2>&1 | grep 'Locality Domain Count' | awk '{ print \$4 }'`);
+        qx{/usr/bin/mpsched -s 2>&1 | grep 'Locality Domain Count' | awk '{ print \$4 }'};
     return $no_of_cpus;
 }
 
@@ -4941,7 +4942,7 @@ sub no_of_cores_hpux {
     #   Number of CPU cores on HP-UX
     #   undef if not HP-UX
     my $no_of_cores =
-        (`/usr/bin/mpsched -s 2>&1 | grep 'Processor Count' | awk '{ print \$3 }'`);
+        qx{/usr/bin/mpsched -s 2>&1 | perl -ne '/Processor Count\\D+(\\d+)/ and print "\$1\n"'};
     return $no_of_cores;
 }
 
