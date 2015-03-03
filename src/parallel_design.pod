@@ -262,6 +262,14 @@ B<--pipepart>/B<--pipe> should be done on the local machine inside B<--tmux>
 =back
 
 
+=head2 --block-size adjustment
+
+Every time GNU B<parallel> detects a record bigger than
+B<--block-size> it increases the block size by 30%. A small
+B<--block-size> gives very poor performance; by exponentially
+increasing the block size performance will not suffer.
+
+
 =head2 Shell shock
 
 The shell shock bug in B<bash> did not affect GNU B<parallel>, but the

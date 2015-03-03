@@ -1,3 +1,12 @@
+echo 'bug #44250: pxz complains File format not recognized but decompresses anyway'
+bug #44250: pxz complains File format not recognized but decompresses anyway
+  # The first line dumps core if run from make file. Why?!
+  stdout parallel --compress --compress-program pxz ls /{} ::: OK-if-missing-file
+Segmentation fault (core dumped)
+  stdout parallel --compress --compress-program pixz --decompress-program 'pixz -d' ls /{}  ::: OK-if-missing-file
+ls: cannot access /OK-if-missing-file: No such file or directory
+  stdout parallel --compress --compress-program pixz --decompress-program 'pixz -d' true ::: OK-if-no-output
+  stdout parallel --compress --compress-program pxz true ::: OK-if-no-output
 echo 'bug #41613: --compress --line-buffer no newline';
 bug #41613: --compress --line-buffer no newline
   perl -e 'print "It worked"'| $NICEPAR --pipe --compress --line-buffer cat; echo

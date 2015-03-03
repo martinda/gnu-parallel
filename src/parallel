@@ -301,7 +301,7 @@ sub spreadstdin {
     my $recendrecstart = $recend.$recstart;
     my $chunk_number = 1;
     my $one_time_through;
-    my $two_gb = (1<<31)-1;
+    my $two_gb = 2**31-1;
     my $blocksize = $opt::blocksize;
     my $in = *STDIN;
     my $header = find_header(\$buf,$in);
@@ -460,7 +460,7 @@ sub nindex {
     #   the position where the Nth copy is found
     my ($buf_ref, $str, $n) = @_;
     my $i = 0;
-    my $two_gb = (1<<31)-1;
+    my $two_gb = 2**31-1;
     for(1..$n) {
 	$i = index64($buf_ref,$str,$i+1);
 	if($i == -1) { last }
@@ -514,13 +514,13 @@ sub index64 {
     # Do index on strings > 2GB.
     # index in Perl < v5.22 does not work for > 2GB
     # Input:
-    #   as index
+    #   as index except STR which must be passed as a reference
     # Output:
     #   as index
     my $ref = shift;
     my $match = shift;
     my $pos = shift || 0;
-    my $block_size = (1<<31)-1;
+    my $block_size = 2**31-1;
     my $strlen   = length($$ref);
     # No point in doing extra work if we don't need to.
     if($strlen < $block_size) {
@@ -546,13 +546,13 @@ sub rindex64 {
     # Do rindex on strings > 2GB.
     # rindex in Perl < v5.22 does not work for > 2GB
     # Input:
-    #   as rindex
+    #   as rindex except STR which must be passed as a reference
     # Output:
     #   as rindex
     my $ref = shift;
     my $match = shift;
     my $pos = shift;
-    my $block_size = (1<<31)-1;
+    my $block_size = 2**31-1;
     my $strlen = length($$ref);
     # Default: search from end
     $pos = defined $pos ? $pos : $strlen;
@@ -895,9 +895,9 @@ sub parse_options {
        not defined $opt::recend) { $opt::recend = "\n"; }
     if(not defined $opt::blocksize) { $opt::blocksize = "1M"; }
     $opt::blocksize = multiply_binary_prefix($opt::blocksize);
-    if($opt::blocksize > (1<<31)-1) {
+    if($opt::blocksize > 2**31-1) {
 	warning("--blocksize >= 2G causes problems. Using 2G-1\n");
-	$opt::blocksize = (1<<31)-1;
+	$opt::blocksize = 2**31-1;
     }
     $opt::memfree = multiply_binary_prefix($opt::memfree);
     if(defined $opt::controlmaster) { $opt::noctrlc = 1; }
@@ -5347,11 +5347,11 @@ sub slot {
 		    *IN = *STDIN;
 		}
 
+		my $first_round = 1;
 		my $flags;
 		fcntl(IN, F_GETFL, $flags) || die $!; # Get the current flags on the filehandle
 		$flags |= O_NONBLOCK; # Add non-blocking to the flags
 		fcntl(IN, F_SETFL, $flags) || die $!; # Set the flags on the filehandle
-		open(OUT,"|-",$cmd) || die("cattail: Cannot run $cmd");
 
 		while(1) {
 		    # clear EOF
@@ -5361,31 +5361,28 @@ sub slot {
 		    if($read) {
 			# We can unlink the file now: The writer has written something
 			-e $unlink_file and unlink $unlink_file;
+
+			if($first_round) {
+			    # Do not start command if there is no input
+			    $first_round = 0;
+			    open(OUT,"|-",$cmd) || die("cattail: Cannot run $cmd");
+			}
+
 			# Blocking print
 			while($buf) {
 			    my $bytes_written = syswrite(OUT,$buf);
 			    # syswrite may be interrupted by SIGHUP
 			    substr($buf,0,$bytes_written) = "";
 			}
-			# Something printed: Wait less next time
-			$sleep /= 2;
 		    } else {
 			if(eof(IN) and not $writer_running) {
 			    # Writer dead: There will never be more to read => exit
+			    -e $unlink_file and unlink $unlink_file;
 			    exit;
 			}
-			# TODO This could probably be done more efficiently using select(2)
-			# Nothing read: Wait longer before next read
-			# Up to 30 milliseconds
-			$sleep = ($sleep < 30) ? ($sleep * 1.001 + 0.01) : ($sleep);
-			usleep($sleep);
+			# Wait for something to happen on file handle IN
+			select(fileno(IN), undef, undef, undef);
 		    }
-		}
-
-		sub usleep {
-		    # Sleep this many milliseconds.
-		    my $secs = shift;
-		    select(undef, undef, undef, $secs/1000);
 		}
 	    };
 	    $cattail =~ s/#.*//mg;
@@ -5487,14 +5484,38 @@ sub grouped {
     }
 }
 
+sub empty_input_detector {
+    # If no input: exec true
+    # If some input: Pass input as input to pipe
+    # This avoids starting the $read command if there is no input.
+    # Returns:
+    #   $cmd = script to prepend to '($real command)'
+
+    # The $tmpfile might exist if run on a remote system - we accept that risk
+    my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".chr");
+    # Unlink to avoid leaving files if --dry-run or --sshlogin
+    unlink $tmpfile;
+    my $cmd =
+	# Exit value:
+	#   empty input = true
+	#   some input = exit val from command
+	# sh -c needed as csh cannot hide stderr
+	qq{ sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null'; }.
+	qq{ test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true; }.
+	qq{ (cat $tmpfile; rm $tmpfile; cat - ) | };
+    return $cmd;
+}
+
 sub filter_through_compress {
     my $self = shift;
     # Send stdout to stdin for $opt::compress_program(1)
     # Send stderr to stdin for $opt::compress_program(2)
     # cattail get pid:  $pid = $self->fh($fdno,'rpid');
     my $cattail = cattail();
+
     for my $fdno (1,2) {
-	my $wpid = open(my $fdw,"|-","$opt::compress_program >>".
+	my $wpid = open(my $fdw,"|-", empty_input_detector().
+			"($opt::compress_program) >>".
 			$self->fh($fdno,'name')) || die $?;
 	$self->set_fh($fdno,'w',$fdw);
 	$self->set_fh($fdno,'wpid',$wpid);
@@ -5931,22 +5952,10 @@ sub wrapped {
 	if(@Global::cat_partials) {
 	    # Prepend:
 	    # < /tmp/foo perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 11 |
-	    $command = (shift @Global::cat_partials). "|". "(". $command. ")";
+	    $command = (shift @Global::cat_partials). " | ($command)";
 	} elsif($opt::pipe) {
 	    # Prepend EOF-detector to avoid starting $command if EOF.
-	    # The $tmpfile might exist if run on a remote system - we accept that risk
-	    my ($dummy_fh, $tmpfile) = ::tmpfile(SUFFIX => ".chr");
-	    # Unlink to avoid leaving files if --dry-run or --sshlogin
-	    unlink $tmpfile;
-	    $command =
-		# Exit value:
-		#   empty input = true
-		#   some input = exit val from command
-		# sh -c needed as csh cannot hide stderr
-		qq{ sh -c 'dd bs=1 count=1 of=$tmpfile 2>/dev/null'; }.
-		qq{ test \! -s "$tmpfile" && rm -f "$tmpfile" && exec true; }.
-		qq{ (cat $tmpfile; rm $tmpfile; cat - ) | }.
-		"($command);";
+	    $command = empty_input_detector(). "($command);";
 	}
 	if($opt::tmux) {
 	    # Wrap command with 'tmux'

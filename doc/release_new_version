@@ -224,6 +224,12 @@ New in this release:
 
 * GNU Parallel was used in: https://github.com/alexbyrnes/FCC-Political-Ads_The-Code
 
+* GNU Parallel was used in: https://github.com/martymac/fpart
+
+* GNU Parallel was used in: https://github.com/mehmattski/HybSeqPipeline
+
+* Using GNU Parallel on a Raspberry Pi cluster: http://www.dcglug.org.uk/cluster-progress/
+
 * Bug fixes and man page updates.
 
 GNU Parallel - For people who live life in the parallel lane.
