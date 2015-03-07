@@ -82,3 +82,11 @@ timings: tests-to-run/* ../src/parallel
 	stdout bash -x /tmp/timing.script | tee /tmp/timing.out
 	echo + .usr.bin.time_END >>/tmp/timing.out
 	perl -ne '/\+ .usr.bin.time/ and do { print $$last.$$h; $$h=$$_ }; chomp; s/.*\0//;$$last = $$_' /tmp/timing.out |sort -n >timings
+
+timingbar:
+	vmstat 1 | timestamp --iso > vmstat.timestamp.1 &
+	stdout make 1 | timestamp --iso | tee make.timestamp.1
+	killall vmstat
+	mv vmstat.timestamp.1 vmstat.timestamp
+	mv make.timestamp.1 make.timestamp
+	sort vmstat.timestamp make.timestamp | perl -pe '/tests-to-run(\S+)/ and $$p=$$1; print "$$p "' | field 6,1,2 | perl -ne '/^\d+ / and print' | histogram -i vh

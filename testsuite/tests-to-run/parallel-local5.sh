@@ -6,12 +6,6 @@ seq 1 1000000 >/tmp/parallel-seq
 shuf --random-source=/tmp/parallel-seq /tmp/parallel-seq >/tmp/blocktest
 
 cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj2 -k --joblog /tmp/jl-`basename $0` -L1
-echo '### -L >4GB'
-  (head -c 5000000000 /dev/zero; echo FOO; 
-   head -c 3000000000 /dev/zero; echo FOO; 
-   head -c 1000000000 /dev/zero;) | 
-   parallel --pipe  -L2 --block 1g -k LANG=c wc -c
-
 echo '### Test 200M records with too small block'; 
   ( 
    echo start; 

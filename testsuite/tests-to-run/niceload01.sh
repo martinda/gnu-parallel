@@ -32,7 +32,7 @@ echo '### -N and --noswap. Must give 0'
 EOF
 
 # force load > 10
-while uptime | grep -v age:.[1-9][0-9].[0-9][0-9] >/dev/null ; do (timeout 5 nice burnP6 2>/dev/null &) done
+while uptime | egrep -v 'age:.[1-9][0-9]?[0-9].[0-9][0-9]' >/dev/null ; do (timeout 5 nice burnP6 2>/dev/null &) done
 
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 --joblog /tmp/jl-`basename $0` -L1
 echo '### -H and --hard'
@@ -50,4 +50,5 @@ EOF
 #sleep 3 &
 #nice-load -v -p $!
 
+killall freepl 2>/dev/null
 

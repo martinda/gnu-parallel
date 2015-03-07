@@ -1,12 +1,6 @@
 #!/bin/bash
 
 cat <<'EOF' | sed -e 's/;$/; /;s/$SERVER1/'$SERVER1'/;s/$SERVER2/'$SERVER2'/' | stdout parallel -vj0 -k --joblog /tmp/jl-`basename $0` -L1
-echo '### bug #44358: 2 GB records cause problems for -N2'
-  (yes "`echo {1..100}`" | head -c 5000000000; echo FOO; 
-   yes "`echo {1..100}`" | head -c 3000000000; echo FOO; 
-   yes "`echo {1..100}`" | head -c 1000000000;) | 
-    parallel --pipe --recend FOO'\n' --block 1g -k LANG=c wc -c
-
 echo "### --line-buffer"
   seq 10 | parallel -j20 --line-buffer  'seq {} 10 | pv -qL 10' > /tmp/parallel_l$$; 
   seq 10 | parallel -j20                'seq {} 10 | pv -qL 10' > /tmp/parallel_$$; 

@@ -120,7 +120,7 @@ echo '### added transfersize/returnsize to local jobs'
 echo '### --tmux test - check termination'
   perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' | 
     stdout parallel --tmux echo {} :::: - ::: a b | 
-    perl -pe 's:tmp.par.*tms:tmp/parXXXXX.tms:; s/\d/0/g'
+    perl -pe 's:tmp.par.*tms:tmp/parXXXXX.tms:; s/\d+/0/g'
 
 EOF
 
