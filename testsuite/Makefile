@@ -84,8 +84,8 @@ timings: tests-to-run/* ../src/parallel
 	perl -ne '/\+ .usr.bin.time/ and do { print $$last.$$h; $$h=$$_ }; chomp; s/.*\0//;$$last = $$_' /tmp/timing.out |sort -n >timings
 
 timingbar:
-	vmstat 1 | timestamp --iso > vmstat.timestamp.1 &
-	stdout make 1 | timestamp --iso | tee make.timestamp.1
+	vmstat 1 | timestamp --isotime > vmstat.timestamp.1 &
+	stdout make 1 | timestamp --isotime | tee make.timestamp.1
 	killall vmstat
 	mv vmstat.timestamp.1 vmstat.timestamp
 	mv make.timestamp.1 make.timestamp

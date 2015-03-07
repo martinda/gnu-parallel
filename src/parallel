@@ -956,7 +956,7 @@ sub parse_options {
             $opt::jobs = 1;
         }
         if(not defined $opt::group) {
-            $opt::ungroup = 0;
+            $opt::ungroup = 1;
         }
     }
     if(@opt::trc) {
