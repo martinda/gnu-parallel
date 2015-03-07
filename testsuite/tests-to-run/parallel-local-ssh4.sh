@@ -53,8 +53,10 @@ echo '### These blocked due to length'
   parallel -Scsh@lo --tmux echo ::: 111111111111111111111111111111111111111111111111111111111
 
 echo '### bug #43746: --transfer and --return of multiple inputs {1} and {2}'
+echo '### and:'
+echo '### bug #44371: --trc with csh complains'
   cd /tmp; echo 1 > file1; echo 2 > file2; 
-  parallel -Sparallel@lo --trc {1}.a --trc {2}.b 'echo A {1} > {1}.a; echo B {2} > {2}.b' ::: file1 ::: file2; 
+  parallel -Scsh@lo --trc {1}.a --trc {2}.b 'echo A {1} > {1}.a; echo B {2} > {2}.b' ::: file1 ::: file2; 
   cat file1.a file2.b; 
   rm /tmp/file1 /tmp/file2 /tmp/file1.a /tmp/file2.b
 

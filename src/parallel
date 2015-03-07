@@ -5188,7 +5188,7 @@ sub cleanup_cmd {
 	$dir .= $_."/";
 	unshift @rmdir, ::shell_quote_file($dir);
     }
-    my $rmdir = @rmdir ? "rmdir @rmdir 2>/dev/null;" : "";
+    my $rmdir = @rmdir ? "rmdir @rmdir >&/dev/null;" : "";
     if(defined $opt::workdir and $opt::workdir eq "...") {
 	$rmdir .= "rm -rf " . ::shell_quote_file($workdir).';';
     }
