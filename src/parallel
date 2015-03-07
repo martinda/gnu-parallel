@@ -632,6 +632,8 @@ sub write_record_to_pipe {
     my $job = shift @Global::virgin_jobs;
     # Job is no longer virgin
     $job->set_virgin(0);
+    # We ignore the removed rec_sep which is technically wrong.
+    $job->add_transfersize($endpos + length $$header_ref);
     if(fork()) {
 	# Skip
     } else {
@@ -1050,7 +1052,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150302;
+    $Global::version = 20150305;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -5646,6 +5648,7 @@ sub set_stdin_buffer {
     }
     $self->{'stdin_buffer_length'} = length $self->{'stdin_buffer'};
     $self->{'stdin_buffer_pos'} = 0;
+    $self->add_transfersize($self->{'stdin_buffer_length'});
 }
 
 sub stdin_buffer_length {
@@ -6299,6 +6302,12 @@ sub transfersize {
     return $self->{'transfersize'};
 }
 
+sub add_transfersize {
+    my $self = shift;
+    my $transfersize = shift;
+    $self->{'transfersize'} += $transfersize;
+}
+
 sub sshtransfer {
     # Returns for each transfer file:
     #   rsync $file remote:$workdir
@@ -6333,6 +6342,12 @@ sub returnsize {
 	}
     }
     return $self->{'returnsize'};
+}
+
+sub add_returnsize {
+    my $self = shift;
+    my $returnsize = shift;
+    $self->{'returnsize'} += $returnsize;
 }
 
 sub sshreturn {
@@ -6770,13 +6785,14 @@ sub print {
     if($opt::pipe and $self->virgin()) {
 	# Skip --joblog, --dryrun, --verbose
     } else {
-	if($Global::joblog and defined $self->{'exitstatus'}) {
+	if($opt::ungroup and $Global::joblog and defined $self->{'exitstatus'}) {
+#	if($Global::joblog and defined $self->{'exitstatus'}) {
 	    # Add to joblog when finished
 	    $self->print_joblog();
+	    # Printing is only relevant for grouped/--line-buffer output.
+	    $opt::ungroup and return;
 	}
 
-	# Printing is only relevant for grouped/--line-buffer output.
-	$opt::ungroup and return;
 	# Check for disk full
 	exit_if_disk_full();
 
@@ -6821,6 +6837,11 @@ sub print {
 	flush $out_fd;
     }
     ::debug("print", "<<joboutput @command\n");
+    if($Global::joblog and defined $self->{'exitstatus'}
+	and not ($self->virgin() and $opt::pipe)) {
+	# Add to joblog when finished
+	$self->print_joblog();
+    }
 }
 
 sub files_print {
@@ -6839,6 +6860,7 @@ sub files_print {
 	}
     } elsif($fdno == 1 and $self->fh($fdno,"name")) {
 	print $out_fd $self->fh($fdno,"name"),"\n";
+	$self->add_returnsize(-s $self->fh($fdno,"name"));
     }
 }
 
@@ -6871,6 +6893,7 @@ sub linebuffer_print {
     # 3276800 --tag = 4.3s
     # 10240000 --tag = 4.3s
     # 32768000 --tag = 4.7s
+    my $outputlength = 0;
     while(read($in_fh,substr($$partial,length $$partial),3276800)) {
 	# Append to $$partial
 	# Find the last \n
@@ -6884,6 +6907,7 @@ sub linebuffer_print {
 		# Length of partial line has changed: Find the last \n again
 		$i = ::rindex64($partial,"\n");
 	    }
+	    $outputlength += $i+1;
 	    if($opt::tag or defined $opt::tagstring) {
 		# Replace ^ with $tag within the full line
 		my $tag = $self->tag();
@@ -6897,9 +6921,11 @@ sub linebuffer_print {
 	    substr($$partial,0,$i+1) = "";
 	}
     }
+    $self->add_returnsize($outputlength);
     if(defined $self->{'exitstatus'}) {
 	# If the job is dead: print the remaining partial line
 	# read remaining
+	$self->add_returnsize(length $$partial);
 	if($$partial and ($opt::tag or defined $opt::tagstring)) {
 	    my $tag = $self->tag();
 	    $$partial =~ s/^/$tag/gm;
@@ -6931,14 +6957,20 @@ sub tag_print {
 	    if(/^(client_process_control: )?tcgetattr: Invalid argument\n/) {
 		# Skip
 	    } else {
+		$self->add_returnsize(length $_);
 		print $out_fd $tag,$_;
 	    }
 	    # At most run the loop once
 	    last;
 	}
     }
+    my $outputlength = 0;
     while(<$in_fh>) {
 	print $out_fd $tag,$_;
+	$outputlength += length $_;
+    }
+    if($fdno == 1) {
+	$self->add_returnsize($outputlength);
     }
     close $in_fh;
 }
@@ -6956,9 +6988,15 @@ sub normal_print {
 	sysread($in_fh,$buf,1_000);
 	$buf =~ s/^(client_process_control: )?tcgetattr: Invalid argument\n//;
 	print $out_fd $buf;
+	$self->add_returnsize(length $buf);
     }
+    my $outputlength = 0;
     while(sysread($in_fh,$buf,32768)) {
 	print $out_fd $buf;
+	$outputlength += length $buf;
+    }
+    if($fdno == 1) {
+	$self->add_returnsize($outputlength);
     }
     close $in_fh;
 }

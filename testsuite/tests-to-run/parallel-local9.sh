@@ -7,7 +7,7 @@ export XAP
 NICEPAR="nice nice parallel"
 export NICEPAR
 
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj6 -k --joblog /tmp/jl-`basename $0` -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | stdout parallel -vj4 -k --joblog /tmp/jl-`basename $0` -L1
 echo 'bug #44250: pxz complains File format not recognized but decompresses anyway'
   # The first line dumps core if run from make file. Why?!
   stdout parallel --compress --compress-program pxz ls /{} ::: OK-if-missing-file

@@ -199,3 +199,159 @@ Contact the systems administrator for further assistance.
   perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which;   rm -f /tmp/par*.par
 shell? /bin/bash -c   perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which;   rm -f /tmp/par*.par
 which bash => shell path /bin/bash
+echo '### added transfersize/returnsize to local jobs'
+### added transfersize/returnsize to local jobs
+  echo '### normal'
+### normal
+  seq 100 111 | parallel --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+0	292	0
+0	296	0
+0	300	0
+0	304	0
+0	308	0
+0	312	0
+0	316	0
+0	320	0
+0	324	0
+0	328	0
+0	332	0
+0	336	0
+Send	Receive	Exitval
+  echo '### --line-buffer'
+### --line-buffer
+  seq 100 111 | parallel --joblog /dev/stderr --line-buffer seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+0	292	0
+0	296	0
+0	300	0
+0	304	0
+0	308	0
+0	312	0
+0	316	0
+0	320	0
+0	324	0
+0	328	0
+0	332	0
+0	336	0
+Send	Receive	Exitval
+  echo '### --tag'
+### --tag
+  seq 100 111 | parallel --tag --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+0	292	0
+0	296	0
+0	300	0
+0	304	0
+0	308	0
+0	312	0
+0	316	0
+0	320	0
+0	324	0
+0	328	0
+0	332	0
+0	336	0
+Send	Receive	Exitval
+  echo '### --tag --line-buffer'
+### --tag --line-buffer
+  seq 100 111 | parallel --tag --line-buffer --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+0	292	0
+0	296	0
+0	300	0
+0	304	0
+0	308	0
+0	312	0
+0	316	0
+0	320	0
+0	324	0
+0	328	0
+0	332	0
+0	336	0
+Send	Receive	Exitval
+  echo '### --files'
+### --files
+  seq 100 111 | parallel --files --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+0	292	0
+0	296	0
+0	300	0
+0	304	0
+0	308	0
+0	312	0
+0	316	0
+0	320	0
+0	324	0
+0	328	0
+0	332	0
+0	336	0
+Send	Receive	Exitval
+  echo '### --files --tag'
+### --files --tag
+  seq 100 111 | parallel --files --tag --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+0	292	0
+0	296	0
+0	300	0
+0	304	0
+0	308	0
+0	312	0
+0	316	0
+0	320	0
+0	324	0
+0	328	0
+0	332	0
+0	336	0
+Send	Receive	Exitval
+  echo '### --pipe'
+### --pipe
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --pipe pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+1108	1108	0
+1112	1112	0
+1112	1112	0
+561	561	0
+Send	Receive	Exitval
+  echo '### --pipe --line-buffer'
+### --pipe --line-buffer
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --pipe --line-buffer pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+1108	1108	0
+1112	1112	0
+1112	1112	0
+561	561	0
+Send	Receive	Exitval
+  echo '### --pipe --tag'
+### --pipe --tag
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --pipe --tag pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+1108	1108	0
+1112	1112	0
+1112	1112	0
+561	561	0
+Send	Receive	Exitval
+  echo '### --pipe --tag --line-buffer'
+### --pipe --tag --line-buffer
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --pipe --tag --line-buffer pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+1108	1108	0
+1112	1112	0
+1112	1112	0
+561	561	0
+Send	Receive	Exitval
+  echo '### --files --pipe'
+### --files --pipe
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --files --pipe pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+1108	1108	0
+1112	1112	0
+1112	1112	0
+561	561	0
+Send	Receive	Exitval
+  echo '### --files --pipe --tag'
+### --files --pipe --tag
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --files --pipe --tag pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+1108	1108	0
+1112	1112	0
+1112	1112	0
+561	561	0
+Send	Receive	Exitval
+  echo '### --pipe --round-robin'
+### --pipe --round-robin
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 -j2 --pipe --round-robin pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+1673	1673	0
+2220	2220	0
+Send	Receive	Exitval
+echo '### --tmux test - check termination'
+### --tmux test - check termination
+  perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' |     stdout parallel --tmux echo {} :::: - ::: a b |     perl -pe 's:tmp.par.*tms:tmp/parXXXXX.tms:; s/\d/0/g'
+See output with: tmux -S /tmp/parXXXXX.tms attach -t p000000

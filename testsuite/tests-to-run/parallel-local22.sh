@@ -89,9 +89,38 @@ echo '### bug #42913: Dont use $SHELL but the shell currently running'
   perl -e 'system(qw(parallel -Dinit echo ::: 1))' | grep which; 
   rm -f /tmp/par*.par
 
+echo '### added transfersize/returnsize to local jobs'
+  echo '### normal'
+  seq 100 111 | parallel --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --line-buffer'
+  seq 100 111 | parallel --joblog /dev/stderr --line-buffer seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --tag'
+  seq 100 111 | parallel --tag --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --tag --line-buffer'
+  seq 100 111 | parallel --tag --line-buffer --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --files'
+  seq 100 111 | parallel --files --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --files --tag'
+  seq 100 111 | parallel --files --tag --joblog /dev/stderr seq {} '|' pv -qL100 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --pipe'
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --pipe pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --pipe --line-buffer'
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --pipe --line-buffer pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --pipe --tag'
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --pipe --tag pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --pipe --tag --line-buffer'
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --pipe --tag --line-buffer pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --files --pipe'
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --files --pipe pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --files --pipe --tag'
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 --files --pipe --tag pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+  echo '### --pipe --round-robin'
+  seq 1000 | parallel --joblog /dev/stderr --block 1111 -j2 --pipe --round-robin pv -qL300 2>&1 >/dev/null | cut -f 5-7 | sort
+
+echo '### --tmux test - check termination'
+  perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' | 
+    stdout parallel --tmux echo {} :::: - ::: a b | 
+    perl -pe 's:tmp.par.*tms:tmp/parXXXXX.tms:; s/\d/0/g'
+
 EOF
 
-
-# TODO This is too unstable
-# echo '### --tmux test - check termination'
-#  perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' | stdout parallel --tmux echo {} :::: - ::: a b | perl -pe 's/\d/0/g'
