@@ -65,3 +65,7 @@ echo '### bug #44371: --trc with csh complains'
   cd /tmp; echo 1 > file1; echo 2 > file2;   parallel -Scsh@lo --trc {1}.a --trc {2}.b 'echo A {1} > {1}.a; echo B {2} > {2}.b' ::: file1 ::: file2;   cat file1.a file2.b;   rm /tmp/file1 /tmp/file2 /tmp/file1.a /tmp/file2.b
 A file1
 B file2
+echo '### bug #44143: csh and nice'
+### bug #44143: csh and nice
+  parallel --nice 1 -S csh@lo setenv B {}\; echo '$B' ::: OK
+OK

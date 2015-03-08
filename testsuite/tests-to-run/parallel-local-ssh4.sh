@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SSH only allowed to localhost/lo
-cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj8 -k --joblog /tmp/jl-`basename $0` -L1
+cat <<'EOF' | sed -e s/\$SERVER1/$SERVER1/\;s/\$SERVER2/$SERVER2/ | parallel -vj7 -k --joblog /tmp/jl-`basename $0` -L1
 echo '### zsh'
   ssh zsh@lo 'fun="() { echo function from zsh to zsh \$*; }"; 
               export fun; 
@@ -59,5 +59,8 @@ echo '### bug #44371: --trc with csh complains'
   parallel -Scsh@lo --trc {1}.a --trc {2}.b 'echo A {1} > {1}.a; echo B {2} > {2}.b' ::: file1 ::: file2; 
   cat file1.a file2.b; 
   rm /tmp/file1 /tmp/file2 /tmp/file1.a /tmp/file2.b
+
+echo '### bug #44143: csh and nice'
+  parallel --nice 1 -S csh@lo setenv B {}\; echo '$B' ::: OK
 
 EOF

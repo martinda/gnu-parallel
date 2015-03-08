@@ -5953,9 +5953,19 @@ sub wrapped {
 	    # Prepend \nice -n19 $SHELL -c
 	    # and quote.
 	    # The '\' before nice is needed to avoid tcsh's built-in
-	    $command = '\nice'. " -n". $opt::nice. " ".
-		$Global::shell. " -c ".
-		::shell_quote_scalar($command);
+	    my $sshlogin = $self->sshlogin();
+	    my $serverlogin = $sshlogin->serverlogin();
+	    if($serverlogin eq ":") {
+		# Local use $Global::shell
+		$command = '\nice'. " -n". $opt::nice. " ".
+		    $Global::shell. " -c ".
+		    ::shell_quote_scalar($command);
+	    } else {
+		# Remote systems use $SHELL
+		$command = '\nice'. " -n". $opt::nice. 
+		    ' $SHELL -c '.
+		    ::shell_quote_scalar($command);
+	    }
 	}
 	if($opt::cat) {
 	    # Prepend 'cat > {};'
@@ -5981,7 +5991,12 @@ sub wrapped {
 	$command = $self->sshlogin_wrap($command);
 	if(@Global::cat_partials) {
 	    # Prepend:
-	    # < /tmp/foo perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 11 |
+	    # < /tmp/foo perl -e 'while(@ARGV) {
+	    #   sysseek(STDIN,shift,0) || die; $left = shift;
+	    #   while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){
+	    #     $left -= $read; syswrite(STDOUT,$buf);
+	    #   }
+	    # }'  0 0 0 11 |
 	    $command = (shift @Global::cat_partials). " | ($command)";
 	} elsif($opt::pipe) {
 	    # Prepend EOF-detector to avoid starting $command if EOF.
