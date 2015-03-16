@@ -1,67 +1,67 @@
 echo '### tmux1.9'
 ### tmux1.9
   seq 000 100 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 100 200 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 200 300 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 300 400 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 400 500 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 500 600 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 600 700 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 700 800 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 800 900 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 900 1000 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1000 1100 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1100 1200 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1200 1300 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1300 1400 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1400 1500 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1500 1600 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1600 1700 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1700 1800 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1800 1900 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 1900 2000 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
   seq 2000 2021 | TMUX=tmux1.9 par_tmux
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
 echo '### tmux1.9 fails'
 ### tmux1.9 fails
@@ -71,24 +71,24 @@ parallel: Error: Command line too long (4053 >= 4052) at input 0: 2022
 echo '### tmux1.8'
 ### tmux1.8
   seq 1 50 | TMUX=tmux1.8 par_tmux
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
 0
   seq 51 100 | TMUX=tmux1.8 par_tmux
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
 0
   seq 101 150 | TMUX=tmux1.8 par_tmux
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
 0
   seq 151 200 | TMUX=tmux1.8 par_tmux
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
 0
   seq 201 233 | TMUX=tmux1.8 par_tmux
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
 0
 echo '### tmux1.8 fails'
 ### tmux1.8 fails
   echo 234 | TMUX=tmux1.8 par_tmux
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
 command too long
 1
   echo 235 | TMUX=tmux1.8 par_tmux
@@ -100,25 +100,25 @@ parallel: Error: Command line too long (480 >= 477) at input 0: 236
 echo '### tmux1.8 0..255 ascii'
 ### tmux1.8 0..255 ascii
 perl -e 'print map { ($_, map { pack("c*",$_) } grep { $_>=1 && $_!=10 } 0..$_),"\n" } 0..255' |    TMUX=tmux1.8 stdout parallel --tmux --timeout 3 echo | par_tmux_filter; echo $?
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
 0
 echo '### tmux1.9 0..255 ascii'
 ### tmux1.9 0..255 ascii
 perl -e 'print map { ($_, map { pack("c*",$_) } grep { $_>=1 && $_!=10 } 0..$_),"\n" } 0..255' |    TMUX=tmux1.9 stdout parallel --tmux --timeout 3 echo | par_tmux_filter; echo $?
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
 0
 echo '### Test output ascii'
 ### Test output ascii
   rm -f /tmp/paralocal7*;   perl -e 'print map { ($_, map { pack("c*",$_) } grep { $_!=10 } 1..$_),"\n" } 1..255' | stdout parallel --tmux echo {}'>>/tmp/paralocal7{%}' | par_tmux_filter;   sort /tmp/paralocal7* | md5sum
-See output with: tmux -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux -S /tmp/parXXXXX.tms attach
 a7ee232967c8aab2edf227169e8cdce0  -
 echo '### Test critical lengths. Must not block'
 ### Test critical lengths. Must not block
   seq 70 130  | TMUX=tmux1.8 stdout parallel --tmux echo '{}{=$_="&"x$_=}' | par_tmux_filter
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
   seq 70 130  | TMUX=tmux1.9 stdout parallel --tmux echo '{}{=$_="&"x$_=}' | par_tmux_filter
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach
   seq 280 425 | TMUX=tmux1.8 stdout parallel --tmux echo '{}{=$_="a"x$_=}' | par_tmux_filter
-See output with: tmux1.8 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.8 -S /tmp/parXXXXX.tms attach
   seq 280 425 | TMUX=tmux1.9 stdout parallel --tmux echo '{}{=$_="a"x$_=}' | par_tmux_filter
-See output with: tmux1.9 -S /tmp/parXXXXX.tms attach -tpID
+See output with: tmux1.9 -S /tmp/parXXXXX.tms attach

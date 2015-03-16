@@ -270,6 +270,43 @@ B<--block-size> gives very poor performance; by exponentially
 increasing the block size performance will not suffer.
 
 
+=head2 Convenience options --nice --basefile --transfer --return
+--cleanup --tmux --group --compress --cat --fifo --workdir
+
+These are all convenience options that make it easier to do a
+task. But more importantly: They are tested to work on corner cases,
+too. Take B<--nice> as an example:
+
+  nice parallel command ...
+
+will work just fine. But when run remotely, you need to move the nice
+command so it is being run on the server:
+
+  parallel --S server nice command ...
+
+And this will again work just fine, as long as you are running a
+single command. When you are running a composed command you need nice
+to apply to the whole command, and it gets harder still:
+
+  parallel --S server --q nice bash -c 'command1 ...; command2 | command3'
+
+It is not impossible, but by using B<--nice> GNU B<parallel> will do
+the right thing for you. Similarly when transferring files: It starts
+to get hard when the file names contain space, :, ‘, *, or other
+special characters.
+
+To run the commands in a B<tmux> session you basically just need to
+quote the command. For simple commands that is easy, but when commands
+contain special characters, it gets much harder to get right.
+
+B<--cat> and B<--fifo> are easy to do by hand, until you want to clean
+up the tmpfile and keep the exit code of the command.
+
+The real killer comes when you try to combine several of these: Doing
+that correctly for all corner cases is next to impossible to do by
+hard.
+
+
 =head2 Shell shock
 
 The shell shock bug in B<bash> did not affect GNU B<parallel>, but the

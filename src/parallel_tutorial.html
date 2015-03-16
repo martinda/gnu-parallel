@@ -56,6 +56,7 @@
     <ul>
       <li><a href="#Number-of-simultaneous-jobs">Number of simultaneous jobs</a></li>
       <li><a href="#Interactivity">Interactivity</a></li>
+      <li><a href="#A-terminal-for-every-job">A terminal for every job</a></li>
       <li><a href="#Timing">Timing</a></li>
       <li><a href="#Progress">Progress</a></li>
       <li><a href="#Termination">Termination</a></li>
@@ -1072,6 +1073,18 @@
 
 <pre><code>  parallel -X --tty vi ::: 1 2 3</code></pre>
 
+<h2 id="A-terminal-for-every-job">A terminal for every job</h2>
+
+<p>Using tmux GNU Parallel can start a terminal for every job run:</p>
+
+<pre><code>  seq 10 40 | parallel --tmux &#39;echo start {}; sleep {}; echo done {}&#39;</code></pre>
+
+<p>This will tell you to run something similar to:</p>
+
+<pre><code>  tmux -S /tmp/paroRLCx.tms attach</code></pre>
+
+<p>Using normal tmux keystrokes (CTRL-b n or CTRL-b p) you can cycle between windows of the running jobs. When a job is finished it will pause for 10 seconds before closing the window.</p>
+
 <h2 id="Timing">Timing</h2>
 
 <p>Some jobs do heavy I/O when they start. To avoid a thundering herd GNU Parallel can delay starting new jobs. --delay X will make sure there is at least X seconds between each start:</p>
@@ -1132,6 +1145,14 @@
 
   Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
   local:0/9/100%/1.1s</code></pre>
+
+<p>A progress bar can be shown with --bar:</p>
+
+<pre><code>  parallel --bar sleep ::: 1 3 2 2 1 3 3 2 1</code></pre>
+
+<p>And a graphic bar can be shown with --bar and zenity:</p>
+
+<pre><code>  seq 1000 | parallel -j10 --bar &#39;(echo -n {};sleep 0.1)&#39; 2&gt; &gt;(zenity --progress --auto-kill)</code></pre>
 
 <p>A logfile of the jobs completed so far can be generated with --joblog:</p>
 

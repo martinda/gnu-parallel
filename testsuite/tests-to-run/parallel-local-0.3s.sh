@@ -60,5 +60,12 @@ echo '### bug #43817: Some JP char cause problems in positional replacement stri
   parallel -Xj1 echo ::: '�<�>' '�<1 $_=2�>' 'ワ'
   parallel -Xj1 echo {1} ::: '�<�>' '�<1 $_=2�>' 'ワ'
 
+echo '**'
+
+parallel --plus --rpl '%' 
+  --rpl '%D $_=::shell_quote(::dirname($_));' --rpl '%B s:.*/::;s:\.[^/.]+$::;' --rpl '%E s:.*\.::' 
+  'echo {}=%;echo %D={//};echo %B={/.};echo %E={+.};echo %D/%B.%E={}' ::: a.b/c.d/e.f
+
+echo '**'
 
 EOF

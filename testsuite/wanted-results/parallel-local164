@@ -322,7 +322,7 @@ correct
 correct
 echo 'bug #38439: "open files" with --files --pipe blocks after a while'
 bug #38439: "open files" with --files --pipe blocks after a while
-  ulimit -n 20; yes |head -n 10M | parallel --pipe -k echo {#} of 20
+  ulimit -n 20; yes "`seq 3000`" |head -c 20M | parallel --pipe -k echo {#} of 20
 1 of 20
 2 of 20
 3 of 20

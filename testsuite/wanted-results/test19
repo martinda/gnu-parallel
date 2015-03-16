@@ -83,11 +83,11 @@ one-server exec perl -e '@GNU_Parallel=("use","IPC::Open3;","use","MIME::Base64"
 -l parallel one-server cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
 'newlineX.out2
 one-server (rm -f ./tmp/parallel.file.'
-'newlineX; rmdir ./tmp/ ./ 2>/dev/null;)
+'newlineX; rmdir ./tmp/ ./ >&/dev/null;)
 one-server (rm -f ./tmp/parallel.file.'
-'newlineX.out; rmdir ./tmp/ ./ 2>/dev/null;)
+'newlineX.out; rmdir ./tmp/ ./ >&/dev/null;)
 one-server (rm -f ./tmp/parallel.file.'
-'newlineX.out2; rmdir ./tmp/ ./ 2>/dev/null;)
+'newlineX.out2; rmdir ./tmp/ ./ >&/dev/null;)
 one-server mkdir -p ./.
 -l parallel one-server rsync --server -lDrRze.iLsfx . ./.
 one-server exec perl -e '@GNU_Parallel=("use","IPC::Open3;","use","MIME::Base64");eval"@GNU_Parallel";$SIG{CHLD}="IGNORE";my$zip=(grep{-x$_}"/usr/local/bin/bzip2")[0]||"bzip2";my($in,$out,$eval);open3($in,$out,">&STDERR",$zip,"-dc");if(my$perlpid=fork){close$in;$eval=join"",<$out>;close$out;}else{close$out;print$in(decode_base64(join"",@ARGV));close$in;exit;}wait;eval$eval;' base64
@@ -96,8 +96,8 @@ one-server exec perl -e '@GNU_Parallel=("use","IPC::Open3;","use","MIME::Base64"
 -l parallel one-server cd ././tmp; rsync --server --sender -lDrRze.iLsfx . ./parallel.file.'
 'newlineX.out2
 one-server (rm -f ./tmp/parallel.file.'
-'newlineX; rmdir ./tmp/ ./ 2>/dev/null;)
+'newlineX; rmdir ./tmp/ ./ >&/dev/null;)
 one-server (rm -f ./tmp/parallel.file.'
-'newlineX.out; rmdir ./tmp/ ./ 2>/dev/null;)
+'newlineX.out; rmdir ./tmp/ ./ >&/dev/null;)
 one-server (rm -f ./tmp/parallel.file.'
-'newlineX.out2; rmdir ./tmp/ ./ 2>/dev/null;)
+'newlineX.out2; rmdir ./tmp/ ./ >&/dev/null;)

@@ -144,7 +144,7 @@ echo '### Negative replacement strings'
   parallel --colsep ' ' echo '{-3}orrect' ::: "1 c 3 4"
 
 echo 'bug #38439: "open files" with --files --pipe blocks after a while'
-  ulimit -n 20; yes |head -n 10M | parallel --pipe -k echo {#} of 20
+  ulimit -n 20; yes "`seq 3000`" |head -c 20M | parallel --pipe -k echo {#} of 20
 
 echo 'bug #34241: --pipe should not spawn unneeded processes - part 2'
   seq 500 | parallel --tmpdir . -j10 --pipe --block 1k --files wc >/dev/null; 

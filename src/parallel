@@ -1052,7 +1052,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150307;
+    $Global::version = 20150308;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1585,7 +1585,7 @@ sub perl_quote_scalar {
 }
 
 sub unquote_printf {
-    # Convert \t \n \r \0 \000
+    # Convert \t \n \r \000 \0
     $_ = shift;
     s/\\t/\t/g;
     s/\\n/\n/g;
@@ -3756,7 +3756,7 @@ sub memfree_recompute {
     my $script = memfreescript();
 
     # TODO add sshlogin and backgrounding
-    $self->{'memfree'} = `$script`;
+    $self->{'memfree'} = qx{ $script };
     #::debug("mem","New free:",$self->{'memfree'}," ");
 }
 
@@ -3805,7 +3805,7 @@ sub memfree_recompute {
 	    for my $os (keys %script_of) {
 		$perlscript .= 'if($^O eq "'.$os.'") { '.$script_of{$os}.'}';
 	    }
-	    $perlscript =~ s/[\t\n]/ /g;
+	    $perlscript =~ s/[\t\n ]+/ /g;
 	    $perlscript = "perl -e " . ::shell_quote_scalar($perlscript);
 	    $script = $Global::envvar. " " .$perlscript;
 	}
@@ -5403,15 +5403,26 @@ sub slot {
 			    # syswrite may be interrupted by SIGHUP
 			    substr($buf,0,$bytes_written) = "";
 			}
+			# Something printed: Wait less next time
+			$sleep /= 2;
 		    } else {
 			if(eof(IN) and not $writer_running) {
 			    # Writer dead: There will never be more to read => exit
 			    -e $unlink_file and unlink $unlink_file;
 			    exit;
 			}
-			# Wait for something to happen on file handle IN
-			select(fileno(IN), undef, undef, undef);
+			# TODO This could probably be done more efficiently using select(2)
+			# Nothing read: Wait longer before next read
+			# Up to 30 milliseconds
+			$sleep = ($sleep < 30) ? ($sleep * 1.001 + 0.01) : ($sleep);
+			usleep($sleep);
 		    }
+		}
+
+		sub usleep {
+		    # Sleep this many milliseconds.
+		    my $secs = shift;
+		    select(undef, undef, undef, $secs/1000);
 		}
 	    };
 	    $cattail =~ s/#.*//mg;
@@ -6684,7 +6695,7 @@ sub print_dryrun_and_verbose {
 	    (undef, $tmuxsocket) = ::tmpfile(SUFFIX => ".tms");
 	    $Global::unlink{$tmuxsocket} = 1;
 	    unlink $tmuxsocket;
-	    ::status("See output with: $ENV{'TMUX'} -S $tmuxsocket attach -t p$$\n");
+	    ::status("See output with: $ENV{'TMUX'} -S $tmuxsocket attach\n");
 	}
 	$tmux = $ENV{'TMUX'}." -S $tmuxsocket new-session -s p$$ -d 'sleep .2' >&/dev/null;" .
 	    $ENV{'TMUX'}." -S $tmuxsocket new-window -t p$$ -n $title";
@@ -6801,7 +6812,6 @@ sub print {
 	# Skip --joblog, --dryrun, --verbose
     } else {
 	if($opt::ungroup and $Global::joblog and defined $self->{'exitstatus'}) {
-#	if($Global::joblog and defined $self->{'exitstatus'}) {
 	    # Add to joblog when finished
 	    $self->print_joblog();
 	    # Printing is only relevant for grouped/--line-buffer output.
@@ -7659,7 +7669,6 @@ sub replaced {
 	# This is actually a CommandLine-object,
 	# but it looks nice to be able to say {= $job->slot() =}
 	my $job = $self;
-
 	for my $word (@word) {
 	    # word = AB \257< perlexpr \257> CD \257< perlexpr \257> EF
 	    ::debug("replace", "Replacing in $word\n");
@@ -7758,7 +7767,10 @@ sub new {
 	# to deal with: {={==}
 	while(s{([^\257]*) \Q$Global::parensleft\E ([^\257]*?) \Q$Global::parensright\E }
 	      {$1\257<$2\257>}gx) {}
-	for my $rpl (keys %Global::rpl) {
+	for my $rpl (sort { length $b <=> length $a } keys %Global::rpl) {
+	    # Replace long --rpl's before short ones, as a short may be a
+	    # substring of a long:
+	    #   --rpl '% s/a/b/' --rpl '%% s/b/a/'
 	    # Replace the short hand string (--rpl)
 	    # with the {= perl expr =}
 	    # Avoid replacing inside existing {= perl expr =}
@@ -7930,15 +7942,14 @@ sub get {
 	my $cmd_line = shift @{$self->{'unget'}};
 	return ($cmd_line);
     } else {
-	my $cmd_line;
-	$cmd_line = CommandLine->new($self->seq(),
-				     $self->{'command'},
-				     $self->{'arg_queue'},
-				     $self->{'context_replace'},
-				     $self->{'max_number_of_args'},
-				     $self->{'return_files'},
-				     $self->{'replacecount'},
-				     $self->{'len'},
+	my $cmd_line = CommandLine->new($self->seq(),
+					$self->{'command'},
+					$self->{'arg_queue'},
+					$self->{'context_replace'},
+					$self->{'max_number_of_args'},
+					$self->{'return_files'},
+					$self->{'replacecount'},
+					$self->{'len'},
 	    );
 	$cmd_line->populate();
 	::debug("init","cmd_line->number_of_args ",

@@ -29,12 +29,12 @@ echo '### Test tmux works on different shells'
   parallel -Scsh@lo,tcsh@lo,parallel@lo,zsh@lo --tmux false ::: 1 2 3 4; echo $?
 
   export PARTMUX='parallel -Scsh@lo,tcsh@lo,parallel@lo,zsh@lo --tmux '; 
-  ssh zsh@lo "$PARTMUX" 'true ::: 1 2 3 4; echo $status'; 
-  ssh zsh@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $status'; 
-  ssh parallel@lo "$PARTMUX" 'true ::: 1 2 3 4; echo $?'; 
-  ssh parallel@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $?'; 
-  ssh tcsh@lo "$PARTMUX" 'true ::: 1 2 3 4; echo $status'; 
-  ssh tcsh@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $status'
+  stdout ssh zsh@lo      "$PARTMUX" 'true  ::: 1 2 3 4; echo $status' | grep -v 'See output'; 
+  stdout ssh zsh@lo      "$PARTMUX" 'false ::: 1 2 3 4; echo $status' | grep -v 'See output'; 
+  stdout ssh parallel@lo "$PARTMUX" 'true  ::: 1 2 3 4; echo $?'      | grep -v 'See output'; 
+  stdout ssh parallel@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $?'      | grep -v 'See output'; 
+  stdout ssh tcsh@lo     "$PARTMUX" 'true  ::: 1 2 3 4; echo $status' | grep -v 'See output'; 
+  stdout ssh tcsh@lo     "$PARTMUX" 'false ::: 1 2 3 4; echo $status' | grep -v 'See output'
 
 echo '### This fails - word too long'
   export PARTMUX='parallel -Scsh@lo,tcsh@lo,parallel@lo,zsh@lo --tmux '; 
@@ -42,15 +42,15 @@ echo '### This fails - word too long'
   stdout ssh csh@lo "$PARTMUX" 'false ::: 1 2 3 4; echo $status' | grep -v 'See output'
 
 echo '### works'
-  parallel -Sparallel@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
-  stdout parallel -Sparallel@lo --tmux echo ::: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+  stdout parallel -Sparallel@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@ | grep -v 'See output'
+  stdout parallel -Sparallel@lo --tmux echo ::: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx | grep -v 'See output'
 
 echo '### These blocked due to length'
-  parallel -Slo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
-  parallel -Scsh@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
-  parallel -Stcsh@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
-  parallel -Szsh@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@
-  parallel -Scsh@lo --tmux echo ::: 111111111111111111111111111111111111111111111111111111111
+  stdout parallel -Slo      --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@ | grep -v 'See output'
+  stdout parallel -Scsh@lo  --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@ | grep -v 'See output'
+  stdout parallel -Stcsh@lo --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@ | grep -v 'See output'
+  stdout parallel -Szsh@lo  --tmux echo ::: \\\\\\\"\\\\\\\"\\\;\@ | grep -v 'See output'
+  stdout parallel -Scsh@lo  --tmux echo ::: 111111111111111111111111111111111111111111111111111111111 | grep -v 'See output'
 
 echo '### bug #43746: --transfer and --return of multiple inputs {1} and {2}'
 echo '### and:'

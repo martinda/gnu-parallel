@@ -354,4 +354,4 @@ Send	Receive	Exitval
 echo '### --tmux test - check termination'
 ### --tmux test - check termination
   perl -e 'map {printf "$_%o%c\n",$_,$_}1..255' |     stdout parallel --tmux echo {} :::: - ::: a b |     perl -pe 's:tmp.par.*tms:tmp/parXXXXX.tms:; s/\d+/0/g'
-See output with: tmux -S /tmp/parXXXXX.tms attach -t p0
+See output with: tmux -S /tmp/parXXXXX.tms attach
