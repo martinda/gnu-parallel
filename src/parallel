@@ -1473,6 +1473,7 @@ sub read_args_from_command_line {
 		# Put args into argfile
 		print $outfh map { $_,$/ } @group;
 		seek $outfh, 0, 0;
+		exit_if_disk_full();
 		# Append filehandle to -a
 		push @opt::a, $outfh;
 	    } else {
@@ -3384,7 +3385,7 @@ sub reap_usleep {
 	    kill_youngster_if_not_enough_mem();
 	}
 	usleep($ms);
-	Job::exit_if_disk_full();
+	exit_if_disk_full();
 	if($opt::linebuffer) {
 	    for my $job (values %Global::running) {
 		$job->print();
@@ -3510,6 +3511,46 @@ sub tmpfile {
     return ::tempfile(DIR=>$ENV{'TMPDIR'}, TEMPLATE => 'parXXXXX', @_);
 }
 
+{
+    my ($disk_full_fh, $b8193, $name);
+    sub exit_if_disk_full {
+	# Checks if $TMPDIR is full by writing 8kb to a tmpfile
+	# If the disk is full: Exit immediately.
+	# Returns:
+	#   N/A
+	if(not $disk_full_fh) {
+	    ($disk_full_fh, $name) = ::tmpfile(SUFFIX => ".df");
+	    unlink $name;
+	    $b8193 = "x"x8193;
+	}
+	# Linux does not discover if a disk is full if writing <= 8192
+	# Tested on:
+	# bfs btrfs cramfs ext2 ext3 ext4 ext4dev jffs2 jfs minix msdos
+	# ntfs reiserfs tmpfs ubifs vfat xfs
+	# TODO this should be tested on different OS similar to this:
+	#
+	# doit() {
+	#   sudo mount /dev/ram0 /mnt/loop; sudo chmod 1777 /mnt/loop
+	#   seq 100000 | parallel --tmpdir /mnt/loop/ true &
+	#   seq 6900000 > /mnt/loop/i && echo seq OK
+	#   seq 6980868 > /mnt/loop/i
+	#   seq 10000 > /mnt/loop/ii
+	#   sleep 3
+	#   sudo umount /mnt/loop/ || sudo umount -l /mnt/loop/
+	#   echo >&2
+	# }
+	print $disk_full_fh $b8193;
+	if(not $disk_full_fh
+	   or
+	   tell $disk_full_fh == 0) {
+	    ::error("Output is incomplete. Cannot append to buffer file in $ENV{'TMPDIR'}. Is the disk full?\n");
+	    ::error("Change \$TMPDIR with --tmpdir or use --compress.\n");
+	    ::wait_and_exit(255);
+	}
+	truncate $disk_full_fh, 0;
+	seek($disk_full_fh, 0, 0) || die;
+    }
+}
 sub __DEBUGGING__ {}
 
 sub debug {
@@ -6826,7 +6867,7 @@ sub print {
 	}
 
 	# Check for disk full
-	exit_if_disk_full();
+	::exit_if_disk_full();
 
 	if(($opt::dryrun or $Global::verbose)
 	   and
@@ -7103,46 +7144,7 @@ sub set_exitsignal {
     $self->{'exitsignal'} = $exitsignal;
 }
 
-{
-    my ($disk_full_fh, $b8193, $name);
-    sub exit_if_disk_full {
-	# Checks if $TMPDIR is full by writing 8kb to a tmpfile
-	# If the disk is full: Exit immediately.
-	# Returns:
-	#   N/A
-	if(not $disk_full_fh) {
-	    ($disk_full_fh, $name) = ::tmpfile(SUFFIX => ".df");
-	    unlink $name;
-	    $b8193 = "x"x8193;
-	}
-	# Linux does not discover if a disk is full if writing <= 8192
-	# Tested on:
-	# bfs btrfs cramfs ext2 ext3 ext4 ext4dev jffs2 jfs minix msdos
-	# ntfs reiserfs tmpfs ubifs vfat xfs
-	# TODO this should be tested on different OS similar to this:
-	#
-	# doit() {
-	#   sudo mount /dev/ram0 /mnt/loop; sudo chmod 1777 /mnt/loop
-	#   seq 100000 | parallel --tmpdir /mnt/loop/ true &
-	#   seq 6900000 > /mnt/loop/i && echo seq OK
-	#   seq 6980868 > /mnt/loop/i
-	#   seq 10000 > /mnt/loop/ii
-	#   sleep 3
-	#   sudo umount /mnt/loop/ || sudo umount -l /mnt/loop/
-	#   echo >&2
-	# }
-	print $disk_full_fh $b8193;
-	if(not $disk_full_fh
-	   or
-	   tell $disk_full_fh == 0) {
-	    ::error("Output is incomplete. Cannot append to buffer file in $ENV{'TMPDIR'}. Is the disk full?\n");
-	    ::error("Change \$TMPDIR with --tmpdir or use --compress.\n");
-	    ::wait_and_exit(255);
-	}
-	truncate $disk_full_fh, 0;
-	seek($disk_full_fh, 0, 0) || die;
-    }
-}
+
 
 sub should_we_halt {
     # Should we halt? Immediately? Gracefully?
