@@ -62,10 +62,16 @@ echo '### bug #43817: Some JP char cause problems in positional replacement stri
 
 echo '**'
 
+echo '### --rpl % that is a substring of longer --rpl %D'
 parallel --plus --rpl '%' 
   --rpl '%D $_=::shell_quote(::dirname($_));' --rpl '%B s:.*/::;s:\.[^/.]+$::;' --rpl '%E s:.*\.::' 
   'echo {}=%;echo %D={//};echo %B={/.};echo %E={+.};echo %D/%B.%E={}' ::: a.b/c.d/e.f
 
 echo '**'
+
+echo '### Disk full'
+cat /dev/zero >/mnt/ram/out; 
+  parallel --tmpdir /mnt/ram echo ::: OK; 
+  rm /mnt/ram/out
 
 EOF

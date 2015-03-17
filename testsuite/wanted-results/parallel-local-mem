@@ -1,8 +1,8 @@
-make[2]: Entering directory `/home/tange/privat/parallel/testsuite'
+make[1]: Entering directory `/home/tange/privat/parallel/testsuite'
 VBoxManage controlvm CentOS3-root:centos3 savestate
 VBoxManage controlvm RedHat9-root:redhat9 savestate
 VBoxManage controlvm OracleXE savestate
-make[2]: Leaving directory `/home/tange/privat/parallel/testsuite'
+make[1]: Leaving directory `/home/tange/privat/parallel/testsuite'
 echo '### Trouble reading a record > 2 GB for certain versions of Perl (substr($a,0,2G+1)="fails")'
 ### Trouble reading a record > 2 GB for certain versions of Perl (substr($a,0,2G+1)="fails")
 echo '### perl -e $buf=("x"x(2**31))."x"; substr($buf,0,2**31+1)=""; print length $buf'
@@ -49,7 +49,7 @@ echo '### -L >4GB'
 parallel: Warning: A record was longer than 1000000000. Increasing to --blocksize 1300000001
 parallel: Warning: A record was longer than 1300000001. Increasing to --blocksize 1690000003
 parallel: Warning: A record was longer than 1690000003. Increasing to --blocksize 2147483647
-make[2]: Entering directory `/home/tange/privat/parallel/testsuite'
+make[1]: Entering directory `/home/tange/privat/parallel/testsuite'
 # Make sure we can reach the virtual machines
 sudo ifconfig wlan0:0 192.168.1.72
 # If they are already running: Don't fail
@@ -59,4 +59,4 @@ VM "CentOS3-root:centos3" has been successfully started.
 VBoxManage startvm RedHat9-root:redhat9 || VBoxManage controlvm RedHat9-root:redhat9 resume || true
 Waiting for VM "RedHat9-root:redhat9" to power on...
 VM "RedHat9-root:redhat9" has been successfully started.
-make[2]: Leaving directory `/home/tange/privat/parallel/testsuite'
+make[1]: Leaving directory `/home/tange/privat/parallel/testsuite'

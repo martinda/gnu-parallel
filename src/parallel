@@ -2248,7 +2248,7 @@ sub progress {
 	    $last_column_time = time;
 	    $columns = $ENV{'COLUMNS'};
 	    if(not $columns) {
-		my $resize = qx{ resize 2>/dev/null };
+		my $resize = qx{ sh -c 'resize 2>/dev/null' };
 		$resize =~ /COLUMNS=(\d+);/ and do { $columns = $1; };
 	    }
 	    $columns ||= 80;
@@ -2697,6 +2697,7 @@ sub parallelized_host_filtering {
     #              will make it less likely to overload the ssh daemon.
     # --retries 3: If the ssh daemon it overloaded, try 3 times
     # -s 16000: Half of the max line on UnixWare
+    # TODO sh -c wrapper to work in csh
     my $cmd = "cat $tmpfile | $0 -j0 --timeout 5 -s 16000 --joblog - --plain --delay 0.1 --retries 3 --tag --tagstring {1} -0 --colsep '\t' -k eval {2} 2>/dev/null";
     ::debug("init", $cmd, "\n");
     my @out;
@@ -4502,6 +4503,7 @@ sub simultaneous_sshlogin {
     my $sshcmd = $self->sshcommand();
     my $serverlogin = $self->serverlogin();
     my $sshdelay = $opt::sshdelay ? "sleep $opt::sshdelay;" : "";
+    # TODO sh -c wrapper to work for csh
     my $cmd = "$sshdelay$sshcmd $serverlogin echo simultaneouslogin </dev/null 2>&1 &"x$wanted_processes;
     ::debug("init", "Trying $wanted_processes logins at $serverlogin\n");
     open (my $simul_fh, "-|", "($cmd)|grep simultaneouslogin | wc -l") or
@@ -4717,7 +4719,7 @@ sub no_of_cores {
 sub nproc {
     # Returns:
     #   Number of cores using `nproc`
-    my $no_of_cores = `nproc 2>/dev/null`;
+    my $no_of_cores = qx{ sh -c 'nproc 2>/dev/null' };
     return $no_of_cores;
 }
 
@@ -4792,6 +4794,7 @@ sub no_of_cpus_freebsd {
     # Returns:
     #   Number of physical CPUs on FreeBSD
     #   undef if not FreeBSD
+    # TODO sh -c wrapper to work in csh
     my $no_of_cpus =
 	(`sysctl -a dev.cpu 2>/dev/null | grep \%parent | awk '{ print \$2 }' | uniq | wc -l | awk '{ print \$1 }'`
 	 or
@@ -4804,6 +4807,7 @@ sub no_of_cores_freebsd {
     # Returns:
     #   Number of CPU cores on FreeBSD
     #   undef if not FreeBSD
+    # TODO sh -c wrapper to work in csh
     my $no_of_cores =
 	(`sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`
 	 or
@@ -4816,7 +4820,7 @@ sub no_of_cpus_netbsd {
     # Returns:
     #   Number of physical CPUs on NetBSD
     #   undef if not NetBSD
-    my $no_of_cpus = `sysctl -n hw.ncpu 2>/dev/null`;
+    my $no_of_cpus = qx{ sh -c 'sysctl -n hw.ncpu 2>/dev/null' };
     chomp $no_of_cpus;
     return $no_of_cpus;
 }
@@ -4825,7 +4829,7 @@ sub no_of_cores_netbsd {
     # Returns:
     #   Number of CPU cores on NetBSD
     #   undef if not NetBSD
-    my $no_of_cores = `sysctl -n hw.ncpu 2>/dev/null`;
+    my $no_of_cores = qx{ sh -c 'sysctl -n hw.ncpu 2>/dev/null' };
     chomp $no_of_cores;
     return $no_of_cores;
 }
@@ -4834,7 +4838,7 @@ sub no_of_cpus_openbsd {
     # Returns:
     #   Number of physical CPUs on OpenBSD
     #   undef if not OpenBSD
-    my $no_of_cpus = `sysctl -n hw.ncpu 2>/dev/null`;
+    my $no_of_cpus = qx{ sh -c 'sysctl -n hw.ncpu 2>/dev/null' };
     chomp $no_of_cpus;
     return $no_of_cpus;
 }
@@ -4843,7 +4847,7 @@ sub no_of_cores_openbsd {
     # Returns:
     #   Number of CPU cores on OpenBSD
     #   undef if not OpenBSD
-    my $no_of_cores = `sysctl -n hw.ncpu 2>/dev/null`;
+    my $no_of_cores = qx{ sh -c 'sysctl -n hw.ncpu 2>/dev/null' };
     chomp $no_of_cores;
     return $no_of_cores;
 }
@@ -4852,7 +4856,7 @@ sub no_of_cpus_hurd {
     # Returns:
     #   Number of physical CPUs on HURD
     #   undef if not HURD
-    my $no_of_cpus = `nproc`;
+    my $no_of_cpus = qx{ nproc };
     chomp $no_of_cpus;
     return $no_of_cpus;
 }
@@ -4870,6 +4874,7 @@ sub no_of_cpus_darwin {
     # Returns:
     #   Number of physical CPUs on Mac Darwin
     #   undef if not Mac Darwin
+    # TODO sh -c wrapper to work in csh
     my $no_of_cpus =
 	(`sysctl -n hw.physicalcpu 2>/dev/null`
 	 or
@@ -4881,6 +4886,7 @@ sub no_of_cores_darwin {
     # Returns:
     #   Number of CPU cores on Mac Darwin
     #   undef if not Mac Darwin
+    # TODO sh -c wrapper to work in csh
     my $no_of_cores =
 	(`sysctl -n hw.logicalcpu 2>/dev/null`
 	 or
@@ -4961,7 +4967,7 @@ sub no_of_cpus_hpux {
     #   Number of physical CPUs on HP-UX
     #   undef if not HP-UX
     my $no_of_cpus =
-        qx{/usr/bin/mpsched -s 2>&1 | grep 'Locality Domain Count' | awk '{ print \$4 }'};
+        qx{ sh -c '/usr/bin/mpsched -s 2>&1' | grep 'Locality Domain Count' | awk '{ print \$4 }'};
     return $no_of_cpus;
 }
 
@@ -4970,7 +4976,7 @@ sub no_of_cores_hpux {
     #   Number of CPU cores on HP-UX
     #   undef if not HP-UX
     my $no_of_cores =
-        qx{/usr/bin/mpsched -s 2>&1 | perl -ne '/Processor Count\\D+(\\d+)/ and print "\$1\n"'};
+        qx{ sh -c '/usr/bin/mpsched -s 2>&1' | perl -ne '/Processor Count\\D+(\\d+)/ and print "\$1\n"'};
     return $no_of_cores;
 }
 
@@ -5188,7 +5194,7 @@ sub cleanup_cmd {
 	$dir .= $_."/";
 	unshift @rmdir, ::shell_quote_file($dir);
     }
-    my $rmdir = @rmdir ? "rmdir @rmdir >&/dev/null;" : "";
+    my $rmdir = @rmdir ? "sh -c 'rmdir @rmdir 2>/dev/null';" : "";
     if(defined $opt::workdir and $opt::workdir eq "...") {
 	$rmdir .= "rm -rf " . ::shell_quote_file($workdir).';';
     }
@@ -6697,6 +6703,7 @@ sub print_dryrun_and_verbose {
 	    unlink $tmuxsocket;
 	    ::status("See output with: $ENV{'TMUX'} -S $tmuxsocket attach\n");
 	}
+	# TODO sh -c wrapper for >&
 	$tmux = $ENV{'TMUX'}." -S $tmuxsocket new-session -s p$$ -d 'sleep .2' >&/dev/null;" .
 	    $ENV{'TMUX'}." -S $tmuxsocket new-window -t p$$ -n $title";
 
@@ -8112,26 +8119,16 @@ sub tmux_length {
     my $len = shift;
     if($opt::tmux) {
 	$ENV{'TMUX'} ||= "tmux";
-	my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".tmb");
-	$Global::unlink{$tmpfile}=1;
-	close $fh;
-	unlink $tmpfile;
-	my $b2020 = "x"x2020;
-	my $b16320 = "x"x16320;
-	my $b100000 = "x"x100000;
-	my $blen = "x"x$len;
-	my @out = qx{
-            sleep .2;
-	    echo 1;
-	    $ENV{'TMUX'} -S $tmpfile new-session -d -n echo 2020$b2020 2>/dev/null && echo 2020;
-	    $ENV{'TMUX'} -S $tmpfile new-session -d -n echo 16320$b16320 2>/dev/null && echo 16320;
-	    $ENV{'TMUX'} -S $tmpfile new-session -d -n echo 100000$b100000 2>/dev/null && echo 100000;
-	},
-	# $len can be > 131072 which will confuse bash, so run it on its own
-	qx{
-	    $ENV{'TMUX'} -S $tmpfile new-session -d -n echo $len$blen 2>/dev/null && echo $len;
-	};
-	unlink $tmpfile;
+	my @out;
+	for my $l (1, 2020, 16320, 100000, $len) {
+	    my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".tmb");
+	    close $fh;
+	    $Global::unlink{$tmpfile} = 1;
+	    unlink $tmpfile;
+	    my $tmuxcmd = "sh -c '".$ENV{'TMUX'}." -S $tmpfile new-session -d -n echo $l".
+		("x"x$l). " 2>/dev/null' && echo $l";
+	    push @out, qx{ $tmuxcmd };
+	}
 	::debug("tmux","tmux-length ",@out);
 	chomp @out;
 	# The arguments is given 3 times on the command line

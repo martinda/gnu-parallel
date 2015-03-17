@@ -2,13 +2,19 @@ testsuite: 3
 	true
 
 3: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
-	TRIES=3 time sh Start.sh || true
+	TRIES=3 time sh Start.sh - mem || true
 	touch ~/.parallel/will-cite
 	date
 	make stopvm
 
 1: ../src/parallel tests-to-run/* wanted-results/* prereqlocal startdb prereqremote
-	time sh Start.sh || true
+	time sh Start.sh - mem || true
+	touch ~/.parallel/will-cite
+	date
+	make stopvm
+
+mem: ../src/parallel tests-to-run/*mem* wanted-results/*mem* startdb prereqlocal prereqremote
+	time sh Start.sh mem NONE || true
 	touch ~/.parallel/will-cite
 	date
 	make stopvm
@@ -49,9 +55,10 @@ startvm:
 	VBoxManage startvm RedHat9-root:redhat9 || VBoxManage controlvm RedHat9-root:redhat9 resume || true
 
 stopvm:
-	VBoxManage controlvm CentOS3-root:centos3 savestate
-	VBoxManage controlvm RedHat9-root:redhat9 savestate
-	VBoxManage controlvm OracleXE savestate
+	# || true - because this should not fail if the VM is not running
+	VBoxManage controlvm CentOS3-root:centos3 savestate || true
+	VBoxManage controlvm RedHat9-root:redhat9 savestate || true
+	VBoxManage controlvm OracleXE savestate || true
 
 installparallel: ../src/parallel
 	cd .. && make -j && sudo make -j install
