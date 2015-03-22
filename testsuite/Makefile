@@ -13,21 +13,21 @@ testsuite: 3
 	date
 	make stopvm
 
-mem: ../src/parallel tests-to-run/*mem* wanted-results/*mem* startdb prereqlocal prereqremote
+mem: ../src/parallel tests-to-run/*mem* wanted-results/*mem* prereqlocal
 	time sh Start.sh mem NONE || true
 	touch ~/.parallel/will-cite
 	date
 	make stopvm
 
 testdb: ../src/parallel tests-to-run/*sql* wanted-results/*sql* prereqdb
-	time sh Start.sh sql
+	time sh Start.sh sql NONE
 	date
 
 local:	testlocal
 	true
 
 testlocal: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal installparallel
-	time sh Start.sh local
+	time sh Start.sh local NONE
 	date
 
 prereqlocal: installparallel
@@ -97,3 +97,4 @@ timingbar:
 	mv vmstat.timestamp.1 vmstat.timestamp
 	mv make.timestamp.1 make.timestamp
 	sort vmstat.timestamp make.timestamp | perl -pe '/tests-to-run(\S+)/ and $$p=$$1; print "$$p "' | field 6,1,2 | perl -ne '/^\d+ / and print' | histogram -i vh
+

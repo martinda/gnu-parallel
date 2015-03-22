@@ -1,7 +1,8 @@
 make[1]: Entering directory `/home/tange/privat/parallel/testsuite'
-VBoxManage controlvm CentOS3-root:centos3 savestate
-VBoxManage controlvm RedHat9-root:redhat9 savestate
-VBoxManage controlvm OracleXE savestate
+# || true - because this should not fail if the VM is not running
+VBoxManage controlvm CentOS3-root:centos3 savestate || true
+VBoxManage controlvm RedHat9-root:redhat9 savestate || true
+VBoxManage controlvm OracleXE savestate || true
 make[1]: Leaving directory `/home/tange/privat/parallel/testsuite'
 echo '### Trouble reading a record > 2 GB for certain versions of Perl (substr($a,0,2G+1)="fails")'
 ### Trouble reading a record > 2 GB for certain versions of Perl (substr($a,0,2G+1)="fails")

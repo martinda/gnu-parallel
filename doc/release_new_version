@@ -33,7 +33,7 @@ make -j && sudo make install
 
 == Testsuite ==
 
-cd testsuite; make
+cd testsuite; make mem; make
 
 == Update NEWS ==
 
@@ -236,22 +236,52 @@ New in this release:
 
 * GNU Parallel was cited in: Evidence for DCO+ as a probe of ionization in the warm disk surface http://arxiv.org/pdf/1503.02659.pdf
 
+* GNU Parallel was cited in: De novo assembly and annotation of the Asian tiger mosquito (Aedes albopictus) repeatome with dnaPipeTE from raw genomic reads and comparative analysis with the yellow fever mosquito (Aedes aegypti) http://gbe.oxfordjournals.org/content/early/2015/03/11/gbe.evv050.full.pdf
+
+* GNU Parallel was cited in: A General Approach to Network Configuration Analysis http://research.microsoft.com/en-us/um/people/ratul/papers/nsdi2015-batfish.pdf
+
+* GNU Parallel was cited in: Scrimer: designing primers from transcriptome data http://onlinelibrary.wiley.com/doi/10.1111/1755-0998.12403/pdf
+
+* GNU Parallel was cited in: Efficient Retrieval of Key Material for Inspecting Potentially Malicious Traffic in the Cloud http://sacko.uk/pdf/2015.1.pdf
+
+
+* <<afventer opdatering>> CIDER: a pipeline for detecting waves of coordinated transcriptional regulation in gene expression time-course data http://biorxiv.org/content/biorxiv/early/2015/03/17/012518.full.pdf
+
+* <<afventer opdatering>> GNU Parallel was used (unfortunately without citation) in: MUGBAS: a species free gene-based programme suite for post-GWAS analysis http://www.ncbi.nlm.nih.gov/pubmed/25765345
+
+taxator-tk http://algbio.cs.uni-duesseldorf.de/webapps/wa-download/ (check it)
+
+* GNU Parallel will be presented at Strataconf: Poor Man's Parallel Pipelines http://strataconf.com/big-data-conference-uk-2015/public/schedule/detail/40031
+
 * GNU Parallel was used in: https://github.com/alexbyrnes/FCC-Political-Ads_The-Code
 
 * GNU Parallel was used in: https://github.com/martymac/fpart
 
+* GNU Parallel was used in: https://github.com/hoytak/diabetic-retinopathy-code
+
 * GNU Parallel was used in: https://github.com/mehmattski/HybSeqPipeline
 
-
-taxator-tk http://algbio.cs.uni-duesseldorf.de/webapps/wa-download/ (check it)
+* GNU Parallel was used in: http://search.cpan.org/~ajpage/Bio-Roary-2.0.0/lib/Bio/Roary/JobRunner/Parallel.pm
 
 * Using GNU Parallel on a Raspberry Pi cluster: http://www.dcglug.org.uk/cluster-progress/
+
+* An introduction to vector tiling and map reduce in postgis: http://dimensionaledge.com/intro-vector-tiling-map-reduce-postgis/
 
 * Running scripts in parallel with GNU Parallel: http://code.jasonbhill.com/2015/03/
 
 * Mahout: Parallelising the creation of DecisionTrees: http://www.markhneedham.com/blog/2012/12/27/mahout-parallelising-the-creation-of-decisiontrees/
 
+* High-Performance Scientific Computing: Running serial jobs in parallel https://support.scinet.utoronto.ca/education/staticpublic/course178/serial.pdf
+
+* Parallel cardinality on your laptop https://highonscience.wordpress.com/2015/03/15/parallel-cardinality-on-your-laptop/
+
+* Experiments about a better locate using grep http://a3nm.net/blog/better_locate.html
+
+* Homework with GNU Parallel: https://support.scinet.utoronto.ca/education/staticpublic/course178content349.html
+
 * Parallel - Jobs in Skripten parallelisieren: https://slzm.de/blog/linux-tool-des-tages-parallel-jobs-in-skripten-parallelisieren/#more-612
+
+* GNU Parallel, czyli 100% użycia procesora http://matmatyk.blogspot.dk/2015/03/gnu-parallel-czyli-100-uzycia-procesora.html
 
 * Bug fixes and man page updates.
 

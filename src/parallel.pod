@@ -1175,14 +1175,6 @@ Overrides an earlier B<--keep-order> (e.g. if set in
 B<~/.parallel/config>).
 
 
-=item B<--no-notice>
-
-Do not display citation notice. A citation notice is printed on stderr
-(standard error) only if stderr (standard error) is a terminal, the
-user has not specified B<--no-notice>, and the user has not run
-B<--bibtex> once.
-
-
 =item B<--nice> I<niceness>
 
 Run the command at this niceness. For simple commands you can just add

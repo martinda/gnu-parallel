@@ -74,4 +74,14 @@ cat /dev/zero >/mnt/ram/out;
   parallel --tmpdir /mnt/ram echo ::: OK; 
   rm /mnt/ram/out
 
+echo '**'
+
+echo '### bug #44546: If --compress-program fails: fail'
+  parallel --line-buffer --compress-program false echo \;ls ::: /no-existing; echo $?
+  parallel --tag --line-buffer --compress-program false echo \;ls ::: /no-existing; echo $?
+  (parallel --files --tag --line-buffer --compress-program false echo \;sleep 1\;ls ::: /no-existing; echo $?) | tail -n1
+  parallel --tag --compress-program false echo \;ls ::: /no-existing; echo $?
+  parallel --line-buffer --compress-program false echo \;ls ::: /no-existing; echo $?
+  parallel --compress-program false echo \;ls ::: /no-existing; echo $?
+
 EOF

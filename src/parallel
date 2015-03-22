@@ -1052,7 +1052,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150308;
+    $Global::version = 20150311;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3060,7 +3060,7 @@ sub citation_notice {
 	     "This helps funding further development; and it won't cost you a cent.\n",
 	     "If you pay 10000 EUR you should feel free to use GNU Parallel without citing.\n",
 	     "\n",
-	     "Silence the citation notice: run 'parallel --bibtex' once or use '--will-cite'.\n\n",
+	     "To silence the citation notice: run 'parallel --bibtex'.\n\n",
 	    );
     }
 }
@@ -3149,11 +3149,15 @@ sub bibtex {
 	my $input = <STDIN>;
 	if($input =~ /will cite/i) {
 	    mkdir $ENV{'HOME'}."/.parallel";
-	    open (my $fh, ">", $ENV{'HOME'}."/.parallel/will-cite")
-		|| ::die_bug("Cannot write: ".$ENV{'HOME'}."/.parallel/will-cite");
-	    close $fh;
-	    print "\nThank you for your support. It is much appreciated. The citation\n",
-	    "notice is now silenced.\n";
+	    if(open (my $fh, ">", $ENV{'HOME'}."/.parallel/will-cite")) {
+		close $fh;
+		print "\nThank you for your support. It is much appreciated. The citation\n",
+		"notice is now silenced. You may also use '--will-cite'.\n";
+	    } else {
+		print "\nThank you for your support. It is much appreciated. The citation\n",
+		"cannot permanently be disabled. Use --will-cite instead.\n";
+		last;
+	    }
 	}
     }
 }
@@ -3542,7 +3546,8 @@ sub tmpfile {
 	print $disk_full_fh $b8193;
 	if(not $disk_full_fh
 	   or
-	   tell $disk_full_fh == 0) {
+	   tell $disk_full_fh != 8193) {
+	    # On raspbian the disk can be full except for 10 chars.
 	    ::error("Output is incomplete. Cannot append to buffer file in $ENV{'TMPDIR'}. Is the disk full?\n");
 	    ::error("Change \$TMPDIR with --tmpdir or use --compress.\n");
 	    ::wait_and_exit(255);
@@ -4835,11 +4840,10 @@ sub no_of_cpus_freebsd {
     # Returns:
     #   Number of physical CPUs on FreeBSD
     #   undef if not FreeBSD
-    # TODO sh -c wrapper to work in csh
     my $no_of_cpus =
-	(`sysctl -a dev.cpu 2>/dev/null | grep \%parent | awk '{ print \$2 }' | uniq | wc -l | awk '{ print \$1 }'`
+	(qx{ sh -c 'sysctl -a dev.cpu 2>/dev/null' | grep \%parent | awk '{ print \$2 }' | uniq | wc -l | awk '{ print \$1 }' }
 	 or
-	 `sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`);
+	 qx{ sh -c 'sysctl hw.ncpu 2>/dev/null' | awk '{ print \$2 }' });
     chomp $no_of_cpus;
     return $no_of_cpus;
 }
@@ -4848,11 +4852,10 @@ sub no_of_cores_freebsd {
     # Returns:
     #   Number of CPU cores on FreeBSD
     #   undef if not FreeBSD
-    # TODO sh -c wrapper to work in csh
     my $no_of_cores =
-	(`sysctl hw.ncpu 2>/dev/null | awk '{ print \$2 }'`
+	(qx{ sh -c 'sysctl hw.ncpu 2>/dev/null' | awk '{ print \$2 }' }
 	 or
-	 `sysctl -a hw  2>/dev/null | grep [^a-z]logicalcpu[^a-z] | awk '{ print \$2 }'`);
+	 qx{ sh -c 'sysctl -a hw  2>/dev/null' | grep [^a-z]logicalcpu[^a-z] | awk '{ print \$2 }' });
     chomp $no_of_cores;
     return $no_of_cores;
 }
@@ -4915,11 +4918,10 @@ sub no_of_cpus_darwin {
     # Returns:
     #   Number of physical CPUs on Mac Darwin
     #   undef if not Mac Darwin
-    # TODO sh -c wrapper to work in csh
     my $no_of_cpus =
-	(`sysctl -n hw.physicalcpu 2>/dev/null`
+	(qx{ sh -c 'sysctl -n hw.physicalcpu 2>/dev/null' }
 	 or
-	 `sysctl -a hw 2>/dev/null | grep [^a-z]physicalcpu[^a-z] | awk '{ print \$2 }'`);
+	 qx{ sh -c 'sysctl -a hw 2>/dev/null' | grep [^a-z]physicalcpu[^a-z] | awk '{ print \$2 }' });
     return $no_of_cpus;
 }
 
@@ -4927,11 +4929,10 @@ sub no_of_cores_darwin {
     # Returns:
     #   Number of CPU cores on Mac Darwin
     #   undef if not Mac Darwin
-    # TODO sh -c wrapper to work in csh
     my $no_of_cores =
-	(`sysctl -n hw.logicalcpu 2>/dev/null`
+	(qx{ sh -c 'sysctl -n hw.logicalcpu 2>/dev/null' }
 	 or
-	 `sysctl -a hw  2>/dev/null | grep [^a-z]logicalcpu[^a-z] | awk '{ print \$2 }'`);
+	 qx{ sh -c 'sysctl -a hw  2>/dev/null' | grep [^a-z]logicalcpu[^a-z] | awk '{ print \$2 }' });
     return $no_of_cores;
 }
 
@@ -4946,7 +4947,7 @@ sub no_of_cpus_solaris {
         }
     }
     if(-x "/usr/sbin/prtconf") {
-        my @prtconf = `/usr/sbin/prtconf | grep cpu..instance`;
+        my @prtconf = qx{ /usr/sbin/prtconf | grep cpu..instance };
         if($#prtconf >= 0) {
             return $#prtconf +1;
         }
@@ -4965,7 +4966,7 @@ sub no_of_cores_solaris {
         }
     }
     if(-x "/usr/sbin/prtconf") {
-        my @prtconf = `/usr/sbin/prtconf | grep cpu..instance`;
+        my @prtconf = qx{ /usr/sbin/prtconf | grep cpu..instance };
         if($#prtconf >= 0) {
             return $#prtconf +1;
         }
@@ -6923,7 +6924,12 @@ sub files_print {
 
     # If --compress: $in_fh must be closed first.
     close $self->fh($fdno,"w");
+    if($? and $opt::compress) {
+	::error($opt::decompress_program." failed\n");
+	$self->set_exitstatus(255);
+    }
     close $in_fh;
+    # TODO if $?: die(?)
     if($opt::pipe and $self->virgin()) {
 	# Nothing was printed to this job:
 	# cleanup unused tmp files if --files was set
@@ -6945,6 +6951,10 @@ sub linebuffer_print {
     if(defined $self->{'exitstatus'}) {
 	# If the job is dead: close printing fh. Needed for --compress
 	close $self->fh($fdno,"w");
+	if($? and $opt::compress) {
+	    ::error($opt::decompress_program." failed\n");
+	    $self->set_exitstatus(255);
+	}
 	if($opt::compress) {
 	    # Blocked reading in final round
 	    $Global::use{"Fcntl"} ||= eval "use Fcntl qw(:DEFAULT :flock); 1;";
@@ -7011,6 +7021,7 @@ sub linebuffer_print {
 	} else {
 	    # decompress done: close fh
 	    close $in_fh;
+	    # TODO if $?: die(?)
 	}
     }
 }
@@ -7020,6 +7031,10 @@ sub tag_print {
     my ($fdno,$in_fh,$out_fd) = @_;
     my $buf;
     close $self->fh($fdno,"w");
+    if($? and $opt::compress) {
+	::error($opt::decompress_program." failed\n");
+	$self->set_exitstatus(255);
+    }
     seek $in_fh, 0, 0;
     # $in_fh is now ready for reading at position 0
     my $tag = $self->tag();
@@ -7053,6 +7068,10 @@ sub normal_print {
     my ($fdno,$in_fh,$out_fd) = @_;
     my $buf;
     close $self->fh($fdno,"w");
+    if($? and $opt::compress) {
+	::error($opt::decompress_program." failed\n");
+	$self->set_exitstatus(255);
+    }
     seek $in_fh, 0, 0;
     # $in_fh is now ready for reading at position 0
     if($fdno == 2) {
