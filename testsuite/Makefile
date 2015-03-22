@@ -97,4 +97,3 @@ timingbar:
 	mv vmstat.timestamp.1 vmstat.timestamp
 	mv make.timestamp.1 make.timestamp
 	sort vmstat.timestamp make.timestamp | perl -pe '/tests-to-run(\S+)/ and $$p=$$1; print "$$p "' | field 6,1,2 | perl -ne '/^\d+ / and print' | histogram -i vh
-
