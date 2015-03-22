@@ -6236,7 +6236,7 @@ sub sshlogin_wrap {
 
 	# running @bashfunc on the command line, will set the functions
 	my @bashfunc = map {
-	    my $v=$_; s/BASH_FUNC_(.*)(\(\)|%%)/$1/; "$_$ENV{$v};" } @bash_functions;
+	    my $v=$_; s/BASH_FUNC_(.*)(\(\)|%%)/$1/; "$_$ENV{$v};export -f $_ >/dev/null;" } @bash_functions;
 	# eval $bashfuncset will set $bashfunc
 	my $bashfuncset;
 	if(@bashfunc) {

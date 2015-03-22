@@ -1553,7 +1553,15 @@ the workdir, and setting --nice value. -vv shows all of this.
 
 Output:
 
-  ssh -tt -oLogLevel=quiet lo  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ bar;
+  ssh lo exec perl\ -e\ \\\$ENV\\\{\\\"PARALLEL_PID\\\"\\\}=\\\"2554030\\\"\\\;\
+  \\$ENV\\\{\\\"PARALLEL_SEQ\\\"\\\}=\\\"1\\\"\\\;\\\$bashfunc\\\ =\\\ \\\"\\\"\
+  \\;@ARGV=\\\"echo\\\ bar\\\"\\\;\\\$SIG\\\{CHLD\\\}=sub\\\{\\\$done=1\\\;\\\}\
+  \\;\\\$pid=fork\\\;unless\\\(\\\$pid\\\)\\\{setpgrp\\\;exec\\\$ENV\\\{SHELL\\\
+  },\\\"-c\\\",\\\(\\\$bashfunc.\\\"@ARGV\\\"\\\)\\\;die\\\"exec:\\\$\\\!\\\\n\\
+  \"\\\;\\\}do\\\{\\\$s=\\\$s\\\<1\\\?0.001+\\\$s\\\*1.03:\\\$s\\\;select\\\(
+  undef,undef,undef,\\\$s\\\)\\\;\\\}until\\\(\\\$done\\\|\\\|getppid==1\\\)\\\;
+  kill\\\(SIGHUP,-\\\$\\\{pid\\\}\\\)unless\\\$done\\\;wait\\\;exit\\\(\\\$\\\?\
+  \\&127\\\?128+\\\(\\\$\\\?\\\&127\\\):1+\\\$\\\?\\\>\\\>8\\\);
   bar
 
 When the command gets more complex, the output is so hard to read, that it is only useful for debugging:
@@ -1566,11 +1574,33 @@ When the command gets more complex, the output is so hard to read, that it is on
 
 Output will be similar to:
 
-  ssh server mkdir -p .parallel/tmp/hk-31483-1; rsync -rlDzR -essh ./abc-file server:.parallel/tmp/hk-31483-1;ssh -tt -oLogLevel=quiet server  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;mkdir\ -p\ .parallel/tmp/hk-31483-1\;\ cd\ .parallel/tmp/hk-31483-1\ \&\&\ echo\ \$SHELL\ \|\ grep\ \"/t\\\{0,1\\\}csh\"\ \>\ /dev/null\ \&\&\ setenv\ my_func3\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\\\ \\\>\\\ \\\$1.out\"'
-  '\"\\\}\ \&\&\ setenv\ VAR\ foo\ \&\&\ setenv\ my_func2\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
-  '\"\\\}\ \|\|\ export\ my_func3=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\\\ \\\>\\\ \\\$1.out\"'
-  '\"\\\}\ \&\&\ export\ VAR=foo\ \&\&\ export\ my_func2=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ eval\ my_func3\"\$my_func3\"\ \&\&\ eval\ my_func2\"\$my_func2\"\;\\nice\ -n17\ /bin/bash\ -c\ my_func3\\\ abc-file;_EXIT_status=$?; mkdir -p .; rsync --rsync-path=cd\ .parallel/tmp/hk-31483-1/.\;\ rsync -rlDzR -essh server:abc-file.out .;ssh server rm\ -f\ .parallel/tmp/hk-31483-1/abc-file\;rm\ -f\ .parallel/tmp/hk-31483-1/abc-file.out\;rm -rf .parallel/tmp/hk-31483-1\;; exit $_EXIT_status;
+  ( ssh lo mkdir -p ./.parallel/tmp/aspire-2554425-1;rsync --protocol 30 -rlDzR 
+  -essh ./abc-file lo:./.parallel/tmp/aspire-2554425-1 );ssh lo exec perl -e \''
+  @GNU_Parallel=("use","IPC::Open3;","use","MIME::Base64");eval"@GNU_Parallel";
+  $SIG{CHLD}="IGNORE";my$zip=(grep{-x$_}"/usr/local/bin/bzip2")[0]||"bzip2";my(
+  $in,$out,$eval);open3($in,$out,">&STDERR",$zip,"-dc");if(my$perlpid=fork){
+  close$in;$eval=join"",<$out>;close$out;}else{close$out;print$in(decode_base64(
+  join"",@ARGV));close$in;exit;}wait;eval$eval;'\' QlpoOTFBWSZTWayP388AAbdfgAAQd
+  X/+3//l/wS/7//vQAIq3U6bauIpk1NPUwnqGgND1NGI9TTQ0A0ADIDQNITU9NGqfonpPJRvU0ZQZAA
+  GhpoBoABpqaFNBMh+kGoybUaHogwCYBAADCSgRNqek1TxTeknqemhGyBqek8pk2jRPSeo002mQRo5f
+  oSZYrgzQFDd3HNWaskbx+MxNR89BdDzESFbADOJkI+QhIlnojHCWRVuGc2j2lzMzE41wC7auAMQ06c
+  S3AlqQfKcdo0gd506U0HzAAxMkGJBHjDCZULOMpVbowhIVxxaQz7yansTsBgurEZaGO/6K0Nc4iodr
+  BW4m9SXErqRbLNy5eANDvZ+TIt2c2GBcWSlmYuloxY5u2bGUdU/dGsO5EhyrvKCpZMhIgmQFAQhcwR
+  mD+jMKRawkRFJSGyTNC3PqWnE51ucPyx29Yxjnkyub98lytpyk+v8BUc4eA3xz98dMYjxvb0pgWksh
+  oHZ7HwGQRq1vuDyzKgkwPL9lwGIdL+WPNJFSljlVAahIhQpDCAOJpTqDhgmfoRQcy54PC9T0T3iMnV
+  JeTUdL8P0/s18NqDSUavMNV3qD0CtYi6entl0neNsOQN2VDSLHj0xOMls65LNPo+Wh28rJtVoh2JgE
+  7Q9Qo/XBr6krGIsYpQR6nRDuJCD/5aaQBBFFQGtv2VoFTwkXiUTxFP1CC4AGBznAaMklgWQvVtKguJ
+  zQnPqr9ABtHwbB5GTzPOQ4iWAmrUxvl4j5wqrVchOZcs3NYUQmGO2+VYBimFVxhGcaxDALMZ6bWEUo
+  yt8eC8W5o1ObFtTnHAvjOQgYEL/nHTcxU0G57QMKCzJcASQWFNpe2CpQcgYlBxIN4kwtfxdyRThQkK
+  yP388;_EXIT_status=$?; mkdir -p ./.; rsync --protocol 30 --rsync-path=cd\ 
+  ./.parallel/tmp/aspire-2554425-1/./.\;\ rsync -rlDzR -essh lo:./abc-file.out 
+  ./.;ssh lo \(rm\ -f\ ./.parallel/tmp/aspire-2554425-1/abc-file\;\ sh\ -c\ \'
+  rmdir\ ./.parallel/tmp/aspire-2554425-1/\ ./.parallel/tmp/\ ./.parallel/\ 2\>
+  /dev/null\'\;rm\ -rf\ ./.parallel/tmp/aspire-2554425-1\;\);ssh lo \(rm\ -f\ 
+  ./.parallel/tmp/aspire-2554425-1/abc-file.out\;\ sh\ -c\ \'rmdir\ ./.parallel
+  /tmp/aspire-2554425-1/\ ./.parallel/tmp/\ ./.parallel/\ 2\>/dev/null\'\;rm\ 
+  -rf\ ./.parallel/tmp/aspire-2554425-1\;\);ssh lo rm -rf .parallel/tmp/
+  aspire-2554425-1; exit $_EXIT_status;
 
 =head1 --pipe
 
@@ -2093,12 +2123,9 @@ a user by putting them in ~/.parallel/config.
 
 Profiles work the same way, but have to be referred to with --profile:
 
-  echo '-S :,'$SERVER1 > ~/.parallel/cluster
-  echo '--nice 17' >> ~/.parallel/cluster
-  echo '--filter-hosts' >> ~/.parallel/cluster
-  echo '--timeout 300%' >> ~/.parallel/cluster
-  echo '--env _' >> ~/.parallel/cluster
-  parallel --profile cluster echo ::: A B C
+  echo '--nice 17' > ~/.parallel/nicetimeout
+  echo '--timeout 300%' >> ~/.parallel/nicetimeout
+  parallel --profile nicetimeout echo ::: A B C
 
 Output:
 
@@ -2109,25 +2136,13 @@ Output:
 Profiles can be combined:
 
   echo '-vv --dry-run' > ~/.parallel/dryverbose
-  parallel --profile dryverbose --profile cluster echo ::: A B C
+  parallel --profile dryverbose --profile nicetimeout echo ::: A B C
 
 Output:
 
-  ssh -tt -oLogLevel=quiet lo  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$SHELL\ \|\ grep\ \"/t\\\{0,1\\\}csh\"\ \>\ /dev/null\ \&\&\ setenv\ SERVER1\ lo\ \&\&\ setenv\ MYVAR\ foo\\\ bar\ \&\&\ setenv\ VAR\ foo\ \&\&\ setenv\ my_func\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ setenv\ my_func2\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
-  '\"\\\}\ \|\|\ export\ SERVER1=lo\ \&\&\ export\ MYVAR=foo\\\ bar\ \&\&\ export\ VAR=foo\ \&\&\ export\ my_func=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ export\ my_func2=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ eval\ my_func\"\$my_func\"\ \&\&\ eval\ my_func2\"\$my_func2\"\;\\nice\ -n17\ /bin/bash\ -c\ echo\\\ A;
-  ssh -tt -oLogLevel=quiet lo  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$SHELL\ \|\ grep\ \"/t\\\{0,1\\\}csh\"\ \>\ /dev/null\ \&\&\ setenv\ SERVER1\ lo\ \&\&\ setenv\ MYVAR\ foo\\\ bar\ \&\&\ setenv\ VAR\ foo\ \&\&\ setenv\ my_func\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ setenv\ my_func2\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
-  '\"\\\}\ \|\|\ export\ SERVER1=lo\ \&\&\ export\ MYVAR=foo\\\ bar\ \&\&\ export\ VAR=foo\ \&\&\ export\ my_func=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ export\ my_func2=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ eval\ my_func\"\$my_func\"\ \&\&\ eval\ my_func2\"\$my_func2\"\;\\nice\ -n17\ /bin/bash\ -c\ echo\\\ B;
-  ssh -tt -oLogLevel=quiet lo  'eval `echo $SHELL | grep "/t\{0,1\}csh" > /dev/null  && echo setenv PARALLEL_SEQ '$PARALLEL_SEQ'\;  setenv PARALLEL_PID '$PARALLEL_PID'  || echo PARALLEL_SEQ='$PARALLEL_SEQ'\;export PARALLEL_SEQ\;  PARALLEL_PID='$PARALLEL_PID'\;export PARALLEL_PID` ;'  tty\ \>/dev/null\ \&\&\ stty\ isig\ -onlcr\ -echo\;echo\ \$SHELL\ \|\ grep\ \"/t\\\{0,1\\\}csh\"\ \>\ /dev/null\ \&\&\ setenv\ SERVER1\ lo\ \&\&\ setenv\ MYVAR\ foo\\\ bar\ \&\&\ setenv\ VAR\ foo\ \&\&\ setenv\ my_func\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ setenv\ my_func2\ \\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
-  '\"\\\}\ \|\|\ export\ SERVER1=lo\ \&\&\ export\ MYVAR=foo\\\ bar\ \&\&\ export\ VAR=foo\ \&\&\ export\ my_func=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ export\ my_func2=\\\(\\\)\\\ \\\{\\\ \\\ echo\\\ in\\\ my_func2\\\ \\\$VAR\\\ \\\$1\"'
-  '\"\\\}\ \&\&\ eval\ my_func\"\$my_func\"\ \&\&\ eval\ my_func2\"\$my_func2\"\;\\nice\ -n17\ /bin/bash\ -c\ echo\\\ C;
+  \nice -n17 /bin/bash -c echo\ A
+  \nice -n17 /bin/bash -c echo\ B
+  \nice -n17 /bin/bash -c echo\ C
 
 
 =head1 Spread the word
@@ -2184,7 +2199,7 @@ https://my.fsf.org/donate/
 
 =back
 
-(C) 2013,2014 Ole Tange, GPLv3
+(C) 2013,2014,2015 Ole Tange, GPLv3
 
 
 =cut

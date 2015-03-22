@@ -101,3 +101,7 @@ echo '### Uniq {=perlexpr=} in return - not used in command'
   cd /tmp;   rm -f /tmp/parallel_perlexpr.2Parallel_PerlexPr;   echo local > parallel_perlexpr;   parallel -Sparallel@lo --trc {=s/pr/pr.2/=}{=s/p/P/g=} echo remote OK '>' {}.2{=s/p/P/g=} ::: parallel_perlexpr;   cat /tmp/parallel_perlexpr.2Parallel_PerlexPr;   rm -f /tmp/parallel_perlexpr.2Parallel_PerlexPr /tmp/parallel_perlexpr
 remote OK
 #  Should be changed to --return '{=s:/f:/g:=}' and tested with csh - is error code kept?
+echo '### functions and --nice'
+### functions and --nice
+  myfunc() { echo OK $*; }; export -f myfunc; parallel --nice 10 --env myfunc -S parallel@lo myfunc ::: func
+OK func

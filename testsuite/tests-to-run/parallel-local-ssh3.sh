@@ -61,4 +61,7 @@ echo '### Uniq {=perlexpr=} in return - not used in command'
 
 #  Should be changed to --return '{=s:/f:/g:=}' and tested with csh - is error code kept?
 
+echo '### functions and --nice'
+  myfunc() { echo OK $*; }; export -f myfunc; parallel --nice 10 --env myfunc -S parallel@lo myfunc ::: func
+
 EOF
