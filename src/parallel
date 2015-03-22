@@ -1052,7 +1052,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150322;
+    $Global::version = 20150323;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3524,6 +3524,7 @@ sub tmpfile {
 	#   N/A
 	if(not $disk_full_fh) {
 	    ($disk_full_fh, $name) = ::tmpfile(SUFFIX => ".df");
+	    # Separate unlink due to NFS dealing badly with File::Temp
 	    unlink $name;
 	    $b8193 = "x"x8193;
 	}
@@ -3787,14 +3788,7 @@ sub memfree {
     # Returns:
     #   $memfree in bytes
     my $self = shift;
-    if(not $self->{'memfree'}) {
-	$self->memfree_recompute();
-    }
-#    if(time - $self->{'last_memfree'} >= 1) {
-	# More than 10 seconds old: Recompute
-	$self->{'last_memfree'} = time;
-	$self->memfree_recompute();
-#    }
+    $self->memfree_recompute();
     return (not defined $self->{'memfree'} or $self->{'memfree'})
 }
 
@@ -5640,7 +5634,7 @@ sub max_file_name_length {
 	rmdir($testdir."/".$dir);
 	$len *= 16;
 	$dir = "x"x$len;
-    } while (mkdir $testdir."/".$dir);
+    } while ($len < $upper and mkdir $testdir."/".$dir);
     # Then search for the actual max length between $len/16 and $len
     my $min = $len/16;
     my $max = $len;

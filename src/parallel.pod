@@ -488,7 +488,7 @@ I<regexp> is a Perl Regular Expression:
 http://perldoc.perl.org/perlre.html
 
 
-=item B<--compress> (alpha testing)
+=item B<--compress> (beta testing)
 
 Compress temporary files. If the output is big and very compressible
 this will take up less disk space in $TMPDIR and possibly be faster
@@ -499,9 +499,9 @@ B<plzip>, B<bzip2>, B<lzma>, B<lzip>, B<xz> in that order, and use the
 first available.
 
 
-=item B<--compress-program> I<prg> (alpha testing)
+=item B<--compress-program> I<prg> (beta testing)
 
-=item B<--decompress-program> I<prg> (alpha testing)
+=item B<--decompress-program> I<prg> (beta testing)
 
 Use I<prg> for (de)compressing temporary files. It is assumed that I<prg
 -dc> will decompress stdin (standard input) to stdout (standard
@@ -514,9 +514,9 @@ If receiving SIGNING, GNU B<parallel> will send SIGINT to tasks
 running on remote computers thus killing them.
 
 
-=item B<--delimiter> I<delim> (alpha testing)
+=item B<--delimiter> I<delim> (beta testing)
 
-=item B<-d> I<delim> (alpha testing)
+=item B<-d> I<delim> (beta testing)
 
 Input items are terminated by I<delim>.  Quotes and backslash are not
 special; every character in the input is taken literally.  Disables
@@ -780,7 +780,7 @@ specified, and for B<-I>{} otherwise.  This option is deprecated;
 use B<-I> instead.
 
 
-=item B<--joblog> I<logfile> (alpha testing)
+=item B<--joblog> I<logfile> (beta testing)
 
 Logfile for executed jobs. Save a list of the executed jobs to
 I<logfile> in the following TAB separated format: sequence number,
@@ -1037,9 +1037,9 @@ of each job is saved in a file and the filename is then printed.
 
 See also: B<--results>
 
-=item B<--pipe> (alpha testing)
+=item B<--pipe> (beta testing)
 
-=item B<--spreadstdin> (alpha testing)
+=item B<--spreadstdin> (beta testing)
 
 Spread input to jobs on stdin (standard input). Read a block of data
 from stdin (standard input) and give one block of data as input to one
@@ -1160,13 +1160,13 @@ exit (used by GNU B<parallel> itself to determine the line length
 on remote computers).
 
 
-=item B<--number-of-cpus> (alpha testing)
+=item B<--number-of-cpus> (beta testing)
 
 Print the number of physical CPUs and exit (used by GNU B<parallel>
 itself to determine the number of physical CPUs on remote computers).
 
 
-=item B<--number-of-cores> (alpha testing)
+=item B<--number-of-cores> (beta testing)
 
 Print the number of CPU cores and exit (used by GNU B<parallel> itself
 to determine the number of CPU cores on remote computers).
@@ -1178,7 +1178,7 @@ Overrides an earlier B<--keep-order> (e.g. if set in
 B<~/.parallel/config>).
 
 
-=item B<--nice> I<niceness> (alpha testing)
+=item B<--nice> I<niceness> (beta testing)
 
 Run the command at this niceness. For simple commands you can just add
 B<nice> in front of the command. But if the command consists of more
@@ -1387,7 +1387,7 @@ useful if some jobs fail for no apparent reason (such as network
 failure).
 
 
-=item B<--return> I<filename> (beta testing)
+=item B<--return> I<filename>
 
 Transfer files from remote computers. B<--return> is used with
 B<--sshlogin> when the arguments are files on the remote computers. When
@@ -1435,7 +1435,7 @@ B<--keep-order> will not work with B<--round-robin> as it is
 impossible to track which input block corresponds to which output.
 
 
-=item B<--rpl> 'I<tag> I<perl expression>' (alpha testing)
+=item B<--rpl> 'I<tag> I<perl expression>' (beta testing)
 
 Use I<tag> as a replacement string for I<perl expression>. This makes
 it possible to define your own replacement strings. GNU B<parallel>'s
@@ -1763,7 +1763,7 @@ the lines will be prepended with the sshlogin instead.
 B<--tag> is ignored when using B<-u>.
 
 
-=item B<--tagstring> I<str> (alpha testing)
+=item B<--tagstring> I<str> (beta testing)
 
 Tag lines with a string. Each output line will be prepended with
 I<str> and TAB (\t). I<str> can contain replacement strings such as
@@ -1780,7 +1780,7 @@ different dir for the files. Setting B<--tmpdir> is equivalent to
 setting $TMPDIR.
 
 
-=item B<--tmux> (alpha testing)
+=item B<--tmux> (beta testing)
 
 Use B<tmux> for output. Start a B<tmux> session and run each job in a
 window in that session. No other output will be produced.
