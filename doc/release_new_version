@@ -244,13 +244,6 @@ New in this release:
 
 * GNU Parallel was cited in: Efficient Retrieval of Key Material for Inspecting Potentially Malicious Traffic in the Cloud http://sacko.uk/pdf/2015.1.pdf
 
-
-* <<afventer opdatering>> CIDER: a pipeline for detecting waves of coordinated transcriptional regulation in gene expression time-course data http://biorxiv.org/content/biorxiv/early/2015/03/17/012518.full.pdf
-
-* <<afventer opdatering>> GNU Parallel was used (unfortunately without citation) in: MUGBAS: a species free gene-based programme suite for post-GWAS analysis http://www.ncbi.nlm.nih.gov/pubmed/25765345
-
-taxator-tk http://algbio.cs.uni-duesseldorf.de/webapps/wa-download/ (check it)
-
 * GNU Parallel will be presented at Strataconf: Poor Man's Parallel Pipelines http://strataconf.com/big-data-conference-uk-2015/public/schedule/detail/40031
 
 * GNU Parallel was used in: https://github.com/alexbyrnes/FCC-Political-Ads_The-Code

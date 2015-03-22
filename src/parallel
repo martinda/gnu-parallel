@@ -1052,7 +1052,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150311;
+    $Global::version = 20150322;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -6021,7 +6021,7 @@ sub wrapped {
 		    ::shell_quote_scalar($command);
 	    } else {
 		# Remote systems use $SHELL
-		$command = '\nice'. " -n". $opt::nice. 
+		$command = '\nice'. " -n". $opt::nice.
 		    ' $SHELL -c '.
 		    ::shell_quote_scalar($command);
 	    }
