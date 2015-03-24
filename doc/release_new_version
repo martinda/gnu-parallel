@@ -136,12 +136,13 @@ pushd
 git diff
 
 # Recheck OBS https://build.opensuse.org/package/show?package=parallel&project=home%3Atange
+
+YYYYMMDD=`yyyymmdd`
+TAG=MyTag
+echo "Released as $YYYYMMDD ('$TAG')."
+
 git commit -a
 
-Released as 20150x22 ('').
-
-TAG=MyTag
-YYYYMMDD=`yyyymmdd`
 git tag -s -m "Released as $YYYYMMDD ('$TAG')" $TAG
 git tag -s -m "Released as $YYYYMMDD ('$TAG')" $YYYYMMDD
 
@@ -218,11 +219,19 @@ Haiku of the month:
 
 New in this release:
 
+* GNU Parallel was cited in: Bayesian inference of protein structure from chemical shift data https://peerj.com/articles/861/
+
 * <<afventer opdatering>> CIDER: a pipeline for detecting waves of coordinated transcriptional regulation in gene expression time-course data http://biorxiv.org/content/biorxiv/early/2015/03/17/012518.full.pdf
 
 * <<afventer opdatering>> GNU Parallel was used (unfortunately without citation) in: MUGBAS: a species free gene-based programme suite for post-GWAS analysis http://www.ncbi.nlm.nih.gov/pubmed/25765345
 
 taxator-tk http://algbio.cs.uni-duesseldorf.de/webapps/wa-download/ (check it)
+
+* GNU Parallel was used in: landsat-gifworks https://github.com/KAPPS-/landsat-gifworks
+
+* GNU Parallel (Sebuah Uji Coba) http://kaka.prakasa.my.id/2014/09/04/gnu-parallel-sebuah-uji-coba/
+
+* Bug fixes and man page updates.
 
 GNU Parallel - For people who live life in the parallel lane.
 

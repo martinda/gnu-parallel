@@ -84,4 +84,10 @@ echo '### bug #44546: If --compress-program fails: fail'
   parallel --line-buffer --compress-program false echo \;ls ::: /no-existing; echo $?
   parallel --compress-program false echo \;ls ::: /no-existing; echo $?
 
+echo '### bug #44614: --pipepart --header off by one'
+  seq 10 >/tmp/parallel_44616; 
+    parallel --pipepart -a /tmp/parallel_44616 -k --block 5 'echo foo; cat'; 
+    parallel --pipepart -a /tmp/parallel_44616 -k --block 2 --regexp --recend 3'\n' 'echo foo; cat'; 
+    rm /tmp/parallel_44616
+
 EOF

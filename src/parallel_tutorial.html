@@ -81,6 +81,7 @@
       <li><a href="#Records">Records</a></li>
       <li><a href="#Record-separators">Record separators</a></li>
       <li><a href="#Header">Header</a></li>
+      <li><a href="#pipepart">--pipepart</a></li>
     </ul>
   </li>
   <li><a href="#Shebang">Shebang</a>
@@ -1827,6 +1828,18 @@
 <pre><code>  cat num_%header | parallel --header 2 --pipe -N3 echo JOB{#}\;cat</code></pre>
 
 <p>Output: Same as above.</p>
+
+<h2 id="pipepart">--pipepart</h2>
+
+<p>--pipe is not very efficient. It maxes out at around 500 MB/s. --pipepart can easily deliver 5 GB/s. But there are a few limitations. The input has to be a normal file (not a pipe) given by -a or :::: and -L/-l/-N do not work.</p>
+
+<pre><code>  parallel --pipepart -a num1000000 --block 3m wc</code></pre>
+
+<p>Output (the order may be different):</p>
+
+<pre><code> 444443  444444 3000002
+ 428572  428572 3000004
+ 126985  126984  888890</code></pre>
 
 <h1 id="Shebang">Shebang</h1>
 

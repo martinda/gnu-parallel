@@ -1832,6 +1832,22 @@ If the header is 2 lines, --header 2 will work:
 
 Output: Same as above.
 
+=head2 --pipepart
+
+--pipe is not very efficient. It maxes out at around 500
+MB/s. --pipepart can easily deliver 5 GB/s. But there are a few
+limitations. The input has to be a normal file (not a pipe) given by
+-a or :::: and -L/-l/-N do not work.
+
+  parallel --pipepart -a num1000000 --block 3m wc
+
+Output (the order may be different):
+
+ 444443  444444 3000002
+ 428572  428572 3000004
+ 126985  126984  888890
+
+
 =head1 Shebang
 
 =head2 Input data and parallel command in the same file

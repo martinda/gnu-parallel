@@ -128,3 +128,32 @@ parallel: Error: false -dc failed
 1
 parallel: Error: false -dc failed
 parallel: Error: false -dc failed
+echo '### bug #44614: --pipepart --header off by one'
+### bug #44614: --pipepart --header off by one
+  seq 10 >/tmp/parallel_44616;     parallel --pipepart -a /tmp/parallel_44616 -k --block 5 'echo foo; cat';     parallel --pipepart -a /tmp/parallel_44616 -k --block 2 --regexp --recend 3'\n' 'echo foo; cat';     rm /tmp/parallel_44616
+foo
+1
+2
+3
+foo
+4
+5
+6
+foo
+7
+8
+9
+foo
+10
+foo
+1
+2
+3
+foo
+4
+5
+6
+7
+8
+9
+10
