@@ -4081,6 +4081,9 @@ sub loadavg_too_high {
 	    # aix => "ps -ae -o state,command" # state wrong
 	    # bsd => "ps ax -o state,command"
 	    # sysv => "ps -ef -o s -o comm"
+	    # cygwin => perl -ne 'close STDERR; /Name/ and print"\n"; \
+	    #    /(Name|Pid|Ppid|State):\s+(\S+)/ and print "$2\t";' /proc/*/status |
+	    #    awk '{print $2,$1}'
 	    # dec_osf => bsd
 	    # dragonfly => bsd
 	    # freebsd => bsd
@@ -4101,10 +4104,13 @@ sub loadavg_too_high {
 		$sysv2="ps -ef -o state -o comm";
 		$bsd="ps ax -o state,command";
 		$psel="ps -el|awk '{ print \$2,\$14,\$15 }'";
+		$cygwin=q{ perl -ne 'close STDERR; /Name/ and print"\n";
+                    /(Name|Pid|Ppid|State):\s+(\S+)/ and print "$2\t";' /proc/*/status |
+                    awk '{print $2,$1}' };
 		$dummy="echo S COMMAND;echo R dummy";
 		%ps=(
 		    'aix' => "uptime",
-		    'cygwin' => $sysv,
+		    'cygwin' => $cygwin,
 		    'darwin' => $bsd,
 		    'dec_osf' => $sysv2,
 		    'dragonfly' => $bsd,

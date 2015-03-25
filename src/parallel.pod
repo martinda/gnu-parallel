@@ -4090,6 +4090,14 @@ completely for certain jobs (and may even be considered less readable):
 
   map -p 4 'echo -n % 2>&1 | sed -e "s/^/$$:/"' 1 2 3 | sort | cut -f2- -d:
 
+B<map>s replacement strings (% %D %B %E) can be simulated in GNU
+B<parallel> by putting this in B<~/.parallel/config>:
+
+  --rpl '%'
+  --rpl '%D $_=::shell_quote(::dirname($_));'
+  --rpl '%B s:.*/::;s:\.[^/.]+$::;'
+  --rpl '%E s:.*\.::'
+
 B<map> cannot handle bundled options: B<map -vp 0 echo this fails>
 
 B<map> does not have an argument separator on the command line, but

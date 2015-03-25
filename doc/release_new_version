@@ -219,6 +219,8 @@ Haiku of the month:
 
 New in this release:
 
+* GNU Parallel now has a DOI: https://dx.doi.org/10.5281/zenodo.16303
+
 * GNU Parallel was cited in: Bayesian inference of protein structure from chemical shift data https://peerj.com/articles/861/
 
 * <<afventer opdatering>> CIDER: a pipeline for detecting waves of coordinated transcriptional regulation in gene expression time-course data http://biorxiv.org/content/biorxiv/early/2015/03/17/012518.full.pdf
