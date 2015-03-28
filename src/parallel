@@ -3190,6 +3190,14 @@ sub show_limits {
 
 sub __GENERIC_COMMON_FUNCTION__ {}
 
+sub tmpfile {
+    # Create tempfile as $TMPDIR/parXXXXX
+    # Returns:
+    #   $filehandle = opened file handle
+    #   $filename = file name created
+    return ::tempfile(DIR=>$ENV{'TMPDIR'}, TEMPLATE => 'parXXXXX', @_);
+}
+
 sub uniq {
     # Remove duplicates and return unique values
     return keys %{{ map { $_ => 1 } @_ }};
@@ -3241,6 +3249,99 @@ sub undef_as_zero {
 sub undef_as_empty {
     my $a = shift;
     return $a ? $a : "";
+}
+
+sub multiply_binary_prefix {
+    # Evalualte numbers with binary prefix
+    # Ki=2^10, Mi=2^20, Gi=2^30, Ti=2^40, Pi=2^50, Ei=2^70, Zi=2^80, Yi=2^80
+    # ki=2^10, mi=2^20, gi=2^30, ti=2^40, pi=2^50, ei=2^70, zi=2^80, yi=2^80
+    # K =2^10, M =2^20, G =2^30, T =2^40, P =2^50, E =2^70, Z =2^80, Y =2^80
+    # k =10^3, m =10^6, g =10^9, t=10^12, p=10^15, e=10^18, z=10^21, y=10^24
+    # 13G = 13*1024*1024*1024 = 13958643712
+    # Input:
+    #   $s = string with prefixes
+    # Returns:
+    #   $value = int with prefixes multiplied
+    my $s = shift;
+    if(not $s) {
+	return $s;
+    }
+    $s =~ s/ki/*1024/gi;
+    $s =~ s/mi/*1024*1024/gi;
+    $s =~ s/gi/*1024*1024*1024/gi;
+    $s =~ s/ti/*1024*1024*1024*1024/gi;
+    $s =~ s/pi/*1024*1024*1024*1024*1024/gi;
+    $s =~ s/ei/*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/zi/*1024*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/yi/*1024*1024*1024*1024*1024*1024*1024*1024/gi;
+    $s =~ s/xi/*1024*1024*1024*1024*1024*1024*1024*1024*1024/gi;
+
+    $s =~ s/K/*1024/g;
+    $s =~ s/M/*1024*1024/g;
+    $s =~ s/G/*1024*1024*1024/g;
+    $s =~ s/T/*1024*1024*1024*1024/g;
+    $s =~ s/P/*1024*1024*1024*1024*1024/g;
+    $s =~ s/E/*1024*1024*1024*1024*1024*1024/g;
+    $s =~ s/Z/*1024*1024*1024*1024*1024*1024*1024/g;
+    $s =~ s/Y/*1024*1024*1024*1024*1024*1024*1024*1024/g;
+    $s =~ s/X/*1024*1024*1024*1024*1024*1024*1024*1024*1024/g;
+
+    $s =~ s/k/*1000/g;
+    $s =~ s/m/*1000*1000/g;
+    $s =~ s/g/*1000*1000*1000/g;
+    $s =~ s/t/*1000*1000*1000*1000/g;
+    $s =~ s/p/*1000*1000*1000*1000*1000/g;
+    $s =~ s/e/*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/z/*1000*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/y/*1000*1000*1000*1000*1000*1000*1000*1000/g;
+    $s =~ s/x/*1000*1000*1000*1000*1000*1000*1000*1000*1000/g;
+
+    $s = eval $s;
+    ::debug($s);
+    return $s;
+}
+
+{
+    my ($disk_full_fh, $b8193, $name);
+    sub exit_if_disk_full {
+	# Checks if $TMPDIR is full by writing 8kb to a tmpfile
+	# If the disk is full: Exit immediately.
+	# Returns:
+	#   N/A
+	if(not $disk_full_fh) {
+	    ($disk_full_fh, $name) = ::tmpfile(SUFFIX => ".df");
+	    # Separate unlink due to NFS dealing badly with File::Temp
+	    unlink $name;
+	    $b8193 = "x"x8193;
+	}
+	# Linux does not discover if a disk is full if writing <= 8192
+	# Tested on:
+	# bfs btrfs cramfs ext2 ext3 ext4 ext4dev jffs2 jfs minix msdos
+	# ntfs reiserfs tmpfs ubifs vfat xfs
+	# TODO this should be tested on different OS similar to this:
+	#
+	# doit() {
+	#   sudo mount /dev/ram0 /mnt/loop; sudo chmod 1777 /mnt/loop
+	#   seq 100000 | parallel --tmpdir /mnt/loop/ true &
+	#   seq 6900000 > /mnt/loop/i && echo seq OK
+	#   seq 6980868 > /mnt/loop/i
+	#   seq 10000 > /mnt/loop/ii
+	#   sleep 3
+	#   sudo umount /mnt/loop/ || sudo umount -l /mnt/loop/
+	#   echo >&2
+	# }
+	print $disk_full_fh $b8193;
+	if(not $disk_full_fh
+	   or
+	   tell $disk_full_fh != 8193) {
+	    # On raspbian the disk can be full except for 10 chars.
+	    ::error("Output is incomplete. Cannot append to buffer file in $ENV{'TMPDIR'}. Is the disk full?\n");
+	    ::error("Change \$TMPDIR with --tmpdir or use --compress.\n");
+	    ::wait_and_exit(255);
+	}
+	truncate $disk_full_fh, 0;
+	seek($disk_full_fh, 0, 0) || die;
+    }
 }
 
 sub spacefree {
@@ -3376,13 +3477,47 @@ sub which {
 	my $p=$$;
 	for (@pidtable) {
 	    # must match: 24436 21224 busybox ash
-	    /(\S+)\s+(\S+)\s+(\S+.*)/ or ::die_bug("pidtable format: $_");
-	    $parent_of{$1} = $2;
-	    push @{$children_of{$2}}, $1;
-	    $name_of{$1} = $3;
+	    # must match: 24436 21224 <<empty on MacOSX running cubase>>
+	    #   or: perl -e 'while($0=" "){}'
+	    if(/^\s*(\S+)\s+(\S+)\s+(\S+.*)/
+	       or
+	       $^O eq "darwin" and /^\s*(\S+)\s+(\S+)\s+()$/) {
+		$parent_of{$1} = $2;
+		push @{$children_of{$2}}, $1;
+		$name_of{$1} = $3;
+	    } else {
+		::die_bug("pidtable format: $_");
+	    }
 	}
 	return(\%children_of, \%parent_of, \%name_of);
     }
+}
+
+sub now {
+    # Returns time since epoch as in seconds with 3 decimals
+    # Uses:
+    #   @Global::use
+    # Returns:
+    #   $time = time now with millisecond accuracy
+    if(not $Global::use{"Time::HiRes"}) {
+	if(eval "use Time::HiRes qw ( time );") {
+	    eval "sub TimeHiRestime { return Time::HiRes::time };";
+	} else {
+	    eval "sub TimeHiRestime { return time() };";
+	}
+	$Global::use{"Time::HiRes"} = 1;
+    }
+
+    return (int(TimeHiRestime()*1000))/1000;
+}
+
+sub usleep {
+    # Sleep this many milliseconds.
+    # Input:
+    #   $ms = milliseconds to sleep
+    my $ms = shift;
+    ::debug(int($ms),"ms ");
+    select(undef, undef, undef, $ms/1000);
 }
 
 sub reap_usleep {
@@ -3417,33 +3552,6 @@ sub reap_usleep {
     }
 }
 
-sub usleep {
-    # Sleep this many milliseconds.
-    # Input:
-    #   $ms = milliseconds to sleep
-    my $ms = shift;
-    ::debug(int($ms),"ms ");
-    select(undef, undef, undef, $ms/1000);
-}
-
-sub now {
-    # Returns time since epoch as in seconds with 3 decimals
-    # Uses:
-    #   @Global::use
-    # Returns:
-    #   $time = time now with millisecond accuracy
-    if(not $Global::use{"Time::HiRes"}) {
-	if(eval "use Time::HiRes qw ( time );") {
-	    eval "sub TimeHiRestime { return Time::HiRes::time };";
-	} else {
-	    eval "sub TimeHiRestime { return time() };";
-	}
-	$Global::use{"Time::HiRes"} = 1;
-    }
-
-    return (int(TimeHiRestime()*1000))/1000;
-}
-
 sub kill_youngster_if_not_enough_mem {
     # Check each $sshlogin if there is enough mem.
     # If less than 50% enough free mem: kill off the youngest child
@@ -3473,106 +3581,6 @@ sub kill_youngster_if_not_enough_mem {
     }
 }
 
-sub multiply_binary_prefix {
-    # Evalualte numbers with binary prefix
-    # Ki=2^10, Mi=2^20, Gi=2^30, Ti=2^40, Pi=2^50, Ei=2^70, Zi=2^80, Yi=2^80
-    # ki=2^10, mi=2^20, gi=2^30, ti=2^40, pi=2^50, ei=2^70, zi=2^80, yi=2^80
-    # K =2^10, M =2^20, G =2^30, T =2^40, P =2^50, E =2^70, Z =2^80, Y =2^80
-    # k =10^3, m =10^6, g =10^9, t=10^12, p=10^15, e=10^18, z=10^21, y=10^24
-    # 13G = 13*1024*1024*1024 = 13958643712
-    # Input:
-    #   $s = string with prefixes
-    # Returns:
-    #   $value = int with prefixes multiplied
-    my $s = shift;
-    if(not $s) {
-	return $s;
-    }
-    $s =~ s/ki/*1024/gi;
-    $s =~ s/mi/*1024*1024/gi;
-    $s =~ s/gi/*1024*1024*1024/gi;
-    $s =~ s/ti/*1024*1024*1024*1024/gi;
-    $s =~ s/pi/*1024*1024*1024*1024*1024/gi;
-    $s =~ s/ei/*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/zi/*1024*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/yi/*1024*1024*1024*1024*1024*1024*1024*1024/gi;
-    $s =~ s/xi/*1024*1024*1024*1024*1024*1024*1024*1024*1024/gi;
-
-    $s =~ s/K/*1024/g;
-    $s =~ s/M/*1024*1024/g;
-    $s =~ s/G/*1024*1024*1024/g;
-    $s =~ s/T/*1024*1024*1024*1024/g;
-    $s =~ s/P/*1024*1024*1024*1024*1024/g;
-    $s =~ s/E/*1024*1024*1024*1024*1024*1024/g;
-    $s =~ s/Z/*1024*1024*1024*1024*1024*1024*1024/g;
-    $s =~ s/Y/*1024*1024*1024*1024*1024*1024*1024*1024/g;
-    $s =~ s/X/*1024*1024*1024*1024*1024*1024*1024*1024*1024/g;
-
-    $s =~ s/k/*1000/g;
-    $s =~ s/m/*1000*1000/g;
-    $s =~ s/g/*1000*1000*1000/g;
-    $s =~ s/t/*1000*1000*1000*1000/g;
-    $s =~ s/p/*1000*1000*1000*1000*1000/g;
-    $s =~ s/e/*1000*1000*1000*1000*1000*1000/g;
-    $s =~ s/z/*1000*1000*1000*1000*1000*1000*1000/g;
-    $s =~ s/y/*1000*1000*1000*1000*1000*1000*1000*1000/g;
-    $s =~ s/x/*1000*1000*1000*1000*1000*1000*1000*1000*1000/g;
-
-    $s = eval $s;
-    ::debug($s);
-    return $s;
-}
-
-sub tmpfile {
-    # Create tempfile as $TMPDIR/parXXXXX
-    # Returns:
-    #   $filehandle = opened file handle
-    #   $filename = file name created
-    return ::tempfile(DIR=>$ENV{'TMPDIR'}, TEMPLATE => 'parXXXXX', @_);
-}
-
-{
-    my ($disk_full_fh, $b8193, $name);
-    sub exit_if_disk_full {
-	# Checks if $TMPDIR is full by writing 8kb to a tmpfile
-	# If the disk is full: Exit immediately.
-	# Returns:
-	#   N/A
-	if(not $disk_full_fh) {
-	    ($disk_full_fh, $name) = ::tmpfile(SUFFIX => ".df");
-	    # Separate unlink due to NFS dealing badly with File::Temp
-	    unlink $name;
-	    $b8193 = "x"x8193;
-	}
-	# Linux does not discover if a disk is full if writing <= 8192
-	# Tested on:
-	# bfs btrfs cramfs ext2 ext3 ext4 ext4dev jffs2 jfs minix msdos
-	# ntfs reiserfs tmpfs ubifs vfat xfs
-	# TODO this should be tested on different OS similar to this:
-	#
-	# doit() {
-	#   sudo mount /dev/ram0 /mnt/loop; sudo chmod 1777 /mnt/loop
-	#   seq 100000 | parallel --tmpdir /mnt/loop/ true &
-	#   seq 6900000 > /mnt/loop/i && echo seq OK
-	#   seq 6980868 > /mnt/loop/i
-	#   seq 10000 > /mnt/loop/ii
-	#   sleep 3
-	#   sudo umount /mnt/loop/ || sudo umount -l /mnt/loop/
-	#   echo >&2
-	# }
-	print $disk_full_fh $b8193;
-	if(not $disk_full_fh
-	   or
-	   tell $disk_full_fh != 8193) {
-	    # On raspbian the disk can be full except for 10 chars.
-	    ::error("Output is incomplete. Cannot append to buffer file in $ENV{'TMPDIR'}. Is the disk full?\n");
-	    ::error("Change \$TMPDIR with --tmpdir or use --compress.\n");
-	    ::wait_and_exit(255);
-	}
-	truncate $disk_full_fh, 0;
-	seek($disk_full_fh, 0, 0) || die;
-    }
-}
 sub __DEBUGGING__ {}
 
 sub debug {

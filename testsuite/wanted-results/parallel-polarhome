@@ -5,107 +5,109 @@ minix.polarhome.com	### Run the test on minix.polarhome.com
 copy_and_test freebsd.polarhome.com
 freebsd.polarhome.com	### Run the test on freebsd.polarhome.com
 freebsd.polarhome.com	Works on freebsd.polarhome.com
-freebsd.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531.
+freebsd.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198.
 copy_and_test solaris.polarhome.com
 solaris.polarhome.com	### Run the test on solaris.polarhome.com
 solaris.polarhome.com	Works on solaris.polarhome.com
 solaris.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Parent directory (/) is not writable
-solaris.polarhome.com	 at bin/parallel line 3531
+solaris.polarhome.com	 at bin/parallel line 3198
 copy_and_test openbsd.polarhome.com
 openbsd.polarhome.com	### Run the test on openbsd.polarhome.com
 openbsd.polarhome.com	Works on openbsd.polarhome.com
-openbsd.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+openbsd.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test netbsd.polarhome.com
 netbsd.polarhome.com	### Run the test on netbsd.polarhome.com
 netbsd.polarhome.com	Works on netbsd.polarhome.com
-netbsd.polarhome.com	Error in tempfile() using template /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531.
+netbsd.polarhome.com	Error in tempfile() using template /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198.
 copy_and_test debian.polarhome.com
 debian.polarhome.com	### Run the test on debian.polarhome.com
 debian.polarhome.com	Works on debian.polarhome.com
-debian.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+debian.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test aix.polarhome.com
 aix.polarhome.com	### Run the test on aix.polarhome.com
 aix.polarhome.com	Works on aix.polarhome.com
-aix.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: The file access permissions do not allow the specified action. at bin/parallel line 3531
+aix.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: The file access permissions do not allow the specified action. at bin/parallel line 3198
 copy_and_test redhat.polarhome.com
 redhat.polarhome.com	### Run the test on redhat.polarhome.com
 redhat.polarhome.com	Works on redhat.polarhome.com
-redhat.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+redhat.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test hpux.polarhome.com
 hpux.polarhome.com	### Run the test on hpux.polarhome.com
 hpux.polarhome.com	Works on hpux.polarhome.com
-hpux.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+hpux.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test qnx.polarhome.com
 qnx.polarhome.com	### Run the test on qnx.polarhome.com
 qnx.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.
 qnx.polarhome.com	Works on qnx.polarhome.com
-qnx.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+qnx.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test tru64.polarhome.com
 tru64.polarhome.com	### Run the test on tru64.polarhome.com
 tru64.polarhome.com	Works on tru64.polarhome.com
 tru64.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Parent directory (/) is not writable
-tru64.polarhome.com	 at bin/parallel line 3531
+tru64.polarhome.com	 at bin/parallel line 3198
 copy_and_test openindiana.polarhome.com
 openindiana.polarhome.com	### Run the test on openindiana.polarhome.com
 openindiana.polarhome.com	parallel: Warning: Cannot figure out number of CPU cores. Using 1.
 openindiana.polarhome.com	Works on openindiana.polarhome.com
-openindiana.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+openindiana.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test suse.polarhome.com
 suse.polarhome.com	### Run the test on suse.polarhome.com
 suse.polarhome.com	Works on suse.polarhome.com
-suse.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531.
+suse.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198.
 copy_and_test solaris-x86.polarhome.com
 solaris-x86.polarhome.com	### Run the test on solaris-x86.polarhome.com
 solaris-x86.polarhome.com	Works on solaris-x86.polarhome.com
-solaris-x86.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+solaris-x86.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test mandriva.polarhome.com
 mandriva.polarhome.com	### Run the test on mandriva.polarhome.com
 mandriva.polarhome.com	Works on mandriva.polarhome.com
-mandriva.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+mandriva.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test ubuntu.polarhome.com
 ubuntu.polarhome.com	### Run the test on ubuntu.polarhome.com
 ubuntu.polarhome.com	Works on ubuntu.polarhome.com
-ubuntu.polarhome.com	Error in tempfile() using template /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531.
+ubuntu.polarhome.com	Error in tempfile() using template /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198.
 copy_and_test scosysv.polarhome.com
 scosysv.polarhome.com	### Run the test on scosysv.polarhome.com
 scosysv.polarhome.com	Works on scosysv.polarhome.com
 scosysv.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Parent directory (/) is not writable
-scosysv.polarhome.com	 at bin/parallel line 3531
+scosysv.polarhome.com	 at bin/parallel line 3198
 copy_and_test unixware.polarhome.com
 unixware.polarhome.com	### Run the test on unixware.polarhome.com
 unixware.polarhome.com	Works on unixware.polarhome.com
-unixware.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+unixware.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test dragonfly.polarhome.com
 dragonfly.polarhome.com	### Run the test on dragonfly.polarhome.com
 dragonfly.polarhome.com	Works on dragonfly.polarhome.com
-dragonfly.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+dragonfly.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test centos.polarhome.com
 centos.polarhome.com	### Run the test on centos.polarhome.com
 centos.polarhome.com	Works on centos.polarhome.com
 centos.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Parent directory (/) is not writable
-centos.polarhome.com	 at bin/parallel line 3531
+centos.polarhome.com	 at bin/parallel line 3198
 copy_and_test miros.polarhome.com
 miros.polarhome.com	### Run the test on miros.polarhome.com
 miros.polarhome.com	Works on miros.polarhome.com
 miros.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Parent directory (/) is not writable
-miros.polarhome.com	 at bin/parallel line 3531
+miros.polarhome.com	 at bin/parallel line 3198
 copy_and_test hurd.polarhome.com
 hurd.polarhome.com	### Run the test on hurd.polarhome.com
 hurd.polarhome.com	Works on hurd.polarhome.com
-hurd.polarhome.com	Error in tempfile() using template /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531.
+hurd.polarhome.com	Error in tempfile() using template /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198.
 copy_and_test raspbian.polarhome.com
 raspbian.polarhome.com	### Run the test on raspbian.polarhome.com
 raspbian.polarhome.com	Works on raspbian.polarhome.com
-raspbian.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+raspbian.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test macosx.polarhome.com
 macosx.polarhome.com	### Run the test on macosx.polarhome.com
 macosx.polarhome.com	Works on macosx.polarhome.com
-macosx.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3531
+macosx.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Could not create temp file /XXXXXXXX.arg: Permission denied at bin/parallel line 3198
 copy_and_test hpux-ia64.polarhome.com
 hpux-ia64.polarhome.com	### Run the test on hpux-ia64.polarhome.com
 hpux-ia64.polarhome.com	Works on hpux-ia64.polarhome.com
 hpux-ia64.polarhome.com	Error in tempfile() using /XXXXXXXX.arg: Parent directory (/) is not writable
-hpux-ia64.polarhome.com	 at bin/parallel line 3531
+hpux-ia64.polarhome.com	 at bin/parallel line 3198
 copy_and_test syllable.polarhome.com
 syllable.polarhome.com	### Run the test on syllable.polarhome.com
 syllable.polarhome.com	chmod: changing permissions of `bin/p.tmp': Function not implemented
+macosx.polarhome.com	### Test if empty command in process list causes problems
+macosx.polarhome.com	OK_with_empty_cmd
