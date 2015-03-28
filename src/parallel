@@ -1051,7 +1051,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150323;
+    $Global::version = 20150324;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -1195,7 +1195,7 @@ sub record_env {
     if(open(my $vars_fh, ">", $ignore_filename)) {
 	print $vars_fh map { $_,"\n" } keys %ENV;
     } else {
-	::error("Cannot write to $ignore_filename\n");
+	::error("Cannot write to $ignore_filename.\n");
 	::wait_and_exit(255);
     }
 }
@@ -1688,6 +1688,22 @@ sub __RUNNING_THE_JOBS_AND_PRINTING_PROGRESS__ {}
 #    $Global::host{$sshlogin} = Pointer to SSHLogin-object
 #    $Global::total_running = total number of running jobs
 #    $Global::total_started = total jobs started
+#    $Global::tty_taken = is the tty in use by a running job?
+#    $Global::max_procs_file = filename if --jobs is given a filename
+#    $Global::JobQueue = JobQueue object for the queue of jobs
+#    $Global::timeoutq = queue of times where jobs timeout
+#    $Global::newest_job = Job object of the most recent job started
+#    $Global::newest_starttime = timestamp of $Global::newest_job
+#    @Global::sshlogin
+#    $Global::minimal_command_line_length = minimum length supported by all sshlogins
+#    $Global::start_no_new_jobs = should more jobs be started?
+#    $Global::original_stderr = file handle for STDERR when the program started
+#    $Global::total_started = total number of jobs started
+#    $Global::envvar = string to set the shell environment variables
+#    $Global::joblog = filehandle of joblog
+#    $Global::debug = Is debugging on?
+#    $Global::exitstatus = status code of GNU Parallel
+#    $Global::quoting = quote the command to run
 
 sub init_run_jobs {
     # Set Global variables and progress signal handlers
@@ -1704,21 +1720,22 @@ sub init_run_jobs {
 {
     my $last_time;
     my %last_mtime;
+    my $max_procs_file_last_mod;
 
     sub changed_procs_file {
 	# If --jobs is a file and it is modfied:
 	# Force recomputing of max_jobs_running for each $sshlogin
 	# Uses:
 	#   $Global::max_procs_file
-	#   $Global::max_procs_file_last_mod
 	#   %Global::host
 	# Returns: N/A
 	if($Global::max_procs_file) {
 	    # --jobs filename
 	    my $mtime = (stat($Global::max_procs_file))[9];
-	    if($mtime > $Global::max_procs_file_last_mod) {
+	    $max_procs_file_last_mod ||= 0;
+	    if($mtime > $max_procs_file_last_mod) {
 		# file changed: Force re-computing max_jobs_running
-		$Global::max_procs_file_last_mod = $mtime;
+		$max_procs_file_last_mod = $mtime;
 		for my $sshlogin (values %Global::host) {
 		    $sshlogin->set_max_jobs_running(undef);
 		}
@@ -1947,7 +1964,6 @@ sub init_progress {
 sub drain_job_queue {
     # Uses:
     #   $opt::progress
-    #   $Global::original_stderr
     #   $Global::total_running
     #   $Global::max_jobs_running
     #   %Global::running
@@ -2510,7 +2526,7 @@ sub setup_basefile {
       if($sshlogin->string() eq ":") { next }
       for my $file (@opt::basefile) {
 	if($file !~ m:^/: and $opt::workdir eq "...") {
-	  ::error("Work dir '...' will not work with relative basefiles\n");
+	  ::error("Work dir '...' will not work with relative basefiles.\n");
 	  ::wait_and_exit(255);
 	}
 	$workdir ||= Job->new("")->workdir();
@@ -4262,11 +4278,11 @@ sub compute_max_loadavg {
                 close $in_fh;
                 $load = $self->compute_max_loadavg($opt_load_file);
             } else {
-                ::error("Cannot open $loadspec\n");
+                ::error("Cannot open $loadspec.\n");
                 ::wait_and_exit(255);
             }
         } else {
-            ::error("Parsing of --load failed\n");
+            ::error("Parsing of --load failed.\n");
             ::die_usage();
         }
         if($load < 0.01) {
@@ -4596,7 +4612,6 @@ sub user_requested_processes {
             }
         } elsif (-f $opt_P) {
             $Global::max_procs_file = $opt_P;
-            $Global::max_procs_file_last_mod = (stat($Global::max_procs_file))[9];
             if(open(my $in_fh, "<", $Global::max_procs_file)) {
                 my $opt_P_file = join("",<$in_fh>);
                 close $in_fh;
@@ -6925,7 +6940,7 @@ sub files_print {
     # If --compress: $in_fh must be closed first.
     close $self->fh($fdno,"w");
     if($? and $opt::compress) {
-	::error($opt::decompress_program." failed\n");
+	::error($opt::decompress_program." failed.\n");
 	$self->set_exitstatus(255);
     }
     close $in_fh;
@@ -6938,7 +6953,7 @@ sub files_print {
 	    unlink $self->fh($fdno,"unlink");
 	}
     } elsif($fdno == 1 and $self->fh($fdno,"name")) {
-	print $out_fd $self->fh($fdno,"name"),"\n";
+	print $out_fd $self->tag(),$self->fh($fdno,"name"),"\n";
 	$self->add_returnsize(-s $self->fh($fdno,"name"));
     }
 }
@@ -6952,7 +6967,7 @@ sub linebuffer_print {
 	# If the job is dead: close printing fh. Needed for --compress
 	close $self->fh($fdno,"w");
 	if($? and $opt::compress) {
-	    ::error($opt::decompress_program." failed\n");
+	    ::error($opt::decompress_program." failed.\n");
 	    $self->set_exitstatus(255);
 	}
 	if($opt::compress) {
@@ -7032,7 +7047,7 @@ sub tag_print {
     my $buf;
     close $self->fh($fdno,"w");
     if($? and $opt::compress) {
-	::error($opt::decompress_program." failed\n");
+	::error($opt::decompress_program." failed.\n");
 	$self->set_exitstatus(255);
     }
     seek $in_fh, 0, 0;
@@ -7069,7 +7084,7 @@ sub normal_print {
     my $buf;
     close $self->fh($fdno,"w");
     if($? and $opt::compress) {
-	::error($opt::decompress_program." failed\n");
+	::error($opt::decompress_program." failed.\n");
 	$self->set_exitstatus(255);
     }
     seek $in_fh, 0, 0;
@@ -7114,9 +7129,13 @@ sub print_joblog {
 
 sub tag {
     my $self = shift;
-    if(not defined $self->{'tag'}) {
-	$self->{'tag'} = $self->{'commandline'}->
-	    replace_placeholders([$opt::tagstring],0,0)."\t";
+    if($opt::tag or defined $opt::tagstring) {
+	if(not defined $self->{'tag'}) {
+	    $self->{'tag'} = $self->{'commandline'}->
+		replace_placeholders([$opt::tagstring],0,0)."\t";
+	}
+    } else {
+	return "";
     }
     return $self->{'tag'};
 }
@@ -8140,6 +8159,10 @@ sub tmux_length {
     my $len = shift;
     if($opt::tmux) {
 	$ENV{'TMUX'} ||= "tmux";
+	if(not ::which($ENV{'TMUX'})) {
+	    ::error($ENV{'TMUX'}." not found in \$PATH.\n");
+	    ::wait_and_exit(255);
+	}
 	my @out;
 	for my $l (1, 2020, 16320, 100000, $len) {
 	    my ($fh, $tmpfile) = ::tmpfile(SUFFIX => ".tmb");

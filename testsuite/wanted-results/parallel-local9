@@ -3,7 +3,7 @@ bug #44250: pxz complains File format not recognized but decompresses anyway
   # The first line dumps core if run from make file. Why?!
   stdout parallel --compress --compress-program pxz ls /{} ::: OK-if-missing-file
 Segmentation fault (core dumped)
-parallel: Error: pxz -dc failed
+parallel: Error: pxz -dc failed.
   stdout parallel --compress --compress-program pixz --decompress-program 'pixz -d' ls /{}  ::: OK-if-missing-file
 ls: cannot access /OK-if-missing-file: No such file or directory
   stdout parallel --compress --compress-program pixz --decompress-program 'pixz -d' true ::: OK-if-no-output

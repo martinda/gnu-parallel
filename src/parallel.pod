@@ -568,7 +568,7 @@ If I<eof-str> is omitted, there is no end of file string.  If neither
 B<-E> nor B<-e> is used, no end of file string is used.
 
 
-=item B<--env> I<var>
+=item B<--env> I<var> (alpha testing)
 
 Copy environment variable I<var>. This will copy I<var> to the
 environment that the command is run in. This is especially useful for
@@ -1066,7 +1066,7 @@ B<--files> is often used with B<--pipe>.
 See also: B<--recstart>, B<--recend>, B<--fifo>, B<--cat>, B<--pipepart>.
 
 
-=item B<--pipepart>
+=item B<--pipepart> (alpha testing)
 
 Pipe parts of a physical file. B<--pipepart> works similar to
 B<--pipe>, but is much faster. It has a few limitations:
@@ -1259,6 +1259,8 @@ Swap activity is computed as (swap-in)*(swap-out) which in practice is
 a good value: swapping out is not a problem, swapping in is not a
 problem, but both swapping in and out usually indicates a problem.
 
+B<--memfree> may give better results, so try using that first.
+
 
 =item B<--record-env>
 
@@ -1350,7 +1352,9 @@ will generate the files:
   foo/1/II/2/IIII/stderr
   foo/1/II/2/IIII/stdout
 
-See also B<--files>, B<--header>, B<--joblog>.
+If you do not want the dir structure, try B<--files> B<--tag> instead.
+
+See also B<--files>, B<--tag>, B<--header>, B<--joblog>.
 
 
 =item B<--resume>

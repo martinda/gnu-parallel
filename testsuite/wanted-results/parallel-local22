@@ -44,7 +44,7 @@ echo '### bug #42041: Implement $PARALLEL_JOBSLOT'
 echo '### bug #42363: --pipepart and --fifo/--cat does not work'
 ### bug #42363: --pipepart and --fifo/--cat does not work
   seq 100 > /tmp/bug42363;   parallel --pipepart --block 31 -a /tmp/bug42363 -k --fifo wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;   parallel --pipepart --block 31 -a /tmp/bug42363 -k --cat  wc | perl -pe s:/tmp/.........pip:/tmp/XXXX: ;   rm /tmp/bug42363
-     13      14      32 /tmp/XXXX
+     14      14      33 /tmp/XXXX
      11      11      33 /tmp/XXXX
      11      11      33 /tmp/XXXX
      11      11      33 /tmp/XXXX
@@ -52,8 +52,8 @@ echo '### bug #42363: --pipepart and --fifo/--cat does not work'
      11      11      33 /tmp/XXXX
      11      11      33 /tmp/XXXX
      11      11      33 /tmp/XXXX
-     10       9      29 /tmp/XXXX
-13 14 32 /tmp/XXXX
+      9       9      28 /tmp/XXXX
+14 14 33 /tmp/XXXX
 11 11 33 /tmp/XXXX
 11 11 33 /tmp/XXXX
 11 11 33 /tmp/XXXX
@@ -61,7 +61,7 @@ echo '### bug #42363: --pipepart and --fifo/--cat does not work'
 11 11 33 /tmp/XXXX
 11 11 33 /tmp/XXXX
 11 11 33 /tmp/XXXX
-10  9 29 /tmp/XXXX
+ 9  9 28 /tmp/XXXX
 echo '### bug #42055: --pipepart -a bigfile should not require sequential reading of bigfile'
 ### bug #42055: --pipepart -a bigfile should not require sequential reading of bigfile
   parallel --pipepart -a /etc/passwd -L 1 should not be run
@@ -73,11 +73,11 @@ parallel: Error: --pipepart is incompatible with --max-replace-args, --max-lines
 echo '### bug #42893: --block should not cause decimals in cat_partial'
 ### bug #42893: --block should not cause decimals in cat_partial
   seq 100000 >/tmp/parallel-decimal;   parallel --dry-run -kvv --pipepart --block 0.12345M -a /tmp/parallel-decimal true;   rm /tmp/parallel-decimal
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 129449 | (true)
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 129449 129450 | (true)
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 258899 129450 | (true)
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 388349 129450 | (true)
-</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 517799 71096 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 0 129450 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 129450 129450 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 258900 129450 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 388350 129450 | (true)
+</tmp/parallel-decimal perl -e 'while(@ARGV) { sysseek(STDIN,shift,0) || die; $left = shift; while($read = sysread(STDIN,$buf, ($left > 32768 ? 32768 : $left))){ $left -= $read; syswrite(STDOUT,$buf); } }'  0 0 517800 71095 | (true)
 echo '### bug #42902: profiles containing arguments with space'
 ### bug #42902: profiles containing arguments with space
   echo "--rpl 'FULLPATH chomp(\$_=\"/bin/bash=\".\`readlink -f \$_\`);' " > ~/.parallel/FULLPATH;   parallel -JFULLPATH echo FULLPATH ::: $0

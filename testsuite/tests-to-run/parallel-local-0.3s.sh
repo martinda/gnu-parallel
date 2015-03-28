@@ -90,4 +90,7 @@ echo '### bug #44614: --pipepart --header off by one'
     parallel --pipepart -a /tmp/parallel_44616 -k --block 2 --regexp --recend 3'\n' 'echo foo; cat'; 
     rm /tmp/parallel_44616
 
+echo '### TMUX not found'
+  TMUX=not-existing parallel --tmux echo ::: 1
+
 EOF
