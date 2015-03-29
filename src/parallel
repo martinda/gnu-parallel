@@ -521,7 +521,7 @@ sub index64 {
     my $block_size = 2**31-1;
     my $strlen   = length($$ref);
     # No point in doing extra work if we don't need to.
-    if($strlen < $block_size) {
+    if($strlen < $block_size or $] > 5.022) {
 	return index($$ref, $match, $pos);
     }
 
@@ -3401,16 +3401,20 @@ sub which {
 	    #
 	    # ash bash csh dash fdsh fish fizsh ksh ksh93 mksh pdksh
 	    # posh rbash rush rzsh sash sh static-sh tcsh yash zsh
-	    my @shells = qw(ash bash csh dash fdsh fish fizsh ksh
-                            ksh93 mksh pdksh posh rbash rush rzsh
-                            sash sh static-sh tcsh yash zsh -sh -csh);
+	    my @shells = (qw(ash bash csh dash fdsh fish fizsh ksh
+                             ksh93 mksh pdksh posh rbash rush rzsh
+                             sash sh static-sh tcsh yash zsh -sh -csh),
+			  '-sh (sh)' # sh on FreeBSD
+		);
 	    # Can be formatted as:
-	    #   [sh]  -sh  sh  busybox sh
+	    #   [sh]  -sh  sh  busybox sh  -sh (sh)
 	    #   /bin/sh /sbin/sh /opt/csw/sh
 	    # NOT: foo.sh sshd crash flush pdflush scosh fsflush ssh
-	    my $shell = "(?:".join("|",@shells).")";
-	    $regexp = '^((\[)('. $shell. ')(\])|(|\S+/|busybox )('. $shell. '))($| )';
+	    my $shell = "(?:".join("|",map { "\Q$_\E" } @shells).")";
+	    $regexp = '^((\[)('. $shell. ')(\])|(|\S+/|busybox )('. $shell. '))($| [^(])';
 	    %fakename = (
+		# sh disguises itself as -sh (sh) on FreeBSD
+		"-sh (sh)" => ["sh"],
 		# csh and tcsh disguise themselves as -sh/-csh
 		"-sh" => ["csh", "tcsh"],
 		"-csh" => ["tcsh", "csh"],
@@ -4180,7 +4184,8 @@ sub loadavg {
 	local $/ = undef;
         my $load_out = <$load_fh>;
         close $load_fh;
-	my $load =()= ($load_out=~/(^\s?[DOR]\S* [^\[])/gm);
+	# Count lines starting with D,O,R but command does not start with [
+	my $load =()= ($load_out=~/(^\s?[DOR]\S* +(?=[^\[])\S)/gm);
         if($load > 0) {
 	    # load is overestimated by 1
             $self->{'loadavg'} = $load - 1;
@@ -6187,13 +6192,14 @@ sub sshlogin_wrap {
 	if(not $monitor_parent_sshd_script) {
 	    $monitor_parent_sshd_script =
 		# This will be packed in ', so only use "
-	    ::spacefree(0,q{
+		::spacefree(0,'$shell = "'.($ENV{'PARALLEL_SHELL'} || '$ENV{SHELL}').'";'.
+			q{
                 $SIG{CHLD} = sub { $done = 1; };
 		$pid = fork;
                 unless($pid) {
 		    # Make own process group to be able to kill HUP it later
 		    setpgrp;
-		    exec $ENV{SHELL}, "-c", ($bashfunc."@ARGV");
+		    exec $shell, "-c", ($bashfunc."@ARGV");
 		    die "exec: $!\n";
 		}
 		do {
