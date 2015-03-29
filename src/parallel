@@ -1051,7 +1051,7 @@ sub parse_options {
 
 sub init_globals {
     # Defaults:
-    $Global::version = 20150324;
+    $Global::version = 20150329;
     $Global::progname = 'parallel';
     $Global::infinity = 2**31;
     $Global::debug = 0;
@@ -3465,6 +3465,7 @@ sub which {
 	     'linux' => $sysv,
 	     'mirbsd' => $bsd,
 	     'msys' => $sysv,
+	     'MSWin32' => $sysv,
 	     'netbsd' => $bsd,
 	     'nto' => $sysv,
 	     'openbsd' => $bsd,
@@ -4145,11 +4146,12 @@ sub loadavg_too_high {
 		    'freebsd' => $bsd,
 		    'gnu' => $bsd,
 		    'hpux' => $psel,
-		    'irix' => 'ps -ef -o state -o comm',
+		    'irix' => $sysv2,
 		    'linux' => $bsd,
 		    'minix' => "ps el|awk '{print \$1,\$11}'",
 		    'mirbsd' => $bsd,
 		    'msys' => $sysv,
+	            'MSWin32' => $sysv,
 		    'netbsd' => $bsd,
 		    'nto' => $dummy,
 		    'openbsd' => $bsd,
