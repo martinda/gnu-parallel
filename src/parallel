@@ -2003,7 +2003,7 @@ sub drain_job_queue {
 		    $sleep = $sleep/2+0.001;
 		}
 	    }
-            # Sometimes SIGCHLD is not registered, so force reaper
+            # Exponential back-off sleeping
 	    $sleep = ::reap_usleep($sleep);
         }
         if(not $Global::JobQueue->empty()) {
@@ -2886,6 +2886,9 @@ sub save_original_signal_handler {
 		      unlink keys %Global::unlink; exit -1  };
     %Global::original_sig = %SIG;
     $SIG{TERM} = sub {}; # Dummy until jobs really start
+    # When a child dies, wake up from sleep (or select(,,,))
+    $SIG{CHLD} = sub { kill "ALRM", $$ };
+    $SIG{ALRM} = 'IGNORE';
 }
 
 sub list_running_jobs {
@@ -3551,7 +3554,7 @@ sub reap_usleep {
 		$job->print();
 	    }
 	}
-	# Sleep exponentially longer (1.1^n) if a job did not finish
+	# Sleep exponentially longer (1.1^n) if a job did not finish,
 	# though at most 1000 ms.
 	return (($ms < 1000) ? ($ms * 1.1) : ($ms));
     }
