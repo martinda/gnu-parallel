@@ -489,7 +489,8 @@ sub nindex {
 	    # until one is empty and a new block is passed
 	    # Make a queue to spread the blocks evenly
 	    if(not @robin_queue) {
-		push @robin_queue, values %Global::running;
+		push @robin_queue, (sort { $a->seq() <=> $b->seq() }
+				    values %Global::running);
 	    }
 	    while(my $job = shift @robin_queue) {
 		if($job->stdin_buffer_length() > 0) {
@@ -2879,28 +2880,31 @@ sub save_original_signal_handler {
     # Uses:
     #   %Global::original_sig
     # Returns: N/A
-    $SIG{TERM} ||= sub { exit 0; }; # $SIG{TERM} is not set on Mac OS X
     $SIG{INT} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; }
 		      unlink keys %Global::unlink; exit -1  };
     $SIG{TERM} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; }
 		      unlink keys %Global::unlink; exit -1  };
     %Global::original_sig = %SIG;
     $SIG{TERM} = sub {}; # Dummy until jobs really start
-    # When a child dies, wake up from sleep (or select(,,,))
-    $SIG{CHLD} = sub { kill "ALRM", $$ };
     $SIG{ALRM} = 'IGNORE';
 }
 
 sub list_running_jobs {
     # Print running jobs on tty
+    # Uses:
+    #   %Global::running
     # Returns: N/A
-    for my $v (values %Global::running) {
-        ::status("$Global::progname: ",$v->replaced(),"\n");
+    for my $job (values %Global::running) {
+        ::status("$Global::progname: ",$job->replaced(),"\n");
     }
 }
 
 sub start_no_new_jobs {
     # Start no more jobs
+    # Uses:
+    #    %Global::original_sig
+    #    %Global::unlink
+    #    $Global::start_no_new_jobs
     # Returns: N/A
     $SIG{TERM} = $Global::original_sig{TERM};
     unlink keys %Global::unlink;
@@ -2926,7 +2930,8 @@ sub reaper {
     #   $opt::halt
     #   $opt::keeporder
     #   $Global::total_running
-    # Returns: N/A
+    # Returns:
+    #   $children_reaped = number of children finished
     my $stiff;
     my $children_reaped = 0;
     debug("run", "Reaper ");
@@ -2955,7 +2960,7 @@ sub reaper {
 	    push @Global::slots, $job->slot();
 	    if($opt::timeout) {
 		# Update average runtime for timeout
-		$Global::timeoutq->update_delta_time($job->runtime());
+		$Global::timeoutq->update_median_runtime($job->runtime());
 	    }
             # Force printing now if --halt forces us to exit
             my $print_now =
@@ -3547,7 +3552,11 @@ sub reap_usleep {
 	if($opt::memfree) {
 	    kill_youngster_if_not_enough_mem();
 	}
+	# When a child dies, wake up from sleep (or select(,,,))
+	$SIG{CHLD} = sub { kill "ALRM", $$ };
 	usleep($ms);
+	# --compress needs $SIG{CHLD} undefined
+	$SIG{CHLD} = undef;
 	exit_if_disk_full();
 	if($opt::linebuffer) {
 	    for my $job (values %Global::running) {
@@ -3564,6 +3573,8 @@ sub kill_youngster_if_not_enough_mem {
     # Check each $sshlogin if there is enough mem.
     # If less than 50% enough free mem: kill off the youngest child
     # Put the child back in the queue.
+    # Uses:
+    #   %Global::running
     my %jobs_of;
     my @sshlogins;
 
@@ -3753,7 +3764,6 @@ sub string {
 
 sub jobs_running {
     my $self = shift;
-
     return ($self->{'jobs_running'} || "0");
 }
 
@@ -8707,7 +8717,7 @@ sub set_remedian {
     $self->{'remedian'} = (sort @{$rref->[2]})[$#{$rref->[2]}/2];
 }
 
-sub update_delta_time {
+sub update_median_runtime {
     # Update delta_time based on runtime of finished job if timeout is
     # a percentage
     my $self = shift;

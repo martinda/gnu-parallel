@@ -4,31 +4,26 @@ testsuite: 3
 3: ../src/parallel tests-to-run/* wanted-results/* startdb prereqlocal prereqremote
 	TRIES=3 time sh Start.sh - mem || true
 	touch ~/.parallel/will-cite
-	date
 	make stopvm
 
 1: ../src/parallel tests-to-run/* wanted-results/* prereqlocal startdb prereqremote
 	time sh Start.sh - mem || true
 	touch ~/.parallel/will-cite
-	date
 	make stopvm
 
 mem: ../src/parallel tests-to-run/*mem* wanted-results/*mem* prereqlocal
 	time sh Start.sh mem NONE || true
 	touch ~/.parallel/will-cite
-	date
 	make stopvm
 
 testdb: ../src/parallel tests-to-run/*sql* wanted-results/*sql* prereqdb
 	time sh Start.sh sql NONE
-	date
 
 local:	testlocal
 	true
 
 testlocal: ../src/parallel tests-to-run/*local* wanted-results/*local* prereqlocal installparallel
 	time sh Start.sh local NONE
-	date
 
 prereqlocal: installparallel
 	tcsh -c echo tcsh installed || (echo tcsh is required for testsuite; /bin/false)

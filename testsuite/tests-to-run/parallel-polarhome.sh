@@ -33,7 +33,7 @@ copy_and_test() {
     echo '### Run the test on '$H
     cat `which parallel` | 
       stdout ssh -oLogLevel=quiet $H 'cat > bin/p.tmp && chmod 755 bin/p.tmp && mv bin/p.tmp bin/parallel && bin/perl bin/parallel echo Works on {} ::: '$H'; bin/perl bin/parallel --tmpdir / echo ::: test read-only tmp' |
-      perl -pe 's:/[a-z0-9_]+.arg:/XXXXXXXX.arg:gi'
+      perl -pe 's:/[a-z0-9_]+.arg:/XXXXXXXX.arg:gi; s/\d\d\d\d/0000/gi;'
 }
 export -f copy_and_test
 stdout parallel -j0 -k --retries 5 --timeout 80 --delay 0.1 --tag  -v copy_and_test {} ::: $POLAR

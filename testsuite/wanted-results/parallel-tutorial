@@ -1,0 +1,953 @@
+### test parallel_tutorial
++ parallel -k echo ::: A B C
++ parallel -k echo ::: D E F
++ perl -e 'printf "A\0B\0C\0"'
++ perl -e 'printf "A_B_C_"'
++ perl -e 'printf "f1\tf2\nA\tB\nC\tD\n"'
++ perl -e 'for(1..8){print "$_\n"}'
++ perl -e 'for(1..128){print "$_\n"}'
++ perl -e 'for(1..30000){print "$_\n"}'
++ perl -e 'for(1..1000000){print "$_\n"}'
++ perl -e 'for(1..10){print "$_\n"}'
++ parallel echo ::: A B C
+A
+B
+C
++ parallel -a abc-file echo
+A
+B
+C
++ parallel echo
+A
+B
+C
++ parallel echo ::: A B C ::: D E F
+A D
+A E
+A F
+B D
+B E
+B F
+C D
+C E
+C F
++ parallel -a abc-file -a def-file echo
+A D
+A E
+A F
+B D
+B E
+B F
+C D
+C E
+C F
++ parallel -a - -a def-file echo
+A D
+A E
+A F
+B D
+B E
+B F
+C D
+C E
+C F
++ parallel echo :::: - def-file
+A D
+A E
+A F
+B D
+B E
+B F
+C D
+C E
+C F
++ parallel echo ::: A B C :::: def-file
+A D
+A E
+A F
+B D
+B E
+B F
+C D
+C E
+C F
++ parallel --xapply echo ::: A B C ::: D E F
+A D
+B E
+C F
++ parallel --xapply echo ::: A B C D E ::: F G
+A F
+B G
+C F
+D G
+E F
++ parallel --arg-sep ,, echo ,, A B C :::: def-file
+A D
+A E
+A F
+B D
+B E
+B F
+C D
+C E
+C F
++ parallel --arg-file-sep // echo ::: A B C // def-file
+A D
+A E
+A F
+B D
+B E
+B F
+C D
+C E
+C F
++ parallel -d _ echo :::: abc_-file
+A
+B
+C
++ parallel -d '\0' echo :::: abc0-file
+A
+B
+C
++ parallel -E stop echo ::: A B stop C D
+A
+B
++ parallel --no-run-if-empty echo
+1
+2
++ parallel ::: ls 'echo foo' pwd
+1-col
+1-col.diff
+1-col.txt
+2-col
+2-col.diff
+2-col.txt
+a
+abc-file
+abc0-file
+abc_-file
+b
+def-file
+num1000000
+num128
+num30000
+num8
+num_%header
+tsv-file.tsv
+中国 (Zhōngguó)
+foo
+/home/tange/privat/parallel/testsuite/tmp
++ export -f my_func
++ parallel my_func ::: 1 2 3
+in my_func 1
+in my_func 2
+in my_func 3
++ parallel echo ::: A/B.C
+A/B.C
++ parallel echo '{}' ::: A/B.C
+A/B.C
++ parallel echo '{.}' ::: A/B.C
+A/B
++ parallel echo '{/}' ::: A/B.C
+B.C
++ parallel echo '{//}' ::: A/B.C
+A
++ parallel echo '{/.}' ::: A/B.C
+B
++ parallel echo '{#}' ::: A B C
+1
+2
+3
++ parallel -j 2 echo '{%}' ::: A B C
+1
+2
+1
++ parallel -I ,, echo ,, ::: A/B.C
+A/B.C
++ parallel --extensionreplace ,, echo ,, ::: A/B.C
+A/B
++ parallel --basenamereplace ,, echo ,, ::: A/B.C
+B.C
++ parallel --dirnamereplace ,, echo ,, ::: A/B.C
+A
++ parallel --basenameextensionreplace ,, echo ,, ::: A/B.C
+B
++ parallel --seqreplace ,, echo ,, ::: A B C
+1
+2
+3
++ parallel -j2 --slotreplace ,, echo ,, ::: A B C
+1
+2
+1
++ parallel echo '{= s:\.[^.]+$::;s:\.[^.]+$::; =}' ::: foo.tar.gz
+foo
++ parallel --parens ,,,, echo ',, s:\.[^.]+$::;s:\.[^.]+$::; ,,' ::: foo.tar.gz
+foo
++ parallel --rpl '.. s:\.[^.]+$::;s:\.[^.]+$::;' echo .. ::: foo.tar.gz
+foo
++ parallel --rpl '{..} s:\.[^.]+$::;s:\.[^.]+$::;' echo '{..}' ::: foo.tar.gz
+foo
++ --rpl '{} '
+bash: line 103: --rpl: command not found
++ --rpl '{#} $_=$job->seq()'
+bash: line 104: --rpl: command not found
++ --rpl '{%} $_=$job->slot()'
+bash: line 105: --rpl: command not found
++ --rpl '{/} s:.*/::'
+bash: line 106: --rpl: command not found
++ --rpl '{//} $Global::use{"File::Basename"} ||= eval "use File::Basename; 1;"; $_ = dirname($_);'
+bash: line 107: --rpl: command not found
++ --rpl '{/.} s:.*/::; s:\.[^/.]+$::;'
+bash: line 108: --rpl: command not found
++ --rpl '{.} s:\.[^/.]+$::'
+bash: line 109: --rpl: command not found
++ parallel echo '{1}' and '{2}' ::: A B ::: C D
+A and C
+A and D
+B and C
+B and D
++ parallel echo '/={1/}' '//={1//}' '/.={1/.}' '.={1.}' ::: A/B.C D/E.F
+/=B.C //=A /.=B .=A/B
+/=E.F //=D /.=E .=D/E
++ parallel echo '1={1}' '2={2}' '3={3}' '-1={-1}' '-2={-2}' '-3={-3}' ::: A B ::: C D ::: E F
+1=A 2=C 3=E -1=E -2=C -3=A
+1=A 2=C 3=F -1=F -2=C -3=A
+1=A 2=D 3=E -1=E -2=D -3=A
+1=A 2=D 3=F -1=F -2=D -3=A
+1=B 2=C 3=E -1=E -2=C -3=B
+1=B 2=C 3=F -1=F -2=C -3=B
+1=B 2=D 3=E -1=E -2=D -3=B
+1=B 2=D 3=F -1=F -2=D -3=B
++ parallel echo '{=2 s:\.[^.]+$::;s:\.[^.]+$::; =} {1}' ::: bar ::: foo.tar.gz
+foo bar
++ parallel --rpl '{..} s:\.[^.]+$::;s:\.[^.]+$::;' echo '{2..} {1}' ::: bar ::: foo.tar.gz
+foo bar
++ parallel --colsep '\t' echo '1={1}' '2={2}' :::: tsv-file.tsv
+1=f1 2=f2
+1=A 2=B
+1=C 2=D
++ parallel --header : echo 'f1={f1}' 'f2={f2}' ::: f1 A B ::: f2 C D
+f1=A f2=C
+f1=A f2=D
+f1=B f2=C
+f1=B f2=D
++ parallel --header : --colsep '\t' echo 'f1={f1}' 'f2={f2}' :::: tsv-file.tsv
+f1=A f2=B
+f1=C f2=D
++ parallel --xargs echo
+2
++ parallel --xargs -s 10000 echo
+17
++ parallel --jobs 4 -m echo
+5
++ parallel --jobs 4 -m echo ::: 1 2 3 4 5 6 7 8 9 10
+1 2 3
+4 5 6
+7 8 9
+10
++ parallel --jobs 4 -X echo 'pre-{}-post' ::: A B C D E F G
+pre-A-post pre-B-post
+pre-C-post pre-D-post
+pre-E-post pre-F-post
+pre-G-post
++ parallel -N3 echo ::: A B C D E F G H
+A B C
+D E F
+G H
++ parallel -N3 echo '1={1}' '2={2}' '3={3}' ::: A B C D E F G H
+1=A 2=B 3=C
+1=D 2=E 3=F
+1=G 2=H 3=
++ parallel -N0 echo foo ::: 1 2 3
+foo
+foo
+foo
++ perl -e 'print "@ARGV\n"' A
+A
++ parallel perl -e 'print "@ARGV\n"' ::: This wont work
++ parallel: Warning: Input is read from the terminal. Only experts do this on purpose. Press CTRL-D to exit.
+bash: line 148: parallel:: command not found
++ perl -e 'print "@ARGV\n"'
+
++ '[CTRL-D]'
+bash: line 150: [CTRL-D]: command not found
++ parallel --trim r echo 'pre-{}-post' ::: ' A '
+pre- A-post
++ parallel --trim l echo 'pre-{}-post' ::: ' A '
+pre-A -post
++ parallel --trim lr echo 'pre-{}-post' ::: ' A '
+pre-A-post
++ parallel --tag echo 'foo-{}' ::: A B C
+A	foo-A
+B	foo-B
+C	foo-C
++ parallel --tagstring '{}-bar' echo 'foo-{}' ::: A B C
+A-bar	foo-A
+B-bar	foo-B
+C-bar	foo-C
++ parallel --dryrun echo '{}' ::: A B C
+echo A
+echo B
+echo C
++ parallel --verbose echo '{}' ::: A B C
+echo A
+echo B
+echo C
+A
+B
+C
++ parallel -j2 'printf "%s-start\n%s" {} {};sleep {};printf "%s\n" -middle;echo {}-end' ::: 4 2 1
+4-start
+4-middle
+4-end
+2-start
+2-middle
+2-end
+1-start
+1-middle
+1-end
++ parallel -j2 --ungroup 'printf "%s-start\n%s" {} {};sleep {};printf "%s\n" -middle;echo {}-end' ::: 4 2 1
+4-start
+42-start
+2-middle
+2-end
+1-start
+1-middle
+1-end
+-middle
+4-end
++ parallel -j2 --linebuffer 'printf "%s-start\n%s" {} {};sleep {};printf "%s\n" -middle;echo {}-end' ::: 4 2 1
+4-start
+2-start
+2-middle
+2-end
+1-start
+1-middle
+1-end
+4-middle
+4-end
++ parallel -j2 -k 'printf "%s-start\n%s" {} {};sleep {};printf "%s\n" -middle;echo {}-end' ::: 4 2 1
+4-start
+4-middle
+4-end
+2-start
+2-middle
+2-end
+1-start
+1-middle
+1-end
++ parallel --files echo ::: A B C
+/tmp/parXXXXX.par
+/tmp/parXXXXX.par
+/tmp/parXXXXX.par
++ parallel --tmpdir /var/tmp --files echo ::: A B C
+/var/tmp/parXXXXX.par
+/var/tmp/parXXXXX.par
+/var/tmp/parXXXXX.par
++ parallel --results outdir echo ::: A B C
+A
+B
+C
++ outdir/1/A/stderr
+bash: line 181: outdir/1/A/stderr: Permission denied
++ outdir/1/A/stdout
+bash: line 182: outdir/1/A/stdout: Permission denied
++ outdir/1/B/stderr
+bash: line 183: outdir/1/B/stderr: Permission denied
++ outdir/1/B/stdout
+bash: line 184: outdir/1/B/stdout: Permission denied
++ outdir/1/C/stderr
+bash: line 185: outdir/1/C/stderr: Permission denied
++ outdir/1/C/stdout
+bash: line 186: outdir/1/C/stdout: Permission denied
++ parallel --header : --results outdir echo ::: f1 A B ::: f2 C D
+A C
+A D
+B C
+B D
++ outdir/f1/A/f2/C/stderr
+bash: line 190: outdir/f1/A/f2/C/stderr: Permission denied
++ outdir/f1/A/f2/C/stdout
+bash: line 191: outdir/f1/A/f2/C/stdout: Permission denied
++ outdir/f1/A/f2/D/stderr
+bash: line 192: outdir/f1/A/f2/D/stderr: Permission denied
++ outdir/f1/A/f2/D/stdout
+bash: line 193: outdir/f1/A/f2/D/stdout: Permission denied
++ outdir/f1/B/f2/C/stderr
+bash: line 194: outdir/f1/B/f2/C/stderr: Permission denied
++ outdir/f1/B/f2/C/stdout
+bash: line 195: outdir/f1/B/f2/C/stdout: Permission denied
++ outdir/f1/B/f2/D/stderr
+bash: line 196: outdir/f1/B/f2/D/stderr: Permission denied
++ outdir/f1/B/f2/D/stdout
+bash: line 197: outdir/f1/B/f2/D/stdout: Permission denied
++ /usr/bin/time -f %e parallel -N0 -j64 sleep 1 :::: num128
+2
++ /usr/bin/time -f %e parallel -N0 sleep 1 :::: num128
+16
++ /usr/bin/time -f %e parallel -N0 --jobs 200% sleep 1 :::: num128
+8
++ /usr/bin/time -f %e parallel -N0 --jobs 0 sleep 1 :::: num128
+1
++ sleep 1
++ /usr/bin/time -f %e parallel -N0 --jobs my_jobs sleep 1 :::: num128
++ wait
+3
++ parallel --use-cpus-instead-of-cores -N0 sleep 1 :::: num8
++ seq 10 20
++ parallel --tmux 'echo start {}; sleep {}; echo done {}'
+See output with: tmux -S /tmp/parXXXXX.tms attach
++ tmux -S /tmp/parXXXXX.tms attach
+no sessions
++ parallel --delay 2.5 echo Starting '{};date' ::: 1 2 3
+Starting 1
+DATE OUTPUT
+Starting 2
+DATE OUTPUT
+Starting 3
+DATE OUTPUT
++ parallel --timeout 2.1 sleep '{};' echo '{}' ::: 1 2 3 4
+1
+2
++ parallel --timeout 200% sleep '{};' echo '{}' ::: 2.1 2.2 3 7 2.3
+2
+2
+3
+2
++ parallel --eta sleep ::: 1 3 2 2 1 3 3 2 1
+
+Computers / CPU cores / Max jobs to run
+1:local / 8 / 8
+
+Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
+
++ parallel --progress sleep ::: 1 3 2 2 1 3 3 2 1
+
+Computers / CPU cores / Max jobs to run
+1:local / 8 / 8
+
+Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
+
++ seq 1000
++ parallel -j10 --bar '(echo -n {};sleep 0.1)'
+++ zenity --timeout=12 --progress --auto-kill
+BASE64 parallel --joblog /tmp/log exit ::: 1 2 3 0
+Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
+1	:	TIMESTAMP	9.999	0	0	1	0	exit 1
+2	:	TIMESTAMP	9.999	0	0	2	0	exit 2
+3	:	TIMESTAMP	9.999	0	0	3	0	exit 3
+4	:	TIMESTAMP	9.999	0	0	0	0	exit 0
++ parallel --joblog /tmp/log exit ::: 1 2 3 0
+Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
+1	:	TIMESTAMP	9.999	0	0	1	0	exit 1
+2	:	TIMESTAMP	9.999	0	0	2	0	exit 2
+3	:	TIMESTAMP	9.999	0	0	3	0	exit 3
+4	:	TIMESTAMP	9.999	0	0	0	0	exit 0
++ parallel --resume --joblog /tmp/log exit ::: 1 2 3 0 0 0
+Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
+1	:	TIMESTAMP	9.999	0	0	1	0	exit 1
+2	:	TIMESTAMP	9.999	0	0	2	0	exit 2
+3	:	TIMESTAMP	9.999	0	0	3	0	exit 3
+4	:	TIMESTAMP	9.999	0	0	0	0	exit 0
+5	:	TIMESTAMP	9.999	0	0	0	0	exit 0
+6	:	TIMESTAMP	9.999	0	0	0	0	exit 0
++ parallel --resume-failed --joblog /tmp/log exit ::: 1 2 3 0 0 0
+Seq	Host	Starttime	JobRuntime	Send	Receive	Exitval	Signal	Command
+1	:	TIMESTAMP	9.999	0	0	1	0	exit 1
+2	:	TIMESTAMP	9.999	0	0	2	0	exit 2
+3	:	TIMESTAMP	9.999	0	0	3	0	exit 3
+4	:	TIMESTAMP	9.999	0	0	0	0	exit 0
+5	:	TIMESTAMP	9.999	0	0	0	0	exit 0
+6	:	TIMESTAMP	9.999	0	0	0	0	exit 0
+1	:	TIMESTAMP	9.999	0	0	1	0	exit 1
+2	:	TIMESTAMP	9.999	0	0	2	0	exit 2
+3	:	TIMESTAMP	9.999	0	0	3	0	exit 3
++ parallel -j2 --halt 1 echo '{};' exit '{}' ::: 0 0 1 2 3
+0
+0
+1
+parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
+echo 1; exit 1
+2
+parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
+echo 2; exit 2
++ parallel -j2 --halt 2 echo '{};' exit '{}' ::: 0 0 1 2 3
+0
+0
+1
+parallel: This job failed:
+echo 1; exit 1
++ parallel -j2 --halt 20% echo '{};' exit '{}' ::: 0 0 1 2 3 4 5 6 7
+0
+0
+1
+2
+3
+4
+parallel: Starting no more jobs. Waiting for 2 jobs to finish. This job failed:
+echo 4; exit 4
+5
+parallel: Starting no more jobs. Waiting for 1 jobs to finish. This job failed:
+echo 5; exit 5
++ parallel -k --retries 3 'echo tried {} >>/tmp/runs; echo completed {}; exit {}' ::: 1 2 0
+completed 1
+completed 2
+completed 0
+tried 1
+tried 2
+tried 0
+tried 1
+tried 2
+tried 1
+tried 2
++ parallel --load 100% echo load is less than '{}' job per cpu ::: 1
+load is less than 1 job per cpu
++ parallel --noswap echo the system is not swapping ::: now
+the system is not swapping now
++ parallel --nice 17 echo this is being run with nice -n ::: 17
+this is being run with nice -n 17
++ parallel -S parallel@lo echo running on ::: parallel@lo
+running on parallel@lo
++ parallel -S parallel@lo echo running on ::: username@parallel@lo
+running on username@parallel@lo
++ parallel -S : echo running on ::: the_local_machine
+running on the_local_machine
++ parallel -S '/usr/bin/ssh parallel@lo' echo custom ::: ssh
+custom ssh
++ parallel -S parallel@lo -S csh@lo echo ::: running on more hosts
+running
+on
+more
+hosts
++ parallel --sshloginfile nodefile echo ::: running on more hosts
+running
+on
+more
+hosts
++ parallel -S 4/parallel@lo echo force '{}' cpus on server ::: 4
+force 4 cpus on server
++ parallel -S parallel@lo --transfer cat ::: input_file
+This is input_file
++ parallel -S parallel@lo --transfer --return '{}.out' cat '{}' '>{}.out' ::: input_file
+This is input_file
++ parallel -S parallel@lo --transfer --return '{}.out' --cleanup cat '{}' '>{}.out' ::: input_file
+This is input_file
++ parallel -S parallel@lo --trc '{}.out' cat '{}' '>{}.out' ::: input_file
+This is input_file
++ parallel --basefile common_file -S parallel@lo cat 'common_file;' echo '{}' ::: foo
+common data
+foo
++ parallel -S parallel@lo pwd ::: ''
+/home/parallel
++ parallel --workdir . -S parallel@lo pwd ::: ''
+/home/parallel/privat/parallel/testsuite/tmp
++ parallel --workdir ... -S parallel@lo pwd ::: ''
+/home/parallel/.TMPWORKDIR
++ parallel -S parallel@lo --sshdelay 0.2 echo ::: 1 2 3
+1
+2
+3
++ parallel --controlmaster -S parallel@lo echo ::: 1 2 3
+1
+2
+3
++ parallel --filter-hosts -S 173.194.32.46,parallel@lo echo ::: bar
+parallel: Warning: Removed 173.194.32.46
+bar
++ parallel --onall -S parallel@lo,csh@lo echo ::: foo bar
+foo
+bar
+foo
+bar
++ parallel --nonall --tag -S parallel@lo,csh@lo echo foo bar
+csh@lo	foo bar
+parallel@lo	foo bar
++ MYVAR='foo bar'
++ export MYVAR
++ parallel --env MYVAR -S parallel@lo echo '$MYVAR' ::: baz
+foo bar baz
++ export -f my_func
++ parallel --env my_func -S parallel@lo my_func ::: baz
+in my_func baz
++ parallel --record-env
++ sort
+BASH_FUNC_my_func%%
+CLUTTER_IM_MODULE
+COLORFGBG
+DBUS_SESSION_BUS_ADDRESS
+DEBEMAIL
+DEBFULLNAME
+DEFAULTS_PATH
+DESKTOP_SESSION
+DISPLAY
+DM_CONTROL
+GLADE_CATALOG_PATH
+GLADE_MODULE_PATH
+GLADE_PIXMAP_PATH
+GPG_AGENT_INFO
+GTK_IM_MODULE
+HISTCONTROL
+HOME
+IM_CONFIG_PHASE
+INSTANCE
+JAVA_HOME
+JDK_HOME
+JOB
+KONSOLE_DBUS_SERVICE
+KONSOLE_DBUS_SESSION
+KONSOLE_DBUS_WINDOW
+KONSOLE_PROFILE_NAME
+LANG
+LANGUAGE
+LESS
+LESSCLOSE
+LESSOPEN
+LOGNAME
+LS_COLORS
+MAKEFLAGS
+MAKELEVEL
+MANDATORY_PATH
+MFLAGS
+MOZ_NO_REMOTE
+MYVAR
+ORACLE_HOME
+ORACLE_SID
+PARALLEL
+PATH
+PERL_MB_OPT
+PERL_MM_OPT
+PROFILEHOME
+PWD
+QT4_IM_MODULE
+QT_IM_MODULE
+SELINUX_INIT
+SERVER1
+SERVER2
+SESSION
+SESSIONTYPE
+SESSION_MANAGER
+SHELL
+SHELL_SESSION_ID
+SHLVL
+SSH_AGENT_PID
+SSH_AUTH_SOCK
+TERM
+TEXTDOMAIN
+TEXTDOMAINDIR
+TIMEOUT
+TMPDIR
+UPSTART_EVENTS
+UPSTART_INSTANCE
+UPSTART_JOB
+UPSTART_SESSION
+USER
+VISUAL
+WINDOWID
+WINDOWPATH
+XDG_CONFIG_DIRS
+XDG_CURRENT_DESKTOP
+XDG_DATA_DIRS
+XDG_MENU_PREFIX
+XDG_RUNTIME_DIR
+XDG_SEAT
+XDG_SESSION_ID
+XDG_VTNR
+XDM_MANAGED
+XMODIFIERS
+_
++ export -f my_func2
++ VAR=foo
++ export VAR
++ parallel --env _ -S parallel@lo 'echo $VAR; my_func2' ::: bar
+foo
+in my_func2 foo bar
++ parallel -vv -S parallel@lo echo ::: bar
+ssh parallel@lo exec perl\ -e\ \\\$ENV\\\{\\\"PARALLEL_PID\\\"\\\}=\\\"000000\\\"\\\;\\\$ENV\\\{\\\"PARALLEL_SEQ\\\"\\\}=\\\"1\\\"\\\;\\\$bashfunc\\\ =\\\ \\\"\\\"\\\;@ARGV=\\\"echo\\\ bar\\\"\\\;\\\$shell=\\\"\\\$ENV\\\{SHELL\\\}\\\"\\\;\\\$SIG\\\{CHLD\\\}=sub\\\{\\\$done=1\\\;\\\}\\\;\\\$pid=fork\\\;unless\\\(\\\$pid\\\)\\\{setpgrp\\\;exec\\\$shell,\\\"-c\\\",\\\(\\\$bashfunc.\\\"@ARGV\\\"\\\)\\\;die\\\"exec:\\\$\\\!\\\\n\\\"\\\;\\\}do\\\{\\\$s=\\\$s\\\<1\\\?0.001+\\\$s\\\*1.03:\\\$s\\\;select\\\(undef,undef,undef,\\\$s\\\)\\\;\\\}until\\\(\\\$done\\\|\\\|getppid==1\\\)\\\;kill\\\(SIGHUP,-\\\$\\\{pid\\\}\\\)unless\\\$done\\\;wait\\\;exit\\\(\\\$\\\?\\\&127\\\?128+\\\(\\\$\\\?\\\&127\\\):1+\\\$\\\?\\\>\\\>8\\\);
+bar
++ export -f my_func3
++ parallel -vv --workdir ... --nice 17 --env _ --trc '{}.out' -S parallel@lo my_func3 '{}' ::: abc-file
+( ssh parallel@lo mkdir -p ./.TMPWORKDIR;rsync --protocol 30 -rlDzR -essh ./abc-file parallel@lo:./.TMPWORKDIR );ssh parallel@lo exec perl -e \''@GNU_Parallel=("use","IPC::Open3;","use","MIME::Base64");eval"@GNU_Parallel";$SIG{CHLD}="IGNORE";my$zip=(grep{-x$_}"/usr/local/bin/bzip2")[0]||"bzip2";my($in,$out,$eval);open3($in,$out,">&STDERR",$zip,"-dc");if(my$perlpid=fork){close$in;$eval=join"",<$out>;close$out;}else{close$out;print$in(decode_base64(join"",@ARGV));close$in;exit;}wait;eval$eval;'\' BASE64;_EXIT_status=$?; mkdir -p ./.; rsync --protocol 30 --rsync-path=cd\ ./.TMPWORKDIR/./.\;\ rsync -rlDzR -essh parallel@lo:./abc-file.out ./.;ssh parallel@lo \(rm\ -f\ ./.TMPWORKDIR/abc-file\;\ sh\ -c\ \'rmdir\ ./.TMPWORKDIR/\ ./.parallel/tmp/\ ./.parallel/\ 2\>/dev/null\'\;rm\ -rf\ ./.TMPWORKDIR\;\);ssh parallel@lo \(rm\ -f\ ./.TMPWORKDIR/abc-file.out\;\ sh\ -c\ \'rmdir\ ./.TMPWORKDIR/\ ./.parallel/tmp/\ ./.parallel/\ 2\>/dev/null\'\;rm\ -rf\ ./.TMPWORKDIR\;\);ssh parallel@lo rm -rf .TMPWORKDIR; exit $_EXIT_status;
++ parallel --pipe wc
+ 165668  165668 1048571
+ 149797  149797 1048579
+ 149796  149796 1048572
+ 149797  149797 1048579
+ 149797  149797 1048579
+ 149796  149796 1048572
+  85349   85349  597444
++ parallel --pipe --block 2M wc
+ 315465  315465 2097150
+ 299593  299593 2097151
+ 299593  299593 2097151
+  85349   85349  597444
++ parallel --pipe -j4 --round-robin wc
+ 315465  315465 2097150
+ 299593  299593 2097151
+ 235145  235145 1646016
+ 149797  149797 1048579
++ parallel --pipe -N140000 wc
+ 140000  140000  868895
+ 140000  140000  980000
+ 140000  140000  980000
+ 140000  140000  980000
+ 140000  140000  980000
+ 140000  140000  980000
+ 140000  140000  980000
+  20000   20000  140001
++ parallel --pipe -L75 wc
+ 165600  165600 1048095
+ 149850  149850 1048950
+ 149775  149775 1048425
+ 149775  149775 1048425
+ 149850  149850 1048950
+ 149775  149775 1048425
+  85350   85350  597450
+     25      25     176
++ parallel -kN1 --recend ', ' --pipe echo 'JOB{#};cat;echo' END
+JOB1
+/foo, END
+JOB2
+bar/, END
+JOB3
+/baz, END
+JOB4
+qux/,
+END
++ parallel -kN1 --recstart / --pipe echo 'JOB{#};cat;echo' END
+JOB1
+/foo, barEND
+JOB2
+/, END
+JOB3
+/baz, quxEND
+JOB4
+/,
+END
++ parallel -kN1 --recend ', ' --recstart / --pipe echo 'JOB{#};cat;echo' END
+JOB1
+/foo, bar/, END
+JOB2
+/baz, qux/,
+END
++ parallel -kN1 --regexp --recend ,_+ --pipe echo 'JOB{#};cat;echo' END
+JOB1
+foo,bar,_END
+JOB2
+baz,__END
+JOB3
+qux,
+END
++ parallel -kN1 --rrs --regexp --recend ,_+ --pipe echo 'JOB{#};cat;echo' END
+JOB1
+foo,barEND
+JOB2
+bazEND
+JOB3
+qux,
+END
++ parallel --header '(%.*\n)*' --pipe -N3 echo 'JOB{#};cat'
+JOB1
+%head1
+%head2
+1
+2
+3
+JOB2
+%head1
+%head2
+4
+5
+6
+JOB3
+%head1
+%head2
+7
+8
+9
+JOB4
+%head1
+%head2
+10
++ parallel --header 2 --pipe -N3 echo 'JOB{#};cat'
+JOB1
+%head1
+%head2
+1
+2
+3
+JOB2
+%head1
+%head2
+4
+5
+6
+JOB3
+%head1
+%head2
+7
+8
+9
+JOB4
+%head1
+%head2
+10
++ parallel --pipepart -a num1000000 --block 3m wc
+ 444444  444444 3000003
+ 428572  428572 3000004
+ 126984  126984  888889
++ parallel command
+/bin/bash: This is input_file: command not found
++ foo
+bash: line 374: foo: command not found
++ bar
+bash: line 375: bar: command not found
++ baz
+bash: line 376: baz: command not found
++ parallel command
+/bin/bash: This is input_file: command not found
++ parallel command ::: foo bar
+/bin/bash: foo: command not found
+/bin/bash: bar: command not found
++ command
++ command foo bar
++ foo bar
+bash: line 382: foo: command not found
++ print '@ARGV\n'
+Warning: unknown mime-type for "@ARGV\n" -- using "application/octet-stream"
+Error: no such file "@ARGV\n"
++ parallel perl_echo ::: foo bar
+/bin/bash: perl_echo: command not found
+/bin/bash: perl_echo: command not found
++ print '@ARGV\n'
+Warning: unknown mime-type for "@ARGV\n" -- using "application/octet-stream"
+Error: no such file "@ARGV\n"
++ perl_echo foo bar
+bash: line 394: perl_echo: command not found
++ sem 'sleep 1; echo The first finished'
+The first is now running in the background
++ sem 'sleep 1; echo The second finished'
+The first finished
+The second is now running in the background
++ sem --wait
+The second finished
++ sem --fg 'sleep 1; echo The first finished'
+The first finished
+The first finished running in the foreground
++ sem --fg 'sleep 1; echo The second finished'
+The second finished
+The second finished running in the foreground
++ sem --wait
++ sem --id my_id -u 'echo First started; sleep 10; echo The first finished'
++ sem --id my_id -u 'echo Second started; sleep 10; echo The second finished'
+First started
+The first finished
++ sem --jobs 3 --id my_id -u 'echo First started; sleep 5; echo The first finished'
+Second started
++ sem --jobs 3 --id my_id -u 'echo Second started; sleep 6; echo The second finished'
+First started
++ sem --jobs 3 --id my_id -u 'echo Third started; sleep 7; echo The third finished'
+Second started
+The first finished
++ sem --jobs 3 --id my_id -u 'echo Fourth started; sleep 8; echo The fourth finished'
+Third started
+The second finished
++ sem --wait --id my_id
+Fourth started
+The second finished
+The third finished
+The fourth finished
++ parallel --help
+Usage:
+
+parallel [options] [command [arguments]] < list_of_arguments
+parallel [options] [command [arguments]] (::: arguments|:::: argfile(s))...
+cat ... | parallel --pipe [options] [command [arguments]]
+
+-j n            Run n jobs in parallel
+-k              Keep same order
+-X              Multiple arguments with context replace
+--colsep regexp Split input on regexp for positional replacements
+{} {.} {/} {/.} {#} {%} {= perl code =} Replacement strings
+{3} {3.} {3/} {3/.} {=3 perl code =}    Positional replacement strings
+With --plus:    {} = {+/}/{/} = {.}.{+.} = {+/}/{/.}.{+.} = {..}.{+..} =
+                {+/}/{/..}.{+..} = {...}.{+...} = {+/}/{/...}.{+...}
+
+-S sshlogin     Example: foo@server.example.com
+--slf ..        Use ~/.parallel/sshloginfile as the list of sshlogins
+--trc {}.bar    Shorthand for --transfer --return {}.bar --cleanup
+--onall         Run the given command with argument on all sshlogins
+--nonall        Run the given command with no arguments on all sshlogins
+
+--pipe          Split stdin (standard input) to multiple jobs.
+--recend str    Record end separator for --pipe.
+--recstart str  Record start separator for --pipe.
+
+See 'man parallel' for details
+
+Academic tradition requires you to cite works you base your article on.
+When using programs that use GNU Parallel to process data for publication
+please cite:
+
+  O. Tange (2011): GNU Parallel - The Command-Line Power Tool,
+  ;login: The USENIX Magazine, February 2011:42-47.
+
+This helps funding further development; and it won't cost you a cent.
+If you pay 10000 EUR you should feel free to use GNU Parallel without citing.
+
++ parallel --version
+GNU parallel 20150329
+Copyright (C) 2007,2008,2009,2010,2011,2012,2013,2014,2015 Ole Tange
+and Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+GNU parallel comes with no warranty.
+
+Web site: http://www.gnu.org/software/parallel
+
+When using programs that use GNU Parallel to process data for publication
+please cite as described in 'parallel --bibtex'.
++ parallel --minversion 20130722
+20150329
+Your version is at least 20130722.
++ parallel --bibtex
+Academic tradition requires you to cite works you base your article on.
+When using programs that use GNU Parallel to process data for publication
+please cite:
+
+@article{Tange2011a,
+ title = {GNU Parallel - The Command-Line Power Tool},
+ author = {O. Tange},
+ address = {Frederiksberg, Denmark},
+ journal = {;login: The USENIX Magazine},
+ month = {Feb},
+ number = {1},
+ volume = {36},
+ url = {http://www.gnu.org/s/parallel},
+ year = {2011},
+ pages = {42-47}
+ doi = {10.5281/zenodo.16303}
+}
+
+(Feel free to use \nocite{Tange2011a})
+
+This helps funding further development; and it won't cost you a cent.
+If you pay 10000 EUR you should feel free to use GNU Parallel without citing.
+
+If you send a copy of your published article to tange@gnu.org, it will be
+mentioned in the release notes of next version of GNU Parallel.
+
++ parallel --max-line-length-allowed
+131071
++ parallel --number-of-cpus
+1
++ parallel --number-of-cores
+8
++ parallel --profile nicetimeout echo ::: A B C
+A
+B
+C
++ parallel --profile dryverbose --profile nicetimeout echo ::: A B C
+\nice -n17 /bin/bash -c echo\ A
+\nice -n17 /bin/bash -c echo\ B
+\nice -n17 /bin/bash -c echo\ C

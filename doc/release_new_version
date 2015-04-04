@@ -223,6 +223,12 @@ New in this release:
 
 * GNU Parallel was cited in: Bayesian inference of protein structure from chemical shift data https://peerj.com/articles/861/
 
+* GNU Parallel was cited in: Toward Enhanced Metadata Quality of Large-Scale Digital Libraries: Estimating Volume Time Range https://www.ideals.illinois.edu/bitstream/handle/2142/73656/186_ready.pdf
+
+* GNU Parallel was cited in: Contrasting regional architectures of schizophrenia and other complex diseases using fast variance components analysis http://biorxiv.org/content/biorxiv/early/2015/03/13/016527.full.pdf
+
+* GNU Parallel was cited in: Experimental study on the Wind Farm Substation Cable Installation Problem http://i11www.iti.uni-karlsruhe.de/_media/teaching/theses/ma-schmitz-14.pdf
+
 * <<afventer>> Comparing the CarbonTracker and TM5-4DVar data assimilation systems for CO2 surface flux inversions http://www.atmos-chem-phys-discuss.net/15/8883/2015/acpd-15-8883-2015-discussion.html
 
 * <<afventer opdatering>> CIDER: a pipeline for detecting waves of coordinated transcriptional regulation in gene expression time-course data http://biorxiv.org/content/biorxiv/early/2015/03/17/012518.full.pdf
@@ -235,7 +241,15 @@ taxator-tk http://algbio.cs.uni-duesseldorf.de/webapps/wa-download/ (check it)
 
 * GNU Parallel was used in: https://github.com/exascience/elprep
 
+* GNU Parallel was used in: http://search.cpan.org/~jillrowe/HPC-Runner-GnuParallel-0.01/
+
+* GNU Parallel was used in: http://search.cpan.org/~ajpage/Bio-Roary-2.0.7/lib/Bio/Roary/JobRunner/Parallel.pm
+
 * Pictures and Metadata http://www.ozzy.no/2015/02/05/pictures-and-metadata/
+
+* Task automation with bash and parallel https://biowize.wordpress.com/2015/03/23/task-automation-with-bash-and-parallel/
+
+* Mirroring a Git Repository https://avacariu.me/articles/mirroring-a-git-repository.html
 
 * Add an ENVI header to JAXA Global Mangrove Watch PALSAR tiles https://spectraldifferences.wordpress.com/2015/03/24/add-an-envi-header-to-jaxa-global-mangrove-watch-palsar-tiles/
 

@@ -23,6 +23,7 @@ else
     >$SHFILE
 fi
 
+date
 mkdir -p actual-results
 stdout sh -x $SHFILE | tee testsuite.log
 rm $SHFILE
@@ -35,4 +36,4 @@ else
   cp -a ../src src-passing-testsuite
 fi
 rm testsuite.log
-
+date
