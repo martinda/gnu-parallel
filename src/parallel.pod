@@ -2014,6 +2014,22 @@ Arguments will be recycled if one input source has more arguments than the other
 
 See also B<--header>.
 
+=item B<--propagate-sigterm1, --propagate-sigterm2>
+
+The first time GNU B<parallel> receives the B<SIGTERM> signal, it
+stops dispatching new jobs, and waits for running jobs to complete.
+
+If you wish for GNU B<parallel> to propagate the first B<SIGTERM> signal to
+the running jobs, use the B<--propagate-sigterm1> option.
+
+The second time GNU B<parallel> receives the B<SIGTERM> signal, it
+exits with no further actions. The running jobs are abandonned to the OS.
+
+If you wish for GNU B<parallel> to propage the second B<SIGTERM> signal to
+the running jobs, use the B<--propagate-sigterm2> option.
+
+See also B<>
+
 =back
 
 =head1 EXAMPLE: Working as xargs -n1. Argument appending
@@ -3320,7 +3336,6 @@ If you want a list of the jobs currently running you can run:
 GNU B<parallel> will then print the currently running jobs on stderr
 (standard error).
 
-
 =head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
 
 If you regret starting a lot of jobs you can simply break GNU B<parallel>,
@@ -3332,6 +3347,30 @@ should send the signal B<SIGTERM> to GNU B<parallel>:
 This will tell GNU B<parallel> to not start any new jobs, but wait until
 the currently running jobs are finished before exiting.
 
+If you send B<SIGTERM> a second time, GNU B<parallel> will quit
+without waiting for the jobs to be finished.
+
+=head1 TERMINATE RUNNING JOBS AND DO NOT START NEW JOBS
+
+If you wish for GNU B<parallel> to propagate the B<SIGTERM> signal to
+the jobs that are still running, you have two choices.
+
+You can tell GNU B<parallel> to propagate the TERM signal the first
+time you sent the B<SIGTERM> signal:
+
+  parallel --propagate-sigterm1 sleep 120 ::: 1 & pid=$! 
+  kill -TERM $pid
+
+or the second time you sent the B<SIGTERM> signal.
+
+  parallel --propagate-sigterm2 sleep 120 & pid=$!
+  kill -TERM $pid
+  kill -TERM $pid
+
+GNU B<parallel> gives your program a grace period of to 200 milliseconds
+to cleanup before it itself exits. If for some reason you want to extend
+this grace period, you can use the B<--wait-for-child GRACE_PERIOD>
+option with a B<GRACE_PERIOD> grace period specified in seconds.
 
 =head1 ENVIRONMENT VARIABLES
 

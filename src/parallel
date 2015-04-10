@@ -131,7 +131,7 @@ my $sem;
 if($Global::semaphore) {
     $sem = acquire_semaphore();
 }
-$SIG{TERM} = \&start_no_new_jobs;
+$SIG{TERM} = \&sig_term_handler;
 start_more_jobs();
 if(not $opt::pipepart) {
     if($opt::pipe) {
@@ -817,6 +817,10 @@ sub options_hash {
 	 "fifo" => \$opt::fifo,
 	 "pipepart|pipe-part" => \$opt::pipepart,
 	 "hgrp|hostgroup|hostgroups" => \$opt::hostgroups,
+         # Job control options
+	 "propagate-sigterm1" => \$opt::propagate_sigterm1,
+	 "propagate-sigterm2" => \$opt::propagate_sigterm2,
+	 "wait-for-children:i" => \$opt::wait_for_children,
 	);
 }
 
@@ -1044,6 +1048,12 @@ sub parse_options {
         ::warning("Using -X or -m with --sshlogin may fail.\n");
     }
 
+    if (defined $opt::wait_for_children) {
+        if ($opt::wait_for_children < 0) {
+            ::error("--wait-for-children takes a positive integer value in seconds. A value of ",$opt::wait_for_children," was specified.\n");
+            wait_and_exit(255);
+        }
+    }
     if(not defined $opt::jobs) {
         $opt::jobs = "100%";
     }
@@ -2882,8 +2892,6 @@ sub save_original_signal_handler {
     # Returns: N/A
     $SIG{INT} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; }
 		      unlink keys %Global::unlink; exit -1  };
-    $SIG{TERM} = sub { if($opt::tmux) { qx { tmux kill-session -t p$$ }; }
-		      unlink keys %Global::unlink; exit -1  };
     %Global::original_sig = %SIG;
     $SIG{TERM} = sub {}; # Dummy until jobs really start
     $SIG{ALRM} = 'IGNORE';
@@ -2899,21 +2907,52 @@ sub list_running_jobs {
     }
 }
 
-sub start_no_new_jobs {
+sub sig_term_handler {
     # Start no more jobs
     # Uses:
     #    %Global::original_sig
     #    %Global::unlink
     #    $Global::start_no_new_jobs
+    #    $Global::sig_term_count
     # Returns: N/A
-    $SIG{TERM} = $Global::original_sig{TERM};
-    unlink keys %Global::unlink;
-    ::status
-        ("$Global::progname: SIGTERM received. No new jobs will be started.\n",
-         "$Global::progname: Waiting for these ", scalar(keys %Global::running),
-         " jobs to finish. Send SIGTERM again to stop now.\n");
-    list_running_jobs();
     $Global::start_no_new_jobs ||= 1;
+    if (!defined $Global::sig_term_count) {
+        $Global::sig_term_count = 1;
+    } else {
+        $Global::sig_term_count++;
+    }
+    ::debug("SIG TERM HANDLER called $Global::sig_term_count\n");
+    if ($Global::sig_term_count == 1) {
+        if ($opt::propagate_sigterm1) {
+            ::status
+                 ("$Global::progname: SIGTERM 1 received. No new jobs will be started.\n",
+                 "$Global::progname: Propagating SIGTERM to these ", scalar(keys %Global::running),
+                 "\n");
+            list_running_jobs();
+            unlink keys %Global::unlink;
+            wait_and_exit(143);
+        } else {
+            ::status
+                 ("$Global::progname: SIGTERM 1 received. No new jobs will be started.\n",
+                 "$Global::progname: Waiting for these ", scalar(keys %Global::running),
+                 " jobs to finish. Send SIGTERM again to stop now, or if --propagate-sigterm2 is set, to kill the in-flight processes.\n");
+            list_running_jobs();
+            unlink keys %Global::unlink;
+        }
+    } elsif ($Global::sig_term_count == 2) {
+        if ($opt::propagate_sigterm2) {
+            ::status
+                 ("$Global::progname: SIGTERM 2 received. No new jobs will be started.\n",
+                 "$Global::progname: Propagating SIGTERM to these ", scalar(keys %Global::running),
+                 "\n");
+            list_running_jobs();
+            unlink keys %Global::unlink;
+            wait_and_exit(143);
+        } else {
+            unlink keys %Global::unlink;
+            exit -1;
+        }
+    }
 }
 
 sub reaper {
@@ -2994,6 +3033,7 @@ sub wait_and_exit {
     my $error = shift;
     if($error) {
 	# Kill all without printing
+        ## Question to Ole: Why call kill TERM twice? It's complicates documentation... should I write my own wait_and_exit?
 	for my $job (values %Global::running) {
 	    $job->kill("TERM");
 	    $job->kill("TERM");
@@ -4391,7 +4431,6 @@ sub compute_number_of_processes {
 	    # This is the child
 	    # The child takes one process slot
 	    # It will be killed later
-	    $SIG{TERM} = $Global::original_sig{TERM};
 	    sleep 10000000;
 	    exit(0);
 	} else {
@@ -5870,11 +5909,16 @@ sub kill {
     my $self = shift;
     my @signals = @_;
     my @family_pids = $self->family_pids();
-    # Record this jobs as failed
+    # Record this job as failed
     $self->set_exitstatus(-1);
     # Send two TERMs to give time to clean up
     ::debug("run", "Kill seq ", $self->seq(), "\n");
-    my @send_signals = @signals || ("TERM", "TERM", "KILL");
+    my @send_signals;
+    if (@signals) {
+      @send_signals = @signals;
+    } else {
+      @send_signals = ("TERM", "TERM", "KILL");
+    }
     for my $signal (@send_signals) {
 	my $alive = 0;
 	for my $pid (@family_pids) {
@@ -5884,13 +5928,25 @@ sub kill {
 		$alive = 1;
 	    }
 	}
-	# If a signal was given as input, do not do the sleep below
-	@signals and next;
+
+        ## Question to Ole: Should --wait-for-children be available for all instead of just sigterm propagation?
+        my $sleep_timeout = 200; # milliseconds
+        if ($opt::propagate_sigterm1 or $opt::propagate_sigterm2) {
+            if (defined $opt::wait_for_children) {
+                if ($opt::wait_for_children > 0) {
+                    $sleep_timeout = $opt::wait_for_children * 1000;
+                }
+            }
+        } elsif (@signals) {
+            # If a signal was given as input, do not do the sleep below
+            next;
+        }
 
 	if($signal eq "TERM" and $alive) {
 	    # Wait up to 200 ms between TERMs - but only if any pids are alive
 	    my $sleep = 1;
-	    for (my $sleepsum = 0; kill 0, $family_pids[0] and $sleepsum < 200;
+            ## Question to Ole: Do you know why only family_pids[0] is checked and not the entire array?
+	    for (my $sleepsum = 0; kill 0, $family_pids[0] and $sleepsum < $sleep_timeout;
 		 $sleepsum += $sleep) {
 		$sleep = ::reap_usleep($sleep);
 	    }
