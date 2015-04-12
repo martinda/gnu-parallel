@@ -1800,6 +1800,12 @@ If I<val> is followed by a % then the timeout will dynamically be
 computed as a percentage of the median average runtime. Only values
 > 100% will make sense.
 
+To customize the termination sequence, see B<--term-seq>.
+
+Note: the B<--timeout> option automatically propagates the
+termination sequence to the commands. There is no need to specify the
+B<--propagate-term-seq> option with B<--timeout>.
+
 
 =item B<--verbose>
 
@@ -2013,6 +2019,32 @@ Arguments will be recycled if one input source has more arguments than the other
     ::: 1 2 ::: I II III ::: a b c d e f g
 
 See also B<--header>.
+
+=item B<--term-seq> I<TERM_SEQ>
+
+The optional termination sequence sent by GNU B<parallel> when it
+terminates jobs.  The default sequence is SIGTERM, followed by SIGTERM 200
+ms later, followed by SIGKILL 200 ms later.  By default, the termination
+sequence is used only when the B<--timeout> I<val> option is used.
+
+You can customize the I<TERM_SEQ> termination sequence by specifying
+a comma separated list of signals and delays in seconds. The sequence
+will be used when the B<--timeout> I<val> value has been reached.
+
+For example, to send SIGTERM, followed by SIGKILL 8 seconds later,
+when a timeout value of 5 seconds is reached, do:
+
+  parallel --timeout 5 --term-seq TERM,8,KILL sleep ::: 60 60 60 & pid=$!
+
+
+=item B<--propagate-term-seq>
+
+Normally, GNU B<parallel> only propagates the termination sequence
+when the B<--timeout> I<val> value has been reached. When you send the
+B<SIGTERM> signal to GNU B<parallel> with C<kill -TERM>, no termination
+sequence is used.  But you can ask GNU B<parallel> to propagate
+the B<SIGTERM> signal to the jobs in all cases using this option. See
+CONTROLING JOB TERMINATION for detailed examples.
 
 =back
 
@@ -3320,17 +3352,45 @@ If you want a list of the jobs currently running you can run:
 GNU B<parallel> will then print the currently running jobs on stderr
 (standard error).
 
+=head1 CONTROLING JOB TERMINATION
 
-=head1 COMPLETE RUNNING JOBS BUT DO NOT START NEW JOBS
-
-If you regret starting a lot of jobs you can simply break GNU B<parallel>,
-but if you want to make sure you do not have half-completed jobs you
-should send the signal B<SIGTERM> to GNU B<parallel>:
+If you regret starting a lot of jobs or if you need to abort your jobs,
+you can simply break GNU B<parallel>, but if you want to make sure you
+do not have half-completed jobs you should send the signal B<SIGTERM>
+to GNU B<parallel>:
 
   killall -TERM parallel
 
-This will tell GNU B<parallel> to not start any new jobs, but wait until
-the currently running jobs are finished before exiting.
+This will tell GNU B<parallel> to not start any new jobs, but
+wait until the currently running jobs are finished before exiting.
+
+If you want to propagate the B<SIGTERM> signal to your jobs to
+ask them to gracefully terminate, use the B<--propagate-term-seq>
+option. This will cause GNU B<parallel> to propagate the SIGTERM signal
+to all the jobs, and it will wait until the current running jobs are
+finished before exiting. This gives your jobs a chance to cleanup when
+they get the B<SIGTERM> signal.
+
+  parallel --propagate-term-seq complex_command ::: {1..99} & pid=$!
+  kill -TERM $pid
+
+If you want to send a custom termination sequence instead of the
+B<SIGTERM> signal, use the B<--term-seq> option.  This can be useful
+if you want to limit how much time jobs have for their own cleanup. For
+example, to send B<SIGTERM>, followed by B<SIGKILL> 10 seconds later, use:
+
+  parallel --term-seq TERM,10,KILL --propagate-term-seq complex_command ::: {1..99} & pid=$!
+  kill -TERM $pid
+
+If you send B<SIGTERM> a second time, GNU B<parallel> will quit without
+waiting for the jobs to be finished.
+
+If you combine B<--term-seq> I<TERM_SEQ>, B<--propagate-term-seq>
+and B<--timeout> I<val>, then your jobs will run no longer than I<val>
+seconds, or until you send B<SIGTERM>, which ever comes sooner. In this
+case, whether the termination is due to a timeout or to B<SIGTERM>,
+the termination sequence specified by B<--term-seq> I<TERM_SEQ> will be
+sent to your jobs.
 
 
 =head1 ENVIRONMENT VARIABLES
