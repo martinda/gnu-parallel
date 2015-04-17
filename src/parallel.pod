@@ -1792,13 +1792,61 @@ window in that session. No other output will be produced.
 
 =item B<--timeout> I<val>
 
-Time out for command. If the command runs for longer than I<val>
-seconds it will get killed with SIGTERM, followed by SIGTERM 200 ms
-later, followed by SIGKILL 200 ms later.
+Time out for command. If the command runs for longer than I<val> seconds
+it will be sent the termination sequence. The default termination sequence
+is SIGTERM, followed by SIGTERM 200 ms later, followed by SIGKILL 200
+ms later. To use an alternate termination sequence, see B<--term-seq>.
 
 If I<val> is followed by a % then the timeout will dynamically be
 computed as a percentage of the median average runtime. Only values
 > 100% will make sense.
+
+=item B<--term-seq> I<TERM_SEQ>
+
+You can use this option to set a different termination sequence.
+The default termination sequence for GNU parallel is:
+
+=over 8
+
+=item *
+Send SIGTERM to the job and its children
+
+=item *
+Wait for 200us or until the job had ended (but do not monitor the children)
+
+=item *
+Send SIGTERM to the job and its children
+
+=item *
+Wait for 200us or until the job had ended (but do not monitor the children)
+
+=item *
+Send SIGKILL
+
+=item *
+Wait for 200us or until the job had ended (but do not monitor the children)
+
+=item *
+Exit GNU parallel
+
+=back
+
+The termination sequence is used when:
+
+=over 8
+
+=item *
+A timeout occurs (B<--timeout> I<val>)
+
+=item *
+There is not enough memory as per the B<--memfree> option
+
+=back
+
+To set a different termination sequence, set I<TERM_SEQ> to a comma separated
+list of signal names and delays in seconds. For example:
+
+  parallel --term-seq SIGTERM,60,SIGQUIT,60,SIGKILL [other options] command
 
 
 =item B<--verbose>

@@ -725,7 +725,6 @@ sub options_hash {
 	 "use-cpus-instead-of-cores" => \$opt::use_cpus_instead_of_cores,
 	 "shellquote|shell_quote|shell-quote" => \$opt::shellquote,
 	 "nice=i" => \$opt::nice,
-	 "timeout=s" => \$opt::timeout,
 	 "tag" => \$opt::tag,
 	 "tagstring|tag-string=s" => \$opt::tagstring,
 	 "onall" => \$opt::onall,
@@ -751,7 +750,6 @@ sub options_hash {
 	 "compress" => \$opt::compress,
 	 "tty" => \$opt::tty,
 	 "T" => \$opt::retired,
-	 "halt-on-error|halt=s" => \$opt::halt,
 	 "H=i" => \$opt::retired,
 	 "retries=i" => \$opt::retries,
 	 "dry-run|dryrun" => \$opt::dryrun,
@@ -779,6 +777,10 @@ sub options_hash {
 	 "bibtex" => \$opt::bibtex,
 	 "wc|willcite|will-cite|nn|nonotice|no-notice" => \$opt::willcite,
 	 "memfree=s" => \$opt::memfree,
+         # Termination
+	 "timeout=s" => \$opt::timeout,
+	 "halt-on-error|halt=s" => \$opt::halt,
+         "term-seq=s" => \$opt::term_seq,
 	 # xargs-compatibility - implemented, man, testsuite
 	 "max-procs|P=s" => \$opt::jobs,
 	 "delimiter|d=s" => \$opt::d,
@@ -923,6 +925,27 @@ sub parse_options {
     if(defined $opt::timeout and $opt::timeout !~ /^\d+(\.\d+)?%?$/) {
 	::error("--timeout must be seconds or percentage\n");
 	wait_and_exit(255);
+    }
+    if (defined $opt::term_seq) {
+        my @term_seq = split(',',$opt::term_seq);
+        for my $elem (@term_seq) {
+            if ($elem =~ /^\d+(\.\d+)?$/) {
+                push(@Global::term_seq,$elem);
+                next;
+            }
+            if (exists $SIG{$elem}) {
+                push(@Global::term_seq,$elem);
+                next;
+            } else {
+                my $siglist = join(", ", sort(keys %SIG));
+                ::error("Signal $elem is not supported on this system. Supported signals are:\n$siglist\n");
+                wait_and_exit(255);
+            }
+            ::error("--term-seq must be a comma separated list of: delays in seconds or signal names\n");
+            wait_and_exit(255);
+        }
+    } else {
+      @Global::term_seq = ("TERM",0.2,"TERM",0.2,"KILL");
     }
     if(defined $opt::minversion) {
 	print $Global::version,"\n";
@@ -5862,39 +5885,54 @@ sub timedout {
 
 sub kill {
     # Kill the job.
-    # Send the signals to (grand)*children and pid.
-    # If no signals: TERM TERM KILL
-    # Wait 200 ms after each TERM.
+    # Send the termination sequence to (grand)*children and pid.
+    # If no term seq: use the Global::term_seq
     # Input:
-    #   @signals = signals to send
+    #   @input_term_seq = a termination sequence
+    #       (a comma separated list of signals and delays in seconds)
     my $self = shift;
-    my @signals = @_;
+    my @input_term_seq = @_;
     my @family_pids = $self->family_pids();
     # Record this jobs as failed
     $self->set_exitstatus(-1);
-    # Send two TERMs to give time to clean up
-    ::debug("run", "Kill seq ", $self->seq(), "\n");
-    my @send_signals = @signals || ("TERM", "TERM", "KILL");
-    for my $signal (@send_signals) {
-	my $alive = 0;
-	for my $pid (@family_pids) {
-	    if(kill 0, $pid) {
-		# The job still running
-		kill $signal, $pid;
-		$alive = 1;
-	    }
-	}
-	# If a signal was given as input, do not do the sleep below
-	@signals and next;
 
-	if($signal eq "TERM" and $alive) {
-	    # Wait up to 200 ms between TERMs - but only if any pids are alive
-	    my $sleep = 1;
-	    for (my $sleepsum = 0; kill 0, $family_pids[0] and $sleepsum < 200;
-		 $sleepsum += $sleep) {
-		$sleep = ::reap_usleep($sleep);
-	    }
-	}
+    # Send the termination sequence
+    ::debug("run", "Kill seq ", $self->seq(), "\n");
+
+    my @term_seq;
+    if (scalar @input_term_seq) {
+        @term_seq = @input_term_seq;
+    } else {
+        @term_seq = @Global::term_seq;
+    }
+
+    # Apply the termination sequence
+    my $alive = 1;
+    for my $elem (@term_seq) {
+
+        last if $alive == 0;
+
+        # The sequence element is a signal
+        if (exists($SIG{$elem})) {
+            $alive = 0;
+            for my $pid (@family_pids) {
+                if(kill 0, $pid) {
+                    # The job still running
+                    kill $elem, $pid;
+                    $alive = 1;
+                }
+            }
+            next;
+        }
+
+        # The sequence element is a delay in seconds
+        if ($elem =~ /^\d+(\.\d+)?$/ and $alive) {
+            my $sleep = 1;
+            for (my $sleepsum = 0; kill 0, $family_pids[0] and $sleepsum < $elem*1000;
+                $sleepsum += $sleep) {
+                $sleep = ::reap_usleep($sleep);
+            }
+        }
     }
 }
 

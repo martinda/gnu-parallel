@@ -1086,6 +1086,10 @@ Output:
   Computer:jobs running/jobs completed/%of started jobs/Average seconds to complete
   ETA: 2s 0left 1.11avg  local:0/9/100%/1.1s 
 
+When a timeout occurs, GNU parallel sends the default termination
+sequence.  If you wish to change the termination sequence used when
+there is a timeout, see the --term-seq option under Termination sequence section.
+
 =head2 Progress
 
 GNU Parallel can give progress information with --progress:
@@ -1244,6 +1248,24 @@ Output:
   tried 0
 
 Note how job 1 and 2 were tried 3 times, but 0 was not retried because it had exit code 0.
+
+=head2 Termination sequence
+
+When a timeout occurs (as per --timeout), or when a memory limitation is
+identified (--memfree), GNU Parallel sends a termination sequence to all
+its jobs. This termination sequence is: SIGTERM, wait 200ms, SIGTERM,
+wait 200ms, send SIGKILL, wait 200ms.
+
+In some cases, when jobs are run remotely or have long cleanup cycles,
+it might be useful to increase the wait periods of the termination
+sequence. Similarily, some jobs might respond better to a termination
+sequence formed of other signals and delays than the default one.
+
+You can change the termination sequence with the --term-seq option,
+and specify a comma separated list of signals and delays:
+
+  parallel --term-seq TERM,5,QUIT,5,KILL command ::: 1
+
 
 =head2 Limiting the resources
 
