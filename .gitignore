@@ -18,3 +18,5 @@ src/sql.1
 src/sql.html
 src/niceload.1
 src/niceload.html
+.*.swp
+Session.vim
